@@ -3155,4 +3155,39 @@ WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WSError SceneSessionManagerProxy::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "run SceneSessionManagerProxy::GetHostWindowRect");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(hostWindowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write hostWindowId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write useImplicit failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_USE_IMPLICIT_ANIMATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest UseImplicitAnimation failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen
