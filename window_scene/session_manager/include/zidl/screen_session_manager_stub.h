@@ -41,6 +41,7 @@ private:
     void ProcSetVirtualScreenSecurityExemption(MessageParcel& data, MessageParcel& reply);
     void ProcGetScreenCapture(MessageParcel& data, MessageParcel& reply);
     void ProcGetDisplaySnapshotWithOption(MessageParcel& data, MessageParcel& reply);
+    void ProcSetScreenSkipProtectedWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace Rosen
 } // namespace OHOS

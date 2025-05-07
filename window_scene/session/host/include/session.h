@@ -787,6 +787,8 @@ private:
     /*
      * Window Lifecycle
      */
+    void RecordWindowStateAttachExceptionEvent(bool isAttached);
+
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     std::atomic<bool> isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;

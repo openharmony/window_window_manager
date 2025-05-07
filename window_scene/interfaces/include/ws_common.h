@@ -83,6 +83,7 @@ enum class WSError : int32_t {
     WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED,
+    WS_ERROR_START_UI_ABILITY_TIMEOUT,
 
     WS_ERROR_EDM_CONTROLLED = 2097215, // enterprise limit
 };
@@ -649,6 +650,8 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
+    SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
+    SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
