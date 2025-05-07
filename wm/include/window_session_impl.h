@@ -39,6 +39,7 @@
 #include "window.h"
 #include "window_option.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
