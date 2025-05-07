@@ -158,6 +158,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
+    void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
