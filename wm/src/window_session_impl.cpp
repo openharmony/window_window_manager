@@ -3759,7 +3759,8 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
+WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activeColor,
+                                                        const std::string& inactiveColor)
 {
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
