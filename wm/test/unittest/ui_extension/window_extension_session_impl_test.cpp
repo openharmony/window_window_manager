@@ -2466,9 +2466,9 @@ HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState, TestSize.
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("GetImmersiveModeEnabledState");
     window->hostImmersiveModeEnabled_ = false;
-    EXPECT_EQ(false, window->GetImmersiveModeEnabledState(enable));
+    EXPECT_EQ(false, window->GetImmersiveModeEnabledState());
     window->hostImmersiveModeEnabled_ = true;
-    EXPECT_EQ(true, window->GetImmersiveModeEnabledState(enable));
+    EXPECT_EQ(true, window->GetImmersiveModeEnabledState());
 }
 
 /**
