@@ -2531,7 +2531,8 @@ WSError SessionProxy::KeyFrameAnimateEnd()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+WSError SessionProxy::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
 {
     MessageParcel data;
     MessageParcel reply;

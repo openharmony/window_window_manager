@@ -172,7 +172,8 @@ public:
     /**
      * Window Transition Animation
      */
-    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation) override;
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
 
     /**
      * window rotation

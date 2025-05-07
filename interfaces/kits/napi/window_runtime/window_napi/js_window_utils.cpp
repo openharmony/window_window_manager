@@ -630,7 +630,7 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     if (transitionAnimation->config.curve == WindowAnimationCurve::LINEAR) {
         napi_set_named_property(env, configJsValue, "duration",
             CreateJsValue(env, transitionAnimation->config.duration));
-    } else if (transitionAnimation->config.curve == WindowAnimationCurve::INTERPOLATIONSPRING) {
+    } else if (transitionAnimation->config.curve == WindowAnimationCurve::INTERPOLATION_SPRING) {
         napi_value params = nullptr;
         napi_create_array(env, &params);
         for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
@@ -664,7 +664,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
         if (!ParseJsValue(config, env, "duration", duration)) {
             return false;
         }
-    } else if (curve == static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATIONSPRING)) {
+    } else if (curve == static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)) {
         napi_value paramsValue = nullptr;
         napi_get_named_property(env, config, "param", &paramsValue);
         for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
@@ -1451,8 +1451,8 @@ napi_value WindowAnimationCurveInit(napi_env env)
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "LINEAR",
         CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
-    napi_set_named_property(env, objValue, "INTERPOLATIONSPRING",
-        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATIONSPRING)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
     return objValue;
 }
 
