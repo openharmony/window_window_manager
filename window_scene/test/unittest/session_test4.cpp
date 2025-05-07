@@ -1288,7 +1288,7 @@ HWTEST_F(WindowSessionTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Leve
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_CONNECT;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
+    ASSERT_NE(nullptr, mockSessionStage);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_EQ(WSError::WS_OK, session_->NotifyAppForceLandscapeConfigUpdated());
     session_->sessionStage_ = nullptr;

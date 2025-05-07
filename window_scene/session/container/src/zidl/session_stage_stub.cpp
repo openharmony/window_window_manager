@@ -1006,8 +1006,7 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
 int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
-    WSError errCode = NotifyAppForceLandscapeConfigUpdated();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    NotifyAppForceLandscapeConfigUpdated();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
