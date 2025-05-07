@@ -985,20 +985,21 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCompatibleModeInPc
- * @tc.desc: GetCompatibleModeInPc
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, IsAdaptToCompatibleImmersive, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetCompatibleModeInPc");
+    option->SetWindowName("IsAdaptToCompatibleImmersive");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool enable = true;
-    window->property_->SetCompatibleModeInPc(enable);
-    EXPECT_EQ(true, window->GetCompatibleModeInPc());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc end";
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(true, window->IsAdaptToCompatibleImmersive());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive end";
 }
 
 /**

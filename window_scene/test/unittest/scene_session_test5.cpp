@@ -145,17 +145,20 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, TestSize.Level1)
     avoidArea.bottomRect_ = { -1, -1, -1, -1 };
     Rect invalidRect = { -1, -1, -1, -1 };
     // hook Func only support compatibleMode
-    session->SetCompatibleModeInPc(false, true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(false);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
-    session->SetCompatibleModeInPc(true, true);
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
 
     // test top system avoidArea
-    session->SetCompatibleModeInPc(true, true);
+    session->property_->GetCompatibleModeProperty()->SetIsAdaptToImmersive(true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     auto vpr = 3.5f;
@@ -687,9 +690,6 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, TestSize.Level1)
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
-    session->property_->compatibleModeInPc_ = true;
-    session->OnMoveDragCallback(reason);
-    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 }
 
 /**
@@ -1892,12 +1892,13 @@ HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale01, TestSize.Level1)
     auto property = mainSession->GetSessionProperty();
     float scaleX = 2.0f;
     float scaleY = 2.0f;
-    property->SetCompatibleModeInPc(true);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
     EXPECT_EQ(res, true);
-    property->SetCompatibleModeInPc(false);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), false);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
     EXPECT_EQ(res, false);
 }
@@ -1917,12 +1918,13 @@ HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale02, TestSize.Level1)
     auto property = mainSession->GetSessionProperty();
     float scaleX = 1.0f;
     float scaleY = 1.0f;
-    property->SetCompatibleModeInPc(true);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
     EXPECT_EQ(res, false);
-    property->SetCompatibleModeInPc(false);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), false);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
     EXPECT_EQ(res, false);
 }
@@ -1947,11 +1949,14 @@ HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
     mainSession->SetSessionRect(preRect);
     EXPECT_EQ(preRect, mainSession->GetSessionRect());
     auto property = mainSession->GetSessionProperty();
-    property->SetCompatibleModeInPc(false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     WSRect currRect;
     mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
     EXPECT_EQ(preRect, currRect);
-    property->SetCompatibleModeInPc(true);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
     EXPECT_EQ(resultRect, currRect);
 }
@@ -1975,11 +1980,13 @@ HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level
     float scaleY = 0.5f;
     bool isScale = true;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
-    auto property = mainSession->GetSessionProperty();
-    property->SetCompatibleModeInPc(false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
     EXPECT_EQ(noChangeRect, preRect);
-    property->SetCompatibleModeInPc(true);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
     mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
     EXPECT_EQ(resultRect, preRect);
     isScale = false;

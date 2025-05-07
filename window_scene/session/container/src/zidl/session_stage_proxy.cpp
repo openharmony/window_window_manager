@@ -1227,81 +1227,6 @@ void SessionStageProxy::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& k
     }
 }
 
-WSError SessionStageProxy::CompatibleFullScreenRecover()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_SCB, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SCB, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
-WSError SessionStageProxy::CompatibleFullScreenMinimize()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_SCB, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SCB, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
-WSError SessionStageProxy::CompatibleFullScreenClose()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_SCB, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SCB, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
 WSError SessionStageProxy::PcAppInPadNormalClose()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1326,7 +1251,7 @@ WSError SessionStageProxy::PcAppInPadNormalClose()
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyCompatibleModeEnableInPad(bool enable)
+WSError SessionStageProxy::NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1340,13 +1265,12 @@ WSError SessionStageProxy::NotifyCompatibleModeEnableInPad(bool enable)
         TLOGE(WmsLogTag::WMS_SCB, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(enable)) {
+    if (!data.WriteParcelable(property.GetRefPtr())) {
         TLOGE(WmsLogTag::DEFAULT, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_PROPERTY_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SCB, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
