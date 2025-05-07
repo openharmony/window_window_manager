@@ -2381,7 +2381,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetLayoutFullScreen, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
 
     SessionInfo sessionInfo;
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr();
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     EXPECT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
@@ -2489,7 +2489,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, Tes
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
-    EXPECT_EQ(WMError::WM_OK, UpdateHostSpecificSystemBarEnabled(true, true, type));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled(true, true, type));
 }
 }
 } // namespace Rosen
