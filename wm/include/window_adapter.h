@@ -162,6 +162,12 @@ public:
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
     /*
+     * Compatible Mode
+     */
+    virtual WMError GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
+        const sptr<IRemoteObject>& token);
+
+    /*
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId);

@@ -311,6 +311,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         auto parentWindowId = parentSession->GetPersistentId();
         property_->SetParentPersistentId(parentWindowId);
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+        property_->SetIsUIExtensionAbilityProcess(parentSession->GetProperty()->GetIsUIExtensionAbilityProcess());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);

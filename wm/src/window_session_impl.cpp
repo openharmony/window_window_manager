@@ -311,13 +311,22 @@ bool WindowSessionImpl::GetCompatibleModeInPc() const
 
 bool WindowSessionImpl::IsAdaptToCompatibleImmersive() const
 {
-    return property_->IsAdaptToImmersive();
+    auto property = GetPropertyByContext();
+    return property->IsAdaptToImmersive();
+}
+
+bool WindowSessionImpl::IsAdaptToSimulationScale() const
+{
+    auto property = GetPropertyByContext();
+    return property->IsAdaptToSimulationScale();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
-    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
+    bool isNormalCompatSubWindow = IsAdaptToCompatibleImmersive() &&
+        !property_->GetIsUIExtensionAbilityProcess();
+    if (IsPcOrPadCapabilityEnabled() && !isNormalCompatSubWindow && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_PC, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -1241,7 +1250,7 @@ void WindowSessionImpl::CopyUniqueDensityParameter(sptr<WindowSessionImpl> paren
     }
 }
 
-sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
+sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext() const
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -1259,7 +1268,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
     return nullptr;
 }
 
-sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
+sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() const
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -1272,6 +1281,20 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
         }
     }
     return nullptr;
+}
+
+sptr<WindowSessionProperty> WindowSessionImpl::GetPropertyByContext() const
+{
+    if (WindowHelper::IsSubWindow(GetType())) {
+        if (property_->GetIsUIExtensionAbilityProcess()) {
+            auto extensionWindow = FindExtensionWindowWithContext();
+            return extensionWindow != nullptr ? extensionWindow->GetProperty() : property_;
+        } else {
+            auto mainWindow = FindMainWindowWithContext();
+            return mainWindow != nullptr ? mainWindow->GetProperty() : property_;
+        }
+    }
+    return property_;
 }
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)

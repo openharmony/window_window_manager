@@ -2005,6 +2005,11 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsAdaptToSimulationScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
 {
     isAdaptToImmersive_ = isAdaptToImmersive;
@@ -2085,6 +2090,16 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
+{
+    isAdaptToSimulationScale_ = isAdaptToSimulationScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToSimulationScale() const
+{
+    return isAdaptToSimulationScale_;
+}
+
 bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteBool(isAdaptToImmersive_) &&
@@ -2094,7 +2109,8 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableDragResize_) &&
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
-        parcel.WriteBool(disableWindowLimit_);
+        parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isAdaptToSimulationScale_);
 }
 
 CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
@@ -2111,7 +2127,24 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->isAdaptToSimulationScale_ = parcel.ReadBool();
     return property;
+}
+
+void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& property)
+{
+    if (property == nullptr) {
+        return;
+    }
+    isAdaptToImmersive_ = property->isAdaptToImmersive_;
+    isAdaptToEventMapping_ = property->isAdaptToEventMapping_;
+    isAdaptToProportionalScale_ = property->isAdaptToProportionalScale_;
+    isAdaptToBackButton_ = property->isAdaptToBackButton_;
+    disableDragResize_ = property->disableDragResize_;
+    disableResizeWithDpi_ = property->disableResizeWithDpi_;
+    disableFullScreen_ = property->disableFullScreen_;
+    disableWindowLimit_ = property->disableWindowLimit_;
+    isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
 }
 } // namespace Rosen
 } // namespace OHOS
