@@ -7136,7 +7136,7 @@ napi_value JsWindow::OnSetWindowContainerModalColor(napi_env env, napi_callback_
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 2) {  // 2: params num
+    if (argc != ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
