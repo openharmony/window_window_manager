@@ -8271,9 +8271,8 @@ void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitA
             return;
         }
         session->useImplicitAnimationChangeFunc_ = std::move(func);
-        TLOGND(WmsLogTag::MS_PC, "%{public}s id: %{public}d", 
-               where, session->GetId());
+        TLOGND(WmsLogTag::MS_PC, "%{public}s id: %{public}d", where, session->GetId());
     },
-    __func__);
+        __func__);
 }
 } // namespace OHOS::Rosen
