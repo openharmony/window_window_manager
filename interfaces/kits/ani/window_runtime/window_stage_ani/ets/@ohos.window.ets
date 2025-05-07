@@ -1377,12 +1377,8 @@ export class WindowInternal implements Window {
     private native setWindowTouchableSync(nativeObj: long, enable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: number, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: string,
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
-    private native offSync(nativeObj: long, type: string,
-        callback?: WindowEventCallback | WindowSizeCallback | WindowStatusCallback |
-        KeyboardHeightChangeCallback | KeyboardDidShowOrHideCallback | WindowVoidCallback): void;
+    private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public resize(width: double, height: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
@@ -1884,7 +1880,7 @@ export class WindowInternal implements Window {
     //    this.onSync(this.nativeObj, type, callback);
     //}
 
-    public on<T>(type: string, callback: Callback<T>): void {
+    public on(type: string, callback: object): void {
       switch (type) {
         case 'windowEvent':
           this.onSync(this.nativeObj, type, callback as WindowEventCallback);
@@ -1910,14 +1906,17 @@ export class WindowInternal implements Window {
         case 'touchOutside':
           this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
           break;
+        default:
+          this.onSync(this.nativeObj, type, callback);
+          break;
       }
     }
 
-    public on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void {
+    public on(type: 'noInteractionDetected', timeout: number, callback: object): void {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
-    public off<T>(type: string, callback?: Callback<T>): void {
+    public off(type: string, callback?: object): void {
       switch (type) {
         case 'windowEvent':
           this.offSync(this.nativeObj, type, callback as WindowEventCallback);
@@ -1945,6 +1944,9 @@ export class WindowInternal implements Window {
           break;
         case 'noInteractionDetected':
           this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
+          break;
+        default:
+          this.offSync(this.nativeObj, type, callback);
           break;
       }
     }
@@ -2012,9 +2014,9 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
-    on<T>(type: string, calback: Callback<T>): void;
-    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
-    off<T>(type:string, callback?: Callback<T>): void;
+    on(type: string, calback: object): void;
+    on(type: 'noInteractionDetected', timeout: number, callback: object): void;
+    off(type:string, callback?: object): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
