@@ -21,6 +21,7 @@ import hilog from '@ohos.hilog';
 import { ColorMetrics } from '@ohos.arkui.node';
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
+export type WindowRectCallback = (data: window.Rect) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
 export type KeyboardHeightChangeCallback = (data: number) => void;
@@ -2085,6 +2086,11 @@ function runWindowEventCallBack(cb: object, cbArg: int): void {
 function runWindowTouchOutCallback(cb: object): void {
     const func = cb as () => void;
     func();
+}
+
+function runWindowRectCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: Rect) => void;
+    func(cbArg as Rect);
 }
 
 function runWindowSizeCallBack(cb: object, cbArg: object): void {
