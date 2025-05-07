@@ -56,7 +56,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_ROTATION_CHANGE_CB,
 };
 
-class JsWindowRegisterManager {
+class JsWindowRegisterManager : public std::enable_shared_from_this<JsWindowRegisterManager> {
 public:
     JsWindowRegisterManager();
     ~JsWindowRegisterManager();
@@ -64,6 +64,16 @@ public:
         CaseType caseType, napi_env env, napi_value callback, napi_value parameter = nullptr);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
         CaseType caseType, napi_env env, napi_value value);
+    struct TypeWithRef {
+        std::string type;
+        NativeReference* callbackRef;
+        std::weak_ptr<JsWindowRegisterManager> jsWindowManager;
+    };
+    void CleanReferenceWithType(std::string type, NativeReference* callbackRef);
+    std::weak_ptr<JsWindowRegisterManager> getWeak()
+    {
+        return weak_from_this();
+    }
     
 private:
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
@@ -122,7 +132,7 @@ private:
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         napi_env env, napi_value parameter);
-    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 } // namespace Rosen
