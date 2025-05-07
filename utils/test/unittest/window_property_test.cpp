@@ -113,6 +113,7 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE);
 
     ASSERT_EQ(false, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
@@ -142,6 +143,7 @@ HWTEST_F(WindowPropertyTest, Write, TestSize.Level1)
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE));
 }
 
 /**
