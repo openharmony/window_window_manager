@@ -1931,8 +1931,7 @@ struct KeyboardLayoutParams : public Parcelable {
                 WriteParcel(parcel, LandscapeKeyboardRect_) &&
                 WriteParcel(parcel, PortraitKeyboardRect_) &&
                 WriteParcel(parcel, LandscapePanelRect_) &&
-                WriteParcel(parcel, PortraitPanelRect_) &&
-                parcel.WriteUint64(displayId_));
+                WriteParcel(parcel, PortraitPanelRect_));
     }
 
     static KeyboardLayoutParams* Unmarshalling(Parcel& parcel)
