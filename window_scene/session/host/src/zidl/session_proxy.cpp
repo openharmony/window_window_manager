@@ -2966,7 +2966,11 @@ WSError OHOS::Rosen::SessionProxy::UseImplicitAnimation(bool useImplicit)
         TLOGE(WmsLogTag::WMS_PC, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen
