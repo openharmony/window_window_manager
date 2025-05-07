@@ -21,6 +21,7 @@
 #include "window_scene.h"
 #include "window_manager_hilog.h"
 #include "ani_window_utils.h"
+#include "singleton_container.h"
 #include "ani_window.h"
 
 namespace OHOS {
@@ -66,6 +67,25 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
         return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
     }
     return CreateAniWindowObject(env, window);
+}
+
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_double sourceWindowId, ani_double targetWindowId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+}
+
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
+    }
+    return ;
 }
 }  // namespace Rosen
 }  // namespace OHOS
