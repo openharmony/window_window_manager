@@ -1287,13 +1287,12 @@ int SceneSessionManagerStub::HandleGetGlobalWindowMode(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
-    WMError errCode = GetGlobalWindowMode(displayId, globalWinMode);
-    if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
+    if (!reply.WriteInt32(static_cast<int32_t>(GetGlobalWindowMode(displayId, globalWinMode)))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
         return ERR_INVALID_DATA;
     }
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+    if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
