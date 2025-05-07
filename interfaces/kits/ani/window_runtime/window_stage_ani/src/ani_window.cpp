@@ -23,13 +23,13 @@
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "ani_window_utils.h"
+#include "pixel_map.h"
+#include "pixel_map_ani.h"
 #include "window_helper.h"
 #include "window_scene.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "pixel_map.h"
-#include "pixel_map_ani.h"
 
 using OHOS::Rosen::WindowScene;
 
@@ -953,7 +953,7 @@ void AniWindow::HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHid
     if (windowToken_->IsFloatingWindowAppType()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is app floating window");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "HideNonSystemFloatingWindows is not allowed since window is app window");
+            "HideNonSystemFloatingWindows is not allowed since window is app floating window");
         return;
     }
     WMError ret = windowToken_->HideNonSystemFloatingWindows(shouldHide);
