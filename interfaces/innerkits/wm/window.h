@@ -3729,12 +3729,6 @@ public:
     }
 
     /**
-     * @brief Use implict animation
-     *
-     * @param used used
-     * @return Returns WMError::WM_OK if called success, otherwise failed.
-     */
-    virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
      * @brief notify avoid area for compatible mode app
      */
     virtual void HookCompatibleModeAvoidAreaNotify() {}
