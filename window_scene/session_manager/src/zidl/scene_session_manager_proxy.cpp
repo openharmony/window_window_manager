@@ -2051,17 +2051,17 @@ WMError SceneSessionManagerProxy::GetGlobalWindowMode(DisplayId displayId, Globa
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     uint32_t mode = 0;
     if (!reply.ReadUint32(mode)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read global window mode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     globalWinMode = static_cast<GlobalWindowMode>(mode);
-    int32_t errCode = 0;
-    if (!reply.ReadInt32(errCode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
     return static_cast<WMError>(errCode);
 }
 
