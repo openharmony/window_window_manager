@@ -1115,6 +1115,33 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
+{
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
+        {"isAdaptToImmersive", &CompatibleModeProperty::SetIsAdaptToImmersive},
+        {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
+        {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
+        {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+    };
+    bool atLeastOneParam = false;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
+    for (iter = funcs.begin(); iter != funcs.end(); ++iter) {
+        std::string paramStr = iter->first;
+        bool ret = false;
+        if (ParseJsValue(env, value, paramStr, ret)) {
+            void (CompatibleModeProperty::*func)(bool) = iter->second;
+            (compatibleModeProperty.*func)(ret);
+            atLeastOneParam = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
+    return atLeastOneParam;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {

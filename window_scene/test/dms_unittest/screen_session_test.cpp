@@ -3216,6 +3216,193 @@ HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
     ASSERT_EQ(0, screenSession->GetValidSensorRotation());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetValidSensorRotation end";
 }
+
+/**
+ * @tc.name: EnableMirrorScreenRegion
+ * @tc.desc: EnableMirrorScreenRegion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_EQ(nullptr, screenSession);
+    screenSession->SetIsEnableRegionRotation(true);
+    screenSession->EnableMirrorScreenRegion();
+    EXPECT_EQ(screenSession->GetIsEnableRegionRotation(), true);
+    screenSession->SetIsPhysicalMirrorSwitch(true);
+    screenSession->EnableMirrorScreenRegion();
+    EXPECT_EQ(screenSession->GetIsPhysicalMirrorSwitch(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(true);
+    EXPECT_EQ(session->GetIsExtend(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(false);
+    EXPECT_EQ(session->GetIsExtend(), false);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(true);
+    EXPECT_EQ(session->GetIsCurrentInUse(), true);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(false);
+    EXPECT_EQ(session->GetIsCurrentInUse(), false);
+}
+
+/**
+ * @tc.name: SetValidHeight
+ * @tc.desc: SetValidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidHeight, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validHeight = 100;
+    session->SetValidHeight(validHeight);
+    EXPECT_EQ(session->GetValidHeight(), validHeight);
+}
+
+/**
+ * @tc.name: SetValidWidth
+ * @tc.desc: SetValidWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidWidth, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validWidth = 100;
+    session->SetValidWidth(validWidth);
+    EXPECT_EQ(session->GetValidWidth(), validWidth);
+}
+
+/**
+ * @tc.name: UpdateRotationOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    int rotation = 0;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    session->UpdateRotationOrientation(rotation, foldDisplayMode);
+    ScreenProperty screenProperty = session->GetScreenProperty();
+    EXPECT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->UpdatePropertyByFakeInUse(false);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), false);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->UpdatePropertyByFakeInUse(true);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), true);
+}
+
+/**
+ * @tc.name: SetRotationAndScreenRotationOnly
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
+    if (enableRotation) {
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+        EXPECT_EQ(session->property_.GetRotation(), 0.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
+        EXPECT_EQ(session->property_.GetRotation(), 90.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
+        EXPECT_EQ(session->property_.GetRotation(), 180.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
+        EXPECT_EQ(session->property_.GetRotation(), 270.0f);
+    }
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetTouchEnabledFromJs(false);
+    EXPECT_EQ(session->IsTouchEnabled(), false);
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetTouchEnabledFromJs(true);
+    EXPECT_EQ(session->IsTouchEnabled(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

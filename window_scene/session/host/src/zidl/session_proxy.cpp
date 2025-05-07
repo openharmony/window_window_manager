@@ -323,19 +323,14 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WindowSizeLimits windowSizeLimits = { reply.ReadUint32(), reply.ReadUint32(),
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
-        property->SetCompatibleModeInPc(reply.ReadBool());
-        property->SetCompatibleModeInPcTitleVisible(reply.ReadBool());
-        property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
-                                              reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
-        property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
-        property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
+        property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);

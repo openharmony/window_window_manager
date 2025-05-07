@@ -158,35 +158,6 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleDownForCompatibleMode, TestSize.Leve
 }
 
 /**
- * @tc.name: NotifyCompatibleModeEnableInPad
- * @tc.desc: NotifyCompatibleModeEnableInPad
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, NotifyCompatibleModeEnableInPad, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("HandleDownForCompatibleMode");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
-
-    window->hostSession_ = nullptr;
-    window->property_->persistentId_ = INVALID_SESSION_ID;
-    window->state_ = WindowState::STATE_DESTROYED;
-
-    auto ret = window->NotifyCompatibleModeEnableInPad(true);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
-    window->state_ = WindowState::STATE_CREATED;
-    ret = window->NotifyCompatibleModeEnableInPad(true);
-    ASSERT_EQ(ret, WSError::WS_OK);
-}
-
-/**
  * @tc.name: Maximize
  * @tc.desc: Maximize
  * @tc.type: FUNC
@@ -1457,7 +1428,9 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode01, Func
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetCompatibleModeInPc(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableWindowLimit(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
     window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
@@ -1480,7 +1453,9 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode02, Func
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetCompatibleModeInPc(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableWindowLimit(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
     window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
@@ -1503,7 +1478,9 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode03, Func
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetCompatibleModeInPc(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableWindowLimit(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
     window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
@@ -1526,7 +1503,9 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode04, Func
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetCompatibleModeInPc(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableWindowLimit(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
     window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
@@ -1549,7 +1528,9 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Func
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetCompatibleModeInPc(false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableWindowLimit(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
     window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
