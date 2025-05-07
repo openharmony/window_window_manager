@@ -421,6 +421,23 @@ void AniWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& ti
 
 void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] rect:%{public}s, reason:%{public}d", rect.ToString().c_str(), reason);
+    auto task = [self = weakRef_, rect, reason, eng = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener or eng is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowRectCallback",
+            nullptr, thisListener->aniCallBack_, AniWindowUtils::CreateAniRect(eng, rect),
+            static_cast<ani_int>(reason));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "wms:AniWindowListener::RectChangeCallBack", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
