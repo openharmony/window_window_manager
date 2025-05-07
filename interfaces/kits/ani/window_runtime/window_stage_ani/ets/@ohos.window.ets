@@ -1881,35 +1881,7 @@ export class WindowInternal implements Window {
     //}
 
     public on(type: string, callback: object): void {
-      switch (type) {
-        case 'windowEvent':
-          this.onSync(this.nativeObj, type, callback as WindowEventCallback);
-          break;
-        case 'windowSizeChange':
-          this.onSync(this.nativeObj, type, callback as WindowSizeCallback);
-          break;
-        case 'windowStatusChange':
-          this.onSync(this.nativeObj, type, callback as WindowStatusCallback);
-          break;
-        case 'keyboardHeightChange':
-          this.onSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
-          break;
-        case 'keyboardDidShow':
-          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'keyboardDidHide':
-          this.onSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'dialogTargetTouch':
-          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'touchOutside':
-          this.onSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        default:
-          this.onSync(this.nativeObj, type, callback);
-          break;
-      }
+      this.onSync(this.nativeObj, type, callback);
     }
 
     public on(type: 'noInteractionDetected', timeout: number, callback: object): void {
@@ -1917,38 +1889,7 @@ export class WindowInternal implements Window {
     }
 
     public off(type: string, callback?: object): void {
-      switch (type) {
-        case 'windowEvent':
-          this.offSync(this.nativeObj, type, callback as WindowEventCallback);
-          break;
-        case 'windowSizeChange':
-          this.offSync(this.nativeObj, type, callback as WindowSizeCallback);
-          break;
-        case 'windowStatusChange':
-          this.offSync(this.nativeObj, type, callback as WindowStatusCallback);
-          break;
-        case 'keyboardHeightChange':
-          this.offSync(this.nativeObj, type, callback as KeyboardHeightChangeCallback);
-          break;
-        case 'keyboardDidShow':
-          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'keyboardDidHide':
-          this.offSync(this.nativeObj, type, callback as KeyboardDidShowOrHideCallback);
-          break;
-        case 'dialogTargetTouch':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'touchOutside':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        case 'noInteractionDetected':
-          this.offSync(this.nativeObj, type, callback as WindowVoidCallback);
-          break;
-        default:
-          this.offSync(this.nativeObj, type, callback);
-          break;
-      }
+      this.offSync(this.nativeObj, type, callback);
     }
     //public off(type: 'windowEvent', callback?: Callback<WindowEventType>): void {
     //    this.offSync(this.nativeObj, type, callback);
