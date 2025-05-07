@@ -429,7 +429,8 @@ public:
      * @param animation window transition animation.
      * @return WM_OK means set success.
      */
-    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
     {
         return WSError::WS_OK;
     }
@@ -442,7 +443,7 @@ public:
      */
     virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
     {
-        return std::shared_ptr<TransitionAnimation>();
+        return nullptr;
     }
 };
 } // namespace OHOS::Rosen

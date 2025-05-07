@@ -7941,19 +7941,20 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 /**
  * Window Transition Animation
  */
-WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
 {
     std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-    TransitionAnimationConfig_[transitionType] = config;
+    transitionAnimationConfig_[transitionType] = config;
     return WSError::WS_OK;
 }
 
 std::shared_ptr<TransitionAnimation> SceneSession::GetWindowTransitionAnimation(WindowTransitionType transitionType)
 {
-    if (TransitionAnimationConfig_.find(transitionType) != TransitionAnimationConfig_.end()) {
-        return TransitionAnimationConfig_[transitionType];
+    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
+        return transitionAnimationConfig_[transitionType];
     } else {
-        return std::shared_ptr<TransitionAnimation>();
+        return nullptr;
     }
 }
 

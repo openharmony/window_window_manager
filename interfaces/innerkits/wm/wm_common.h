@@ -2161,9 +2161,9 @@ enum class WindowAnimationCurve : uint32_t {
     LINEAR = 0,
 
     /**
-     * animation curve type interpolationspring.
+     * animation curve type interpolation_spring.
      */
-    INTERPOLATIONSPRING = 0,
+    INTERPOLATION_SPRING = 1,
 };
 
 const int32_t TRANSITION_ANIMATION_PARAM_SIZE = 4;
@@ -2172,10 +2172,47 @@ const int32_t TRANSITION_ANIMATION_MAX_DURATION = 3000;
 /*
  * @brief Window transition animation configuration.
  */
-struct WindowTransitonAnimationConfig {
-    WindowAnimationCurve curve;
-    uint32_t duration;
+struct WindowTransitonAnimationConfig : public Parcelable {
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    uint32_t duration = 0;
     std::array<float, TRANSITION_ANIMATION_PARAM_SIZE> param;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
+            return false;
+        }
+        if (param.size() != TRANSITION_ANIMATION_PARAM_SIZE) {
+            return false;
+        }
+        for (auto p: param) {
+            if (!parcel.WriteFloat(p)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static WindowTransitonAnimationConfig* Unmarshalling(Parcel& parcel)
+    {
+        WindowTransitonAnimationConfig* windowAnimationConfig = new WindowTransitonAnimationConfig();
+        if (!(parcel.ReadUint32(reinterpret_cast<uint32_t&>(windowAnimationConfig->curve)) &&
+              parcel.ReadUint32(windowAnimationConfig->duration))) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        if (windowAnimationConfig->param.size() != TRANSITION_ANIMATION_PARAM_SIZE) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        for (auto& param: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(param)) {
+                delete windowAnimationConfig;
+                return nullptr;
+            }
+        }
+        return windowAnimationConfig;
+    }
 };
 
 /*
@@ -2183,18 +2220,12 @@ struct WindowTransitonAnimationConfig {
  */
 struct TransitionAnimation : public Parcelable {
     WindowTransitonAnimationConfig config;
-    float opacity;
+    float opacity = 1.0;
     
     bool Marshalling(Parcel& parcel) const override
     {
-        if (!(parcel.WriteFloat(opacity) && parcel.WriteUint32(static_cast<uint32_t>(config.curve)) &&
-              parcel.WriteUint32(config.duration))) {
-                return false;
-        }
-        for (auto param: config.param) {
-            if (!parcel.WriteFloat(param)) {
-                return false;
-            }
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
+            return false;
         }
         return true;
     }
@@ -2202,18 +2233,17 @@ struct TransitionAnimation : public Parcelable {
     static TransitionAnimation* Unmarshalling(Parcel& parcel)
     {
         TransitionAnimation* transitionAnimation = new TransitionAnimation();
-        if (!(parcel.ReadFloat(transitionAnimation->opacity) &&
-              parcel.ReadUint32(reinterpret_cast<uint32_t&>(transitionAnimation->config.curve)) &&
-              parcel.ReadUint32(transitionAnimation->config.duration))) {
+        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
                 delete transitionAnimation;
                 return nullptr;
         }
-        for (auto& param: transitionAnimation->config.param) {
-            if (!parcel.ReadFloat(param)) {
-                delete transitionAnimation;
-                return nullptr;
-            }
+        WindowTransitonAnimationConfig* animationConfig = parcel.ReadParcelable<WindowTransitonAnimationConfig>();
+        if (animationConfig == nullptr) {
+            delete transitionAnimation;
+            delete animationConfig;
+            return nullptr;
         }
+        transitionAnimation->config = *animationConfig;
         return transitionAnimation;
     }
 };

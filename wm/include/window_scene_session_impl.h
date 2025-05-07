@@ -271,7 +271,8 @@ public:
     /**
      * Window Transition Animation
      */
-    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation) override;
+    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
     std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
 
 protected:
@@ -455,7 +456,7 @@ private:
     /**
      * Window Transition Animation
      */
-    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> TransitionAnimationConfig_;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -5620,20 +5620,24 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
 }
 
 WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
-    TransitionAnimation animation)
+    const TransitionAnimation& animation)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!GetHostSession()) {
+    WSError ret = WSError::WM_DO_NOTHING;
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
         TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
+    } else {
+        ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
+        if (ret == WSError::WS_OK) {
+            std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+            transitionAnimationConfig_[transitionType] = config;
+        }
     }
-    WSError ret = GetHostSession()->SetWindowTransitionAnimation(transitionType, animation);
-    if (ret == WSError::WS_OK) {
-        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-        TransitionAnimationConfig_[transitionType] = config;
-    }
+
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
@@ -5641,12 +5645,12 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     transitionType)
 {
     if (IsWindowSessionInvalid()) {
-        return std::shared_ptr<TransitionAnimation>();
+        return nullptr;
     }
-    if (TransitionAnimationConfig_.find(transitionType) != TransitionAnimationConfig_.end()) {
-        return TransitionAnimationConfig_[transitionType];
+    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
+        return transitionAnimationConfig_[transitionType];
     } else {
-        return std::shared_ptr<TransitionAnimation>();
+        return nullptr;
     }
 }
 

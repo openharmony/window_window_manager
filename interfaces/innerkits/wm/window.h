@@ -3606,11 +3606,12 @@ public:
      *
      * @param transitionType window transition type.
      * @param animation window transition animation.
-     * @return WM_OK means set success.
+     * @return WM_OK means set window transition aniamtion success, others means failed.
      */
-    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType, TransitionAnimation animation)
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
     {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return WMError::WM_OK;
     }
 
     /**
@@ -3621,7 +3622,7 @@ public:
      */
     virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
     {
-        return std::shared_ptr<TransitionAnimation>();
+        return nullptr;
     }
 
      /**
