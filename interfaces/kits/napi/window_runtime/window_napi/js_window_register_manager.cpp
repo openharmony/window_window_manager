@@ -424,40 +424,12 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
     return false;
 }
 
-void JsWindowRegisterManager::CleanReferenceWithType(std::string type, NativeReference* callbackRef)
-{
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end() ||
-            jsCbMap_[type].find(callbackRef) == jsCbMap_[type].end()) {
-            TLOGW(WmsLogTag::DEFAULT, "type %{public}s was not registered", type.c_str());
-            return;
-        }
-        jsCbMap_[type].erase(callbackRef);
-        TLOGI(WmsLogTag::DEFAULT, "type %{public}s erase callbackRef", type.c_str());
-        delete callbackRef;
-        if (jsCbMap_[type].empty()) {
-            TLOGI(WmsLogTag::DEFAULT, "type %{public}s is empty()", type.c_str());
-            jsCbMap_.erase(type);
-        }
-    }
-}
-
 static void CleanUp(void* data)
 {
-    auto reference = reinterpret_cast<JsWindowRegisterManager::TypeWithRef*>(data);
-    if (reference == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "reference is null");
-        return;
-    }
-    auto jsWindowManager = reference->jsWindowManager.lock();
-    if (jsWindowManager == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "jsWindowManager is null");
+    auto reference = reinterpret_cast<NativeReference*>(data);
+    if (reference != nullptr) {
         delete reference;
-        return;
     }
-    jsWindowManager->CleanReferenceWithType(reference->type, reference->callbackRef);
-    delete reference;
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
@@ -481,12 +453,10 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     NativeReference* callbackRef = reinterpret_cast<NativeReference*>(result);
-    auto callbackData = new TypeWithRef{ type, callbackRef, this->getWeak() };
-    napi_add_env_cleanup_hook(env, CleanUp, callbackData);
+    napi_add_env_cleanup_hook(env, CleanUp, callbackRef);
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
         WLOGFE("New JsWindowListener failed");
-        napi_delete_reference(env, result);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
@@ -494,7 +464,6 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("Register type %{public}s failed", type.c_str());
-        napi_delete_reference(env, result);
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;

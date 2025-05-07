@@ -1024,7 +1024,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.posY_ = posY;
     }
     if (GetType(env, jsWidth_) != napi_undefined) {
-        uint32_t width = 0;
+        uint32_t width;
         if (!ConvertFromJsValue(env, jsWidth_, width)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to width_");
             return false;
@@ -1032,7 +1032,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.width_ = width;
     }
     if (GetType(env, jsHeight_) != napi_undefined) {
-        uint32_t height = 0;
+        uint32_t height;
         if (!ConvertFromJsValue(env, jsHeight_, height)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to height_");
             return false;
