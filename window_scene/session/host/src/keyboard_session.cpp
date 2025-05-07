@@ -817,6 +817,10 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
 
 void KeyboardSession::AddCrossScreenChild()
 {
+    if (moveDragController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "move drag controller is null");
+        return;
+    }
     for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
         if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
             continue;
@@ -848,6 +852,10 @@ void KeyboardSession::AddCrossScreenChild()
 
 void KeyboardSession::RemoveCrossScreenChild()
 {
+    if (moveDragController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "move drag controller is null");
+        return;
+    }
     for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
         if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
             continue;
