@@ -1302,6 +1302,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode01, TestSize.Level0)
     SessionInfo sessionInfo3;
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
     sceneSession3->GetSessionProperty()->SetDisplayId(VIRTUAL_DISPLAY_ID);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
 
@@ -1377,6 +1378,7 @@ HWTEST_F(SceneSessionManagerTest12, IsSessionInSpecificDisplay01, TestSize.Level
     WSRect rect1 = { 0, 0, 100, 100 };
     sceneSession1->SetSessionRect(rect1);
     sceneSession1->SetSessionGlobalRect(rect1);
+    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
     bool ret1 = ssm_->IsSessionInSpecificDisplay(sceneSession1, VIRTUAL_DISPLAY_ID);
     EXPECT_EQ(ret1, false);
 
