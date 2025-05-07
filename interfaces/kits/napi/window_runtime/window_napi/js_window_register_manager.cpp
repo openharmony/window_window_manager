@@ -427,8 +427,13 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
 static void CleanUp(void* data)
 {
     auto reference = reinterpret_cast<NativeReference*>(data);
-    delete reference;
-    reference = nullptr;
+    uint32_t refCount = reference->GetRefCount();
+    if (refCount > 0  || reference->GetFinalRun()) {
+        delete reference;
+        reference = nullptr;
+    } else {
+        reference->SetDeleteSelf();
+    }
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
