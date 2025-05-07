@@ -8247,19 +8247,17 @@ bool SceneSession::GetIsAncoForFloatingWindow() const
 
 WSError SceneSession::UseImplicitAnimation(bool useImplicit)
 {
-    return PostSyncTask(
-        [weakThis = wptr(this), useImplicit, where = __func__] {
-            auto session = weakThis.promote();
-            if (!session) {
-                TLOGNE(WmsLogTag::WMS_PC, "%{public}s session is null", where);
-                return WSError::WS_ERROR_DESTROYED_OBJECT;
-            }
-            if (session->useImplicitAnimationChangeFunc_) {
-                session->useImplicitAnimationChangeFunc_(useImplicit);
-            }
-            return WSError::WS_OK;
-        },
-        __func__);
+    return PostSyncTask([weakThis = wptr(this), useImplicit, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->useImplicitAnimationChangeFunc_) {
+            session->useImplicitAnimationChangeFunc_(useImplicit);
+        }
+        return WSError::WS_OK;
+    }, __func__);
 }
  
 void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func)
@@ -8272,7 +8270,6 @@ void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitA
         }
         session->useImplicitAnimationChangeFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
-    },
-        __func__);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
