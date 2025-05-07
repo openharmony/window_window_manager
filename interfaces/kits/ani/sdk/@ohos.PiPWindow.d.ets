@@ -13,32 +13,6 @@
  * limitations under the License.
  */
 
-/**
- * @file
- * @kit ArkUI
- */
-
-import type BaseContext from './application/BaseContext';
-import type { Callback } from './@ohos.base';
-import { NodeController } from './arkui/NodeController';
-import { typeNode } from './arkui/FrameNode';
-import XComponentController from './arkui/component/xComponent';
-
-/**
- * Picture In Picture Window Manager
- *
- * @namespace PiPWindow
- * @syscap SystemCapability.Window.SessionManager
- * @since 11
- */
-/**
- * Picture In Picture Window Manager
- *
- * @namespace PiPWindow
- * @syscap SystemCapability.Window.SessionManager
- * @atomicservice
- * @since 12
- */
 declare namespace PiPWindow {
   /**
    * If picture-in-picture enabled in current OS.
