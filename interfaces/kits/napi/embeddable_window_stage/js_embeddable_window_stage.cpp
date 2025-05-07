@@ -20,11 +20,16 @@
 #include "js_extension_window_utils.h"
 #include "window_manager_hilog.h"
 #include "js_window_utils.h"
+#include "js_window.h"
 #include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
+namespace {
+const int CONTENT_STORAGE_ARG = 2;
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsEmbeddableWindowStage"};
+} //namespace
 
 JsEmbeddableWindowStage::JsEmbeddableWindowStage(sptr<Rosen::Window> window, sptr<AAFwk::SessionInfo> sessionInfo)
     : windowExtensionSessionImpl_(window), sessionInfo_(sessionInfo),
@@ -96,6 +101,20 @@ napi_value JsEmbeddableWindowStage::GetSubWindow(napi_env env, napi_callback_inf
     TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
+}
+
+napi_value JsEmbeddableWindowStage::SetUIContent(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
@@ -341,6 +360,109 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsEmbeddableWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
+{
+    if (windowExtensionSessionImpl_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string windowName;
+    if (!ConvertFromJsValue(env, argv[0], windowName)) {
+        WLOGFE("Failed to convert parameter to windowName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    sptr<WindowOption> option = new WindowOption();
+    if (!ParseSubWindowOptions(env, argv[1], option)) {
+        WLOGFE("Get invalid options param");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        return NapiGetUndefined(env);
+    }
+
+    if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP)));
+        return NapiGetUndefined(env);
+    }
+    option->SetParentId(sessionInfo_->hostWindowId);
+    const char* const where = __func__;
+    napi_value lastParam = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [where, extensionWindow = windowExtensionSessionImpl_, windowName = std::move(windowName),
+        windowOption = option, env, task = napiAsyncTask]() mutable {
+        if (extensionWindow == nullptr) {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
+            return;
+        }
+        windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetOnlySupportSceneBoard(true);
+        windowOption->SetIsUIExtFirstSubWindow(true);
+        auto window = Window::Create(windowName, windowOption, extensionWindow->GetContext());
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Create window failed", where);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "create sub window failed"));
+            return;
+        }
+        if (!window->IsTopmost()) {
+            extensionWindow->NotifyModalUIExtensionMayBeCovered(false);
+        }
+        task->Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s Create sub window %{public}s end",
+            where, windowName.c_str());
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsEmbeddableWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) { // 2: minimum param num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        return NapiGetUndefined(env);
+    }
+
+    // Parse info->argv[0] as abilitycontext
+    auto objContext = argv[0];
+    if (objContext == nullptr) {
+        WLOGFE("Context is nullptr");
+        return NapiGetUndefined(env);
+    }
+
+    // Parse info->argv[1] as url
+    std::string contextUrl;
+    if (!ConvertFromJsValue(env, argv[1], contextUrl)) {
+        WLOGFE("Failed to convert parameter to url");
+        return NapiGetUndefined(env);
+    }
+
+    if (windowExtensionSessionImpl_ == nullptr) {
+        WLOGFE("extensionWindow is null");
+        return NapiGetUndefined(env);
+    }
+    windowExtensionSessionImpl_->NapiSetUIContent(contextUrl, env, argv[CONTENT_STORAGE_ARG]);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, sptr<Rosen::Window> window,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
@@ -365,6 +487,9 @@ napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, 
     BindNativeFunction(env, objValue, "off", moduleName, JsEmbeddableWindowStage::Off);
     BindNativeFunction(env, objValue, "createSubWindow", moduleName, JsEmbeddableWindowStage::CreateSubWindow);
     BindNativeFunction(env, objValue, "getSubWindow", moduleName, JsEmbeddableWindowStage::GetSubWindow);
+    BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName,
+        JsEmbeddableWindowStage::CreateSubWindowWithOptions);
+    BindNativeFunction(env, objValue, "setUIContent", moduleName, JsEmbeddableWindowStage::SetUIContent);
 
     return objValue;
 }

@@ -2340,6 +2340,39 @@ WSError SceneSessionManagerProxy::GetHostWindowRect(int32_t hostWindowId, Rect& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerProxy::GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write interface token failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(hostWindowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write hostWindowId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto errorCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT), data, reply, option);
+    if (errorCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed code: %{public}d", errorCode);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto posX = reply.ReadInt32();
+    auto posY = reply.ReadInt32();
+    auto width = reply.ReadUint32();
+    auto height = reply.ReadUint32();
+    globalScaledRect = {posX, posY, width, height};
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WSError SceneSessionManagerProxy::GetFreeMultiWindowEnableState(bool& enable)
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");

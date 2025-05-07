@@ -938,6 +938,15 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetHostWindowRect(hostWindowId, rect));
 }
 
+WMError WindowAdapter::GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->GetHostGlobalScaledRect(hostWindowId, globalScaledRect));
+}
+
 WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);

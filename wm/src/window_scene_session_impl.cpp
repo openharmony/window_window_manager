@@ -31,6 +31,7 @@
 #include "display_manager.h"
 #include "display_manager_adapter.h"
 #include "dm_common.h"
+#include "extension/extension_business_info.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
@@ -5238,6 +5239,12 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
     enableImmersiveMode_ = enable;
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+    AAFwk::Want want;
+    want.SetParam(Extension::IMMERSIVE_MODE_ENABLED, enable);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
     WindowMode mode = GetWindowMode();
     if (!windowSystemConfig_.IsPcWindow() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return SetLayoutFullScreen(enableImmersiveMode_);
@@ -5470,12 +5477,18 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     }
     TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u, enable %{public}u", GetWindowId(), enable);
     gestureBackEnabled_ = enable;
+    AAFwk::Want want;
+    want.SetParam(Extension::GESTURE_BACK_ENABLED, enable);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_GESTURE_BACK_ENABLED),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
 }
 
-WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
+WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
 {
     if (windowSystemConfig_.IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_IMMS, "device not support");

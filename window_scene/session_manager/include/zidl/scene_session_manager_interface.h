@@ -135,6 +135,7 @@ public:
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_PARENT_WINDOW,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
+        TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -325,6 +326,10 @@ public:
         return WSError::WS_OK;
     }
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override
     {
         return WSError::WS_OK;
     }
