@@ -861,6 +861,20 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostWindowCompatiblityInfo
+ * @tc.desc: WindowAdapter/GetHostWindowCompatiblityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto err = windowAdapter.GetHostWindowCompatiblityInfo(property, token);
+    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: WindowAdapter/MinimizeByWindowId
  * @tc.type: FUNC

@@ -176,6 +176,11 @@ private:
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
+    /*
+     * Compatible Mode
+     */
+    WMError GetHostWindowCompatiblityInfo();
+
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
     sptr<IRemoteObject> abilityToken_ { nullptr };

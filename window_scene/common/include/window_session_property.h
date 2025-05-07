@@ -278,6 +278,7 @@ public:
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsAdaptToSimulationScale() const;
 
     /*
      * Keyboard
@@ -539,8 +540,13 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
+    bool IsAdaptToSimulationScale() const;
+
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
+
+    void CopyFrom(const sptr<CompatibleModeProperty>& property);
 
     std::string ToString() const
     {
@@ -553,6 +559,7 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
         return ss.str();
     }
 
@@ -565,6 +572,7 @@ private:
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
     bool disableWindowLimit_ { false };
+    bool isAdaptToSimulationScale_ { false };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
