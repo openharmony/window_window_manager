@@ -427,9 +427,8 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
 static void CleanUp(void* data)
 {
     auto reference = reinterpret_cast<NativeReference*>(data);
-    if (reference != nullptr) {
-        delete reference;
-    }
+    delete reference;
+    reference = nullptr;
 }
 
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
@@ -589,9 +588,6 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 WLOGFE("Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            if (it->first != nullptr) {
-                delete it->first;
-            }
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -611,9 +607,6 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("Unregister type %{public}s failed", type.c_str());
                 return ret;
-            }
-            if (it->first != nullptr) {
-                delete it->first;
             }
             jsCbMap_[type].erase(it);
             break;
