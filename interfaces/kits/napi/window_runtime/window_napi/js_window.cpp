@@ -6994,9 +6994,9 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     return result;
 }
 
-static napi_value IsCallingWindowValid(napi_env env, sptr<Window> windowToken)
+static napi_value IsCallingWindowInvalid(napi_env env, sptr<Window> windowToken)
 {
-    if (!windowToken->IsPcWindow() || !windowToken->IsPadWindow()) {
+    if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
@@ -7027,9 +7027,9 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value isValid = IsCallingWindowValid(env, windowToken_);
-    if (!isValid) {
-        return isValid;
+    napi_value isInvalid = IsCallingWindowInvalid(env, windowToken_);
+    if (isInvalid) {
+        return isInvalid;
     }
 
     const char* const where = __func__;
