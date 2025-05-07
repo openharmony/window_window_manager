@@ -696,7 +696,7 @@ bool ConvertWindowEffectAnimationConfigFromJsValue(napi_env env, napi_value conf
     if (!ParseJsValue(config, env, "curve", curve)) {
         return false;
     }
-    animationConfig.curve = static_cast<WindowAnimationCurve>(animationConfig.curve);
+    animationConfig.curve = static_cast<WindowAnimationCurve>(curve);
     uint32_t duration = 0;
     std::array<double, TRANSITION_ANIMATION_PARAM_SIZE> params;
     switch (curve) {
