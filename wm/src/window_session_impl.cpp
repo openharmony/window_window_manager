@@ -3773,24 +3773,27 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
     }
     uint32_t activeColorValue;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
-        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, active value: [%{public}s, %{public}u]",
-            GetWindowName().c_str(), activeColor.c_str(), activeColorValue);
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, active value: [%{public}s, %{public}u]",
+            GetPersistentId(), activeColor.c_str(), activeColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     uint32_t inactiveColorValue;
     if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
-        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive value: [%{public}s, %{public}u]",
-            GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive value: [%{public}s, %{public}u]",
+            GetPersistentId(), inactiveColor.c_str(), inactiveColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if ((inactiveColorValue & 0xff000000) != 0xff000000) {
-        TLOGE(WmsLogTag::WMS_DECOR, "window: %{public}s, inactive alpha value error", GetWindowName().c_str());
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive alpha value error", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_DECOR, "window: %{public}s, activeValue: %{public}u, inactiveValue: %{public}u",
-            GetWindowName().c_str(), activeColorValue, inactiveColorValue);
+        TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}d, activeValue: %{public}u, inactiveValue: %{public}u",
+            GetPersistentId(), activeColorValue, inactiveColorValue);
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
+    } else {
+        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return WMError::WM_OK;
 }
