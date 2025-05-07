@@ -257,6 +257,32 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
     }
 }
 
+void AniWindow::SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetWindowFocusable(env, isFocusable);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetWindowFocusable failed.");
+    }
+}
+
 void AniWindow::setWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -1267,6 +1293,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
         ani_native_function {"setWaterMarkFlagSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
+        ani_native_function {"setWindowFocusableSync", "JZ:V",
+            reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
         ani_native_function {"keepKeyboardOnFocusSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
         ani_native_function {"setWindowTouchableSync", "JZ:V",
