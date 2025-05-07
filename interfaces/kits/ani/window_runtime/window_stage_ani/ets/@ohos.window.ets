@@ -339,7 +339,7 @@ namespace window {
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    type: WindowType;
+    type: number;
 
     /**
      * The visibility of system bar
@@ -349,7 +349,7 @@ namespace window {
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    isEnable?: boolean;
+    isEnable: boolean;
 
     /**
      * The region of system bar
@@ -359,7 +359,7 @@ namespace window {
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    region?: Rect;
+    region: Rect;
 
     /**
      * The background color of the system bar.
@@ -369,7 +369,7 @@ namespace window {
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    backgroundColor?: string;
+    backgroundColor: string;
 
     /**
      * The content color of the system bar.
@@ -379,15 +379,15 @@ namespace window {
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    contentColor?: string;
+    contentColor: string;
   }
 
   export class SystemBarRegionTintInternal implements SystemBarRegionTint {
-    type: WindowType;
-    isEnable?: boolean;
-    region?: Rect;
-    backgroundColor?: string;
-    contentColor?: string;
+    type: number;
+    isEnable: boolean;
+    region: Rect;
+    backgroundColor: string;
+    contentColor: string;
   }
 
   /**
