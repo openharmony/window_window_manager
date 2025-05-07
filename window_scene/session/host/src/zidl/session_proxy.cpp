@@ -2969,8 +2969,8 @@ WSError OHOS::Rosen::SessionProxy::UseImplicitAnimation(bool useImplicit)
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WMError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(ret);
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen
