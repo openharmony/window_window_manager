@@ -582,6 +582,9 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 WLOGFE("Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
+            if (it->first != nullptr) {
+                delete it->first;
+            }
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -601,6 +604,9 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("Unregister type %{public}s failed", type.c_str());
                 return ret;
+            }
+            if (it->first != nullptr) {
+                delete it->first;
             }
             jsCbMap_[type].erase(it);
             break;
