@@ -8271,7 +8271,7 @@ void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitA
             return;
         }
         session->useImplicitAnimationChangeFunc_ = std::move(func);
-        TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetId());
+        TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
     },
         __func__);
 }
