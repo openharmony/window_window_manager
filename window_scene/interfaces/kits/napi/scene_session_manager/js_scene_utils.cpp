@@ -87,27 +87,43 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
         return objValue;
     }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_value configJsValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
-    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, transitionAnimation->config.curve));
-    if (transitionAnimation->config.curve == WindowAnimationCurve::LINEAR) {
-        napi_set_named_property(env, configJsValue, "duration",
-            CreateJsValue(env, transitionAnimation->config.duration));
-    } else if (transitionAnimation->config.curve == WindowAnimationCurve::INTERPOLATION_SPRING) {
-        napi_value params = nullptr;
-        napi_create_array(env, &params);
-        for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
-            napi_value element;
-            napi_create_double(env, static_cast<double>(transitionAnimation->config.param[i]), &element);
-            napi_set_element(env, params, i, element);
-        }
-        napi_set_named_property(env, configJsValue, "param", params);
+    napi_value configJsValue = ConvertWindowEffectAnimationConfigToJsValue(env, transitionAnimation->config);
+    if (!configJsValue) {
+        return nullptr;
     }
-
     napi_set_named_property(env, objValue, "config", configJsValue);
     napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, transitionAnimation->opacity));
 
     return objValue;
+}
+
+napi_value ConvertWindowEffectAnimationConfigToJsValue(napi_env env,
+    const WindowEffectAnimationConfig& animationConfig)
+{
+    napi_value configJsValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
+    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, animationConfig.curve));
+    switch (animationConfig.curve)
+    {
+        case WindowAnimationCurve::LINEAR: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            break;
+        }
+        case WindowAnimationCurve::INTERPOLATION_SPRING: {
+            napi_value params = nullptr;
+            napi_create_array(env, &params);
+            for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
+                napi_value element;
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_set_element(env, params, i, element);
+            }
+            napi_set_named_property(env, configJsValue, "param", params);
+            break;
+        }   
+        default:
+            break;
+    }
+    return configJsValue;
 }
 
 napi_value WindowTransitionTypeInit(napi_env env)
