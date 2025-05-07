@@ -346,4 +346,11 @@ void BaseAdapterLite::Clear()
     }
     isProxyValid_ = false;
 }
+
+bool DisplayManagerAdapterLite::GetKeyBoardState()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->GetKeyBoardState();
+}
 } // namespace OHOS::Rosen

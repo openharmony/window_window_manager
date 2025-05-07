@@ -853,4 +853,27 @@ sptr<ScreenInfo> DisplayManagerLiteProxy::GetScreenInfoById(ScreenId screenId)
     }
     return info;
 }
+
+bool DisplayManagerLiteProxy::GetKeyBoardState()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetKeyBoardState: remote is null");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_KEY_BOARD_STATE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
 } // namespace OHOS::Rosen
