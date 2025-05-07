@@ -2167,6 +2167,8 @@ enum class WindowAnimationCurve : uint32_t {
 };
 
 const int32_t TRANSITION_ANIMATION_PARAM_SIZE = 4;
+const double TRANSITION_ANIMATION_PARAM_MIN = 0.0;
+const double TRANSITION_ANIMATION_PARAM_DEFAULT = 1.0;
 const int32_t TRANSITION_ANIMATION_MAX_DURATION = 3000;
 
 /*

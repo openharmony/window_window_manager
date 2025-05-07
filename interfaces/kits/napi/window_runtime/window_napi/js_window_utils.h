@@ -383,6 +383,9 @@ public:
         std::shared_ptr<TransitionAnimation> transitionAnimation);
     bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject,
         TransitionAnimation& transitionAnimation);
+    bool ConvertWindowTransitonAnimationConfigFromJsValue(napi_env env, napi_value config,
+            WindowTransitonAnimationConfig& animationConfig);
+    bool CheckWindowTransitonAnimationConfig(const WindowTransitonAnimationConfig& animationConfig);
     bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
