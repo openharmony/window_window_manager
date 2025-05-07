@@ -312,7 +312,7 @@ public:
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
-    WMError SetMainWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
+    WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
 
     /*

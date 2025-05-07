@@ -1641,48 +1641,48 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor01
- * @tc.desc: SetMainWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor01
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor02
- * @tc.desc: SetMainWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor02
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor03
- * @tc.desc: SetMainWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor03
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor03, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1692,19 +1692,19 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor03, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
- * @tc.name: SetMainWindowContainerColor04
- * @tc.desc: SetMainWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor04
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1714,7 +1714,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowContainerColor04, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetMainWindowContainerColor(activeColor, inactiveColor);
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 

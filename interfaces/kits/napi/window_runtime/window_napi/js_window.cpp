@@ -991,11 +991,11 @@ napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetMainWindowContainerColor(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetWindowContainerModalColor(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetMainWindowContainerColor(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetWindowContainerModalColor(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
@@ -7131,7 +7131,7 @@ napi_value JsWindow::OnSetWindowContainerColor(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
-napi_value JsWindow::OnSetMainWindowContainerColor(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetWindowContainerModalColor(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -7154,7 +7154,7 @@ napi_value JsWindow::OnSetMainWindowContainerColor(napi_env env, napi_callback_i
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container inactiveColor");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WMError errCode = windowToken_->SetMainWindowContainerColor(activeColor, inactiveColor);
+    WMError errCode = windowToken_->SetWindowContainerModalColor(activeColor, inactiveColor);
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] set activeColor: %{public}s,"
         " inactiveColor: %{public}s, result: %{public}d", windowToken_->GetWindowId(),
         windowToken_->GetWindowName().c_str(), activeColor.c_str(), inactiveColor.c_str(), errCode);
@@ -8292,7 +8292,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
-    BindNativeFunction(env, object, "setMainWindowContainerColor", moduleName, JsWindow::SetMainWindowContainerColor);
+    BindNativeFunction(env, object, "setWindowContainerModalColor", moduleName, JsWindow::SetWindowContainerModalColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
