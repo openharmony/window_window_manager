@@ -2852,6 +2852,52 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTe
         dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
     EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
 }
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated01
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigUpdated01");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated01 end";
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated02
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigUpdated02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated02 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
