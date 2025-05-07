@@ -155,6 +155,7 @@ public:
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;
+    WSError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Pattern
