@@ -17,6 +17,7 @@
 
 #include <bool_wrapper.h>
 #include <hitrace_meter.h>
+#include <int_wrapper.h>
 #include <ipc_types.h>
 #include <parameters.h>
 #include <string_wrapper.h>
@@ -1569,9 +1570,6 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
     hostImmersiveModeEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::IMMERSIVE_MODE_ENABLED, 0));
 
     extensionConfig_ = AAFwk::WantParams(configParam);
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SetHostParams(extensionConfig_);
-    }
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
 
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
