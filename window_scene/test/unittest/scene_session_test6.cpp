@@ -449,7 +449,7 @@ HWTEST_F(SceneSessionTest6, GetFollowScreenChange01, TestSize.Level1)
     bool isFollowScreenChange = true;
     sceneSession->SetFollowScreenChange(isFollowScreenChange);
     bool res = sceneSession->GetFollowScreenChange();
-    ASSERT_EQ(res, isFollowScreenChange);
+    EXPECT_EQ(res, isFollowScreenChange);
 }
 
 /**
@@ -464,9 +464,7 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateFollowScreenChange, TestSize.Level
     info.bundleName_ = "HandleActionUpdateFollowScreenChange";
     info.isSystem_ = true;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, session);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     property->SetFollowScreenChange(true);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE;
     auto res = session->HandleActionUpdateFollowScreenChange(property, action);
