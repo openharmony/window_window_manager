@@ -3759,16 +3759,16 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetMainWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
 {
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     uint32_t activeColorValue;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
