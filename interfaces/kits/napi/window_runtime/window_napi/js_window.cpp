@@ -7014,11 +7014,6 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (animation.config.curve == WindowAnimationCurve::LINEAR &&
-        animation.config.duration > TRANSITION_ANIMATION_MAX_DURATION) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animation.config.duration);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
