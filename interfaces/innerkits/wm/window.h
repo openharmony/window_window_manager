@@ -2408,6 +2408,13 @@ public:
     virtual bool IsPcWindow() const { return false; }
 
     /**
+     * @brief Is pad window or not.
+     *
+     * @return True means pc window, false means the opposite.
+     */
+    virtual bool IsPadWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -3611,7 +3618,7 @@ public:
     virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**

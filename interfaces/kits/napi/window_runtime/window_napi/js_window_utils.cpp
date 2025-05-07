@@ -677,7 +677,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     return true;
 }
 
-bool CheckWindowEffectAnimationConfigst(WindowEffectAnimationConfig& animationConfig) {
+bool CheckWindowEffectAnimationConfig(const WindowEffectAnimationConfig& animationConfig) {
     if (animationConfig.curve == WindowAnimationCurve::LINEAR &&
         animationConfig.duration > TRANSITION_ANIMATION_MAX_DURATION) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
