@@ -2793,8 +2793,8 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated01, TestSiz
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     WSError res = window->NotifyAppForceLandscapeConfigUpdated();
-    ASSERT_EQ(res, WSError::WS_DO_NOTHING);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated01 end";
 }
 
@@ -2816,8 +2816,8 @@ HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated02, TestSiz
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     WSError res = window->NotifyAppForceLandscapeConfigUpdated();
-    ASSERT_EQ(res, WSError::WS_DO_NOTHING);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated02 end";
 }
 } // namespace

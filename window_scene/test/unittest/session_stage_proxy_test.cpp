@@ -783,7 +783,7 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
-    ASSERT_EQ(WSError::WS_OK, res);
+    EXPECT_EQ(WSError::WS_OK, res);
 }
 } // namespace
 } // namespace Rosen

@@ -1014,7 +1014,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
 }
 } // namespace
 } // namespace Rosen

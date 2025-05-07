@@ -2067,9 +2067,9 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "GetAppForceLandscapeConfig";
     AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
-    ASSERT_EQ(config.mode_, 0);
-    ASSERT_EQ(config.homePage_, "");
-    ASSERT_EQ(config.isSupportSplitMode_, false);
+    EXPECT_EQ(config.mode_, 0);
+    EXPECT_EQ(config.homePage_, "");
+    EXPECT_EQ(config.isSupportSplitMode_, false);
 }
 
 /**

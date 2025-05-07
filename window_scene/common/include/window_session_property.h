@@ -574,9 +574,12 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (config == nullptr) {
             return nullptr;
         }
-        config->mode_ = parcel.ReadInt32();
-        config->homePage_ = parcel.ReadString();
-        config->isSupportSplitMode_ = parcel.ReadBool();
+        if (!parcel.ReadInt32(config->mode_) ||
+            !parcel.ReadString(config->homePage_) ||
+            !parcel.ReadBool(config->isSupportSplitMode_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
 };
