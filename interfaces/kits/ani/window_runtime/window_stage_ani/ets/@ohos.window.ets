@@ -2190,7 +2190,7 @@ export interface Window {
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
     rotate(rotateOptions: RotateOptions): void;
-    setShadow(radius: number, color:? string, offsetX?: number, offsetY?: number): void;
+    setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void;
     on(type: string, calback: object): void;
     on(type: 'noInteractionDetected', timeout: number, callback: object): void;
     off(type:string, callback?: object): void;
