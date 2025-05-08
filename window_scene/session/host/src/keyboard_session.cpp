@@ -552,10 +552,6 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
         uint32_t screenWidth = 0;
         uint32_t screenHeight = 0;
         auto sessionProperty = session->GetSessionProperty();
-        if (sessionProperty == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session property is null", where);
-            return;
-        }
         bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
         if (!ret) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
