@@ -11787,9 +11787,8 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
             WindowType winType = session->GetWindowType();
             if ((!WindowHelper::IsMainWindow(winType) && !WindowHelper::IsPipWindow(winType)) ||
                 !IsSessionVisibleForeground(session)) {
-                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u, "
-                    "isVisible=%{public}d", where, session->GetWindowId(), session->GetWindowName().c_str(),
-                    static_cast<uint32_t>(winType));
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u",
+                    where, session->GetWindowId(), session->GetWindowName().c_str(), static_cast<uint32_t>(winType));
                 continue;
             }
             WindowMode winMode = session->GetWindowMode();
