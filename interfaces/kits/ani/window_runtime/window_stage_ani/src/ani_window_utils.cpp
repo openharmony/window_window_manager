@@ -135,14 +135,14 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
         return ret;
     }
 
-    ani_int double_value;
+    ani_double double_value;
     if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
         "doubleValue", nullptr, &double_value)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
         return ret;
     }
     result = static_cast<double>(double_value);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}f", propertyName, result);
     return ret;
 }
 
@@ -160,14 +160,14 @@ ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_objec
         return ANI_INVALID_ARGS;
     }
 
-    ani_int double_value;
+    ani_double double_value;
     ani_status ret = env->Object_CallMethodByName_Double(double_object, "doubleValue", nullptr, &double_value)
     if (ANI_OK != ret) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Double Failed!");
         return ret;
     }
     result = static_cast<double>(double_value);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] double result is: %{public}u", result);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] double result is: %{public}f", result);
     return ret;
 }
 
