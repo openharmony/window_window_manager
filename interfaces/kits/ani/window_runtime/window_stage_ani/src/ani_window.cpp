@@ -563,7 +563,7 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     Rect globalScaleRect{0, 0, 0, 0};
-    WMError ret = windowToken_->GetGlobalScaledRect(globalScaleRect);
+    WMError ret = window->GetGlobalScaledRect(globalScaleRect);
     if (ret != WMError::WM_OK) {
         if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -571,7 +571,7 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s] globalScaleRect: %{public}s",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), globalScaleRect.ToString().c_str());
+        window->GetWindowId(), window->GetWindowName().c_str(), globalScaleRect.ToString().c_str());
     return AniWindowUtils::CreateAniRect(env, globalScaleRect);
 }
 
