@@ -738,6 +738,18 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowCrossAxisChange, Function | SmallTes
     sessionStage_->NotifyWindowCrossAxisChange(state);
     ASSERT_NE(nullptr, sessionStage_);
 }
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: test function : NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(WSError::WS_OK, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

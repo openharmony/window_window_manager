@@ -130,6 +130,7 @@ using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool i
 using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<SceneSession>& session, bool isNewWant)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
+using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -380,6 +381,8 @@ public:
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
     void ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark);
+    void RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func);
+    WSError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * PC Window Layout
@@ -838,6 +841,7 @@ protected:
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
     NotifyUpdateFlagFunc onUpdateFlagFunc_;
+    NotifyUseImplicitAnimationChangeFunc useImplicitAnimationChangeFunc_;
 
     /*
      * PiP Window
