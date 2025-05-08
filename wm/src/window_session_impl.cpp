@@ -6143,7 +6143,7 @@ RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChang
         rotationChangeInfo.orientation_, rotationChangeInfo.displayRect_.posX_,
         rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
         rotationChangeInfo.displayRect_.height_);
-    NotifyRotationChangeResultInner(windowRotationChangeListeners);
+    NotifyRotationChangeResultInner(rotationChangeInfo);
     RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
     getRotationResultFuture_->ResetRotationResultLock();
     rotationChangeResult = getRotationResultFuture_->GetRotationResult(WINDOW_ROTATION_CHANGE);
