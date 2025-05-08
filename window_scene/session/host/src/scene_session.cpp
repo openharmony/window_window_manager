@@ -8110,14 +8110,14 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
 WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
-    std::lock_guard guard(session->currentRotationMutex_);
-    session->currentRotation_ = currentRotation;
     PostTask([weakThis = wptr(this), currentRotation, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
             return;
         }
+        std::lock_guard guard(session->currentRotationMutex_);
+        session->currentRotation_ = currentRotation;
         if (!session->sessionStage_) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s sessionStage is null", where);
             return;
