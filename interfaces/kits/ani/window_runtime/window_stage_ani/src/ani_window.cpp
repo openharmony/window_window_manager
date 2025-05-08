@@ -515,7 +515,7 @@ void AniWindow::OnSetShadow(ani_env* env, ani_double radius, ani_string color, a
     TLOGNI(WmsLogTag::WMS_ANIMATION, "[ANI] Window [%{public}u, %{public}s] Set Window Shadow end, "
         "radius=%{public}f, color=%{public}s, offsetX=%{public}f offsetY=%{public}f",
         window->GetWindowId(), window->GetWindowName().c_str(),
-        radiusValue, colorValue.c_str, offsetXValue, offsetYValue);
+        radiusValue, colorValue.c_str(), offsetXValue, offsetYValue);
 }
 
 void AniWindow::SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isPrivacyMode)

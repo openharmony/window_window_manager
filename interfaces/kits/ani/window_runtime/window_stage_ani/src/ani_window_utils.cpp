@@ -161,7 +161,7 @@ ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_objec
     }
 
     ani_double double_value;
-    ani_status ret = env->Object_CallMethodByName_Double(double_object, "doubleValue", nullptr, &double_value)
+    ani_status ret = env->Object_CallMethodByName_Double(double_object, "doubleValue", nullptr, &double_value);
     if (ANI_OK != ret) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Double Failed!");
         return ret;
