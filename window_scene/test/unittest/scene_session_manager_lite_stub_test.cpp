@@ -61,7 +61,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError GetSessionInfos(const std::string& deviceId,
-        int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) override
+                            int32_t numMax,
+                            std::vector<SessionInfoBean>& sessionInfos) override
     {
         return WSError::WS_OK;
     }
@@ -74,7 +75,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
-        SessionInfoBean& sessionInfo) override
+                                              SessionInfoBean& sessionInfo) override
     {
         return WSError::WS_OK;
     }
@@ -82,13 +83,16 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError TerminateSessionNew(
-        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info,
+                                bool needStartCaller,
+                                bool isFromBroker = false) override
     {
         return WSError::WS_OK;
     }
-    WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
-        SessionSnapshot& snapshot, bool isLowResolution) override
+    WSError GetSessionSnapshot(const std::string& deviceId,
+                               int32_t persistentId,
+                               SessionSnapshot& snapshot,
+                               bool isLowResolution) override
     {
         return WSError::WS_OK;
     }
@@ -113,28 +117,25 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
-        std::vector<std::int32_t>& result) override
+                                     std::vector<std::int32_t>& result) override
     {
         return WSError::WS_OK;
     }
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent) override
+                                       const sptr<IWindowManagerAgent>& windowManagerAgent) override
     {
         return WMError::WM_OK;
     }
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent) override
+                                         const sptr<IWindowManagerAgent>& windowManagerAgent) override
     {
         return WMError::WM_OK;
     }
-    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
-        std::vector<sptr<WindowInfo>>& infos) override
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override
     {
         return WMError::WM_OK;
     }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override
-    {
-    }
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override {}
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override
     {
         return WMError::WM_OK;
@@ -155,8 +156,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
-        std::vector<int32_t>& clearFailedIds) override
+    WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override
     {
         clearFailedIds.push_back(1);
         return WMError::WM_OK;
@@ -166,7 +166,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
+                                                const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override
     {
         return WSError::WS_OK;
     }
@@ -207,25 +207,46 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return nullptr;
     }
-    WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
-        AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override
+    WMError CheckUIExtensionCreation(int32_t windowId,
+                                     uint32_t tokenId,
+                                     const AppExecFwk::ElementName& element,
+                                     AppExecFwk::ExtensionAbilityType extensionAbilityType,
+                                     int32_t& pid) override
     {
         return WMError::WM_OK;
     }
-    WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
-        const std::vector<AppUseControlInfo>& controlList) override { return WSError::WS_OK; }
-    WMError MinimizeMainSession(const std::string& bundleName,
-        int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
-    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
-        bool& hasFloatingShowing) override { return WMError::WM_OK; }
-    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
-        bool isLock) override { return WMError::WM_OK; }
+    WSError NotifyAppUseControlList(ControlAppType type,
+                                    int32_t userId,
+                                    const std::vector<AppUseControlInfo>& controlList) override
+    {
+        return WSError::WS_OK;
+    }
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken, bool& hasFloatingShowing) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override
+    {
+        return WMError::WM_OK;
+    }
     WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
-        const std::vector<int32_t>& persistentIdList) override { return WMError::WM_OK; }
+                                                  const std::vector<int32_t>& persistentIdList) override
+    {
+        return WMError::WM_OK;
+    }
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
-        const std::vector<std::string>& bundleNameList) override { return WMError::WM_OK; }
-    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
-        override { return WMError::WM_OK; }
+                                                      const std::vector<std::string>& bundleNameList) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -237,13 +258,9 @@ public:
     sptr<SceneSessionManagerLiteStub> sceneSessionManagerLiteStub_ = nullptr;
 };
 
-void SceneSessionManagerLiteStubTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerLiteStubTest::SetUpTestCase() {}
 
-void SceneSessionManagerLiteStubTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerLiteStubTest::TearDownTestCase() {}
 
 void SceneSessionManagerLiteStubTest::SetUp()
 {
@@ -264,25 +281,22 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerLiteStubTest, OnRemoteRequest, TestSize.Level1)
 {
-    uint32_t code = static_cast<uint32_t>(SceneSessionManagerLiteStub::
-        SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL);
+    uint32_t code =
+        static_cast<uint32_t>(SceneSessionManagerLiteStub::SceneSessionManagerLiteMessage::TRANS_ID_SET_SESSION_LABEL);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(u"OpenHarmeny");
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::OnRemoteRequest(1000, data, reply, option);
     EXPECT_EQ(IPC_STUB_UNKNOW_TRANS_ERR, res);
     data.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
     data.WriteString("OnRemoteRequest UT Testing.");
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -295,8 +309,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionIcon, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionIcon(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -309,8 +322,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsValidSessionIds, TestSize.Leve
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleIsValidSessionIds(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleIsValidSessionIds(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -323,8 +335,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, Test
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -337,8 +348,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundForDel
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(
+        data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -351,8 +362,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterSessionListener, TestSiz
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterSessionListener(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -365,8 +375,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegisterSessionListener, TestS
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -379,8 +388,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfos, TestSize.Level1
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnRegisterSessionListener(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -393,8 +401,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWindowStatesByPid, TestSi
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
@@ -408,21 +415,18 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     std::u16string deviceIdU16 = u"testDeviceId";
     data.WriteString16(deviceIdU16);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t persistentId = 0;
     data.WriteString16(deviceIdU16);
     data.WriteInt32(persistentId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -436,14 +440,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfoByContinueSessionI
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     std::string continueSessionId = "testSessionId";
     data.WriteString(continueSessionId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
+    res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -456,8 +460,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionNew, TestSize.Le
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleTerminateSessionNew(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleTerminateSessionNew(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -471,8 +474,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken, TestSize.L
     MessageParcel data;
     MessageParcel reply;
     data.WriteUint64(0);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -485,8 +487,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken1, TestSize.
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -500,8 +501,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement, TestSize
     MessageParcel data;
     MessageParcel reply;
     data.WriteUint64(0);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -514,8 +514,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement1, TestSiz
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -529,24 +528,21 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, TestSiz
     MessageParcel data;
     MessageParcel reply;
 
-    sptr <IRemoteObject> token = nullptr;
+    sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t continueStateValue = -3;
     data.WriteRemoteObject(token);
     data.WriteInt32(continueStateValue);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     continueStateValue = 1;
     data.WriteRemoteObject(token);
     data.WriteInt32(continueStateValue);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -561,8 +557,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, TestSi
     MessageParcel reply;
     data.WriteRemoteObject(nullptr);
     data.WriteInt32(-2);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
@@ -578,8 +573,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState2, TestSi
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
     data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(res, ERR_NONE);
     uint32_t writtenError;
     EXPECT_TRUE(reply.ReadUint32(writtenError));
@@ -601,8 +595,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, TestSize.Lev
     data.WriteInt32(persistentId);
     const bool isLowResolution = true;
     data.WriteBool(isLowResolution);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -616,14 +609,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearSession, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleClearSession(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t persistentId = 0;
     data.WriteInt32(persistentId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleClearSession(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -636,8 +627,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearAllSessions, TestSize.Level
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleClearAllSessions(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearAllSessions(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -651,14 +641,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSession, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleLockSession(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t persistentId = 0;
     data.WriteInt32(persistentId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleLockSession(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -672,14 +660,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSession, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t sessionId = 0;
     data.WriteInt32(sessionId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -693,22 +679,19 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, TestSi
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     std::vector<int32_t> sessionIds;
     sessionIds.push_back(0);
     data.WriteInt32Vector(sessionIds);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
     int32_t topSessionId = 0;
     data.WriteInt32Vector(sessionIds);
     data.WriteInt32(topSessionId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -721,8 +704,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToBackground, TestSi
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -736,8 +718,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo, TestSize.Le
     MessageParcel data;
     MessageParcel reply;
     data.WriteUint64(0);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -750,8 +731,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo1, TestSize.L
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
@@ -766,8 +746,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleCheckWindowId, TestSize.Level1)
     MessageParcel reply;
     int32_t numMax = 100;
     data.WriteInt32(numMax);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleCheckWindowId(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleCheckWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -781,23 +760,19 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Test
     MessageParcel data;
     MessageParcel reply;
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 
     data.WriteUint32(-100);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     data.WriteUint32(100);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     data.WriteUint32(5);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -811,23 +786,19 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Te
     MessageParcel data;
     MessageParcel reply;
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 
     data.WriteUint32(-100);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     data.WriteUint32(100);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     data.WriteUint32(5);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -846,8 +817,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleListWindowInfo, TestSize.Level1)
     data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL));
     data.WriteUint64(displayId);
     data.WriteInt32(windowId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleListWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -860,8 +830,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetVisibilityWindowInfo, TestSiz
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetVisibilityWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -876,8 +845,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetMainWinodowInfo, TestSize.Lev
     MessageParcel reply;
     int32_t numMax = 100;
     data.WriteInt32(numMax);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -890,8 +858,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAllMainWindowInfos, TestSize.
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetAllMainWindowInfos(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -904,10 +871,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearMainSessions, TestSize.Leve
 {
     MessageParcel data;
     MessageParcel reply;
-    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<int32_t> persistentIds = { 1, 2, 3 };
     data.WriteInt32Vector(persistentIds);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleClearMainSessions(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -922,8 +888,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRaiseWindowToTop, TestSize.Level
     MessageParcel reply;
     int32_t persistentId = 65535;
     data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleRaiseWindowToTop(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -937,14 +902,13 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, 
     MessageParcel data;
     MessageParcel reply;
 
-    auto res = sceneSessionManagerLiteStub_->
-    SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     int32_t persistentId = 1;
     data.WriteInt32(persistentId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -957,8 +921,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetWindowStyleType, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetWindowStyleType(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -972,8 +935,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleCloseTargetFloatWindow, TestSize
     MessageParcel data;
     MessageParcel reply;
     data.WriteString("test");
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleCloseTargetFloatWindow(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -986,8 +948,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleCloseTargetPiPWindow, TestSize.L
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleCloseTargetPiPWindow(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleCloseTargetPiPWindow(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1000,8 +961,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetCurrentPiPWindowInfo, TestSiz
 {
     MessageParcel data;
     MessageParcel reply;
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1016,8 +976,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, TestSize.Le
     MessageParcel reply;
     int32_t persistentId = 1;
     data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1044,8 +1003,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, TestSiz
     data.WriteInt32(appIndex);
     data.WriteBool(isControl);
 
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1091,10 +1049,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, TestSi
     data.WriteInt32(appIndex);
     data.WriteBool(isLock);
 
-    auto res =
-        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

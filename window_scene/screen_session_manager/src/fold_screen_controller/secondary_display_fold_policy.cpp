@@ -100,6 +100,10 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     if (displayMode == FoldDisplayMode::UNKNOWN) {
         TLOGW(WmsLogTag::DMS, "displayMode is unknown");
     } else {
@@ -109,7 +113,6 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
     if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         TLOGW(WmsLogTag::DMS, "Set device status to STATUS_GLOBAL_FULL");

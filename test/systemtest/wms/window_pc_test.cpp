@@ -72,7 +72,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag01, TestSize.Level1)
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)));
-    
+
     window->Destroy(true, true);
 }
 
@@ -98,7 +98,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag02, TestSize.Level1)
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)));
- 
+
     window->Destroy(true, true);
 }
 
@@ -530,6 +530,6 @@ HWTEST_F(WindowPCTest, SetMainWindowTopmost03, TestSize.Level1)
     window->Destroy(true, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

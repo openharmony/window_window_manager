@@ -123,6 +123,8 @@ public:
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
+    void HookCompatibleModeAvoidAreaNotify() override;
+    bool IsAdaptToCompatibleImmersive() const override;
     WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
     bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
@@ -251,6 +253,8 @@ public:
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
     void UpdateTitleButtonVisibility();
+    void HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton, bool& hideMinimizeButton,
+        bool& hideCloseButton);
     WSError NotifyDestroy() override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
@@ -310,6 +314,8 @@ public:
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
+    WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
+    nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
 
     /*
      * Window Decor listener
@@ -433,6 +439,7 @@ public:
     void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
     DisplayOrientation GetDisplayOrientationForRotation() const;
     void SetPreferredRequestedOrientation(Orientation orientation) override;
+    WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
 protected:
     WMError Connect();
@@ -604,7 +611,7 @@ protected:
      * Window Immersive
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
-    uint32_t GetStatusBarHeight() override;
+    uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
 
     /*
@@ -738,6 +745,7 @@ private:
     bool IsUserOrientation(Orientation orientation) const;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     bool IsNotifyInteractiveDuplicative(bool interactive);

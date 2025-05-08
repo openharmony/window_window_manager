@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//gtest
+// gtest
 #include <gtest/gtest.h>
 
 #include "ability_context_impl.h"
@@ -201,8 +201,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener));
 
-    sptr<IWindowTitleButtonRectChangedListener> listener1 =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener1 = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener1));
 
@@ -229,8 +228,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, TestSize.Level1)
     window->property_->SetPersistentId(10022);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -267,8 +265,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, TestSize.Level1)
     window->property_->SetPersistentId(10023);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -305,8 +302,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, TestSize.Level1)
     window->property_->SetPersistentId(10024);
     window->hostSession_ = session;
 
-    sptr<IWindowTitleButtonRectChangedListener> listener =
-    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
+    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -462,6 +458,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose04, TestSize.Level1)
     window->Destroy(true, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

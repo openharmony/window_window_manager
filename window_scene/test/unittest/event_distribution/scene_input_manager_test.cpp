@@ -33,6 +33,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
@@ -49,9 +50,7 @@ void SceneInputManagerTest::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneInputManagerTest::SetUp()
-{
-}
+void SceneInputManagerTest::SetUp() {}
 
 void SceneInputManagerTest::TearDown()
 {
@@ -88,7 +87,6 @@ void CheckNeedUpdateTest()
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     }
 }
-
 
 void WindowInfoListZeroTest(sptr<SceneSessionManager> ssm_)
 {
@@ -208,9 +206,7 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, TestSize.Level1)
     EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
     sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
     EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
-    ExtensionWindowEventInfo extensionInfo {
-        .persistentId = 12345
-    };
+    ExtensionWindowEventInfo extensionInfo{ .persistentId = 12345 };
     sceneSession->AddNormalModalUIExtension(extensionInfo);
     sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
     EXPECT_EQ(sceneInputManager->focusedSessionId_, extensionInfo.persistentId);
@@ -483,22 +479,20 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, TestSize.Level0)
     info.abilityName_ = "NotifyWindowInfoChange";
     info.bundleName_ = "NotifyWindowInfoChange";
     info.appIndex_ = 10;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
     // sceneSessionDirty_ = nullptr
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
-    SceneInputManager::GetInstance()
-    .NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
+    SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
-    SceneInputManager::GetInstance()
-    .NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
+    SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChange end";
 }
@@ -515,8 +509,8 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, TestSize.Leve
     info.abilityName_ = "NotifyWindowInfoChangeFromSession";
     info.bundleName_ = "NotifyWindowInfoChangeFromSession";
     info.appIndex_ = 100;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
@@ -545,8 +539,8 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, TestSize.Level1)
     info.abilityName_ = "NotifyMMIWindowPidChange";
     info.bundleName_ = "NotifyMMIWindowPidChange";
     info.appIndex_ = 1000;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
@@ -810,6 +804,6 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, TestSize.Level1)
     windowInfoList[0].pointerChangeAreas.clear();
     SceneInputManager::GetInstance().lastWindowInfoList_[0].pointerChangeAreas.clear();
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
