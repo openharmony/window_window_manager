@@ -552,6 +552,10 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
         uint32_t screenWidth = 0;
         uint32_t screenHeight = 0;
         auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session property is null", where);
+            return;
+        }
         bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
         if (!ret) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
@@ -573,11 +577,14 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
             params.PortraitPanelRect_.posX_ = rect.posX_;
             params.PortraitPanelRect_.posY_ = rect.posY_;
         }
+        sessionProperty->SetKeyboardLayoutParams(params);
+        if (session->adjustKeyboardLayoutFunc_) {
+            session->adjustKeyboardLayoutFunc_(params);
+        }
         TLOGI(WmsLogTag::WMS_KEYBOARD,
             "isLand:%{public}d, landRect:%{public}s, portraitRect:%{public}s, displayId:%{public}" PRIu64,
             isLand, params.LandscapeKeyboardRect_.ToString().c_str(),
             params.PortraitKeyboardRect_.ToString().c_str(), displayId);
-        session->AdjustKeyboardLayout(params);
     }, __func__ + GetRectInfo(rect));
 }
 
