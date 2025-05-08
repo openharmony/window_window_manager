@@ -2946,6 +2946,20 @@ void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
     }, __func__);
 }
 
+void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func)
+{
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session or func is null", where);
+            return;
+        }
+        session->updateTransitionAnimationFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    }, __func__);
+}
+
 bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
@@ -7944,18 +7958,10 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
     const TransitionAnimation& animation)
 {
-    std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-    transitionAnimationConfig_[transitionType] = config;
-    return WSError::WS_OK;
-}
-
-std::shared_ptr<TransitionAnimation> SceneSession::GetWindowTransitionAnimation(WindowTransitionType transitionType)
-{
-    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
-        return transitionAnimationConfig_[transitionType];
-    } else {
-        return nullptr;
+    if (updateTransitionAnimationFunc_) {
+        updateTransitionAnimationFunc_(transitionType, animation);
     }
+    return WSError::WS_OK;
 }
 
 void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)
