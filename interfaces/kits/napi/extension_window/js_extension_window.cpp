@@ -483,7 +483,7 @@ napi_value JsExtensionWindow::OnGetUIContext(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu, expect zero params", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1308,20 +1308,20 @@ napi_value JsExtensionWindow::OnSetWindowColorSpace(napi_env env, napi_callback_
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     } else {
         napi_value nativeType = argv[0];
         if (nativeType == nullptr) {
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-            WLOGFE("Failed to convert parameter to ColorSpace");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to ColorSpace");
         } else {
             uint32_t resultValue = 0;
             CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 napi_get_value_uint32(env, nativeType, &resultValue));
             colorSpace = static_cast<ColorSpace>(resultValue);
             if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT || colorSpace < ColorSpace::COLOR_SPACE_DEFAULT) {
-                WLOGFE("ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
+                TLOGE(WmsLogTag::WMS_UIEXT, "ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
         }

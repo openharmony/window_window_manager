@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-const int CONTENT_STORAGE_ARG = 2;
+constexpr int CONTENT_STORAGE_ARG = 2;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsEmbeddableWindowStage"};
 } //namespace
 
@@ -372,13 +372,13 @@ napi_value JsEmbeddableWindowStage::OnCreateSubWindowWithOptions(napi_env env, n
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
-        WLOGFE("Failed to convert parameter to windowName");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to windowName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
-        WLOGFE("Get invalid options param");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get invalid options param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -437,26 +437,26 @@ napi_value JsEmbeddableWindowStage::OnSetUIContent(napi_env env, napi_callback_i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: minimum param num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiGetUndefined(env);
     }
 
     // Parse info->argv[0] as abilitycontext
     auto objContext = argv[0];
     if (objContext == nullptr) {
-        WLOGFE("Context is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Context is nullptr");
         return NapiGetUndefined(env);
     }
 
     // Parse info->argv[1] as url
     std::string contextUrl;
     if (!ConvertFromJsValue(env, argv[1], contextUrl)) {
-        WLOGFE("Failed to convert parameter to url");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to url");
         return NapiGetUndefined(env);
     }
 
     if (windowExtensionSessionImpl_ == nullptr) {
-        WLOGFE("extensionWindow is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
         return NapiGetUndefined(env);
     }
     windowExtensionSessionImpl_->NapiSetUIContent(contextUrl, env, argv[CONTENT_STORAGE_ARG]);
