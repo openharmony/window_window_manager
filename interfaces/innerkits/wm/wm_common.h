@@ -2149,6 +2149,11 @@ enum class WindowTransitionType : uint32_t {
      * window destroy.
      */
     DESTROY = 0,
+    
+    /**
+     * end type.
+     */
+    END,
 };
 
 /*
@@ -2166,25 +2171,23 @@ enum class WindowAnimationCurve : uint32_t {
     INTERPOLATION_SPRING = 1,
 };
 
-const int32_t TRANSITION_ANIMATION_PARAM_SIZE = 4;
-const double TRANSITION_ANIMATION_PARAM_MIN = 0.0;
-const double TRANSITION_ANIMATION_PARAM_DEFAULT = 1.0;
-const int32_t TRANSITION_ANIMATION_MAX_DURATION = 3000;
+const int32_t ANIMATION_PARAM_SIZE = 4;
+const int32_t ANIMATION_MAX_DURATION = 3000;
 
 /*
  * @brief Window transition animation configuration.
  */
-struct SceneAnimationConfig : public Parcelable {
+struct WindowAnimationOptions : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
-    std::array<float, TRANSITION_ANIMATION_PARAM_SIZE> param;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
 
     bool Marshalling(Parcel& parcel) const override
     {
         if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
             return false;
         }
-        if (param.size() != TRANSITION_ANIMATION_PARAM_SIZE) {
+        if (param.size() > ANIMATION_PARAM_SIZE) {
             return false;
         }
         for (auto p: param) {
@@ -2195,15 +2198,15 @@ struct SceneAnimationConfig : public Parcelable {
         return true;
     }
 
-    static SceneAnimationConfig* Unmarshalling(Parcel& parcel)
+    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
     {
-        SceneAnimationConfig* windowAnimationConfig = new SceneAnimationConfig();
+        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
         if (!(parcel.ReadUint32(reinterpret_cast<uint32_t&>(windowAnimationConfig->curve)) &&
               parcel.ReadUint32(windowAnimationConfig->duration))) {
             delete windowAnimationConfig;
             return nullptr;
         }
-        if (windowAnimationConfig->param.size() != TRANSITION_ANIMATION_PARAM_SIZE) {
+        if (windowAnimationConfig->param.size() != ANIMATION_PARAM_SIZE) {
             delete windowAnimationConfig;
             return nullptr;
         }
@@ -2221,7 +2224,7 @@ struct SceneAnimationConfig : public Parcelable {
  * @brief Transition animation configuration.
  */
 struct TransitionAnimation : public Parcelable {
-    SceneAnimationConfig config;
+    WindowAnimationOptions config;
     float opacity = 1.0;
     
     bool Marshalling(Parcel& parcel) const override
@@ -2239,7 +2242,7 @@ struct TransitionAnimation : public Parcelable {
                 delete transitionAnimation;
                 return nullptr;
         }
-        SceneAnimationConfig* animationConfig = parcel.ReadParcelable<SceneAnimationConfig>();
+        WindowAnimationOptions* animationConfig = parcel.ReadParcelable<WindowAnimationOptions>();
         if (animationConfig == nullptr) {
             delete transitionAnimation;
             delete animationConfig;
