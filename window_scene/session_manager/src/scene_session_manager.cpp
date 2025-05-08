@@ -140,6 +140,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
+constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -1493,6 +1494,11 @@ AvoidArea SceneSessionManager::GetRootSessionAvoidAreaByType(AvoidAreaType type)
         return rootSession->GetAvoidAreaByType(type);
     }
     return {};
+}
+
+uint32_t SceneSessionManager::GetRootSceneStatusBarHeight() const
+{
+    return static_cast<uint32_t>(rootSceneSession_->GetStatusBarHeight());
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
@@ -10535,9 +10541,14 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     taskScheduler_->PostAsyncTask(task, where);
 }
 
-void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible)
+void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const
 {
-    isVisible = statusBarConstantlyShowMap_[displayId];
+    auto it = statusBarConstantlyShowMap_.find(displayId);
+    if (it != statusBarConstantlyShowMap_.end()) {
+        isVisible = it->second;
+    } else {
+        isVisible = false;
+    }
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
@@ -13658,9 +13669,23 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         return WSError::WS_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+
+    AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
+    
     appForceLandscapeMap_[bundleName] = config;
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s",
-        bundleName.c_str(), config.mode_, config.homePage_.c_str());
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
+        bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
+    
+    if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
+        //Notify the client of the mode change
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+                session->NotifyAppForceLandscapeConfigUpdated();
+            }
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -14769,5 +14794,20 @@ void SceneSessionManager::ConfigSupportZLevel()
         systemConfig_.supportZLevel_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
+}
+
+WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d, useImplicit:%{public}d", hostWindowId, useImplicit);
+    auto task = [this, hostWindowId, useImplicit]() {
+        auto sceneSession = GetSceneSession(hostWindowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        return sceneSession->UseImplicitAnimation(useImplicit);
+    };
+ 
+    return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
 }
 } // namespace OHOS::Rosen

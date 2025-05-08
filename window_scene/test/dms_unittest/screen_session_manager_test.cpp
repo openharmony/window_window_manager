@@ -6623,6 +6623,37 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenModeChange, Function | SmallTest | Le
     ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
     ssm_->OnScreenModeChange(screenModeChangeEvent);
 }
+
+/**
+ * @tc.name: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.desc: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetIsFoldStatusLocked, Function | SmallTest | Level3)
+{
+    ssm_->SetIsFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetIsFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: SetFoldStatusExpandAndLocked
+ * @tc.desc: SetFoldStatusExpandAndLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->SetFoldStatusExpandAndLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetFoldStatusExpandAndLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

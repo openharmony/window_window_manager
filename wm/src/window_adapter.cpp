@@ -1143,5 +1143,13 @@ WMError WindowAdapter::SetForegroundWindowNum(int32_t windowNum)
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->SetForegroundWindowNum(windowNum);
 }
+
+WMError WindowAdapter::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->UseImplicitAnimation(hostWindowId, useImplicit));
+}
 } // namespace Rosen
 } // namespace OHOS

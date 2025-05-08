@@ -450,7 +450,7 @@ public:
     /**
      * @brief Set fold status expand and locked, only for super fold display device.
      *
-     * @param isEnable wether to set fold status expand and locked.
+     * @param locked wether to set fold status expand and locked.
      */
     void SetFoldStatusExpandAndLocked(bool locked);
 

@@ -2298,10 +2298,6 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const
 {
-    if (isDisplayStatusBarTemporarily_.load()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
-        return;
-    }
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
@@ -6970,8 +6966,7 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
-        GetSessionProperty() == nullptr) {
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
         return height;
     }
@@ -8243,5 +8238,33 @@ void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
 bool SceneSession::GetIsAncoForFloatingWindow() const
 {
     return isAncoForFloatingWindow_;
+}
+
+WSError SceneSession::UseImplicitAnimation(bool useImplicit)
+{
+    return PostSyncTask([weakThis = wptr(this), useImplicit, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->useImplicitAnimationChangeFunc_) {
+            session->useImplicitAnimationChangeFunc_(useImplicit);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+ 
+void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session or func is null", where);
+            return;
+        }
+        session->useImplicitAnimationChangeFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
 }
 } // namespace OHOS::Rosen
