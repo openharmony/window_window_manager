@@ -91,7 +91,7 @@ enum class SessionInterfaceCode {
     TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED,
     TRANS_ID_UPDATE_ROTATION_CHANGE,
 
-    // window transition animation
+    // Window Transition Animation For PC
     TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION,
 
     // Extension

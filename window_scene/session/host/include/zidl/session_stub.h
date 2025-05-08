@@ -143,7 +143,7 @@ private:
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
     
-    // Window Transition Animation
+    // Window Transition Animation For PC
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

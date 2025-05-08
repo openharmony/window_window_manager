@@ -1033,19 +1033,19 @@ void JsSceneSession::ProcessUpdateTransitionAnimationRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->SetTransitionAnimationCallback([weakThis = wptr(this), where = __func__](const WindowTransitionType& type,
         const TransitionAnimation& animation) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnUpdateTransitionAnimation(type, animation);
     });
-    WLOGFD("success");
+    TLOGD("success");
 }
 
 void JsSceneSession::ProcessBufferAvailableChangeRegister()
@@ -3381,21 +3381,21 @@ void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& typ
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", session->GetPersistentId(), type);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "id: %{public}d, type: %{public}d", session->GetPersistentId(), type);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, type, animation, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "OnUpdateTransitionAnimation jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_ANIMATION, 
+                "OnUpdateTransitionAnimation jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_TRANSITION_ANIMATION_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "jsCallBack is nullptr");
             return;
         }
         napi_value jsTransitionTypeObj = CreateJsValue(env, type);

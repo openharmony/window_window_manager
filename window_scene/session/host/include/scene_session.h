@@ -753,7 +753,7 @@ public:
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
     /**
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation) override;
@@ -1233,7 +1233,7 @@ private:
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
 
     /**
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
 };

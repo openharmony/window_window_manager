@@ -180,7 +180,7 @@ public:
 
 
     /*
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     static napi_value SetWindowTransitionAnimation(napi_env env, napi_callback_info info);
     static napi_value GetWindowTransitionAnimation(napi_env env, napi_callback_info info);
@@ -378,7 +378,7 @@ private:
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     napi_value OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info);
     napi_value OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info);

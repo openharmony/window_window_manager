@@ -6994,17 +6994,19 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     return result;
 }
 
-static napi_value IsCallingWindowInvalid(napi_env env, sptr<Window> windowToken)
+static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken)
 {
     if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return false;
     }
     if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return false;
     }
-    return nullptr;
+    return true;
 }
 
 napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
@@ -7018,7 +7020,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t type = 0;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > WindowTransitionType::DESTROY)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -7027,9 +7029,8 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value isInvalid = IsCallingWindowInvalid(env, windowToken_);
-    if (isInvalid) {
-        return isInvalid;
+    if(!IsTransitionAnimationEnable(env, windowToken_)){
+        return NapiGetUndefined(env);
     }
 
     const char* const where = __func__;
@@ -7052,7 +7053,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env, CreateJsError(env, 
+        napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
