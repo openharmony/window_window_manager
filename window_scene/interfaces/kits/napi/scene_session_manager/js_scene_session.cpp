@@ -1045,7 +1045,7 @@ void JsSceneSession::ProcessUpdateTransitionAnimationRegister()
         }
         jsSceneSession->OnUpdateTransitionAnimation(type, animation);
     });
-    TLOGD("success");
+    TLOGD(WmsLogTag::WMS_ANIMATION, "success");
 }
 
 void JsSceneSession::ProcessBufferAvailableChangeRegister()

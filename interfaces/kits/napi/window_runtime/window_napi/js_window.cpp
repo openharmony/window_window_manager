@@ -7012,6 +7012,10 @@ static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken)
 napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    if(!IsTransitionAnimationEnable(env, windowToken_)){
+        return NapiGetUndefined(env);
+    }
+    
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -7020,17 +7024,14 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t type = 0;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > WindowTransitionType::DESTROY)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > static_cast<uint32_t>(WindowTransitionType::END))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    TransitionAnimation animation = TransitionAnimation();
+    TransitionAnimation animation;
     if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    if(!IsTransitionAnimationEnable(env, windowToken_)){
-        return NapiGetUndefined(env);
     }
 
     const char* const where = __func__;
@@ -7070,7 +7071,7 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowTransitionType type;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > WindowTransitionType::END)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
