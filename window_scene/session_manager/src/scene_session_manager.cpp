@@ -11784,10 +11784,12 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
                     where, session->GetWindowId(), session->GetWindowName().c_str());
                 continue;
             }
-            if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !session->GetRSVisible() ||
-                !session->IsSessionForeground()) {
-                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win: [%{public}d, %{public}s]",
-                    where, session->GetWindowId(), session->GetWindowName().c_str());
+            WindowType winType = session->GetWindowType();
+            if ((!WindowHelper::IsMainWindow(winType) && !WindowHelper::IsPipWindow(winType)) ||
+                !IsSessionVisibleForeground(session)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u, "
+                    "isVisible=%{public}d", where, session->GetWindowId(), session->GetWindowName().c_str(),
+                    static_cast<uint32_t>(winType));
                 continue;
             }
             WindowMode winMode = session->GetWindowMode();
@@ -11797,7 +11799,7 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
                 globalWinMode = globalWinMode | GlobalWindowMode::SPLIT;
             } else if (WindowHelper::IsFloatingWindow(winMode)) {
                 globalWinMode = globalWinMode | GlobalWindowMode::FLOAT;
-            } else if (WindowHelper::IsPipWindowMode(winMode)) {
+            } else if (WindowHelper::IsPipWindow(winType)) {
                 globalWinMode = globalWinMode | GlobalWindowMode::PIP;
             }
             if (globalWinMode == GlobalWindowMode::ALL) {
