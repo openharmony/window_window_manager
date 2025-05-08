@@ -281,6 +281,7 @@ public:
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
     virtual WMError SetForegroundWindowNum(int32_t windowNum) { return WMError::WM_OK; }
+    virtual WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) { return WSError::WS_OK; }
 
     /*
      * Sub Window

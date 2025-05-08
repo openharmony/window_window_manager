@@ -98,6 +98,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
     UPDATE_PIP_TEMPLATE_INFO_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
+    USE_IMPLICIT_ANIMATION_CB,
 };
 
 class SceneSession;
@@ -372,6 +373,7 @@ private:
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
+    void ProcessUseImplicitAnimationChangeRegister();
 
     /*
      * Window Property
@@ -451,6 +453,7 @@ private:
     void OnRotationChange(int32_t persistentId, bool isRegister);
     void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
+    void OnUseImplicitAnimationChange(bool useImplicit);
 
     /*
      * Window Property

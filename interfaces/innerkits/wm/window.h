@@ -2764,6 +2764,18 @@ public:
     }
 
     /**
+     * @brief Set main window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
@@ -3281,7 +3293,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() const { return 0; }
 
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
@@ -3739,6 +3751,14 @@ public:
      * @return true comptbleMode adapt to immersive, others means not.
      */
     virtual bool IsAdaptToCompatibleImmersive() const { return false; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WMError::WM_OK if called success, otherwise failed.
+     */
+    virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -133,6 +133,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Property
