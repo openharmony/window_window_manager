@@ -1347,6 +1347,7 @@ export class WindowInternal implements Window {
 
     private native resize(nativeObj: long, width: double, height: double): int;
     private native moveWindowTo(nativeObj: long, x: double, y: double): int;
+    private native getGlobalRect(nativeObj:long): Rect;
 
     private native getWindowDecorHeight(nativeObj:long): double;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
@@ -1424,6 +1425,11 @@ export class WindowInternal implements Window {
         }).catch((err: NullishType) => {
             callback(err as BusinessError, undefined);
         });
+    }
+
+    public getGlobalRect(): Rect {
+       let ret = this.getGlobalRect(this.nativeObj);
+       return ret;
     }
   
     public getWindowDecorHeight(): number {
@@ -1934,6 +1940,7 @@ export interface Window {
     moveWindowTo(x: double, y: double): Promise<void>;
     resize(width: double, height: double, callback: AsyncCallback<void>): void;
     moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
+    getGlobalRect(): Rect;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
