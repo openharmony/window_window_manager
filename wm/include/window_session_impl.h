@@ -314,6 +314,7 @@ public:
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
+    WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
 
     /*
@@ -610,7 +611,7 @@ protected:
      * Window Immersive
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
-    uint32_t GetStatusBarHeight() override;
+    uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
 
     /*
@@ -744,6 +745,7 @@ private:
     bool IsUserOrientation(Orientation orientation) const;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     bool IsNotifyInteractiveDuplicative(bool interactive);
