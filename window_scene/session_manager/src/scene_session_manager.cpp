@@ -13265,19 +13265,7 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
     }
     bool findAllWindow = windowNumber <= 0;
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
-    auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
-    int defaultScreenPhyHight = defaultScreenDisplay->GetDisplayInfo()->GetPhysicalHeight();
-    auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
-    int screenHightByDisplayId = defaultScreenPhyHight;
-    if (screenDisplay != nullptr) {
-        screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
-    }
-    TLOGI(WmsLogTag::DEFAULT, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
-        defaultScreenPhyHight, screenHightByDisplayId);
-    if (displayId == VIRTUAL_DISPLAY_ID) {
-        displayId = DEFAULT_DISPLAY_ID;
-        y = y + defaultScreenPhyHight - screenHightByDisplayId;
-    }
+    ChangeWindowRectYInVirtualDisplay(displayId, y);
     bool checkPoint = (x >= 0 && y >= 0);
     auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
         findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
@@ -13307,6 +13295,23 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         TraverseSessionTree(func, true);
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y)
+{
+    auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
+    int defaultScreenPhyHight = defaultScreenDisplay->GetDisplayInfo()->GetPhysicalHeight();
+    auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
+    int screenHightByDisplayId = defaultScreenPhyHight;
+    if (screenDisplay != nullptr) {
+        screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
+    }
+    TLOGI(WmsLogTag::DEFAULT, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
+        defaultScreenPhyHight, screenHightByDisplayId);
+    if (displayId == VIRTUAL_DISPLAY_ID) {
+        displayId = DEFAULT_DISPLAY_ID;
+        y = y + defaultScreenPhyHight - screenHightByDisplayId;
+    }
 }
 
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const

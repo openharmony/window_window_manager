@@ -488,6 +488,7 @@ public:
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
+    void ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y);
 
     int32_t ReclaimPurgeableCleanMem();
     void OnBundleUpdated(const std::string& bundleName, int userId);
