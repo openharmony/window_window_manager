@@ -794,14 +794,9 @@ void JsWindowListener::OnRotationChange(const RotationChangeInfo& rotationChange
             GetRotationResultFromJs(env, rotationChangeResultObj, rotationChangeResult);
         }
     };
-
-    if (!eventHandler_ ||
-        (eventHandler_->GetEventRunner() && eventHandler_->GetEventRunner()->IsCurrentRunnerThread())) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is alreay main thread!");
-        return jsCallback();
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "failed to send event");
     }
-    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnRotationChange",
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
 } // namespace OHOS
