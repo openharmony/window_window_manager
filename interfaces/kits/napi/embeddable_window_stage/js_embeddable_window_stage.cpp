@@ -28,7 +28,6 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr int CONTENT_STORAGE_ARG = 2;
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsEmbeddableWindowStage"};
 } //namespace
 
 JsEmbeddableWindowStage::JsEmbeddableWindowStage(sptr<Rosen::Window> window, sptr<AAFwk::SessionInfo> sessionInfo)
