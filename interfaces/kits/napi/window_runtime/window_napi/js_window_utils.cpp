@@ -662,12 +662,13 @@ napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
     return configJsValue;
 }
 
-bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, TransitionAnimation& transitionAnimation)
+bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, TransitionAnimation& transitionAnimation,
+    napi_value& result)
 {
     napi_value jsAnimationConfig = nullptr;
     napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
-    if (!ConvertWindowAnimationOptionsFromJsValue(env, jsAnimationConfig, transitionAnimation.config) ||
-        !CheckWindowAnimationOptions(transitionAnimation.config)) {
+    if (!ConvertWindowAnimationOptionsFromJsValue(env, jsAnimationConfig, transitionAnimation.config, result) ||
+        !CheckWindowAnimationOptions(transitionAnimation.config, result)) {
         return false;
     }
     double opacity = 1.0f;
@@ -676,7 +677,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     return true;
 }
 
-bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig)
+bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig, napi_value& result)
 {
     switch (animationConfig.curve) {
         case WindowAnimationCurve::LINEAR: {
@@ -689,6 +690,8 @@ bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig)
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             for (int i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
                 if (animationConfig.param[i] <= 0.0) {
+                    TLOGE(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
+                        i, animationConfig.param[i]);
                     return false;
                 }
             }
@@ -701,7 +704,7 @@ bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig)
 }
 
 bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimationConfig,
-    WindowAnimationOptions& animationConfig)
+    WindowAnimationOptions& animationConfig, napi_value& result)
 {
     if (jsAnimationConfig == nullptr) {
         return false;
