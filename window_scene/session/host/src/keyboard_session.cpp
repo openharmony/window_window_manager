@@ -573,7 +573,7 @@ void KeyboardSession::NotifySessionRectChange(const WSRect& rect,
             params.PortraitPanelRect_.posX_ = rect.posX_;
             params.PortraitPanelRect_.posY_ = rect.posY_;
         }
-        TLOGD(WmsLogTag::WMS_KEYBOARD,
+        TLOGI(WmsLogTag::WMS_KEYBOARD,
             "isLand:%{public}d, landRect:%{public}s, portraitRect:%{public}s, displayId:%{public}" PRIu64,
             isLand, params.LandscapeKeyboardRect_.ToString().c_str(),
             params.PortraitKeyboardRect_.ToString().c_str(), displayId);
@@ -851,7 +851,8 @@ void KeyboardSession::AddCrossScreenChild()
         }
         displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
         keyboardPanelSurfaceNode->SetIsCrossNode(true);
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Add window to display: %{public}" PRIu64, displayId);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
+            keyboardPanelSession_->persistentId_, displayId);
     }
 }
 
@@ -891,7 +892,8 @@ void KeyboardSession::RemoveCrossScreenChild()
         }
         displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
         keyboardPanelSurfaceNode->SetIsCrossNode(false);
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Remove window from display: %{public}" PRIu64, displayId);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
+            keyboardPanelSession_->persistentId_, displayId);
     }
 }
 
