@@ -59,6 +59,7 @@ public:
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
     MOCK_METHOD1(SetActive, WSError(bool active));
+    MOCK_METHOD1(TransferExtensionData, int32_t(const AAFwk::WantParams& wantParams));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -23,12 +23,16 @@ constexpr const char* const WINDOW_MODE_FIELD = "windowMode";
 constexpr const char* const CROSS_AXIS_FIELD = "crossAxis";
 constexpr const char* const WATERFALL_MODE_FIELD = "waterfallMode";
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
+constexpr const char* const GESTURE_BACK_ENABLED = "gestureBackEnabled";
+constexpr const char* const IMMERSIVE_MODE_ENABLED = "immersiveModeEnabled";
 
-enum class Businesscode : uint8_t {
+enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
     SYNC_CROSS_AXIS_STATE,
     SYNC_HOST_WATERFALL_MODE,
     SYNC_WANT_PARAMS,
+    SYNC_HOST_IMMERSIVE_MODE_ENABLED,
+    SYNC_HOST_GESTURE_BACK_ENABLED,
 };
 }  // namespace OHOS::Rosen::Extension
 

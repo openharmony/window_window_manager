@@ -205,7 +205,7 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
-    WMError GetGestureBackEnabled(bool& enable) override;
+    WMError GetGestureBackEnabled(bool& enable) const override;
 
     /*
      * PC Fold Screen

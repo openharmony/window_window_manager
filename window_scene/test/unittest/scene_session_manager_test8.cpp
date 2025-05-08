@@ -754,6 +754,34 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: test function : GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->OnScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.bundleName_ = "GetHostGlobalScaledRect";
+    info.abilityName_ = "GetHostGlobalScaledRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    auto ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: NotifyStackEmpty
  * @tc.desc: test function : NotifyStackEmpty
  * @tc.type: FUNC
