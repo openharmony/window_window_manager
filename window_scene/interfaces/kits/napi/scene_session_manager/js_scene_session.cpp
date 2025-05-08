@@ -30,6 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScen
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 const std::string CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR = "changeSessionVisibilityWithStatusBar";
 const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
+const std::string UPDATE_TRANSITION_ANIMATION_CB = "updateTransitionAnimation";
 const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
@@ -112,6 +113,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
         ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR},
     {SESSION_STATE_CHANGE_CB,               ListenerFuncType::SESSION_STATE_CHANGE_CB},
+    {UPDATE_TRANSITION_ANIMATION_CB,        ListenerFuncType::UPDATE_TRANSITION_ANIMATION_CB},
     {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB},
     {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
     {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
@@ -446,8 +448,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSidebarBlur", moduleName, JsSceneSession::SetSidebarBlur);
     BindNativeFunction(env, objValue, "notifyRotationProperty", moduleName, JsSceneSession::NotifyRotationProperty);
     BindNativeFunction(env, objValue, "setCurrentRotation", moduleName, JsSceneSession::SetCurrentRotation);
-    BindNativeFunction(env, objValue, "getWindowTransitionAnimation",
-        moduleName, JsSceneSession::GetWindowTransitionAnimation);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -1025,6 +1025,25 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
             return;
         }
         jsSceneSession->OnSessionStateChange(state);
+    });
+    WLOGFD("success");
+}
+
+void JsSceneSession::ProcessUpdateTransitionAnimationRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetTransitionAnimationCallback([weakThis = wptr(this), where = __func__](const WindowTransitionType& type,
+        const TransitionAnimation& animation) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateTransitionAnimation(type, animation);
     });
     WLOGFD("success");
 }
@@ -2471,13 +2490,6 @@ napi_value JsSceneSession::SetCurrentRotation(napi_env env, napi_callback_info i
     return (me != nullptr) ? me->OnSetCurrentRotation(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::GetWindowTransitionAnimation(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnGetWindowTransitionAnimation(env, info) : nullptr;
-}
-
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession::IsCallbackRegistered[%s]", type.c_str());
@@ -2560,6 +2572,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_STATE_CHANGE_CB):
             ProcessSessionStateChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_TRANSITION_ANIMATION_CB):
+            ProcessUpdateTransitionAnimationRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB):
             ProcessBufferAvailableChangeRegister();
@@ -3360,6 +3375,37 @@ void JsSceneSession::OnSessionStateChange(const SessionState& state)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionStateChange, state:" + std::to_string(static_cast<int>(state)));
+}
+
+void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", session->GetPersistentId(), type);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, animation, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnUpdateTransitionAnimation jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_TRANSITION_ANIMATION_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsTransitionTypeObj = CreateJsValue(env, type);
+        napi_value jsTransitionAnimationObj = ConvertTransitionAnimationToJsValue(env, 
+            std::make_shared<TransitionAnimation>(animation));
+        napi_value argv[] = {jsTransitionTypeObj, jsTransitionAnimationObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnUpdateTransitionAnimation, type:" +
+        std::to_string(static_cast<int>(type)));
 }
 
 void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
@@ -6782,37 +6828,6 @@ napi_value JsSceneSession::OnSetSidebarBlur(napi_env env, napi_callback_info inf
         return NapiGetUndefined(env);
     }
     session->SetSidebarBlur(isDefaultSidebarBlur);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    size_t argc = ARGC_ONE;
-    napi_value argv[ARGC_ONE] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    WindowTransitionType type;
-    if (!ConvertFromJsValue(env, argv[0], type)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    napi_value result = ConvertTransitionAnimationToJsValue(env, session->GetWindowTransitionAnimation(type));
-    if (result != nullptr) {
-        return result;
-    }
     return NapiGetUndefined(env);
 }
 
