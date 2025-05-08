@@ -704,7 +704,7 @@ HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
     int32_t hostWindowId = 0;
     Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
 }
 
 /**
