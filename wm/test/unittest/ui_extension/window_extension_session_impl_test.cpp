@@ -1933,7 +1933,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, TestSize.Level1)
 HWTEST_F(WindowExtensionSessionImplTest, GetGlobalScaledRect, TestSize.Level1)
 {
     Rect rect;
-    ASSERT_EQ(WMError::WM_OK, window_->GetGlobalScaledRect(rect));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window_->GetGlobalScaledRect(rect));
 }
 
 /**
