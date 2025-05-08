@@ -855,7 +855,7 @@ void KeyboardSession::AddCrossScreenChild()
         displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
         keyboardPanelSurfaceNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
-            keyboardPanelSession_->persistentId_, displayId);
+            keyboardPanelSession_->GetPersistentId(), displayId);
     }
 }
 
@@ -896,7 +896,7 @@ void KeyboardSession::RemoveCrossScreenChild()
         displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
         keyboardPanelSurfaceNode->SetIsCrossNode(false);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
-            keyboardPanelSession_->persistentId_, displayId);
+            keyboardPanelSession_->GetPersistentId(), displayId);
     }
 }
 
