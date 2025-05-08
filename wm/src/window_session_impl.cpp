@@ -6086,12 +6086,7 @@ RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChang
         rotationChangeInfo.orientation_, rotationChangeInfo.displayRect_.posX_,
         rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
         rotationChangeInfo.displayRect_.height_);
-    std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListeners;
-    {
-        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
-        windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
-    }
-    NotifyRotationChangeResultInner(windowRotationChangeListeners, rotationChangeInfo);
+    NotifyRotationChangeResultInner(windowRotationChangeListeners);
     RotationChangeResult rotationChangeResult = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
     getRotationResultFuture_->ResetRotationResultLock();
     rotationChangeResult = getRotationResultFuture_->GetRotationResult(WINDOW_ROTATION_CHANGE);
@@ -6115,12 +6110,15 @@ void WindowSessionImpl::NotifyRotationChangeResult(RotationChangeResult rotation
     }
 }
 
-void WindowSessionImpl::NotifyRotationChangeResultInner(
-    const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListeners,
-    const RotationChangeInfo& rotationChangeInfo)
+void WindowSessionImpl::NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo)
 {
+    std::vector<sptr<IWindowRotationChangeListener>> windowRotationChangeListeners;
+    {
+        std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
+        windowRotationChangeListeners = GetListeners<IWindowRotationChangeListener>();
+    }
     handler_->PostTask(
-        [weakThis = wptr(this), &windowRotationChangeListeners, &rotationChangeInfo] {
+        [weakThis = wptr(this), windowRotationChangeListeners, rotationChangeInfo] {
             TLOGI(WmsLogTag::WMS_ROTATION, "post task to notify listener.");
             auto window = weakThis.promote();
             if (window == nullptr) {
