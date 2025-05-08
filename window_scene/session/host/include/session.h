@@ -753,6 +753,8 @@ protected:
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
+    std::mutex currentRotationMutex_;
+    int32_t currentRotation_ = 0;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
