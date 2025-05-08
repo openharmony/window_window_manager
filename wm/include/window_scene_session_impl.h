@@ -269,7 +269,7 @@ public:
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     /**
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation) override;
@@ -454,7 +454,7 @@ private:
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 
     /**
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };

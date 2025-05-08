@@ -170,7 +170,7 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
 
     /**
-     * Window Transition Animation
+     * Window Transition Animation For PC
      */
     WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation) override;

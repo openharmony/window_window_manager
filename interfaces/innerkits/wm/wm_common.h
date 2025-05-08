@@ -2174,7 +2174,7 @@ const int32_t TRANSITION_ANIMATION_MAX_DURATION = 3000;
 /*
  * @brief Window transition animation configuration.
  */
-struct WindowEffectAnimationConfig : public Parcelable {
+struct SceneAnimationConfig : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
     std::array<float, TRANSITION_ANIMATION_PARAM_SIZE> param;
@@ -2195,9 +2195,9 @@ struct WindowEffectAnimationConfig : public Parcelable {
         return true;
     }
 
-    static WindowEffectAnimationConfig* Unmarshalling(Parcel& parcel)
+    static SceneAnimationConfig* Unmarshalling(Parcel& parcel)
     {
-        WindowEffectAnimationConfig* windowAnimationConfig = new WindowEffectAnimationConfig();
+        SceneAnimationConfig* windowAnimationConfig = new SceneAnimationConfig();
         if (!(parcel.ReadUint32(reinterpret_cast<uint32_t&>(windowAnimationConfig->curve)) &&
               parcel.ReadUint32(windowAnimationConfig->duration))) {
             delete windowAnimationConfig;
@@ -2221,7 +2221,7 @@ struct WindowEffectAnimationConfig : public Parcelable {
  * @brief Transition animation configuration.
  */
 struct TransitionAnimation : public Parcelable {
-    WindowEffectAnimationConfig config;
+    SceneAnimationConfig config;
     float opacity = 1.0;
     
     bool Marshalling(Parcel& parcel) const override
@@ -2239,7 +2239,7 @@ struct TransitionAnimation : public Parcelable {
                 delete transitionAnimation;
                 return nullptr;
         }
-        WindowEffectAnimationConfig* animationConfig = parcel.ReadParcelable<WindowEffectAnimationConfig>();
+        SceneAnimationConfig* animationConfig = parcel.ReadParcelable<SceneAnimationConfig>();
         if (animationConfig == nullptr) {
             delete transitionAnimation;
             delete animationConfig;

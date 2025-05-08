@@ -624,7 +624,7 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
         return objValue;
     }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_value configJsValue = ConvertWindowEffectAnimationConfigToJsValue(env, transitionAnimation->config);
+    napi_value configJsValue = ConvertSceneAnimationConfigToJsValue(env, transitionAnimation->config);
     if (!configJsValue) {
         return nullptr;
     }
@@ -634,14 +634,13 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     return objValue;
 }
 
-napi_value ConvertWindowEffectAnimationConfigToJsValue(napi_env env,
-    const WindowEffectAnimationConfig& animationConfig)
+napi_value ConvertSceneAnimationConfigToJsValue(napi_env env,
+    const SceneAnimationConfig& animationConfig)
 {
     napi_value configJsValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
     napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, animationConfig.curve));
-    switch (animationConfig.curve)
-    {
+    switch (animationConfig.curve) {
         case WindowAnimationCurve::LINEAR: {
             napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
             break;
@@ -656,7 +655,7 @@ napi_value ConvertWindowEffectAnimationConfigToJsValue(napi_env env,
             }
             napi_set_named_property(env, configJsValue, "param", params);
             break;
-        }   
+        }
         default:
             break;
     }
@@ -665,10 +664,10 @@ napi_value ConvertWindowEffectAnimationConfigToJsValue(napi_env env,
 
 bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, TransitionAnimation& transitionAnimation)
 {
-    napi_value config = nullptr;
-    napi_get_named_property(env, jsObject, "config", &config);
-    if (!ConvertWindowEffectAnimationConfigFromJsValue(env, config, transitionAnimation.config) ||
-        !CheckWindowEffectAnimationConfig(transitionAnimation.config)){
+    napi_value jsAnimationConfig = nullptr;
+    napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
+    if (!ConvertSceneAnimationConfigFromJsValue(env, jsAnimationConfig, transitionAnimation.config) ||
+        !CheckSceneAnimationConfig(transitionAnimation.config)) {
         return false;
     }
     double opacity = 1.0f;
@@ -677,7 +676,8 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     return true;
 }
 
-bool CheckWindowEffectAnimationConfig(const WindowEffectAnimationConfig& animationConfig) {
+bool CheckSceneAnimationConfig(const SceneAnimationConfig& animationConfig)
+{
     if (animationConfig.curve == WindowAnimationCurve::LINEAR &&
         animationConfig.duration > TRANSITION_ANIMATION_MAX_DURATION) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
@@ -686,14 +686,14 @@ bool CheckWindowEffectAnimationConfig(const WindowEffectAnimationConfig& animati
     return true;
 }
 
-bool ConvertWindowEffectAnimationConfigFromJsValue(napi_env env, napi_value config,
-    WindowEffectAnimationConfig& animationConfig)
+bool ConvertSceneAnimationConfigFromJsValue(napi_env env, napi_value jsAnimationConfig,
+    SceneAnimationConfig& animationConfig)
 {
-    if (config == nullptr) {
+    if (jsAnimationConfig == nullptr) {
         return false;
     }
     uint32_t curve;
-    if (!ParseJsValue(config, env, "curve", curve)) {
+    if (!ParseJsValue(jsAnimationConfig, env, "curve", curve)) {
         return false;
     }
     animationConfig.curve = static_cast<WindowAnimationCurve>(curve);
@@ -701,7 +701,7 @@ bool ConvertWindowEffectAnimationConfigFromJsValue(napi_env env, napi_value conf
     std::array<double, TRANSITION_ANIMATION_PARAM_SIZE> params;
     switch (curve) {
         case static_cast<uint32_t>(WindowAnimationCurve::LINEAR): {
-            if (!ParseJsValue(config, env, "duration", duration)) {
+            if (!ParseJsValue(jsAnimationConfig, env, "duration", duration)) {
                 return false;
             }
             animationConfig.duration = duration;
@@ -709,7 +709,7 @@ bool ConvertWindowEffectAnimationConfigFromJsValue(napi_env env, napi_value conf
         }
         case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): {
             napi_value paramsValue = nullptr;
-            napi_get_named_property(env, config, "param", &paramsValue);
+            napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
             for (int i = 0; i < TRANSITION_ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
                 napi_get_element(env, paramsValue, i, &element);

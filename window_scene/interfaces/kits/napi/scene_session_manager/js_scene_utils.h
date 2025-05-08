@@ -234,8 +234,8 @@ napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t per
 napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
-napi_value ConvertWindowEffectAnimationConfigToJsValue(napi_env env,
-    const WindowEffectAnimationConfig& animationConfig);
+napi_value ConvertSceneAnimationConfigToJsValue(napi_env env,
+    const SceneAnimationConfig& animationConfig);
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
 bool NapiIsCallable(napi_env env, napi_value value);

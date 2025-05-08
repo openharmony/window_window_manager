@@ -7953,7 +7953,7 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 }
 
 /**
- * Window Transition Animation
+ * Window Transition Animation For PC
  */
 WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
     const TransitionAnimation& animation)
