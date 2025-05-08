@@ -1422,7 +1422,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     WSRect rect3 = { 0, 200, 1200, 1000 };
     sceneSession3->SetSessionRect(rect3);
     sceneSession3->SetSessionGlobalRect(rect3);
-    sceneSession3->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession3->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
     GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
