@@ -74,6 +74,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsSuperFoldStatus(env));
     napi_set_named_property(env, exportObj, "ExtendScreenConnectStatus",
         JsScreenUtils::CreateJsExtendScreenConnectStatus(env));
+    napi_set_named_property(env, exportObj, "ScreenModeChangeEvent",
+        JsScreenUtils::CreateJsScreenModeChangeEvent(env));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);
@@ -126,6 +128,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyExtendScreenCreateFinish);
     BindNativeFunction(env, exportObj, "notifyExtendScreenDestroyFinish", moduleName,
         JsScreenSessionManager::NotifyExtendScreenDestroyFinish);
+    BindNativeFunction(env, exportObj, "notifyScreenMaskAppear", moduleName,
+        JsScreenSessionManager::NotifyScreenMaskAppear);
     return NapiGetUndefined(env);
 }
 
@@ -318,6 +322,13 @@ napi_value JsScreenSessionManager::NotifyExtendScreenDestroyFinish(napi_env env,
     TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenDestroyFinish");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenDestroyFinish(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyScreenMaskAppear");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenMaskAppear(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -1079,6 +1090,12 @@ napi_value JsScreenSessionManager::OnNotifyExtendScreenCreateFinish(napi_env env
 napi_value JsScreenSessionManager::OnNotifyExtendScreenDestroyFinish(napi_env env, const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().NotifyExtendScreenDestroyFinish();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyScreenMaskAppear(napi_env env, const napi_callback_info info)
+{
+    ScreenSessionManagerClient::GetInstance().NotifyScreenMaskAppear();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

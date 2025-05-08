@@ -84,6 +84,7 @@ struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
     uint32_t sdkVersion_;
     std::string codePath_;
+    bool isAbilityHook_;
 };
 
 struct SessionIdentityInfo {
@@ -302,6 +303,7 @@ public:
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
+    void ConfigSupportZLevel();
 
     /*
      * Multi User
@@ -407,7 +409,8 @@ public:
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect = { 0, 0, 0, 0 });
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect = { 0, 0, 0, 0 },
+        bool isNotSessionRectWithDpiChange = false);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
@@ -425,7 +428,7 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     void NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible);
-    void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible);
+    void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const;
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
@@ -434,6 +437,7 @@ public:
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
+    uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
@@ -463,6 +467,7 @@ public:
     void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
+    void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
 
     /*
      * UIExtension
@@ -489,6 +494,7 @@ public:
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
     void ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y);
+    WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;
 
     int32_t ReclaimPurgeableCleanMem();
     void OnBundleUpdated(const std::string& bundleName, int userId);
@@ -538,6 +544,7 @@ public:
     void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
+    void ConfigSupportFollowParentWindowLayout();
 
     /*
      * Window Property
@@ -775,8 +782,7 @@ private:
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
-    sptr<SceneSession> GetMainSessionByModuleName(const SessionInfo& sessionInfo);
-    void SetSceneSessionIsAbilityHook(sptr<SceneSession> sceneSession);
+    sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
 
@@ -952,7 +958,7 @@ private:
     void EraseSceneSessionMapById(int32_t persistentId);
     void EraseSceneSessionAndMarkDirtyLocked(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
-        std::vector<SCBAbilityInfo>& scbAbilityInfos);
+        std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId = 0);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
@@ -1182,6 +1188,8 @@ private:
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& sceneSession, sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     sptr<AAFwk::IAbilityManagerCollaborator> GetCollaboratorByType(int32_t collaboratorType);
+    void GetCollaboratorAbilityInfos(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+        std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId);
 
     std::vector<uint64_t> skipSurfaceNodeIds_;
     std::atomic_bool processingFlushUIParams_ { false };

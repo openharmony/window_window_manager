@@ -48,6 +48,7 @@ public:
     void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override {};
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) override { return true; };
@@ -58,6 +59,7 @@ public:
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override {};
     std::string OnDumperClientScreenSessions() override { return ""; };
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };

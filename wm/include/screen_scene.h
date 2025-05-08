@@ -82,7 +82,7 @@ public:
     }
 
     Ace::UIContent* GetUIContent() const override;
-    WMError Destroy() override;
+    WMError Destroy(uint32_t reason = 0) override;
 
     std::string GetClassType() const override { return "ScreenScene"; }
 

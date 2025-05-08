@@ -160,6 +160,7 @@ public:
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    virtual WMError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit);
 
     /*
      * Sub Window

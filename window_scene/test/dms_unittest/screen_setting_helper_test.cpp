@@ -388,6 +388,48 @@ namespace {
     }
 
     /**
+     * @tc.name: ConvertStrToUInt64Test01
+     * @tc.desc: ConvertStrToUInt64Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test01, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "fvcea";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_FALSE(ret);
+        ASSERT_EQ(num, 0);
+    }
+
+    /**
+     * @tc.name: ConvertStrToUInt64Test02
+     * @tc.desc: ConvertStrToUInt64Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test02, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "2349z";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_FALSE(ret);
+        ASSERT_EQ(num, 0);
+    }
+
+    /**
+     * @tc.name: ConvertStrToUInt64Test03
+     * @tc.desc: ConvertStrToUInt64Test03
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUint64Test03, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "2349";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(num, 2349);
+    }
+
+    /**
      * @tc.name: RegisterSettingWireCastObserver01
      * @tc.desc: RegisterSettingWireCastObserver01
      * @tc.type: FUNC

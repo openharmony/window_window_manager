@@ -36,21 +36,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionConverterTest::SetUpTestCase()
-{
-}
+void SceneSessionConverterTest::SetUpTestCase() {}
 
-void SceneSessionConverterTest::TearDownTestCase()
-{
-}
+void SceneSessionConverterTest::TearDownTestCase() {}
 
-void SceneSessionConverterTest::SetUp()
-{
-}
+void SceneSessionConverterTest::SetUp() {}
 
-void SceneSessionConverterTest::TearDown()
-{
-}
+void SceneSessionConverterTest::TearDown() {}
 
 namespace {
 
@@ -111,6 +103,6 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, result3);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

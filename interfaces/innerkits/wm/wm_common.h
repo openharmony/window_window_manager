@@ -55,7 +55,6 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
@@ -466,6 +465,8 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
+    MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END,
 };
 
@@ -1372,12 +1373,12 @@ struct PiPControlEnableInfo {
 };
 
 struct PiPTemplateInfo : public Parcelable {
-    uint32_t pipTemplateType;
-    uint32_t priority;
+    uint32_t pipTemplateType{0};
+    uint32_t priority{0};
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
-    uint32_t defaultWindowSizeType;
+    uint32_t defaultWindowSizeType{0};
 
     PiPTemplateInfo() {}
 
@@ -1658,18 +1659,20 @@ struct WindowDisplayInfo : public Parcelable {
  */
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
+    uint32_t zOrder = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
+            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
             delete windowLayoutInfo;
             return nullptr;
         }
@@ -1689,21 +1692,36 @@ struct WindowMetaInfo : public Parcelable {
     std::string abilityName;
     int32_t appIndex = 0;
     int32_t pid = -1;
+    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    uint32_t parentWindowId = INVALID_WINDOW_ID;
+    uint64_t surfaceNodeId = 0;
+    uint64_t leashWinSurfaceNodeId = 0;
+    bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
+               parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
+               parcel.WriteBool(isPrivacyMode);
     }
+
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
+        uint32_t windowTypeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid) ||
+            !parcel.ReadUint32(windowTypeValue) || !parcel.ReadUint32(windowMetaInfo->parentWindowId) ||
+            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
+            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
             delete windowMetaInfo;
             return nullptr;
         }
+        windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         return windowMetaInfo;
     }
 };

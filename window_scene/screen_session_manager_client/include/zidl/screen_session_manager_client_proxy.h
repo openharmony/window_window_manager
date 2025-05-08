@@ -61,6 +61,8 @@ public:
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override;
     std::string OnDumperClientScreenSessions() override;
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
 };

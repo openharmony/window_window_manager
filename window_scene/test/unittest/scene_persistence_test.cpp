@@ -31,6 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<Media::PixelMap> mPixelMap = std::make_shared<Media::PixelMap>();
 };
@@ -40,21 +41,13 @@ constexpr const char* IMAGE_SUFFIX = ".jpg";
 
 static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("testBundleName", 1423);
 
-void ScenePersistenceTest::SetUpTestCase()
-{
-}
+void ScenePersistenceTest::SetUpTestCase() {}
 
-void ScenePersistenceTest::TearDownTestCase()
-{
-}
+void ScenePersistenceTest::TearDownTestCase() {}
 
-void ScenePersistenceTest::SetUp()
-{
-}
+void ScenePersistenceTest::SetUp() {}
 
-void ScenePersistenceTest::TearDown()
-{
-}
+void ScenePersistenceTest::TearDown() {}
 
 namespace {
 /**
@@ -109,8 +102,8 @@ HWTEST_F(ScenePersistenceTest, SaveSnapshot, TestSize.Level1)
 
     scenePersistence->SaveSnapshot(mPixelMap);
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
-    std::string test = ScenePersistence::snapshotDirectory_ +
-        bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
+    std::string test =
+        ScenePersistence::snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
     std::pair<uint32_t, uint32_t> sizeResult = scenePersistence->GetSnapshotSize();
     EXPECT_EQ(sizeResult.first, 0);
     EXPECT_EQ(sizeResult.second, 0);
@@ -166,8 +159,7 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, TestSize.Level1)
     auto abilityInfo = session->GetSessionInfo();
     auto persistentId = abilityInfo.persistentId_;
     ScenePersistence::CreateSnapshotDir("storage");
-    sptr<ScenePersistence> scenePersistence =
-        sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
     EXPECT_EQ(result, nullptr);
@@ -263,6 +255,6 @@ HWTEST_F(ScenePersistenceTest, ResetSnapshotCache, TestSize.Level1)
     scenePersistence->ResetSnapshotCache();
     ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

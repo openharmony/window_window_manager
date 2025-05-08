@@ -38,7 +38,8 @@ public:
     ~WindowExtensionSessionImpl();
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
+        bool isModuleAbilityHookEnd = false) override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
@@ -82,7 +83,8 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true,
+        uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL)) override;
 
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
@@ -131,6 +133,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Property

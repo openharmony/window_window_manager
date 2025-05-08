@@ -503,6 +503,15 @@ enum class VirtualScreenType: uint32_t {
     HICAR,
 };
 
+/**
+ * @brief Enumerates the screen mode change events.
+ */
+enum class ScreenModeChangeEvent: uint32_t {
+    UNKNOWN = 0,
+    BEGIN,
+    END,
+};
+
 struct Point {
     int32_t posX_;
     int32_t posY_;

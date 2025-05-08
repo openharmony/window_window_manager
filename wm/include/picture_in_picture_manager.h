@@ -54,6 +54,7 @@ public:
     static void PipSizeChange(double width, double height, double scale);
     static void AutoStartPipWindow();
     static void DoDestroy();
+    static bool IsPcType();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
 
 private:

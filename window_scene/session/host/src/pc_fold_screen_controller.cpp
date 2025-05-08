@@ -329,7 +329,7 @@ void PcFoldScreenController::ThrowSlipFloatingRectDirectly(WSRect& rect, const W
         rect.ToString().c_str(), floatingRect.ToString().c_str());
     auto& manager = PcFoldScreenManager::GetInstance();
     const ScreenSide side = manager.CalculateScreenSide(rect);
-    const ScreenSide floatingSide = manager.CalculateScreenSide(floatingRect);
+    const ScreenSide floatingSide = manager.CalculateScreenSide(floatingRect.posY_);
     rect = floatingRect;
     if (side == floatingSide) {
         return;

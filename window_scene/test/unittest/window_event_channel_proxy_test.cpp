@@ -44,21 +44,13 @@ public:
         sptr<WindowEventChannelProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void WindowEventChannelProxyTest::SetUpTestCase()
-{
-}
+void WindowEventChannelProxyTest::SetUpTestCase() {}
 
-void WindowEventChannelProxyTest::TearDownTestCase()
-{
-}
+void WindowEventChannelProxyTest::TearDownTestCase() {}
 
-void WindowEventChannelProxyTest::SetUp()
-{
-}
+void WindowEventChannelProxyTest::SetUp() {}
 
-void WindowEventChannelProxyTest::TearDown()
-{
-}
+void WindowEventChannelProxyTest::TearDown() {}
 
 namespace {
 /**
@@ -122,8 +114,8 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, TestSize
     ASSERT_NE(keyEvent, nullptr);
     bool isPreImeEvent = false;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    WSError res = windowEventChannelProxy_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent,
-        iRemoteObjectMocker);
+    WSError res =
+        windowEventChannelProxy_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, iRemoteObjectMocker);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -169,8 +161,8 @@ HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityHoverEvent, TestSize.
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -213,6 +205,6 @@ HWTEST_F(WindowEventChannelProxyTest, TransferAccessibilityDumpChildInfo, TestSi
     WSError res = windowEventChannelProxy_->TransferAccessibilityDumpChildInfo(params, info);
     ASSERT_EQ(WSError::WS_OK, res);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
