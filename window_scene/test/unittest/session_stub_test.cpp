@@ -52,13 +52,9 @@ private:
     sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubTest::SetUpTestCase()
-{
-}
+void SessionStubTest::SetUpTestCase() {}
 
-void SessionStubTest::TearDownTestCase()
-{
-}
+void SessionStubTest::TearDownTestCase() {}
 
 void SessionStubTest::SetUp()
 {
@@ -83,7 +79,7 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, TestSize.Level1)
     uint32_t code = 1;
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     auto res = session_->OnRemoteRequest(code, data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     data.WriteInterfaceToken(u"OHOS.ISession");
@@ -101,7 +97,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
@@ -160,7 +156,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
@@ -215,7 +211,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
@@ -224,11 +220,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, TestSize.Level1)
     EXPECT_NE(data.WriteString("HandleSessionException"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
     ASSERT_EQ(data.WriteUint64(2), true);
-    auto res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW), data, reply, option);
+    auto res =
+        session_->ProcessRemoteRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE), data, reply, option);
+    res =
+        session_->ProcessRemoteRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED), data, reply, option);
@@ -265,7 +261,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteInt32(2), true);
     auto res = session_->ProcessRemoteRequest(
@@ -304,7 +300,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
@@ -340,7 +336,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     AAFwk::Want want;
     data.WriteParcelable(&want);
     data.WriteBool(true);
@@ -376,7 +372,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteUint32(1), true);
@@ -415,7 +411,9 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
     ASSERT_EQ(data.WriteBool(true), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
-        data, reply, option);
+        data,
+        reply,
+        option);
     ASSERT_EQ(ERR_NONE, res);
 }
 
@@ -975,7 +973,7 @@ HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, TestSize.Level1)
     MessageParcel reply;
     std::string label = "demo label";
     data.WriteString(label);
-    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint32_t color[] = { 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 };
     uint32_t len = sizeof(color) / sizeof(color[0]);
     Media::InitializationOptions opts;
     opts.size.width = 2;
@@ -999,8 +997,8 @@ HWTEST_F(SessionStubTest, HandleGetCrossAxisState, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
-    EXPECT_CALL(*session, GetCrossAxisState(_)).
-        WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    EXPECT_CALL(*session, GetCrossAxisState(_))
+        .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
     session->HandleGetCrossAxisState(data, reply);
     uint32_t state = 0;
     reply.ReadUint32(state);
@@ -1324,11 +1322,9 @@ HWTEST_F(SessionStubTest, HandleSetSupportedWindowModes, Function | SmallTest | 
 {
     MessageParcel data;
     MessageParcel reply;
-    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
     auto result = session_->HandleSetSupportedWindowModes(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
     data.WriteUint32(supportedWindowModes.size());
@@ -1390,6 +1386,6 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     result = session_->HandleTransferAccessibilityEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

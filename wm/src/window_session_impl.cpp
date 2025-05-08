@@ -66,14 +66,23 @@ constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
+constexpr uint32_t OPAQUE = 0xFF000000;
 
 /*
  * DFX
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
+const std::string BUTTON_BACKGROUND_CORNER_RADIUS = "buttonBackgroundCornerRadius";
+const std::string BUTTON_BACKGROUND_SIZE = "buttonBackgroundSize";
+const std::string BUTTON_ICON_SIZE = "buttonIconSize";
+const std::string CLOSE_BUTTON_RIGHT_MARGIN = "closeButtonRightMargin";
+const std::string BUTTON_COLOR_MODE = "colorMode";
+const std::string BUTTON_SPACING_BETWEEN = "spacingBetweenButtons";
+const std::string DECOR_BUTTON_STYLE_CHANGE = "decor_button_style_change";
 constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
+const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -295,9 +304,15 @@ bool WindowSessionImpl::IsSceneBoardEnabled() const
     return SceneBoardJudgement::IsSceneBoardEnabled();
 }
 
+// method will be instead after ace fix
 bool WindowSessionImpl::GetCompatibleModeInPc() const
 {
-    return property_->GetCompatibleModeInPc();
+    return property_->IsAdaptToImmersive();
+}
+
+bool WindowSessionImpl::IsAdaptToCompatibleImmersive() const
+{
+    return property_->IsAdaptToImmersive();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -1542,16 +1557,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
-    if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen, hideMinimizeButton, hideCloseButton);
-        if (!property_->GetCompatibleModeInPcTitleVisible()) {
-            uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isLayoutFullScreen ? "false" : "true");
-        }
-    } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-        uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, "false");
-    }
+    HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
             auto window = weakThis.promote();
@@ -1568,6 +1574,30 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
                 window->supportEnterWaterfallMode_ ? "true" : "false");
         }, "UIContentOnContainerModalEvent");
     }
+}
+
+void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximizeButton,
+    bool& hideMinimizeButton, bool& hideCloseButton)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr || !IsDecorEnable()) {
+        return;
+    }
+    hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
+    bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
+        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
+            hideMinimizeButton, hideCloseButton);
+    } else {
+        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+    }
+    // compatible mode adapt to proportional scale, will show its button
+    bool showScaleBtn = property_->IsAdaptToProportionalScale();
+    uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY,
+        !isLayoutFullScreen && showScaleBtn  ? "true" : "false");
+    // compatible mode adapt to back, will show its button
+    bool isAdaptToBackButton = property_->IsAdaptToBackButton();
+    uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -1604,13 +1634,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = nullptr;
-    auto context = GetContext();
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else if (context != nullptr) {
-        uiContent = Ace::UIContent::Create(context.get(), reinterpret_cast<NativeEngine*>(env));
-    }
+    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+        Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1650,7 +1675,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
-        if (property_->GetCompatibleModeInPc() && !property_->GetCompatibleModeInPcTitleVisible()) {
+        if (property_->IsAdaptToImmersive()) {
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
@@ -1779,8 +1804,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
 
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.mode_ == FORCE_SPLIT_MODE) {
-        SetForceSplitEnable(true, config.homePage_);
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        SetForceSplitEnable(isForceSplit, config.homePage_);
     }
 
     uint32_t version = 0;
@@ -2323,7 +2349,8 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     if (orientation == Orientation::INVALID) {
         orientation = GetRequestedOrientation();
     }
-    if (property_->GetCompatibleModeInPc() && IsHorizontalOrientation(orientation)) {
+    // when compatible mode disable fullscreen and request orientation, will enter into immersive mode
+    if (property_->IsFullScreenDisabled() && IsHorizontalOrientation(orientation)) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
         property_->SetIsLayoutFullScreen(true);
     }
@@ -2571,14 +2598,14 @@ WMError WindowSessionImpl::UnregisterWindowChangeListener(const sptr<IWindowChan
 WMError WindowSessionImpl::RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
 {
     WLOGFD("in");
-    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
     return RegisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
 {
     WLOGFD("in");
-    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
     return UnregisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
 }
 
@@ -2791,7 +2818,8 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent->SetContainerButtonStyle(decorButtonStyle);
+    nlohmann::json decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
+    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
@@ -3315,7 +3343,7 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
-    std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
     for (const auto& listener : windowCrossAxisListeners) {
         if (listener != nullptr) {
@@ -3648,6 +3676,22 @@ WSError WindowSessionImpl::SetSplitButtonVisible(bool isVisible)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    TLOGI(WmsLogTag::DEFAULT, "window %{public}u set follow screen change: %{public}d",
+        GetWindowId(), isFollowScreenChange);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window %{public}u type not support", GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+    property_->SetFollowScreenChange(isFollowScreenChange);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE);
+}
+
 WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
 {
     if (IsWindowSessionInvalid()) {
@@ -3723,6 +3767,45 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activeColor,
+                                                        const std::string& inactiveColor)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    uint32_t activeColorValue;
+    if (!ColorParser::Parse(activeColor, activeColorValue)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, active value: [%{public}s, %{public}u]",
+            GetPersistentId(), activeColor.c_str(), activeColorValue);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    uint32_t inactiveColorValue;
+    if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive value: [%{public}s, %{public}u]",
+            GetPersistentId(), inactiveColor.c_str(), inactiveColorValue);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if ((inactiveColorValue & OPAQUE) != OPAQUE) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive alpha value error", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}d, activeValue: %{public}u, inactiveValue: %{public}u",
+            GetPersistentId(), activeColorValue, inactiveColorValue);
+        uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
+    } else {
+        TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return WMError::WM_OK;
 }
@@ -5220,6 +5303,15 @@ WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBar
     return WMError::WM_OK;
 }
 
+void WindowSessionImpl::HookCompatibleModeAvoidAreaNotify()
+{
+    AvoidArea avoidArea;
+    Rect rect = GetRect();
+    GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea, rect);
+    auto avoidSptr = sptr<AvoidArea>::MakeSptr(avoidArea);
+    NotifyAvoidAreaChange(avoidSptr, AvoidAreaType::TYPE_SYSTEM);
+}
+
 void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
     SystemBarProperty& property)
 {
@@ -5441,13 +5533,13 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
     return windowStatus;
 }
 
-uint32_t WindowSessionImpl::GetStatusBarHeight()
+uint32_t WindowSessionImpl::GetStatusBarHeight() const
 {
     uint32_t height = 0;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
-    TLOGI(WmsLogTag::WMS_IMMS, "height %{public}u", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u height %{public}u", GetPersistentId(), height);
     return height;
 }
 
@@ -5711,6 +5803,22 @@ void WindowSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string
     TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
         isForceSplit, homePage.c_str());
     uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    WindowType winType = GetType();
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+            isForceSplit, config.homePage_.c_str());
+        SetForceSplitEnable(isForceSplit, config.homePage_);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
 }
 
 void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
@@ -6099,6 +6207,18 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     }
     property_->EditSessionInfo().currentRotation_ = currentRotation;
     return WSError::WS_OK;
+}
+
+nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
+{
+    nlohmann::json decorJson;
+    decorJson.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
+    decorJson.emplace(BUTTON_BACKGROUND_SIZE, decorButtonStyle.buttonBackgroundSize);
+    decorJson.emplace(BUTTON_ICON_SIZE, decorButtonStyle.buttonIconSize);
+    decorJson.emplace(CLOSE_BUTTON_RIGHT_MARGIN, decorButtonStyle.closeButtonRightMargin);
+    decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
+    decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
+    return decorJson;
 }
 } // namespace Rosen
 } // namespace OHOS

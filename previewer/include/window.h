@@ -160,6 +160,7 @@ public:
     virtual bool IsFullScreen() const = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowType(WindowType type) = 0;
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetAlpha(float alpha) = 0;
     virtual WMError SetTransform(const Transform& trans) = 0;
     virtual const Transform& GetTransform() const = 0;
@@ -401,6 +402,10 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener)
     {
@@ -442,7 +447,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get sub window zLevel
      *
@@ -544,13 +549,6 @@ public:
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
-
-    /**
      * @brief Get the root host window type of UIExtension.
      *
      * @return WindowType of the root host window.
@@ -632,6 +630,18 @@ public:
      * @return WMError.
      */
     virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
 };
 }
 }

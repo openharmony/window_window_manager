@@ -67,6 +67,8 @@ private:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override;
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

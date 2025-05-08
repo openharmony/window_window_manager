@@ -37,13 +37,9 @@ private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
-void WindowSplitTest::SetUpTestCase()
-{
-}
+void WindowSplitTest::SetUpTestCase() {}
 
-void WindowSplitTest::TearDownTestCase()
-{
-}
+void WindowSplitTest::TearDownTestCase() {}
 
 void WindowSplitTest::SetUp()
 {
@@ -86,7 +82,7 @@ namespace {
  */
 HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.1";
+    fullInfo_.name = "fullscreen.1";
     fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
     splitInfo_.name = "primary.1";
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -111,7 +107,6 @@ HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetWindowMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetWindowMode());
 
@@ -129,7 +124,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
  */
 HWTEST_F(WindowSplitTest, SplitWindow02, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.2";
+    fullInfo_.name = "fullscreen.2";
     fullInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
     splitInfo_.name = "secondary.2";
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -152,7 +147,6 @@ HWTEST_F(WindowSplitTest, SplitWindow02, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, secWindow->GetWindowMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetWindowMode());
 
@@ -170,7 +164,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, TestSize.Level1)
  */
 HWTEST_F(WindowSplitTest, SplitScreen03, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.3";
+    fullInfo_.name = "fullscreen.3";
     fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     splitInfo_.name = "primary.3";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
@@ -207,7 +201,7 @@ HWTEST_F(WindowSplitTest, SplitScreen03, TestSize.Level1)
  */
 HWTEST_F(WindowSplitTest, SplitScreen04, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.4";
+    fullInfo_.name = "fullscreen.4";
     splitInfo_.name = "secondary.4";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
@@ -236,6 +230,6 @@ HWTEST_F(WindowSplitTest, SplitScreen04, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, secWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -25,7 +25,6 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -43,8 +42,8 @@ public:
     void TearDown() override;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
-SceneSessionDirtyManager *manager_;
-SceneSessionManager *ssm_;
+SceneSessionDirtyManager* manager_;
+SceneSessionManager* ssm_;
 void SceneSessionDirtyManagerTest::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -107,10 +106,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
         sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
         ASSERT_NE(sceneSession, nullptr);
         sceneSession->UpdateVisibilityInner(true);
-        ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+        ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     }
     {
-        ssm_->sceneSessionMap_.insert({111, nullptr});
+        ssm_->sceneSessionMap_.insert({ 111, nullptr });
     }
     {
         sptr<SceneSession> sceneSessionDialog1 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -118,7 +117,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
         sceneSessionDialog1->UpdateVisibilityInner(true);
         sptr<WindowSessionProperty> propertyDialog1 = sceneSessionDialog1->GetSessionProperty();
         propertyDialog1->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-        ssm_->sceneSessionMap_.insert({sceneSessionDialog1->GetPersistentId(), sceneSessionDialog1});
+        ssm_->sceneSessionMap_.insert({ sceneSessionDialog1->GetPersistentId(), sceneSessionDialog1 });
     }
     {
         sptr<SceneSession> sceneSessionModal1 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -126,7 +125,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
         sceneSessionModal1->UpdateVisibilityInner(true);
         sptr<WindowSessionProperty> propertyModal1 = sceneSessionModal1->GetSessionProperty();
         propertyModal1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
-        ssm_->sceneSessionMap_.insert({sceneSessionModal1->GetPersistentId(), sceneSessionModal1});
+        ssm_->sceneSessionMap_.insert({ sceneSessionModal1->GetPersistentId(), sceneSessionModal1 });
     }
     auto [windowInfoList1, pixelMapList1] = manager_->GetFullWindowInfoList();
     ASSERT_EQ(windowInfoList.size() + 3, windowInfoList1.size());
@@ -359,19 +358,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, TestSize.Lev
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::WindowInfo windowInfo;
     windowInfoList.emplace_back(windowInfo);
-    ExtensionWindowEventInfo extensionInfo = {
-        .persistentId = 12345,
-        .pid = 1234
-    };
+    ExtensionWindowEventInfo extensionInfo = { .persistentId = 12345, .pid = 1234 };
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr, extensionInfo);
     EXPECT_EQ(windowInfoList.size(), 1);
-    
+
     sceneSession->AddNormalModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 2);
     EXPECT_TRUE(windowInfoList[1].defaultHotAreas.empty());
 
-    Rect windowRect {1, 1, 7, 8};
+    Rect windowRect{ 1, 1, 7, 8 };
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
@@ -636,13 +632,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, TestSize.Level
 HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, TestSize.Level1)
 {
     std::vector<MMI::Rect> rects(0);
-    for (int i = 0; i < 2 ; i++) {
-        MMI::Rect rect = {
-            .x = i * 10,
-            .y = i * 10,
-            .width = i * 10,
-            .height = i * 10
-        };
+    for (int i = 0; i < 2; i++) {
+        MMI::Rect rect = { .x = i * 10, .y = i * 10, .width = i * 10, .height = i * 10 };
         rects.emplace_back(rect);
     }
     std::string ret = DumpRect(rects);
@@ -692,9 +683,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, T
     limits.minWidth_ = 0;
     sceneSession->property_->SetWindowLimits(limits);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
-    std::vector<int32_t> compare = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
-        POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
-        pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+    std::vector<int32_t> compare = { POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
+                                     POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+                                     POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
+                                     POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT };
     ASSERT_EQ(compare, pointerChangeAreas);
 }
 
@@ -955,7 +947,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, TestSize.Level0)
     std::vector<OHOS::Rosen::Rect> touchHotAreasInSceneSession(0);
     sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
     sceneSession->persistentId_ = 1;
-    for (int i = 0; i < 2 ; i++) {
+    for (int i = 0; i < 2; i++) {
         OHOS::Rosen::Rect area;
         area.posX_ = i * 10;
         area.posY_ = i * 10;
@@ -968,7 +960,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, TestSize.Level0)
     pointerHotAreas.clear();
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     ASSERT_EQ(touchHotAreas.size(), 2);
-    for (int i = 2; i < 10 ; i++) {
+    for (int i = 2; i < 10; i++) {
         OHOS::Rosen::Rect area;
         area.posX_ = i * 10;
         area.posY_ = i * 10;
@@ -1025,25 +1017,47 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, TestSize.Level1)
     sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
     sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    if (sceneSession == nullptr) {
-        return;
+    ASSERT_NE(sceneSession, nullptr);
+    float vpr = 1.5f; // 1.5: default vp
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        vpr = screenSession->GetScreenProperty().GetDensity();
     }
-    WSRect rect = {0, 0, 320, 240};
+    uint32_t offset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
+    WSRect rect = { 0, 0, 320, 240 };
     sceneSession->SetSessionRect(rect);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
+    ASSERT_EQ(empty[0].x, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
+    sceneSession->singleHandModeFlag_ = true;
+    SceneSessionManager::GetInstance().singleHandScreenInfo_.mode = SingleHandMode::LEFT;
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+    SceneSessionManager::GetInstance().singleHandScreenInfo_.mode = SingleHandMode::MIDDLE;
 }
 
 /**

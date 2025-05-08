@@ -801,6 +801,11 @@ DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refr
         refreshRate, actualRefreshRate);
 }
 
+void ScreenManager::SetFoldStatusExpandAndLocked(bool locked)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetFoldStatusExpandAndLocked(locked);
+}
+
 DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     if (screenIds.empty()) {

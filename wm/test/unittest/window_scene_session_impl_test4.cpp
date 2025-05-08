@@ -736,6 +736,41 @@ HWTEST_F(WindowSceneSessionImplTest4, UnregisterWindowAttachStateChangeListener,
 }
 
 /**
+ * @tc.name: NotifyWindowAttachStateChange
+ * @tc.desc: NotifyWindowAttachStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyWindowAttachStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowAttachStateChange");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = nullptr;
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: listener is nullptr
+    auto ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+
+    // case2: listener is not nullptr, then attach is true
+    sptr<IWindowAttachStateChangeListner> listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    auto ret2 = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret2);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    // case3: listener is not nullptr, then attach is false
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: GetSystemBarPropertyByType
  * @tc.desc: GetSystemBarPropertyByType
  * @tc.type: FUNC

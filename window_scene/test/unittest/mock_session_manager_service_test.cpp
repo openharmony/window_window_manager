@@ -31,8 +31,10 @@ namespace Rosen {
 class MockMockSessionManagerService : public MockSessionManagerService {
 public:
     MOCK_METHOD(sptr<IRemoteObject>, GetSceneSessionManagerByUserId, (int32_t), (override));
-    MOCK_METHOD(int32_t, NotifySCBSnapshotSkipByUserIdAndBundleNames,
-        (int32_t, const std::vector<std::string>&, const sptr<IRemoteObject>&), (override));
+    MOCK_METHOD(int32_t,
+                NotifySCBSnapshotSkipByUserIdAndBundleNames,
+                (int32_t, const std::vector<std::string>&, const sptr<IRemoteObject>&),
+                (override));
 };
 
 namespace {
@@ -54,13 +56,13 @@ HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInner
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
+    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
     EXPECT_EQ(ERR_NONE, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
     EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
     EXPECT_EQ(ERR_NONE, ret);
 }
 
@@ -82,13 +84,13 @@ HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSize
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillRepeatedly(Return(ERR_NONE));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
+    int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
     EXPECT_EQ(ERR_NONE, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
     EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
     EXPECT_EQ(ERR_NONE, ret);
 }
 
@@ -112,7 +114,7 @@ HWTEST(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.L
         .WillOnce(Return(ERR_TRANSACTION_FAILED))
         .WillOnce(Return(ERR_NONE));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
+    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
     EXPECT_EQ(ERR_NONE, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(-1);
@@ -127,6 +129,6 @@ HWTEST(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.L
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
     EXPECT_EQ(ERR_NONE, ret);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

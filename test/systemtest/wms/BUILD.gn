@@ -77,14 +77,17 @@ test_external_deps = [
   "googletest:gmock",
   "googletest:gtest",
   "googletest:gtest_main",
+  "graphic_2d:2d_graphics",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hilog:libhilog",
   "init:libbegetutil",
   "input:libmmi-client",
+  "ipc:ipc_core",
   "ipc:ipc_single",
   "napi:ace_napi",
   "power_manager:powermgr_client",
+  "resource_management:global_resmgr",
 ]
 
 ohos_systemtest("wms_window_layout_test") {
@@ -547,20 +550,6 @@ config("wms_systemtest_common_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
     "${window_base_path}/test/common/utils/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//third_party/googletest/googlemock/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-
-    # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "//base/global/resource_management/interfaces/inner_api/include",
-    "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-
-    # abilityContext end
   ]
 }
 

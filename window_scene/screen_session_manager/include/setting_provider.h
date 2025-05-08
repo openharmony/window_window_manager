@@ -61,6 +61,7 @@ private:
     static bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper);
     static Uri AssembleUri(const std::string& key);
     static Uri AssembleUriMultiUser(const std::string& key);
+    static Uri AssembleUriWallMultiUser(const std::string& key);
 
     static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelperMultiUserByTable(std::string tableName);
     static Uri AssembleUriMultiUserByTable(const std::string& key, std::string tableName);

@@ -40,13 +40,9 @@ public:
     sptr<ExtensionSession::ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
 };
 
-void ExtensionSessionTest::SetUpTestCase()
-{
-}
+void ExtensionSessionTest::SetUpTestCase() {}
 
-void ExtensionSessionTest::TearDownTestCase()
-{
-}
+void ExtensionSessionTest::TearDownTestCase() {}
 
 void ExtensionSessionTest::SetUp()
 {
@@ -84,8 +80,8 @@ HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level0)
 {
     SystemSessionConfig sessionConfig;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
-    auto res = extensionSession_->Connect(mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, nullptr,
-        nullptr, "");
+    auto res =
+        extensionSession_->Connect(mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, nullptr, nullptr, "");
     ASSERT_EQ(res, WSError::WS_OK);
 
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
@@ -408,8 +404,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent01, TestSize.Level
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError result = extensionSession_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError result = extensionSession_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -426,8 +421,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityHoverEvent02, TestSize.Level
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError result = extensionSession_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError result = extensionSession_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -656,7 +650,7 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest01, Test
     data.WriteBool(true);
     data.WriteInt32(0);
     uint32_t code = static_cast<uint32_t>(IWindowEventChannelListener::WindowEventChannelListenerMessage::
-        TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC);
+                                              TRANS_ID_ON_TRANSFER_KEY_EVENT_FOR_CONSUMED_ASYNC);
     WindowEventChannelListener listener;
     ASSERT_EQ(listener.OnRemoteRequest(code, data, reply, option), 0);
 }
@@ -782,7 +776,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, TestSize.Level0)
     AvoidAreaType typeKeyboard = AvoidAreaType::TYPE_KEYBOARD;
     AvoidAreaType typeNavigationIndicator = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     AvoidArea expectedAvoidArea;
-    expectedAvoidArea.topRect_ = {10, 20, 30, 40};
+    expectedAvoidArea.topRect_ = { 10, 20, 30, 40 };
     EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
     auto res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, expectedAvoidArea);
@@ -946,6 +940,6 @@ HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, TestSize.Level1)
     sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_EQ(info.persistentId_, extensionSessionC->GetPersistentId());
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

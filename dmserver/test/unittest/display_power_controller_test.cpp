@@ -116,6 +116,21 @@ HWTEST_F(DisplayPowerControllerTest, SetDisplayState03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDisplayState04
+ * @tc.desc: test function : SetDisplayState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayPowerControllerTest, SetDisplayState04, TestSize.Level1)
+{
+    dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
+        const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
+
+    DisplayState state = dpc_->GetDisplayState(0);
+    auto ret = dpc_->SetDisplayState(state);
+    EXPECT_EQ(false, ret);
+}
+
+/**
  * @tc.name: GetDisplayState
  * @tc.desc: test function : GetDisplayState
  * @tc.type: FUNC
@@ -158,6 +173,22 @@ HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent02, TestSize.Level1)
     DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
     dpc_->NotifyDisplayEvent(event);
     ASSERT_EQ(true, dpc_->isKeyguardDrawn_);
+}
+
+/**
+ * @tc.name: NotifyDisplayEvent03
+ * @tc.desc: test function : NotifyDisplayEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayPowerControllerTest, NotifyDisplayEvent03, TestSize.Level1)
+{
+    dpc_ = new DisplayPowerController(mutex_, [](DisplayId, sptr<DisplayInfo>,
+        const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType) {});
+
+    bool isKeyguardDrawn = dpc_->isKeyguardDrawn_;
+    DisplayEvent event = DisplayEvent::SCREEN_LOCK_END_DREAM;
+    dpc_->NotifyDisplayEvent(event);
+    EXPECT_EQ(isKeyguardDrawn, dpc_->isKeyguardDrawn_);
 }
 }
 }

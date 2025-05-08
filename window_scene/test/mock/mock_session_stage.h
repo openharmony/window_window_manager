@@ -63,11 +63,8 @@ public:
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
-    MOCK_METHOD0(CompatibleFullScreenRecover, WSError(void));
-    MOCK_METHOD0(CompatibleFullScreenMinimize, WSError(void));
-    MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
-    MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
+    MOCK_METHOD1(NotifyCompatibleModePropertyChange, WSError(const sptr<CompatibleModeProperty> property));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
@@ -82,6 +79,7 @@ public:
     MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
     MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
+    MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
 };
 } // namespace Rosen
 } // namespace OHOS

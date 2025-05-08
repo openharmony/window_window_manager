@@ -440,7 +440,7 @@ struct SessionInfo {
      */
     int32_t currentRotation_ = 0;
 
-    AAFwk::Want SafelyGetWant() const
+    AAFwk::Want GetWantSafely() const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);
         if (want != nullptr) {
@@ -450,7 +450,7 @@ struct SessionInfo {
         }
     }
 
-    void SafelySetWant(const AAFwk::Want& newWant) const
+    void SetWantSafely(const AAFwk::Want& newWant) const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);
         if (want == nullptr) {
@@ -503,6 +503,8 @@ enum class SizeChangeReason : uint32_t {
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
+    MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END,
 };
 
@@ -529,6 +531,8 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
     EVENT_MAXIMIZE_WATERFALL,
     EVENT_WATERFALL_TO_MAXIMIZE,
+    EVENT_COMPATIBLE_TO_MAXIMIZE,
+    EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_END
 };
 

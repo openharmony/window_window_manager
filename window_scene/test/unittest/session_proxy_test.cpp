@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SessionProxyTest : public testing::Test {
-  public:
+public:
     SessionProxyTest() {}
     ~SessionProxyTest() {}
 };
@@ -62,7 +62,7 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, TestSize.Level1)
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionRect start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    WSRect rect{.posX_ = 1, .posY_ = 1, .width_ = 100, .height_ = 100};
+    WSRect rect{ .posX_ = 1, .posY_ = 1, .width_ = 100, .height_ = 100 };
     SizeChangeReason reason = SizeChangeReason::RECOVER;
     WSError res = sProxy->UpdateSessionRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -852,11 +852,9 @@ HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, TestSize.Level1)
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
 
-    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
     WSError res = sProxy->NotifySupportWindowModesChange(supportedWindowModes);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange end";
