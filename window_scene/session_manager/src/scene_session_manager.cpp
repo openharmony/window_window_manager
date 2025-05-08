@@ -11810,16 +11810,12 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
 
 bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const
 {
-    if (session == nullptr || session->GetSessionGlobalRect().IsInvalid()) {
+    if (session == nullptr) {
         return false;
     }
-    bool isVirtualDisplay = false;
-    if (displayId == VIRTUAL_DISPLAY_ID) {
-        displayId = DEFAULT_DISPLAY_ID;
-        isVirtualDisplay = true;
-    }
-    if (displayId == DEFAULT_DISPLAY_ID &&
-        PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId())) {
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&
+        (displayId == VIRTUAL_DISPLAY_ID || displayId == DEFAULT_DISPLAY_ID)) {
+        bool isVirtualDisplay = displayId == VIRTUAL_DISPLAY_ID;
         if (isVirtualDisplay &&
             session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "not in virtual display, win: [%{public}d, %{public}s]",
@@ -11831,6 +11827,7 @@ bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& s
                 session->GetWindowId(), session->GetWindowName().c_str());
             return false;
         }
+        return true;
     }
     return displayId == session->GetSessionProperty()->GetDisplayId();
 }
