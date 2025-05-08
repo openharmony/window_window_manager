@@ -13264,8 +13264,21 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     bool findAllWindow = windowNumber <= 0;
-    bool checkPoint = (x >= 0 && y >= 0);
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
+    int defaultScreenPhyHight = defaultScreenDisplay->GetDisplayInfo()->GetPhysicalHeight();
+    auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
+    int screenHightByDisplayId = defaultScreenPhyHight;
+    if (screenDisplay != nullptr) {
+        screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
+    }
+    TLOGI(WmsLogTag::DEFAULT, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
+        defaultScreenPhyHight, screenHightByDisplayId);
+    if (displayId == VIRTUAL_DISPLAY_ID) {
+        displayId = DEFAULT_DISPLAY_ID;
+        y = y + defaultScreenPhyHight - screenHightByDisplayId;
+    }
+    bool checkPoint = (x >= 0 && y >= 0);
     auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
         findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
         if (session == nullptr) {

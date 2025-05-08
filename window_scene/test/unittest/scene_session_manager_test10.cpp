@@ -602,6 +602,38 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWindowIdsByCoordinate06
+ * @tc.desc: GetWindowIdsByCoordinate, windowNumber 3, x y effictive value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSession(1, 131, 11, true, {100, 100, 200, 200});
+    ssm_->sceneSessionMap_.insert({102, nullptr});
+    InitTestSceneSession(1, 133, 14, true, {120, 120, 220, 220});
+    InitTestSceneSession(1, 134, 12, true, {100, 100, 200, 200});
+    ASSERT_TRUE(ssm_->sceneSessionMap_.find(134) != ssm_->sceneSessionMap_.end());
+    InitTestSceneSession(1, 135, 12, true, {100, 100, 200, 200});
+    auto it1 = ssm_->sceneSessionMap_.find(135);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->sessionInfo_.bundleName_ = "other";
+    }
+    InitTestSceneSession(0, 136, 15, true, {140, 1706, 240, 240});
+    InitTestSceneSession(0, 137, 15, true, {150, 1756, 250, 250});
+    InitTestSceneSession(0, 139, 13, true, {160, 1766, 260, 260});
+
+    std::vector<int32_t> windowIds;
+    WMError result = ssm_->GetWindowIdsByCoordinate(999, 3, 180, 180, windowIds);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(3, windowIds.size());
+    EXPECT_EQ(136, windowIds[0]);
+    EXPECT_EQ(137, windowIds[1]);
+    EXPECT_EQ(139, windowIds[2]);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: ProcessFocusZOrderChange
  * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
