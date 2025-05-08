@@ -5814,26 +5814,11 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool isWaterfallMode = isFullScreenWaterfallMode_.load();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "waterfall: %{public}d, winId: %{public}u", isWaterfallMode, GetWindowId());
     want.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(isWaterfallMode)));
-}
-
-void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
-{
-    if (want == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
-        return;
-    }
-
-    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
-    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (IsValidCrossState(state)) {
-        crossAxisState_ = static_cast<CrossAxisState>(state);
-    }
-    auto waterfallModeValue = configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0);
-    isFullScreenWaterfallMode_.store(static_cast<bool>(waterfallModeValue));
-    isValidWaterfallMode_.store(true);
-    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, winId: %{public}u",
-        state, isFullScreenWaterfallMode_.load(), GetWindowId());
+    bool gestureBackEnable = true;
+    GetGestureBackEnabled(gestureBackEnable);
+    want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
+    want.SetParam(Extension::IMMERSIVE_MODE_ENABLED,
+        AAFwk::Integer::Box(static_cast<int32_t>(GetImmersiveModeEnabledState())));
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const
