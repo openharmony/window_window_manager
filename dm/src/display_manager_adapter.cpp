@@ -977,6 +977,12 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
     return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
 }
 
+void ScreenManagerAdapter::SetFoldStatusExpandAndLocked(bool locked)
+{
+    INIT_PROXY_CHECK_RETURN();
+    return displayManagerServiceProxy_->SetFoldStatusExpandAndLocked(locked);
+}
+
 DMError ScreenManagerAdapter::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

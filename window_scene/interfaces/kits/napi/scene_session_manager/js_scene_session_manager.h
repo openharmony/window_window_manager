@@ -61,6 +61,7 @@ public:
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
+    static napi_value GetSystemConfig(napi_env env, napi_callback_info info);
     static napi_value UpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
@@ -117,6 +118,8 @@ public:
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
+    static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    static napi_value SupportZLevel(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -163,6 +166,7 @@ private:
     napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
+    napi_value OnGetSystemConfig(napi_env env, napi_callback_info info);
     napi_value OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
@@ -217,6 +221,8 @@ private:
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
+    napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     
     /*
      * PC Window

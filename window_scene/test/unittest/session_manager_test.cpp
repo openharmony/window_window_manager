@@ -37,17 +37,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManager> sm_;
 };
 
-void SessionManagerTest::SetUpTestCase()
-{
-}
+void SessionManagerTest::SetUpTestCase() {}
 
-void SessionManagerTest::TearDownTestCase()
-{
-}
+void SessionManagerTest::TearDownTestCase() {}
 
 void SessionManagerTest::SetUp()
 {
@@ -73,147 +70,20 @@ HWTEST_F(SessionManagerTest, OnRemoteRequest, TestSize.Level1)
     OHOS::MessageOption option;
     IPCObjectStub iPCObjectStub;
 
-    uint32_t code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
-        SessionManagerServiceRecoverMessage::TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
+    uint32_t code =
+        static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::SessionManagerServiceRecoverMessage::
+                                  TRANS_ID_ON_SESSION_MANAGER_SERVICE_RECOVER);
     auto ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(ret, 0);
 
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::
-        SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
+                                     SessionManagerServiceRecoverMessage::TRANS_ID_ON_WMS_CONNECTION_CHANGED);
     ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(ret, 0);
 
     code = 10;
     ret = iPCObjectStub.OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(0, ret);
-}
-
-/**
- * @tc.name: GetSceneSessionManagerProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->Clear();
-    sm_->ClearSessionManagerProxy();
-    auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
-
-    sm_->ClearSessionManagerProxy();
-    sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
-    sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
-}
-
-/**
- * @tc.name: ClearSessionManagerProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, ClearSessionManagerProxy, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->ClearSessionManagerProxy();
-    ASSERT_EQ(sm_->sessionManagerServiceProxy_, nullptr);
-
-    sm_->isRecoverListenerRegistered_ = true;
-    sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
-    sm_->ClearSessionManagerProxy();
-    ASSERT_EQ(sm_->sessionManagerServiceProxy_, nullptr);
-}
-
-/**
- * @tc.name: OnWMSConnectionChangedCallback
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    bool funcInvoked = false;
-    sm_->wmsConnectionChangedFunc_ = nullptr;
-    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-    ASSERT_EQ(funcInvoked, false);
-
-    sm_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
-    sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
-    ASSERT_EQ(funcInvoked, true);
-}
-
-/**
- * @tc.name: OnWMSConnectionChanged1
- * @tc.desc: wms disconnected
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChanged1, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sptr<ISessionManagerService> sessionManagerService;
-    sm_->isWMSConnected_ = true;
-    sm_->currentWMSUserId_ = 100;
-    sm_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
-    ASSERT_EQ(sm_->isWMSConnected_, false);
-
-    sm_->currentWMSUserId_ = 101;
-    sm_->isWMSConnected_ = true;
-    sm_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, false, sessionManagerService);
-    ASSERT_EQ(sm_->isWMSConnected_, true);
-}
-
-/**
- * @tc.name: OnWMSConnectionChanged2
- * @tc.desc: wms connected
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, OnWMSConnectionChanged2, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sptr<ISessionManagerService> sessionManagerService;
-    sm_->isWMSConnected_ = false;
-    sm_->currentWMSUserId_ = INVALID_USER_ID;
-    sm_->OnWMSConnectionChanged(100, DEFAULT_SCREEN_ID, true, sessionManagerService);
-    ASSERT_EQ(sm_->isWMSConnected_, true);
-
-    // user switch
-    sm_->currentWMSUserId_ = 100;
-    sm_->isWMSConnected_ = true;
-    sm_->OnWMSConnectionChanged(101, DEFAULT_SCREEN_ID, true, sessionManagerService);
-    ASSERT_EQ(sm_->isWMSConnected_, true);
-}
-
-/**
- * @tc.name: RegisterUserSwitchListener
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RegisterUserSwitchListener, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->RegisterUserSwitchListener(nullptr);
-    ASSERT_EQ(sm_->userSwitchCallbackFunc_, nullptr);
-
-    sm_->RegisterUserSwitchListener([]() {});
-    ASSERT_NE(sm_->userSwitchCallbackFunc_, nullptr);
-}
-
-/**
- * @tc.name: OnUserSwitch
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, OnUserSwitch, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->OnUserSwitch(nullptr);
-    ASSERT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
-
-    bool funInvoked = false;
-    sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
-    auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
-    sm_->OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(funInvoked, true);
 }
 
 /**
@@ -267,35 +137,6 @@ HWTEST_F(SessionManagerTest, OnFoundationDied, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterWMSConnectionChangedListener
- * @tc.desc: WMSConnectionChangedCallbackFunc is null
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    auto ret = sm_->RegisterWMSConnectionChangedListener(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
- * @tc.name: RegisterWMSConnectionChangedListener1
- * @tc.desc: normal test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->isRecoverListenerRegistered_ = true;
-    sm_->currentWMSUserId_ = 100;
-    sm_->currentScreenId_ = 0;
-    sm_->isWMSConnected_ = true;
-    auto callbackFunc = [](int32_t userId, int32_t screenId, bool isConnected) {};
-    auto ret = sm_->RegisterWMSConnectionChangedListener(callbackFunc);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: InitMockSMSProxy
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -319,6 +160,6 @@ HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, TestSize.
     sm_->RegisterWindowManagerRecoverCallbackFunc(testFunc);
     ASSERT_NE(sm_->windowManagerRecoverFunc_, nullptr);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

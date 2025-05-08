@@ -28,13 +28,9 @@ public:
     static void TearDownTestCase();
 };
 
-void WindowSessionPropertyAnimationTest::SetUpTestCase()
-{
-}
+void WindowSessionPropertyAnimationTest::SetUpTestCase() {}
 
-void WindowSessionPropertyAnimationTest::TearDownTestCase()
-{
-}
+void WindowSessionPropertyAnimationTest::TearDownTestCase() {}
 
 namespace {
 /**

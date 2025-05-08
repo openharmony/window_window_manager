@@ -2502,6 +2502,31 @@ DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
     return ret;
 }
 
+void ScreenSessionManagerProxy::SetFoldStatusExpandAndLocked(bool locked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
+        TLOGE(WmsLogTag::DMS, "Write lock fold display status failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED request failed");
+    }
+}
+
 FoldDisplayMode ScreenSessionManagerProxy::GetFoldDisplayMode()
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3762,9 +3787,9 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
-    if (!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
-        !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_)||
-        !reply.WriteBool(hookInfo.enableHookRotation_)) {
+    if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
+        !reply.ReadFloat(hookInfo.density_) || !reply.ReadUint32(hookInfo.rotation_)||
+        !reply.ReadBool(hookInfo.enableHookRotation_)) {
         TLOGE(WmsLogTag::DMS, "reply write hookInfo failed!");
     }
 }
@@ -4192,4 +4217,25 @@ void ScreenSessionManagerProxy::NotifyExtendScreenDestroyFinish()
     }
 }
 
+void ScreenSessionManagerProxy::NotifyScreenMaskAppear()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_MASK_APPEAR),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

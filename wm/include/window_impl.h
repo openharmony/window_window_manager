@@ -181,7 +181,7 @@ public:
 
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
-    virtual WMError Destroy() override;
+    virtual WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -436,7 +436,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();
@@ -517,6 +517,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex windowStateMutex_;
     static std::recursive_mutex globalMutex_;
+    static std::shared_mutex windowMapMutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;

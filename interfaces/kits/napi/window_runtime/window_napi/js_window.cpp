@@ -991,6 +991,13 @@ napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowContainerModalColor(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowContainerModalColor(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -2391,6 +2398,11 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     }
     WLOGFI("Register end, window [%{public}u, %{public}s], type=%{public}s",
         windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
+    // if comptible mode app adpt to immersive, avoid area change will be called when regist
+    if (cbType == AVOID_AREA_CHANGE_CB && windowToken->IsAdaptToCompatibleImmersive()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "notify avoid area change for compatible mode app when regist callback");
+        windowToken->HookCompatibleModeAvoidAreaNotify();
+    }
     return NapiGetUndefined(env);
 }
 
@@ -2963,8 +2975,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                     "Invalidate params."));
                 return;
             }
-            // compatibleModeInPc need apply avoidArea method
-            if (window->IsPcOrPadFreeMultiWindowMode() && !window->GetCompatibleModeInPc()) {
+            // compatibleMode app adapt to immersive need apply avoidArea method
+            if (window->IsPcOrPadFreeMultiWindowMode() && !window->IsAdaptToCompatibleImmersive()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
@@ -7124,6 +7136,41 @@ napi_value JsWindow::OnSetWindowContainerColor(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowContainerModalColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::string activeColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], activeColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container activeColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string inactiveColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], inactiveColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container inactiveColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WMError errCode = windowToken_->SetWindowContainerModalColor(activeColor, inactiveColor);
+    TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] set activeColor: %{public}s,"
+        " inactiveColor: %{public}s, result: %{public}d", windowToken_->GetWindowId(),
+        windowToken_->GetWindowName().c_str(), activeColor.c_str(), inactiveColor.c_str(), errCode);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling()) {
@@ -7476,8 +7523,7 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     }
     auto objValue = CreateJsValue(env, windowStatus);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "window [%{public}u, %{public}s] end",
-            window->GetWindowId(), window->GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_PC, "id:[%{public}u] end", window->GetWindowId());
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
@@ -8251,6 +8297,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
+    BindNativeFunction(env, object, "setWindowContainerModalColor", moduleName, JsWindow::SetWindowContainerModalColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);

@@ -87,7 +87,7 @@ std::shared_ptr<IDataHandler> WindowExtensionSessionImpl::GetExtensionDataHandle
 }
 
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isModuleAbilityHookEnd)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Called.");
     if (!context || !iSession) {
@@ -228,7 +228,7 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
     }
 }
 
-WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
@@ -724,11 +724,21 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
+        window->rotationAnimationCount_++;
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
+        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
+            auto window = weak.promote();
+            if (!window) {
+                return;
+            }
+            window->rotationAnimationCount_--;
+            if (window->rotationAnimationCount_ == 0) {
+                window->NotifyRotationAnimationEnd();
+            }
+        });
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
@@ -1601,6 +1611,13 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         return static_cast<int32_t>(DataHandlerErr::OK);
     };
     dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
+}
+
+WMError WindowExtensionSessionImpl::UseImplicitAnimation(bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "WindowId: %{public}u", GetWindowId());
+    SingletonContainer::Get<WindowAdapter>().UseImplicitAnimation(property_->GetParentId(), useImplicit);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t WAIT_ASYNC_US = 100000;  // 100ms
+constexpr uint32_t WAIT_ASYNC_US = 100000; // 100ms
 }
 using Utils = WindowTestUtils;
 class WindowInputTest : public testing::Test {
@@ -40,13 +40,11 @@ void WindowInputTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowInputTest::TearDownTestCase()
-{
-}
+void WindowInputTest::TearDownTestCase() {}
 
 void WindowInputTest::SetUp()
 {
@@ -61,9 +59,7 @@ void WindowInputTest::SetUp()
     };
 }
 
-void WindowInputTest::TearDown()
-{
-}
+void WindowInputTest::TearDown() {}
 
 namespace {
 /**

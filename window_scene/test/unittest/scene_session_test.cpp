@@ -35,12 +35,15 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 std::string logMsg;
-void SceneSessionLogCallback(
-    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+void SceneSessionLogCallback(const LogType type,
+                             const LogLevel level,
+                             const unsigned int domain,
+                             const char* tag,
+                             const char* msg)
 {
     logMsg = msg;
 }
-}
+} // namespace
 constexpr int WAIT_ASYNC_US = 1000000;
 class SceneSessionTest : public testing::Test {
 public:
@@ -50,21 +53,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionTest::SetUpTestCase()
-{
-}
+void SceneSessionTest::SetUpTestCase() {}
 
-void SceneSessionTest::TearDownTestCase()
-{
-}
+void SceneSessionTest::TearDownTestCase() {}
 
-void SceneSessionTest::SetUp()
-{
-}
+void SceneSessionTest::SetUp() {}
 
-void SceneSessionTest::TearDown()
-{
-}
+void SceneSessionTest::TearDown() {}
 
 namespace {
 
@@ -162,13 +157,12 @@ HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, TestSize.Level1)
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     sceneSession->SetPiPTemplateInfo(pipTemplateInfo);
-    ASSERT_EQ(sceneSession->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
+    ASSERT_EQ(sceneSession->GetPiPTemplateInfo().pipTemplateType, static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 
     pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
     sceneSession->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(sceneSession->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING));
+              static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING));
 }
 
 /**
@@ -228,13 +222,13 @@ HWTEST_F(SceneSessionTest, GetTouchHotAreas01, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    Rect windowRect = {1, 1, 1, 1};
+    Rect windowRect = { 1, 1, 1, 1 };
     std::vector<Rect> rects;
     uint32_t hotAreasNum = 10;
     uint32_t hotAreaWidth = windowRect.width_ / hotAreasNum;
     uint32_t hotAreaHeight = windowRect.height_ / hotAreasNum;
     for (uint32_t i = 0; i < hotAreasNum; ++i) {
-        rects.emplace_back(Rect{hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight});
+        rects.emplace_back(Rect{ hotAreaWidth * i, hotAreaHeight * i, hotAreaWidth, hotAreaHeight });
     }
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
@@ -695,9 +689,9 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
     sceneSession->sessionRectChangeFunc_ = [](const WSRect& rect,
-        SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
-        return;
-    };
+                                              SizeChangeReason reason,
+                                              DisplayId displayId,
+                                              const RectAnimationConfig& rectAnimationConfig) { return; };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
 }
@@ -725,7 +719,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
-    WSRect overlapRect = {0, 0, 0, 0};
+    WSRect overlapRect = { 0, 0, 0, 0 };
     AvoidArea avoidArea;
     sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
     ASSERT_EQ(true, overlapRect.IsEmpty());
@@ -879,21 +873,20 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, TestSize.Level1)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type,
-            uint64_t displayId)-> std::vector<sptr<SceneSession>>
-    {
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         SessionInfo info_;
         info_.abilityName_ = "Background01";
         info_.bundleName_ = "IsFloatingWindowAppType";
         std::vector<sptr<SceneSession>> backgroundSession;
-        sptr<SceneSession> session2= sptr<SceneSession>::MakeSptr(info_, nullptr);
+        sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info_, nullptr);
         backgroundSession.push_back(session2);
         return backgroundSession;
     };
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
-    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     sceneSession->SetSessionRect(rect);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -947,11 +940,10 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, TestSize.Level1)
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession =
-        sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
@@ -1315,25 +1307,25 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(sceneSession->GetScreenId(), 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    WSRect rect = {0, 0, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = { 0, 0, 0, 0 };
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    rect = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = { 0, 100, 0, 0 };
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 100);
 
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
     sceneSession->clientDisplayId_ = 0;
-    rect = {0, 100, 100, 100};
+    rect = { 0, 100, 100, 100 };
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 100);
     sceneSession->clientDisplayId_ = 999;
-    rect = {0, 100, 100, 100};
+    rect = { 0, 100, 100, 100 };
     auto rect2 = rect;
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, rect2.posY_);
@@ -1362,7 +1354,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, TestSize.Level1)
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::MOVE;
     WSError result = sceneSession->UpdateSessionRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1391,7 +1383,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, TestSize.Level1)
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::RESIZE;
     WSError result = sceneSession->UpdateSessionRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1420,7 +1412,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, TestSize.Level1)
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = sceneSession->UpdateSessionRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1445,8 +1437,8 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, TestSize.Level1)
 
     sceneSession->SetSessionProperty(property);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    WSRect oldRect({1, 1, 1, 1});
-    WSRect parentRect({10, 10, 1, 1});
+    WSRect oldRect({ 1, 1, 1, 1 });
+    WSRect parentRect({ 10, 10, 1, 1 });
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetParentSession(parentSession);
@@ -1479,8 +1471,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     ASSERT_EQ(height, 0);
     SystemBarProperty propertyHide;
     propertyHide.enable_ = false;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-        propertyHide));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, propertyHide));
     ASSERT_EQ(height, 0);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -1488,11 +1479,10 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 0);
-    WSRect rect({0, 0, 0, 1});
+    WSRect rect({ 0, 0, 0, 1 });
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
-        uint64_t displayId)->std::vector<sptr<SceneSession>>
-    {
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
         vec.push_back(sceneSession);
         return vec;
@@ -1502,8 +1492,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     sceneSession->property_ = property;
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 1);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
-        propertyHide));
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, propertyHide));
     ASSERT_EQ(height, 1);
 }
 
@@ -1525,11 +1514,10 @@ HWTEST_F(SceneSessionTest, GetDockHeight, TestSize.Level1)
     EXPECT_NE(specificCallback_, nullptr);
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
-    WSRect rect({0, 0, 0, 112});
+    WSRect rect({ 0, 0, 0, 112 });
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
-        uint64_t displayId)->std::vector<sptr<SceneSession>>
-    {
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
         vec.push_back(sceneSession);
         return vec;
@@ -1562,72 +1550,6 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, TestSize.Level1)
     AppForceLandscapeConfig config = {};
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: HandleCompatibleModeMoveDrag
- * @tc.desc: HandleCompatibleModeMoveDrag
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleCompatibleModeMoveDrag";
-    info.bundleName_ = "HandleCompatibleModeMoveDrag";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-
-    WSRect rect = {1, 1, 1, 1};
-    WSRect rect2 = {2, 2, 2, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
-    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
-    WSRect rect3 = {1, 1, 2, 1};
-    ASSERT_NE(rect2, rect3);
-    ASSERT_EQ(rect2.posX_, 2);
-    ASSERT_EQ(rect2.posY_, 2);
-
-    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
-    ASSERT_NE(rect2, rect3);
-    ASSERT_EQ(rect2.posX_, 2);
-    ASSERT_EQ(rect2.posY_, 2);
-}
-
-/**
- * @tc.name: HandleCompatibleModeDrag
- * @tc.desc: HandleCompatibleModeDrag
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleCompatibleModeDrag";
-    info.bundleName_ = "HandleCompatibleModeDrag";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-
-    WSRect rect = {1, 1, 1, 1};
-    WSRect rect2 = {2, 1, 1, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
-    ASSERT_EQ(sceneSession->winRect_, rect2);
-
-    rect2 = {1, 2, 1, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
-    ASSERT_EQ(sceneSession->winRect_, rect2);
-
-    rect2 = {1, 1, 2, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
-    ASSERT_EQ(sceneSession->winRect_, rect2);
-
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
-    ASSERT_EQ(sceneSession->winRect_, rect2);
 }
 
 /**
@@ -1736,9 +1658,7 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, TestSize.Level0)
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_ERROR_NULLPTR);
 
-    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
-        return WSError::WS_ERROR_NULLPTR;
-    };
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) { return WSError::WS_ERROR_NULLPTR; };
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_ERROR_NULLPTR);
 
     sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
@@ -1861,5 +1781,5 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
 }
 } // namespace
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS

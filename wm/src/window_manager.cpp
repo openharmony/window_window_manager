@@ -104,6 +104,7 @@ public:
         std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
     std::vector<sptr<IWindowPidVisibilityChangedListener>> windowPidVisibilityListeners_;
     sptr<WindowManagerAgent> windowPidVisibilityListenerAgent_;
+    std::shared_mutex visibilityListenerAgentListenerMutex_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -1085,18 +1086,23 @@ WMError WindowManager::RegisterWindowPidVisibilityChangedListener(
         TLOGE(WmsLogTag::WMS_LIFE, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     WMError ret = WMError::WM_OK;
-    if (pImpl_->windowPidVisibilityListenerAgent_ == nullptr) {
-        pImpl_->windowPidVisibilityListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->visibilityListenerAgentListenerMutex_);
+        if (pImpl_->windowPidVisibilityListenerAgent_ == nullptr) {
+            pImpl_->windowPidVisibilityListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+        }
+    
+        ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+            pImpl_->windowPidVisibilityListenerAgent_);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "RegisterWindowManagerAgent failed!");
+            pImpl_->windowPidVisibilityListenerAgent_ = nullptr;
+        }
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
-        pImpl_->windowPidVisibilityListenerAgent_);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LIFE, "RegisterWindowManagerAgent failed!");
-        pImpl_->windowPidVisibilityListenerAgent_ = nullptr;
-    } else {
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    if (ret == WMError::WM_OK) {
         auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
             pImpl_->windowPidVisibilityListeners_.end(), listener);
         if (iter != pImpl_->windowPidVisibilityListeners_.end()) {
@@ -1115,16 +1121,25 @@ WMError WindowManager::UnregisterWindowPidVisibilityChangedListener(
         TLOGE(WmsLogTag::WMS_LIFE, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
-    auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
-        pImpl_->windowPidVisibilityListeners_.end(), listener);
-    if (iter == pImpl_->windowPidVisibilityListeners_.end()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "could not find this listener");
-        return WMError::WM_OK;
+    bool isListenEmpty = true;
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        auto iter = std::find(pImpl_->windowPidVisibilityListeners_.begin(),
+            pImpl_->windowPidVisibilityListeners_.end(), listener);
+        if (iter == pImpl_->windowPidVisibilityListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "could not find this listener");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowPidVisibilityListeners_.erase(iter);
+        isListenEmpty = pImpl_->windowPidVisibilityListeners_.empty();
     }
-    pImpl_->windowPidVisibilityListeners_.erase(iter);
+    
     WMError ret = WMError::WM_OK;
-    if (pImpl_->windowPidVisibilityListeners_.empty() && pImpl_->windowPidVisibilityListenerAgent_ != nullptr) {
+    if (!isListenEmpty) {
+        return ret;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->visibilityListenerAgentListenerMutex_);
+    if (isListenEmpty && pImpl_->windowPidVisibilityListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
             pImpl_->windowPidVisibilityListenerAgent_);
@@ -1750,6 +1765,33 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", observedInfoForLog.str().c_str());
     return ret;
+}
+
+void WindowManager::SetIsModuleHookOffToSet(const std::string& moduleName)
+{
+    isModuleHookOffSet_.insert(moduleName);
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s", moduleName.c_str());
+}
+
+bool WindowManager::GetIsModuleHookOffFromSet(const std::string& moduleName)
+{
+    auto iter = isModuleHookOffSet_.find(moduleName);
+    if (iter != isModuleHookOffSet_.end()) {
+        return true;
+    }
+    return false;
+}
+
+bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName)
+{
+    if (isModuleAbilityHookEnd) {
+        SetIsModuleHookOffToSet(moduleName);
+    }
+    if (GetIsModuleHookOffFromSet(moduleName)) {
+        TLOGI(WmsLogTag::WMS_MAIN, "set IsModuleHookOff true");
+        return true;
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

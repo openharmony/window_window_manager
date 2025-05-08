@@ -670,6 +670,107 @@ HWTEST_F(WindowSceneSessionImplTest4, RegisterKeyboardPanelInfoChangeListener, T
 }
 
 /**
+ * @tc.name: RegisterWindowAttachStateChangeListener
+ * @tc.desc: RegisterWindowAttachStateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, RegisterWindowAttachStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterKeyboardPanelInfoChangeListener");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: listener is nullptr
+    sptr<IWindowAttachStateChangeListner> listener = nullptr;
+    auto ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    // case2: listener is not nullptr
+    listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    // case3: host session is nullptr
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterWindowAttachStateChangeListener
+ * @tc.desc: UnregisterWindowAttachStateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UnregisterWindowAttachStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterWindowAttachStateChangeListener");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: register listener
+    sptr<IWindowAttachStateChangeListner> listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    auto ret = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    // case2: unregister success
+    ret = windowSceneSessionImpl->UnregisterWindowAttachStateChangeListener();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowSceneSessionImpl->windowAttachStateChangeListener_, nullptr);
+
+    // case3: host session is nullptr
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    ret = windowSceneSessionImpl->UnregisterWindowAttachStateChangeListener();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyWindowAttachStateChange
+ * @tc.desc: NotifyWindowAttachStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyWindowAttachStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowAttachStateChange");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->windowAttachStateChangeListener_ = nullptr;
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    // case1: listener is nullptr
+    auto ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+
+    // case2: listener is not nullptr, then attach is true
+    sptr<IWindowAttachStateChangeListner> listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    auto ret2 = windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret2);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    // case3: listener is not nullptr, then attach is false
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: GetSystemBarPropertyByType
  * @tc.desc: GetSystemBarPropertyByType
  * @tc.type: FUNC

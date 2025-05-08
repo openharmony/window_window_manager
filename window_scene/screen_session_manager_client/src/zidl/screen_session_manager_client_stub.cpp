@@ -136,6 +136,14 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnDumperClientScreenSessions(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_BEFORE_PROPERTY_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnBeforeScreenPropertyChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_MODE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenModeChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -445,6 +453,27 @@ int ScreenSessionManagerClientStub::HandleSyncScreenCombination(MessageParcel& d
     auto extendScreenId = static_cast<ScreenId>(data.ReadUint64());
     auto extendCombination = static_cast<ScreenCombination>(data.ReadUint32());
     SetScreenCombination(mainScreenId, extendScreenId, extendCombination);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t status = data.ReadUint32();
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    if (status > static_cast<uint32_t>(FoldStatus::HALF_FOLD)) {
+        return ERR_INVALID_VALUE;
+    }
+    foldStatus = static_cast<FoldStatus>(status);
+    TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
+    OnBeforeScreenPropertyChanged(foldStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
+    TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
+    OnScreenModeChanged(screenModeChangeEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

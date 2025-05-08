@@ -37,15 +37,14 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerTest9::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
-{
-}
+void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
 
 bool getStateFalse(const ManagerState key)
 {
@@ -62,13 +61,9 @@ bool TraverseFuncTest(const sptr<SceneSession>& session)
     return true;
 }
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerTest9::SetUpTestCase()
 {
@@ -80,9 +75,7 @@ void SceneSessionManagerTest9::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerTest9::SetUp()
-{
-}
+void SceneSessionManagerTest9::SetUp() {}
 
 void SceneSessionManagerTest9::TearDown()
 {
@@ -972,7 +965,8 @@ HWTEST_F(SceneSessionManagerTest9, RecoverAndReconnectSceneSession02, TestSize.L
  * @tc.desc: RefreshPcZorder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, TestSize.Level0) {
+HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, TestSize.Level0)
+{
     std::vector<int32_t> persistentIds;
     SessionInfo info1;
     info1.abilityName_ = "RefreshPcZorder1";
@@ -980,21 +974,21 @@ HWTEST_F(SceneSessionManagerTest9, RefreshPcZorder, TestSize.Level0) {
     sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(session1, nullptr);
     persistentIds.push_back(session1->GetPersistentId());
-    ssm_->sceneSessionMap_.insert({session1->GetPersistentId(), session1});
+    ssm_->sceneSessionMap_.insert({ session1->GetPersistentId(), session1 });
     SessionInfo info2;
     info2.abilityName_ = "RefreshPcZorder2";
     info2.bundleName_ = "RefreshPcZorder2";
     sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_NE(session2, nullptr);
     persistentIds.push_back(session2->GetPersistentId());
-    ssm_->sceneSessionMap_.insert({session2->GetPersistentId(), session2});
+    ssm_->sceneSessionMap_.insert({ session2->GetPersistentId(), session2 });
     SessionInfo info3;
     info3.abilityName_ = "RefreshPcZorder3";
     info3.bundleName_ = "RefreshPcZorder3";
     sptr<SceneSession> session3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     ASSERT_NE(session3, nullptr);
     session3->SetZOrder(404);
-    ssm_->sceneSessionMap_.insert({session3->GetPersistentId(), session3});
+    ssm_->sceneSessionMap_.insert({ session3->GetPersistentId(), session3 });
     persistentIds.push_back(999);
     uint32_t startZOrder = 100;
     std::vector<int32_t> newPersistentIds = persistentIds;
@@ -1092,8 +1086,8 @@ HWTEST_F(SceneSessionManagerTest9, ShiftFocus, TestSize.Level1)
     ASSERT_NE(nextSession, nullptr);
     focusedSession->persistentId_ = 1;
     nextSession->persistentId_ = 4;
-    ssm_->sceneSessionMap_.insert({1, focusedSession});
-    ssm_->sceneSessionMap_.insert({4, nextSession});
+    ssm_->sceneSessionMap_.insert({ 1, focusedSession });
+    ssm_->sceneSessionMap_.insert({ 4, nextSession });
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(1);
     WSError ret = ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, nextSession, false, FocusChangeReason::DEFAULT);
@@ -1264,7 +1258,7 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, TestS
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = 1;
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetParentPersistentId(1);
@@ -1294,7 +1288,7 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId02, TestS
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = 1;
     sceneSession->SetClientDisplayId(999);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetParentPersistentId(1);
@@ -1346,12 +1340,12 @@ HWTEST_F(SceneSessionManagerTest9, SetSkipEventOnCastPlusInner01, TestSize.Level
     sessionInfo.abilityName_ = "SetSkipEventOnCastPlusInner";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), true);
     EXPECT_EQ(true, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
     ssm_->SetSkipEventOnCastPlusInner(sceneSession->GetPersistentId(), false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

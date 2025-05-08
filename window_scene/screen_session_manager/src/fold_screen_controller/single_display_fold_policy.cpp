@@ -30,6 +30,9 @@ namespace OHOS::Rosen {
 namespace {
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
+const int32_t CREASE_REGION_POS_Y = 994;
+const int32_t CREASE_REGION_POS_WIDTH = 1320;
+const int32_t CREASE_REGION_POS_HEIGHT = 132;
 
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
@@ -49,9 +52,9 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
 
     ScreenId screenIdFull = 0;
     int32_t foldCreaseRegionPosX = 0;
-    int32_t foldCreaseRegionPosY = 1064;
-    int32_t foldCreaseRegionPosWidth = 2496;
-    int32_t foldCreaseRegionPosHeight = 171;
+    int32_t foldCreaseRegionPosY = CREASE_REGION_POS_Y;
+    int32_t foldCreaseRegionPosWidth = CREASE_REGION_POS_WIDTH;
+    int32_t foldCreaseRegionPosHeight = CREASE_REGION_POS_HEIGHT;
 
     std::vector<DMRect> rect = {
         {
