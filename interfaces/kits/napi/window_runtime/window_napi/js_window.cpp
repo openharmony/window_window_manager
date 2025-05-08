@@ -7029,7 +7029,8 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     TransitionAnimation animation;
-    if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation)) {
+    napi_value convertResult = nullptr;
+    if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation, convertResult)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }

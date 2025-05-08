@@ -384,10 +384,10 @@ public:
     napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
         const WindowAnimationOptions& animationConfig);
     bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject,
-        TransitionAnimation& transitionAnimation);
+        TransitionAnimation& transitionAnimation, napi_value& result);
     bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value config,
-        WindowAnimationOptions& animationConfig);
-    bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig);
+        WindowAnimationOptions& animationConfig, napi_value& result);
+    bool CheckWindowAnimationOptions(const WindowAnimationOptions& animationConfig, napi_value& result);
     bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
