@@ -11792,14 +11792,22 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
                 continue;
             }
             WindowMode winMode = session->GetWindowMode();
-            if (WindowHelper::IsFullScreenWindow(winMode)) {
+            if (WindowHelper::IsPipWindow(winType)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found pip win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                globalWinMode = globalWinMode | GlobalWindowMode::PIP;
+            } else if (WindowHelper::IsFullScreenWindow(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found fullscreen win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
                 globalWinMode = globalWinMode | GlobalWindowMode::FULLSCREEN;
             } else if (WindowHelper::IsSplitWindowMode(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found split win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
                 globalWinMode = globalWinMode | GlobalWindowMode::SPLIT;
             } else if (WindowHelper::IsFloatingWindow(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found floating win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
                 globalWinMode = globalWinMode | GlobalWindowMode::FLOAT;
-            } else if (WindowHelper::IsPipWindow(winType)) {
-                globalWinMode = globalWinMode | GlobalWindowMode::PIP;
             }
             if (globalWinMode == GlobalWindowMode::ALL) {
                 break;
