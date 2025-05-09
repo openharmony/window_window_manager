@@ -2108,15 +2108,15 @@ export class WindowInternal implements Window {
     //    this.onSync(this.nativeObj, type, callback);
     //}
 
-    public on(type: string, callback: object): void {
+    public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
 
-    public on(type: 'noInteractionDetected', timeout: number, callback: object): void {
+    public on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
-    public off(type: string, callback?: object): void {
+    public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
     }
     //public off(type: 'windowEvent', callback?: Callback<WindowEventType>): void {
@@ -2191,9 +2191,9 @@ export interface Window {
     translate(translateOptions: TranslateOptions): void;
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void;
-    on(type: string, calback: object): void;
-    on(type: 'noInteractionDetected', timeout: number, callback: object): void;
-    off(type:string, callback?: object): void;
+    on<T>(type: string, callback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
+    off<T>(type: string, callback?: Callback<T>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
@@ -2208,7 +2208,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
-native function offSync(nativeObj: long, type: string, callback: object): void;
+native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: number, targetWindowId: number): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -2235,11 +2235,11 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     });
 }
 
-export function on(type: string, callback: object): void {
+export function on<T>(type: string, callback: Callback<T>): void {
   onSync(nativeObj, type, callback);
 }
 
-export function off(type: string, callback: object): void {
+export function off<T>(type: string, callback?: Callback<T>): void {
   offSync(nativeObj, type, callback);
 }
 
