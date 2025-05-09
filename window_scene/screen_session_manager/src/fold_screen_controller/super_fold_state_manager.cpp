@@ -539,9 +539,9 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     return true;
 }
 
-bool SuperFoldStateManager::GetKeyBoardState()
+bool SuperFoldStateManager::GetKeyboardState()
 {
-    TLOGI(WmsLogTag::DMS, "GetKeyBoardState isKeyboardOn_ : %{public}d", isKeyboardOn_);
+    TLOGI(WmsLogTag::DMS, "GetKeyboardState isKeyboardOn_ : %{public}d", isKeyboardOn_);
     return isKeyboardOn_;
 }
 } // Rosen

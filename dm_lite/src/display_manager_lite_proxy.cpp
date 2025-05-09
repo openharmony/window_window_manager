@@ -854,11 +854,11 @@ sptr<ScreenInfo> DisplayManagerLiteProxy::GetScreenInfoById(ScreenId screenId)
     return info;
 }
 
-bool DisplayManagerLiteProxy::GetKeyBoardState()
+bool DisplayManagerLiteProxy::GetKeyboardState()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetKeyBoardState: remote is null");
+        TLOGE(WmsLogTag::DMS, "GetKeyboardState: remote is null");
         return false;
     }
 
@@ -869,7 +869,7 @@ bool DisplayManagerLiteProxy::GetKeyBoardState()
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return false;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_KEY_BOARD_STATE),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_KEYBOARD_STATE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return false;

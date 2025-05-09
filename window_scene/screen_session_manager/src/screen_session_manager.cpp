@@ -9831,10 +9831,10 @@ void ScreenSessionManager::NotifyScreenMaskAppear()
     screenMaskCV_.notify_all();
 }
 
-bool ScreenSessionManager::GetKeyBoardState()
+bool ScreenSessionManager::GetKeyboardState()
 {
 #ifdef FOLD_ABILITY_ENABLE
-    return SuperFoldStateManager::GetInstance().GetKeyBoardState();
+    return SuperFoldStateManager::GetInstance().GetKeyboardState();
 #endif
     return false;
 }
