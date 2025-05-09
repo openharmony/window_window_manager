@@ -1254,18 +1254,18 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_PARAMETER_ERROR);
     }
     DisplayId displayId = DISPLAY_ID_INVALID;
     if (argc == ARGC_ONE) {
         int32_t inputDisplayId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], inputDisplayId)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_PARAMETER_ERROR);
         }
         if (inputDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}d", inputDisplayId);
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_PARAMETER_ERROR);
         }
         displayId = static_cast<DisplayId>(inputDisplayId);
     }
