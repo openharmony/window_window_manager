@@ -59,14 +59,22 @@ ErrCode DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_REGISTER_DISPLAY_MANAGER_AGENT));
         return errCode;
     }
 
-    dmError = reply.ReadInt32();
+    if (!reply.ReadInt32(dmError)) {
+        TLOGE(WmsLogTag::DMS, "Read dmError failed!");
+        return ERR_INVALID_DATA;
+    }
+
     return ERR_OK;
 }
 
@@ -109,14 +117,22 @@ ErrCode DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_UNREGISTER_DISPLAY_MANAGER_AGENT));
         return errCode;
     }
 
-    dmError = reply.ReadInt32();
+    if (!reply.ReadInt32(dmError)) {
+        TLOGE(WmsLogTag::DMS, "Read dmError failed!");
+        return ERR_INVALID_DATA;
+    }
+
     return ERR_OK;
 }
 
@@ -144,9 +160,13 @@ ErrCode DisplayManagerLiteProxy::GetDefaultDisplayInfo(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_DEFAULT_DISPLAY_INFO));
         return errCode;
     }
@@ -190,9 +210,13 @@ ErrCode DisplayManagerLiteProxy::GetDisplayInfoById(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_DISPLAY_INFO_BY_ID));
         return errCode;
     }
@@ -236,9 +260,13 @@ ErrCode DisplayManagerLiteProxy::GetCutoutInfo(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_CUTOUT_INFO));
         return errCode;
     }
@@ -282,9 +310,13 @@ ErrCode DisplayManagerLiteProxy::WakeUpBegin(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_WAKE_UP_BEGIN));
         return errCode;
     }
@@ -317,9 +349,13 @@ ErrCode DisplayManagerLiteProxy::WakeUpEnd(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_WAKE_UP_END));
         return errCode;
     }
@@ -358,9 +394,13 @@ ErrCode DisplayManagerLiteProxy::SuspendBegin(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SUSPEND_BEGIN));
         return errCode;
     }
@@ -393,9 +433,13 @@ ErrCode DisplayManagerLiteProxy::SuspendEnd(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SUSPEND_END));
         return errCode;
     }
@@ -444,9 +488,13 @@ ErrCode DisplayManagerLiteProxy::SetSpecifiedScreenPower(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SET_SPECIFIED_SCREEN_POWER));
         return errCode;
     }
@@ -490,9 +538,13 @@ ErrCode DisplayManagerLiteProxy::SetScreenPowerForAll(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SET_SCREEN_POWER_FOR_ALL));
         return errCode;
     }
@@ -531,9 +583,13 @@ ErrCode DisplayManagerLiteProxy::GetScreenPower(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_POWER));
         return errCode;
     }
@@ -572,9 +628,13 @@ ErrCode DisplayManagerLiteProxy::SetDisplayState(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SET_DISPLAY_STATE));
         return errCode;
     }
@@ -613,9 +673,13 @@ ErrCode DisplayManagerLiteProxy::GetDisplayState(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_DISPLAY_STATE));
         return errCode;
     }
@@ -648,9 +712,13 @@ ErrCode DisplayManagerLiteProxy::TryToCancelScreenOff(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_TRY_TO_CANCEL_SCREEN_OFF));
         return errCode;
     }
@@ -683,14 +751,22 @@ ErrCode DisplayManagerLiteProxy::GetAllDisplayIds(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_DISPLAY_IDS));
         return errCode;
     }
 
-    int32_t displayIdsSize = reply.ReadInt32();
+    int32_t displayIdsSize = 0;
+    if (!reply.ReadInt32(displayIdsSize)) {
+        TLOGE(WmsLogTag::DMS, "Read displayIdsSize failed!");
+        return ERR_INVALID_DATA;
+    }
     if (displayIdsSize > static_cast<int32_t>(VECTOR_MAX_SIZE)) {
         TLOGE(WmsLogTag::DMS, "The vector/array size exceeds the security limit!");
         return ERR_INVALID_DATA;
@@ -699,6 +775,7 @@ ErrCode DisplayManagerLiteProxy::GetAllDisplayIds(
         uint64_t value1 = reply.ReadUint64();
         displayIds.push_back(value1);
     }
+
     return ERR_OK;
 }
 
@@ -727,14 +804,22 @@ ErrCode DisplayManagerLiteProxy::GetAllScreenInfos(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_SCREEN_INFOS));
         return errCode;
     }
 
-    int32_t screenInfosSize = reply.ReadInt32();
+    int32_t screenInfosSize = 0;
+    if (!reply.ReadInt32(screenInfosSize)) {
+        TLOGE(WmsLogTag::DMS, "Read screenInfosSize failed!");
+        return ERR_INVALID_DATA;
+    }
     if (screenInfosSize > static_cast<int32_t>(VECTOR_MAX_SIZE)) {
         TLOGE(WmsLogTag::DMS, "The vector/array size exceeds the security limit!");
         return ERR_INVALID_DATA;
@@ -748,7 +833,12 @@ ErrCode DisplayManagerLiteProxy::GetAllScreenInfos(
 
         screenInfos.push_back(value2);
     }
-    dmError = reply.ReadInt32();
+
+    if (!reply.ReadInt32(dmError)) {
+        TLOGE(WmsLogTag::DMS, "Read dmError failed!");
+        return ERR_INVALID_DATA;
+    }
+
     return ERR_OK;
 }
 
@@ -782,9 +872,13 @@ ErrCode DisplayManagerLiteProxy::GetScreenInfoById(
         return result;
     }
 
-    ErrCode errCode = reply.ReadInt32();
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Read result failed, code is: %{public}d.",
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
             static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_INFO_BY_ID));
         return errCode;
     }

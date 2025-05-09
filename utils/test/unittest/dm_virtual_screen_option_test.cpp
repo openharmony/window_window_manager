@@ -31,12 +31,11 @@ HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling01, TestSize.Level1)
     bool ret = dmVirtualScreenOption.Marshalling(parcel);
     ASSERT_TRUE(ret);
 
-    DmVirtualScreenOption* option = DmVirtualScreenOption::Unmarshalling(parcel);
+    sptr<DmVirtualScreenOption> option = DmVirtualScreenOption::Unmarshalling(parcel);
     ASSERT_NE(option, nullptr);
-    ASSERT_EQ(option->GetOption().name_, "");
-    ASSERT_EQ(option->GetOption().width_, 0);
-    ASSERT_EQ(option->GetOption().height_, 0);
-    delete option;
+    EXPECT_EQ(option->GetOption().name_, "");
+    EXPECT_EQ(option->GetOption().width_, 0);
+    EXPECT_EQ(option->GetOption().height_, 0);
 }
 
 /**
@@ -56,11 +55,10 @@ HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling02, TestSize.Level1)
     bool ret = dmVirtualScreenOption.Marshalling(parcel);
     ASSERT_TRUE(ret);
 
-    DmVirtualScreenOption* option = DmVirtualScreenOption::Unmarshalling(parcel);
+    sptr<DmVirtualScreenOption> option = DmVirtualScreenOption::Unmarshalling(parcel);
     ASSERT_NE(option, nullptr);
-    ASSERT_EQ(option->GetOption().name_, virtualOption.name_);
-    ASSERT_EQ(option->GetOption().width_, virtualOption.width_);
-    ASSERT_EQ(option->GetOption().height_, virtualOption.height_);
-    delete option;
+    EXPECT_EQ(option->GetOption().name_, virtualOption.name_);
+    EXPECT_EQ(option->GetOption().width_, virtualOption.width_);
+    EXPECT_EQ(option->GetOption().height_, virtualOption.height_);
 }
 } // namespace OHOS::Rosen

@@ -84,8 +84,8 @@ HWTEST_F(ScreenshotTest, GetScreenshot_01, TestSize.Level1)
 
     uint32_t width = screenshot->GetWidth();
     uint32_t height = screenshot->GetHeight();
-    ASSERT_EQ(width, CommonTestUtils::TEST_IMAGE_WIDTH);
-    ASSERT_EQ(height, CommonTestUtils::TEST_IMAGE_HEIGHT);
+    EXPECT_EQ(width, CommonTestUtils::TEST_IMAGE_WIDTH);
+    EXPECT_EQ(height, CommonTestUtils::TEST_IMAGE_HEIGHT);
 }
 }
 } // namespace Rosen

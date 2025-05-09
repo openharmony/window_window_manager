@@ -514,13 +514,12 @@ enum class ScreenModeChangeEvent: uint32_t {
 
 class Point : public Parcelable {
 public:
-    int32_t posX_{ 0 };
-    int32_t posY_{ 0 };
+    int32_t posX_{0};
+    int32_t posY_{0};
 
     Point() = default;
 
-    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY)
-    {}
+    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {}
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -583,8 +582,7 @@ public:
     DisplayPhysicalResolution() = default;
 
     DisplayPhysicalResolution(FoldDisplayMode foldDisplayMode, uint32_t physicalWidth, uint32_t physicalHeight)
-        : foldDisplayMode_(foldDisplayMode), physicalWidth_(physicalWidth), physicalHeight_(physicalHeight)
-    {}
+        : foldDisplayMode_(foldDisplayMode), physicalWidth_(physicalWidth), physicalHeight_(physicalHeight) {}
 
     bool Marshalling(Parcel& parcel) const override
     {
