@@ -79,7 +79,7 @@ bool DisplayChangeUnitTest::DisplaySizeEqual(const sptr<Display> display, const 
 {
     uint32_t dWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t dHeight = static_cast<uint32_t>(display->GetHeight());
-    TLOGI(WmsLogTag::DMS_DM, "DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
+    TLOGI(WmsLogTag::DMS, "DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
         dWidth, dHeight, curInfo->width_, curInfo->height_);
     return ((curInfo->width_ == dWidth) && (curInfo->height_ == dHeight));
 }

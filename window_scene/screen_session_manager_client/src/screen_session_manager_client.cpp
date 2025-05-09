@@ -44,24 +44,24 @@ ScreenSessionManagerClient& ScreenSessionManagerClient::GetInstance()
 void ScreenSessionManagerClient::ConnectToServer()
 {
     if (screenSessionManager_) {
-        TLOGI(WmsLogTag::DMS_SSM_CLIENT, "Success to get screen session manager proxy");
+        TLOGI(WmsLogTag::DMS, "Success to get screen session manager proxy");
         return;
     }
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityMgr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Failed to get system ability mgr");
+        TLOGE(WmsLogTag::DMS, "Failed to get system ability mgr");
         return;
     }
 
     auto remoteObject = systemAbilityMgr->GetSystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID);
     if (!remoteObject) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Failed to get display manager service");
+        TLOGE(WmsLogTag::DMS, "Failed to get display manager service");
         return;
     }
 
     screenSessionManager_ = iface_cast<IScreenSessionManager>(remoteObject);
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Failed to get screen session manager proxy");
+        TLOGE(WmsLogTag::DMS, "Failed to get screen session manager proxy");
         return;
     }
     screenSessionManager_->SetClient(this);
@@ -70,24 +70,24 @@ void ScreenSessionManagerClient::ConnectToServer()
 void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnectionListener* listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Failed to register screen connection listener, listener is null");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen connection listener, listener is null");
         return;
     }
 
     screenConnectionListener_ = listener;
     ConnectToServer();
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "Success to register screen connection listener");
+    TLOGI(WmsLogTag::DMS, "Success to register screen connection listener");
 }
 
 void ScreenSessionManagerClient::RegisterScreenConnectionChangeListener(
     const sptr<IScreenConnectionChangeListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Failed: listener is null");
+        TLOGE(WmsLogTag::DMS, "Failed: listener is null");
         return;
     }
     screenConnectionChangeListener_ = listener;
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "Success");
+    TLOGI(WmsLogTag::DMS, "Success");
 }
 
 void ScreenSessionManagerClient::NotifyScreenConnect(const sptr<ScreenSession>& screenSession)
@@ -113,22 +113,22 @@ void ScreenSessionManagerClient::NotifyScreenDisconnect(const sptr<ScreenSession
 bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
 {
     if (option.rsId_ == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "rsId is invalid");
+        TLOGE(WmsLogTag::DMS, "rsId is invalid");
         return false;
     }
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is nullptr");
         return false;
     }
     if (screenSessionManager_->GetScreenProperty(option.screenId_).GetScreenType() == ScreenType::VIRTUAL) {
         if (option.name_ == "HiCar" || option.name_ == "SuperLauncher" || option.name_ == "CastEngine" ||
             option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView" ||
             option.name_ == "PadWithCar") {
-            TLOGI(WmsLogTag::DMS_SSM_CLIENT, "HiCar or SuperLauncher or CastEngine or DevEcoViewer or CeliaView, "
+            TLOGI(WmsLogTag::DMS, "HiCar or SuperLauncher or CastEngine or DevEcoViewer or CeliaView, "
                 "need to connect the screen");
             return true;
         } else {
-            TLOGE(WmsLogTag::DMS_SSM_CLIENT, "ScreenType is virtual, no need to connect the screen");
+            TLOGE(WmsLogTag::DMS, "ScreenType is virtual, no need to connect the screen");
             return false;
         }
     }
@@ -137,12 +137,12 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
 
 void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent)
 {
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64 " name:"
+    TLOGI(WmsLogTag::DMS, "sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64 " name:"
         " %{public}s iName: %{public}s", option.screenId_, static_cast<int>(screenEvent), option.rsId_,
         option.name_.c_str(), option.innerName_.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
         if (!CheckIfNeedConnectScreen(option)) {
-            TLOGE(WmsLogTag::DMS_SSM_CLIENT, "There is no need to connect the screen");
+            TLOGE(WmsLogTag::DMS, "There is no need to connect the screen");
             return;
         }
         ScreenSessionConfig config = {
@@ -164,7 +164,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
         screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(option.screenId_));
         NotifyScreenConnect(screenSession);
         if (screenConnectionListener_) {
-            TLOGI(WmsLogTag::DMS_SSM_CLIENT, "screenId: %{public}" PRIu64 " density: %{public}f ",
+            TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " density: %{public}f ",
                 option.screenId_, config.property.GetDensity());
             screenSession->SetScreenSceneDpi(config.property.GetDensity());
         }
@@ -174,7 +174,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         auto screenSession = GetScreenSession(option.screenId_);
         if (!screenSession) {
-            TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+            TLOGE(WmsLogTag::DMS, "screenSession is null");
             return;
         }
         screenSession->DestroyScreenScene();
@@ -191,7 +191,7 @@ void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
 {
     auto screenSession = GetScreenSessionExtra(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "extra screenSession is null");
+        TLOGE(WmsLogTag::DMS, "extra screenSession is null");
         return;
     }
     screenSession->DestroyScreenScene();
@@ -199,17 +199,17 @@ void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         extraScreenSessionMap_.erase(screenId);
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "ExtraDestroyScreen end");
+    TLOGI(WmsLogTag::DMS, "ExtraDestroyScreen end");
 }
 
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     auto screenSession = GetScreenSession(mainScreenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "mainScreenId=%{public}" PRIu64" extendScreenId=%{public}" PRIu64,
+    TLOGI(WmsLogTag::DMS, "mainScreenId=%{public}" PRIu64" extendScreenId=%{public}" PRIu64,
         mainScreenId, extendScreenId);
     screenSession->ScreenExtendChange(mainScreenId, extendScreenId);
 }
@@ -219,7 +219,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Error found screen session with id: %{public}" PRIu64, screenId);
+        TLOGE(WmsLogTag::DMS, "Error found screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
@@ -230,7 +230,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionExtra(ScreenId s
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = extraScreenSessionMap_.find(screenId);
     if (iter == extraScreenSessionMap_.end()) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "Error found extra screen session with id: %{public}" PRIu64, screenId);
+        TLOGE(WmsLogTag::DMS, "Error found extra screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
@@ -241,7 +241,7 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->PropertyChange(property, reason);
@@ -252,12 +252,12 @@ void ScreenSessionManagerClient::OnPowerStatusChanged(DisplayPowerEvent event, E
 {
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     if (screenSessionMap_.empty()) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "[UL_POWER]screenSessionMap_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSessionMap_ is nullptr");
         return;
     }
     auto screenSession = screenSessionMap_.begin()->second;
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "[UL_POWER]screenSession is null");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]screenSession is null");
         return;
     }
     screenSession->PowerStatusChange(event, status, reason);
@@ -267,7 +267,7 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->SensorRotationChange(sensorRotation);
@@ -277,7 +277,7 @@ void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->HandleHoverStatusChange(hoverStatus, needRotate);
@@ -287,7 +287,7 @@ void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, f
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->ScreenOrientationChange(screenOrientation);
@@ -297,7 +297,7 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->SetScreenRotationLocked(isLocked);
@@ -307,7 +307,7 @@ void ScreenSessionManagerClient::OnCameraBackSelfieChanged(ScreenId screenId, bo
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
@@ -380,7 +380,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     ScreenDirectionInfo directionInfo, ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
@@ -396,7 +396,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
@@ -415,7 +415,7 @@ void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, Scree
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     screenSession->SetDisplayNodeScreenId(displayNodeScreenId);
@@ -424,7 +424,7 @@ void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, Scree
 uint32_t ScreenSessionManagerClient::GetCurvedCompressionArea()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return 0;
     }
     return screenSessionManager_->GetCurvedCompressionArea();
@@ -433,7 +433,7 @@ uint32_t ScreenSessionManagerClient::GetCurvedCompressionArea()
 ScreenProperty ScreenSessionManagerClient::GetPhyScreenProperty(ScreenId screenId)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return {};
     }
     return screenSessionManager_->GetPhyScreenProperty(screenId);
@@ -443,7 +443,7 @@ __attribute__((no_sanitize("cfi"))) void ScreenSessionManagerClient::NotifyDispl
     const sptr<DisplayChangeInfo>& info)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->NotifyDisplayChangeInfoChanged(info);
@@ -452,42 +452,42 @@ __attribute__((no_sanitize("cfi"))) void ScreenSessionManagerClient::NotifyDispl
 void ScreenSessionManagerClient::SetScreenPrivacyState(bool hasPrivate)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "Begin calling the SetScreenPrivacyState() of screenSessionManager_, "
+    TLOGD(WmsLogTag::DMS, "Begin calling the SetScreenPrivacyState() of screenSessionManager_, "
         "hasPrivate: %{public}d", hasPrivate);
     screenSessionManager_->SetScreenPrivacyState(hasPrivate);
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "End calling the SetScreenPrivacyState() of screenSessionManager_");
+    TLOGD(WmsLogTag::DMS, "End calling the SetScreenPrivacyState() of screenSessionManager_");
 }
 
 void ScreenSessionManagerClient::SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "Begin calling the SetPrivacyStateByDisplayId, hasPrivate: %{public}d",
+    TLOGD(WmsLogTag::DMS, "Begin calling the SetPrivacyStateByDisplayId, hasPrivate: %{public}d",
         hasPrivate);
     screenSessionManager_->SetPrivacyStateByDisplayId(id, hasPrivate);
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "End calling the SetPrivacyStateByDisplayId");
+    TLOGD(WmsLogTag::DMS, "End calling the SetPrivacyStateByDisplayId");
 }
 
 void ScreenSessionManagerClient::SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "Begin calling the SetScreenPrivacyWindowList(), id: %{public}" PRIu64, id);
+    TLOGD(WmsLogTag::DMS, "Begin calling the SetScreenPrivacyWindowList(), id: %{public}" PRIu64, id);
     screenSessionManager_->SetScreenPrivacyWindowList(id, privacyWindowList);
-    TLOGD(WmsLogTag::DMS_SSM_CLIENT, "End calling the SetScreenPrivacyWindowList()");
+    TLOGD(WmsLogTag::DMS, "End calling the SetScreenPrivacyWindowList()");
 }
 
 void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect area)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->UpdateAvailableArea(screenId, area);
@@ -496,7 +496,7 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
 void ScreenSessionManagerClient::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
@@ -505,7 +505,7 @@ void ScreenSessionManagerClient::UpdateSuperFoldAvailableArea(ScreenId screenId,
 void ScreenSessionManagerClient::UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->UpdateSuperFoldExpandAvailableArea(screenId, area);
@@ -514,7 +514,7 @@ void ScreenSessionManagerClient::UpdateSuperFoldExpandAvailableArea(ScreenId scr
 int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return 0;
     }
     return screenSessionManager_->SetScreenOffDelayTime(delay);
@@ -523,7 +523,7 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
 int32_t ScreenSessionManagerClient::SetScreenOnDelayTime(int32_t delay)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return 0;
     }
     return screenSessionManager_->SetScreenOnDelayTime(delay);
@@ -532,7 +532,7 @@ int32_t ScreenSessionManagerClient::SetScreenOnDelayTime(int32_t delay)
 void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     return screenSessionManager_->SetCameraStatus(cameraStatus, cameraPosition);
@@ -541,7 +541,7 @@ void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t c
 void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
@@ -550,7 +550,7 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->RecordEventFromScb(description, needRecordEvent);
@@ -559,11 +559,11 @@ void ScreenSessionManagerClient::RecordEventFromScb(std::string description, boo
 void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
 {
     if (screenSessionManager_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     if (oldScbPids.size() == 0) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "oldScbPids size 0");
+        TLOGE(WmsLogTag::DMS, "oldScbPids size 0");
         return;
     }
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
@@ -575,7 +575,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         {
             auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
             if (displayNode == nullptr) {
-                TLOGE(WmsLogTag::DMS_SSM_CLIENT, "display node is null");
+                TLOGE(WmsLogTag::DMS, "display node is null");
                 continue;
             }
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
@@ -584,12 +584,12 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         if (transactionProxy != nullptr) {
             transactionProxy->FlushImplicitTransaction();
         } else {
-            TLOGW(WmsLogTag::DMS_SSM_CLIENT, "transactionProxy is null");
+            TLOGW(WmsLogTag::DMS, "transactionProxy is null");
         }
         ScreenId screenId = iter.first;
         sptr<ScreenSession> screenSession = iter.second;
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+            TLOGE(WmsLogTag::DMS, "screenSession is null");
             return;
         }
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -602,17 +602,17 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
                 ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
         }
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "switch user callback end");
+    TLOGI(WmsLogTag::DMS, "switch user callback end");
 }
 
 void ScreenSessionManagerClient::SwitchingCurrentUser()
 {
     if (screenSessionManager_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->SwitchUser();
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "switch to current user end");
+    TLOGI(WmsLogTag::DMS, "switch to current user end");
 }
 
 void ScreenSessionManagerClient::DisconnectAllExternalScreen()
@@ -621,11 +621,11 @@ void ScreenSessionManagerClient::DisconnectAllExternalScreen()
     for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
         auto screenSession = sessionIt->second;
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is nullptr!");
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
             continue;
         }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->GetIsExtend()) {
-            TLOGI(WmsLogTag::DMS_SSM_CLIENT, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
+            TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
             screenSession->DestroyScreenScene();
             NotifyScreenDisconnect(screenSession);
             ScreenId screenId = sessionIt->first;
@@ -639,7 +639,7 @@ void ScreenSessionManagerClient::DisconnectAllExternalScreen()
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return FoldStatus::UNKNOWN;
     }
     return screenSessionManager_->GetFoldStatus();
@@ -648,7 +648,7 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
 SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return SuperFoldStatus::UNKNOWN;
     }
     return screenSessionManager_->GetSuperFoldStatus();
@@ -657,7 +657,7 @@ SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
 void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     return screenSessionManager_->SetLandscapeLockStatus(isLocked);
@@ -666,7 +666,7 @@ void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
 ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return ExtendScreenConnectStatus::UNKNOWN;
     }
     return screenSessionManager_->GetExtendScreenConnectStatus();
@@ -677,7 +677,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "get screen session is null");
+        TLOGE(WmsLogTag::DMS, "get screen session is null");
         return nullptr;
     }
     return screenSession->GetScreenSnapshot(scaleX, scaleY);
@@ -686,7 +686,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(S
 DeviceScreenConfig ScreenSessionManagerClient::GetDeviceScreenConfig()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return {};
     }
     return screenSessionManager_->GetDeviceScreenConfig();
@@ -715,7 +715,7 @@ ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
 bool ScreenSessionManagerClient::IsFoldable()
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return false;
     }
     return screenSessionManager_->IsFoldable();
@@ -725,11 +725,11 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screen session is null");
+        TLOGE(WmsLogTag::DMS, "screen session is null");
         return;
     }
     if (screenSession->isScreenGroup_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64,
+        TLOGE(WmsLogTag::DMS, "cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64,
             screenId);
         return;
     }
@@ -739,7 +739,7 @@ void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, f
 void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
@@ -748,7 +748,7 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
 void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) const
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
     screenSessionManager_->GetDisplayHookInfo(uid, hookInfo);
@@ -766,15 +766,15 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
 {
     auto session = GetScreenSession(id);
     if (session == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "session is null");
+        TLOGE(WmsLogTag::DMS, "session is null");
         return;
     }
     auto displayNode = session->GetDisplayNode();
     if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "displayNode is null");
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
-    TLOGW(WmsLogTag::DMS_SSM_CLIENT, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX,
+    TLOGW(WmsLogTag::DMS, "scale [%{public}f, %{public}f] translate [%{public}f, %{public}f]", scaleX,
         scaleY, translateX, translateY);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                       "ssmc:UpdateDisplayScale(ScreenId = %" PRIu64
@@ -788,10 +788,10 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
 {
     sptr<ScreenSession> screenSession = GetScreenSession(mainScreenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screen session is null");
+        TLOGE(WmsLogTag::DMS, "screen session is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
+    TLOGI(WmsLogTag::DMS, "capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
     screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
 
@@ -800,10 +800,10 @@ void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, Sup
     currentstate_ = superFoldStatus;
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "screenId=%{public}" PRIu64 " superFoldStatus=%{public}d", screenId,
+    TLOGI(WmsLogTag::DMS, "screenId=%{public}" PRIu64 " superFoldStatus=%{public}d", screenId,
         static_cast<uint32_t>(superFoldStatus));
     screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
 }
@@ -812,10 +812,10 @@ void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, 
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "screenId=%{public}" PRIu64 " isSecondaryReflexion=%{public}d", screenId,
+    TLOGI(WmsLogTag::DMS, "screenId=%{public}" PRIu64 " isSecondaryReflexion=%{public}d", screenId,
         isSecondaryReflexion);
     screenSession->SecondaryReflexionChange(screenId, isSecondaryReflexion);
 }
@@ -825,10 +825,10 @@ void ScreenSessionManagerClient::OnExtendScreenConnectStatusChanged(ScreenId scr
 {
     auto screenSession = GetScreenSession(GetDefaultScreenId());
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS_SSM_CLIENT, "screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM_CLIENT, "screenId=%{public}" PRIu64 " extendScreenConnectStatus=%{public}d", screenId,
+    TLOGI(WmsLogTag::DMS, "screenId=%{public}" PRIu64 " extendScreenConnectStatus=%{public}d", screenId,
         static_cast<uint32_t>(extendScreenConnectStatus));
     screenSession->ExtendScreenConnectStatusChange(screenId, extendScreenConnectStatus);
 }

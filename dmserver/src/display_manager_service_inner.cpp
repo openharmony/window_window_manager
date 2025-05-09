@@ -28,7 +28,7 @@ DisplayId DisplayManagerServiceInner::GetDefaultDisplayId() const
 {
     auto defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
         return DISPLAY_ID_INVALID;
     }
     return defaultDisplayInfo->GetDisplayId();
@@ -38,7 +38,7 @@ sptr<DisplayInfo> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId
 {
     sptr<DisplayInfo> display = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "GetDisplayById can not find corresponding display!\n");
+        TLOGE(WmsLogTag::DMS, "GetDisplayById can not find corresponding display!\n");
     }
     return display;
 }
@@ -67,7 +67,7 @@ std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() cons
         if (display != nullptr) {
             res.emplace_back(display);
         } else {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "GetAllDisplays display %" PRIu64" nullptr!", displayId);
+            TLOGE(WmsLogTag::DMS, "GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
@@ -83,7 +83,7 @@ sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId 
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return nullptr;
     }
     return DisplayManagerService::GetInstance().GetScreenInfoById(displayInfo->GetScreenId());
@@ -93,7 +93,7 @@ ScreenId DisplayManagerServiceInner::GetScreenGroupIdByDisplayId(DisplayId displ
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return INVALID_SCREEN_ID;
     }
     return DisplayManagerService::GetInstance().GetScreenGroupIdByScreenId(displayInfo->GetScreenId());
@@ -103,13 +103,13 @@ sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId
 {
     const sptr<ScreenInfo> screenInfo = GetScreenInfoByDisplayId(displayId);
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return nullptr;
     }
     auto modes = screenInfo->GetModes();
     auto id = screenInfo->GetModeId();
     if (id >= modes.size()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "can not get screenMode.");
+        TLOGE(WmsLogTag::DMS, "can not get screenMode.");
         return nullptr;
     }
     return modes[id];

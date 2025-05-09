@@ -146,7 +146,7 @@ std::string ScreenSceneConfig::GetConfigPath(const std::string& configFileName)
     char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
     char tmpPath[PATH_MAX + 1] = { 0 };
     if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
-        TLOGI(WmsLogTag::DMS_SSM, "can not get customization config file");
+        TLOGI(WmsLogTag::DMS, "can not get customization config file");
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
@@ -160,21 +160,21 @@ bool ScreenSceneConfig::LoadConfigXml()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     }
-    TLOGI(WmsLogTag::DMS_SSM, "filePath: %{public}s", configFilePath.c_str());
+    TLOGI(WmsLogTag::DMS, "filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "load xml error!");
+        TLOGE(WmsLogTag::DMS, "load xml error!");
         return false;
     }
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        TLOGE(WmsLogTag::DMS_SSM, "get root element failed!");
+        TLOGE(WmsLogTag::DMS, "get root element failed!");
         xmlFreeDoc(docPtr);
         return false;
     }
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            TLOGE(WmsLogTag::DMS_SSM, ":invalid node!");
+            TLOGE(WmsLogTag::DMS, ":invalid node!");
             continue;
         }
         ParseNodeConfig(curNodePtr);
@@ -221,7 +221,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     } else if (xmlNodeMap_[SCROLLABLE_PARAM] == nodeName) {
         ReadScrollableParam(currNode);
     } else {
-        TLOGI(WmsLogTag::DMS_SSM, "xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
+        TLOGI(WmsLogTag::DMS, "xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
     }
 }
 
@@ -237,7 +237,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -250,7 +250,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!IsNumber(num)) {
-            TLOGE(WmsLogTag::DMS_SSM, "read number error: nodeName:(%{public}s)", currNode->name);
+            TLOGE(WmsLogTag::DMS, "read number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
@@ -266,12 +266,12 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
 {
     xmlChar* displayMode = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
     if (displayMode == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
     xmlChar* displayModeContext = xmlNodeGetContent(currNode);
     if (displayModeContext == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml nodeName:(%{public}s) context null", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml nodeName:(%{public}s) context null", currNode->name);
         xmlFree(displayMode);
         return;
     }
@@ -317,12 +317,12 @@ void ScreenSceneConfig::ReadScrollableParam(const xmlNodePtr& currNode)
 {
     xmlChar* displayModeXml = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
     if (displayModeXml == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
     xmlChar* displayModeContext = xmlNodeGetContent(currNode);
     if (displayModeContext == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml nodeName:(%{public}s) context null", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml nodeName:(%{public}s) context null", currNode->name);
         xmlFree(displayModeXml);
         return;
     }
@@ -367,7 +367,7 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (enable == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -393,7 +393,7 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -406,18 +406,18 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std::string name)
 {
     if (rootNode == nullptr || rootNode->name == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "get root element failed!");
+        TLOGE(WmsLogTag::DMS, "get root element failed!");
         return;
     }
     xmlChar* rootContext = xmlNodeGetContent(rootNode);
     if (rootContext == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "rootContext is null");
+        TLOGE(WmsLogTag::DMS, "rootContext is null");
         return;
     }
     std::vector<std::string> stringVec;
     for (xmlNodePtr curNodePtr = rootNode->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            TLOGE(WmsLogTag::DMS_SSM, "invalid node!");
+            TLOGE(WmsLogTag::DMS, "invalid node!");
             continue;
         }
         xmlChar* context = xmlNodeGetContent(curNodePtr);
@@ -452,17 +452,17 @@ const std::map<std::string, std::vector<std::string>>& ScreenSceneConfig::GetStr
 void ScreenSceneConfig::DumpConfig()
 {
     for (auto& enable : enableConfig_) {
-        TLOGI(WmsLogTag::DMS_SSM, "Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
+        TLOGI(WmsLogTag::DMS, "Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
     }
     for (auto& numbers : intNumbersConfig_) {
-        TLOGI(WmsLogTag::DMS_SSM, "Numbers: %{public}s %{public}zu",
+        TLOGI(WmsLogTag::DMS, "Numbers: %{public}s %{public}zu",
             numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
-            TLOGI(WmsLogTag::DMS_SSM, "Num: %{public}d", num);
+            TLOGI(WmsLogTag::DMS, "Num: %{public}d", num);
         }
     }
     for (auto& string : stringConfig_) {
-        TLOGI(WmsLogTag::DMS_SSM, "String: %{public}s", string.first.c_str());
+        TLOGI(WmsLogTag::DMS, "String: %{public}s", string.first.c_str());
     }
 }
 
@@ -483,24 +483,24 @@ DMRect ScreenSceneConfig::CalcCutoutBoundaryRect(std::string svgPath)
     DMRect emptyRect = { 0, 0, 0, 0 };
     SkPath skCutoutSvgPath;
     if (!SkParsePath::FromSVGString(svgPath.c_str(), &skCutoutSvgPath)) {
-        TLOGE(WmsLogTag::DMS_SSM, "Parse svg string path failed.");
+        TLOGE(WmsLogTag::DMS, "Parse svg string path failed.");
         return emptyRect;
     }
     SkRect skRect = skCutoutSvgPath.computeTightBounds();
     if (skRect.isEmpty()) {
-        TLOGW(WmsLogTag::DMS_SSM, "Get empty skRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skRect");
         return emptyRect;
     }
     SkIRect skiRect = skRect.roundOut();
     if (skiRect.isEmpty()) {
-        TLOGW(WmsLogTag::DMS_SSM, "Get empty skiRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skiRect");
         return emptyRect;
     }
     int32_t left = static_cast<int32_t>(skiRect.left());
     int32_t top = static_cast<int32_t>(skiRect.top());
     uint32_t width = static_cast<uint32_t>(skiRect.width());
     uint32_t height = static_cast<uint32_t>(skiRect.height());
-    TLOGI(WmsLogTag::DMS_SSM,
+    TLOGI(WmsLogTag::DMS,
         "calc cutout boundary rect - left: [%{public}d top: %{public}d width: %{public}u height: %{public}u]",
         left, top, width, height);
     DMRect cutoutMinOuterRect = {
@@ -540,7 +540,7 @@ void ScreenSceneConfig::SetCurvedCompressionAreaInLandscape()
     if (intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]].size() > 0) {
         curvedAreaInLandscape_ = static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE]][0]);
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "waterfallAreaCompressionSizeWhenHorzontal value is not exist");
+        TLOGW(WmsLogTag::DMS, "waterfallAreaCompressionSizeWhenHorzontal value is not exist");
     }
 }
 
@@ -552,7 +552,7 @@ std::vector<int> ScreenSceneConfig::GetCurvedScreenBoundaryConfig()
 uint32_t ScreenSceneConfig::GetCurvedCompressionAreaInLandscape()
 {
     if (!isWaterfallDisplay_ || !isScreenCompressionEnableInLandscape_) {
-        TLOGW(WmsLogTag::DMS_SSM, "not waterfall screen or waterfall compression is not enabled");
+        TLOGW(WmsLogTag::DMS, "not waterfall screen or waterfall compression is not enabled");
         return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
     }
     return curvedAreaInLandscape_;

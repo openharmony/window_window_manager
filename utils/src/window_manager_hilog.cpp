@@ -49,13 +49,6 @@ const char* g_domainContents[static_cast<uint32_t>(WmsLogTag::END)] = {
     "WMSCompat",
     "WMSRotation",
     "WMSAnimation",
-    "DMSDm",
-    "DMSDmLite",
-    "DMSDmServer",
-    "DMSKits",
-    "DMSSsmClient",
-    "DMSScreenSession",
-    "DMSSsm",
 };
 } // namespace OHOS
 }

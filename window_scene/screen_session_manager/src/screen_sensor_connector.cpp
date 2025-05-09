@@ -43,7 +43,7 @@ static void TentMotionEventCallback(const MotionSensorEvent& motionData);
 
 void ScreenSensorConnector::SubscribeRotationSensor()
 {
-    TLOGD(WmsLogTag::DMS_SSM, "subscribe rotation-related sensor");
+    TLOGD(WmsLogTag::DMS, "subscribe rotation-related sensor");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
 #endif
@@ -58,7 +58,7 @@ void ScreenSensorConnector::UnsubscribeRotationSensor()
 
 void ScreenSensorConnector::SubscribeTentSensor()
 {
-    TLOGD(WmsLogTag::DMS_SSM, "start");
+    TLOGD(WmsLogTag::DMS, "start");
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionTentSubscriber::SubscribeMotionSensor();
 #endif
@@ -75,14 +75,14 @@ void ScreenSensorConnector::UnsubscribeTentSensor()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "start");
+    TLOGI(WmsLogTag::DMS, "start");
     if (isMotionSensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS_SSM, "motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "motion sensor's already subscribed");
         return;
     }
 
     if (!SubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_SSM, "dms: motion sensor subscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor subscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = true;
@@ -91,12 +91,12 @@ void MotionSubscriber::SubscribeMotionSensor()
 void MotionSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS_SSM, "start");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
     
     if (!UnsubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_SSM, "dms: motion sensor unsubscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor unsubscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = false;
@@ -131,14 +131,14 @@ void RotationMotionEventCallback(const MotionSensorEvent& motionData)
 
 void MotionTentSubscriber::SubscribeMotionSensor()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "Subscribe tent motion Sensor");
+    TLOGI(WmsLogTag::DMS, "Subscribe tent motion Sensor");
     if (isMotionSensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS_SSM, "tent motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "tent motion sensor's already subscribed");
         return;
     }
     
     if (!SubscribeCallback(MOTION_TYPE_TENT, TentMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_SSM, "dms: motion sensor subscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor subscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = true;
@@ -147,12 +147,12 @@ void MotionTentSubscriber::SubscribeMotionSensor()
 void MotionTentSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS_SSM, "start");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
     
     if (!UnsubscribeCallback(MOTION_TYPE_TENT, TentMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_SSM, "dms: motion sensor unsubscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor unsubscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = false;
@@ -160,15 +160,15 @@ void MotionTentSubscriber::UnsubscribeMotionSensor()
 
 void TentMotionEventCallback(const MotionSensorEvent& motionData)
 {
-    TLOGI(WmsLogTag::DMS_SSM, "tent mode status %{public}d", motionData.status);
+    TLOGI(WmsLogTag::DMS, "tent mode status %{public}d", motionData.status);
     if (motionData.dataLen < 1 || motionData.data == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "tent mode datalen %{public}d", motionData.dataLen);
+        TLOGE(WmsLogTag::DMS, "tent mode datalen %{public}d", motionData.dataLen);
         return;
     }
     uint32_t tentData = static_cast<uint32_t>(motionData.data[0]);
     int realHall = static_cast<int>(tentData & 0xFF);
     if (realHall != 0 && realHall != 1) {
-        TLOGW(WmsLogTag::DMS_SSM, "tent mode invalid hall : %{public}d", realHall);
+        TLOGW(WmsLogTag::DMS, "tent mode invalid hall : %{public}d", realHall);
         realHall = -1;
     }
 
@@ -176,7 +176,7 @@ void TentMotionEventCallback(const MotionSensorEvent& motionData)
         motionData.status == MOTION_ACTION_TENT_MODE_HOVER) {
         ScreenTentProperty::HandleSensorEventInput(motionData.status, realHall);
     } else {
-        TLOGE(WmsLogTag::DMS_SSM, "tent motion:%{public}d invalid", motionData.status);
+        TLOGE(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
     }
 }
 #endif

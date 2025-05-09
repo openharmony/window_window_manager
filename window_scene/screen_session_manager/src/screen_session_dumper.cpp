@@ -107,7 +107,7 @@ ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16strin
         params_.emplace_back(arg);
         info += arg;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "input args: [%{public}s]", info.c_str());
+    TLOGI(WmsLogTag::DMS, "input args: [%{public}s]", info.c_str());
 }
 
 bool ScreenSessionDumper::IsNumber(std::string str)
@@ -126,14 +126,14 @@ bool ScreenSessionDumper::IsNumber(std::string str)
 void ScreenSessionDumper::OutputDumpInfo()
 {
     if (fd_ < 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "invalid fd: %{public}d", fd_);
+        TLOGE(WmsLogTag::DMS, "invalid fd: %{public}d", fd_);
         return;
     }
 
     static_cast<void>(signal(SIGPIPE, SIG_IGN));  // ignore SIGPIPE crash
     int ret = dprintf(fd_, "%s\n", dumpInfo_.c_str());
     if (ret < 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "dprintf error. ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "dprintf error. ret: %{public}d", ret);
         return;
     }
     dumpInfo_.clear();
@@ -143,11 +143,11 @@ void ScreenSessionDumper::OutputDumpInfo()
 void ScreenSessionDumper::ExecuteDumpCmd()
 {
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
-        TLOGE(WmsLogTag::DMS_SSM, "dump permission denied!");
+        TLOGE(WmsLogTag::DMS, "dump permission denied!");
         return;
     }
     if (params_.empty()) {
-        TLOGE(WmsLogTag::DMS_SSM, "params is null");
+        TLOGE(WmsLogTag::DMS, "params is null");
         return;
     }
     if (params_[0] == ARG_DUMP_HELP) {
@@ -176,7 +176,7 @@ void ScreenSessionDumper::ExecuteInjectCmd()
     }
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
-        TLOGI(WmsLogTag::DMS_SSM, "Can't use DMS hidumper inject methods.");
+        TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
         return;
     }
@@ -185,7 +185,7 @@ void ScreenSessionDumper::ExecuteInjectCmd()
         return;
     }
     if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
-        TLOGI(WmsLogTag::DMS_SSM, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
             params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
         ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
             params_[DUMPER_PARAM_INDEX_TWO]);
@@ -389,12 +389,12 @@ void ScreenSessionDumper::DumpFoldCreaseRegion()
     std::ostringstream oss;
     auto creaseRegion = ScreenSessionManager::GetInstance().GetCurrentFoldCreaseRegion();
     if (creaseRegion == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "creaseRegion is nullptr.");
+        TLOGE(WmsLogTag::DMS, "creaseRegion is nullptr.");
         return;
     }
     auto creaseRects = creaseRegion->GetCreaseRects();
     if (creaseRects.empty()) {
-        TLOGE(WmsLogTag::DMS_SSM, "current crease region is null");
+        TLOGE(WmsLogTag::DMS, "current crease region is null");
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "CurrentCreaseRects<X, Y, W, H>: "
@@ -409,7 +409,7 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
     oss << "[SCREEN SESSION]" << std::endl;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "Name: "
@@ -443,7 +443,7 @@ void ScreenSessionDumper::DumpRsInfoById(ScreenId id)
     oss << "[RS INFO]" << std::endl;
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(id);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenSession nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(id));
@@ -532,7 +532,7 @@ void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
     oss << "[CUTOUT INFO]" << std::endl;
     sptr<CutoutInfo> cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfo(id);
     if (cutoutInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().left, "WaterFall_L<X,Y,W,H>: ");
@@ -555,7 +555,7 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
     oss << "[SCREEN INFO]" << std::endl;
     auto screenInfo = ScreenSessionManager::GetInstance().GetScreenInfoById(id);
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "screenInfo nullptr. screen id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "screenInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "VirtualWidth: "
@@ -587,7 +587,7 @@ void ScreenSessionDumper::DumpVisibleAreaDisplayInfoById(DisplayId id)
     oss << "[DISPLAY INFO]" << std::endl;
     auto displayInfo = ScreenSessionManager::GetInstance().GetVisibleAreaDisplayInfoById(id);
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "displayInfo nullptr. display id: %{public}" PRIu64"", id);
+        TLOGE(WmsLogTag::DMS, "displayInfo nullptr. display id: %{public}" PRIu64"", id);
         return;
     }
     oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaWidth: "
@@ -653,7 +653,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
  */
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "params_: [%{public}s]", params_[0].c_str());
+    TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", params_[0].c_str());
     int errCode = ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(params_[0]);
     if (errCode != 0) {
         ShowIllegalArgsInfo();
@@ -685,11 +685,11 @@ void ScreenSessionDumper::SetMotionSensorValue(std::string input)
         int32_t value = std::stoi(valueStr);
         if (value <  static_cast<int32_t>(DeviceRotation::INVALID) ||
             value > static_cast<int32_t>(DeviceRotation::ROTATION_LANDSCAPE_INVERTED)) {
-            TLOGE(WmsLogTag::DMS_SSM, "params is invalid: %{public}d", value);
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
         ScreenRotationProperty::HandleSensorEventInput(static_cast<DeviceRotation>(value));
-        TLOGI(WmsLogTag::DMS_SSM, "mock motion sensor: %{public}d", value);
+        TLOGI(WmsLogTag::DMS, "mock motion sensor: %{public}d", value);
     }
 }
 
@@ -706,7 +706,7 @@ void ScreenSessionDumper::SetRotationLockedValue(std::string input)
         }
         int32_t value = std::stoi(valueStr);
         ScreenSessionManager::GetInstance().SetScreenRotationLocked(static_cast<bool>(value));
-        TLOGI(WmsLogTag::DMS_SSM, "mock rotation locked: %{public}d", value);
+        TLOGI(WmsLogTag::DMS, "mock rotation locked: %{public}d", value);
     }
 }
 
@@ -760,7 +760,7 @@ int ScreenSessionDumper::SetFoldDisplayMode()
     } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
         displayMode = FoldDisplayMode::COORDINATION;
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "SetFoldDisplayMode mode not support");
+        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;
     }
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
@@ -779,7 +779,7 @@ int ScreenSessionDumper::SetFoldStatusLocked()
     } else if (lockParam == ARG_UNLOCK_FOLD_DISPLAY_STATUS) {
         lockDisplayStatus = false;
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "SetFoldStatusLocked status not support");
+        TLOGW(WmsLogTag::DMS, "SetFoldStatusLocked status not support");
         return -1;
     }
     ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
@@ -802,7 +802,7 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
     size_t commaPos = input.find_last_of(',');
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "screenSession is nullptr");
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
@@ -818,11 +818,11 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
         int32_t value = std::stoi(valueStr);
         if ((value < static_cast<int32_t>(DeviceHoverStatus::INVALID)) ||
             (value > static_cast<int32_t>(DeviceHoverStatus::CAMERA_STATUS_CANCEL))) {
-            TLOGE(WmsLogTag::DMS_SSM, "params is invalid: %{public}d", value);
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
         screenSession->HoverStatusChange(value);
-        TLOGI(WmsLogTag::DMS_SSM, "SetHoverStatusChange: %{public}d", value);
+        TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
     }
 }
 
@@ -836,11 +836,11 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
         tokens.push_back(token);
     }
     if (tokens.size() != DUMPER_PARAM_INDEX_THREE && tokens[0] != ARG_SET_POSTURE_HALL) {
-        TLOGE(WmsLogTag::DMS_SSM, "param error: %{public}s", input.c_str());
+        TLOGE(WmsLogTag::DMS, "param error: %{public}s", input.c_str());
         return;
     }
     if (!IsNumber(tokens[DUMPER_PARAM_INDEX_ONE]) || !IsNumber(tokens[DUMPER_PARAM_INDEX_TWO])) {
-        TLOGE(WmsLogTag::DMS_SSM, "param error: %{public}s", input.c_str());
+        TLOGE(WmsLogTag::DMS, "param error: %{public}s", input.c_str());
         return;
     }
     int hallVal = stoi(tokens[DUMPER_PARAM_INDEX_ONE]);
@@ -862,7 +862,7 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
     };
     FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
     FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
-    TLOGI(WmsLogTag::DMS_SSM, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
+    TLOGI(WmsLogTag::DMS, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
 #endif
 }
 
@@ -895,7 +895,7 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
                 ScreenSensorConnector::UnsubscribeRotationSensor();
             }
         }
-        TLOGI(WmsLogTag::DMS_SSM, "hall and posture register status: %{public}d", value);
+        TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
     }
 #endif
 }
@@ -919,12 +919,12 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
         int32_t value = std::stoi(valueStr);
         if (value <=  static_cast<int32_t>(SuperFoldStatusChangeEvents::UNDEFINED) ||
             value >= static_cast<int32_t>(SuperFoldStatusChangeEvents::INVALID)) {
-            TLOGE(WmsLogTag::DMS_SSM, "params is invalid: %{public}d", value);
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
         SuperFoldStateManager::GetInstance().
             HandleSuperFoldStatusChange(static_cast<SuperFoldStatusChangeEvents>(value));
-        TLOGI(WmsLogTag::DMS_SSM, "state: %{public}d, event: %{public}d",
+        TLOGI(WmsLogTag::DMS, "state: %{public}d, event: %{public}d",
             SuperFoldStateManager::GetInstance().GetCurrentStatus(), value);
     }
 #endif
@@ -934,10 +934,10 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        TLOGD(WmsLogTag::DMS_SSM, "not secondary device");
+        TLOGD(WmsLogTag::DMS, "not secondary device");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "secondary input: %{public}s", input.c_str());
+    TLOGI(WmsLogTag::DMS, "secondary input: %{public}s", input.c_str());
     size_t commaPos = input.find(',');
     if (!((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SECONDARY_FOLD_STATUS))) {
         return;
@@ -947,7 +947,7 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
         return;
     }
     char ch = valueStr[0];
-    TLOGI(WmsLogTag::DMS_SSM, "value: %{public}c", ch);
+    TLOGI(WmsLogTag::DMS, "value: %{public}c", ch);
     const char *end = SECONDARY_DUMPER_VALUE_BOUNDARY + sizeof(SECONDARY_DUMPER_VALUE_BOUNDARY); // mfg
     const char *result = std::find(SECONDARY_DUMPER_VALUE_BOUNDARY, end, ch);
     if (result == end) {
@@ -956,7 +956,7 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
         } else if (ch == 'z') { // foldstatus
             TriggerSecondaryFoldStatus(input.substr(commaPos + 1, input.size() - commaPos - 1));
         } else {
-            TLOGE(WmsLogTag::DMS_SSM, "command not supported.");
+            TLOGE(WmsLogTag::DMS, "command not supported.");
         }
         return;
     }
@@ -969,7 +969,7 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
     } else if (ch == SECONDARY_DUMPER_VALUE_BOUNDARY[SECONDARY_FOLD_STATUS_INDEX_G]) {
         displayMode = FoldDisplayMode::GLOBAL_FULL;
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "SetFoldDisplayMode mode is not supported.");
+        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode is not supported.");
         return;
     }
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
@@ -980,7 +980,7 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        TLOGI(WmsLogTag::DMS_SSM, "not super fold device");
+        TLOGI(WmsLogTag::DMS, "not super fold device");
         return;
     }
     size_t commaPos = input.find_last_of(',');
@@ -995,7 +995,7 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
         } else {
             ScreenSessionManager::GetInstance().HandleExtendScreenDisconnect(0);
         }
-        TLOGI(WmsLogTag::DMS_SSM, "landscape lock: %{public}d", value);
+        TLOGI(WmsLogTag::DMS, "landscape lock: %{public}d", value);
     }
 #endif
 }
@@ -1006,7 +1006,7 @@ bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
     for (size_t i = 0; i < firstPostureStr.size(); i++) {
         if (!std::isdigit(firstPostureStr[i])) {
-            TLOGW(WmsLogTag::DMS_SSM, "%{public}s is not number", firstPostureStr.c_str());
+            TLOGW(WmsLogTag::DMS, "%{public}s is not number", firstPostureStr.c_str());
             return false;
         }
     }
@@ -1037,11 +1037,11 @@ bool ScreenSessionDumper::GetPostureAndHall(std::vector<std::string> strVec,
             thirdPostureStr = posturesStrList[DUMPER_PARAM_INDEX_TWO];
             if (!WindowHelper::IsFloatingNumber(firstPostureStr) ||
                 !WindowHelper::IsFloatingNumber(secondPostureStr)) {
-                TLOGW(WmsLogTag::DMS_SSM, "posture should be a float number");
+                TLOGW(WmsLogTag::DMS, "posture should be a float number");
                 return false;
             }
             if (thirdPostureStr != "0" && thirdPostureStr != "1") {
-                TLOGW(WmsLogTag::DMS_SSM, "third posture is not 0 or 1");
+                TLOGW(WmsLogTag::DMS, "third posture is not 0 or 1");
                 return false;
             }
             postures.emplace_back(std::stof(firstPostureStr));
@@ -1056,7 +1056,7 @@ bool ScreenSessionDumper::GetPostureAndHall(std::vector<std::string> strVec,
             halls.emplace_back(static_cast<uint16_t>(std::stoi(firstPostureStr)));
             halls.emplace_back(static_cast<uint16_t>(std::stoi(secondPostureStr)));
         } else {
-            TLOGW(WmsLogTag::DMS_SSM, "sensor command error");
+            TLOGW(WmsLogTag::DMS, "sensor command error");
             return false;
         }
     }
@@ -1065,12 +1065,12 @@ bool ScreenSessionDumper::GetPostureAndHall(std::vector<std::string> strVec,
 
 void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
 {
-    TLOGI(WmsLogTag::DMS_SSM, "%{public}s", valueStr.c_str());
+    TLOGI(WmsLogTag::DMS, "%{public}s", valueStr.c_str());
     std::vector<std::string> strVec = WindowHelper::Split(valueStr, "/");
     std::vector<float> postures;
     std::vector<uint16_t> halls;
     if (!GetPostureAndHall(strVec, postures, halls)) {
-        TLOGW(WmsLogTag::DMS_SSM, "GetPostureAndHall failed");
+        TLOGW(WmsLogTag::DMS, "GetPostureAndHall failed");
         return;
     }
     FoldScreenSensorManager::ExtHallData hallData = {
@@ -1091,7 +1091,7 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
         .data = reinterpret_cast<uint8_t *>(&postureData),
         .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
     };
-    TLOGI(WmsLogTag::DMS_SSM, "mock secondary sensor: %{public}s, %{public}s",
+    TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(postures, ANGLE_STR).c_str(),
         FoldScreenStateInternel::TransVec2Str(halls, HALL_STR).c_str());
     SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
@@ -1102,13 +1102,13 @@ void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr
 {
     std::vector<std::string> strVec = WindowHelper::Split(valueStr, "=");
     if (strVec.size() != SECONDARY_FOLD_STATUS_COMMAND_NUM) {
-        TLOGW(WmsLogTag::DMS_SSM, "secondary foldstatus command miss '=' or has extra '='.");
+        TLOGW(WmsLogTag::DMS, "secondary foldstatus command miss '=' or has extra '='.");
         return;
     }
     const std::string &foldStatusStr = strVec[1];
     for (size_t i = 0; i < foldStatusStr.size(); i++) {
         if (!std::isdigit(foldStatusStr[i])) {
-            TLOGW(WmsLogTag::DMS_SSM, "secondary foldstatus command contains characters that are not numbers.");
+            TLOGW(WmsLogTag::DMS, "secondary foldstatus command contains characters that are not numbers.");
             return;
         }
     }
@@ -1126,11 +1126,11 @@ void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS_SSM, "secondary foldstatus is out of range.");
+            TLOGW(WmsLogTag::DMS, "secondary foldstatus is out of range.");
             return;
         }
     }
-    TLOGI(WmsLogTag::DMS_SSM, "change fold status, %{public}s", foldStatusStr.c_str());
+    TLOGI(WmsLogTag::DMS, "change fold status, %{public}s", foldStatusStr.c_str());
     ScreenSessionManager::GetInstance().TriggerFoldStatusChange(static_cast<FoldStatus>(foldStatus));
 }
 #endif
