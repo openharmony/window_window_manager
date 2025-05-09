@@ -1173,9 +1173,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyScreenMaskAppear();
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_GET_KEY_BOARD_STATE: {
-            bool isKeyBoardOn = GetKeyBoardState();
-            reply.WriteBool(isKeyBoardOn);
+        case DisplayManagerMessage::TRANS_ID_GET_KEYBOARD_STATE: {
+            bool isKeyboardOn = GetKeyboardState();
+            reply.WriteBool(isKeyboardOn);
             break;
         }
         default:

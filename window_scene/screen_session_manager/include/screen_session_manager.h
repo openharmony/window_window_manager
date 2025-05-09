@@ -450,7 +450,7 @@ public:
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
-    bool GetKeyBoardState() override;
+    bool GetKeyboardState() override;
 
 protected:
     ScreenSessionManager();
