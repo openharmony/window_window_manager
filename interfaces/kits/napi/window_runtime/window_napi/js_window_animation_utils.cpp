@@ -173,6 +173,7 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
             break;
         }
         default:
+            result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
             return false;
     }
     return true;
