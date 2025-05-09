@@ -1259,6 +1259,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     option->SetWindowName("SetFollowParentWindowLayoutEnabled01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     auto property = window->GetProperty();
+    window->windowSystemConfig_.supportFollowParentWindowLayout_ = true;
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     WMError ret = window->SetFollowParentWindowLayoutEnabled(true);
