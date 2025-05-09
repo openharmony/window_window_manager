@@ -13382,6 +13382,10 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
 
 void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y)
 {
+    if (displayId != VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_PC, "This is not VIRTUAL_DISPLAY_ID");
+        return;
+    }
     auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
     if (defaultScreenDisplay == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "get display object failed of defaultScreenDisplay");
