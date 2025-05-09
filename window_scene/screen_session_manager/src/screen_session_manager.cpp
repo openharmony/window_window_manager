@@ -8148,6 +8148,9 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
         !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SetDisplayNodeScreenId(SCREEN_ID_FULL, SCREEN_ID_FULL);
+    }
     /* Avoid fold to expand process queues */
     if (foldScreenController_ != nullptr) {
         foldScreenController_->SetdisplayModeChangeStatus(false);
