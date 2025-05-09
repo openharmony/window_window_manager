@@ -489,7 +489,7 @@ private:
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     int32_t zLevel_ = 0;
-    int32_t zIndex_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
