@@ -1476,13 +1476,13 @@ HWTEST_F(sceneSessionManagerProxyTest, GetHostWindowCompatiblityInfo, TestSize.L
 
     sptr<CompatibleModeProperty> property = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    WMError res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(property, token);
+    WMError res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
     property = sptr<CompatibleModeProperty>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(property, token);
+    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
     token = sptr<IRemoteObjectMocker>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(property, token);
+    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 

@@ -291,8 +291,8 @@ public:
     /*
      * Compatible Mode
      */
-    virtual WMError GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-        const sptr<IRemoteObject>& token) { return WMError::WM_OK; }
+    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property) { return WMError::WM_OK; }
 };
 }
 }

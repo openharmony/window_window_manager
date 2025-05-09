@@ -165,8 +165,8 @@ public:
     /*
      * Compatible Mode
      */
-    virtual WMError GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-        const sptr<IRemoteObject>& token);
+    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property);
 
     /*
      * Sub Window

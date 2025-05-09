@@ -2894,8 +2894,8 @@ WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, b
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-    const sptr<IRemoteObject>& token)
+WMError SceneSessionManagerProxy::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
 {
     if (property == nullptr || token == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "input is nullptr");
@@ -2905,16 +2905,16 @@ WMError SceneSessionManagerProxy::GetHostWindowCompatiblityInfo(sptr<CompatibleM
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteRemoteObject(token)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write token failed");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write token failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO),

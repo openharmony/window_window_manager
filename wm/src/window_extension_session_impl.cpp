@@ -149,10 +149,10 @@ WMError WindowExtensionSessionImpl::GetHostWindowCompatiblityInfo()
     if (compatibleModeProperty == nullptr) {
         compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     }
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetHostWindowCompatiblityInfo(
-        compatibleModeProperty, abilityToken_);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetHostWindowCompatiblityInfo(abilityToken_,
+        compatibleModeProperty);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "get compat info failed");
+        TLOGD(WmsLogTag::WMS_COMPAT, "get compat info failed");
         return ret;
     }
     property_->SetCompatibleModeProperty(compatibleModeProperty);
@@ -823,7 +823,7 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         return;
     }
     if (IsAdaptToSimulationScale()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
         return;
     }
     auto task = [weak = wptr(this)]() {
@@ -851,7 +851,7 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
 {
     if (IsAdaptToSimulationScale()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
         return WSError::WS_OK;
     }
     if (config.isDensityFollowHost_ && std::islessequal(config.density_, 0.0f)) {
@@ -894,7 +894,7 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
     if (IsAdaptToSimulationScale()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
         return;
     }
     isDensityFollowHost_ = config.isDensityFollowHost_;

@@ -56,8 +56,8 @@ public:
     /*
      * Compatible Mode
      */
-    WMError GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-        const sptr<IRemoteObject>& token) override;
+    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property) override;
 
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

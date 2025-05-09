@@ -870,7 +870,7 @@ HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
     WindowAdapter windowAdapter;
     sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto err = windowAdapter.GetHostWindowCompatiblityInfo(property, token);
+    auto err = windowAdapter.GetHostWindowCompatiblityInfo(token, property);
     ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
 }
 

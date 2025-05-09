@@ -1798,7 +1798,7 @@ int SceneSessionManagerStub::HandleGetHostWindowCompatiblityInfo(MessageParcel& 
         return ERR_INVALID_DATA;
     }
     sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
-    WMError errCode = GetHostWindowCompatiblityInfo(property, token);
+    WMError errCode = GetHostWindowCompatiblityInfo(token, property);
     if (!reply.WriteParcelable(property)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Write property failed.");
         return ERR_INVALID_DATA;
