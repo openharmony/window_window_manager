@@ -607,6 +607,13 @@ inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
+struct WindowAnimationInfo {
+    WSRect beginRect { 0, 0, 0, 0 };
+    WSRect endRect { 0, 0, 0, 0 };
+    bool animated { false };
+    uint32_t callingId { 0 };
+};
+
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
@@ -616,12 +623,12 @@ struct WindowShadowConfig {
 };
 
 struct KeyboardSceneAnimationConfig {
-    std::string curveType_ = "default";
-    float ctrlX1_ = 0.2f;
+    std::string curveType_;
+    float ctrlX1_ = 0.0f;
     float ctrlY1_ = 0.0f;
-    float ctrlX2_ = 0.2f;
-    float ctrlY2_ = 1.0f;
-    uint32_t duration_ = 150;
+    float ctrlX2_ = 0.0f;
+    float ctrlY2_ = 0.0f;
+    uint32_t duration_ = 0;
 };
 
 struct WindowAnimationConfig {

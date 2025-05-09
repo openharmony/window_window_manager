@@ -2582,6 +2582,18 @@ HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, Function | SmallTest |
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
 }
+
+/**
+ * @tc.name: ConfigSupportFunctionType
+ * @tc.desc: test function : ConfigSupportFunctionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
+{
+    ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
+    EXPECT_EQ(true,
+        (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
