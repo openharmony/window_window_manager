@@ -833,11 +833,11 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
         }
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
         if (screenSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
             continue;
         }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to add cross parent child");
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to add cross parent child");
             continue;
         }
         if (keyboardPanelSession_ == nullptr) {
@@ -877,12 +877,12 @@ void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         if (rsTransaction != nullptr) {
             rsTransaction->Begin();
         }
-        AddCrossScreenChild();
+        HandleCrossScreenChild(true);
         if (rsTransaction != nullptr) {
             rsTransaction->Commit();
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
-        RemoveCrossScreenChild();
+        HandleCrossScreenChild(false);
     }
 }
 
