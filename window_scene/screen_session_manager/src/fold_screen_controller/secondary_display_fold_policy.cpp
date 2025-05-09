@@ -65,7 +65,7 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
         ((screenParamsSigned[FULL_STATUS_WIDTH] / HALF_DIVIDER) - (foldCreaseRegionABPosHeight / HALF_DIVIDER));
     int32_t foldCreaseRegionBCPosWidth = screenParamsSigned[SCREEN_HEIGHT]; // 2232
     int32_t foldCreaseRegionBCPosHeight = foldCreaseRegionABPosHeight; // 128
-    TLOGW(WmsLogTag::DMS_SSM, "created, screenIdFull = %{public}" PRIu64", foldCreaseRegionABPosX = %{public}d,\
+    TLOGW(WmsLogTag::DMS, "created, screenIdFull = %{public}" PRIu64", foldCreaseRegionABPosX = %{public}d,\
         foldCreaseRegionABPosY = %{public}d, foldCreaseRegionABPosHeight = %{public}d,\
         foldCreaseRegionABPosWidth = %{public}d, foldCreaseRegionBCPosX = %{public}d,\
         foldCreaseRegionBCPosY = %{public}d, foldCreaseRegionBCPosWidth = %{public}d,\
@@ -89,16 +89,16 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
 {
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
-        TLOGW(WmsLogTag::DMS_SSM, "last process not complete, skip mode: %{public}d", displayMode);
+        TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
         return;
     }
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "default screenSession is null");
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
     if (displayMode == FoldDisplayMode::UNKNOWN) {
-        TLOGW(WmsLogTag::DMS_SSM, "displayMode is unknown");
+        TLOGW(WmsLogTag::DMS, "displayMode is unknown");
     } else {
         ChangeSuperScreenDisplayMode(screenSession, displayMode);
     }
@@ -113,17 +113,17 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
 
 void SecondaryDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
 {
-    TLOGW(WmsLogTag::DMS_SSM, "FoldStatus: %{public}d", foldStatus);
+    TLOGW(WmsLogTag::DMS, "FoldStatus: %{public}d", foldStatus);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     ChangeScreenDisplayMode(displayMode);
 }
 
 void SecondaryDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
-    TLOGW(WmsLogTag::DMS_SSM, "onBootAnimation: %{public}d", onBootAnimation);
+    TLOGW(WmsLogTag::DMS, "onBootAnimation: %{public}d", onBootAnimation);
     onBootAnimation_ = onBootAnimation;
     if (!onBootAnimation_) {
-        TLOGW(WmsLogTag::DMS_SSM, "when boot animation finished, change display mode");
+        TLOGW(WmsLogTag::DMS, "when boot animation finished, change display mode");
         isChangeScreenWhenBootCompleted = true;
         RecoverWhenBootAnimationExit();
     }
@@ -131,7 +131,7 @@ void SecondaryDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
 
 void SecondaryDisplayFoldPolicy::RecoverWhenBootAnimationExit()
 {
-    TLOGW(WmsLogTag::DMS_SSM, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
+    TLOGW(WmsLogTag::DMS, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     ChangeScreenDisplayMode(displayMode);
 }
@@ -177,10 +177,10 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS_SSM, "FoldStatus is invalid");
+            TLOGW(WmsLogTag::DMS, "FoldStatus is invalid");
         }
     }
-    TLOGW(WmsLogTag::DMS_SSM, "displayMode: %{public}d", displayMode);
+    TLOGW(WmsLogTag::DMS, "displayMode: %{public}d", displayMode);
     return displayMode;
 }
 
@@ -191,7 +191,7 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode && !isChangeScreenWhenBootCompleted) {
-            TLOGW(WmsLogTag::DMS_SSM, "already in displayMode %{public}d", displayMode);
+            TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
             return;
         }
         if (isChangeScreenWhenBootCompleted) {
@@ -229,14 +229,14 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         SetStatusGlobalFullActiveRectAndTpFeature(screenProperty_);
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "unKnown displayMode");
+        TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
     screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     }
-    TLOGI(WmsLogTag::DMS_SSM, "screenBounds : width_= %{public}f, height_= %{public}f",
+    TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
           screenSession->GetScreenProperty().GetBounds().rect_.width_,
           screenSession->GetScreenProperty().GetBounds().rect_.height_);
 }
@@ -254,7 +254,7 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
     };
     if (!onBootAnimation_) {
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-        TLOGI(WmsLogTag::DMS_SSM, "rs response is %{public}ld", static_cast<long>(response));
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -275,7 +275,7 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
     };
     if (!onBootAnimation_) {
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-        TLOGI(WmsLogTag::DMS_SSM, "rs response is %{public}ld", static_cast<long>(response));
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_MAIN, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -296,7 +296,7 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
     };
     if (!onBootAnimation_) {
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-        TLOGI(WmsLogTag::DMS_SSM, "rs response is %{public}ld", static_cast<long>(response));
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_GLOBAL_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -307,14 +307,14 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
 void SecondaryDisplayFoldPolicy::ReportFoldDisplayModeChange(FoldDisplayMode displayMode)
 {
     int32_t mode = static_cast<int32_t>(displayMode);
-    TLOGW(WmsLogTag::DMS_SSM, "displayMode: %{public}d", mode);
+    TLOGW(WmsLogTag::DMS, "displayMode: %{public}d", mode);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "DISPLAY_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_DISPLAY_MODE", mode);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -335,11 +335,11 @@ void SecondaryDisplayFoldPolicy::InitScreenParams()
             screenParams_.push_back(resolution.physicalWidth_);
             screenParams_.push_back(resolution.physicalHeight_);
         } else {
-            TLOGW(WmsLogTag::DMS_SSM, "unKnown displayMode");
+            TLOGW(WmsLogTag::DMS, "unKnown displayMode");
         }
     }
     screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH] - screenParams_[FULL_STATUS_WIDTH]);
-    TLOGI(WmsLogTag::DMS_SSM,
+    TLOGI(WmsLogTag::DMS,
         "PhysicalResolution : mainStatusWidth_= %{public}d, fullStatusWidth_= %{public}d, gloablFullStatusWidth_="
         "%{public}d, screenHeight_= %{public}d, fullStatusOffsetX_= %{public}d",
           screenParams_[MAIN_STATUS_WIDTH], screenParams_[FULL_STATUS_WIDTH],

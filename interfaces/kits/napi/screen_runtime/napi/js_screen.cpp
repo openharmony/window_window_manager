@@ -40,27 +40,27 @@ JsScreen::JsScreen(const sptr<Screen>& screen) : screen_(screen)
 
 JsScreen::~JsScreen()
 {
-    TLOGI(WmsLogTag::DMS_KITS, "JsScreen::~JsScreen is called");
+    TLOGI(WmsLogTag::DMS, "JsScreen::~JsScreen is called");
 }
 
 void JsScreen::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     auto jsScreen = std::unique_ptr<JsScreen>(static_cast<JsScreen*>(data));
     if (jsScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "jsScreen is null");
+        TLOGE(WmsLogTag::DMS, "jsScreen is null");
         return;
     }
     sptr<Screen> screen = jsScreen->screen_;
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "screen is null");
+        TLOGE(WmsLogTag::DMS, "screen is null");
         return;
     }
     ScreenId screenId = screen->GetId();
-    TLOGI(WmsLogTag::DMS_KITS, "screenId : %{public}" PRIu64"", screenId);
+    TLOGI(WmsLogTag::DMS, "screenId : %{public}" PRIu64"", screenId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsScreenMap.find(screenId) != g_JsScreenMap.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "screen is destroyed: %{public}" PRIu64"", screenId);
+        TLOGI(WmsLogTag::DMS, "screen is destroyed: %{public}" PRIu64"", screenId);
         g_JsScreenMap.erase(screenId);
     }
 }
@@ -87,7 +87,7 @@ napi_valuetype GetType(napi_env env, napi_value value)
 
 napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     bool paramValidFlag = true;
     Orientation orientation = Orientation::UNSPECIFIED;
     size_t argc = 4;
@@ -95,21 +95,21 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
     std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS_KITS, "Params not match, info argc: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match, info argc: %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else if (!ConvertFromJsValue(env, argv[0], orientation)) {
         paramValidFlag = false;
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert parameter to orientation");
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to orientation");
         errMsg = "Failed to convert parameter to orientation";
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS_KITS, "paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
     if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
-        TLOGE(WmsLogTag::DMS_KITS, "Orientation param error! orientation value must from enum Orientation");
+        TLOGE(WmsLogTag::DMS, "Orientation param error! orientation value must from enum Orientation");
         errMsg = "orientation value must from enum Orientation";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -126,10 +126,10 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetOrientation(orientation));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
-            TLOGNI(WmsLogTag::DMS_KITS, "OnSetOrientation success");
+            TLOGNI(WmsLogTag::DMS, "OnSetOrientation success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "JsScreen::OnSetOrientation failed."));
-            TLOGNE(WmsLogTag::DMS_KITS, "OnSetOrientation failed");
+            TLOGNE(WmsLogTag::DMS, "OnSetOrientation failed");
         }
         delete task;
     };
@@ -139,7 +139,7 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
 
 napi_value JsScreen::SetScreenActiveMode(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "SetScreenActiveMode is called");
+    TLOGI(WmsLogTag::DMS, "SetScreenActiveMode is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
 #ifdef XPOWER_EVENT_ENABLE
     if (me != nullptr) {
@@ -151,7 +151,7 @@ napi_value JsScreen::SetScreenActiveMode(napi_env env, napi_callback_info info)
 
 napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     bool paramValidFlag = true;
     uint32_t modeId = 0;
     size_t argc = 4;
@@ -159,18 +159,18 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
     std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS_KITS, "Params not match %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
         if (!ConvertFromJsValue(env, argv[0], modeId)) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to convert parameter to modeId");
+            TLOGE(WmsLogTag::DMS, "Failed to convert parameter to modeId");
             errMsg = "Failed to convert parameter to modeId";
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS_KITS, "paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -186,11 +186,11 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(modeId));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
-            TLOGNI(WmsLogTag::DMS_KITS, "OnSetScreenActiveMode success");
+            TLOGNI(WmsLogTag::DMS, "OnSetScreenActiveMode success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                             "JsScreen::OnSetScreenActiveMode failed."));
-            TLOGNE(WmsLogTag::DMS_KITS, "OnSetScreenActiveMode failed");
+            TLOGNE(WmsLogTag::DMS, "OnSetScreenActiveMode failed");
         }
         delete task;
     };
@@ -200,14 +200,14 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
 
 napi_value JsScreen::SetDensityDpi(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "SetDensityDpi is called");
+    TLOGI(WmsLogTag::DMS, "SetDensityDpi is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
     return (me != nullptr) ? me->OnSetDensityDpi(env, info) : nullptr;
 }
 
 napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     bool paramValidFlag = true;
     uint32_t densityDpi = 0;
     size_t argc = 4;
@@ -215,18 +215,18 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS_KITS, "Params not match %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
         if (!ConvertFromJsValue(env, argv[0], densityDpi)) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to convert parameter to densityDpi");
+            TLOGE(WmsLogTag::DMS, "Failed to convert parameter to densityDpi");
             errMsg = "Failed to convert parameter to densityDpi";
             paramValidFlag = false;
         }
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS_KITS, "paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -242,11 +242,11 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetDensityDpi(densityDpi));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
-            TLOGNI(WmsLogTag::DMS_KITS, "OnSetDensityDpi success");
+            TLOGNI(WmsLogTag::DMS, "OnSetDensityDpi success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                             "JsScreen::OnSetDensityDpi failed."));
-            TLOGNE(WmsLogTag::DMS_KITS, "OnSetDensityDpi failed");
+            TLOGNE(WmsLogTag::DMS, "OnSetDensityDpi failed");
         }
         delete task;
     };
@@ -262,16 +262,16 @@ void JsScreen::NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
         napiAsyncTask.release();
-        TLOGE(WmsLogTag::DMS_KITS, "send event success");
+        TLOGE(WmsLogTag::DMS, "send event success");
     }
 }
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+    TLOGD(WmsLogTag::DMS, "[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsScreenMap.find(screenId) == g_JsScreenMap.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+        TLOGI(WmsLogTag::DMS, "[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
         return nullptr;
     }
     return g_JsScreenMap[screenId];
@@ -279,25 +279,25 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
 
 napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "called");
+    TLOGD(WmsLogTag::DMS, "called");
     napi_value objValue = nullptr;
     std::shared_ptr<NativeReference> jsScreenObj = FindJsDisplayObject(screen->GetId());
     if (jsScreenObj != nullptr && jsScreenObj->GetNapiValue() != nullptr) {
-        TLOGI(WmsLogTag::DMS_KITS, "[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
+        TLOGI(WmsLogTag::DMS, "[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
         objValue = jsScreenObj->GetNapiValue();
     }
     if (objValue == nullptr) {
         napi_create_object(env, &objValue);
     }
     if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert prop to jsObject");
+        TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
         return NapiGetUndefined(env);
     }
     std::unique_ptr<JsScreen> jsScreen = std::make_unique<JsScreen>(screen);
     napi_wrap(env, objValue, jsScreen.release(), JsScreen::Finalizer, nullptr, nullptr);
     auto info = screen->GetScreenInfo();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to GetScreenInfo");
+        TLOGE(WmsLogTag::DMS, "Failed to GetScreenInfo");
         return NapiGetUndefined(env);
     }
     ScreenId screenId = info->GetScreenId();
@@ -341,11 +341,11 @@ napi_value CreateJsScreenModeArrayObject(napi_env env, std::vector<sptr<Supporte
 
 napi_value CreateJsScreenModeObject(napi_env env, const sptr<SupportedScreenModes>& mode)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "called");
+    TLOGD(WmsLogTag::DMS, "called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert prop to jsObject");
+        TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
         return NapiGetUndefined(env);
     }
     uint32_t id = mode->id_;

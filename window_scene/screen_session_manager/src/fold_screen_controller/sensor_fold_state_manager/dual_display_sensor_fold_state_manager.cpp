@@ -99,7 +99,7 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     if (nextState != GetCurrentState()) {
-        TLOGI(WmsLogTag::DMS_SSM, "angle: %{public}f, hall: %{public}d.", angle, hall);
+        TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d.", angle, hall);
     }
     UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
@@ -120,7 +120,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
     if (nextState != GetCurrentState()) {
-        TLOGI(WmsLogTag::DMS_SSM, "angle: %{public}f, hall: %{public}d.", angle, hall);
+        TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d.", angle, hall);
     }
     UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
@@ -155,14 +155,14 @@ void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
     applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "appMgrClient_ is nullptr.");
+        TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
     } else {
         auto flag = static_cast<int32_t>(
             appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, packageNames_));
         if (flag != ERR_OK) {
-            TLOGE(WmsLogTag::DMS_SSM, "Register app debug listener failed.");
+            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
         } else {
-            TLOGI(WmsLogTag::DMS_SSM, "Register app debug listener success.");
+            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
         }
     }
 }

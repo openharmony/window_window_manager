@@ -154,48 +154,48 @@ JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
 
 JsDisplay::~JsDisplay()
 {
-    TLOGI(WmsLogTag::DMS_KITS, "JsDisplay::~JsDisplay is called");
+    TLOGI(WmsLogTag::DMS, "JsDisplay::~JsDisplay is called");
 }
 
 void JsDisplay::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     auto jsDisplay = std::unique_ptr<JsDisplay>(static_cast<JsDisplay*>(data));
     if (jsDisplay == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "jsDisplay is null");
+        TLOGE(WmsLogTag::DMS, "jsDisplay is null");
         return;
     }
     sptr<Display> display = jsDisplay->display_;
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "display is null");
+        TLOGE(WmsLogTag::DMS, "display is null");
         return;
     }
     DisplayId displayId = display->GetId();
-    TLOGI(WmsLogTag::DMS_KITS, "displayId : %{public}" PRIu64"", displayId);
+    TLOGI(WmsLogTag::DMS, "displayId : %{public}" PRIu64"", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) != g_JsDisplayMap.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "Display is destroyed: %{public}" PRIu64"", displayId);
+        TLOGI(WmsLogTag::DMS, "Display is destroyed: %{public}" PRIu64"", displayId);
         g_JsDisplayMap.erase(displayId);
     }
 }
 
 napi_value JsDisplay::GetCutoutInfo(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "GetCutoutInfo is called");
+    TLOGD(WmsLogTag::DMS, "GetCutoutInfo is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetCutoutInfo(env, info) : nullptr;
 }
 
 napi_value JsDisplay::GetDisplayCapability(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "GetDisplayCapability is called");
+    TLOGI(WmsLogTag::DMS, "GetDisplayCapability is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetDisplayCapability(env, info) : nullptr;
 }
 
 napi_value JsDisplay::GetAvailableArea(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "GetAvailableArea is called");
+    TLOGI(WmsLogTag::DMS, "GetAvailableArea is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetAvailableArea(env, info) : nullptr;
 }
@@ -222,7 +222,7 @@ bool NapiIsCallable(napi_env env, napi_value value)
 bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS, "IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
         return false;
     }
 
@@ -230,7 +230,7 @@ bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsLi
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter.first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            TLOGE(WmsLogTag::DMS_KITS, "IfCallbackRegistered callback already registered!");
+            TLOGE(WmsLogTag::DMS, "IfCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -239,12 +239,12 @@ bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsLi
 
 napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "OnRegisterDisplayManagerCallback is called");
+    TLOGD(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        TLOGE(WmsLogTag::DMS_KITS, "JsDisplayManager Params not match: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "JsDisplayManager Params not match: %{public}zu", argc);
         std::string errMsg = "Invalid args count, need 2 args";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -253,18 +253,18 @@ napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callba
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         std::string errMsg = "Failed to convert parameter to callbackType";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert parameter to callbackType");
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callbackType");
         return NapiGetUndefined(env);
     }
     napi_value value = argv[INDEX_ONE];
     if (value == nullptr) {
-        TLOGI(WmsLogTag::DMS_KITS, "OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
+        TLOGI(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
         std::string errMsg = "OnRegisterDisplayManagerCallback is nullptr";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
     if (!NapiIsCallable(env, value)) {
-        TLOGI(WmsLogTag::DMS_KITS, "OnRegisterDisplayManagerCallback info->argv[1] is not callable");
+        TLOGI(WmsLogTag::DMS, "OnRegisterDisplayManagerCallback info->argv[1] is not callable");
         std::string errMsg = "OnRegisterDisplayManagerCallback is not callable";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -272,7 +272,7 @@ napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callba
     std::lock_guard<std::mutex> lock(mtx_);
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(env, cbType, value));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to register display listener with type");
+        TLOGE(WmsLogTag::DMS, "Failed to register display listener with type");
         std::string errMsg = "Failed to register display listener with type";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -283,7 +283,7 @@ napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callba
 DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (IfCallbackRegistered(env, type, value)) {
-        TLOGI(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType callback already registered!");
+        TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType callback already registered!");
         return DMError::DM_OK;
     }
     std::unique_ptr<NativeReference> callbackRef;
@@ -293,18 +293,18 @@ DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::stri
     sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(env);
     DMError ret = DMError::DM_OK;
     if (displayListener == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "displayListener is nullptr");
+        TLOGE(WmsLogTag::DMS, "displayListener is nullptr");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (type == EVENT_AVAILABLE_AREA_CHANGED) {
         auto displayId = display_->GetId();
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener, displayId);
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
+        TLOGE(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS_KITS, "RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
+        TLOGE(WmsLogTag::DMS, "RegisterDisplayListenerWithType failed, ret: %{public}u", ret);
         return ret;
     }
     displayListener->AddCallback(type, value);
@@ -314,19 +314,19 @@ DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::stri
 
 napi_value JsDisplay::OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "OnUnregisterDisplayCallback is called");
+    TLOGI(WmsLogTag::DMS, "OnUnregisterDisplayCallback is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS_KITS, "JsDisplayManager Params not match %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "JsDisplayManager Params not match %{public}zu", argc);
         std::string errMsg = "Invalid args count, need one arg at least!";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert parameter to callbackType");
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callbackType");
         std::string errMsg = "Failed to convert parameter to string";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -344,7 +344,7 @@ napi_value JsDisplay::OnUnregisterDisplayManagerCallback(napi_env env, napi_call
         }
     }
     if (ret != DmErrorCode::DM_OK) {
-        TLOGW(WmsLogTag::DMS_KITS, "failed to unregister display listener with type");
+        TLOGW(WmsLogTag::DMS, "failed to unregister display listener with type");
         std::string errMsg = "failed to unregister display listener with type";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
@@ -355,7 +355,7 @@ napi_value JsDisplay::OnUnregisterDisplayManagerCallback(napi_env env, napi_call
 DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
+        TLOGI(WmsLogTag::DMS, "UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
         return DMError::DM_OK;
     }
@@ -370,7 +370,7 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
         jsCbMap_[type].erase(it++);
-        TLOGI(WmsLogTag::DMS_KITS, "unregister display listener with type %{public}s  ret: %{public}u",
+        TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u",
             type.c_str(), ret);
     }
     jsCbMap_.erase(type);
@@ -380,7 +380,7 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
 DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS_KITS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
+        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
         return DMError::DM_OK;
     }
@@ -399,7 +399,7 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
             jsCbMap_[type].erase(it++);
-            TLOGI(WmsLogTag::DMS_KITS, "unregister display listener with type %{public}s  ret: %{public}u",
+            TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u",
                 type.c_str(), ret);
             break;
         } else {
@@ -414,7 +414,7 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
 
 napi_value JsDisplay::HasImmersiveWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "HasImmersiveWindow is called");
+    TLOGI(WmsLogTag::DMS, "HasImmersiveWindow is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnHasImmersiveWindow(env, info) : nullptr;
 }
@@ -428,7 +428,7 @@ napi_valuetype GetType(napi_env env, napi_value value)
 
 napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "OnGetCutoutInfo is called");
+    TLOGD(WmsLogTag::DMS, "OnGetCutoutInfo is called");
     napi_value result = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -443,7 +443,7 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
         sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
         if (cutoutInfo != nullptr) {
             task->Resolve(env, CreateJsCutoutInfoObject(env, cutoutInfo));
-            TLOGND(WmsLogTag::DMS_KITS, "JsDisplay::OnGetCutoutInfo success");
+            TLOGND(WmsLogTag::DMS, "JsDisplay::OnGetCutoutInfo success");
         } else {
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
@@ -479,7 +479,7 @@ std::unique_ptr<NapiAsyncTask> JsDisplay::CreateEmptyAsyncTask(napi_env env, nap
 
 napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "OnGetAvailableArea is called");
+    TLOGI(WmsLogTag::DMS, "OnGetAvailableArea is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -496,7 +496,7 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetAvailableArea(area));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsRectObject(env, area));
-            TLOGNI(WmsLogTag::DMS_KITS, "JsDisplay::OnGetAvailableArea success");
+            TLOGNI(WmsLogTag::DMS, "JsDisplay::OnGetAvailableArea success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                 "JsDisplay::OnGetAvailableArea failed."));
@@ -514,24 +514,24 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
 
 napi_value JsDisplay::OnGetDisplayCapability(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string capabilitInfo;
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetDisplayCapability(capabilitInfo));
     if (ret == DmErrorCode::DM_OK) {
-        TLOGI(WmsLogTag::DMS_KITS, "success, displayCapability = %{public}s", capabilitInfo.c_str());
+        TLOGI(WmsLogTag::DMS, "success, displayCapability = %{public}s", capabilitInfo.c_str());
     } else {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
-        TLOGE(WmsLogTag::DMS_KITS, "failed.");
+        TLOGE(WmsLogTag::DMS, "failed.");
     }
     return CreateJsValue(env, capabilitInfo);
 }
 
 napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -548,7 +548,7 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->HasImmersiveWindow(immersive));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsValue(env, immersive));
-            TLOGNI(WmsLogTag::DMS_KITS, "JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d",
+            TLOGNI(WmsLogTag::DMS, "JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d",
                 immersive);
         } else {
             task->Reject(env, CreateJsError(env,
@@ -567,19 +567,19 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
 
 napi_value JsDisplay::GetSupportedColorSpaces(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "GetSupportedColorSpaces is called");
+    TLOGI(WmsLogTag::DMS, "GetSupportedColorSpaces is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetSupportedColorSpaces(env, info) : nullptr;
 }
 
 static napi_value CreateJsColorSpaceArray(napi_env env, const std::vector<uint32_t>& colorSpaces)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "JsDisplay::CreateJsColorSpaceArray is called");
+    TLOGD(WmsLogTag::DMS, "JsDisplay::CreateJsColorSpaceArray is called");
     std::set<uint32_t> nativeColorSpaces;
     for (const auto colorSpace : colorSpaces) {
         GraphicCM_ColorSpaceType colorSpaceValue = static_cast<GraphicCM_ColorSpaceType>(colorSpace);
         if (NATIVE_TO_JS_COLOR_SPACE_TYPE_MAP.count(colorSpaceValue) == 0) {
-            TLOGE(WmsLogTag::DMS_KITS, "Get color space name %{public}u, but not in api type", colorSpace);
+            TLOGE(WmsLogTag::DMS, "Get color space name %{public}u, but not in api type", colorSpace);
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(DMError::DM_ERROR_DEVICE_NOT_SUPPORT)));
             return NapiGetUndefined(env);
         }
@@ -588,7 +588,7 @@ static napi_value CreateJsColorSpaceArray(napi_env env, const std::vector<uint32
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, nativeColorSpaces.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to create color space array");
+        TLOGE(WmsLogTag::DMS, "Failed to create color space array");
         return NapiGetUndefined(env);
     }
     uint32_t index = 0;
@@ -600,7 +600,7 @@ static napi_value CreateJsColorSpaceArray(napi_env env, const std::vector<uint32
 
 napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "OnGetSupportedColorSpaces is called");
+    TLOGI(WmsLogTag::DMS, "OnGetSupportedColorSpaces is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -617,11 +617,11 @@ napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedColorSpaces(colorSpaces));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsColorSpaceArray(env, colorSpaces));
-            TLOGNI(WmsLogTag::DMS_KITS, "OnGetSupportedColorSpaces success");
+            TLOGNI(WmsLogTag::DMS, "OnGetSupportedColorSpaces success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                             "JsDisplay::OnGetSupportedColorSpaces failed."));
-            TLOGNE(WmsLogTag::DMS_KITS, "OnGetSupportedColorSpaces failed");
+            TLOGNE(WmsLogTag::DMS, "OnGetSupportedColorSpaces failed");
         }
         delete task;
     };
@@ -636,19 +636,19 @@ napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info
 
 napi_value JsDisplay::GetSupportedHDRFormats(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "GetSupportedHDRFormats is called");
+    TLOGI(WmsLogTag::DMS, "GetSupportedHDRFormats is called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetSupportedHDRFormats(env, info) : nullptr;
 }
 
 static napi_value CreateJsHDRFormatArray(napi_env env, const std::vector<uint32_t>& hdrFormats)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "JsDisplay::CreateJsHDRFormatArray is called");
+    TLOGD(WmsLogTag::DMS, "JsDisplay::CreateJsHDRFormatArray is called");
     std::set<uint32_t> nativeHDRFormats;
     for (const auto hdrFormat : hdrFormats) {
         ScreenHDRFormat hdrFormatValue = static_cast<ScreenHDRFormat>(hdrFormat);
         if (NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP.count(hdrFormatValue) == 0) {
-            TLOGE(WmsLogTag::DMS_KITS, "Get HDR format name %{public}u, but not in api type", hdrFormat);
+            TLOGE(WmsLogTag::DMS, "Get HDR format name %{public}u, but not in api type", hdrFormat);
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(DMError::DM_ERROR_DEVICE_NOT_SUPPORT)));
             return NapiGetUndefined(env);
         }
@@ -657,7 +657,7 @@ static napi_value CreateJsHDRFormatArray(napi_env env, const std::vector<uint32_
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, hdrFormats.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to create HDR format array");
+        TLOGE(WmsLogTag::DMS, "Failed to create HDR format array");
         return NapiGetUndefined(env);
     }
     uint32_t index = 0;
@@ -669,7 +669,7 @@ static napi_value CreateJsHDRFormatArray(napi_env env, const std::vector<uint32_
 
 napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "OnGetSupportedHDRFormats is called");
+    TLOGI(WmsLogTag::DMS, "OnGetSupportedHDRFormats is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -686,11 +686,11 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetSupportedHDRFormats(hdrFormats));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsHDRFormatArray(env, hdrFormats));
-            TLOGNI(WmsLogTag::DMS_KITS, "OnGetSupportedHDRFormats success");
+            TLOGNI(WmsLogTag::DMS, "OnGetSupportedHDRFormats success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
                                             "JsDisplay::OnGetSupportedHDRFormats failed."));
-            TLOGNE(WmsLogTag::DMS_KITS, "OnGetSupportedHDRFormats failed");
+            TLOGNE(WmsLogTag::DMS, "OnGetSupportedHDRFormats failed");
         }
         delete task;
     };
@@ -705,10 +705,10 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+    TLOGD(WmsLogTag::DMS, "[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) == g_JsDisplayMap.end()) {
-        TLOGD(WmsLogTag::DMS_KITS, "[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+        TLOGD(WmsLogTag::DMS, "[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
         return nullptr;
     }
     return g_JsDisplayMap[displayId];
@@ -723,15 +723,15 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value CreateJsCutoutInfoObject(napi_env env, sptr<CutoutInfo> cutoutInfo)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "JsDisplay::CreateJsCutoutInfoObject is called");
+    TLOGD(WmsLogTag::DMS, "JsDisplay::CreateJsCutoutInfoObject is called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to convert prop to jsObject");
+        TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
         return NapiGetUndefined(env);
     }
     if (cutoutInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Get null cutout info");
+        TLOGE(WmsLogTag::DMS, "Get null cutout info");
         return NapiGetUndefined(env);
     }
     std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
@@ -826,23 +826,23 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "CreateJsDisplay is called");
+    TLOGD(WmsLogTag::DMS, "CreateJsDisplay is called");
     napi_value objValue = nullptr;
     std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
     if (jsDisplayObj != nullptr && jsDisplayObj->GetNapiValue() != nullptr) {
-        TLOGD(WmsLogTag::DMS_KITS, "[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
+        TLOGD(WmsLogTag::DMS, "[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
         objValue = jsDisplayObj->GetNapiValue();
     }
     if (objValue == nullptr) {
         napi_create_object(env, &objValue);
     }
     if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to get jsObject");
+        TLOGE(WmsLogTag::DMS, "Failed to get jsObject");
         return NapiGetUndefined(env);
     }
     auto info = display->GetDisplayInfoWithCache();
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "Failed to GetDisplayInfo");
+        TLOGE(WmsLogTag::DMS, "Failed to GetDisplayInfo");
         return NapiGetUndefined(env);
     }
 

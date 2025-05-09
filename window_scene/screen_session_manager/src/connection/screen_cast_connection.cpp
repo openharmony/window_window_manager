@@ -33,45 +33,45 @@ ScreenCastConnection &ScreenCastConnection::GetInstance()
 bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
 {
     if (bundleName_.empty() || abilityName_.empty()) {
-        TLOGE(WmsLogTag::DMS_SSM, "screen cast bundleName or abilityName is empty");
+        TLOGE(WmsLogTag::DMS, "screen cast bundleName or abilityName is empty");
         return false;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "bundleName: %{public}s, abilityName: %{public}s",
+    TLOGI(WmsLogTag::DMS, "bundleName: %{public}s, abilityName: %{public}s",
         bundleName_.c_str(), abilityName_.c_str());
     if (abilityConnection_ != nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "screen cast already connected");
+        TLOGI(WmsLogTag::DMS, "screen cast already connected");
         return true;
     }
     abilityConnection_ = std::make_unique<ScreenSessionAbilityConnection>();
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "connection is nullptr");
+        TLOGE(WmsLogTag::DMS, "connection is nullptr");
         return false;
     }
     std::vector<std::pair<std::string, std::string>> params;
     auto iter = PARAM_FLAG_MAP.find(paramFlag);
     if (iter == PARAM_FLAG_MAP.end()) {
-        TLOGE(WmsLogTag::DMS_SSM, "The paramFlag does not exist!");
+        TLOGE(WmsLogTag::DMS, "The paramFlag does not exist!");
         return false;
     }
     params.push_back(iter->second);
     bool ret = abilityConnection_->ScreenSessionConnectExtension(bundleName_, abilityName_, params);
     if (!ret) {
-        TLOGE(WmsLogTag::DMS_SSM, "ScreenSessionConnectExtension failed");
+        TLOGE(WmsLogTag::DMS, "ScreenSessionConnectExtension failed");
         return false;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "CastConnectExtension succeed");
+    TLOGI(WmsLogTag::DMS, "CastConnectExtension succeed");
     return true;
 }
 
 void ScreenCastConnection::CastDisconnectExtension()
 {
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "ability connect failed");
+        TLOGE(WmsLogTag::DMS, "ability connect failed");
         return;
     }
     abilityConnection_->ScreenSessionDisconnectExtension();
     abilityConnection_ = nullptr;
-    TLOGI(WmsLogTag::DMS_SSM, "CastDisconnectExtension exit");
+    TLOGI(WmsLogTag::DMS, "CastDisconnectExtension exit");
 }
 
 void ScreenCastConnection::SetBundleName(const std::string &bundleName)
@@ -97,7 +97,7 @@ std::string ScreenCastConnection::GetAbilityName() const
 bool ScreenCastConnection::IsConnectedSync()
 {
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "ability connection is nullptr");
+        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
         return false;
     }
     return abilityConnection_->IsConnectedSync();
@@ -107,7 +107,7 @@ int32_t ScreenCastConnection::SendMessageToCastService(const int32_t &transCode,
     MessageParcel &reply)
 {
     if (abilityConnection_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "ability connection is nullptr");
+        TLOGE(WmsLogTag::DMS, "ability connection is nullptr");
         return -1;
     }
     return abilityConnection_->SendMessage(transCode, data, reply);

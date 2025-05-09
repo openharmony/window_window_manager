@@ -83,11 +83,11 @@ public:
     void OnScreenConnect(sptr<ScreenInfo> screenInfo)
     {
         if (screenInfo == nullptr || screenInfo->GetScreenId() == SCREEN_ID_INVALID) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenConnect, screenInfo is invalid.");
+            TLOGE(WmsLogTag::DMS, "OnScreenConnect, screenInfo is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenConnect, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "OnScreenConnect, impl is nullptr.");
             return;
         }
         pImpl_->NotifyScreenConnect(screenInfo);
@@ -100,11 +100,11 @@ public:
     void OnScreenDisconnect(ScreenId screenId)
     {
         if (screenId == SCREEN_ID_INVALID) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenDisconnect, screenId is invalid.");
+            TLOGE(WmsLogTag::DMS, "OnScreenDisconnect, screenId is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenDisconnect, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "OnScreenDisconnect, impl is nullptr.");
             return;
         }
         pImpl_->NotifyScreenDisconnect(screenId);
@@ -117,14 +117,14 @@ public:
     void OnScreenChange(const sptr<ScreenInfo>& screenInfo, ScreenChangeEvent event)
     {
         if (screenInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenChange, screenInfo is null.");
+            TLOGE(WmsLogTag::DMS, "OnScreenChange, screenInfo is null.");
             return;
         }
         if (pImpl_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "OnScreenChange, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "OnScreenChange, impl is nullptr.");
             return;
         }
-        TLOGD(WmsLogTag::DMS_DM, "OnScreenChange. event %{public}u", event);
+        TLOGD(WmsLogTag::DMS, "OnScreenChange. event %{public}u", event);
         pImpl_->NotifyScreenChange(screenInfo);
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenListeners_) {
@@ -136,14 +136,14 @@ public:
         ScreenGroupChangeEvent groupEvent)
     {
         if (screenInfos.empty()) {
-            TLOGE(WmsLogTag::DMS_DM, "screenInfos is empty.");
+            TLOGE(WmsLogTag::DMS, "screenInfos is empty.");
             return;
         }
         if (pImpl_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
-        TLOGD(WmsLogTag::DMS_DM, "trigger %{public}s, event %{public}u", trigger.c_str(), groupEvent);
+        TLOGD(WmsLogTag::DMS, "trigger %{public}s, event %{public}u", trigger.c_str(), groupEvent);
         pImpl_->NotifyScreenChange(screenInfos);
         std::vector<ScreenId> screenIds;
         for (auto screenInfo : screenInfos) {
@@ -162,37 +162,37 @@ private:
         const std::string trigger, std::vector<ScreenId>& ids, ScreenGroupChangeEvent groupEvent)
     {
         if (screenInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "screenInfo is nullptr");
+            TLOGE(WmsLogTag::DMS, "screenInfo is nullptr");
             return;
         }
         // check for invalid scene
         if (pImpl_->virtualScreenGroupListeners_.size() <= 0) {
-            TLOGW(WmsLogTag::DMS_DM, "no virtual screen group listeners");
+            TLOGW(WmsLogTag::DMS, "no virtual screen group listeners");
             return;
         }
         if (screenInfo->GetType() != ScreenType::VIRTUAL) {
-            TLOGW(WmsLogTag::DMS_DM, "not virtual screen type: %{public}u", screenInfo->GetType());
+            TLOGW(WmsLogTag::DMS, "not virtual screen type: %{public}u", screenInfo->GetType());
             return;
         }
 
         // get the parent of screen
         ScreenId parent = groupEvent == ScreenGroupChangeEvent::ADD_TO_GROUP ?
             screenInfo->GetParentId() : screenInfo->GetLastParentId();
-        TLOGD(WmsLogTag::DMS_DM, "parentId=[%{public}llu], lastParentId=[%{public}llu]",
+        TLOGD(WmsLogTag::DMS, "parentId=[%{public}llu], lastParentId=[%{public}llu]",
             (unsigned long long)screenInfo->GetParentId(), (unsigned long long)screenInfo->GetLastParentId());
         if (parent == INVALID_SCREEN_ID) {
-            TLOGE(WmsLogTag::DMS_DM, "parentId is invalid");
+            TLOGE(WmsLogTag::DMS, "parentId is invalid");
             return;
         }
         auto screenGroup = pImpl_->GetScreenGroup(parent);
         if (screenGroup == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM, "screenGroup is null");
+            TLOGE(WmsLogTag::DMS, "screenGroup is null");
             return;
         }
 
         // notify mirror
         ScreenCombination comb = screenGroup->GetCombination();
-        TLOGD(WmsLogTag::DMS_DM, "comb %{public}u", comb);
+        TLOGD(WmsLogTag::DMS, "comb %{public}u", comb);
         IVirtualScreenGroupListener::ChangeInfo changeInfo = {groupEvent, trigger, ids};
         for (auto listener: pImpl_->virtualScreenGroupListeners_) {
             if (comb == ScreenCombination::SCREEN_MIRROR) {
@@ -212,12 +212,12 @@ extern "C" __attribute__((destructor)) void ScreenManager::Impl::DlcloseTimeout(
 ScreenManager::ScreenManager()
 {
     pImpl_ = new Impl();
-    TLOGD(WmsLogTag::DMS_DM, "Create instance");
+    TLOGD(WmsLogTag::DMS, "Create instance");
 }
 
 ScreenManager::~ScreenManager()
 {
-    TLOGI(WmsLogTag::DMS_DM, "Destroy instance");
+    TLOGI(WmsLogTag::DMS, "Destroy instance");
 }
 
 ScreenManager::Impl::~Impl()
@@ -247,7 +247,7 @@ sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroup(ScreenId screenId)
     auto screenGroupInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(screenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenGroupInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "screenGroupInfo is null");
+        TLOGE(WmsLogTag::DMS, "screenGroupInfo is null");
         screenGroupMap_.erase(screenId);
         return nullptr;
     }
@@ -301,7 +301,7 @@ DMError ScreenManager::Impl::RegisterScreenListener(sptr<IScreenListener> listen
 DMError ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "RegisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "RegisterScreenListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenListener(listener);
@@ -312,7 +312,7 @@ DMError ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> list
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenListeners_.begin(), screenListeners_.end(), listener);
     if (iter == screenListeners_.end()) {
-        TLOGE(WmsLogTag::DMS_DM, "could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenListeners_.erase(iter);
@@ -322,7 +322,7 @@ DMError ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> list
 DMError ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "UnregisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterScreenListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenListener(listener);
@@ -341,7 +341,7 @@ DMError ScreenManager::Impl::RegisterScreenGroupListener(sptr<IScreenGroupListen
 DMError ScreenManager::RegisterScreenGroupListener(sptr<IScreenGroupListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "RegisterScreenGroupListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "RegisterScreenGroupListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenGroupListener(listener);
@@ -352,7 +352,7 @@ DMError ScreenManager::Impl::UnregisterScreenGroupListener(sptr<IScreenGroupList
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenGroupListeners_.begin(), screenGroupListeners_.end(), listener);
     if (iter == screenGroupListeners_.end()) {
-        TLOGE(WmsLogTag::DMS_DM, "could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupListeners_.erase(iter);
@@ -362,7 +362,7 @@ DMError ScreenManager::Impl::UnregisterScreenGroupListener(sptr<IScreenGroupList
 DMError ScreenManager::UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "UnregisterScreenGroupListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterScreenGroupListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenGroupListener(listener);
@@ -381,7 +381,7 @@ DMError ScreenManager::Impl::RegisterVirtualScreenGroupListener(sptr<IVirtualScr
 DMError ScreenManager::RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "RegisterVirtualScreenGroupListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "RegisterVirtualScreenGroupListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterVirtualScreenGroupListener(listener);
@@ -392,7 +392,7 @@ DMError ScreenManager::Impl::UnregisterVirtualScreenGroupListener(sptr<IVirtualS
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(virtualScreenGroupListeners_.begin(), virtualScreenGroupListeners_.end(), listener);
     if (iter == virtualScreenGroupListeners_.end()) {
-        TLOGE(WmsLogTag::DMS_DM, "could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     virtualScreenGroupListeners_.erase(iter);
@@ -402,7 +402,7 @@ DMError ScreenManager::Impl::UnregisterVirtualScreenGroupListener(sptr<IVirtualS
 DMError ScreenManager::UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "UnregisterVirtualScreenGroupListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterVirtualScreenGroupListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterVirtualScreenGroupListener(listener);
@@ -417,7 +417,7 @@ DMError ScreenManager::Impl::RegisterDisplayManagerAgent()
             screenManagerListener_, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         if (regSucc != DMError::DM_OK) {
             screenManagerListener_ = nullptr;
-            TLOGW(WmsLogTag::DMS_DM, "RegisterDisplayManagerAgent failed !");
+            TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         }
     }
     return regSucc;
@@ -431,7 +431,7 @@ DMError ScreenManager::Impl::UnregisterDisplayManagerAgent()
             screenManagerListener_, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         screenManagerListener_ = nullptr;
         if (unRegSucc != DMError::DM_OK) {
-            TLOGW(WmsLogTag::DMS_DM, "UnregisterDisplayManagerAgent failed!");
+            TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent failed!");
         }
     }
     return unRegSucc;
@@ -439,12 +439,12 @@ DMError ScreenManager::Impl::UnregisterDisplayManagerAgent()
 
 DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, ScreenId& screenGroupId)
 {
-    TLOGD(WmsLogTag::DMS_DM, "Make expand");
+    TLOGD(WmsLogTag::DMS, "Make expand");
     if (options.empty()) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (options.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "Make expand failed. Options size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        TLOGW(WmsLogTag::DMS, "Make expand failed. Options size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     std::vector<ScreenId> screenIds;
@@ -458,7 +458,7 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenIds, startPoints, screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM, "Make expand failed");
+        TLOGE(WmsLogTag::DMS, "Make expand failed");
     }
     return ret;
 }
@@ -471,13 +471,13 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 
 DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
 {
-    TLOGD(WmsLogTag::DMS_DM, "start Make UniqueScreen");
+    TLOGD(WmsLogTag::DMS, "start Make UniqueScreen");
     if (screenIds.empty()) {
-        TLOGE(WmsLogTag::DMS_DM, "screenIds is null");
+        TLOGE(WmsLogTag::DMS, "screenIds is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screenIds.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        TLOGW(WmsLogTag::DMS, "Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
@@ -486,15 +486,15 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, 
 
 DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS_DM, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
+    TLOGI(WmsLogTag::DMS, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
     if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
         screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM, "create mirror failed");
+        TLOGE(WmsLogTag::DMS, "create mirror failed");
     }
     return ret;
 }
@@ -502,15 +502,15 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
 DMError ScreenManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
     ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS_DM, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
+    TLOGI(WmsLogTag::DMS, "Make mirror for screen: %{public}" PRIu64"", mainScreenId);
     if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirrorForRecord(mainScreenId, mirrorScreenId,
         screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM, "create mirror failed");
+        TLOGE(WmsLogTag::DMS, "create mirror failed");
     }
     return ret;
 }
@@ -518,15 +518,15 @@ DMError ScreenManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<Sc
 DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, DMRect mainScreenRegion,
     ScreenId& screenGroupId)
 {
-    TLOGI(WmsLogTag::DMS_DM, "Make mirror with region for screen: %{public}" PRIu64"", mainScreenId);
+    TLOGI(WmsLogTag::DMS, "Make mirror with region for screen: %{public}" PRIu64"", mainScreenId);
     if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        TLOGW(WmsLogTag::DMS, "Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
         mainScreenRegion, screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM, "create mirror failed");
+        TLOGE(WmsLogTag::DMS, "create mirror failed");
     }
     return ret;
 }
@@ -534,7 +534,7 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
 DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
     MultiScreenMode screenMode)
 {
-    TLOGI(WmsLogTag::DMS_DM, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64","
+    TLOGI(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64","
         "screenMode:%{public}u", mainScreenId, secondaryScreenId, screenMode);
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenMode(mainScreenId,
         secondaryScreenId, screenMode);
@@ -544,7 +544,7 @@ DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId second
 DMError ScreenManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
     MultiScreenPositionOptions secondScreenOption)
 {
-    TLOGI(WmsLogTag::DMS_DM, "mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", "
+    TLOGI(WmsLogTag::DMS, "mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", "
         "X:%{public}u, Y:%{public}u", mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(mainScreenOptions,
@@ -554,7 +554,7 @@ DMError ScreenManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions
 
 DMError ScreenManager::StopExpand(const std::vector<ScreenId>& expandScreenIds)
 {
-    TLOGD(WmsLogTag::DMS_DM, "Stop expand");
+    TLOGD(WmsLogTag::DMS, "Stop expand");
     if (expandScreenIds.empty()) {
         return DMError::DM_OK;
     }
@@ -563,7 +563,7 @@ DMError ScreenManager::StopExpand(const std::vector<ScreenId>& expandScreenIds)
 
 DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
 {
-    TLOGD(WmsLogTag::DMS_DM, "Stop mirror");
+    TLOGD(WmsLogTag::DMS, "Stop mirror");
     if (mirrorScreenIds.empty()) {
         return DMError::DM_OK;
     }
@@ -572,19 +572,19 @@ DMError ScreenManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
 
 DMError ScreenManager::DisableMirror(bool disableOrNot)
 {
-    TLOGI(WmsLogTag::DMS_DM, "Disable mirror %{public}d", disableOrNot);
+    TLOGI(WmsLogTag::DMS, "Disable mirror %{public}d", disableOrNot);
     return SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(disableOrNot);
 }
 
 DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
-    TLOGI(WmsLogTag::DMS_DM, "screens.size=%{public}llu", (unsigned long long)screens.size());
+    TLOGI(WmsLogTag::DMS, "screens.size=%{public}llu", (unsigned long long)screens.size());
     if (screens.empty()) {
-        TLOGW(WmsLogTag::DMS_DM, "RemoveVirtualScreenFromGroup failed. screens is empty.");
+        TLOGW(WmsLogTag::DMS, "RemoveVirtualScreenFromGroup failed. screens is empty.");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screens.size() > MAX_SCREEN_SIZE) {
-        TLOGW(WmsLogTag::DMS_DM, "RemoveVirtualScreenFromGroup failed. Screens size bigger than %{public}u.",
+        TLOGW(WmsLogTag::DMS, "RemoveVirtualScreenFromGroup failed. Screens size bigger than %{public}u.",
             MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -655,14 +655,14 @@ DMError ScreenManager::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t r
 
 bool ScreenManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS_DM, "screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u",
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u",
         screenId, state, reason);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(screenId, state, reason);
 }
 
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS_DM, "state:%{public}u, reason:%{public}u", state, reason);
+    TLOGI(WmsLogTag::DMS, "state:%{public}u, reason:%{public}u", state, reason);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPowerForAll(state, reason);
 }
 
@@ -699,7 +699,7 @@ void ScreenManager::Impl::NotifyScreenConnect(sptr<ScreenInfo> info)
 
 void ScreenManager::Impl::NotifyScreenDisconnect(ScreenId screenId)
 {
-    TLOGI(WmsLogTag::DMS_DM, "screenId:%{public}" PRIu64".", screenId);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64".", screenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     screenMap_.erase(screenId);
 }
@@ -721,18 +721,18 @@ void ScreenManager::Impl::NotifyScreenChange(const std::vector<sptr<ScreenInfo>>
 bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
 {
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "displayInfo is null");
+        TLOGE(WmsLogTag::DMS, "displayInfo is null");
         return false;
     }
     ScreenId screenId = screenInfo->GetScreenId();
-    TLOGD(WmsLogTag::DMS_DM, "screenId:%{public}" PRIu64".", screenId);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64".", screenId);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM, "displayId is invalid.");
+        TLOGE(WmsLogTag::DMS, "displayId is invalid.");
         return false;
     }
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end() && iter->second != nullptr) {
-        TLOGD(WmsLogTag::DMS_DM, "Screen Info Updated: %{public}s",
+        TLOGD(WmsLogTag::DMS, "Screen Info Updated: %{public}s",
             GetScreenInfoSrting(screenInfo).c_str());
         iter->second->UpdateScreenInfo(screenInfo);
         return true;
@@ -745,7 +745,7 @@ bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
 std::string ScreenManager::Impl::GetScreenInfoSrting(sptr<ScreenInfo> screenInfo)
 {
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "screenInfo nullptr.");
+        TLOGE(WmsLogTag::DMS, "screenInfo nullptr.");
         return "";
     }
     std::ostringstream oss;
@@ -765,7 +765,7 @@ bool ScreenManager::Impl::isAllListenersRemoved() const
 
 void ScreenManager::Impl::OnRemoteDied()
 {
-    TLOGD(WmsLogTag::DMS_DM, "dms is died");
+    TLOGD(WmsLogTag::DMS, "dms is died");
     {
         std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
         virtualScreenAgent_ = nullptr;
@@ -795,7 +795,7 @@ DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refr
 DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     if (screenIds.empty()) {
-        TLOGI(WmsLogTag::DMS_DM, "screenIds is null");
+        TLOGI(WmsLogTag::DMS, "screenIds is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);

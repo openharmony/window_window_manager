@@ -29,9 +29,9 @@ namespace OHOS::Rosen {
 int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    TLOGD(WmsLogTag::DMS_DM, "code:%{public}u", code);
+    TLOGD(WmsLogTag::DMS, "code:%{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        TLOGE(WmsLogTag::DMS_DM, "InterfaceToken check failed");
+        TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
         return -1;
     }
     switch (code) {
@@ -95,7 +95,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_SCREEN_MODE_CHANGED: {
             std::vector<sptr<ScreenInfo>> screenInfos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
-                TLOGE(WmsLogTag::DMS_DM, "Read ScreenInfo failed");
+                TLOGE(WmsLogTag::DMS, "Read ScreenInfo failed");
                 return -1;
             }
             NotifyScreenModeChange(screenInfos);
@@ -104,14 +104,14 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED: {
             ScreenId screenId;
             if (!data.ReadUint64(screenId)) {
-                TLOGE(WmsLogTag::DMS_DM, "Read screenId failed");
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
                 return -1;
             }
             NotifyAbnormalScreenConnectChange(screenId);
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS_DM, "unknown transaction code %{public}d", code);
+            TLOGW(WmsLogTag::DMS, "unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
@@ -122,7 +122,7 @@ int32_t DisplayManagerAgentStub::ProcFoldAngleChanged(MessageParcel& data)
 {
     std::vector<float> foldAngles;
     if (!data.ReadFloatVector(&foldAngles)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read foldAngles failed");
+        TLOGE(WmsLogTag::DMS, "Read foldAngles failed");
         return -1;
     }
     NotifyFoldAngleChanged(foldAngles);
@@ -163,7 +163,7 @@ int32_t DisplayManagerAgentStub::ProcScreenDisconnect(MessageParcel& data)
 {
     ScreenId screenId;
     if (!data.ReadUint64(screenId)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read ScreenId failed");
+        TLOGE(WmsLogTag::DMS, "Read ScreenId failed");
         return -1;
     }
     OnScreenDisconnect(screenId);
@@ -175,7 +175,7 @@ int32_t DisplayManagerAgentStub::ProcScreenChanged(MessageParcel& data)
     sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
     uint32_t event;
     if (!data.ReadUint32(event)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read ScreenChangeEvent failed");
+        TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
         return -1;
     }
     OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
@@ -186,17 +186,17 @@ int32_t DisplayManagerAgentStub::ProcScreenGroupChanged(MessageParcel& data)
 {
     std::string trigger;
     if (!data.ReadString(trigger)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read trigger failed");
+        TLOGE(WmsLogTag::DMS, "Read trigger failed");
         return -1;
     }
     std::vector<sptr<ScreenInfo>> screenInfos;
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read ScreenInfo failed");
+        TLOGE(WmsLogTag::DMS, "Read ScreenInfo failed");
         return -1;
     }
     uint32_t event;
     if (!data.ReadUint32(event)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read ScreenChangeEvent failed");
+        TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
         return -1;
     }
     OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
@@ -214,7 +214,7 @@ int32_t DisplayManagerAgentStub::ProcDisplayDisconnect(MessageParcel& data)
 {
     DisplayId displayId;
     if (!data.ReadUint64(displayId)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read DisplayId failed");
+        TLOGE(WmsLogTag::DMS, "Read DisplayId failed");
         return -1;
     }
     OnDisplayDestroy(displayId);
@@ -226,7 +226,7 @@ int32_t DisplayManagerAgentStub::ProcDisplayChanged(MessageParcel& data)
     sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
     uint32_t event;
     if (!data.ReadUint32(event)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read DisplayChangeEvent failed");
+        TLOGE(WmsLogTag::DMS, "Read DisplayChangeEvent failed");
         return -1;
     }
     OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
@@ -260,7 +260,7 @@ int32_t DisplayManagerAgentStub::ProcFoldStatusChanged(MessageParcel& data)
 {
     uint32_t foldStatus;
     if (!data.ReadUint32(foldStatus)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read FoldStatus failed");
+        TLOGE(WmsLogTag::DMS, "Read FoldStatus failed");
         return -1;
     }
     NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
@@ -272,7 +272,7 @@ int32_t DisplayManagerAgentStub::ProcDisplayChangeInfoChanged(MessageParcel& dat
     sptr<DisplayChangeInfo> info;
     info = DisplayChangeInfo::Unmarshalling(data);
     if (!info) {
-        TLOGE(WmsLogTag::DMS_DM, "Read DisplayChangeInfo failed");
+        TLOGE(WmsLogTag::DMS, "Read DisplayChangeInfo failed");
         return -1;
     }
     NotifyDisplayChangeInfoChanged(info);
@@ -283,7 +283,7 @@ int32_t DisplayManagerAgentStub::ProcDisplayModechanged(MessageParcel& data)
 {
     uint32_t displayMode;
     if (!data.ReadUint32(displayMode)) {
-        TLOGE(WmsLogTag::DMS_DM, "Read FoldDisplayMode failed");
+        TLOGE(WmsLogTag::DMS, "Read FoldDisplayMode failed");
         return -1;
     }
     NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));

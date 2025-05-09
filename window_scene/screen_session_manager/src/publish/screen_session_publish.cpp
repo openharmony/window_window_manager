@@ -41,7 +41,7 @@ std::map<std::string, sptr<EventFwk::Want>> ScreenSessionPublish::cesWantMap_ = 
 
 ScreenSessionPublish::~ScreenSessionPublish()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "destory");
+    TLOGI(WmsLogTag::DMS, "destory");
     UnRegisterLowTempSubscriber();
 }
 
@@ -54,19 +54,19 @@ ScreenSessionPublish &ScreenSessionPublish::GetInstance()
 void ScreenSessionPublish::InitPublishEvents()
 {
     if (publishInfo_ != nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "ScreenSessionPublish has been initialized");
+        TLOGE(WmsLogTag::DMS, "ScreenSessionPublish has been initialized");
         return;
     }
     publishInfo_ = new (std::nothrow) EventFwk::CommonEventPublishInfo();
     if (publishInfo_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "publishInfo new failed");
+        TLOGE(WmsLogTag::DMS, "publishInfo new failed");
         return;
     }
     publishInfo_->SetOrdered(false);
     for (auto &[event, want] : cesWantMap_) {
         want = new (std::nothrow) EventFwk::Want();
         if (want == nullptr) {
-            TLOGE(WmsLogTag::DMS_SSM, "common event: %{publish}s new want failed", event.c_str());
+            TLOGE(WmsLogTag::DMS, "common event: %{publish}s new want failed", event.c_str());
             continue;
         }
         want->SetAction(event);
@@ -77,7 +77,7 @@ int32_t ScreenSessionPublish::PublishEvents(
     const EventFwk::CommonEventData& eventData, std::string bundleName)
 {
     if (publishInfo_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "publishInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "publishInfo is nullptr");
         return PUBLISH_FAILURE;
     }
     if (bundleName != "") {
@@ -85,16 +85,16 @@ int32_t ScreenSessionPublish::PublishEvents(
     }
     bool ret = EventFwk::CommonEventManager::PublishCommonEvent(eventData, *publishInfo_, nullptr);
     if (!ret) {
-        TLOGE(WmsLogTag::DMS_SSM, "PublishCommonEvent failed");
+        TLOGE(WmsLogTag::DMS, "PublishCommonEvent failed");
         return PUBLISH_FAILURE;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "PublishCommonEvent succeed");
+    TLOGI(WmsLogTag::DMS, "PublishCommonEvent succeed");
     return PUBLISH_SUCCESS;
 }
 
 void ScreenSessionPublish::PublishCastPluggedEvent(const bool& isEnable)
 {
-    TLOGI(WmsLogTag::DMS_SSM, "start to publish cast plugged event");
+    TLOGI(WmsLogTag::DMS, "start to publish cast plugged event");
     EventFwk::CommonEventData eventData;
     eventData.SetCode(TRANS_CODE_CAST_PLUGGED_CHANGED);
     if (isEnable) {
@@ -104,41 +104,41 @@ void ScreenSessionPublish::PublishCastPluggedEvent(const bool& isEnable)
     }
     auto want = cesWantMap_[COMMON_EVENT_CAST_PLUGGED_CHANGED];
     if (want == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "want is nullptr");
+        TLOGE(WmsLogTag::DMS, "want is nullptr");
         return;
     }
     eventData.SetWant(*want);
     int32_t ret = PublishEvents(eventData);
     if (ret != PUBLISH_SUCCESS) {
-        TLOGE(WmsLogTag::DMS_SSM, "PublishEvents failed");
+        TLOGE(WmsLogTag::DMS, "PublishEvents failed");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "end of publish cast plugged event");
+    TLOGI(WmsLogTag::DMS, "end of publish cast plugged event");
 }
 
 void ScreenSessionPublish::PublishCastPlugInEvent()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "start to publish cast plug in event");
+    TLOGI(WmsLogTag::DMS, "start to publish cast plug in event");
     PublishCastPluggedEvent(true);
 }
 
 void ScreenSessionPublish::PublishCastPlugOutEvent()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "start to publish cast plug out event");
+    TLOGI(WmsLogTag::DMS, "start to publish cast plug out event");
     PublishCastPluggedEvent(false);
 }
 
 void ScreenSessionPublish::PublishDisplayRotationEvent(
     const ScreenId& screenId, const Rotation& displayRotation)
 {
-    TLOGI(WmsLogTag::DMS_SSM,
+    TLOGI(WmsLogTag::DMS,
         "start to publish display rotation event, screenId: %{public}d, displayRotation: %{public}d",
         static_cast<int32_t>(screenId), static_cast<int32_t>(displayRotation));
     EventFwk::CommonEventData eventData;
     eventData.SetCode(TRANS_CODE_ROTATION_CHANGED);
     auto want = cesWantMap_[COMMON_EVENT_DISPLAY_ROTATION_CHANGED];
     if (want == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "want is nullptr");
+        TLOGE(WmsLogTag::DMS, "want is nullptr");
         return;
     }
     want->SetParam("screenid", static_cast<int32_t>(screenId));
@@ -146,10 +146,10 @@ void ScreenSessionPublish::PublishDisplayRotationEvent(
     eventData.SetWant(*want);
     int32_t ret = PublishEvents(eventData);
     if (ret != PUBLISH_SUCCESS) {
-        TLOGE(WmsLogTag::DMS_SSM, "PublishEvents failed");
+        TLOGE(WmsLogTag::DMS, "PublishEvents failed");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "end of publish display rotation event");
+    TLOGI(WmsLogTag::DMS, "end of publish display rotation event");
 }
 
 void ScreenSessionPublish::PublishSmartNotificationEvent(const std::string& faultDesc, const std::string& faultSuggest)
@@ -157,7 +157,7 @@ void ScreenSessionPublish::PublishSmartNotificationEvent(const std::string& faul
     EventFwk::CommonEventData eventData;
     auto want = cesWantMap_[COMMON_EVENT_SMART_NOTIFICATION];
     if (want == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "want is nullptr");
+        TLOGE(WmsLogTag::DMS, "want is nullptr");
         return;
     }
     eventData.SetWant(*want);
@@ -166,16 +166,16 @@ void ScreenSessionPublish::PublishSmartNotificationEvent(const std::string& faul
     eventData.SetData(eventDataStr);
     int32_t ret = PublishEvents(eventData);
     if (ret != PUBLISH_SUCCESS) {
-        TLOGE(WmsLogTag::DMS_SSM, "PublishEvents failed");
+        TLOGE(WmsLogTag::DMS, "PublishEvents failed");
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "end event, send massage is %{public}s", eventDataStr.c_str());
+    TLOGI(WmsLogTag::DMS, "end event, send massage is %{public}s", eventDataStr.c_str());
 }
 
 bool ScreenSessionPublish::RegisterLowTempSubscriber()
 {
     if (subscriber_ != nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "low temp is registered");
+        TLOGE(WmsLogTag::DMS, "low temp is registered");
         return false;
     }
     EventFwk::MatchingSkills lowTempSkills = EventFwk::MatchingSkills();
@@ -185,26 +185,26 @@ bool ScreenSessionPublish::RegisterLowTempSubscriber()
     lowTempInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     subscriber_ = std::make_shared<EventSubscriber>(lowTempInfo);
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_)) {
-        TLOGE(WmsLogTag::DMS_SSM, "subscribe common event:%{public}s failed!", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
+        TLOGE(WmsLogTag::DMS, "subscribe common event:%{public}s failed!", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
         return false;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "subscribe common event:%{public}s success.", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
+    TLOGI(WmsLogTag::DMS, "subscribe common event:%{public}s success.", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
     return true;
 }
 
 bool ScreenSessionPublish::UnRegisterLowTempSubscriber()
 {
     if (subscriber_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "subscriber_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "subscriber_ is nullptr");
         return false;
     }
     EventFwk::MatchingSkills lowTempSkills = EventFwk::MatchingSkills();
     lowTempSkills.RemoveEvent(COMMON_EVENT_LOW_TEMP_WARNING);
     if (!EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_)) {
-        TLOGE(WmsLogTag::DMS_SSM, "unsubscribe common event:%{public}s failed!", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
+        TLOGE(WmsLogTag::DMS, "unsubscribe common event:%{public}s failed!", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
         return false;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "unsubscribe common event:%{public}s success.", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
+    TLOGI(WmsLogTag::DMS, "unsubscribe common event:%{public}s success.", COMMON_EVENT_LOW_TEMP_WARNING.c_str());
     return true;
 }
 
@@ -214,7 +214,7 @@ void ScreenSessionPublish::EventSubscriber::OnReceiveEvent(const EventFwk::Commo
     if (action == COMMON_EVENT_LOW_TEMP_WARNING) {
         int32_t lowTemp = data.GetWant().GetIntParam("lowTempWarning", RECEIVE_FAILURE);
         ScreenSessionManager::GetInstance().SetLowTemp(static_cast<LowTempMode>(lowTemp));
-        TLOGI(WmsLogTag::DMS_SSM, "receive common event:%{public}s sucess, lowTempWarning is:%{public}d",
+        TLOGI(WmsLogTag::DMS, "receive common event:%{public}s sucess, lowTempWarning is:%{public}d",
             COMMON_EVENT_LOW_TEMP_WARNING.c_str(), lowTemp);
     }
 }

@@ -32,7 +32,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapterLite)
 #define INIT_PROXY_CHECK_RETURN(ret) \
     do { \
         if (!InitDMSProxy()) { \
-            TLOGE(WmsLogTag::DMS_DM_LITE, "InitDMSProxy fail"); \
+            TLOGE(WmsLogTag::DMS, "InitDMSProxy fail"); \
             return ret; \
         } \
     } while (false)
@@ -60,29 +60,29 @@ bool BaseAdapterLite::InitDMSProxy()
         sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!systemAbilityManager) {
-            TLOGE(WmsLogTag::DMS_DM_LITE, "Failed to get system ability mgr.");
+            TLOGE(WmsLogTag::DMS, "Failed to get system ability mgr.");
             return false;
         }
 
         sptr<IRemoteObject> remoteObject
             = systemAbilityManager->GetSystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID);
         if (!remoteObject) {
-            TLOGE(WmsLogTag::DMS_DM_LITE, "Failed to get display manager service.");
+            TLOGE(WmsLogTag::DMS, "Failed to get display manager service.");
             return false;
         }
         displayManagerServiceProxy_ = new(std::nothrow) DisplayManagerLiteProxy(remoteObject);
         if ((!displayManagerServiceProxy_) || (!displayManagerServiceProxy_->AsObject())) {
-            TLOGW(WmsLogTag::DMS_DM_LITE, "Failed to get system display manager services");
+            TLOGW(WmsLogTag::DMS, "Failed to get system display manager services");
             return false;
         }
 
         dmsDeath_ = new(std::nothrow) DMSDeathRecipientLite(*this);
         if (dmsDeath_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DM_LITE, "Failed to create death Recipient ptr DMSDeathRecipient");
+            TLOGE(WmsLogTag::DMS, "Failed to create death Recipient ptr DMSDeathRecipient");
             return false;
         }
         if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(dmsDeath_)) {
-            TLOGE(WmsLogTag::DMS_DM_LITE, "Failed to add death recipient");
+            TLOGE(WmsLogTag::DMS, "Failed to add death recipient");
             return false;
         }
         isProxyValid_ = true;
@@ -128,7 +128,7 @@ void DisplayManagerAdapterLite::SetFoldDisplayMode(const FoldDisplayMode mode)
 sptr<DisplayInfo> DisplayManagerAdapterLite::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGW(WmsLogTag::DMS_DM_LITE, "screen id is invalid");
+        TLOGW(WmsLogTag::DMS, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -139,7 +139,7 @@ sptr<DisplayInfo> DisplayManagerAdapterLite::GetDisplayInfo(DisplayId displayId)
 sptr<CutoutInfo> DisplayManagerAdapterLite::GetCutoutInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM_LITE, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "screen id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -229,7 +229,7 @@ uint32_t DisplayManagerAdapterLite::GetScreenBrightness(uint64_t screenId)
 
 std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds()
 {
-    TLOGD(WmsLogTag::DMS_DM_LITE, "DisplayManagerAdapterLite::GetAllDisplayIds enter");
+    TLOGD(WmsLogTag::DMS, "DisplayManagerAdapterLite::GetAllDisplayIds enter");
     INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
 
     return displayManagerServiceProxy_->GetAllDisplayIds();
@@ -239,7 +239,7 @@ VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId scree
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DM_LITE, "screenId id is invalid");
+        TLOGE(WmsLogTag::DMS, "screenId id is invalid");
         return VirtualScreenFlag::DEFAULT;
     }
     return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
@@ -295,19 +295,19 @@ DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter
 void DMSDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
     if (wptrDeath == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM_LITE, "wptrDeath is nullptr");
+        TLOGE(WmsLogTag::DMS, "wptrDeath is nullptr");
         return;
     }
 
     sptr<IRemoteObject> object = wptrDeath.promote();
     if (!object) {
-        TLOGE(WmsLogTag::DMS_DM_LITE, "object is nullptr");
+        TLOGE(WmsLogTag::DMS, "object is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::DMS_DM_LITE, "dms OnRemoteDied");
+    TLOGI(WmsLogTag::DMS, "dms OnRemoteDied");
     adapter_.Clear();
     if (SingletonContainer::IsDestroyed()) {
-        TLOGE(WmsLogTag::DMS_DM_LITE, "SingletonContainer is destroyed");
+        TLOGE(WmsLogTag::DMS, "SingletonContainer is destroyed");
         return;
     }
     SingletonContainer::Get<DisplayManagerLite>().OnRemoteDied();
@@ -317,7 +317,7 @@ void DMSDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapterLite::~BaseAdapterLite()
 {
-    TLOGI(WmsLogTag::DMS_DM_LITE, "destroy");
+    TLOGI(WmsLogTag::DMS, "destroy");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
@@ -325,7 +325,7 @@ BaseAdapterLite::~BaseAdapterLite()
 
 void BaseAdapterLite::Clear()
 {
-    TLOGI(WmsLogTag::DMS_DM_LITE, "Clear");
+    TLOGI(WmsLogTag::DMS, "Clear");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);

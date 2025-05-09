@@ -22,12 +22,12 @@ using namespace AbilityRuntime;
 
 napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const DeviceScreenConfig& config)
 {
-    TLOGI(WmsLogTag::DMS_KITS, "DeviceScreenConfig rotationPolicy:%{public}s, defaultRotationPolicy:%{public}s.",
+    TLOGI(WmsLogTag::DMS, "DeviceScreenConfig rotationPolicy:%{public}s, defaultRotationPolicy:%{public}s.",
         config.rotationPolicy_.c_str(), config.defaultRotationPolicy_.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "[NAPI]Object is null!");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "rotationPolicy", CreateJsValue(env, config.rotationPolicy_));
@@ -38,12 +38,12 @@ napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const De
 
 JsDeviceScreenConfig::JsDeviceScreenConfig()
 {
-    TLOGD(WmsLogTag::DMS_KITS, "Construct JsDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "Construct JsDeviceScreenConfig");
 }
 
 JsDeviceScreenConfig::~JsDeviceScreenConfig()
 {
-    TLOGD(WmsLogTag::DMS_KITS, "Destroy JsDeviceScreenConfig");
+    TLOGD(WmsLogTag::DMS, "Destroy JsDeviceScreenConfig");
 }
 
 } // namespace OHOS::Rosen

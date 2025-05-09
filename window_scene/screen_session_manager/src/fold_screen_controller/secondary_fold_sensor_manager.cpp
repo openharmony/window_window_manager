@@ -80,14 +80,14 @@ void SecondaryFoldSensorManager::RegisterPostureCallback()
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS_SSM,
+    TLOGI(WmsLogTag::DMS,
         "subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
         subscribeRet, setBatchRet, activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed.");
+        TLOGE(WmsLogTag::DMS, "failed.");
     } else {
         registerPosture_ = true;
-        TLOGI(WmsLogTag::DMS_SSM, "success.");
+        TLOGI(WmsLogTag::DMS, "success.");
     }
 }
 
@@ -95,11 +95,11 @@ void SecondaryFoldSensorManager::UnRegisterPostureCallback()
 {
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS_SSM, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
+    TLOGI(WmsLogTag::DMS, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         registerPosture_ = false;
-        TLOGI(WmsLogTag::DMS_SSM, "success.");
+        TLOGI(WmsLogTag::DMS, "success.");
     }
 }
 
@@ -107,15 +107,15 @@ void SecondaryFoldSensorManager::RegisterHallCallback()
 {
     hallUser.callback = SecondarySensorHallDataCallbackExt;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    TLOGI(WmsLogTag::DMS_SSM, "subscribeRet: %{public}d", subscribeRet);
+    TLOGI(WmsLogTag::DMS, "subscribeRet: %{public}d", subscribeRet);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL_EXT, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    TLOGI(WmsLogTag::DMS_SSM, "setBatchRet: %{public}d", setBatchRet);
+    TLOGI(WmsLogTag::DMS, "setBatchRet: %{public}d", setBatchRet);
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    TLOGI(WmsLogTag::DMS_SSM, "activateRet: %{public}d", activateRet);
+    TLOGI(WmsLogTag::DMS, "activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed.");
+        TLOGE(WmsLogTag::DMS, "failed.");
     } else {
-        TLOGI(WmsLogTag::DMS_SSM, "success.");
+        TLOGI(WmsLogTag::DMS, "success.");
     }
 }
 
@@ -124,7 +124,7 @@ void SecondaryFoldSensorManager::UnRegisterHallCallback()
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        TLOGW(WmsLogTag::DMS_SSM, "success.");
+        TLOGW(WmsLogTag::DMS, "success.");
     }
 }
 
@@ -142,7 +142,7 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
     if (IsDataBeyondBoundary()) {
         return;
     }
-    TLOGD(WmsLogTag::DMS_SSM, "%{public}s, %{public}s",
+    TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(globalAngle_, "angle").c_str(),
         FoldScreenStateInternel::TransVec2Str(globalHall_, "hall").c_str());
     if (sensorFoldStateManager_ == nullptr) {
@@ -180,7 +180,7 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
     if (IsDataBeyondBoundary()) {
         return;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "%{public}s, %{public}s",
+    TLOGI(WmsLogTag::DMS, "%{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(globalAngle_, "angle").c_str(),
         FoldScreenStateInternel::TransVec2Str(globalHall_, "hall").c_str());
     if (!registerPosture_) {
@@ -198,7 +198,7 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
 bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
 {
     if (globalAngle_.size() < SECONDARY_POSTURE_SIZE || globalHall_.size() < SECONDARY_HALL_SIZE) {
-        TLOGE(WmsLogTag::DMS_SSM, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
+        TLOGE(WmsLogTag::DMS, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
             globalAngle_.size(), globalHall_.size());
         return true;
     }
@@ -206,14 +206,14 @@ bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
         float angle = globalAngle_[i];
         if (std::isless(angle, ANGLE_MIN_VAL) ||
             std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
-            TLOGE(WmsLogTag::DMS_SSM, "i = %{public}zu, angle = %{public}f", i, angle);
+            TLOGE(WmsLogTag::DMS, "i = %{public}zu, angle = %{public}f", i, angle);
             return true;
         }
     }
     for (size_t i = 0; i < SECONDARY_HALL_SIZE; i++) {
         uint16_t hall = globalHall_[i];
         if (hall != 0 && hall != 1) {
-            TLOGE(WmsLogTag::DMS_SSM, "i = %{public}zu, hall = %{public}u", i, hall);
+            TLOGE(WmsLogTag::DMS, "i = %{public}zu, hall = %{public}u", i, hall);
             return true;
         }
     }
@@ -224,15 +224,15 @@ bool SecondaryFoldSensorManager::GetPostureInner(const SensorEvent * const event
     float &valueAbAnti)
 {
     if (event == nullptr) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent is nullptr.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent is nullptr.");
         return false;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].data == nullptr) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent[0].data is nullptr.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return false;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(FoldScreenSensorManager::PostureDataSecondary)) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent dataLen less than posture data size.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent dataLen less than posture data size.");
         return false;
     }
     FoldScreenSensorManager::PostureDataSecondary *postureData =
@@ -240,7 +240,7 @@ bool SecondaryFoldSensorManager::GetPostureInner(const SensorEvent * const event
     valueBc = (*postureData).postureBc;
     valueAb = (*postureData).postureAb;
     valueAbAnti = (*postureData).postureAbAnti;
-    TLOGD(WmsLogTag::DMS_SSM, "postureBc: %{public}f, postureAb: %{public}f, postureAbAnti: %{public}f.",
+    TLOGD(WmsLogTag::DMS, "postureBc: %{public}f, postureAb: %{public}f, postureAbAnti: %{public}f.",
         valueBc, valueAb, valueAbAnti);
     return true;
 }
@@ -248,27 +248,27 @@ bool SecondaryFoldSensorManager::GetPostureInner(const SensorEvent * const event
 bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, uint16_t &valueBc, uint16_t &valueAb)
 {
     if (event == nullptr) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent is nullptr.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent is nullptr.");
         return false;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].data == nullptr) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent[0].data is nullptr.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return false;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(FoldScreenSensorManager::ExtHallData)) {
-        TLOGW(WmsLogTag::DMS_SSM, "SensorEvent dataLen less than hall data size.");
+        TLOGW(WmsLogTag::DMS, "SensorEvent dataLen less than hall data size.");
         return false;
     }
     FoldScreenSensorManager::ExtHallData *extHallData =
         reinterpret_cast<FoldScreenSensorManager::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << HALL_B_C_COLUMN_ORDER)) || !(flag & (1 << HALL_A_B_COLUMN_ORDER))) {
-        TLOGW(WmsLogTag::DMS_SSM, "not support Extend Hall.");
+        TLOGW(WmsLogTag::DMS, "not support Extend Hall.");
         return false;
     }
     valueBc = static_cast<uint16_t>((*extHallData).hall); // axis of bc screen. 0: hall closed, 1: hall expaned
     valueAb = static_cast<uint16_t>((*extHallData).hallAb);
-    TLOGI(WmsLogTag::DMS_SSM, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
+    TLOGI(WmsLogTag::DMS, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
 }
 
@@ -289,7 +289,7 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
     } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
         height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
     } else {
-        TLOGW(WmsLogTag::DMS_SSM, "displayMode[%{public}u] unknown.", foldScreenPolicy_->currentDisplayMode_);
+        TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->currentDisplayMode_);
         return;
     }
     OHOS::Rect rectCur {

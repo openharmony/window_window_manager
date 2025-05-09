@@ -28,23 +28,23 @@ bool ScreenPowerUtils::isEnablePowerForceTimingOut_ = false;
 void ScreenPowerUtils::EnablePowerForceTimingOut()
 {
     std::lock_guard<std::mutex> lock(powerTimingMutex_);
-    TLOGI(WmsLogTag::DMS_SSM, "Enable power timeout begin.");
+    TLOGI(WmsLogTag::DMS, "Enable power timeout begin.");
     if (isEnablePowerForceTimingOut_) {
-        TLOGI(WmsLogTag::DMS_SSM, "Already enable.");
+        TLOGI(WmsLogTag::DMS, "Already enable.");
         return;
     }
 
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     PowerErrors setRet = powerMgrClient.SetForceTimingOut(true);
     if (setRet != PowerErrors::ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "SetForceTimingOut failed: %{public}d", setRet);
+        TLOGE(WmsLogTag::DMS, "SetForceTimingOut failed: %{public}d", setRet);
         return;
     }
 
     PowerErrors lockRet = powerMgrClient.LockScreenAfterTimingOut(true, true, false);
     if (lockRet != PowerErrors::ERR_OK) {
         setRet = powerMgrClient.SetForceTimingOut(false);
-        TLOGE(WmsLogTag::DMS_SSM, "LockScreenAfterTimingOut failed, lockRet: %{public}d, setRet: %{public}d",
+        TLOGE(WmsLogTag::DMS, "LockScreenAfterTimingOut failed, lockRet: %{public}d, setRet: %{public}d",
             lockRet, setRet);
         return;
     }
@@ -54,20 +54,20 @@ void ScreenPowerUtils::EnablePowerForceTimingOut()
 void ScreenPowerUtils::DisablePowerForceTimingOut()
 {
     std::lock_guard<std::mutex> lock(powerTimingMutex_);
-    TLOGI(WmsLogTag::DMS_SSM, "Disable power timeout begin.");
+    TLOGI(WmsLogTag::DMS, "Disable power timeout begin.");
     if (!isEnablePowerForceTimingOut_) {
-        TLOGI(WmsLogTag::DMS_SSM, "Already disable.");
+        TLOGI(WmsLogTag::DMS, "Already disable.");
         return;
     }
     auto& powerMgrClient = PowerMgrClient::GetInstance();
     PowerErrors setRet = powerMgrClient.SetForceTimingOut(false);
     if (setRet != PowerErrors::ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "SetForceTimingOut failed: %{public}d", setRet);
+        TLOGE(WmsLogTag::DMS, "SetForceTimingOut failed: %{public}d", setRet);
     }
 
     PowerErrors lockRet = powerMgrClient.LockScreenAfterTimingOut(true, false, true);
     if (lockRet != PowerErrors::ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "LockScreenAfterTimingOut failed, lockRet: %{public}d", lockRet);
+        TLOGE(WmsLogTag::DMS, "LockScreenAfterTimingOut failed, lockRet: %{public}d", lockRet);
     }
     isEnablePowerForceTimingOut_ = false;
 }
@@ -78,7 +78,7 @@ void ScreenPowerUtils::LightAndLockScreen(const std::string& detail)
     if (!powerMgrClient.IsScreenOn()) {
         PowerErrors wakeupRet = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail);
         PowerErrors suspendRet = powerMgrClient.SuspendDevice();
-        TLOGI(WmsLogTag::DMS_SSM, "wakeupRet: %{public}d, suspendRet: %{public}d", wakeupRet, suspendRet);
+        TLOGI(WmsLogTag::DMS, "wakeupRet: %{public}d, suspendRet: %{public}d", wakeupRet, suspendRet);
     }
 }
 bool ScreenPowerUtils::GetEnablePowerForceTimingOut()
