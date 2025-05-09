@@ -3418,9 +3418,12 @@ void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect)
     if (pcFoldScreenController_ == nullptr) {
         return;
     }
+
+    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
     // maximize end rect and notify last rect
     throwSlipToFullScreenAnimCount_.fetch_add(1);
-    pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
+    pcFoldScreenController_->ResizeToFullScreen(endRect, statusBarHeight, dockHeight);
     if (pcFoldScreenController_->IsThrowSlipDirectly()) {
         pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
             rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
@@ -3465,7 +3468,9 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         return false;
     }
     CompatibilityModeWindowScaleTransfer(rect, true);
-    bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
+    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
+    bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, statusBarHeight, dockHeight);
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         pcFoldScreenController_->ResetRecords();
