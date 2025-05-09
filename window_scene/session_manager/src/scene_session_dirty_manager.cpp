@@ -41,7 +41,6 @@ constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
 constexpr int WINDOW_NAME_TYPE_SCREENSHOT = 1;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
-
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -748,7 +747,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     std::string windowName = sceneSession->GetWindowNameAllType();
     std::string screenshotPrefix = SCREENSHOT_WINDOW_NAME_PREFIX;
     std::string previewPrefix = PREVIEW_WINDOW_NAME_PREFIX;
-    if ((windowName.size() >= screenshotPrefix.size() && windowName.substr(0, screenshotPrefix.size()) == screenshotPrefix)||
+    if ((windowName.size() >= screenshotPrefix.size() && windowName.substr(0, screenshotPrefix.size()) == screenshotPrefix) ||
         (windowName.size() >= previewPrefix.size() && windowName.substr(0, previewPrefix.size()) == previewPrefix)) {
         windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
     }
