@@ -593,6 +593,23 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeWindowRectYInVirtualDisplay
+ * @tc.desc: ChangeWindowRectYInVirtualDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ChangeWindowRectYInVirtualDisplay, TestSize.Level1)
+{
+    DisplayId defaultDisplayId = 0;
+    DisplayId displayId = 0;
+    int32_t y = 100;
+    ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
+    EXPECT_EQ(displayId, 0);
+    EXPECT_EQ(y, 100);
+    displayId = 999;
+    ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
+    EXPECT_EQ(displayId, defaultDisplayId);
+}
+/**
  * @tc.name: ProcessFocusZOrderChange
  * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
