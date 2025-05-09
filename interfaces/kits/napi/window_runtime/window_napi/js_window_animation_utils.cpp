@@ -91,7 +91,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
         result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
         return false;
     }
-    transitionAnimation.opacity = static_cast<float>(opacity);    
+    transitionAnimation.opacity = static_cast<float>(opacity);
     return true;
 }
 

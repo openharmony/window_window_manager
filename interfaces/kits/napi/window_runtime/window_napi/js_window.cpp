@@ -7014,7 +7014,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
     WmErrorCode enableResult;
-    if(!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
         return NapiThrowError(env, enableResult);
     }
     size_t argc = FOUR_PARAMS_SIZE;
@@ -7065,7 +7065,7 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
     WmErrorCode enableResult;
-    if(!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
         return NapiThrowError(env, enableResult);
     }
     size_t argc = ONE_PARAMS_SIZE;
