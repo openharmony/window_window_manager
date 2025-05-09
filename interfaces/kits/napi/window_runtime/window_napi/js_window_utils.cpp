@@ -1482,9 +1482,15 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to maximizeSupported");
     }
 
+    bool outlineEnabled = false;
+    if (!ParseJsValue(jsObject, env, "outlineEnabled", outlineEnabled)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to outlineEnabled");
+    }
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
+    windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }
