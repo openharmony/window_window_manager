@@ -1363,7 +1363,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode01, TestSize.Level0)
     sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     sceneSession2->SetRSVisible(true);
-    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     WSRect rect2 = { 0, 2100, 200, 100 };
     sceneSession2->SetSessionRect(rect2);
     sceneSession2->SetSessionGlobalRect(rect2);
@@ -1383,6 +1383,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode01, TestSize.Level0)
     ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
 
     GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    ssm_->sceneSessionMap_.insert({ -1, nullptr });
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
     EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 1);
     ssm_->sceneSessionMap_.clear();
@@ -1410,7 +1411,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     EXPECT_EQ(static_cast<uint32_t>(globalWinMode1), 2);
 
     SessionInfo sessionInfo2;
-    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     sceneSession2->SetRSVisible(true);
     sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -1449,6 +1450,9 @@ HWTEST_F(SceneSessionManagerTest12, IsSessionInSpecificDisplay01, TestSize.Level
 {
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1648, 2472, 0 });
+    bool ret = ssm_->IsSessionInSpecificDisplay(nullptr, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(ret, false);
+
     SessionInfo sessionInfo1;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     WSRect rect1 = { 0, 0, 100, 100 };

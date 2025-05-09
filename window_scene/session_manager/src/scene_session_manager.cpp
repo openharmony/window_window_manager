@@ -12211,6 +12211,7 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
 {
     return taskScheduler_->PostSyncTask([this, displayId, &globalWinMode, where = __func__] {
         globalWinMode = GlobalWindowMode::UNKNOWN;
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: displayId=%{public}" PRIu64, where, displayId);
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, session] : sceneSessionMap_) {
             if (session == nullptr) {
@@ -12222,16 +12223,13 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
                     where, session->GetWindowId(), session->GetWindowName().c_str());
                 continue;
             }
-            WindowType winType = session->GetWindowType();
-            if ((!WindowHelper::IsMainWindow(winType) && !WindowHelper::IsPipWindow(winType)) ||
-                !session->IsSessionForeground() || (!session->GetRSVisible() && !session->IsVisible())) {
-                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u, "
-                    "isForeground=%{public}d", where, session->GetWindowId(), session->GetWindowName().c_str(),
-                    static_cast<uint32_t>(winType), session->IsSessionForeground());
+            if (!session->IsSessionForeground()) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
                 continue;
             }
             WindowMode winMode = session->GetWindowMode();
-            if (WindowHelper::IsPipWindow(winType) || WindowHelper::IsPipWindowMode(winMode)) {
+            if (WindowHelper::IsPipWindowMode(winMode)) {
                 TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found pip win=[%{public}d, %{public}s]",
                     where, session->GetWindowId(), session->GetWindowName().c_str());
                 globalWinMode = globalWinMode | GlobalWindowMode::PIP;
@@ -12259,6 +12257,7 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
 bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const
 {
     if (session == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "session is null");
         return false;
     }
     if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&
