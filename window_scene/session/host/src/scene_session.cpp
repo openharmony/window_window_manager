@@ -8017,7 +8017,8 @@ void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topT
                 TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null");
                 return;
             }
-            uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
+            int32_t currentScreenHeight =
+                static_cast<int32_t>(currentScreenSession->GetScreenProperty().GetBounds().rect_.height_);
             int32_t dockHeight = GetDockHeight();
             topThreshold = creaseRect.posY_ + creaseRect.height_;
             bottomThreshold = currentScreenHeight - dockHeight - creaseRect.posY_ - creaseRect.height_;
