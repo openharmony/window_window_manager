@@ -246,7 +246,7 @@ private:
     RRect bounds_;
     RRect phyBounds_;
     RRect fakeBounds_;
-    bool isFakeInUse_ = false;  // is fake bounds in use
+    bool isFakeInUse_ = false;  // is fakeBounds can be used
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
@@ -305,8 +305,8 @@ private:
     void UpdateXDpi();
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
-    DMRect availableArea_;
-    DMRect expandAvailableArea_;
+    DMRect availableArea_;  // can be used for all devices
+    DMRect expandAvailableArea_;  // only used for 2in1 device
     DMRect creaseRect_;
 
     RRect physicalTouchBounds_;
