@@ -8267,4 +8267,17 @@ void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitA
         TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
 }
+
+void SceneSession::SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled)
+{
+    subWindowOutlineEnabled_ = subWindowOutlineEnabled;
+}
+
+bool SceneSession::IsSubWindowOutlineEnabled() const
+{
+    if (auto sessionProperty = GetSessionProperty()) {
+        return sessionProperty->IsSubWindowOutlineEnabled();
+    }
+    return false;
+}
 } // namespace OHOS::Rosen
