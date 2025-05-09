@@ -1205,6 +1205,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
     abilityToken_ = token;
