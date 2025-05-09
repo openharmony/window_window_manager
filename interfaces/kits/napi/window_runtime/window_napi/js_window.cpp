@@ -6995,16 +6995,16 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     return result;
 }
 
-static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken)
+static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, WmErrorCode& enableResult)
 {
     if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
-        NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
         return false;
     }
     if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
-        NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        enableResult = WmErrorCode::WM_ERROR_INVALID_CALLING;
         return false;
     }
     return true;
@@ -7013,10 +7013,10 @@ static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken)
 napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    if(!IsTransitionAnimationEnable(env, windowToken_)) {
-        return NapiGetUndefined(env);
+    WmErrorCode enableResult;
+    if(!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
     }
-    
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -7027,15 +7027,14 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
     uint32_t type = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > static_cast<uint32_t>(WindowTransitionType::END))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     TransitionAnimation animation;
-    napi_value convertResult = nullptr;
+    WmErrorCode convertResult;
     if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation, convertResult)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
-        return convertResult;
+        return NapiThrowError(env, convertResult);
     }
-
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -7065,6 +7064,10 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
 napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    WmErrorCode enableResult;
+    if(!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
+    }
     size_t argc = ONE_PARAMS_SIZE;
     napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

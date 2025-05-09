@@ -2202,8 +2202,13 @@ struct WindowAnimationOptions : public Parcelable {
     static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
     {
         WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
-        if (!(parcel.ReadUint32(reinterpret_cast<uint32_t&>(windowAnimationConfig->curve)) &&
-              parcel.ReadUint32(windowAnimationConfig->duration))) {
+        uint32_t curve = 0;
+        if (!parcel.ReadUint32(curve)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
+        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
             delete windowAnimationConfig;
             return nullptr;
         }
@@ -2240,8 +2245,8 @@ struct TransitionAnimation : public Parcelable {
     {
         TransitionAnimation* transitionAnimation = new TransitionAnimation();
         if (!parcel.ReadFloat(transitionAnimation->opacity)) {
-                delete transitionAnimation;
-                return nullptr;
+            delete transitionAnimation;
+            return nullptr;
         }
         WindowAnimationOptions* animationConfig = parcel.ReadParcelable<WindowAnimationOptions>();
         if (animationConfig == nullptr) {

@@ -68,10 +68,10 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env,
 napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
     const WindowAnimationOptions& animationConfig);
 bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject,
-    TransitionAnimation& transitionAnimation, napi_value& result);
+    TransitionAnimation& transitionAnimation, WmErrorCode& result);
 bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value config,
-    WindowAnimationOptions& animationConfig, napi_value& result);
-bool CheckWindowAnimationOptions(napi_env env, const WindowAnimationOptions& animationConfig, napi_value& result);
+    WindowAnimationOptions& animationConfig, WmErrorCode& result);
+bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animationConfig, WmErrorCode& result);
 }
 }
 #endif
