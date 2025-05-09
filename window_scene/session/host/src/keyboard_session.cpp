@@ -870,47 +870,6 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
     }
 }
 
-void KeyboardSession::RemoveCrossScreenChild()
-{
-    if (moveDragController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "move drag controller is null");
-        return;
-    }
-    for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
-        if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
-            continue;
-        }
-        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-        if (screenSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
-            continue;
-        }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to remove cross parent child");
-            continue;
-        }
-        if (keyboardPanelSession_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
-            return;
-        }
-        auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
-        if (keyboardPanelSurfaceNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surface node is null");
-            return;
-        }
-        keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
-        auto displayNode = screenSession->GetDisplayNode();
-        if (displayNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "target display node is null");
-            return;
-        }
-        displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
-        keyboardPanelSurfaceNode->SetIsCrossNode(false);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
-            keyboardPanelSession_->GetPersistentId(), displayId);
-    }
-}
-
 void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
