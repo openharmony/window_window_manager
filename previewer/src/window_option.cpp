@@ -181,6 +181,16 @@ int32_t WindowOption::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowOption::SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled)
+{
+    subWindowOutlineEnabled_ = subWindowOutlineEnabled;
+}
+
+bool WindowOption::IsSubWindowOutlineEnabled() const
+{
+    return subWindowOutlineEnabled_;
+}
+
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;

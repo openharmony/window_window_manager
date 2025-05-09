@@ -260,6 +260,19 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Set sub window outline enabled
+     *
+     * @param subWindowOutlineEnabled border of sub window to follow main window is supported
+     */
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+
+    /**
+     * @brief Get sub window outline enabled
+     *
+     */
+    bool IsSubWindowOutlineEnabled() const;
+
+    /**
      * @brief Get window mode.
      *
      * @return The mode of window.
@@ -442,6 +455,7 @@ private:
     std::string bundleName_ { "" };
     std::string subWindowTitle_ = { "" };
     bool subWindowMaximizeSupported_ = false;
+    bool subWindowOutlineEnabled_ = false;
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
