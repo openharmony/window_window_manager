@@ -373,6 +373,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     if (sessionProperty != nullptr) {
         napi_set_named_property(env, objValue, "screenId",
             CreateJsValue(env, static_cast<int32_t>(sessionProperty->GetDisplayId())));
+        napi_set_named_property(env, objValue, "isUIExtFirstSubWindow",
+            CreateJsValue(env, static_cast<int32_t>(sessionProperty->GetIsUIExtFirstSubWindow())));
     } else {
         napi_set_named_property(env, objValue, "screenId",
             CreateJsValue(env, static_cast<int32_t>(SCREEN_ID_INVALID)));

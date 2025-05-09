@@ -135,6 +135,12 @@ public:
     uint32_t GetTargetAPIVersion() const;
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
+    sptr<WindowSessionProperty> GetPropertyByContext() const;
+
+    /*
+     * Compatible Mode
+     */
+    bool IsAdaptToSimulationScale() const;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -482,8 +488,8 @@ protected:
     bool IsVerticalOrientation(Orientation orientation) const;
     bool IsHorizontalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
-    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
+    sptr<WindowSessionImpl> FindMainWindowWithContext() const;
+    sptr<WindowSessionImpl> FindExtensionWindowWithContext() const;
 
     WMError RegisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);

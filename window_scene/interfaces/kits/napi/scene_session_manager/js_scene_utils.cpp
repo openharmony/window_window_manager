@@ -1126,6 +1126,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
     };
     bool atLeastOneParam = false;
     std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;

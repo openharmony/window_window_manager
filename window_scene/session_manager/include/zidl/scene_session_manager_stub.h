@@ -65,6 +65,11 @@ private:
      */
     int HandleSetParentWindow(MessageParcel& data, MessageParcel& reply);
 
+    /*
+     * Compatible Mode
+     */
+    int HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply);
+
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
