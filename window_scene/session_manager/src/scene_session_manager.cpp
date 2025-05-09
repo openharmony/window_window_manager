@@ -4899,7 +4899,7 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     }
     int64_t outInsertNum = -1;
     auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-    TLOGI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num%{public}lld", batchInsertRes, outInsertNum);
+    TLOGI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num%{public}" PRId64, batchInsertRes, outInsertNum);
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
@@ -5034,7 +5034,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             GetBundleStartingWindowInfos(bundleInfo, inputValues);
             int64_t outInsertNum = -1;
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-            TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}lld", batchInsertRes, outInsertNum);
+            TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
     }, __func__);
     taskScheduler_->PostAsyncTask([this, bundleName]() {
