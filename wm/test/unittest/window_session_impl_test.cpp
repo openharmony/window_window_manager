@@ -2044,6 +2044,34 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, ret);
     window->NotifyWaterfallModeChange(true);
 }
+
+/**
+ * @tc.name: CreateSubWindowOutlineEnabled
+ * @tc.desc: CreateSubWindowOutlineEnabled Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, CreateSubWindowOutlineEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateSubWindowOutlineEnabled01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(false, window->property_->GetSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateSubWindowOutlineEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetSubWindowOutlineEnabled(false);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(false, window->property_->GetSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateSubWindowOutlineEnabled03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetSubWindowOutlineEnabled(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(true, window->property_->GetSubWindowOutlineEnabled());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
