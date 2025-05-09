@@ -2620,7 +2620,7 @@ napi_value JsWindow::LoadContentScheduleOld(napi_env env, napi_callback_info inf
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR)));
             return;
         }
         if (errCode != WMError::WM_OK) {
