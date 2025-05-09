@@ -1295,16 +1295,25 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode01, TestSize.Level0)
     SessionInfo sessionInfo2;
     sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
-    sceneSession1->SetSessionRect(rect1);
-    sceneSession1->SetSessionGlobalRect(rect1);
+    sceneSession2->SetRSVisible(true);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    WSRect rect2 = { 0, 2100, 200, 100 };
+    sceneSession2->SetSessionRect(rect2);
+    sceneSession2->SetSessionGlobalRect(rect2);
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
     SessionInfo sessionInfo3;
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
-    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
-    sceneSession3->GetSessionProperty()->SetDisplayId(VIRTUAL_DISPLAY_ID);
+    sceneSession3->GetSessionProperty()->SetDisplayId(100);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
+
+    SessionInfo sessionInfo4;
+    sessionInfo4.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(sessionInfo4, nullptr);
+    sceneSession4->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession4->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
 
     GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
@@ -1348,7 +1357,7 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 6);
 
     SessionInfo sessionInfo3;
-    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
     sceneSession3->SetRSVisible(true);
     sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
