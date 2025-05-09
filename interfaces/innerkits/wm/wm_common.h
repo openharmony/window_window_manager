@@ -80,6 +80,11 @@ constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT = 0xf2f1f1f1;
 constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_DARK = 0xf21a1a1a;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
+
+/*
+ * Compatible Mode
+ */
+constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
 }
 
 /**

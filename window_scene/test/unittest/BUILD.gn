@@ -97,6 +97,7 @@ group("unittest") {
     ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+    ":ws_compatible_mode_property_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_window_session_property_animation_test",
@@ -1023,6 +1024,16 @@ ohos_unittest("ws_window_session_property_test") {
   module_out_path = module_out_path
 
   sources = [ "window_session_property_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("ws_compatible_mode_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "compatible_mode_property_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

@@ -14578,6 +14578,41 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
+{
+    if (!property || !token) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "property or token is nullptr!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &property, token, where = __func__] {
+        int32_t persistentId = INVALID_SESSION_ID;
+        int32_t parentId = INVALID_SESSION_ID;
+        if (!GetExtensionWindowIds(token, persistentId, parentId)) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s Get UIExtension window ids by token failed", where);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d, parentId=%{public}d",
+            where, persistentId, parentId);
+        auto parentSession = GetSceneSession(parentId);
+        if (!parentSession) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s parentSession is nullptr, parentId=%{public}d",
+                where, parentId);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        auto compatInfo = parentSession->GetSessionProperty()->GetCompatibleModeProperty();
+        if (!compatInfo) {
+            TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info failed",
+                where, persistentId);
+            return WMError::WM_DO_NOTHING;
+        }
+        TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",
+            where, persistentId, compatInfo->ToString().c_str());
+        property->CopyFrom(compatInfo); 
+        return WMError::WM_OK;
+    }, __func__);
+}
+
 WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subSession,
     const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
 {
