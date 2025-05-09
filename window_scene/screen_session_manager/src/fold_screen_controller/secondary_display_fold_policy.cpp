@@ -270,6 +270,7 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
@@ -291,6 +292,7 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[MAIN_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
@@ -312,6 +314,7 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
         .h = screenParams_[GLOBAL_FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
