@@ -256,6 +256,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
+            return HandleSetWindowTransitionAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
             return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
@@ -1552,6 +1554,27 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
     }
     TLOGD(WmsLogTag::WMS_SUB, "isFollow: %{public}d", isFollow);
     WSError errCode = SetFollowParentWindowLayoutEnabled(isFollow);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t type;
+    if (!data.ReadUint32(type)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<TransitionAnimation> animation =
+        std::shared_ptr<TransitionAnimation>(data.ReadParcelable<TransitionAnimation>());
+    if (animation == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowTransitionAnimation(static_cast<WindowTransitionType>(type), *animation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
         return ERR_INVALID_DATA;

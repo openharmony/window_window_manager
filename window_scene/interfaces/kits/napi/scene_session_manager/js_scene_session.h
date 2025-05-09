@@ -31,6 +31,7 @@ enum class ListenerFuncType : uint32_t {
     PENDING_SCENE_CB,
     CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
     SESSION_STATE_CHANGE_CB,
+    UPDATE_TRANSITION_ANIMATION_CB,
     BUFFER_AVAILABLE_CHANGE_CB,
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
@@ -116,6 +117,7 @@ private:
      */
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
+    void ProcessUpdateTransitionAnimationRegister();
     void ProcessSessionEventRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -130,6 +132,7 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
+    void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
