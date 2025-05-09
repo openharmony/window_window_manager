@@ -8116,7 +8116,6 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
             return;
         }
-        std::lock_guard guard(session->currentRotationMutex_);
         session->currentRotation_ = currentRotation;
         if (!session->sessionStage_) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s sessionStage is null", where);
