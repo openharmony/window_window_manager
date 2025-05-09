@@ -127,10 +127,12 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
     WindowAnimationOptions& animationConfig, WmErrorCode& result)
 {
     if (jsAnimationConfig == nullptr) {
+        result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
     }
     uint32_t curve;
     if (!ParseJsValue(jsAnimationConfig, env, "curve", curve)) {
+        result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
     }
     animationConfig.curve = static_cast<WindowAnimationCurve>(curve);
