@@ -1747,20 +1747,6 @@ HWTEST_F(SceneSessionTest, SetUIFirstSwitch, TestSize.Level1)
  * @tc.desc: IsFollowParentMultiScreenPolicy
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, SetSubWindowOutlineEnabled, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    EXPECT_EQ(sceneSession->IsFollowParentMultiScreenPolicy(), false);
-}
-
-/**
- * @tc.name: IsFollowParentMultiScreenPolicy
- * @tc.desc: IsFollowParentMultiScreenPolicy
- * @tc.type: FUNC
- */
 HWTEST_F(SceneSessionTest, IsFollowParentMultiScreenPolicy, TestSize.Level1)
 {
     SessionInfo info;
