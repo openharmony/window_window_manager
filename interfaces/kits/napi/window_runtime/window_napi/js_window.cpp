@@ -24,6 +24,7 @@
 
 #include "js_err_utils.h"
 #include "js_window_utils.h"
+#include "js_window_animation_utils.h"
 #include "window.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
