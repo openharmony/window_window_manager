@@ -730,7 +730,7 @@ DMError DisplayManagerLite::Impl::RegisterScreenMagneticStateListener(sptr<IScre
     if (ret != DMError::DM_OK) {
         WLOGFW("RegisterScreenMagneticStateListener failed !");
         screenMagneticStateListenerAgent_ = nullptr;
-    } else {
+    } else if (listener != nullptr) {
         WLOGD("IScreenMagneticStateListener register success");
         bool isKeyBoardOn = SingletonContainer::Get<DisplayManagerAdapterLite>().GetKeyBoardState();
         WLOGI("RegisterScreenMagneticStateListener isKeyBoardOn : %{public}d", isKeyBoardOn);
