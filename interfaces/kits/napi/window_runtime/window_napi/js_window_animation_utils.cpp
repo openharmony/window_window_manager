@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,8 +104,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
         result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
         return false;
     }
-    transitionAnimation.opacity = static_cast<float>(opacity);
-    
+    transitionAnimation.opacity = static_cast<float>(opacity);    
     return true;
 }
 
