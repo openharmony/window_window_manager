@@ -14578,14 +14578,14 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-    const sptr<IRemoteObject>& token)
+WMError SceneSessionManager::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
 {
     if (!property || !token) {
         TLOGE(WmsLogTag::WMS_COMPAT, "property or token is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    return taskScheduler_->PostSyncTask([this, property, token, where = __func__] {
+    return taskScheduler_->PostSyncTask([this, &property, token, where = __func__] {
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
         if (!GetExtensionWindowIds(token, persistentId, parentId)) {
@@ -14602,8 +14602,8 @@ WMError SceneSessionManager::GetHostWindowCompatiblityInfo(sptr<CompatibleModePr
         }
         auto compatInfo = parentSession->GetSessionProperty()->GetCompatibleModeProperty();
         if (!compatInfo) {
-            TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",
-                where, persistentId, compatInfo->ToString().c_str());
+            TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info failed",
+                where, persistentId);
             return WMError::WM_DO_NOTHING;
         }
         TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",

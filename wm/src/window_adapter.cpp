@@ -937,14 +937,14 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetHostWindowRect(hostWindowId, rect));
 }
 
-WMError WindowAdapter::GetHostWindowCompatiblityInfo(sptr<CompatibleModeProperty>& property,
-    const sptr<IRemoteObject>& token)
+WMError WindowAdapter::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return static_cast<WMError>(wmsProxy->GetHostWindowCompatiblityInfo(property, token));
+    return static_cast<WMError>(wmsProxy->GetHostWindowCompatiblityInfo(token, property));
 }
 
 WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)

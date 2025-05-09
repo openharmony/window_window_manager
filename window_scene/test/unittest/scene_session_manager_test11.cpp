@@ -946,19 +946,19 @@ HWTEST_F(SceneSessionManagerTest11, GetHostWindowCompatiblityInfo, TestSize.Leve
     ssm_->sceneSessionMap_.clear();
     sptr<CompatibleModeProperty> property = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    WMError res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    WMError res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
     property = sptr<CompatibleModeProperty>::MakeSptr();
-    res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
     token = sptr<IRemoteObjectMocker>::MakeSptr();
-    res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
     ExtensionWindowAbilityInfo extensionWindowAbilityInfo;
     extensionWindowAbilityInfo.persistentId = 12345958;
     extensionWindowAbilityInfo.parentId = 959;
     ssm_->extSessionInfoMap_.emplace(token, extensionWindowAbilityInfo);
-    res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, res);
     
     SessionInfo info;
@@ -967,11 +967,11 @@ HWTEST_F(SceneSessionManagerTest11, GetHostWindowCompatiblityInfo, TestSize.Leve
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->property_->SetPersistentId(959);
     ssm_->sceneSessionMap_.insert({ session->property_->GetPersistentId(), session });
-    res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_DO_NOTHING, res);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    res = ssm_->GetHostWindowCompatiblityInfo(property, token);
+    res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_OK, res);
 }
 } // namespace
