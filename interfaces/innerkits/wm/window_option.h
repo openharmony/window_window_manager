@@ -294,7 +294,17 @@ public:
      */
     void SetSubWindowZLevel(int32_t zLevel);
 
+    /**
+     * @brief Set subwindow outline enabled
+     *
+     * @param subWindowOutlineEnabled whether subwindow show outline
+     */
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+
+    /**
+     * @brief Get subwindow outline enabled
+     *
+     */
     bool IsSubWindowOutlineEnabled() const;
 
     /**
