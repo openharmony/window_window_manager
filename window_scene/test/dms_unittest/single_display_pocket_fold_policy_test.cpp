@@ -16,7 +16,10 @@
 #include <gtest/gtest.h>
 
 #include <hisysevent.h>
+#include <parameter.h>
+#include <parameters.h>
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
+#include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 #include "fold_screen_state_internel.h"
@@ -84,6 +87,21 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Le
     displayMode = FoldDisplayMode::SUB;
     policy.ChangeScreenDisplayMode(displayMode);
     EXPECT_FALSE(policy.onBootAnimation_);
+
+    ScreenId screenId = 0;
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (nullptr == screenSession) {
+        return;
+    }
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.SetTentMode(0);
+    displayMode = FoldDisplayMode::FULL;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "0");
+
+    displayMode = FoldDisplayMode::MAIN;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "1");
 }
 
 /**
