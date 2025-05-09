@@ -818,13 +818,16 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
 }
 
-void KeyboardSession::AddCrossScreenChild()
+void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
 {
     if (moveDragController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "move drag controller is null");
         return;
     }
-    for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
+    auto displayIds = isMoveOrDrag ?
+        moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag() :
+        moveDragController_->GetDisplayIdsDuringMoveDrag();
+    for (const auto displayId : displayIds) {
         if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
             continue;
         }
@@ -846,16 +849,24 @@ void KeyboardSession::AddCrossScreenChild()
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surface node is null");
             return;
         }
-        keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
         auto displayNode = screenSession->GetDisplayNode();
         if (displayNode == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "target display node is null");
             return;
         }
-        displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
-        keyboardPanelSurfaceNode->SetIsCrossNode(true);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
-            keyboardPanelSession_->GetPersistentId(), displayId);
+        if (isMoveOrDrag) {
+            keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+            displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
+            keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
+                keyboardPanelSession_->GetPersistentId(), displayId);
+        } else {
+            keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+            displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
+            keyboardPanelSurfaceNode->SetIsCrossNode(false);
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
+                keyboardPanelSession_->GetPersistentId(), displayId);
+        }
     }
 }
 

@@ -196,6 +196,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout03, Function | SmallTest | Le
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     ASSERT_NE(keyboardSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardSession->SetSessionProperty(property);
 
