@@ -38,7 +38,7 @@ const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
-constexpr int WINDOW_NAME_TYPE_SCREENSHOT = 1;
+constexpr int WINDOW_NAME_TYPE_THUMBNAIL = 1;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 } // namespace
@@ -752,7 +752,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     bool isPreviewWindow = windowName.size() >= previewPrefix.size() &&
         windowName.substr(0, previewPrefix.size()) == previewPrefix;
     if (isScreenshotWindow || isPreviewWindow) {
-        windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
+        windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
