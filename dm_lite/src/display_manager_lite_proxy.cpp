@@ -858,7 +858,7 @@ bool DisplayManagerLiteProxy::GetKeyBoardState()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetKeyBoardState: remote is null");
+        TLOGE("GetKeyBoardState: remote is null");
         return false;
     }
 
@@ -866,12 +866,12 @@ bool DisplayManagerLiteProxy::GetKeyBoardState()
     MessageParcel data;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE("WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_KEY_BOARD_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE("SendRequest failed");
         return false;
     }
     return reply.ReadBool();
