@@ -19,10 +19,10 @@
 #include <regex>
 #include <sstream>
 
-#include "js_err_utils.h"
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
+#include "js_err_utils.h"
 #include "js_window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -30,19 +30,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-
-napi_value AnimaitonNapiGetUndefined(napi_env env)
-{
-    napi_value result = nullptr;
-    napi_get_undefined(env, &result);
-    return result;
-}
-
-napi_value AnimationNapiThrowError(napi_env env, WmErrorCode errCode)
-{
-    napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
-    return AnimaitonNapiGetUndefined(env);
-}
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
 {
@@ -90,7 +77,7 @@ napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
 }
 
 bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, TransitionAnimation& transitionAnimation,
-    napi_value& result)
+    WmErrorCode& result)
 {
     napi_value jsAnimationConfig = nullptr;
     napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
@@ -101,36 +88,43 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     double opacity = 1.0f;
     ParseJsValue(jsObject, env, "opacity", opacity);
     if (opacity < 0.0 || opacity > 1.0) {
-        result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
         return false;
     }
     transitionAnimation.opacity = static_cast<float>(opacity);    
     return true;
 }
 
-bool CheckWindowAnimationOptions(napi_env env, const WindowAnimationOptions& animationConfig, napi_value& result)
+bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animationConfig, WmErrorCode& result)
 {
     switch (animationConfig.curve) {
         case WindowAnimationCurve::LINEAR: {
             if (animationConfig.duration > ANIMATION_MAX_DURATION) {
                 TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
-                result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+                result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
                 return false;
             }
             break;
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
+            for (int i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
+                if (animationConfig.param[i] <= 0.0) {
+                    TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
+                        i, animationConfig.param[i]);
+                    animationConfig.param[i] = 1.0;
+                }
+            }
             break;
         }
         default:
-            result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
             return false;
     }
     return true;
 }
 
 bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimationConfig,
-    WindowAnimationOptions& animationConfig, napi_value& result)
+    WindowAnimationOptions& animationConfig, WmErrorCode& result)
 {
     if (jsAnimationConfig == nullptr) {
         return false;
@@ -145,7 +139,7 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
     switch (curve) {
         case static_cast<uint32_t>(WindowAnimationCurve::LINEAR): {
             if (!ParseJsValue(jsAnimationConfig, env, "duration", duration)) {
-                result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+                result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                 return false;
             }
             animationConfig.duration = duration;
@@ -158,22 +152,15 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
                 napi_value element;
                 napi_get_element(env, paramsValue, i, &element);
                 if (!ConvertFromJsValue(env, element, params[i])) {
-                    result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+                    result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;
                 }
                 animationConfig.param[i] = static_cast<float>(params[i]);
             }
-            for (int i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
-                if (animationConfig.param[i] <= 0.0) {
-                    TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
-                        i, animationConfig.param[i]);
-                    animationConfig.param[i] = 1.0;
-                }
-            }
             break;
         }
         default:
-            result = AnimationNapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
             return false;
     }
     return true;
