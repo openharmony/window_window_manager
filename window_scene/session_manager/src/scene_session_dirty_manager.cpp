@@ -747,8 +747,11 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     std::string windowName = sceneSession->GetWindowNameAllType();
     std::string screenshotPrefix = SCREENSHOT_WINDOW_NAME_PREFIX;
     std::string previewPrefix = PREVIEW_WINDOW_NAME_PREFIX;
-    if ((windowName.size() >= screenshotPrefix.size() && windowName.substr(0, screenshotPrefix.size()) == screenshotPrefix) ||
-        (windowName.size() >= previewPrefix.size() && windowName.substr(0, previewPrefix.size()) == previewPrefix)) {
+    bool isScreenshotWindow = windowName.size() >= screenshotPrefix.size() &&
+        windowName.substr(0, screenshotPrefix.size()) == screenshotPrefix;
+    bool isPreviewWindow = windowName.size() >= previewPrefix.size() &&
+        windowName.substr(0, previewPrefix.size()) == previewPrefix;
+    if (isScreenshotWindow || isPreviewWindow) {
         windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
