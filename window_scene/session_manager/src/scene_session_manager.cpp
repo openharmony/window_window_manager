@@ -12213,13 +12213,14 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
             }
             WindowType winType = session->GetWindowType();
             if ((!WindowHelper::IsMainWindow(winType) && !WindowHelper::IsPipWindow(winType)) ||
-                !IsSessionVisibleForeground(session)) {
-                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u",
-                    where, session->GetWindowId(), session->GetWindowName().c_str(), static_cast<uint32_t>(winType));
+                !session->IsSessionForeground() || (!session->GetRSVisible() && !session->IsVisible())) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], type=%{public}u, "
+                    "isForeground=%{public}d", where, session->GetWindowId(), session->GetWindowName().c_str(),
+                    static_cast<uint32_t>(winType), session->IsSessionForeground());
                 continue;
             }
             WindowMode winMode = session->GetWindowMode();
-            if (WindowHelper::IsPipWindow(winType)) {
+            if (WindowHelper::IsPipWindow(winType) || WindowHelper::IsPipWindowMode(winMode)) {
                 TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found pip win=[%{public}d, %{public}s]",
                     where, session->GetWindowId(), session->GetWindowName().c_str());
                 globalWinMode = globalWinMode | GlobalWindowMode::PIP;
