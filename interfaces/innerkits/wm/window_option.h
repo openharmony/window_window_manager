@@ -294,6 +294,8 @@ public:
      */
     void SetSubWindowZLevel(int32_t zLevel);
 
+    void SetSubWindowBorderSupported();
+
     /**
      * @brief Set real parent id of UIExtension
      *
