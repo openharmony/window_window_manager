@@ -181,16 +181,6 @@ int32_t WindowOption::GetSubWindowZLevel() const
     return zLevel_;
 }
 
-void WindowOption::SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled)
-{
-    subWindowOutlineEnabled_ = subWindowOutlineEnabled;
-}
-
-bool WindowOption::IsSubWindowOutlineEnabled() const
-{
-    return subWindowOutlineEnabled_;
-}
-
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;
@@ -299,6 +289,16 @@ bool WindowOption::GetWindowTopmost() const
 bool WindowOption::GetSubWindowMaximizeSupported() const
 {
     return subWindowMaximizeSupported_;
+}
+
+void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
+{
+    subWindowOutlineEnabled_ = outlineEnabled;
+}
+
+bool WindowOption::IsSubWindowOutlineEnabled() const
+{
+    return subWindowOutlineEnabled_;
 }
 } // namespace Rosen
 } // namespace OHOS

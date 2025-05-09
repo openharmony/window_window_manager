@@ -262,9 +262,9 @@ public:
     /**
      * @brief Set sub window outline enabled
      *
-     * @param subWindowOutlineEnabled border of sub window to follow main window is supported
+     * @param outlineEnabled whether show sub window outline
      */
-    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    void SetSubWindowOutlineEnabled(bool outlineEnabled);
 
     /**
      * @brief Get sub window outline enabled
