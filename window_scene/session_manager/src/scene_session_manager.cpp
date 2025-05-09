@@ -13383,26 +13383,28 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
 void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y)
 {
     if (displayId != VIRTUAL_DISPLAY_ID) {
-        TLOGI(WmsLogTag::WMS_PC, "This is not VIRTUAL_DISPLAY_ID");
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "This is not VIRTUAL_DISPLAY_ID");
         return;
     }
     auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
     if (defaultScreenDisplay == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "get display object failed of defaultScreenDisplay");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get display object failed of defaultScreenDisplay");
         return;
     }
     auto defaultScreenDisplayInfo = defaultScreenDisplay->GetDisplayInfo();
     if (defaultScreenDisplayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "get display info failed of defaultScreenDisplay");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get display info failed of defaultScreenDisplay");
         return;
     }
     int32_t defaultScreenPhyHight = defaultScreenDisplayInfo->GetPhysicalHeight();
     auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
     int32_t screenHightByDisplayId = defaultScreenPhyHight;
     if (screenDisplay != nullptr) {
-        screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
+        if (screenDisplay->GetDisplayInfo() != nullptr) {
+            screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
+        }
     }
-    TLOGI(WmsLogTag::WMS_PC, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
         defaultScreenPhyHight, screenHightByDisplayId);
     if (displayId == VIRTUAL_DISPLAY_ID) {
         displayId = DEFAULT_DISPLAY_ID;
