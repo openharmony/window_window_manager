@@ -64,7 +64,8 @@ public:
     void OnKeyboardPanelUpdated() override;
     void OnCallingSessionUpdated() override;
     void OpenKeyboardSyncTransaction() override;
-    void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
+    void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating,
+        const WindowAnimationInfo& animationInfo) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
