@@ -745,11 +745,11 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
     std::string windowName = sceneSession->GetWindowNameAllType();
-    bool isScreenshotWindow = windowName.size() >= SCREENSHOT_WINDOW_NAME_PREFIX.size() &&
-        windowName.substr(0, SCREENSHOT_WINDOW_NAME_PREFIX.size()) == SCREENSHOT_WINDOW_NAME_PREFIX;
-    bool isPreviewWindow = windowName.size() >= PREVIEW_WINDOW_NAME_PREFIX.size() &&
-        windowName.substr(0, PREVIEW_WINDOW_NAME_PREFIX.size()) == PREVIEW_WINDOW_NAME_PREFIX;
-    if (isScreenshotWindow || isPreviewWindow) {
+    auto startsWith = [](const std::string& str, const std::string& prefix) {
+        return str.size() >= prefix.size() && 
+            std::equal(prefix.begin(), prefix.end(), str.begin());
+    };
+    if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
         windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
