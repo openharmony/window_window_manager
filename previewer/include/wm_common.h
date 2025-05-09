@@ -251,7 +251,8 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
     WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
-    WM_ERROR_PIP_REPEAT_OPERATION = 1300015
+    WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
+    WM_ERROR_ILLEGAL_PARAM = 1300016,
 };
 
 /**
@@ -1249,6 +1250,123 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
+};
+
+/*
+ * @brief Enumerates window transition type.
+ */
+enum class WindowTransitionType : uint32_t {
+    /**
+     * window destroy.
+     */
+    DESTROY = 0,
+    
+    /**
+     * end type.
+     */
+    END,
+};
+
+/*
+ * @brief Enumerates window animation curve type.
+ */
+enum class WindowAnimationCurve : uint32_t {
+    /**
+     * animation curve type linear.
+     */
+    LINEAR = 0,
+
+    /**
+     * animation curve type interpolation_spring.
+     */
+    INTERPOLATION_SPRING = 1,
+};
+
+const int32_t ANIMATION_PARAM_SIZE = 4;
+const int32_t ANIMATION_MAX_DURATION = 3000;
+
+/*
+ * @brief Window transition animation configuration.
+ */
+struct WindowAnimationOptions : public Parcelable {
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    uint32_t duration = 0;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
+            return false;
+        }
+        if (param.size() > ANIMATION_PARAM_SIZE) {
+            return false;
+        }
+        for (auto p: param) {
+            if (!parcel.WriteFloat(p)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        uint32_t curve = 0;
+        if (!parcel.ReadUint32(curve)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
+        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        for (auto& param: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(param)) {
+                delete windowAnimationConfig;
+                return nullptr;
+            }
+        }
+        return windowAnimationConfig;
+    }
+};
+
+/*
+ * @brief Transition animation configuration.
+ */
+struct TransitionAnimation : public Parcelable {
+    WindowAnimationOptions config;
+    float opacity = 1.0;
+    
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
+            return false;
+        }
+        return true;
+    }
+
+    static TransitionAnimation* Unmarshalling(Parcel& parcel)
+    {
+        TransitionAnimation* transitionAnimation = new TransitionAnimation();
+        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        WindowAnimationOptions* animationConfig = parcel.ReadParcelable<WindowAnimationOptions>();
+        if (animationConfig == nullptr) {
+            delete transitionAnimation;
+            delete animationConfig;
+            return nullptr;
+        }
+        transitionAnimation->config = *animationConfig;
+        return transitionAnimation;
+    }
 };
 
 /**

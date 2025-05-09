@@ -170,6 +170,12 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
 
     /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+
+    /**
      * window rotation
      */
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
