@@ -624,7 +624,7 @@ private:
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
     int32_t zLevel_ = 0;
-    int32_t zIndex_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
     bool isSystemKeyboard_ = false;
 
     /*
