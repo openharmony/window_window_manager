@@ -1286,16 +1286,15 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() cons
 
 sptr<WindowSessionProperty> WindowSessionImpl::GetPropertyByContext() const
 {
-    if (WindowHelper::IsSubWindow(GetType())) {
-        if (property_->GetIsUIExtensionAbilityProcess()) {
-            auto extensionWindow = FindExtensionWindowWithContext();
-            return extensionWindow != nullptr ? extensionWindow->GetProperty() : property_;
-        } else {
-            auto mainWindow = FindMainWindowWithContext();
-            return mainWindow != nullptr ? mainWindow->GetProperty() : property_;
-        }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+       return property_;
     }
-    return property_;
+    if (property_->GetIsUIExtensionAbilityProcess()) {
+        auto extensionWindow = FindExtensionWindowWithContext();
+        return extensionWindow != nullptr ? extensionWindow->GetProperty() : property_;
+    }
+    auto mainWindow = FindMainWindowWithContext();
+    return mainWindow != nullptr ? mainWindow->GetProperty() : property_;
 }
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)
