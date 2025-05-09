@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include <array>
 #include <map>
 #include "js_runtime_utils.h"
+#include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
-#include "js_window_utils.h"
 
 #ifndef WINDOW_PREVIEW
 #include "window_manager.h"
@@ -29,12 +29,13 @@
 #include "mock/window_manager.h"
 #endif
 
+#include "window_helper.h"
 #include "window_option.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
-#include "window_helper.h"
+
 namespace OHOS {
-namespace Rosen { 
+namespace Rosen {
 #define CHECK_NAPI_RETCODE(errCode, code, call)                                           \
     do {                                                                                  \
         napi_status retCode = (call);                                                     \

@@ -3399,7 +3399,7 @@ void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& typ
             return;
         }
         napi_value jsTransitionTypeObj = CreateJsValue(env, type);
-        napi_value jsTransitionAnimationObj = ConvertTransitionAnimationToJsValue(env, 
+        napi_value jsTransitionAnimationObj = ConvertTransitionAnimationToJsValue(env,
             std::make_shared<TransitionAnimation>(animation));
         napi_value argv[] = {jsTransitionTypeObj, jsTransitionAnimationObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

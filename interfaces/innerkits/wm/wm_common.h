@@ -2207,7 +2207,7 @@ struct WindowAnimationOptions : public Parcelable {
             delete windowAnimationConfig;
             return nullptr;
         }
-        if (windowAnimationConfig->param.size() != ANIMATION_PARAM_SIZE) {
+        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
             delete windowAnimationConfig;
             return nullptr;
         }
