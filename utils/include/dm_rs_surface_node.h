@@ -18,27 +18,28 @@
 
 #include <parcel.h>
 #include <ui/rs_surface_node.h>
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 class DmRsSurfaceNode : public Parcelable {
 public:
     DmRsSurfaceNode() = default;
 
-    explicit DmRsSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode)
-    {}
+    explicit DmRsSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode) {}
 
     bool Marshalling(Parcel& parcel) const override
     {
         if (surfaceNode_) {
             return surfaceNode_->Marshalling(parcel);
         }
+        TLOGE(WmsLogTag::DMS, "surfaceNode_ is null");
         return false;
     }
 
     static DmRsSurfaceNode* Unmarshalling(Parcel& parcel)
     {
         std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(parcel);
-        return new DmRsSurfaceNode(surfaceNode);
+        return new (std::nothrow) DmRsSurfaceNode(surfaceNode);
     }
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const

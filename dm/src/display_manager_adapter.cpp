@@ -41,6 +41,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 DMError BaseAdapter::ConvertToDMError(ErrCode errCode, int32_t dmError)
 {
     if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "ConvertToDMError errCode: %{public}d, dmError: %{public}d", errCode, dmError);
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(dmError);
@@ -57,6 +58,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetDefaultDisplayInfo(displayInfo);
     if (FAILED(errCode) || displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDefaultDisplayInfo failed, errCode: %{public}d, displayInfo: %{public}s", errCode,
+            displayInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return displayInfo;
@@ -73,6 +76,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId scree
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId, displayInfo);
     if (FAILED(errCode) || displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayInfoByScreenId failed, screenId: %{public}" PRIu64 ", errCode: %{public}d"
+            ", displayInfo: %{public}s", screenId, errCode, displayInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return displayInfo;
@@ -96,12 +101,14 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
         *errorCode = static_cast<DmErrorCode>(errorCodeOut);
     }
     if (FAILED(errCode) || pixelMap == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayInfoByScreenId failed, displayId: %{public}" PRIu64 ", errCode: %{public}d"
+            ", pixelMap: %{public}s", displayId, errCode, pixelMap == nullptr ? "null" : "not null");
         return nullptr;
     }
     return pixelMap;
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
@@ -109,7 +116,9 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Medi
         return screenSessionManagerServiceProxy_->GetSnapshotByPicker(rect, errorCode);
     }
 
-    *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     return nullptr;
 }
 
@@ -125,8 +134,10 @@ DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<uint32_t> colorGamutsOut;
     int32_t dmError;
     ErrCode errCode = displayManagerServiceProxy_->GetScreenSupportedColorGamuts(screenId, colorGamutsOut, dmError);
-    for (auto colorGamut : colorGamutsOut) {
-        colorGamuts.push_back(static_cast<ScreenColorGamut>(colorGamut));
+    if (SUCCEEDED(errCode)) {
+        for (auto colorGamut : colorGamutsOut) {
+            colorGamuts.push_back(static_cast<ScreenColorGamut>(colorGamut));
+        }
     }
     return ConvertToDMError(errCode, dmError);
 }
@@ -142,7 +153,9 @@ DMError ScreenManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColor
     uint32_t colorGamutOut;
     int32_t dmError;
     ErrCode errCode = displayManagerServiceProxy_->GetScreenColorGamut(screenId, colorGamutOut, dmError);
-    colorGamut = static_cast<ScreenColorGamut>(colorGamutOut);
+    if (SUCCEEDED(errCode)) {
+        colorGamut = static_cast<ScreenColorGamut>(colorGamutOut);
+    }
     return ConvertToDMError(errCode, dmError);
 }
 
@@ -170,7 +183,9 @@ DMError ScreenManagerAdapter::GetScreenGamutMap(ScreenId screenId, ScreenGamutMa
     uint32_t gamutMapOut;
     int32_t dmError;
     ErrCode errCode = displayManagerServiceProxy_->GetScreenGamutMap(screenId, gamutMapOut, dmError);
-    gamutMap = static_cast<ScreenGamutMap>(gamutMapOut);
+    if (SUCCEEDED(errCode)) {
+        gamutMap = static_cast<ScreenGamutMap>(gamutMapOut);
+    }
     return ConvertToDMError(errCode, dmError);
 }
 
@@ -331,6 +346,11 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
 {
     INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
 
+    if (displayManagerAgent == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent is nullptr");
+        return SCREEN_ID_INVALID;
+    }
+
     TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::CreateVirtualScreen");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject());
@@ -347,6 +367,7 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
             displayManagerAgent->AsObject(), screenId);
     }
     if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "CreateVirtualScreen failed, errCode: %{public}d", errCode);
         return SCREEN_ID_INVALID;
     }
     return screenId;
@@ -515,6 +536,8 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
     uint32_t screenPowerState;
     ErrCode errCode = displayManagerServiceProxy_->GetScreenPower(dmsScreenId, screenPowerState);
     if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "GetScreenPower failed, dmsScreenId: %{public}" PRIu64 ", errCode: %{public}d",
+            dmsScreenId, errCode);
         return ScreenPowerState::INVALID_STATE;
     }
     return static_cast<ScreenPowerState>(screenPowerState);
@@ -673,6 +696,8 @@ DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
     uint32_t displayState;
     ErrCode errCode = displayManagerServiceProxy_->GetDisplayState(displayId, displayState);
     if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayState failed, displayId: %{public}" PRIu64 ", errCode: %{public}d",
+            displayId, errCode);
         return DisplayState::UNKNOWN;
     }
     return static_cast<DisplayState>(displayState);
@@ -913,6 +938,8 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
     } else {
         ErrCode errCode = displayManagerServiceProxy_->GetScreenInfoById(screenId, screenInfo);
         if (FAILED(errCode) || screenInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "GetScreenInfo failed, screenId: %{public}" PRIu64 ", errCode: %{public}d"
+                ", screenInfo: %{public}s", screenId, errCode, screenInfo == nullptr ? "null" : "not null");
             return nullptr;
         }
     }
@@ -970,7 +997,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(ScreenId screenId, bool& immer
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DMS, "DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS, "DisplayManagerAdapter::GetDisplayInfo enter, displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "screen id is invalid");
         return nullptr;
@@ -984,6 +1011,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetDisplayInfoById(displayId, displayInfo);
     if (FAILED(errCode) || displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayInfo failed, displayId: %{public}" PRIu64 ", errCode: %{public}d"
+            ", displayInfo: %{public}s", displayId, errCode, displayInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return displayInfo;
@@ -991,7 +1020,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "display id is invalid");
         return nullptr;
@@ -1005,6 +1034,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetVisibleAreaDisplayInfoById(displayId, displayInfo);
     if (FAILED(errCode) || displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed, displayId: %{public}" PRIu64 ", errCode: "
+            "%{public}d, displayInfo: %{public}s", displayId, errCode, displayInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return displayInfo;
@@ -1014,7 +1045,7 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DMS, "DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -1025,6 +1056,8 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     sptr<CutoutInfo> cutoutInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetCutoutInfo(displayId, cutoutInfo);
     if (FAILED(errCode) || cutoutInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetCutoutInfo failed, displayId: %{public}" PRIu64 ", errCode: %{public}d"
+            ", cutoutInfo: %{public}s", displayId, errCode, cutoutInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return cutoutInfo;
@@ -1032,10 +1065,10 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
 {
-    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64" ",
+    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64,
         rotation, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return nullptr;
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -1050,7 +1083,7 @@ DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -1068,7 +1101,7 @@ DMError DisplayManagerAdapter::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     std::shared_ptr<class RSSurfaceNode>& surfaceNode)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -1203,6 +1236,8 @@ sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId scre
     sptr<ScreenGroupInfo> screenGroupInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetScreenGroupInfoById(screenId, screenGroupInfo);
     if (FAILED(errCode) || screenGroupInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenGroupInfoById failed, screenId: %{public}" PRIu64 ", errCode: %{public}d, "
+            "screenGroupInfo: %{public}s", screenId, errCode, screenGroupInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return screenGroupInfo;
@@ -1222,7 +1257,7 @@ DMError ScreenManagerAdapter::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& s
 }
 
 DMError ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
-                                         ScreenId& screenGroupId)
+    ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
@@ -1317,8 +1352,7 @@ DMError ScreenManagerAdapter::SetResolution(ScreenId screenId, uint32_t width, u
     }
 
     int32_t dmError;
-    ErrCode errCode = displayManagerServiceProxy_->SetResolution(screenId, width, height, virtualPixelRatio,
-        dmError);
+    ErrCode errCode = displayManagerServiceProxy_->SetResolution(screenId, width, height, virtualPixelRatio, dmError);
     return ConvertToDMError(errCode, dmError);
 }
 
@@ -1361,7 +1395,7 @@ DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& scre
 DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "displayId id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -1376,7 +1410,7 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
 DMError DisplayManagerAdapter::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "displayId id is invalid");
+        TLOGE(WmsLogTag::DMS, "display id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -1392,7 +1426,7 @@ VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screenId id is invalid");
+        TLOGE(WmsLogTag::DMS, "screen id is invalid");
         return VirtualScreenFlag::DEFAULT;
     }
 
@@ -1407,7 +1441,7 @@ DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "displayId id is invalid");
+        TLOGE(WmsLogTag::DMS, "screen id is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
@@ -1539,7 +1573,9 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
         return screenSessionManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
     }
 
-    *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     return nullptr;
 }
 
@@ -1553,6 +1589,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = displayManagerServiceProxy_->GetDefaultDisplayInfo(displayInfo);
     if (FAILED(errCode) || displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetPrimaryDisplayInfo failed, errCode: %{public}d, displayInfo: %{public}s",
+            errCode, displayInfo == nullptr ? "null" : "not null");
         return nullptr;
     }
     return displayInfo;
@@ -1566,7 +1604,9 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
         return screenSessionManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
     }
 
-    *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     return nullptr;
 }
 

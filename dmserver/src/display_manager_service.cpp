@@ -493,7 +493,7 @@ bool DisplayManagerService::TryToCancelScreenOff()
 bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS,  "set screen brightness permission denied!");
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
         return false;
     }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
@@ -503,7 +503,7 @@ bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t leve
 uint32_t DisplayManagerService::GetScreenBrightness(uint64_t screenId)
 {
     uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
-    TLOGI(WmsLogTag::DMS,  "GetScreenBrightness screenId:%{public}" PRIu64 ", level:%{public}u,", screenId, level);
+    TLOGI(WmsLogTag::DMS, "GetScreenBrightness screenId:%{public}" PRIu64 ", level:%{public}u,", screenId, level);
     return level;
 }
 
@@ -829,7 +829,7 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
     if (allDisplayPhysicalResolution_.empty()) {
         sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
         if (displayInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS,  "default display null");
+            TLOGE(WmsLogTag::DMS, "default display null");
             return allDisplayPhysicalResolution_;
         }
         DisplayPhysicalResolution defaultResolution;

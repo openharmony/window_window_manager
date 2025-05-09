@@ -67,19 +67,19 @@ HWTEST_F(DisplayManagerProxyTest, GetDefaultDisplayInfo01, TestSize.Level1)
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = proxy1.GetDefaultDisplayInfo(displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDefaultDisplayInfo(displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDefaultDisplayInfo(displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -94,19 +94,19 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoById01, TestSize.Level1)
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = proxy1.GetDisplayInfoById(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDisplayInfoById(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDisplayInfoById(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -121,19 +121,19 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoByScreen01, TestSize.Level1)
     sptr<DisplayInfo> displayInfo;
     ErrCode errCode = proxy1.GetDisplayInfoByScreen(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDisplayInfoByScreen(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDisplayInfoByScreen(0, displayInfo);
     ASSERT_EQ(nullptr, displayInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -152,7 +152,7 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, TestSize.Level1)
     ScreenId screenId = SCREEN_ID_INVALID;
     ErrCode errCode = proxy1.CreateVirtualScreen(dmVirtualScreenOption1, displayManagerAgent, screenId);
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
@@ -162,15 +162,15 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, TestSize.Level1)
     DmVirtualScreenOption dmVirtualScreenOption2(virtualOption2);
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, nullptr, screenId);
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, displayManagerAgent, screenId);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     screenId = SCREEN_ID_INVALID;
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, displayManagerAgent, screenId);
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -191,7 +191,7 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen02, TestSize.Level1)
     ErrCode errCode = proxy1.CreateVirtualScreen(dmVirtualScreenOption1, displayManagerAgent, screenId,
         surface->GetProducer());
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
@@ -201,15 +201,15 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen02, TestSize.Level1)
     DmVirtualScreenOption dmVirtualScreenOption2(virtualOption2);
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, nullptr, screenId, surface->GetProducer());
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, displayManagerAgent, screenId, surface->GetProducer());
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     screenId = SCREEN_ID_INVALID;
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.CreateVirtualScreen(dmVirtualScreenOption2, displayManagerAgent, screenId, surface->GetProducer());
     ASSERT_EQ(SCREEN_ID_INVALID, screenId);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -222,18 +222,18 @@ HWTEST_F(DisplayManagerProxyTest, DestroyVirtualScreen01, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.DestroyVirtualScreen(0, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.DestroyVirtualScreen(0, dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.DestroyVirtualScreen(0, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -246,22 +246,22 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetVirtualScreenSurface(0, nullptr, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetVirtualScreenSurface(0, nullptr, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<IConsumerSurface> surface = IConsumerSurface::Create();
     errCode = proxy2.SetVirtualScreenSurface(0, surface->GetProducer(), dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetVirtualScreenSurface(0, surface->GetProducer(), dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -274,18 +274,18 @@ HWTEST_F(DisplayManagerProxyTest, SetOrientation01, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetOrientation(0, static_cast<uint32_t>(Orientation::VERTICAL), dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetOrientation(0, static_cast<uint32_t>(Orientation::VERTICAL), dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetOrientation(0, static_cast<uint32_t>(Orientation::VERTICAL), dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -301,19 +301,19 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplaySnapshot01, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode errCode = proxy1.GetDisplaySnapshot(0, errorCode, false, false, pixelMap);
     ASSERT_EQ(nullptr, pixelMap);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDisplaySnapshot(0, errorCode, false, false, pixelMap);
     ASSERT_EQ(nullptr, pixelMap);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDisplaySnapshot(0, errorCode, false, false, pixelMap);
     ASSERT_EQ(nullptr, pixelMap);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -327,7 +327,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, TestSize.Leve
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.GetScreenSupportedColorGamuts(0, gamutVector, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
     gamutVector.clear();
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
@@ -335,11 +335,11 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, TestSize.Leve
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetScreenSupportedColorGamuts(0, gamutVector, dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenSupportedColorGamuts(0, gamutVector, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -353,7 +353,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     uint32_t screenColorGamut;
     ErrCode errCode = proxy1.GetScreenColorGamut(0, screenColorGamut, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
@@ -361,13 +361,13 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenColorGamut01, TestSize.Level1)
     screenColorGamut = static_cast<uint32_t>(ScreenColorGamut::COLOR_GAMUT_ADOBE_RGB);
     errCode = proxy2.GetScreenColorGamut(0, screenColorGamut, dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
     ASSERT_EQ(static_cast<uint32_t>(ScreenColorGamut::COLOR_GAMUT_NATIVE), screenColorGamut);
 
     screenColorGamut = static_cast<uint32_t>(ScreenColorGamut::COLOR_GAMUT_ADOBE_RGB);
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenColorGamut(0, screenColorGamut, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
     ASSERT_EQ(static_cast<uint32_t>(ScreenColorGamut::COLOR_GAMUT_ADOBE_RGB), screenColorGamut);
 }
 
@@ -381,17 +381,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenColorGamut01, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetScreenColorGamut(0, 3, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenColorGamut(0, 3, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenColorGamut(0, 3, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -405,7 +405,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     auto gamutMap = static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION);
     ErrCode errCode = proxy1.GetScreenGamutMap(0, gamutMap, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
@@ -414,13 +414,13 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenGamutMap01, TestSize.Level1)
     errCode = proxy2.GetScreenGamutMap(0, gamutMap, dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
     ASSERT_EQ(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_CONSTANT), gamutMap);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     gamutMap = static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION);
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenGamutMap(0, gamutMap, dmError_);
     ASSERT_EQ(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION), gamutMap);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -434,7 +434,7 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     auto gamutMap = static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION);
     ErrCode errCode = proxy1.SetScreenGamutMap(0, gamutMap, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
@@ -443,13 +443,13 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenGamutMap01, TestSize.Level1)
     errCode = proxy2.SetScreenGamutMap(0, gamutMap, dmError_);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
     ASSERT_EQ(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION), gamutMap);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     gamutMap = static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION);
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenGamutMap(0, gamutMap, dmError_);
     ASSERT_EQ(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION), gamutMap);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -462,17 +462,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenColorTransform01, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetScreenColorTransform(0);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenColorTransform(0);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenColorTransform(0);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -487,19 +487,19 @@ HWTEST_F(DisplayManagerProxyTest, RegisterDisplayManagerAgent01, TestSize.Level1
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     auto type = static_cast<uint32_t>(DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
     ErrCode errCode = proxy1.RegisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.RegisterDisplayManagerAgent(nullptr, type, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
     errCode = proxy2.RegisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.RegisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -514,20 +514,20 @@ HWTEST_F(DisplayManagerProxyTest, UnregisterDisplayManagerAgent01, TestSize.Leve
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     auto type = static_cast<uint32_t>(DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
     ErrCode errCode = proxy1.UnregisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.UnregisterDisplayManagerAgent(nullptr, type, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
     errCode = proxy2.UnregisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
     ASSERT_EQ(static_cast<int32_t>(DMError::DM_OK), dmError_);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.UnregisterDisplayManagerAgent(displayManagerAgent, type, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -542,17 +542,17 @@ HWTEST_F(DisplayManagerProxyTest, WakeUpBegin01, TestSize.Level1)
     auto reason = static_cast<uint32_t>(PowerStateChangeReason::POWER_BUTTON);
     bool isSucc = false;
     ErrCode errCode = proxy1.WakeUpBegin(reason, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.WakeUpBegin(reason, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.WakeUpBegin(reason, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -566,17 +566,17 @@ HWTEST_F(DisplayManagerProxyTest, WakeUpEnd01, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     bool isSucc = false;
     ErrCode errCode = proxy1.WakeUpEnd(isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.WakeUpEnd(isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.WakeUpEnd(isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -591,17 +591,17 @@ HWTEST_F(DisplayManagerProxyTest, SuspendBegin, TestSize.Level1)
     auto reason = static_cast<uint32_t>(PowerStateChangeReason::POWER_BUTTON);
     bool isSucc = false;
     ErrCode errCode = proxy1.SuspendBegin(reason, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SuspendBegin(reason, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SuspendBegin(reason, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -615,17 +615,17 @@ HWTEST_F(DisplayManagerProxyTest, SuspendEnd, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     bool isSucc = false;
     ErrCode errCode = proxy1.SuspendEnd(isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SuspendEnd(isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SuspendEnd(isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -641,17 +641,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
     auto reason = static_cast<uint32_t>(PowerStateChangeReason::POWER_BUTTON);
     bool isSucc = false;
     ErrCode errCode = proxy1.SetScreenPowerForAll(state, reason, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenPowerForAll(state, reason, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenPowerForAll(state, reason, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -667,17 +667,17 @@ HWTEST_F(DisplayManagerProxyTest, SetSpecifiedScreenPower, TestSize.Level1)
     auto reason = static_cast<uint32_t>(PowerStateChangeReason::POWER_BUTTON);
     bool isSucc = false;
     ErrCode errCode = proxy1.SetSpecifiedScreenPower(0, state, reason, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetSpecifiedScreenPower(0, state, reason, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetSpecifiedScreenPower(0, state, reason, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -692,17 +692,17 @@ HWTEST_F(DisplayManagerProxyTest, SetDisplayState, TestSize.Level1)
     auto state = static_cast<uint32_t>(DisplayState::UNKNOWN);
     bool isSucc = false;
     ErrCode errCode = proxy1.SetDisplayState(state, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetDisplayState(state, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetDisplayState(state, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -718,17 +718,17 @@ HWTEST_F(DisplayManagerProxyTest, AddSurfaceNodeToDisplay, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
     std::shared_ptr<DmRsSurfaceNode> dmRsSurfaceNode = std::make_shared<DmRsSurfaceNode>(surfaceNode);
     ErrCode errCode = proxy1.AddSurfaceNodeToDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.AddSurfaceNodeToDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.AddSurfaceNodeToDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -744,17 +744,17 @@ HWTEST_F(DisplayManagerProxyTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
     std::shared_ptr<DmRsSurfaceNode> dmRsSurfaceNode = std::make_shared<DmRsSurfaceNode>(surfaceNode);
     ErrCode errCode = proxy1.RemoveSurfaceNodeFromDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.RemoveSurfaceNodeFromDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.RemoveSurfaceNodeFromDisplay(0, dmRsSurfaceNode, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -768,17 +768,17 @@ HWTEST_F(DisplayManagerProxyTest, HasPrivateWindow, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     bool hasPrivateWindow = false;
     ErrCode errCode = proxy1.HasPrivateWindow(0, hasPrivateWindow, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.HasPrivateWindow(0, hasPrivateWindow, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.HasPrivateWindow(0, hasPrivateWindow, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -794,17 +794,17 @@ HWTEST_F(DisplayManagerProxyTest, SetFreeze, TestSize.Level1)
     bool isFreeze = true;
     bool isSucc = false;
     ErrCode errCode = proxy1.SetFreeze(displayIds, isFreeze, isSucc);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetFreeze(displayIds, isFreeze, isSucc);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetFreeze(displayIds, isFreeze, isSucc);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -819,17 +819,17 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayState, TestSize.Level1)
     DisplayId displayId = 0;
     uint32_t displayState = 0;
     ErrCode errCode = proxy1.GetDisplayState(displayId, displayState);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDisplayState(displayId, displayState);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDisplayState(displayId, displayState);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -844,17 +844,17 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenPower, TestSize.Level1)
     DisplayId displayId = 0;
     uint32_t screenPowerState = 0;
     ErrCode errCode = proxy1.GetScreenPower(displayId, screenPowerState);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetScreenPower(displayId, screenPowerState);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenPower(displayId, screenPowerState);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -868,17 +868,17 @@ HWTEST_F(DisplayManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     std::vector<DisplayId> displayIds;
     ErrCode errCode = proxy1.GetAllDisplayIds(displayIds);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetAllDisplayIds(displayIds);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetAllDisplayIds(displayIds);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -892,17 +892,17 @@ HWTEST_F(DisplayManagerProxyTest, GetCutoutInfo, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     sptr<CutoutInfo> cutoutInfo;
     ErrCode errCode = proxy1.GetCutoutInfo(0, cutoutInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetCutoutInfo(0, cutoutInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetCutoutInfo(0, cutoutInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -916,17 +916,17 @@ HWTEST_F(DisplayManagerProxyTest, NotifyDisplayEvent, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     auto event = static_cast<uint32_t>(DisplayEvent::UNLOCK);
     ErrCode errCode = proxy1.NotifyDisplayEvent(event);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.NotifyDisplayEvent(event);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.NotifyDisplayEvent(event);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -943,17 +943,17 @@ HWTEST_F(DisplayManagerProxyTest, MakeMirror, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.MakeMirror(mainScreenId, mirrorScreenId, screenGroupId, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.MakeMirror(mainScreenId, mirrorScreenId, screenGroupId, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.MakeMirror(mainScreenId, mirrorScreenId, screenGroupId, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -968,17 +968,17 @@ HWTEST_F(DisplayManagerProxyTest, StopMirror, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.StopMirror(mirrorScreenId, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.StopMirror(mirrorScreenId, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.StopMirror(mirrorScreenId, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -993,17 +993,17 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenInfoById, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.GetScreenInfoById(screenId, screenInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetScreenInfoById(screenId, screenInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenInfoById(screenId, screenInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1018,17 +1018,17 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenGroupInfoById, TestSize.Level1)
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     sptr<ScreenGroupInfo> screenGroupInfo;
     ErrCode errCode = proxy1.GetScreenGroupInfoById(screenId, screenGroupInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetScreenGroupInfoById(screenId, screenGroupInfo);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetScreenGroupInfoById(screenId, screenGroupInfo);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1042,17 +1042,17 @@ HWTEST_F(DisplayManagerProxyTest, GetAllScreenInfos, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.GetAllScreenInfos(screenInfos, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetAllScreenInfos(screenInfos, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetAllScreenInfos(screenInfos, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1072,17 +1072,17 @@ HWTEST_F(DisplayManagerProxyTest, MakeExpand, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.MakeExpand(screenId, startPoint, screenGroupId, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.MakeExpand(screenId, startPoint, screenGroupId, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.MakeExpand(screenId, startPoint, screenGroupId, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1097,17 +1097,17 @@ HWTEST_F(DisplayManagerProxyTest, StopExpand, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.StopExpand(expandScreenIds, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.StopExpand(expandScreenIds, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.StopExpand(expandScreenIds, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1122,17 +1122,17 @@ HWTEST_F(DisplayManagerProxyTest, RemoveVirtualScreenFromGroup, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.RemoveVirtualScreenFromGroup(screens);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.RemoveVirtualScreenFromGroup(screens);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.RemoveVirtualScreenFromGroup(screens);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1146,17 +1146,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenActiveMode, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetScreenActiveMode(screenId, 0, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenActiveMode(screenId, 0, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenActiveMode(screenId, 0, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1171,17 +1171,17 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetVirtualPixelRatio(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetVirtualPixelRatio(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetVirtualPixelRatio(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1195,17 +1195,17 @@ HWTEST_F(DisplayManagerProxyTest, SetResolution, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetResolution(screenId, 50, 100, 1.00, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetResolution(screenId, 50, 100, 1.00, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetResolution(screenId, 50, 100, 1.00, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1220,17 +1220,17 @@ HWTEST_F(DisplayManagerProxyTest, GetDensityInCurResolution, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.GetDensityInCurResolution(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.GetDensityInCurResolution(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.GetDensityInCurResolution(screenId, virtualPixelRatio, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1244,17 +1244,17 @@ HWTEST_F(DisplayManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.IsScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.IsScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.IsScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1268,17 +1268,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLocked, TestSize.Level1)
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenRotationLocked(isLocked, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 
 /**
@@ -1292,17 +1292,17 @@ HWTEST_F(DisplayManagerProxyTest, SetScreenRotationLockedFromJs, TestSize.Level1
     DisplayManagerProxy proxy1(nullptr);
     ASSERT_EQ(nullptr, proxy1.remoteObject_);
     ErrCode errCode = proxy1.SetScreenRotationLockedFromJs(isLocked, dmError_);
-    ASSERT_EQ(ERR_INVALID_DATA, errCode);
+    EXPECT_EQ(ERR_INVALID_DATA, errCode);
 
     sptr<RemoteMocker> remoteMocker = new RemoteMocker();
     DisplayManagerProxy proxy2(remoteMocker);
     ASSERT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy2.remoteObject_);
     errCode = proxy2.SetScreenRotationLockedFromJs(isLocked, dmError_);
-    ASSERT_EQ(ERR_OK, errCode);
+    EXPECT_EQ(ERR_OK, errCode);
 
     remoteMocker->sendRequestResult_ = 1;
     errCode = proxy2.SetScreenRotationLockedFromJs(isLocked, dmError_);
-    ASSERT_EQ(remoteMocker->sendRequestResult_, errCode);
+    EXPECT_EQ(remoteMocker->sendRequestResult_, errCode);
 }
 }
 } // namespace Rosen

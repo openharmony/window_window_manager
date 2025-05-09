@@ -75,7 +75,7 @@ public:
     DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
-    virtual bool GetKeyboardState();
+    bool GetKeyboardState();
 private:
     static inline DMError ConvertToDMError(ErrCode errCode, int32_t dmError);
     sptr<IRemoteObject> Remote()

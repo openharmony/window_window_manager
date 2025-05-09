@@ -25,8 +25,7 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
@@ -172,7 +171,7 @@ HWTEST_F(DisplayManagerStubTest, OnRemoteRequest06, TestSize.Level1)
     data.WriteInterfaceToken(DisplayManagerStub::GetDescriptor());
 
     auto code = static_cast<uint32_t>(IDisplayManagerIpcCode::
-        COMMAND_CREATE_VIRTUAL_SCREEN_IN_VIRTUALSCREENOPTION_IN_IREMOTEOBJECT_OUT_UNSIGNED_LONG_IN_IBUFFERPRODUCER);
+        COMMAND_CREATE_VIRTUAL_SCREEN_IN_DMVIRTUALSCREENOPTION_IN_IREMOTEOBJECT_OUT_UNSIGNED_LONG_IN_IBUFFERPRODUCER);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -1077,25 +1076,4 @@ HWTEST_F(DisplayManagerStubTest, OnRemoteRequest51, TestSize.Level1)
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
-
-/**
- * @tc.name: OnRemoteRequest48
- * @tc.desc: test DisplayManagerStubTest::OnRemoteRequest
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerStubTest, OnRemoteRequest48, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(DisplayManagerStub::GetDescriptor());
-
-    uint32_t code = static_cast<uint32_t>(
-        DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION);
-
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen

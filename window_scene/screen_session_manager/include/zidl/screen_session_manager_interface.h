@@ -351,11 +351,11 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual void SetDefaultMultiScreenModeWhenSwitchUser() {};
-    virtual void NotifyExtendScreenCreateFinish() {};
-    virtual void NotifyExtendScreenDestroyFinish() {};
-    virtual void NotifyScreenMaskAppear() {};
-    virtual bool GetKeyboardState() { return false; };
+    virtual void SetDefaultMultiScreenModeWhenSwitchUser() {}
+    virtual void NotifyExtendScreenCreateFinish() {}
+    virtual void NotifyExtendScreenDestroyFinish() {}
+    virtual void NotifyScreenMaskAppear() {}
+    virtual bool GetKeyboardState() { return false; }
     virtual uint32_t GetDeviceStatus() { return 0; }
 };
 } // namespace Rosen

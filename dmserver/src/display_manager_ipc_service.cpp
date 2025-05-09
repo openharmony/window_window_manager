@@ -64,6 +64,7 @@ ErrCode DisplayManagerIpcService::GetDisplayInfoById(uint64_t displayId, sptr<Di
 {
     displayInfo = displayManagerService_.GetDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayInfoById failed, displayId: %{public}" PRIu64, displayId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -73,6 +74,7 @@ ErrCode DisplayManagerIpcService::GetVisibleAreaDisplayInfoById(uint64_t display
 {
     displayInfo = displayManagerService_.GetVisibleAreaDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed, displayId: %{public}" PRIu64, displayId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -82,6 +84,7 @@ ErrCode DisplayManagerIpcService::GetDisplayInfoByScreen(uint64_t screenId, sptr
 {
     displayInfo = displayManagerService_.GetDisplayInfoByScreen(screenId);
     if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplayInfoByScreen failed, screenId: %{public}" PRIu64, screenId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -132,6 +135,8 @@ ErrCode DisplayManagerIpcService::GetDisplaySnapshot(uint64_t displayId, int32_t
     pixelMap = displayManagerService_.GetDisplaySnapshot(displayId, &errorCodeOut, isUseDma, isCaptureFullOfScreen);
     errorCode = static_cast<int32_t>(errorCodeOut);
     if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetDisplaySnapshot failed, displayId: %{public}" PRIu64 ", errorCode: %{public}d",
+            displayId, errorCode);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -179,7 +184,7 @@ ErrCode DisplayManagerIpcService::SetScreenGamutMap(uint64_t screenId, uint32_t 
 
 ErrCode DisplayManagerIpcService::SetScreenColorTransform(uint64_t screenId)
 {
-    (void)displayManagerService_.SetScreenColorTransform(screenId);
+    displayManagerService_.SetScreenColorTransform(screenId);
     return ERR_OK;
 }
 
@@ -272,6 +277,7 @@ ErrCode DisplayManagerIpcService::GetCutoutInfo(uint64_t displayId, sptr<CutoutI
 {
     cutoutInfo = displayManagerService_.GetCutoutInfo(displayId);
     if (cutoutInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetCutoutInfo failed, displayId: %{public}" PRIu64, displayId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -328,6 +334,7 @@ ErrCode DisplayManagerIpcService::GetScreenInfoById(uint64_t screenId, sptr<Scre
 {
     screenInfo = displayManagerService_.GetScreenInfoById(screenId);
     if (screenInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenInfoById failed, screenId: %{public}" PRIu64, screenId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;
@@ -337,6 +344,7 @@ ErrCode DisplayManagerIpcService::GetScreenGroupInfoById(uint64_t screenId, sptr
 {
     screenGroupInfo = displayManagerService_.GetScreenGroupInfoById(screenId);
     if (screenGroupInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenGroupInfoById failed, screenId: %{public}" PRIu64, screenId);
         return ERR_INVALID_DATA;
     }
     return ERR_OK;

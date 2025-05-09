@@ -14,6 +14,7 @@
  */
 
 #include "dm_virtual_screen_option.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 DmVirtualScreenOption::DmVirtualScreenOption(VirtualScreenOption option) : option_(std::move(option))
@@ -39,11 +40,13 @@ DmVirtualScreenOption* DmVirtualScreenOption::Unmarshalling(Parcel& parcel)
     if (!(parcel.ReadString(name) && parcel.ReadUint32(width) && parcel.ReadUint32(height) &&
         parcel.ReadFloat(density) && parcel.ReadInt32(flags) && parcel.ReadBool(isForShot) &&
         parcel.ReadUInt64Vector(&missionIds))) {
+        TLOGE(WmsLogTag::DMS, "read from parcel failed");
         return nullptr;
     }
 
     auto* virScrOption = new (std::nothrow) DmVirtualScreenOption();
     if (virScrOption == nullptr) {
+        TLOGE(WmsLogTag::DMS, "new DmVirtualScreenOption failed");
         return nullptr;
     }
 

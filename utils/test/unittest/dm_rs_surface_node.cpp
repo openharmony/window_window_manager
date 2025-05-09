@@ -47,12 +47,12 @@ HWTEST(DmRsSurfaceNodeTest, MarshallingUnmarshalling02, TestSize.Level1)
     bool ret = dmRsSurfaceNode.Marshalling(parcel);
     ASSERT_TRUE(ret);
 
-    DmRsSurfaceNode* node = DmRsSurfaceNode::Unmarshalling(parcel);
-    ASSERT_TRUE(node->GetSurfaceNode()->isRenderServiceNode_);
-    ASSERT_EQ(node->GetSurfaceNode()->id_, 10);
-    ASSERT_EQ(node->GetSurfaceNode()->isTextureExportNode_, rsSurfaceNodeConfig.isTextureExportNode);
-    ASSERT_EQ(node->GetSurfaceNode()->name_, rsSurfaceNodeConfig.SurfaceNodeName);
+    sptr<DmRsSurfaceNode> node = DmRsSurfaceNode::Unmarshalling(parcel);
     ASSERT_NE(node, nullptr);
-    delete node;
+    EXPECT_TRUE(node->GetSurfaceNode()->isRenderServiceNode_);
+    EXPECT_EQ(node->GetSurfaceNode()->id_, 10);
+    EXPECT_EQ(node->GetSurfaceNode()->isTextureExportNode_, rsSurfaceNodeConfig.isTextureExportNode);
+    EXPECT_EQ(node->GetSurfaceNode()->name_, rsSurfaceNodeConfig.SurfaceNodeName);
+    EXPECT_NE(node->surfaceNode_, nullptr);
 }
 } // namespace OHOS::Rosen
