@@ -13390,11 +13390,11 @@ void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId
     auto defaultScreenDisplayInfo = defaultScreenDisplay->GetDisplayInfo();
     if (defaultScreenDisplayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "get display info failed of defaultScreenDisplay");
-        return ;
+        return;
     }
-    int defaultScreenPhyHight = defaultScreenDisplayInfo->GetPhysicalHeight();
+    int32_t defaultScreenPhyHight = defaultScreenDisplayInfo->GetPhysicalHeight();
     auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
-    int screenHightByDisplayId = defaultScreenPhyHight;
+    int32_t screenHightByDisplayId = defaultScreenPhyHight;
     if (screenDisplay != nullptr) {
         screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
     }
