@@ -453,6 +453,7 @@ public:
     void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, uint32_t rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
+    void ConfigSupportFunctionType(SupportFunctionType funcType);
 
     /*
      * UIExtension

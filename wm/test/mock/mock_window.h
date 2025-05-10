@@ -66,6 +66,16 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction));
 };
 
+class MockIKeyboardWillShowListener : public IKeyboardWillShowListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillShow, void());
+};
+        
+class MockIKeyboardWillHideListener : public IKeyboardWillHideListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillHide, void());
+};
+
 class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {
 public:
     MOCK_METHOD0(OnKeyboardShow, void());

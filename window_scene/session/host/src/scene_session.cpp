@@ -2946,6 +2946,19 @@ void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
     }, __func__);
 }
 
+void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func)
+{
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: session or func is null", where);
+            return;
+        }
+        session->updateTransitionAnimationFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
+}
+
 bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
@@ -7703,6 +7716,48 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const 
     }, __func__);
 }
 
+void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const WSRect& beginRect, const WSRect& endRect,
+    bool withAnimation, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    PostTask([weakThis = wptr(this), isKeyboardShow, beginRect, endRect, withAnimation,
+        rsTransaction, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+                where, session->GetPersistentId());
+            return;
+        }
+        if (isKeyboardShow && !session->isKeyboardWillShowRegistered_.load()) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
+            return;
+        }
+        if (!isKeyboardShow && !session->isKeyboardWillHideRegistered_.load()) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
+            return;
+        }
+        KeyboardAnimationInfo keyboardAnimationInfo;
+        keyboardAnimationInfo.beginRect = SessionHelper::TransferToRect(beginRect);
+        keyboardAnimationInfo.endRect = SessionHelper::TransferToRect(endRect);
+        keyboardAnimationInfo.isShow = isKeyboardShow;
+        keyboardAnimationInfo.withAnimation = withAnimation;
+        session->sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+        }, __func__);
+}
+
+void SceneSession::NotifyKeyboardWillShowRegistered(bool registered)
+{
+    isKeyboardWillShowRegistered_.store(registered);
+}
+
+void SceneSession::NotifyKeyboardWillHideRegistered(bool registered)
+{
+    isKeyboardWillHideRegistered_.store(registered);
+}
+
 void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 {
     isKeyboardDidShowRegistered_.store(registered);
@@ -7936,5 +7991,17 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SetCurrentRotation(currentRotation);
+}
+
+/**
+ * Window Transition Animation For PC
+ */
+WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    if (updateTransitionAnimationFunc_) {
+        updateTransitionAnimationFunc_(transitionType, animation);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

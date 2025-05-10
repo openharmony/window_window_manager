@@ -305,8 +305,10 @@ public:
         return WSError::WS_OK;
     }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
-    virtual void NotifyKeyboardDidShowRegistered(bool registered) { };
-    virtual void NotifyKeyboardDidHideRegistered(bool registered) { };
+    virtual void NotifyKeyboardWillShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardWillHideRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidHideRegistered(bool registered) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
@@ -421,6 +423,30 @@ public:
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set success.
+     */
+    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Rosen
 

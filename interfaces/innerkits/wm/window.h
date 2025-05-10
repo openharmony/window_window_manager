@@ -623,6 +623,34 @@ public:
 };
 
 /**
+ * @class IKeyboardWillShowListener
+ *
+ * @brief IKeyboardWillShowListener is used to observe keyboard show animation begins.
+ */
+class IKeyboardWillShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation begins.
+     */
+    virtual void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
+};
+
+/**
+ * @class IKeyboardWillHideListener
+ *
+ * @brief IKeyboardWillHideListener is used to observe keyboard hide animation begins.
+ */
+class IKeyboardWillHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation begins.
+     */
+    virtual void OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
+};
+
+/**
  * @class IKeyboardDidShowListener
  *
  * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
@@ -2408,6 +2436,13 @@ public:
     virtual bool IsPcWindow() const { return false; }
 
     /**
+     * @brief Is pad window or not.
+     *
+     * @return True means pc window, false means the opposite.
+     */
+    virtual bool IsPadWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -3614,12 +3649,80 @@ public:
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set window transition aniamtion success, others means failed.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
+
      /**
      * @brief Get is subwindow support maximize.
      *
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Register a listener for observing keyboard show animation begins.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation start listener.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register a listener for observing keyboard hide animation begins.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+ 
+    /**
+     * @brief Unregister keyboard hide animation start listener.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register keyboard show animation completion listener.

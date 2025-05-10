@@ -178,6 +178,13 @@ public:
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
+
+    /*
+     * Window Transition Animation For PC
+     */
+    static napi_value SetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    static napi_value GetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+
     /*
      * Window Decor
      */
@@ -369,6 +376,12 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Transition Animation For PC
+     */
+    napi_value OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor
