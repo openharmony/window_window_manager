@@ -295,6 +295,19 @@ public:
     void SetSubWindowZLevel(int32_t zLevel);
 
     /**
+     * @brief Set sub window outline enabled
+     *
+     * @param outlineEnabled whether show sub window outline
+     */
+    void SetSubWindowOutlineEnabled(bool outlineEnabled);
+
+    /**
+     * @brief Get sub window outline enabled
+     *
+     */
+    bool IsSubWindowOutlineEnabled() const;
+
+    /**
      * @brief Set real parent id of UIExtension
      *
      * @param realParentId real parent id of UIExtension
@@ -620,6 +633,7 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool subWindowMaximizeSupported_ = false;
+    bool subWindowOutlineEnabled_ = false;
     bool onlySupportSceneBoard_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
