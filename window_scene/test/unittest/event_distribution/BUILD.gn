@@ -40,6 +40,7 @@ ohos_unittest("ws_scene_input_manager_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "input:libmmi-napi",
     "safwk:system_ability_fwk",

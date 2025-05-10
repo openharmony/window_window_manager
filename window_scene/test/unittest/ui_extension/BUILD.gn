@@ -33,6 +33,7 @@ ohos_unittest("extension_data_handler_test") {
   deps = [ ws_unittest_common ]
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "googletest:gmock",
     "googletest:gtest",
     "googletest:gtest_main",
@@ -50,6 +51,7 @@ ohos_unittest("ws_extension_session_manager_test") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-napi",
   ]
 }
@@ -74,6 +76,7 @@ ohos_unittest("ws_extension_session_test") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "input:libmmi-napi",
   ]
 }
