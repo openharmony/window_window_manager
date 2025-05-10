@@ -2037,6 +2037,26 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 }
 
+/** @note @window.hierarchy */
+WMError WindowSessionImpl::RaiseToAppTopOnDrag()
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "must be app window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    if (WindowHelper::IsSubWindow(GetType())) {
+        return static_cast<WMError>(hostSession->RaiseToAppTop());
+    }
+    return static_cast<WMError>(hostSession->RaiseAppMainWindowToTop());
+}
+
 bool WindowSessionImpl::IsMainWindowTopmost() const
 {
     return property_->IsMainWindowTopmost();
