@@ -50,17 +50,17 @@ constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (dpiObserver_) {
-        TLOGD(WmsLogTag::DMS_SSM, "setting dpi observer is registered");
+        TLOGD(WmsLogTag::DMS, "setting dpi observer is registered");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
     if (dpiObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
     }
     ErrCode ret = provider.RegisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         dpiObserver_ = nullptr;
     }
 }
@@ -68,13 +68,13 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
 void ScreenSettingHelper::UnregisterSettingDpiObserver()
 {
     if (dpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS_SSM, "dpiObserver_ is nullptr");
+        TLOGD(WmsLogTag::DMS, "dpiObserver_ is nullptr");
         return;
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.UnregisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     dpiObserver_ = nullptr;
 }
@@ -90,7 +90,7 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
     int32_t getValue;
     ErrCode ret = settingData.GetIntValue(key, getValue);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     value = static_cast<uint32_t>(getValue);
@@ -103,7 +103,7 @@ bool ScreenSettingHelper::GetSettingValue(const std::string& key, std::string& v
     std::string getValue = "";
     ErrCode ret = provider.GetStringValue(key, getValue);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     value = getValue;
@@ -115,7 +115,7 @@ bool ScreenSettingHelper::SetSettingValue(const std::string& key, uint32_t value
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.PutIntValue(key, value, false);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
     return true;
@@ -126,7 +126,7 @@ bool ScreenSettingHelper::SetSettingValue(const std::string& key, const std::str
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.PutStringValue(key, value, false);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
     return true;
@@ -137,7 +137,7 @@ bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string&
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = provider.PutIntValue(key, dpi, false);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "put int value failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "put int value failed, ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -146,17 +146,17 @@ bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string&
 void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFunc func)
 {
     if (castObserver_) {
-        TLOGD(WmsLogTag::DMS_SSM, "setting cast observer is registered");
+        TLOGD(WmsLogTag::DMS, "setting cast observer is registered");
         return;
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
     if (castObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
     }
     ErrCode ret = castProvider.RegisterObserver(castObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         castObserver_ = nullptr;
     }
 }
@@ -164,13 +164,13 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
 void ScreenSettingHelper::UnregisterSettingCastObserver()
 {
     if (castObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS_SSM, "castObserver_ is nullptr");
+        TLOGD(WmsLogTag::DMS, "castObserver_ is nullptr");
         return;
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = castProvider.UnregisterObserver(castObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     castObserver_ = nullptr;
 }
@@ -180,7 +180,7 @@ bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = castProvider.GetBoolValue(key, enable);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -189,17 +189,17 @@ bool ScreenSettingHelper::GetSettingCast(bool& enable, const std::string& key)
 void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::UpdateFunc func)
 {
     if (rotationObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "setting rotation observer is registered");
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     rotationObserver_ = settingProvider.CreateObserver(SETTING_ROTATION_KEY, func);
     if (rotationObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
     }
     ErrCode ret = settingProvider.RegisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         rotationObserver_ = nullptr;
     }
 }
@@ -207,13 +207,13 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
 void ScreenSettingHelper::UnregisterSettingRotationObserver()
 {
     if (rotationObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "rotationObserver_ is nullptr");
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.UnregisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
     }
     rotationObserver_ = nullptr;
 }
@@ -223,10 +223,10 @@ void ScreenSettingHelper::SetSettingRotation(int32_t rotation)
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.PutIntValue(SETTING_ROTATION_KEY, rotation, true);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS_SSM, "succeed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotation(int32_t& rotation, const std::string& key)
@@ -234,10 +234,10 @@ bool ScreenSettingHelper::GetSettingRotation(int32_t& rotation, const std::strin
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValue(key, rotation);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
-    TLOGE(WmsLogTag::DMS_SSM, "current rotation:%{public}d", rotation);
+    TLOGE(WmsLogTag::DMS, "current rotation:%{public}d", rotation);
     return true;
 }
 
@@ -246,10 +246,10 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.PutIntValue(SETTING_ROTATION_SCREEN_ID_KEY, screenId, false);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS_SSM, "succeed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
@@ -257,16 +257,16 @@ bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const st
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValue(key, screenId);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
-    TLOGE(WmsLogTag::DMS_SSM, "current rotation screen id:%{public}d", screenId);
+    TLOGE(WmsLogTag::DMS, "current rotation screen id:%{public}d", screenId);
     return true;
 }
 
 std::string ScreenSettingHelper::RemoveInvalidChar(const std::string& input)
 {
-    TLOGW(WmsLogTag::DMS_SSM, "input string: %{public}s", input.c_str());
+    TLOGW(WmsLogTag::DMS, "input string: %{public}s", input.c_str());
     std::string resultString = "";
     for (char character : input) {
         if (std::isdigit(character) || character == ' ' || character == ',' ||
@@ -280,9 +280,9 @@ std::string ScreenSettingHelper::RemoveInvalidChar(const std::string& input)
 bool ScreenSettingHelper::SplitString(std::vector<std::string>& splitValues, const std::string& input,
     char delimiter)
 {
-    TLOGI(WmsLogTag::DMS_SSM, "input string: %{public}s", input.c_str());
+    TLOGI(WmsLogTag::DMS, "input string: %{public}s", input.c_str());
     if (input.size() == 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "noting in input string");
+        TLOGE(WmsLogTag::DMS, "noting in input string");
         return false;
     }
     std::stringstream stream(input);
@@ -291,7 +291,7 @@ bool ScreenSettingHelper::SplitString(std::vector<std::string>& splitValues, con
         splitValues.push_back(token);
     }
     if (splitValues.size() == 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, noting split");
+        TLOGE(WmsLogTag::DMS, "failed, noting split");
         return false;
     }
     return true;
@@ -331,21 +331,21 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return multiScreenInfoMap;
     }
     std::string validString = RemoveInvalidChar(value);
     std::vector<std::string> restoredScreen = {};
     bool split = SplitString(restoredScreen, validString, ',');
     if (!split) {
-        TLOGE(WmsLogTag::DMS_SSM, "split screen failed");
+        TLOGE(WmsLogTag::DMS, "split screen failed");
         return multiScreenInfoMap;
     }
     for (auto infoString : restoredScreen) {
         std::vector<std::string> infoVector = {};
         split = SplitString(infoVector, infoString, ';');
         if (!split || infoVector.size() != VALID_MULTI_SCREEN_INFO_SIZE) {
-            TLOGE(WmsLogTag::DMS_SSM, "split info failed");
+            TLOGE(WmsLogTag::DMS, "split info failed");
             continue;
         }
         MultiScreenInfo info = {};
@@ -359,7 +359,7 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
             continue;
         }
         if (info.mainScreenOption.screenId_ == info.secondaryScreenOption.screenId_) {
-            TLOGE(WmsLogTag::DMS_SSM, "invalid screen of relative position!");
+            TLOGE(WmsLogTag::DMS, "invalid screen of relative position!");
             continue;
         }
         multiScreenInfoMap[infoVector[INDEX_SCREEN_INFO]] = info;
@@ -373,27 +373,27 @@ bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string
     bool split = SplitString(screenMode, inputString, ' ');
     uint32_t dataSize = screenMode.size();
     if (!split || dataSize != EXPECT_SCREEN_MODE_SIZE) {
-        TLOGE(WmsLogTag::DMS_SSM, "split failed, data size: %{public}d", dataSize);
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
         return false;
     }
 
     uint32_t mode = 0;
     if (!IsNumber(screenMode[DATA_INDEX_ZERO])) {
-        TLOGE(WmsLogTag::DMS_SSM, "not number");
+        TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         mode = static_cast<uint32_t>(strtoll(screenMode[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
-        TLOGW(WmsLogTag::DMS_SSM, "internal screen mode: %{public}d", mode);
+        TLOGW(WmsLogTag::DMS, "internal screen mode: %{public}d", mode);
         if (!UpdateScreenMode(info, mode, false)) {
             return false;
         }
     }
     if (!IsNumber(screenMode[DATA_INDEX_ONE])) {
-        TLOGE(WmsLogTag::DMS_SSM, "not number");
+        TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         mode = static_cast<uint32_t>(strtoll(screenMode[DATA_INDEX_ONE].c_str(), nullptr, PARAM_NUM_TEN));
-        TLOGW(WmsLogTag::DMS_SSM, "external screen mode: %{public}d", mode);
+        TLOGW(WmsLogTag::DMS, "external screen mode: %{public}d", mode);
         if (!UpdateScreenMode(info, mode, true)) {
             return false;
         }
@@ -410,7 +410,7 @@ bool ScreenSettingHelper::UpdateScreenMode(MultiScreenInfo& info, uint32_t mode,
     } else if (mode == SCREEN_EXTEND_IN_DATA) {
         info.multiScreenMode = MultiScreenMode::SCREEN_EXTEND;
     } else {
-        TLOGE(WmsLogTag::DMS_SSM, "invalid mode!");
+        TLOGE(WmsLogTag::DMS, "invalid mode!");
         return false;
     }
     return true;
@@ -422,7 +422,7 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
     bool split = SplitString(relativePosition, inputString, ' ');
     uint32_t dataSize = relativePosition.size();
     if (!split || dataSize != EXPECT_RELATIVE_POSITION_SIZE) {
-        TLOGE(WmsLogTag::DMS_SSM, "split failed, data size: %{public}d", dataSize);
+        TLOGE(WmsLogTag::DMS, "split failed, data size: %{public}d", dataSize);
         return false;
     }
 
@@ -430,24 +430,24 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
     uint32_t startX = 0;
     uint32_t startY = 0;
     if (!IsNumber(relativePosition[DATA_INDEX_ZERO])) {
-        TLOGE(WmsLogTag::DMS_SSM, "not number");
+        TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         screenId = static_cast<ScreenId>(strtoll(relativePosition[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
     }
     if (!IsNumber(relativePosition[DATA_INDEX_ONE])) {
-        TLOGE(WmsLogTag::DMS_SSM, "not number");
+        TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         startX = static_cast<uint32_t>(strtoll(relativePosition[DATA_INDEX_ONE].c_str(), nullptr, PARAM_NUM_TEN));
     }
     if (!IsNumber(relativePosition[DATA_INDEX_TWO])) {
-        TLOGE(WmsLogTag::DMS_SSM, "not number");
+        TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
         startY = static_cast<uint32_t>(strtoll(relativePosition[DATA_INDEX_TWO].c_str(), nullptr, PARAM_NUM_TEN));
     }
-    TLOGW(WmsLogTag::DMS_SSM, "screenId: %{public}" PRIu64 ", startX: %{public}d, startY: %{public}d",
+    TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", startX: %{public}d, startY: %{public}d",
         screenId, startX, startY);
 
     ScreenId internalScreenId = ScreenSessionManager::GetInstance().GetInternalScreenId();
@@ -474,25 +474,25 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
             return static_cast<ScreenShape>(std::stoi(shape));
         }
     }
-    TLOGI(WmsLogTag::DMS_SSM, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
+    TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
 }
 
 void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
 {
     if (screenSkipProtectedWindowObserver_ != nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "setting rotation observer is registered");
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
     if (screenSkipProtectedWindowObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
     }
     ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
         SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         screenSkipProtectedWindowObserver_ = nullptr;
     }
 }
@@ -500,14 +500,14 @@ void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(Setti
 void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
 {
     if (screenSkipProtectedWindowObserver_ == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "rotationObserver_ is nullptr");
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
         return;
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.UnregisterObserverByTable(screenSkipProtectedWindowObserver_,
         SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
     }
     screenSkipProtectedWindowObserver_ = nullptr;
 }
@@ -518,7 +518,7 @@ bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, cons
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
     enable = (value == 1);
@@ -528,18 +528,18 @@ bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, cons
 void ScreenSettingHelper::RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func)
 {
     if (wireCastObserver_) {
-        TLOGD(WmsLogTag::DMS_SSM, "setting wire cast observer is registered");
+        TLOGD(WmsLogTag::DMS, "setting wire cast observer is registered");
         return;
     }
     SettingProvider& wireCastProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     wireCastObserver_ = wireCastProvider.CreateObserver(SETTING_CAST_KEY, func);
     if (wireCastObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
         return;
     }
     ErrCode ret = wireCastProvider.RegisterObserver(wireCastObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         wireCastObserver_ = nullptr;
     }
 }
@@ -547,13 +547,13 @@ void ScreenSettingHelper::RegisterSettingWireCastObserver(SettingObserver::Updat
 void ScreenSettingHelper::UnregisterSettingWireCastObserver()
 {
     if (wireCastObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS_SSM, "wireCastObserver_ is nullptr");
+        TLOGD(WmsLogTag::DMS, "wireCastObserver_ is nullptr");
         return;
     }
     SettingProvider& wireCastProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = wireCastProvider.UnregisterObserver(wireCastObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     wireCastObserver_ = nullptr;
 }
@@ -561,18 +561,18 @@ void ScreenSettingHelper::UnregisterSettingWireCastObserver()
 void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (extendScreenDpiObserver_ != nullptr) {
-        TLOGD(WmsLogTag::DMS_SSM, "setting extend dpi observer is registered");
+        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
         return;
     }
     SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     extendScreenDpiObserver_ = extendScreenProvider.CreateObserver(SETTING_EXTEND_DPI_KEY, func);
     if (extendScreenDpiObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "create observer failed");
+        TLOGE(WmsLogTag::DMS, "create observer failed");
         return;
     }
     ErrCode ret = extendScreenProvider.RegisterObserver(extendScreenDpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         extendScreenDpiObserver_ = nullptr;
     }
 }
@@ -580,13 +580,13 @@ void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver
 void ScreenSettingHelper::UnRegisterSettingExtendScreenDpiObserver()
 {
     if (extendScreenDpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS_SSM, "extendScreenDpiObserver_ is nullptr");
+        TLOGD(WmsLogTag::DMS, "extendScreenDpiObserver_ is nullptr");
         return;
     }
     SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = extendScreenProvider.UnregisterObserver(extendScreenDpiObserver_);
     if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     extendScreenDpiObserver_ = nullptr;
 }
@@ -597,10 +597,10 @@ bool ScreenSettingHelper::GetSettingExtendScreenDpi(bool& enable, const std::str
     int32_t value = INDEX_EXTEND_SCREEN_DPI_POSITION;
     ErrCode ret = extendScreenProvider.GetIntValue(key, value);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS_SSM, "failed, ret=%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
-    TLOGI(WmsLogTag::DMS_SSM, "get setting extend dpi is %{public}d", value);
+    TLOGI(WmsLogTag::DMS, "get setting extend dpi is %{public}d", value);
     enable = static_cast<bool>(value);
     return true;
 }

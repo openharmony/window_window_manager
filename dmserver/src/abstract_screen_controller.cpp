@@ -54,13 +54,13 @@ AbstractScreenController::~AbstractScreenController() = default;
 
 void AbstractScreenController::Init()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "screen controller init");
+    TLOGI(WmsLogTag::DMS, "screen controller init");
     RegisterRsScreenConnectionChangeListener();
 }
 
 void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "RegisterRsScreenConnectionChangeListener");
+    TLOGI(WmsLogTag::DMS, "RegisterRsScreenConnectionChangeListener");
     auto res = rsInterface_.SetScreenChangeCallback(
         [this](ScreenId rsScreenId, ScreenEvent screenEvent, ScreenChangeReason reason) {
             OnRsScreenConnectionChange(rsScreenId, screenEvent);
@@ -107,14 +107,14 @@ const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNode
     static std::shared_ptr<RSDisplayNode> notFound = nullptr;
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screen is nullptr");
+        TLOGE(WmsLogTag::DMS, "screen is nullptr");
         return notFound;
     }
     if (screen->rsDisplayNode_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "rsDisplayNode_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "rsDisplayNode_ is nullptr");
         return notFound;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
+    TLOGI(WmsLogTag::DMS, "screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
         screen->dmsId_, screen->rsDisplayNode_->GetId());
     return screen->rsDisplayNode_;
 }
@@ -124,17 +124,17 @@ void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, ScreenId paren
 {
     sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
     if (abstractScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UpdateRSTree] can not find abstractScreen");
+        TLOGE(WmsLogTag::DMS, "[UpdateRSTree] can not find abstractScreen");
         return;
     }
     if (isMultiDisplay) {
         sptr<AbstractScreen> parentAbstractScreen = GetAbstractScreen(parentScreenId);
         if (parentAbstractScreen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "[UpdateRSTree] can not find parentAbstractScreen");
+            TLOGE(WmsLogTag::DMS, "[UpdateRSTree] can not find parentAbstractScreen");
             return;
         }
         if (parentAbstractScreen->rsDisplayNode_ == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "rsDisplayNode of parentAbstractScreen is nullptr");
+            TLOGE(WmsLogTag::DMS, "rsDisplayNode of parentAbstractScreen is nullptr");
             return;
         }
         abstractScreen->UpdateDisplayGroupRSTree(surfaceNode, parentAbstractScreen->rsDisplayNode_->GetId(), isAdd);
@@ -148,7 +148,7 @@ DMError AbstractScreenController::AddSurfaceNodeToScreen(ScreenId dmsScreenId,
 {
     sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
     if (abstractScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "Can not find abstractScreen");
+        TLOGE(WmsLogTag::DMS, "Can not find abstractScreen");
         return DMError::DM_ERROR_NULLPTR;
     }
     return abstractScreen->AddSurfaceNode(surfaceNode, onTop);
@@ -159,7 +159,7 @@ DMError AbstractScreenController::RemoveSurfaceNodeFromScreen(ScreenId dmsScreen
 {
     sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
     if (abstractScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "Can not find abstractScreen");
+        TLOGE(WmsLogTag::DMS, "Can not find abstractScreen");
         return DMError::DM_ERROR_NULLPTR;
     }
     return abstractScreen->RemoveSurfaceNode(surfaceNode);
@@ -167,11 +167,11 @@ DMError AbstractScreenController::RemoveSurfaceNodeFromScreen(ScreenId dmsScreen
 
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId) const
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
+    TLOGD(WmsLogTag::DMS, "GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenMap_.find(dmsScreenId);
     if (iter == dmsScreenMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "did not find screen:%{public}" PRIu64"", dmsScreenId);
+        TLOGE(WmsLogTag::DMS, "did not find screen:%{public}" PRIu64"", dmsScreenId);
         return nullptr;
     }
     return iter->second;
@@ -182,7 +182,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenGroupMap_.find(dmsScreenId);
     if (iter == dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "did not find screen:%{public}" PRIu64"", dmsScreenId);
+        TLOGE(WmsLogTag::DMS, "did not find screen:%{public}" PRIu64"", dmsScreenId);
         return nullptr;
     }
     return iter->second;
@@ -194,16 +194,16 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
         defaultRsScreenId_ = rsInterface_.GetDefaultScreenId();
     }
     if (defaultRsScreenId_ == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::DMS_DMSERVER, "rsDefaultId is invalid.");
+        TLOGW(WmsLogTag::DMS, "rsDefaultId is invalid.");
         return SCREEN_ID_INVALID;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId defaultDmsScreenId;
     if (screenIdManager_.ConvertToDmsScreenId(defaultRsScreenId_, defaultDmsScreenId)) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "screen:%{public}" PRIu64"", defaultDmsScreenId);
+        TLOGD(WmsLogTag::DMS, "screen:%{public}" PRIu64"", defaultDmsScreenId);
         return defaultDmsScreenId;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "default screen is null, try to get.");
+    TLOGI(WmsLogTag::DMS, "default screen is null, try to get.");
     ProcessScreenConnected(defaultRsScreenId_);
     return screenIdManager_.ConvertToDmsScreenId(defaultRsScreenId_);
 }
@@ -229,7 +229,7 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
     }
     for (auto& iter : dmsScreenMap_) {
         if (iter.second != nullptr) {
-            TLOGI(WmsLogTag::DMS_DMSERVER, "dmsScreenId :%{public}" PRIu64"", iter.first);
+            TLOGI(WmsLogTag::DMS, "dmsScreenId :%{public}" PRIu64"", iter.first);
             abstractScreenCallback_->onConnect_(iter.second);
         }
     }
@@ -237,7 +237,7 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
 
 void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "RS screen event. rsScreenId:%{public}" PRIu64", defaultRsScreenId_:"
+    TLOGI(WmsLogTag::DMS, "RS screen event. rsScreenId:%{public}" PRIu64", defaultRsScreenId_:"
         "%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint64_t>(defaultRsScreenId_),
         static_cast<uint32_t>(screenEvent));
     if (screenEvent == ScreenEvent::CONNECTED) {
@@ -251,7 +251,7 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
         };
         controllerHandler_->PostTask(task, "wms:OnRsScreenConnectionChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
     } else {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
+        TLOGE(WmsLogTag::DMS, "unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
     }
 }
 
@@ -263,33 +263,33 @@ void AbstractScreenController::ProcessDefaultScreenReconnected(ScreenId rsScreen
     }
     ScreenId dmsScreenId;
     if (!screenIdManager_.ConvertToDmsScreenId(rsScreenId, dmsScreenId)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_",
+        TLOGE(WmsLogTag::DMS, "disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_",
             rsScreenId);
         return;
     }
-    TLOGD(WmsLogTag::DMS_DMSERVER, "rsScreenId=%{public}" PRIu64", dmsScreenId=%{public}" PRIu64", "
+    TLOGD(WmsLogTag::DMS, "rsScreenId=%{public}" PRIu64", dmsScreenId=%{public}" PRIu64", "
         "defaultRsScreenId: %{public}" PRIu64"", rsScreenId, dmsScreenId, static_cast<uint64_t>(defaultRsScreenId_));
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
     if (dmsScreenMapIter != dmsScreenMap_.end()) {
         auto screen = dmsScreenMapIter->second;
         if (screen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screen is nullptr");
+            TLOGE(WmsLogTag::DMS, "screen is nullptr");
             return;
         }
         auto groupDmsId = screen->lastGroupDmsId_;
         auto iter = dmsScreenGroupMap_.find(groupDmsId);
         if (iter == dmsScreenGroupMap_.end()) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "groupDmsId: %{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+            TLOGE(WmsLogTag::DMS, "groupDmsId: %{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
             return;
         }
         sptr<AbstractScreenGroup> screenGroup = iter->second;
         if (screenGroup == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screenGroup is nullptr");
+            TLOGE(WmsLogTag::DMS, "screenGroup is nullptr");
             return;
         }
         Point point;
         if (!screenGroup->AddChild(screen, point)) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "fail to add screen to group. screen: %{public}" PRIu64"", screen->dmsId_);
+            TLOGE(WmsLogTag::DMS, "fail to add screen to group. screen: %{public}" PRIu64"", screen->dmsId_);
             return;
         }
 
@@ -298,17 +298,17 @@ void AbstractScreenController::ProcessDefaultScreenReconnected(ScreenId rsScreen
         const uint32_t level = 165;
         RSInterfaces::GetInstance().SetScreenBacklight(rsScreenId, level);
     } else {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "can't find screen in dmsScreenMap, dmsScreenId: %{public}" PRIu64"",
+        TLOGE(WmsLogTag::DMS, "can't find screen in dmsScreenMap, dmsScreenId: %{public}" PRIu64"",
             dmsScreenId);
     }
 }
 
 void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "start");
+    TLOGI(WmsLogTag::DMS, "start");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenIdManager_.HasRsScreenId(rsScreenId)) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
+        TLOGD(WmsLogTag::DMS, "reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
         ProcessDefaultScreenReconnected(rsScreenId);
         return;
     }
@@ -323,7 +323,7 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
     if (rsScreenId == rsInterface_.GetDefaultScreenId() && absScreen->rsDisplayNode_ != nullptr) {
         absScreen->screenRequestedOrientation_ = buildInDefaultOrientation_;
         Rotation rotationAfter = absScreen->CalcRotation(absScreen->screenRequestedOrientation_);
-        TLOGD(WmsLogTag::DMS_DMSERVER, "set default rotation to %{public}d for buildin screen", rotationAfter);
+        TLOGD(WmsLogTag::DMS, "set default rotation to %{public}d for buildin screen", rotationAfter);
         sptr<SupportedScreenModes> abstractScreenModes = absScreen->GetActiveScreenMode();
         if (abstractScreenModes != nullptr) {
             float w = abstractScreenModes->width_;
@@ -358,13 +358,13 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
 {
     ScreenId dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
     RSScreenCapability screenCapability = rsInterface_.GetScreenCapability(rsScreenId);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
+    TLOGI(WmsLogTag::DMS, "Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
 
     sptr<AbstractScreen> absScreen =
         new(std::nothrow) AbstractScreen(this, screenCapability.GetName(), dmsScreenId, rsScreenId);
     if (absScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "new AbstractScreen failed.");
+        TLOGE(WmsLogTag::DMS, "new AbstractScreen failed.");
         screenIdManager_.DeleteScreenId(dmsScreenId);
         return nullptr;
     }
@@ -373,7 +373,7 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
 
     if (!InitAbstractScreenModesInfo(absScreen)) {
         screenIdManager_.DeleteScreenId(dmsScreenId);
-        TLOGE(WmsLogTag::DMS_DMSERVER, "InitAndGetScreen failed.");
+        TLOGE(WmsLogTag::DMS, "InitAndGetScreen failed.");
         return nullptr;
     }
     dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
@@ -385,11 +385,11 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
     ScreenId dmsScreenId;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!screenIdManager_.ConvertToDmsScreenId(rsScreenId, dmsScreenId)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_",
+        TLOGE(WmsLogTag::DMS, "disconnect screen, rsScreenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_",
             rsScreenId);
         return;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "disconnect screen, rsScreenId= %{public}" PRIu64", dmsScreenId= %{public}" PRIu64"",
+    TLOGI(WmsLogTag::DMS, "disconnect screen, rsScreenId= %{public}" PRIu64", dmsScreenId= %{public}" PRIu64"",
         rsScreenId, dmsScreenId);
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
     sptr<AbstractScreenGroup> screenGroup;
@@ -428,13 +428,13 @@ bool AbstractScreenController::InitAbstractScreenModesInfo(sptr<AbstractScreen>&
 {
     std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(absScreen->rsId_);
     if (allModes.size() == 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "supported screen mode is 0, screenId=%{public}" PRIu64"", absScreen->rsId_);
+        TLOGE(WmsLogTag::DMS, "supported screen mode is 0, screenId=%{public}" PRIu64"", absScreen->rsId_);
         return false;
     }
     for (const RSScreenModeInfo& rsScreenModeInfo : allModes) {
         sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
         if (info == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "create SupportedScreenModes failed");
+            TLOGE(WmsLogTag::DMS, "create SupportedScreenModes failed");
             return false;
         }
         info->id_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenModeId());
@@ -442,13 +442,13 @@ bool AbstractScreenController::InitAbstractScreenModesInfo(sptr<AbstractScreen>&
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
         absScreen->modes_.push_back(info);
-        TLOGD(WmsLogTag::DMS_DMSERVER, "fill screen idx:%{public}d w/h:%{public}d/%{public}d",
+        TLOGD(WmsLogTag::DMS, "fill screen idx:%{public}d w/h:%{public}d/%{public}d",
             rsScreenModeInfo.GetScreenModeId(), info->width_, info->height_);
     }
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(absScreen->rsId_).GetScreenModeId();
-    TLOGD(WmsLogTag::DMS_DMSERVER, "fill screen activeModeId:%{public}d", activeModeId);
+    TLOGD(WmsLogTag::DMS, "fill screen activeModeId:%{public}d", activeModeId);
     if (static_cast<std::size_t>(activeModeId) >= allModes.size()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:"
+        TLOGE(WmsLogTag::DMS, "activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:"
             "%{public}d/%{public}ud", absScreen->rsId_, activeModeId, static_cast<uint32_t>(allModes.size()));
         return false;
     }
@@ -460,7 +460,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
 {
     sptr<AbstractScreenGroup> res;
     if (dmsScreenGroupMap_.empty()) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "connect the first screen");
+        TLOGI(WmsLogTag::DMS, "connect the first screen");
         res = AddAsFirstScreenLocked(newScreen);
     } else {
         res = AddAsSuccedentScreenLocked(newScreen);
@@ -477,7 +477,7 @@ void AbstractScreenController::RemoveDefaultScreenFromGroupLocked(sptr<AbstractS
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        TLOGE(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
@@ -487,7 +487,7 @@ void AbstractScreenController::RemoveDefaultScreenFromGroupLocked(sptr<AbstractS
     auto rsScreenId = screen->rsId_;
     bool res = screenGroup->RemoveDefaultScreen(screen);
     if (!res) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "RemoveDefaultScreen failed, rsScreenId: %{public}" PRIu64"", rsScreenId);
+        TLOGE(WmsLogTag::DMS, "RemoveDefaultScreen failed, rsScreenId: %{public}" PRIu64"", rsScreenId);
     }
 }
 
@@ -500,12 +500,12 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        TLOGE(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return nullptr;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
     if (!RemoveChildFromGroup(screen, screenGroup)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "RemoveChildFromGroup failed");
+        TLOGE(WmsLogTag::DMS, "RemoveChildFromGroup failed");
         return nullptr;
     }
     return screenGroup;
@@ -515,7 +515,7 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
 {
     bool res = screenGroup->RemoveChild(screen);
     if (!res) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
+        TLOGE(WmsLogTag::DMS, "remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
               screen->dmsId_, screen->groupDmsId_);
         return false;
     }
@@ -534,7 +534,7 @@ bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> scr
     auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        TLOGE(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return false;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
@@ -559,25 +559,25 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
     }
 
     if (screenGroup == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "new AbstractScreenGroup failed");
+        TLOGE(WmsLogTag::DMS, "new AbstractScreenGroup failed");
         screenIdManager_.DeleteScreenId(dmsGroupScreenId);
         return nullptr;
     }
     Point point;
     if (!screenGroup->AddChild(newScreen, point)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to add screen to group. screen=%{public}" PRIu64"", newScreen->dmsId_);
+        TLOGE(WmsLogTag::DMS, "fail to add screen to group. screen=%{public}" PRIu64"", newScreen->dmsId_);
         screenIdManager_.DeleteScreenId(dmsGroupScreenId);
         return nullptr;
     }
     auto iter = dmsScreenGroupMap_.find(dmsGroupScreenId);
     if (iter != dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "group screen existed. id=%{public}" PRIu64"", dmsGroupScreenId);
+        TLOGE(WmsLogTag::DMS, "group screen existed. id=%{public}" PRIu64"", dmsGroupScreenId);
         dmsScreenGroupMap_.erase(iter);
     }
     dmsScreenGroupMap_.insert(std::make_pair(dmsGroupScreenId, screenGroup));
     dmsScreenMap_.insert(std::make_pair(dmsGroupScreenId, screenGroup));
     screenGroup->mirrorScreenId_ = newScreen->dmsId_;
-    TLOGI(WmsLogTag::DMS_DMSERVER, "connect new group screen, screenId: %{public}" PRIu64", screenGroupId:"
+    TLOGI(WmsLogTag::DMS, "connect new group screen, screenId: %{public}" PRIu64", screenGroupId:"
         " %{public}" PRIu64", combination:%{public}u", newScreen->dmsId_, dmsGroupScreenId, newScreen->type_);
     return screenGroup;
 }
@@ -587,14 +587,14 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     ScreenId defaultScreenId = GetDefaultAbstractScreenId();
     auto iter = dmsScreenMap_.find(defaultScreenId);
     if (iter == dmsScreenMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "defaultScreenId:%{public}" PRIu64" is not in dmsScreenMap_.",
+        TLOGE(WmsLogTag::DMS, "defaultScreenId:%{public}" PRIu64" is not in dmsScreenMap_.",
             defaultScreenId);
         return nullptr;
     }
     auto screen = iter->second;
     auto screenGroupIter = dmsScreenGroupMap_.find(screen->groupDmsId_);
     if (screenGroupIter == dmsScreenGroupMap_.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "groupDmsId:%{public}" PRIu64" is not in dmsScreenGroupMap_.",
+        TLOGE(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64" is not in dmsScreenGroupMap_.",
             screen->groupDmsId_);
         return nullptr;
     }
@@ -602,9 +602,9 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     Point point;
     if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
         for (auto& child : screenGroup->GetChildren()) {
-            TLOGD(WmsLogTag::DMS_DMSERVER, "defaultScreen rotation:%d", child->rotation_);
+            TLOGD(WmsLogTag::DMS, "defaultScreen rotation:%d", child->rotation_);
             if (child->GetActiveScreenMode() == nullptr) {
-                TLOGE(WmsLogTag::DMS_DMSERVER, "active screen mode is nullptr");
+                TLOGE(WmsLogTag::DMS, "active screen mode is nullptr");
                 continue;
             }
             if (child->rotation_ == Rotation::ROTATION_90 || child->rotation_ == Rotation::ROTATION_270) {
@@ -613,7 +613,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
                 point.posX_ += static_cast<int32_t>(child->GetActiveScreenMode()->width_);
             }
         }
-        TLOGD(WmsLogTag::DMS_DMSERVER, "point:[%d %d]", point.posX_, point.posY_);
+        TLOGD(WmsLogTag::DMS, "point:[%d %d]", point.posX_, point.posY_);
     }
     screenGroup->AddChild(newScreen, point);
     return screenGroup;
@@ -624,7 +624,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
 {
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "id: %{public}" PRIu64"", rsId);
+    TLOGI(WmsLogTag::DMS, "id: %{public}" PRIu64"", rsId);
     if (rsId == SCREEN_ID_INVALID) {
         return SCREEN_ID_INVALID;
     }
@@ -649,7 +649,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         }
         screenAgentMap_[displayManagerAgent].emplace_back(dmsScreenId);
     } else {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
+        TLOGI(WmsLogTag::DMS, "id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
     }
     return dmsScreenId;
 }
@@ -660,7 +660,7 @@ sptr<AbstractScreen> AbstractScreenController::InitVirtualScreen(ScreenId dmsScr
     sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, option.name_, dmsScreenId, rsId);
     sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
     if (absScreen == nullptr || info == nullptr) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "new AbstractScreen or SupportedScreenModes failed");
+        TLOGI(WmsLogTag::DMS, "new AbstractScreen or SupportedScreenModes failed");
         screenIdManager_.DeleteScreenId(dmsScreenId);
         rsInterface_.RemoveVirtualScreen(rsId);
         return nullptr;
@@ -680,7 +680,7 @@ sptr<AbstractScreen> AbstractScreenController::InitVirtualScreen(ScreenId dmsScr
 
 DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "AbstractScreenController::DestroyVirtualScreen");
+    TLOGI(WmsLogTag::DMS, "AbstractScreenController::DestroyVirtualScreen");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
@@ -710,7 +710,7 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
     screenIdManager_.DeleteScreenId(screenId);
 
     if (rsScreenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "DestroyVirtualScreen: No corresponding rsScreenId");
+        TLOGE(WmsLogTag::DMS, "DestroyVirtualScreen: No corresponding rsScreenId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
@@ -719,7 +719,7 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
 
 DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "begin");
+    TLOGI(WmsLogTag::DMS, "begin");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     int32_t res = -1;
     ScreenId rsScreenId;
@@ -727,7 +727,7 @@ DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, spt
         res = rsInterface_.SetVirtualScreenSurface(rsScreenId, surface);
     }
     if (res != 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "SetVirtualScreenSurface failed in RenderService");
+        TLOGE(WmsLogTag::DMS, "SetVirtualScreenSurface failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     return DMError::DM_OK;
@@ -743,14 +743,14 @@ void AbstractScreenController::SetBuildInDefaultOrientation(Orientation orientat
 DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation,
     bool isFromWindow, bool withAnimation)
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
+    TLOGD(WmsLogTag::DMS, "screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
     if (screen->isScreenGroup_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot set orientation to the combination. screen: %{public}" PRIu64"",
+        TLOGE(WmsLogTag::DMS, "cannot set orientation to the combination. screen: %{public}" PRIu64"",
             screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
@@ -763,7 +763,7 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
         screen->screenRequestedOrientation_ = newOrientation;
     }
     if (screen->orientation_ == newOrientation) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "skip setting orientation. screen %{public}" PRIu64" orientation %{public}u",
+        TLOGD(WmsLogTag::DMS, "skip setting orientation. screen %{public}" PRIu64" orientation %{public}u",
             screenId, newOrientation);
         return DMError::DM_OK;
     }
@@ -775,7 +775,7 @@ DMError AbstractScreenController::SetOrientation(ScreenId screenId, Orientation 
         screen->rotation_ = rotationAfter;
     }
     if (!screen->SetOrientation(newOrientation)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to set rotation, screen %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "fail to set rotation, screen %{public}" PRIu64"", screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
     // Notify rotation event to ScreenManager
@@ -816,7 +816,7 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
     for (auto& screen : screens) {
         auto mode = screen->GetActiveScreenMode();
         if (!mode) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "no active screen mode");
+            TLOGE(WmsLogTag::DMS, "no active screen mode");
             continue;
         }
 
@@ -857,16 +857,16 @@ void AbstractScreenController::SetScreenRotateAnimation(
         return;
     }
     if (rotationAfter == Rotation::ROTATION_0 && screen->rotation_ == Rotation::ROTATION_270) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "[FixOrientation] display rotate with animation");
+        TLOGD(WmsLogTag::DMS, "[FixOrientation] display rotate with animation");
         // avoid animation 270, 240, 210 ... 30, 0, should play from 90->0
         displayNode->SetRotation(90.f);
     } else if (rotationAfter == Rotation::ROTATION_270 && screen->rotation_ == Rotation::ROTATION_0) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "[FixOrientation] display rotate with animation");
+        TLOGD(WmsLogTag::DMS, "[FixOrientation] display rotate with animation");
         // avoid animation 0, 30, 60 ... 270, should play from 360->270
         displayNode->SetRotation(-360.f);
     }
     if (withAnimation) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "[FixOrientation] display rotate with animation %{public}u", rotationAfter);
+        TLOGD(WmsLogTag::DMS, "[FixOrientation] display rotate with animation %{public}u", rotationAfter);
         std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
         static const RSAnimationTimingProtocol timingProtocol(600); // animation time
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
@@ -879,7 +879,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
         RSNode::Animate(timingProtocol, curve, [weakNode, srect, rotationAfter, this]() {
             auto displayNode = weakNode.lock();
             if (displayNode == nullptr) {
-                TLOGE(WmsLogTag::DMS_DMSERVER, "error, cannot get DisplayNode");
+                TLOGE(WmsLogTag::DMS, "error, cannot get DisplayNode");
                 return;
             }
             SetDisplayNode(rotationAfter, displayNode, srect);
@@ -890,7 +890,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
 #endif
         });
     } else {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "[FixOrientation] display rotate without animation %{public}u", rotationAfter);
+        TLOGD(WmsLogTag::DMS, "[FixOrientation] display rotate without animation %{public}u", rotationAfter);
         SetDisplayNode(rotationAfter, displayNode, srect);
     }
 }
@@ -928,19 +928,19 @@ void AbstractScreenController::CloseRotationSyncTransaction()
 bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter,
     bool isFromWindow, bool withAnimation)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, "
+    TLOGI(WmsLogTag::DMS, "Enter SetRotation, screenId: %{public}" PRIu64 ", rotation: %{public}u, "
         "isFromWindow: %{public}u, animation: %{public}u", screenId, rotationAfter, isFromWindow, withAnimation);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot get screen with screenId: %{public}" PRIu64, screenId);
+        TLOGE(WmsLogTag::DMS, "cannot get screen with screenId: %{public}" PRIu64, screenId);
         return false;
     }
     if (rotationAfter == screen->rotation_) {
-        TLOGD(WmsLogTag::DMS_DMSERVER, "rotation not changed. screen %{public}" PRIu64" rotation %{public}u",
+        TLOGD(WmsLogTag::DMS, "rotation not changed. screen %{public}" PRIu64" rotation %{public}u",
             screenId, rotationAfter);
         return false;
     }
-    TLOGD(WmsLogTag::DMS_DMSERVER, "set orientation. rotation %{public}u", rotationAfter);
+    TLOGD(WmsLogTag::DMS, "set orientation. rotation %{public}u", rotationAfter);
     OpenRotationSyncTransaction();
     SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
     screen->rotation_ = rotationAfter;
@@ -1015,9 +1015,9 @@ DMError AbstractScreenController::SetScreenColorTransform(ScreenId screenId)
 
 DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "RsScreenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
+    TLOGI(WmsLogTag::DMS, "RsScreenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "invalid screenId");
+        TLOGE(WmsLogTag::DMS, "invalid screenId");
         return DMError::DM_ERROR_NULLPTR;
     }
     uint32_t usedModeId = 0;
@@ -1025,12 +1025,12 @@ DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto screen = GetAbstractScreen(screenId);
         if (screen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "Get AbstractScreen failed");
+            TLOGE(WmsLogTag::DMS, "Get AbstractScreen failed");
             return DMError::DM_ERROR_NULLPTR;
         }
         ScreenId rsScreenId = SCREEN_ID_INVALID;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "No corresponding rsId");
+            TLOGE(WmsLogTag::DMS, "No corresponding rsId");
             return DMError::DM_ERROR_NULLPTR;
         }
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
@@ -1039,7 +1039,7 @@ DMError AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_
     }
     // add thread to process mode change sync event
     if (usedModeId != modeId) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "modeId: %{public}u ->  %{public}u", usedModeId, modeId);
+        TLOGI(WmsLogTag::DMS, "modeId: %{public}u ->  %{public}u", usedModeId, modeId);
         auto func = [=]() {
             ProcessScreenModeChanged(screenId);
             return;
@@ -1058,17 +1058,17 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
         if (dmsScreenMapIter == dmsScreenMap_.end()) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "dmsScreenId=%{public}" PRIu64" is not in dmsScreenMap", dmsScreenId);
+            TLOGE(WmsLogTag::DMS, "dmsScreenId=%{public}" PRIu64" is not in dmsScreenMap", dmsScreenId);
             return;
         }
         absScreen = GetAbstractScreen(dmsScreenId);
         if (absScreen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screen is nullptr. dmsScreenId=%{public}" PRIu64"", dmsScreenId);
+            TLOGE(WmsLogTag::DMS, "screen is nullptr. dmsScreenId=%{public}" PRIu64"", dmsScreenId);
             return;
         }
         activeScreenMode = absScreen->GetActiveScreenMode();
         if (activeScreenMode == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "active screen mode is nullptr. dmsScreenId=%{public}" PRIu64"",
+            TLOGE(WmsLogTag::DMS, "active screen mode is nullptr. dmsScreenId=%{public}" PRIu64"",
                 dmsScreenId);
             return;
         }
@@ -1087,19 +1087,19 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
 
 DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenId> screens)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeMirror, screenId:%{public}" PRIu64"", screenId);
+    TLOGI(WmsLogTag::DMS, "MakeMirror, screenId:%{public}" PRIu64"", screenId);
     sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
     if (screen == nullptr || screen->type_ != ScreenType::REAL) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screen is nullptr, or screenType is not real.");
+        TLOGE(WmsLogTag::DMS, "screen is nullptr, or screenType is not real.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    TLOGD(WmsLogTag::DMS_DMSERVER, "GetAbstractScreenGroup start");
+    TLOGD(WmsLogTag::DMS, "GetAbstractScreenGroup start");
     auto group = GetAbstractScreenGroup(screen->groupDmsId_);
     if (group == nullptr) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         group = AddToGroupLocked(screen);
         if (group == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "group is nullptr");
+            TLOGE(WmsLogTag::DMS, "group is nullptr");
             return DMError::DM_ERROR_NULLPTR;
         }
         NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
@@ -1107,7 +1107,7 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
             abstractScreenCallback_->onConnect_(screen);
         }
     }
-    TLOGD(WmsLogTag::DMS_DMSERVER, "GetAbstractScreenGroup end");
+    TLOGD(WmsLogTag::DMS, "GetAbstractScreenGroup end");
     Point point;
     std::vector<Point> startPoints;
     startPoints.insert(startPoints.begin(), screens.size(), point);
@@ -1115,7 +1115,7 @@ DMError AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<Scre
         group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->dmsId_;
     group->mirrorScreenId_ = screen->dmsId_;
     ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeMirror success");
+    TLOGI(WmsLogTag::DMS, "MakeMirror success");
     return DMError::DM_OK;
 }
 
@@ -1123,30 +1123,30 @@ DMError AbstractScreenController::StopScreens(const std::vector<ScreenId>& scree
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (ScreenId screenId : screenIds) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64"", screenId);
+        TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64"", screenId);
         auto screen = GetAbstractScreen(screenId);
         if (screen == nullptr) {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "screen:%{public}" PRIu64" is nullptr", screenId);
+            TLOGW(WmsLogTag::DMS, "screen:%{public}" PRIu64" is nullptr", screenId);
             continue;
         }
         auto iter = dmsScreenGroupMap_.find(screen->groupDmsId_);
         if (iter == dmsScreenGroupMap_.end()) {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_",
+            TLOGW(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_",
                 screen->groupDmsId_);
             continue;
         }
         sptr<AbstractScreenGroup> screenGroup = iter->second;
         if (screenGroup == nullptr) {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "screenGroup:%{public}" PRIu64" is nullptr", screen->groupDmsId_);
+            TLOGW(WmsLogTag::DMS, "screenGroup:%{public}" PRIu64" is nullptr", screen->groupDmsId_);
             continue;
         }
         if (screenGroup->combination_ != stopCombination) {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "try to stop screen in another combination");
+            TLOGW(WmsLogTag::DMS, "try to stop screen in another combination");
             continue;
         }
         if (screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
             screen->dmsId_ == screenGroup->mirrorScreenId_) {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "try to stop main mirror screen");
+            TLOGW(WmsLogTag::DMS, "try to stop main mirror screen");
             continue;
         }
 
@@ -1170,13 +1170,13 @@ void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (uint64_t i = 0; i != screens.size(); i++) {
         ScreenId screenId = screens[i];
-        TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64"", screenId);
+        TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64"", screenId);
         auto screen = GetAbstractScreen(screenId);
         if (screen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screen:%{public}" PRIu64" is nullptr", screenId);
+            TLOGE(WmsLogTag::DMS, "screen:%{public}" PRIu64" is nullptr", screenId);
             continue;
         }
-        TLOGI(WmsLogTag::DMS_DMSERVER, "Screen->groupDmsId_: %{public}" PRIu64"", screen->groupDmsId_);
+        TLOGI(WmsLogTag::DMS, "Screen->groupDmsId_: %{public}" PRIu64"", screen->groupDmsId_);
         if (filterScreen && screen->groupDmsId_ == group->dmsId_ && group->HasChild(screen->dmsId_)) {
             continue;
         }
@@ -1206,20 +1206,20 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
             continue;
         }
         Point expandPoint = addChildPos[i];
-        TLOGI(WmsLogTag::DMS_DMSERVER, "screenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
             screen->dmsId_, expandPoint.posX_, expandPoint.posY_);
         bool addChildRes = group->AddChild(screen, expandPoint);
         if (removeChildResMap[screenId] && addChildRes) {
             changeGroup.emplace_back(screen->ConvertToScreenInfo());
-            TLOGD(WmsLogTag::DMS_DMSERVER, "changeGroup");
+            TLOGD(WmsLogTag::DMS, "changeGroup");
         } else if (removeChildResMap[screenId]) {
-            TLOGD(WmsLogTag::DMS_DMSERVER, "removeChild");
+            TLOGD(WmsLogTag::DMS, "removeChild");
             removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
         } else if (addChildRes) {
-            TLOGD(WmsLogTag::DMS_DMSERVER, "AddChild");
+            TLOGD(WmsLogTag::DMS, "AddChild");
             addToGroup.emplace_back(screen->ConvertToScreenInfo());
         } else {
-            TLOGD(WmsLogTag::DMS_DMSERVER, "default, AddChild failed");
+            TLOGD(WmsLogTag::DMS, "default, AddChild failed");
         }
         if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
@@ -1234,7 +1234,7 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
 bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints)
 {
     ScreenId defaultScreenId = GetDefaultAbstractScreenId();
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
+    TLOGI(WmsLogTag::DMS, "MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto defaultScreen = GetAbstractScreen(defaultScreenId);
     if (defaultScreen == nullptr) {
         return false;
@@ -1245,7 +1245,7 @@ bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::
     }
     bool filterExpandScreen = group->combination_ == ScreenCombination::SCREEN_EXPAND;
     ChangeScreenGroup(group, screenIds, startPoints, filterExpandScreen, ScreenCombination::SCREEN_EXPAND);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeExpand success");
+    TLOGI(WmsLogTag::DMS, "MakeExpand success");
     return true;
 }
 
@@ -1286,10 +1286,10 @@ bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agentIter != screenAgentMap_.end()) {
         while (screenAgentMap_[agent].size() > 0) {
             auto diedId = screenAgentMap_[agent][0];
-            TLOGI(WmsLogTag::DMS_DMSERVER, "destroy screenId in OnRemoteDied: %{public}" PRIu64"", diedId);
+            TLOGI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64"", diedId);
             DMError res = DestroyVirtualScreen(diedId);
             if (res != DMError::DM_OK) {
-                TLOGE(WmsLogTag::DMS_DMSERVER, "destroy failed in OnRemoteDied: %{public}" PRIu64"", diedId);
+                TLOGE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64"", diedId);
             }
         }
         screenAgentMap_.erase(agent);
@@ -1301,7 +1301,7 @@ ScreenId AbstractScreenController::ScreenIdManager::CreateAndGetNewScreenId(Scre
 {
     ScreenId dmsScreenId = dmsScreenCount_++;
     if (dms2RsScreenIdMap_.find(dmsScreenId) != dms2RsScreenIdMap_.end()) {
-        TLOGW(WmsLogTag::DMS_DMSERVER, "dmsScreenId: %{public}" PRIu64" exit in dms2RsScreenIdMap_, warning.",
+        TLOGW(WmsLogTag::DMS, "dmsScreenId: %{public}" PRIu64" exit in dms2RsScreenIdMap_, warning.",
             dmsScreenId);
     }
     dms2RsScreenIdMap_[dmsScreenId] = rsScreenId;
@@ -1309,7 +1309,7 @@ ScreenId AbstractScreenController::ScreenIdManager::CreateAndGetNewScreenId(Scre
         return dmsScreenId;
     }
     if (rs2DmsScreenIdMap_.find(rsScreenId) != rs2DmsScreenIdMap_.end()) {
-        TLOGW(WmsLogTag::DMS_DMSERVER, "rsScreenId: %{public}" PRIu64" exit in rs2DmsScreenIdMap_, warning.",
+        TLOGW(WmsLogTag::DMS, "rsScreenId: %{public}" PRIu64" exit in rs2DmsScreenIdMap_, warning.",
             rsScreenId);
     }
     rs2DmsScreenIdMap_[rsScreenId] = dmsScreenId;
@@ -1375,11 +1375,11 @@ ScreenId AbstractScreenController::ScreenIdManager::ConvertToDmsScreenId(ScreenI
 void AbstractScreenController::NotifyScreenConnected(sptr<ScreenInfo> screenInfo) const
 {
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "NotifyScreenConnected error, screenInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "NotifyScreenConnected error, screenInfo is nullptr.");
         return;
     }
     auto task = [=] {
-        TLOGNI(WmsLogTag::DMS_DMSERVER, "NotifyScreenConnected,  screenId:%{public}" PRIu64"",
+        TLOGNI(WmsLogTag::DMS, "NotifyScreenConnected,  screenId:%{public}" PRIu64"",
             screenInfo->GetScreenId());
         DisplayManagerAgentController::GetInstance().OnScreenConnect(screenInfo);
     };
@@ -1389,7 +1389,7 @@ void AbstractScreenController::NotifyScreenConnected(sptr<ScreenInfo> screenInfo
 void AbstractScreenController::NotifyScreenDisconnected(ScreenId screenId) const
 {
     auto task = [=] {
-        TLOGNI(WmsLogTag::DMS_DMSERVER, "NotifyScreenDisconnected,  screenId:%{public}" PRIu64"", screenId);
+        TLOGNI(WmsLogTag::DMS, "NotifyScreenDisconnected,  screenId:%{public}" PRIu64"", screenId);
         DisplayManagerAgentController::GetInstance().OnScreenDisconnect(screenId);
     };
     controllerHandler_->PostTask(task, "wms:NotifyScreenDisconnected", 0, AppExecFwk::EventQueue::Priority::HIGH);
@@ -1398,11 +1398,11 @@ void AbstractScreenController::NotifyScreenDisconnected(ScreenId screenId) const
 void AbstractScreenController::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const
 {
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "NotifyScreenChanged error, screenInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "NotifyScreenChanged error, screenInfo is nullptr.");
         return;
     }
     auto task = [=] {
-        TLOGNI(WmsLogTag::DMS_DMSERVER, "NotifyScreenChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
+        TLOGNI(WmsLogTag::DMS, "NotifyScreenChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         DisplayManagerAgentController::GetInstance().OnScreenChange(screenInfo, event);
     };
     controllerHandler_->PostTask(task, "wms:OnScreenChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
@@ -1412,12 +1412,12 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const
 {
     if (screenInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screenInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "screenInfo is nullptr.");
         return;
     }
     std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        TLOGNI(WmsLogTag::DMS_DMSERVER, "screenId:%{public}" PRIu64", trigger:[%{public}s]",
+        TLOGNI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", trigger:[%{public}s]",
             screenInfo->GetScreenId(), trigger.c_str());
         DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
@@ -1432,7 +1432,7 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     }
     std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        TLOGNI(WmsLogTag::DMS_DMSERVER, "trigger:[%{public}s]", trigger.c_str());
+        TLOGNI(WmsLogTag::DMS, "trigger:[%{public}s]", trigger.c_str());
         DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
     controllerHandler_->PostTask(task, "wms:NotifyScreenGroupChanged", 0, AppExecFwk::EventQueue::Priority::HIGH);
@@ -1441,10 +1441,10 @@ void AbstractScreenController::NotifyScreenGroupChanged(
 bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,
     PowerStateChangeReason reason, bool needToNotify)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "state:%{public}u, reason:%{public}u", state, reason);
+    TLOGI(WmsLogTag::DMS, "state:%{public}u, reason:%{public}u", state, reason);
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "no screen info");
+        TLOGI(WmsLogTag::DMS, "no screen info");
         return false;
     }
     ScreenPowerStatus status;
@@ -1460,7 +1460,7 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS_DMSERVER, "SetScreenPowerStatus state not support");
+            TLOGW(WmsLogTag::DMS, "SetScreenPowerStatus state not support");
             return false;
         }
     }
@@ -1471,16 +1471,16 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state,
             continue;
         }
         if (screen->type_ != ScreenType::REAL) {
-            TLOGD(WmsLogTag::DMS_DMSERVER, "skip virtual screen %{public}" PRIu64"", screen->dmsId_);
+            TLOGD(WmsLogTag::DMS, "skip virtual screen %{public}" PRIu64"", screen->dmsId_);
             continue;
         }
         RSInterfaces::GetInstance().SetScreenPowerStatus(screen->rsId_, status);
-        TLOGI(WmsLogTag::DMS_DMSERVER, "rsscreen %{public}" PRIu64", status %{public}u", screen->rsId_, status);
+        TLOGI(WmsLogTag::DMS, "rsscreen %{public}" PRIu64", status %{public}u", screen->rsId_, status);
         hasSetScreenPower = true;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "SetScreenPowerStatus end");
+    TLOGI(WmsLogTag::DMS, "SetScreenPowerStatus end");
     if (!hasSetScreenPower) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "no real screen");
+        TLOGI(WmsLogTag::DMS, "no real screen");
         return false;
     }
     if (needToNotify) {
@@ -1499,43 +1499,43 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
         {
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             if (dmsScreenMap_.find(dmsScreenId) != dmsScreenMap_.end()) {
-                TLOGI(WmsLogTag::DMS_DMSERVER, "find screen %{public}" PRIu64"", dmsScreenId);
+                TLOGI(WmsLogTag::DMS, "find screen %{public}" PRIu64"", dmsScreenId);
                 res = true;
                 break;
             }
         }
         retryTimes++;
-        TLOGW(WmsLogTag::DMS_DMSERVER, "not find screen, retry %{public}u times", retryTimes);
+        TLOGW(WmsLogTag::DMS, "not find screen, retry %{public}u times", retryTimes);
         std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
     }
     if (retryTimes >= MAX_RETRY_NUM || !res) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot find screen %{public}" PRIu64"", dmsScreenId);
+        TLOGE(WmsLogTag::DMS, "cannot find screen %{public}" PRIu64"", dmsScreenId);
         return ScreenPowerState::INVALID_STATE;
     }
 
     ScreenId rsId = ConvertToRsScreenId(dmsScreenId);
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
-    TLOGI(WmsLogTag::DMS_DMSERVER, "GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
+    TLOGI(WmsLogTag::DMS, "GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
     return state;
 }
 
 DMError AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f",
+    TLOGD(WmsLogTag::DMS, "set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f",
         screenId, virtualPixelRatio);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to set virtual pixel ratio, cannot find screen %{public}" PRIu64"",
+        TLOGE(WmsLogTag::DMS, "fail to set virtual pixel ratio, cannot find screen %{public}" PRIu64"",
             screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
     if (screen->isScreenGroup_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64"",
+        TLOGE(WmsLogTag::DMS, "cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64"",
             screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
     if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) { // less to 1e-6 mean equal
-        TLOGE(WmsLogTag::DMS_DMSERVER, "The density is equivalent to the original value, "
+        TLOGE(WmsLogTag::DMS, "The density is equivalent to the original value, "
             "no update operation is required, aborted.");
         return DMError::DM_OK;
     }

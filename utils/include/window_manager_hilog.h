@@ -71,13 +71,6 @@ enum class WmsLogTag : uint8_t {
     WMS_COMPAT,                // C0421C
     WMS_ROTATION,              // C0421D
     WMS_ANIMATION,             // C0421E
-    DMS_DM,                    // C0421F
-    DMS_DM_LITE,               // C04220
-    DMS_DMSERVER,              // C04221
-    DMS_KITS,                  // C04222
-    DMS_SSM_CLIENT,            // C04223
-    DMS_SCREEN_SESSION,        // C04224
-    DMS_SSM,                   // C04225
     END,                       // Last one, do not use
 };
 

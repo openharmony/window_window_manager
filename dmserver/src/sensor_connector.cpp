@@ -53,7 +53,7 @@ static void RotationMotionEventCallback(const MotionSensorEvent& motionData);
 
 void SensorConnector::SubscribeRotationSensor()
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "dms: subscribe rotation-related sensor");
+    TLOGD(WmsLogTag::DMS, "dms: subscribe rotation-related sensor");
     ScreenRotationController::Init();
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     MotionSubscriber::SubscribeMotionSensor();
@@ -82,25 +82,25 @@ void SensorConnector::UnsubscribeRotationSensor()
 #ifdef SENSOR_ENABLE
 void GravitySensorSubscriber::SubscribeGravitySensor()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "dms: Subscribe gravity Sensor");
+    TLOGI(WmsLogTag::DMS, "dms: Subscribe gravity Sensor");
     if (isGravitySensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: gravity sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "dms: gravity sensor's already subscribed");
         return;
     }
     if (strcpy_s(user_.name, sizeof(user_.name), "ScreenRotationController") != EOK) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms strcpy_s error");
+        TLOGE(WmsLogTag::DMS, "dms strcpy_s error");
         return;
     }
     user_.userData = nullptr;
     user_.callback = &HandleGravitySensorEventCallback;
     if (SubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Subscribe gravity sensor failed");
+        TLOGE(WmsLogTag::DMS, "dms: Subscribe gravity sensor failed");
         return;
     }
     SetBatch(SENSOR_TYPE_ID_GRAVITY, &user_, ORIENTATION_SENSOR_SAMPLING_RATE, ORIENTATION_SENSOR_REPORTING_RATE);
     SetMode(SENSOR_TYPE_ID_GRAVITY, &user_, SENSOR_ON_CHANGE);
     if (ActivateSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Activate gravity sensor failed");
+        TLOGE(WmsLogTag::DMS, "dms: Activate gravity sensor failed");
         return;
     }
     isGravitySensorSubscribed_ = true;
@@ -108,17 +108,17 @@ void GravitySensorSubscriber::SubscribeGravitySensor()
 
 void GravitySensorSubscriber::UnsubscribeGravitySensor()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "dms: Unsubscribe gravity Sensor");
+    TLOGI(WmsLogTag::DMS, "dms: Unsubscribe gravity Sensor");
     if (!isGravitySensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Orientation Sensor is not subscribed");
+        TLOGE(WmsLogTag::DMS, "dms: Orientation Sensor is not subscribed");
         return;
     }
     if (DeactivateSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Deactivate gravity sensor failed");
+        TLOGE(WmsLogTag::DMS, "dms: Deactivate gravity sensor failed");
         return;
     }
     if (UnsubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Unsubscribe gravity sensor failed");
+        TLOGE(WmsLogTag::DMS, "dms: Unsubscribe gravity sensor failed");
         return;
     }
     isGravitySensorSubscribed_ = false;
@@ -130,7 +130,7 @@ void GravitySensorSubscriber::HandleGravitySensorEventCallback(SensorEvent *even
         return;
     }
     if (event->sensorTypeId != SENSOR_TYPE_ID_GRAVITY) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: Orientation Sensor Callback is not SENSOR_TYPE_ID_GRAVITY");
+        TLOGE(WmsLogTag::DMS, "dms: Orientation Sensor Callback is not SENSOR_TYPE_ID_GRAVITY");
         return;
     }
     GravityData* gravityData = reinterpret_cast<GravityData*>(event->data);
@@ -191,13 +191,13 @@ bool GravitySensorSubscriber::CheckCallbackTimeInterval()
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 void MotionSubscriber::SubscribeMotionSensor()
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "dms: Subscribe motion Sensor");
+    TLOGD(WmsLogTag::DMS, "dms: Subscribe motion Sensor");
     if (isMotionSensorSubscribed_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: motion sensor's already subscribed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor's already subscribed");
         return;
     }
     if (!SubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: motion sensor subscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor subscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = true;
@@ -206,11 +206,11 @@ void MotionSubscriber::SubscribeMotionSensor()
 void MotionSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "dms: Unsubscribe motion sensor");
+        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe motion sensor");
         return;
     }
     if (!UnsubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dms: motion sensor unsubscribe failed");
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor unsubscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = false;
