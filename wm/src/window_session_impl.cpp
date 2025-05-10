@@ -2077,6 +2077,15 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
     }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
     TLOGI(WmsLogTag::WMS_FOCUS, "isEnabled: %{public}d", isEnabled);
+    AAFwk::Want want;
+    want.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, isEnabled);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_DELAY_RAISE_STATE),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "uiContent is null, windowId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
     return WMError::WM_OK;
 }
 
@@ -6000,6 +6009,31 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
     want.SetParam(Extension::IMMERSIVE_MODE_ENABLED,
         AAFwk::Integer::Box(static_cast<int32_t>(GetImmersiveModeEnabledState())));
+    bool isHostWindowDelayRaiseEnabled = IsWindowDelayRaiseEnabled();
+    want.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(isHostWindowDelayRaiseEnabled)));
+}
+
+WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+{
+    switch (code) {
+        case static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE): {
+            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+            auto ret = RaiseToAppTopOnDrag();
+            if (ret != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_HIERARCHY, "Raise host window failed, winId: %{public}u, errCode: %{public}d",
+                    GetWindowId(), ret);
+                return ret;
+            }
+            TLOGI(WmsLogTag::WMS_HIERARCHY, "Raise host window successfully, winId: %{public}u", GetWindowId());
+            break;
+        }
+        default: {
+            TLOGI(WmsLogTag::WMS_UIEXT, "Message was not processed, businessCode: %{public}u", code);
+            break;
+        }
+    }
+    return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const

@@ -1403,6 +1403,72 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
     NotifyPointerEvent(pointerEvent);
 }
 
+void WindowExtensionSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    WindowSessionImpl::NotifyPointerEvent(pointerEvent);
+    if (IsWindowDelayRaiseEnabled()) {
+        std::shared_ptr<MMI::PointerEvent> pointerEventBackup;
+        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            pointerEventBackup = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+        } else {
+            pointerEventBackup = pointerEvent;
+        }
+        auto uiContent = GetUIContentSharedPtr();
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is null!");
+            return;
+        }
+        uiContent->ProcessPointerEvent(pointerEvent,
+            [weakThis = wptr(this), pointerEventBackup](bool isHitTargetDraggable) mutable {
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_UIEXT, "window is null!");
+                    return;
+                }
+                window->ProcessPointerEventWithHostWindowDelayRaise(pointerEventBackup, isHitTargetDraggable);
+            });
+    }
+}
+
+void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool isHitTargetDraggable) const
+{
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        return;
+    }
+    const int32_t action = pointerEvent->GetPointerAction();
+    bool isPointerButtonDown = action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    bool isPointerUp = (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    if (!isPointerButtonDown && !isPointerUp) {
+        return;
+    }
+    bool needNotifyHostWindowToRaise = isPointerUp || !isHitTargetDraggable;
+    if (needNotifyHostWindowToRaise) {
+        // Send message to host window to raise hierarchy
+        auto dataHandler = GetExtensionDataHandler();
+        if (dataHandler == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is nullptr!");
+            return;
+        }
+        auto businessCode = Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE;
+        AAFwk::Want dataToSend;
+        auto sendResult = dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(businessCode),
+            dataToSend);
+        if (sendResult != DataHandlerErr::OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, errCode: "
+                "%{public}d", businessCode, sendResult);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_UIEXT, "Notify host window to raise, id: %{public}d, isHitTargetDraggable: %{public}d, "
+            "isPointerUp: %{public}d", GetPersistentId(), isHitTargetDraggable, isPointerUp);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "No need to notify host window to raise, id: %{public}d, isHitTargetDraggable: "
+        "%{public}d, isPointerUp: %{public}d", GetPersistentId(), isHitTargetDraggable, isPointerUp);
+}
+
 bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {
@@ -1568,13 +1634,41 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
     isValidWaterfallMode_.store(true);
     hostGestureBackEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::GESTURE_BACK_ENABLED, 1));
     hostImmersiveModeEnabled_ = static_cast<bool>(configParam.GetIntParam(Extension::IMMERSIVE_MODE_ENABLED, 0));
+    auto isHostWindowDelayRaiseEnabled = configParam.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0);
+    property_->SetWindowDelayRaiseEnabled(static_cast<bool>(isHostWindowDelayRaiseEnabled));
 
     extensionConfig_ = AAFwk::WantParams(configParam);
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
 
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
-        "winId: %{public}u",
-        state, isFullScreenWaterfallMode_.load(), GetWindowId());
+        "isHostWindowDelayRaiseEnabled: %{public}d, winId: %{public}u",
+        state, isFullScreenWaterfallMode_.load(), isHostWindowDelayRaiseEnabled, GetWindowId());
+}
+
+WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+{
+    switch (code) {
+        case static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE): {
+            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+            auto dataHandler = GetExtensionDataHandler();
+            if (dataHandler == nullptr) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is nullptr!");
+                return WMError::WM_ERROR_INVALID_PARAM;
+            }
+            auto sendResult = dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, code, data);
+            if (sendResult != DataHandlerErr::OK) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, "
+                    "errCode: %{public}d", code, sendResult);
+                return WMError::WM_ERROR_IPC_FAILED;
+            }
+            break;
+        }
+        default: {
+            TLOGI(WmsLogTag::WMS_UIEXT, "Message was not processed, businessCode: %{public}u", code);
+            break;
+        }
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
@@ -1652,6 +1746,10 @@ WMError WindowExtensionSessionImpl::OnResyncExtensionConfig(AAFwk::Want&& data, 
     waterfallWant.SetParam(Extension::WATERFALL_MODE_FIELD,
         static_cast<bool>(configParam.GetIntParam(Extension::WATERFALL_MODE_FIELD, 0)));
     OnWaterfallModeChange(std::move(waterfallWant), reply);
+    AAFwk::Want windowDelayRaiseWant;
+    windowDelayRaiseWant.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
+        static_cast<bool>(configParam.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0)));
+    OnHostWindowDelayRaiseStateChange(std::move(windowDelayRaiseWant), reply);
     return WMError::WM_OK;
 }
 
@@ -1682,6 +1780,22 @@ WMError WindowExtensionSessionImpl::OnImmersiveModeEnabledChange(AAFwk::Want&& d
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED),
             data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data,
+    std::optional<AAFwk::Want>& reply)
+{
+    bool isHostWindowDelayRaiseEnabled = data.GetBoolParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, false);
+    if (isHostWindowDelayRaiseEnabled == IsWindowDelayRaiseEnabled()) {
+        return WMError::WM_OK;
+    }
+    property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_DELAY_RAISE_STATE),
+            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "isHostWindowDelayRaiseEnabled: %{public}d", isHostWindowDelayRaiseEnabled);
     return WMError::WM_OK;
 }
 
@@ -1725,6 +1839,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::SYNC_HOST_IMMERSIVE_MODE_ENABLED,
         std::bind(&WindowExtensionSessionImpl::OnImmersiveModeEnabledChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
+        std::bind(&WindowExtensionSessionImpl::OnHostWindowDelayRaiseStateChange,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
