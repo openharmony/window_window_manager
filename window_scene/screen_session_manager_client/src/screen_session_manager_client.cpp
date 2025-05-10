@@ -1126,4 +1126,24 @@ void ScreenSessionManagerClient::OnBeforeScreenPropertyChanged(FoldStatus foldSt
     TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
     screenSession->BeforeScreenPropertyChange(foldStatus);
 }
+
+void ScreenSessionManagerClient::OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent)
+{
+    auto screenSession = GetScreenSession(GetDefaultScreenId());
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenModeChangeEvent=%{public}d", static_cast<uint32_t>(screenModeChangeEvent));
+    screenSession->ScreenModeChange(screenModeChangeEvent);
+}
+
+void ScreenSessionManagerClient::NotifyScreenMaskAppear()
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->NotifyScreenMaskAppear();
+}
 } // namespace OHOS::Rosen

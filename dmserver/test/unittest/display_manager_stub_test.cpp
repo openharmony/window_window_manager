@@ -1001,6 +1001,26 @@ HWTEST_F(DisplayManagerStubTest, OnRemoteRequest47, TestSize.Level1)
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest48
+ * @tc.desc: test DisplayManagerStubTest::OnRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerStubTest, OnRemoteRequest48, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(DisplayManagerStub::GetDescriptor());
+
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

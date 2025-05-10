@@ -303,6 +303,7 @@ public:
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
+    void ConfigSupportZLevel();
 
     /*
      * Multi User
@@ -362,6 +363,12 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     const WindowLimits& GetWindowLimits(int32_t windowId);
+
+    /*
+     * Compatible Mode
+     */
+    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property) override;
 
     /*
      * Sub Window
@@ -427,7 +434,7 @@ public:
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     void NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible);
-    void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible);
+    void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const;
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
@@ -436,6 +443,7 @@ public:
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
+    uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
@@ -491,6 +499,8 @@ public:
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
+    void ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y);
+    WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;
 
     int32_t ReclaimPurgeableCleanMem();
     void OnBundleUpdated(const std::string& bundleName, int userId);

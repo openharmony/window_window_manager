@@ -52,7 +52,6 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 }
@@ -395,6 +394,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     PAGE_ROTATION,
     MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END
 };
 

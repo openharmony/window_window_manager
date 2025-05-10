@@ -374,6 +374,7 @@ public:
     std::vector<sptr<Session>> GetDialogVector() const;
     void ClearDialogVector();
     WSError NotifyDestroy();
+    WSError NotifyAppForceLandscapeConfigUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
@@ -385,15 +386,8 @@ public:
     bool GetStateFromManager(const ManagerState key);
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateWindowMode(WindowMode mode);
-    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
-    WSError SetCompatibleModeInPcTitleVisible(bool enableTitleVisible);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
-    WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-        int32_t landscapeWidth, int32_t landscapeHeight);
-    WSError SetCompatibleModeEnableInPad(bool enable);
-    WSError CompatibleFullScreenRecover();
-    WSError CompatibleFullScreenMinimize();
-    WSError CompatibleFullScreenClose();
+    WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
     WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
@@ -759,6 +753,7 @@ protected:
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
+    int32_t currentRotation_ = 0;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;

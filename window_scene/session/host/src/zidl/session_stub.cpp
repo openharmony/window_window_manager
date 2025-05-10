@@ -252,6 +252,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
+            return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
@@ -445,21 +447,14 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.minWindowWidth);
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
-        reply.WriteBool(property->GetCompatibleModeInPc());
-        reply.WriteBool(property->GetCompatibleModeInPcTitleVisible());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
-        reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
-        reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
+        reply.WriteParcelable(property->GetCompatibleModeProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1666,6 +1661,17 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    bool useImplicit = false;
+    if (!data.ReadBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_PC, "Read useImplicit failed.");
+        return ERR_INVALID_DATA;
+    }
+    UseImplicitAnimation(useImplicit);
     return ERR_NONE;
 }
 

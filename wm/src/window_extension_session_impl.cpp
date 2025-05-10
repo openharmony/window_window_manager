@@ -118,6 +118,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
             property_->GetWindowName().c_str(), GetPersistentId(), ret);
         return ret;
     }
+    GetHostWindowCompatiblityInfo();
     MakeSubOrDialogWindowDragableAndMoveble();
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
@@ -132,9 +133,29 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
-    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d success.",
-        property_->GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d IsSimulateScale:%{public}u success.",
+        property_->GetWindowName().c_str(), GetPersistentId(), IsAdaptToSimulationScale());
     AddSetUIContentTimeoutCheck();
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::GetHostWindowCompatiblityInfo()
+{
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "token is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto compatibleModeProperty = property_->GetCompatibleModeProperty();
+    if (compatibleModeProperty == nullptr) {
+        compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetHostWindowCompatiblityInfo(abilityToken_,
+        compatibleModeProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "get compat info failed");
+        return ret;
+    }
+    property_->SetCompatibleModeProperty(compatibleModeProperty);
     return WMError::WM_OK;
 }
 
@@ -656,6 +677,10 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         uiContent->Foreground();
         UpdateTitleButtonVisibility();
     }
+    if (IsAdaptToSimulationScale()) {
+        isDensityFollowHost_ = true;
+        hostDensityValue_ = COMPACT_SIMULATION_SCALE_DPI;
+    }
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
     WLOGFD("notify uiContent window size change end");
     return WMError::WM_OK;
@@ -797,6 +822,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
         return;
     }
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return;
+    }
     auto task = [weak = wptr(this)]() {
         auto window = weak.promote();
         if (!window) {
@@ -821,6 +850,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
 
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
 {
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return WSError::WS_OK;
+    }
     if (config.isDensityFollowHost_ && std::islessequal(config.density_, 0.0f)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "invalid density_: %{public}f", config.density_);
         return WSError::WS_ERROR_INVALID_PARAM;
@@ -860,6 +893,10 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return;
+    }
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
         hostDensityValue_ = config.density_;
@@ -1611,6 +1648,13 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         return static_cast<int32_t>(DataHandlerErr::OK);
     };
     dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
+}
+
+WMError WindowExtensionSessionImpl::UseImplicitAnimation(bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "WindowId: %{public}u", GetWindowId());
+    SingletonContainer::Get<WindowAdapter>().UseImplicitAnimation(property_->GetParentId(), useImplicit);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

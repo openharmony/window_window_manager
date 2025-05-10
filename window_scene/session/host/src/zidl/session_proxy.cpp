@@ -323,19 +323,14 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WindowSizeLimits windowSizeLimits = { reply.ReadUint32(), reply.ReadUint32(),
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
-        property->SetCompatibleModeInPc(reply.ReadBool());
-        property->SetCompatibleModeInPcTitleVisible(reply.ReadBool());
-        property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
-                                              reply.ReadInt32(), reply.ReadInt32());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
-        property->SetIsSupportDragInPcCompatibleMode(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
-        property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
+        property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -2944,5 +2939,38 @@ WMError SessionProxy::NotifyDisableDelegatorChange()
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
+}
+
+WSError OHOS::Rosen::SessionProxy::UseImplicitAnimation(bool useImplicit)
+{
+    TLOGD(WmsLogTag::WMS_PC, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PC, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_PC, "write useImplicit failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PC, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

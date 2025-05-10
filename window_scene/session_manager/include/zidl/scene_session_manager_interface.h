@@ -135,9 +135,11 @@ public:
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
-        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_PARENT_WINDOW,
+        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
+        TRANS_ID_USE_IMPLICIT_ANIMATION,
+        TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -393,6 +395,7 @@ public:
         int32_t targetPersistentId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override { return WMError::WM_OK; }
+    WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

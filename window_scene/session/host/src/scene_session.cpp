@@ -695,8 +695,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     DMRect statusBarRect = CalcRectForStatusBar();
     if (systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) {
         uint32_t statusBarHeight = statusBarRect.height_;
-        if (statusBarHeight > availableArea.posY_) {
-            availableArea.posY_ = statusBarHeight;
+        if (static_cast<int32_t>(statusBarHeight) > availableArea.posY_) {
+            availableArea.posY_ = static_cast<int32_t>(statusBarHeight);
         }
 
         sptr<ScreenSession> currentScreenSession =
@@ -834,7 +834,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
-        bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
+        bool proportionalScale = property->IsAdaptToProportionalScale();
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -847,8 +847,9 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
-                session->pcFoldScreenController_->RecordStartMoveRect(session->GetSessionRect(),
-                    session->IsFullScreenMovable());
+                WSRect currRect;
+                session->HookStartMoveRect(currRect, session->GetSessionRect());
+                session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
             WSRect rect = session->winRect_;
             if (session->IsFullScreenMovable()) {
@@ -861,7 +862,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             } else {
                 session->moveDragController_->SetStartMoveFlag(true);
                 // use window rect when fullscreen or compatible mode
-                session->moveDragController_->CalcFirstMoveTargetRect(rect, isCompatibleModeInPc);
+                session->moveDragController_->CalcFirstMoveTargetRect(rect, proportionalScale);
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
@@ -2136,7 +2137,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
-    if (sessionProperty->GetCompatibleModeInPc() && !sessionProperty->GetCompatibleModeInPcTitleVisible()) {
+    if (sessionProperty->IsAdaptToImmersive()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
         return;
     }
@@ -2297,16 +2298,12 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const
 {
-    if (isDisplayStatusBarTemporarily_.load()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
-        return;
-    }
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
     }
     // compatibleMode app need to hook avoidArea in pc
-    if (GetSessionProperty()->GetCompatibleModeInPc() && !GetSessionProperty()->GetCompatibleModeInPcTitleVisible()) {
+    if (GetSessionProperty()->IsAdaptToImmersive()) {
         HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
         return;
     }
@@ -2323,12 +2320,10 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
     AvoidArea& avoidArea) const
 {
     WindowMode mode = GetWindowMode();
-    if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        TLOGE(WmsLogTag::WMS_PC, "only support compatibleMode app in pc");
+    if (!GetSessionProperty()->IsAdaptToImmersive() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return;
     }
-
-    float vpr = 3.5f; // 3.5f: default pixel ratio
+    float vpr = 1.9f; // 3.5f: default pixel ratio
     DMHookInfo hookInfo;
     ScreenSessionManagerClient::GetInstance().GetDisplayHookInfo(GetCallingUid(), hookInfo);
     if (hookInfo.density_) {
@@ -2380,7 +2375,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     }
     if (WindowHelper::IsMainWindow(winType)) {
         // compatibleMode app in pc,need use avoid Area
-        if (GetSessionProperty()->GetCompatibleModeInPc()) {
+        if (GetSessionProperty()->IsAdaptToImmersive()) {
             return true;
         }
 
@@ -3251,54 +3246,6 @@ bool SceneSession::AdjustRectByAspectRatio(WSRect& rect)
     return true;
 }
 
-void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason)
-{
-    auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        TLOGE(WmsLogTag::WMS_SCB, "sessionProperty is null");
-        return;
-    }
-    bool isSupportDragInPcCompatibleMode = sessionProperty->GetIsSupportDragInPcCompatibleMode();
-    if (reason != SizeChangeReason::DRAG_MOVE) {
-        if (reason == SizeChangeReason::DRAG_END && !moveDragController_->GetStartDragFlag()) {
-            return;
-        } else {
-            HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
-        }
-    }
-}
-
-void SceneSession::HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode)
-{
-    auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        TLOGE(WmsLogTag::WMS_SCB, "sessionProperty is null");
-        return;
-    }
-    WindowLimits windowLimits = sessionProperty->GetWindowLimits();
-    const int32_t compatibleInPcPortraitWidth = sessionProperty->GetCompatibleInPcPortraitWidth();
-    const int32_t compatibleInPcPortraitHeight = sessionProperty->GetCompatibleInPcPortraitHeight();
-    const int32_t compatibleInPcLandscapeWidth = sessionProperty->GetCompatibleInPcLandscapeWidth();
-    const int32_t compatibleInPcLandscapeHeight = sessionProperty->GetCompatibleInPcLandscapeHeight();
-    const int32_t compatibleInPcDragLimit = compatibleInPcLandscapeWidth - compatibleInPcPortraitWidth;
-    WSRect windowRect = moveDragController_->GetOriginalRect();
-    auto windowWidth = windowRect.width_;
-    auto windowHeight = windowRect.height_;
-    if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
-        (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
-            rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
-        rect.width_ = compatibleInPcPortraitWidth;
-        rect.height_ = compatibleInPcPortraitHeight;
-    } else if (isSupportDragInPcCompatibleMode && windowWidth < windowHeight &&
-        rect.width_ > compatibleInPcPortraitWidth + compatibleInPcDragLimit) {
-        rect.width_ = compatibleInPcLandscapeWidth;
-        rect.height_ = compatibleInPcLandscapeHeight;
-    } else if (isSupportDragInPcCompatibleMode) {
-        rect.width_ = (windowWidth < windowHeight) ? compatibleInPcPortraitWidth : compatibleInPcLandscapeWidth;
-        rect.height_ = (windowWidth < windowHeight) ? compatibleInPcPortraitHeight : compatibleInPcLandscapeHeight;
-    }
-}
-
 void SceneSession::SetMoveDragCallback()
 {
     if (moveDragController_) {
@@ -3415,6 +3362,103 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 }
 
 /**
+ * the window is transformed according to the scale ratio
+ */
+void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
+{
+    const float HALF = 0.5f;
+    auto curWidth = rect.width_;
+    auto curHeight = rect.height_;
+    rect.width_ = static_cast<uint32_t>(curWidth * scaleX);
+    rect.height_ = static_cast<uint32_t>(curHeight * scaleY);
+    auto widthDifference = static_cast<int32_t>((curWidth - rect.width_) * HALF);
+    auto heightDifference = static_cast<int32_t>((curHeight - rect.height_) * HALF);
+    rect.posX_ = rect.posX_ + widthDifference;
+    rect.posY_ = rect.posY_ + heightDifference;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "scaleX: %{public}f, scaleY: %{public}f, sizeDifference: [%{public}d, "
+        "%{public}d], rect: %{public}s", scaleX, scaleY, widthDifference, heightDifference, rect.ToString().c_str());
+}
+
+/**
+ * hook startMoveRect with showRect
+ */
+void SceneSession::HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect)
+{
+    newRect = sessionRect;
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "is not mainWindow");
+        return;
+    }
+    auto scaleX = GetScaleX();
+    auto scaleY = GetScaleY();
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        WindowScaleTransfer(newRect, scaleX, scaleY);
+    }
+}
+
+/**
+ * check compatible mode application that includes scale ratio
+ * @return true: compatible mode application with scale ratio
+ */
+bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
+{
+    auto property = GetSessionProperty();
+    if (property->IsAdaptToProportionalScale() && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
+        MathHelper::GreatNotEqual(scaleY, 0.0f) && (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * throw slip to full screen
+ */
+void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect)
+{
+    if (pcFoldScreenController_ == nullptr) {
+        return;
+    }
+
+    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
+    // maximize end rect and notify last rect
+    throwSlipToFullScreenAnimCount_.fetch_add(1);
+    pcFoldScreenController_->ResizeToFullScreen(endRect, statusBarHeight, dockHeight);
+    if (pcFoldScreenController_->IsThrowSlipDirectly()) {
+        pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
+            rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
+    }
+}
+
+/**
+ * the compatible mode window is being scaled and transformed
+ */
+void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isScale)
+{
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "is not mainWindow");
+        return;
+    }
+    auto scaleX = GetScaleX();
+    auto scaleY = GetScaleY();
+    if (MathHelper::NearZero(scaleX) || MathHelper::NearZero(scaleY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        return;
+    }
+    if (!isScale) {
+        if (!MathHelper::NearZero(scaleX)) {
+            scaleX = 1 / scaleX;
+        }
+        if (!MathHelper::NearZero(scaleY)) {
+            scaleY = 1 / scaleY;
+        }
+    }
+    if (IsCompatibilityModeScale(scaleX, scaleY)) {
+        WindowScaleTransfer(rect, scaleX, scaleY);
+    }
+}
+
+/**
  * move with init velocity
  * @return true: successfully throw slip
  */
@@ -3423,24 +3467,22 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     if (pcFoldScreenController_ == nullptr) {
         return false;
     }
-    bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
+    CompatibilityModeWindowScaleTransfer(rect, true);
+    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
+    bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, statusBarHeight, dockHeight);
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         pcFoldScreenController_->ResetRecords();
+        CompatibilityModeWindowScaleTransfer(rect, false);
         return false;
     }
-
+    CompatibilityModeWindowScaleTransfer(rect, false);
     WSRect endRect = rect;
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
     if (needSetFullScreen) {
-        // maximize end rect and notify last rect
-        throwSlipToFullScreenAnimCount_.fetch_add(1);
-        pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
-        if (pcFoldScreenController_->IsThrowSlipDirectly()) {
-            pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
-                rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
-        }
+        ThrowSlipToFullScreen(endRect, rect);
         finishCallback = [weakThis = wptr(this), rect, where = __func__] {
             auto session = weakThis.promote();
             if (session == nullptr) {
@@ -3543,7 +3585,9 @@ void SceneSession::ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF&
             return;
         }
         bool isFullScreen = session->IsFullScreenMovable();
-        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), throwSlipMode, velocity, isFullScreen);
+        WSRect currRect;
+        session->HookStartMoveRect(currRect, session->GetSessionRect());
+        controller->RecordStartMoveRectDirectly(currRect, throwSlipMode, velocity, isFullScreen);
         const WSRect& oriGlobalRect = session->GetSessionGlobalRect();
         WSRect globalRect = oriGlobalRect;
         if (!session->MoveUnderInteriaAndNotifyRectChange(globalRect, SizeChangeReason::UNDEFINED)) {
@@ -3575,8 +3619,6 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (reason == SizeChangeReason::DRAG_START) {
         InitializeCrossMoveDrag();
     }
-    bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
-    bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
     WSRect rect = moveDragController_->GetTargetRect(
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
@@ -3586,18 +3628,12 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
         UpdateWinRectForSystemBar(rect);
     }
-    if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        HandleCompatibleModeMoveDrag(rect, reason);
-    }
     HandleSubSessionCrossNode(reason);
     if (DragResizeWhenEndFilter(reason)) {
         return;
     }
     UpdateKeyFrameState(reason, rect);
     moveDragController_->SetTargetRect(rect);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, "
-        "isCompatibleMode: %{public}d",
-        rect.posX_, rect.posY_, rect.width_, rect.height_, reason, isCompatibleModeInPc);
     WSRect relativeRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
@@ -6935,8 +6971,7 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
-        GetSessionProperty() == nullptr) {
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
         return height;
     }
@@ -7902,8 +7937,8 @@ bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, 
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is nullptr");
         return false;
     }
-    // PC上兼容模式应用窗口大小不变化
-    if (property->GetCompatibleModeInPc()) {
+    // The size of the window does not change in CompatibleMode
+    if (property->IsWindowLimitDisabled()) {
         return false;
     }
     float currVpr = 0.0f;
@@ -8086,6 +8121,7 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
             return;
         }
+        session->currentRotation_ = currentRotation;
         if (!session->sessionStage_) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s sessionStage is null", where);
             return;
@@ -8208,5 +8244,33 @@ void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
 bool SceneSession::GetIsAncoForFloatingWindow() const
 {
     return isAncoForFloatingWindow_;
+}
+
+WSError SceneSession::UseImplicitAnimation(bool useImplicit)
+{
+    return PostSyncTask([weakThis = wptr(this), useImplicit, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->useImplicitAnimationChangeFunc_) {
+            session->useImplicitAnimationChangeFunc_(useImplicit);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+ 
+void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session or func is null", where);
+            return;
+        }
+        session->useImplicitAnimationChangeFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
 }
 } // namespace OHOS::Rosen
