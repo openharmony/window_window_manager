@@ -941,7 +941,7 @@ private:
     /*
      * Move Drag
      */
-    void HandleMoveDragSurfaceNode(SizeChangeReason reason);
+    virtual void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
