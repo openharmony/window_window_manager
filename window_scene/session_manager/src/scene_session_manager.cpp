@@ -13964,6 +13964,11 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const AbilityInfoBase& abi
     return WMError::WM_OK;
 }
 
+void SceneSessionManager::ConfigSupportFunctionType(SupportFunctionType funcType)
+{
+    systemConfig_.supportFunctionType_ = funcType;
+}
+
 WMError SceneSessionManager::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken, bool& hasOrNot)
 {
     if (!abilityToken) {

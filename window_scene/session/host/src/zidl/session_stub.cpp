@@ -256,12 +256,18 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
+            return HandleSetWindowTransitionAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
             return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
             return HandleUpdateKeyFrameCloneNode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED):
+            return HandleNotifyKeyboardWillShowRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED):
+            return HandleNotifyKeyboardWillHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
@@ -1559,6 +1565,27 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t type;
+    if (!data.ReadUint32(type)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<TransitionAnimation> animation =
+        std::shared_ptr<TransitionAnimation>(data.ReadParcelable<TransitionAnimation>());
+    if (animation == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowTransitionAnimation(static_cast<WindowTransitionType>(type), *animation);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
@@ -1701,6 +1728,30 @@ int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, Mess
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
     NotifyKeyboardDidHideRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillShowRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillHideRegistered(registered);
     return ERR_NONE;
 }
 

@@ -237,13 +237,14 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, Function | SmallTest
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
     bool isRotating = false;
+    WindowAnimationInfo animationInfo;
 
     // isKeyBoardSyncTransactionOpen_ is false
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating, animationInfo);
     keyboardSession->OpenKeyboardSyncTransaction();
 
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating, animationInfo);
     keyboardSession->OpenKeyboardSyncTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
 }
@@ -394,8 +395,9 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTe
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     keyboardSession->OpenKeyboardSyncTransaction();
     WSRect keyboardPanelRect = {0, 0, 0, 0};
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    WindowAnimationInfo animationInfo;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true, animationInfo);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false, animationInfo);
 }
 
 /**
@@ -646,12 +648,13 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyBoardSyncTransaction3, Function | SmallTe
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     bool isKeyboardShow = true;
     bool isRotating = false;
+    WindowAnimationInfo animationInfo;
 
     keyboardSession->dirtyFlags_ = 0;
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating, animationInfo);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
@@ -668,16 +671,17 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, Function | SmallTe
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
     ASSERT_NE(keyboardSession, nullptr);
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    WindowAnimationInfo animationInfo;
     keyboardSession->dirtyFlags_ = 0;
 
     keyboardSession->isKeyboardSyncTransactionOpen_ = false;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false, animationInfo);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(0, keyboardSession->dirtyFlags_);
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->property_->SetCallingSessionId(1);
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false, animationInfo);
     usleep(WAIT_ASYNC_US);
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);

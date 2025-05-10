@@ -63,6 +63,9 @@ struct WindowTitleVisibleFlags {
     bool isCloseVisible = true;
 };
 
+using IKBWillShowListener = IKeyboardWillShowListener;
+using IKBWillHideListener = IKeyboardWillHideListener;
+
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option);
@@ -118,6 +121,7 @@ public:
      * PC Window
      */
     bool IsPcWindow() const override;
+    bool IsPadWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool GetCompatibleModeInPc() const override;
@@ -186,9 +190,13 @@ public:
     void NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info);
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
+    void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
     void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
@@ -207,6 +215,10 @@ public:
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError RegisterKeyboardWillShowListener(const sptr<IKBWillShowListener>& listener) override;
+    WMError UnregisterKeyboardWillShowListener(const sptr<IKBWillShowListener>& listener) override;
+    WMError RegisterKeyboardWillHideListener(const sptr<IKBWillHideListener>& listener) override;
+    WMError UnregisterKeyboardWillHideListener(const sptr<IKBWillHideListener>& listener) override;
     WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
     WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
     WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
@@ -638,6 +650,10 @@ private:
     template<typename T>
     EnableIfSame<T, IKeyboardDidHideListener, std::vector<sptr<IKeyboardDidHideListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IKBWillShowListener, std::vector<sptr<IKBWillShowListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IKBWillHideListener, std::vector<sptr<IKBWillHideListener>>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
@@ -743,6 +759,8 @@ private:
     static std::recursive_mutex dialogDeathRecipientListenerMutex_;
     static std::recursive_mutex dialogTargetTouchListenerMutex_;
     static std::recursive_mutex occupiedAreaChangeListenerMutex_;
+    static std::recursive_mutex keyboardWillShowListenerMutex_;
+    static std::recursive_mutex keyboardWillHideListenerMutex_;
     static std::recursive_mutex keyboardDidShowListenerMutex_;
     static std::recursive_mutex keyboardDidHideListenerMutex_;
     static std::recursive_mutex screenshotListenerMutex_;
@@ -767,6 +785,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IKBWillShowListener>>> keyboardWillShowListeners_;
+    static std::map<int32_t, std::vector<sptr<IKBWillHideListener>>> keyboardWillHideListeners_;
     static std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> keyboardDidShowListeners_;
     static std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> keyboardDidHideListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
@@ -873,6 +893,8 @@ private:
     /*
      * keyboard
      */
+    bool isKeyboardWillShowRegistered_ { false };
+    bool isKeyboardWillHideRegistered_ { false };
     bool isKeyboardDidShowRegistered_ = false;
     bool isKeyboardDidHideRegistered_ = false;
 };

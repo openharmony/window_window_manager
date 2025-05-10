@@ -127,6 +127,8 @@ private:
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply);
 
@@ -142,6 +144,9 @@ private:
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
+    
+    // Window Transition Animation For PC
+    int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

@@ -327,6 +327,7 @@ public:
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
+    napi_value CreateJsWindowAnimationConfigObject(napi_env env, const KeyboardAnimationCurve& curve);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& rotationChangeInfo);
@@ -371,6 +372,8 @@ public:
     napi_value RectChangeReasonInit(napi_env env);
     napi_value RotationChangeTypeInit(napi_env env);
     napi_value RectTypeInit(napi_env env);
+    napi_value WindowTransitionTypeInit(napi_env env);
+    napi_value WindowAnimationCurveInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
