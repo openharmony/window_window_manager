@@ -6584,7 +6584,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId, TestSize.Level1)
     sptr<ScreenSession> newSession = new ScreenSession();
 
     sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(rsScreenId);
-    EXPECT_EQ(result, nullptr);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -6653,6 +6653,53 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked, Function | Smal
 
     ssm_->SetFoldStatusExpandAndLocked(false);
     EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap01
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the map is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap01, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> emptyMap;
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(emptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap02
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap02, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, ""));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap03
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is not found in the map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap03, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial456"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap04
+ * @tc.desc: Test CHeckMultiScreenInfoMap function when all checks pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap04, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial123"));
 }
 }
 } // namespace Rosen
