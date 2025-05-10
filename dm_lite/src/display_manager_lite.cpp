@@ -733,7 +733,7 @@ DMError DisplayManagerLite::Impl::RegisterScreenMagneticStateListener(sptr<IScre
     } else if (listener != nullptr) {
         WLOGD("IScreenMagneticStateListener register success");
         bool isKeyboardOn = SingletonContainer::Get<DisplayManagerAdapterLite>().GetKeyboardState();
-        WLOGI("RegisterScreenMagneticStateListener isKeyboardOn : %{public}d", isKeyboardOn);
+        TLOGI(WmsLogTag::DMS, "RegisterScreenMagneticStateListener isKeyboardOn : %{public}d", isKeyboardOn);
         listener->OnScreenMagneticStateChanged(isKeyboardOn);
         screenMagneticStateListeners_.insert(listener);
     }
