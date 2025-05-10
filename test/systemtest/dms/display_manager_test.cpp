@@ -110,7 +110,7 @@ sptr<Window> DisplayManagerTest::CreateWindow(std::string name,
     width = window->GetRect().width_;
     height = window->GetRect().height_;
     DrawWindowColor(window, color, width, height); // 0x66000000 color_black
-    RSTransactionAdapter::FlushImplicitTransaction(window->GetSurfaceNode());
+    RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
     return window;
 }
 

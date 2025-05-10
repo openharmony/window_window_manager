@@ -2891,7 +2891,6 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
         WLOGFE("displayNode is null");
         return nullptr;
     }
-    // Note that RSUIContext should not be here, it should be placed in ScreenSession.
     return displayNode;
 }
 

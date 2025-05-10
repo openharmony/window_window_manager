@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <string_ex.h>
 #include <unique_fd.h>
+#include <unordered_set>
 #include "input_manager.h"
 
 #include <hitrace_meter.h>
@@ -744,7 +745,7 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
         displayNode = nullptr;
     }
     TLOGI(WmsLogTag::DMS, "free displayNode");
-    RSTransactionAdapter::FlushImplicitTransaction(mirrorSession->GetRSUIDirector());
+    RSTransactionAdapter::FlushImplicitTransaction(mirrorSession->GetRSUIContext());
 }
 
 void ScreenSessionManager::SetScreenCorrection()
@@ -5085,6 +5086,7 @@ DMError ScreenSessionManager::DoMakeUniqueScreenOld(const std::vector<ScreenId>&
     std::vector<DisplayId>& displayIds, bool isCallingByThirdParty)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
     for (auto screenId : allUniqueScreenIds) {
         ScreenId rsScreenId = SCREEN_ID_INVALID;
         bool res = ConvertScreenIdToRsScreenId(screenId, rsScreenId);
@@ -5109,9 +5111,10 @@ DMError ScreenSessionManager::DoMakeUniqueScreenOld(const std::vector<ScreenId>&
         }
         // notify scb to build Screen widget
         OnVirtualScreenChange(screenId, ScreenEvent::CONNECTED);
-        TLOGD(WmsLogTag::DMS, "flush data");
-        RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIDirector());
+        rsUIContexts.insert(screenSession->GetRSUIContext());
     }
+    TLOGD(WmsLogTag::DMS, "flush data");
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
 #endif
     return DMError::DM_OK;
 }
@@ -5539,7 +5542,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
 {
     bool res = screenGroup->RemoveChild(screen);
     if (screen != nullptr) {
-        RSTransactionAdapter::FlushImplicitTransaction(screen->GetRSUIDirector());
+        RSTransactionAdapter::FlushImplicitTransaction(screen->GetRSUIContext());
         TLOGI(WmsLogTag::DMS, "remove child and call flush.");
     }
     if (!res) {
@@ -7655,13 +7658,15 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
 void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> oldScbPids, int32_t newScbPid,
     sptr<ScreenSession> screenSession)
 {
-    auto displayNode = screenSession->GetDisplayNode();
-    if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "display node is null");
-        return;
+    {
+        auto displayNode = screenSession->GetDisplayNode();
+        if (displayNode == nullptr) {
+            TLOGE(WmsLogTag::DMS, "display node is null");
+            return;
+        }
+        displayNode->SetScbNodePid(oldScbPids, newScbPid);
     }
-    displayNode->SetScbNodePid(oldScbPids, newScbPid);
-    RSTransactionAdapter::FlushImplicitTransaction(displayNode);
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -8451,7 +8456,7 @@ void ScreenSessionManager::SetVirtualDisplayMuteFlag(ScreenId screenId, bool mut
         return;
     }
     TLOGI(WmsLogTag::DMS, "flush displayNode mute");
-    RSTransactionAdapter::FlushImplicitTransaction(virtualDisplayNode);
+    RSTransactionAdapter::FlushImplicitTransaction(virtualScreenSession->GetRSUIContext());
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " muteFlag: %{public}d", screenId, muteFlag);
 }
 
@@ -8873,8 +8878,8 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
     } else {
         TLOGW(WmsLogTag::DMS, "DisplayNode is null");
     }
-    RSTransactionAdapter::FlushImplicitTransaction(firstDisplayNode);
-    RSTransactionAdapter::FlushImplicitTransaction(secondDisplayNode);
+    TLOGI(WmsLogTag::DMS, "free displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction({firstDisplayNode, secondDisplayNode});
 #endif
 }
 
@@ -8899,7 +8904,7 @@ void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionO
         TLOGW(WmsLogTag::DMS, "DisplayNode is null");
     }
     TLOGI(WmsLogTag::DMS, "free displayNode");
-    RSTransactionAdapter::FlushImplicitTransaction(defaultDisplayNode);
+    RSTransactionAdapter::FlushImplicitTransaction(defaultScreenSession->GetRSUIContext());
 #endif
 }
 
@@ -9301,8 +9306,9 @@ void ScreenSessionManager::SetMultiScreenOuterMode(sptr<ScreenSession>& innerSes
         }
         displayNode = nullptr;
     }
-    RSTransactionAdapter::FlushImplicitTransaction(innerSession->GetRSUIDirector());
-    RSTransactionAdapter::FlushImplicitTransaction(outerSession->GetRSUIDirector());
+    TLOGI(WmsLogTag::DMS, "free displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerSession->GetRSUIDirector(), outerSession->GetRSUIDirector()});
     ScreenSettingHelper::SetSettingValue("only_second_screen_info", screenMode);
     CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
     TLOGI(WmsLogTag::DMS, "switch out end.");

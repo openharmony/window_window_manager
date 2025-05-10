@@ -37,7 +37,6 @@ class UIContent;
 namespace OHOS {
 namespace Rosen {
 class RSNode;
-class RSUIDirector;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using GetStatusBarHeightCallback = std::function<uint32_t()>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
@@ -147,6 +146,7 @@ public:
      * RS Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     void RegisterInputEventListener();

@@ -90,12 +90,6 @@ public:
     WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
-
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
@@ -454,6 +448,12 @@ public:
     void SetPreferredRequestedOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -534,12 +534,6 @@ protected:
     std::shared_ptr<AbilityRuntime::Context> context_;
     mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> rsUIDirector_;
-
     sptr<WindowSessionProperty> property_;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;
@@ -925,6 +919,12 @@ private:
      */
     bool isKeyboardDidShowRegistered_ = false;
     bool isKeyboardDidHideRegistered_ = false;
+
+    /*
+     * RS Multi Instance
+     */
+    void InitRSUIDirector();
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

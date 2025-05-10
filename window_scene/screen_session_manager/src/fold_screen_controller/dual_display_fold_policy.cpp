@@ -432,7 +432,7 @@ void DualDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int3
         displayNode->RemoveDisplayNodeFromTree();
     }
     TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIDirector());
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 void DualDisplayFoldPolicy::ExitCoordination()

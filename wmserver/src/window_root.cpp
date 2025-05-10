@@ -1858,7 +1858,7 @@ WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
             container->RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         }
     }
-    RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
+    RSTransactionAdapter::FlushImplicitTransaction(node->GetRSUIContext());
     return WMError::WM_OK;
 }
 

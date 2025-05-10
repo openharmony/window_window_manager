@@ -243,7 +243,7 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     {
-        AutoRSSyncTransaction syncTrans(window_->GetSurfaceNode(), false);
+        AutoRSSyncTransaction syncTrans(window_->GetRSUIContext(), false);
         ResetExtController();
         if (!withAnim) {
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");

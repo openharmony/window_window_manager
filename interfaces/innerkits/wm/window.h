@@ -76,6 +76,7 @@ using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
+class RSUIContext;
 class RSUIDirector;
 class ISession;
 class Window;
@@ -836,11 +837,20 @@ public:
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const { return nullptr; }
 
     /**
-     * @brief Get the RSUIDirector associated with the window
+     * @brief Get the associated RSUIDirector instance
      *
-     * @return std::shared_ptr<RSUIDirector> The RSUIDirector instance
+     * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
+     *         or nullptr if unavailable.
      */
     virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
+
+    /**
+     * @brief Get the associated RSUIContext instance
+     *
+     * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
+     *         or nullptr if unavailable.
+     */
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
 
     /**
      * @brief Get ability context

@@ -749,7 +749,7 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
 void WindowNodeContainer::RunInInputMethodSyncTransaction(sptr<WindowNode>& node, std::function<void()> task)
 {
     if (isAnimateTransactionEnabled_) {
-        AutoRSSyncTransaction autoSync(node->surfaceNode_, true);
+        AutoRSSyncTransaction autoSync(node->GetRSUIContext(), true);
         task();
     } else {
         TLOGD(WmsLogTag::DEFAULT, "InputMethodSyncTransaction is disabled");
@@ -815,11 +815,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
     uint32_t percent;
     node->GetWindowGravity(windowGravity, percent);
 
-    std::shared_ptr<RSUIContext> rsUIContext;
-    if (node->surfaceNode_) {
-        rsUIContext = node->surfaceNode_->GetRSUIContext();
-    }
-
+    auto rsUIContext = node->GetRSUIContext();
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("Add node with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
@@ -830,7 +826,7 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationIn_.duration_;
-        RunInInputMethodSyncTransaction(node, [&]() {
+        RunInInputMethodSyncTransaction(node, [&] {
             RSNode::Animate(
                 rsUIContext, timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
         });
@@ -884,11 +880,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     uint32_t percent;
     node->GetWindowGravity(windowGravity, percent);
 
-    std::shared_ptr<RSUIContext> rsUIContext;
-    if (node->surfaceNode_) {
-        rsUIContext = node->surfaceNode_->GetRSUIContext();
-    }
-
+    auto rsUIContext = node->GetRSUIContext();
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("remove with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
@@ -907,7 +899,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
-        RunInInputMethodSyncTransaction(node, [&]() {
+        RunInInputMethodSyncTransaction(node, [&] {
             auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
             RSNode::Animate(
                 rsUIContext, timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
@@ -1436,7 +1428,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
             overlapRect, textFieldPositionY, textFieldHeight);
         if (isAnimateTransactionEnabled_) {
-            auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->surfaceNode_);
+            auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
         } else {
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);

@@ -543,7 +543,7 @@ void SingleDisplayPocketFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screen
     }
     displayNode = nullptr;
     TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIDirector());
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()

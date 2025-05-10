@@ -116,10 +116,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    rsUIDirector_ = RSUIDirector::Create();
-    rsUIDirector_->Init(true, true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+    InitRSUIDirector();
 
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
@@ -185,8 +182,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
     if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
-    auto rsUIContext = rsUIDirector_->GetRSUIContext();
-    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, rsUIContext);
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
@@ -315,14 +311,6 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
-}
-
-std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
-{
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Get RSUIDirector: %{public}s, windowId: %{public}d",
-          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
-    return rsUIDirector_;
 }
 
 Rect WindowImpl::GetRect() const
@@ -4601,6 +4589,37 @@ WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo
     windowPropertyInfo.id = GetWindowId();
     windowPropertyInfo.displayId = GetDisplayId();
     return WMError::WM_OK;
+}
+
+void WindowImpl::InitRSUIDirector()
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED();
+    if (rsUIDirector_) {
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "RSUIDirector already exists: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+        return;
+    }
+    rsUIDirector_ = RSUIDirector::Create();
+    rsUIDirector_->Init(true, true);
+    TLOGI(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+}
+
+std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

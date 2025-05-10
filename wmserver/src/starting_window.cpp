@@ -153,11 +153,8 @@ void StartingWindow::ChangePropertyByApiVersion(const sptr<WindowTransitionInfo>
 WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSUIContext> rsUIContext;
-    if (node->surfaceNode_) {
-        rsUIContext = node->surfaceNode_->GetRSUIContext();
-    }
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
+    auto rsUIContext = node->GetRSUIContext();
     node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
         rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
@@ -171,7 +168,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
     node->startingWinSurfaceNode_ = RSSurfaceNode::Create(
         rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str());
+          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str());
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;

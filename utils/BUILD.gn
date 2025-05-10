@@ -208,6 +208,7 @@ ohos_shared_library("libwmutil") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",

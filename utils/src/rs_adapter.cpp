@@ -15,6 +15,8 @@
 
 #include "rs_adapter.h"
 
+#include <parameters.h>
+
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -110,10 +112,16 @@ void RSTransactionAdapter::FlushImplicitTransaction(
 }
 
 void RSTransactionAdapter::FlushImplicitTransaction(
-    const std::shared_ptr<RSNode>& rsNode, uint64_t timestamp, const std::string& abilityName)
+    const std::unordered_set<std::shared_ptr<RSUIContext>>& rsUIContexts,
+    uint64_t timestamp, const std::string& abilityName)
 {
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
-    FlushImplicitTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, timestamp, abilityName);
+    if (!RSAdapterUtil::IsMultiInstanceEnabled()) {
+        FlushImplicitTransaction(std::shared_ptr<RSUIContext>(nullptr), timestamp, abilityName);
+        return;
+    }
+    for (const auto& rsUIContext : rsUIContexts) {
+        FlushImplicitTransaction(rsUIContext, timestamp, abilityName);
+    }
 }
 
 void RSTransactionAdapter::FlushImplicitTransaction(
@@ -123,14 +131,61 @@ void RSTransactionAdapter::FlushImplicitTransaction(
     FlushImplicitTransaction(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr, timestamp, abilityName);
 }
 
-AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable)
+void RSTransactionAdapter::FlushImplicitTransaction(
+    std::initializer_list<std::shared_ptr<RSUIDirector>> rsUIDirectors,
+    uint64_t timestamp, const std::string& abilityName)
+{
+    if (!RSAdapterUtil::IsMultiInstanceEnabled()) {
+        FlushImplicitTransaction(std::shared_ptr<RSUIContext>(nullptr), timestamp, abilityName);
+        return;
+    }
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
+    for (const auto& rsUIDirector : rsUIDirectors) {
+        rsUIContexts.insert(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr);
+    }
+    FlushImplicitTransaction(rsUIContexts, timestamp, abilityName);
+}
+
+void RSTransactionAdapter::FlushImplicitTransaction(
+    const std::shared_ptr<RSNode>& rsNode, uint64_t timestamp, const std::string& abilityName)
+{
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
+    FlushImplicitTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, timestamp, abilityName);
+}
+
+void RSTransactionAdapter::FlushImplicitTransaction(
+    std::initializer_list<std::shared_ptr<RSNode>> rsNodes,
+    uint64_t timestamp, const std::string& abilityName)
+{
+    if (!RSAdapterUtil::IsMultiInstanceEnabled()) {
+        FlushImplicitTransaction(std::shared_ptr<RSUIContext>(nullptr), timestamp, abilityName);
+        return;
+    }
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
+    for (const auto& rsNode : rsNodes) {
+        rsUIContexts.insert(rsNode ? rsNode->GetRSUIContext() : nullptr);
+    }
+    FlushImplicitTransaction(rsUIContexts, timestamp, abilityName);
+}
+
+void AutoRSTransaction::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable)
 {
     if (enable) {
-        rsTransAdapter_ = std::make_shared<RSTransactionAdapter>(rsNode);
+        rsTransAdapter_ = std::make_shared<RSTransactionAdapter>(rsUIContext);
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Begin transaction: %{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
+              "Begin transaction: %{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
         rsTransAdapter_->Begin();
     }
+}
+
+AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable)
+{
+    InitByRSUIContext(rsUIContext, enable);
+}
+
+AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable)
+{
+    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr, enable);
 }
 
 AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>& rsTransAdapter, bool enable)
@@ -141,7 +196,6 @@ AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>
         rsTransAdapter_->Begin();
     }
 }
-
 
 AutoRSTransaction::~AutoRSTransaction()
 {
@@ -307,18 +361,32 @@ void RSSyncTransactionAdapter::CloseSyncTransaction(
     CloseSyncTransaction(rsNode->GetRSUIContext(), handler);
 }
 
+void AutoRSSyncTransaction::InitByRSUIContext(
+    const std::shared_ptr<RSUIContext>& rsUIContext, bool needFlushImplicitTransaction)
+{
+    if (needFlushImplicitTransaction) {
+        RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+    }
+    rsSyncTransAdapter_ = std::make_shared<RSSyncTransactionAdapter>(rsUIContext);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Open sync transaction: %{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    rsSyncTransAdapter_->OpenSyncTransaction(handler_);
+}
+
+AutoRSSyncTransaction::AutoRSSyncTransaction(
+    const std::shared_ptr<RSUIContext>& rsUIContext,
+    bool needFlushImplicitTransaction,
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
+{
+    InitByRSUIContext(rsUIContext, needFlushImplicitTransaction);
+}
+
 AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSNode>& rsNode,
     bool needFlushImplicitTransaction,
     const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
 {
-    if (needFlushImplicitTransaction) {
-        RSTransactionAdapter::FlushImplicitTransaction(rsNode);
-    }
-    rsSyncTransAdapter_ = std::make_shared<RSSyncTransactionAdapter>(rsNode);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Open sync transaction: %{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
-    rsSyncTransAdapter_->OpenSyncTransaction(handler);
+    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr, needFlushImplicitTransaction);
 }
 
 AutoRSSyncTransaction::AutoRSSyncTransaction(
@@ -360,6 +428,12 @@ AllowInMultiThreadGuard::~AllowInMultiThreadGuard()
               "Reopen check in RS multi-instance: %{public}s", RSAdapterUtil::RSNodeToStr(rsNode_).c_str());
         rsNode_->SetSkipCheckInMultiInstance(false);
     }
+}
+
+bool RSAdapterUtil::IsMultiInstanceEnabled()
+{
+    static bool enabled = system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0";
+    return enabled;
 }
 
 std::string RSAdapterUtil::RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext)

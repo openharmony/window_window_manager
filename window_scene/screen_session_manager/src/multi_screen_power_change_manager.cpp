@@ -191,14 +191,17 @@ DMError MultiScreenPowerChangeManager::HandleScreenOnlyExternalModeChange(sptr<S
 
 void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>& screenScreen)
 {
-    TLOGW(WmsLogTag::DMS, "removeNode screenId=%{public}" PRIu64, screenScreen->GetScreenId());
-    std::shared_ptr<RSDisplayNode> displayNode = screenScreen->GetDisplayNode();
-    if (displayNode != nullptr) {
-        displayNode->SetDisplayOffset(0, 0);
-        displayNode->RemoveFromTree();
-        screenScreen->ReleaseDisplayNode();
+    {
+        TLOGW(WmsLogTag::DMS, "removeNode screenId=%{public}" PRIu64, screenScreen->GetScreenId());
+        std::shared_ptr<RSDisplayNode> displayNode = screenScreen->GetDisplayNode();
+        if (displayNode != nullptr) {
+            displayNode->SetDisplayOffset(0, 0);
+            displayNode->RemoveFromTree();
+            screenScreen->ReleaseDisplayNode();
+        }
+        displayNode = nullptr;
     }
-    RSTransactionAdapter::FlushImplicitTransaction(displayNode);
+    RSTransactionAdapter::FlushImplicitTransaction(screenScreen->GetRSUIContext());
 }
 
 void MultiScreenPowerChangeManager::ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient,

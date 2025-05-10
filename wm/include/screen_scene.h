@@ -34,8 +34,6 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
-class RSUIDirector;
-
 class ScreenScene : public Window {
 public:
     ScreenScene(std::string name);
@@ -96,6 +94,7 @@ public:
      * RS Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     mutable std::mutex mutex_;

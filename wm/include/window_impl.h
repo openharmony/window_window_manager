@@ -122,12 +122,6 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
-
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
@@ -369,6 +363,12 @@ public:
      */
     WMError ShowKeyboard(KeyboardViewMode mode) override;
 
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -518,12 +518,6 @@ private:
     sptr<IAnimationTransitionController> animationTransitionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> rsUIDirector_;
-
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
@@ -567,6 +561,12 @@ private:
     std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+
+    /*
+     * RS Multi Instance
+     */
+    void InitRSUIDirector();
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

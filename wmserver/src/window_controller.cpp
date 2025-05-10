@@ -485,11 +485,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
         const AnimationConfig::KeyboardAnimation& animation = WindowHelper::IsEmptyRect(occupiedArea) ?
             WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationOut_ :
             WindowNodeContainer::GetAnimationConfigRef().keyboardAnimationIn_;
-        std::shared_ptr<RSUIContext> rsUIContext;
-        if (callingWindow->leashWinSurfaceNode_) {
-            rsUIContext = callingWindow->leashWinSurfaceNode_->GetRSUIContext();
-        }
-        RSNode::Animate(rsUIContext, animation.duration_, animation.curve_, setBoundsFun);
+        RSNode::Animate(callingWindow->GetRSUIContext(), animation.duration_, animation.curve_, setBoundsFun);
     }
 
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
@@ -497,7 +493,7 @@ void WindowController::NotifyInputCallingWindowRectAndOccupiedAreaChange(const s
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
         safeRect, safeRect.height_);
 
-    auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->surfaceNode_);
+    auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(callingWindow->GetRSUIContext());
     if (WindowNodeContainer::GetAnimateTransactionEnabled() && rsTransaction) {
         callingWindow->GetWindowToken()->UpdateOccupiedAreaAndRect(info, rect, rsTransaction);
     } else {
@@ -1375,7 +1371,7 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
     WLOGD("FlushWindowInfo");
     displayZoomController_->UpdateWindowZoomInfo(windowId);
     auto node = windowRoot_->GetWindowNode(windowId);
-    RSTransactionAdapter::FlushImplicitTransaction(node ? node->surfaceNode_ : nullptr);
+    RSTransactionAdapter::FlushImplicitTransaction(node ? node->GetRSUIContext() : nullptr);
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }
 
@@ -1557,7 +1553,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
-            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
+            RSTransactionAdapter::FlushImplicitTransaction(node->GetRSUIContext());
             UpdatePrivateStateAndNotify(node);
             break;
         }
@@ -1569,7 +1565,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSecurityLayer(isPrivacyMode);
             }
-            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
+            RSTransactionAdapter::FlushImplicitTransaction(node->GetRSUIContext());
             UpdatePrivateStateAndNotify(node);
             break;
         }
@@ -1581,7 +1577,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             if (node->leashWinSurfaceNode_ != nullptr) {
                 node->leashWinSurfaceNode_->SetSkipLayer(isSnapshotSkip);
             }
-            RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
+            RSTransactionAdapter::FlushImplicitTransaction(node->GetRSUIContext());
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO: {

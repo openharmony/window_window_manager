@@ -126,8 +126,8 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
-    auto task = [screenId, caller = __func__]() {
-        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId, caller);
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         RSSyncTransactionAdapter::OpenSyncTransaction(rsUIContext);
     };
@@ -148,8 +148,8 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
-    auto task = [screenId, caller = __func__]() {
-        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId, caller);
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         RSSyncTransactionAdapter::CloseSyncTransaction(rsUIContext);
     };
     if (auto handler = SceneSessionManager::GetInstance().GetTaskScheduler()) {
@@ -167,8 +167,8 @@ napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, n
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
-    auto task = [screenId, caller = __func__]() {
-        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId, caller);
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         RSSyncTransactionAdapter::CloseSyncTransaction(rsUIContext);
     };
     SceneSessionManager::GetInstance().CloseSyncTransaction(task);
