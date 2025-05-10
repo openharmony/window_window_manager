@@ -9833,4 +9833,12 @@ void ScreenSessionManager::NotifyScreenMaskAppear()
     TLOGI(WmsLogTag::DMS, "screen mask appeared, notify block");
     screenMaskCV_.notify_all();
 }
+
+bool ScreenSessionManager::GetKeyboardState()
+{
+#ifdef FOLD_ABILITY_ENABLE
+    return SuperFoldStateManager::GetInstance().GetKeyboardState();
+#endif
+    return false;
+}
 } // namespace OHOS::Rosen
