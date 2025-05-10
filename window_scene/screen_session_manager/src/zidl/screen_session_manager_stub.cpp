@@ -1173,6 +1173,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyScreenMaskAppear();
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_KEYBOARD_STATE: {
+            bool isKeyboardOn = GetKeyboardState();
+            reply.WriteBool(isKeyboardOn);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

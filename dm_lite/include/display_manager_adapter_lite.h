@@ -62,6 +62,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+    virtual bool GetKeyboardState();
     /*
      * used by powermgr
      */
