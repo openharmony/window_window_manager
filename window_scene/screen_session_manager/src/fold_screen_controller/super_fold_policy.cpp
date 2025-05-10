@@ -39,7 +39,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
     auto defaultInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(DEFAULT_DISPLAY_ID);
     if (screenSession == nullptr || defaultInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "session or display nullptr.");
+        TLOGE(WmsLogTag::DMS, "session or display nullptr.");
         return snapshotRect;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -67,7 +67,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
         << " top:" << snapshotRect.top_
         << " right:" << snapshotRect.right_
         << " bottom:" << snapshotRect.bottom_;
-    TLOGW(WmsLogTag::DMS_SSM, "%{public}s", oss.str().c_str());
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return snapshotRect;
 }
 
@@ -77,7 +77,7 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
     auto defaultInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(DEFAULT_DISPLAY_ID);
     if (screenSession == nullptr || defaultInfo == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "session or display nullptr.");
+        TLOGE(WmsLogTag::DMS, "session or display nullptr.");
         return recordRect;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -105,7 +105,7 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         << " top:" << recordRect.posY_
         << " right:" << recordRect.width_
         << " bottom:" << recordRect.height_;
-    TLOGW(WmsLogTag::DMS_SSM, "%{public}s", oss.str().c_str());
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return recordRect;
 }
 

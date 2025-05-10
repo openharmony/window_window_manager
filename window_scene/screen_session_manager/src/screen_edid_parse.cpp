@@ -29,7 +29,7 @@ static void *g_libHandle = nullptr;
 bool LoadEdidPlugin(void)
 {
     if (g_libHandle != nullptr) {
-        TLOGW(WmsLogTag::DMS_SSM, "edid plugin has already exists.");
+        TLOGW(WmsLogTag::DMS, "edid plugin has already exists.");
         return true;
     }
     int32_t cnt = 0;
@@ -37,9 +37,9 @@ bool LoadEdidPlugin(void)
     do {
         cnt++;
         g_libHandle = dlopen(EDID_PARSE_SO_PATH.c_str(), RTLD_LAZY);
-        TLOGI(WmsLogTag::DMS_SSM, "dlopen %{public}s, retry cnt: %{public}d", EDID_PARSE_SO_PATH.c_str(), cnt);
+        TLOGI(WmsLogTag::DMS, "dlopen %{public}s, retry cnt: %{public}d", EDID_PARSE_SO_PATH.c_str(), cnt);
         if (g_libHandle == nullptr) {
-            TLOGE(WmsLogTag::DMS_SSM, "dlopen failed: %{public}s", dlerror());
+            TLOGE(WmsLogTag::DMS, "dlopen failed: %{public}s", dlerror());
         }
         usleep(SLEEP_TIME_US);
     } while (!g_libHandle && cnt < retryTimes);
@@ -48,7 +48,7 @@ bool LoadEdidPlugin(void)
 
 void UnloadEdidPlugin(void)
 {
-    TLOGI(WmsLogTag::DMS_SSM, "unload edid plugin.");
+    TLOGI(WmsLogTag::DMS, "unload edid plugin.");
     if (g_libHandle != nullptr) {
         dlclose(g_libHandle);
         g_libHandle = nullptr;
@@ -61,26 +61,26 @@ bool GetEdid(ScreenId screenId, struct BaseEdid &edid)
     uint8_t outPort;
     int getEdidFromRS = RSInterfaces::GetInstance().GetDisplayIdentificationData(screenId, outPort, edidData);
     if (getEdidFromRS != 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "get EDID from RS failed.");
+        TLOGE(WmsLogTag::DMS, "get EDID from RS failed.");
         return false;
     }
     uint32_t edidSize = static_cast<uint32_t>(edidData.size());
     int32_t checkCode = GetEdidCheckCode(edidData);
-    TLOGW(WmsLogTag::DMS_SSM, "EDID data size: %{public}u, check code: %{public}d",
+    TLOGW(WmsLogTag::DMS, "EDID data size: %{public}u, check code: %{public}d",
         edidSize, checkCode);
     if (!LoadEdidPlugin()) {
-        TLOGE(WmsLogTag::DMS_SSM, "dlopen failed.");
+        TLOGE(WmsLogTag::DMS, "dlopen failed.");
         return false;
     }
     ParseEdidFunc ParseBaseEdid = (ParseEdidFunc)(dlsym(g_libHandle, "ParseBaseEdid"));
     if (ParseBaseEdid == nullptr) {
-        TLOGE(WmsLogTag::DMS_SSM, "ParseBaseEdid null.");
+        TLOGE(WmsLogTag::DMS, "ParseBaseEdid null.");
         UnloadEdidPlugin();
         return false;
     }
     int32_t getEdid = ParseBaseEdid(edidData.data(), edidSize, &edid);
     if (getEdid != 0) {
-        TLOGE(WmsLogTag::DMS_SSM, "parse EDID failed.");
+        TLOGE(WmsLogTag::DMS, "parse EDID failed.");
         return false;
     }
     return true;
@@ -90,7 +90,7 @@ int32_t GetEdidCheckCode(const std::vector<uint8_t>& edidData)
 {
     int32_t checkCode = 0;
     if (edidData.size() <= CHECK_INDEX_END) {
-        TLOGE(WmsLogTag::DMS_SSM, "EDID data size not enough!");
+        TLOGE(WmsLogTag::DMS, "EDID data size not enough!");
         return CHECK_CODE_INVALID;
     }
     for (uint32_t i = CHECK_INDEX_BEGIN; i <= CHECK_INDEX_END; i++) {

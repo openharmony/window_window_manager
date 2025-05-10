@@ -28,13 +28,13 @@ using namespace AbilityRuntime;
 
 JsDisplayListener::JsDisplayListener(napi_env env) : env_(env), weakRef_(wptr<JsDisplayListener> (this))
 {
-    TLOGI(WmsLogTag::DMS_KITS, "Constructor execution");
+    TLOGI(WmsLogTag::DMS, "Constructor execution");
     napi_add_env_cleanup_hook(env_, CleanEnv, this);
 }
 
 JsDisplayListener::~JsDisplayListener()
 {
-    TLOGI(WmsLogTag::DMS_KITS, "Destructor execution");
+    TLOGI(WmsLogTag::DMS, "Destructor execution");
     napi_remove_env_cleanup_hook(env_, CleanEnv, this);
     env_ = nullptr;
 }
@@ -43,19 +43,19 @@ void JsDisplayListener::CleanEnv(void* obj)
 {
     JsDisplayListener* thisObj = reinterpret_cast<JsDisplayListener*>(obj);
     if (!thisObj) {
-        TLOGE(WmsLogTag::DMS_KITS, "obj is nullptr");
+        TLOGE(WmsLogTag::DMS, "obj is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::DMS_KITS, "env_ is invalid, set to nullptr");
+    TLOGI(WmsLogTag::DMS, "env_ is invalid, set to nullptr");
     thisObj->env_ = nullptr;
 }
 
 void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
-    TLOGD(WmsLogTag::DMS_KITS, "called");
+    TLOGD(WmsLogTag::DMS, "called");
     std::unique_ptr<NativeReference> callbackRef;
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "env_ nullptr");
         return;
     }
     napi_ref result = nullptr;
@@ -63,7 +63,7 @@ void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListen
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(mtx_);
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    TLOGD(WmsLogTag::DMS_KITS, "success, jsCallBack_ size: %{public}u!",
+    TLOGD(WmsLogTag::DMS, "success, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -78,7 +78,7 @@ void JsDisplayListener::RemoveCallback(napi_env env, const std::string& type, na
     std::lock_guard<std::mutex> lock(mtx_);
     auto it = jsCallBack_.find(type);
     if (it == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "no callback to remove");
+        TLOGE(WmsLogTag::DMS, "no callback to remove");
         return;
     }
     auto& listeners = it->second;
@@ -91,25 +91,25 @@ void JsDisplayListener::RemoveCallback(napi_env env, const std::string& type, na
             iter++;
         }
     }
-    TLOGI(WmsLogTag::DMS_KITS, "success, jsCallBack_ size: %{public}u!",
+    TLOGI(WmsLogTag::DMS, "success, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 
 void JsDisplayListener::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)
 {
     if (methodName.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "empty method name str, call method failed");
+        TLOGE(WmsLogTag::DMS, "empty method name str, call method failed");
         return;
     }
-    TLOGD(WmsLogTag::DMS_KITS, "CallJsMethod methodName = %{public}s", methodName.c_str());
+    TLOGD(WmsLogTag::DMS, "CallJsMethod methodName = %{public}s", methodName.c_str());
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS_KITS, "env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "env_ nullptr");
         return;
     }
     for (auto& callback : jsCallBack_[methodName]) {
         napi_value method = callback->GetNapiValue();
         if (method == nullptr) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to get method callback from object");
+            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object");
             continue;
         }
         napi_call_function(env_, NapiGetUndefined(env_), method, argc, argv, nullptr);
@@ -119,20 +119,20 @@ void JsDisplayListener::CallJsMethod(const std::string& methodName, napi_value c
 void JsDisplayListener::OnCreate(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_ADD) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCreate");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -142,30 +142,30 @@ void JsDisplayListener::OnCreate(DisplayId id)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnDestroy(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_REMOVE) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDestroy");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -175,30 +175,30 @@ void JsDisplayListener::OnDestroy(DisplayId id)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnChange(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGD(WmsLogTag::DMS_KITS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGD(WmsLogTag::DMS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_CHANGE) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -208,30 +208,30 @@ void JsDisplayListener::OnChange(DisplayId id)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called, private status: %{public}u", static_cast<uint32_t>(hasPrivate));
+    TLOGI(WmsLogTag::DMS, "called, private status: %{public}u", static_cast<uint32_t>(hasPrivate));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_PRIVATE_MODE_CHANGE) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, hasPrivate, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnPrivateWindow");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, hasPrivate)};
@@ -241,30 +241,30 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called, foldStatus: %{public}u", static_cast<uint32_t>(foldStatus));
+    TLOGI(WmsLogTag::DMS, "called, foldStatus: %{public}u", static_cast<uint32_t>(foldStatus));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_FOLD_STATUS_CHANGED) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, foldStatus, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldStatusChanged");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, foldStatus)};
@@ -274,10 +274,10 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
@@ -285,18 +285,18 @@ void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_FOLD_ANGLE_CHANGED) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, foldAngles, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnFoldAngleChanged");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateNativeArray(env, foldAngles)};
@@ -306,10 +306,10 @@ void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
@@ -317,18 +317,18 @@ void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_CAPTURE_STATUS_CHANGED) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, isCapture, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnCaptureStatusChanged");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, isCapture)};
@@ -338,30 +338,30 @@ void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called, displayMode: %{public}u", static_cast<uint32_t>(displayMode));
+    TLOGI(WmsLogTag::DMS, "called, displayMode: %{public}u", static_cast<uint32_t>(displayMode));
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, displayMode, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnDisplayModeChanged");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, displayMode)};
@@ -371,30 +371,30 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called");
+    TLOGI(WmsLogTag::DMS, "called");
     if (jsCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_AVAILABLE_AREA_CHANGED) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, area, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsDisplayListener::OnAvailableAreaChanged");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DMS_KITS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsRectObject(env, area)};
@@ -404,10 +404,10 @@ void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS_KITS, "Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS_KITS, "env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 } // namespace Rosen

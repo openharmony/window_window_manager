@@ -42,7 +42,7 @@ const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false 
 #define CHECK_SCREEN_AND_RETURN(screenId, ret) \
     do { \
         if ((screenId) == SCREEN_ID_INVALID) { \
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screenId invalid"); \
+            TLOGE(WmsLogTag::DMS, "screenId invalid"); \
             return ret; \
         } \
     } while (false)
@@ -71,30 +71,30 @@ int DisplayManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void DisplayManagerService::OnStart()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "start");
+    TLOGI(WmsLogTag::DMS, "start");
     if (!Init()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "Init failed");
+        TLOGE(WmsLogTag::DMS, "Init failed");
         return;
     }
     sptr<DisplayManagerService> dms = this;
     dms->IncStrongRef(nullptr);
     if (!Publish(sptr<DisplayManagerService>(this))) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "Publish failed");
+        TLOGE(WmsLogTag::DMS, "Publish failed");
     }
     SetDisplayState(DisplayState::ON);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "end");
+    TLOGI(WmsLogTag::DMS, "end");
 }
 
 bool DisplayManagerService::Init()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "start");
+    TLOGI(WmsLogTag::DMS, "start");
     if (DisplayManagerConfig::LoadConfigXml()) {
         DisplayManagerConfig::DumpConfig();
         ConfigureDisplayManagerService();
     }
     abstractScreenController_->Init();
     abstractDisplayController_->Init(abstractScreenController_);
-    TLOGI(WmsLogTag::DMS_DMSERVER, "success");
+    TLOGI(WmsLogTag::DMS, "success");
     return true;
 }
 
@@ -143,7 +143,7 @@ void DisplayManagerService::ConfigureWaterfallDisplayCompressionParams()
 void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
 {
     displayChangeListener_ = listener;
-    TLOGD(WmsLogTag::DMS_DMSERVER, "IDisplayChangeListener registered");
+    TLOGD(WmsLogTag::DMS, "IDisplayChangeListener registered");
 }
 
 void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener)
@@ -154,13 +154,13 @@ void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindow
 DMError DisplayManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "check has private window permission denied!");
+        TLOGE(WmsLogTag::DMS, "check has private window permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     std::vector<DisplayId> displayIds = GetAllDisplayIds();
     auto iter = std::find(displayIds.begin(), displayIds.end(), displayId);
     if (iter == displayIds.end()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "invalid displayId");
+        TLOGE(WmsLogTag::DMS, "invalid displayId");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (windowInfoQueriedListener_ != nullptr) {
@@ -174,7 +174,7 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
     DisplayId id = (displayInfo == nullptr) ? DISPLAY_ID_INVALID : displayInfo->GetDisplayId();
-    TLOGD(WmsLogTag::DMS_DMSERVER, "DisplayId %{public}" PRIu64"", id);
+    TLOGD(WmsLogTag::DMS, "DisplayId %{public}" PRIu64"", id);
     if (displayChangeListener_ != nullptr) {
         displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
     }
@@ -190,10 +190,10 @@ void DisplayManagerService::NotifyScreenshot(DisplayId displayId)
 sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    TLOGD(WmsLogTag::DMS_DMSERVER, "GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
+    TLOGD(WmsLogTag::DMS, "GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to get displayInfo by id: invalid display");
+        TLOGE(WmsLogTag::DMS, "fail to get displayInfo by id: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -203,7 +203,7 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to get displayInfo by id: invalid display");
+        TLOGE(WmsLogTag::DMS, "fail to get displayInfo by id: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -213,7 +213,7 @@ sptr<DisplayInfo> DisplayManagerService::GetVisibleAreaDisplayInfoById(DisplayId
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to get displayInfo by id: invalid display");
+        TLOGE(WmsLogTag::DMS, "fail to get displayInfo by id: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -223,7 +223,7 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenI
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "fail to get displayInfo by screenId: invalid display");
+        TLOGE(WmsLogTag::DMS, "fail to get displayInfo by screenId: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -233,13 +233,13 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
     if (displayManagerAgent == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "displayManagerAgent invalid");
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return SCREEN_ID_INVALID;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:CreateVirtualScreen(%s)", option.name_.c_str());
     if (option.surface_ != nullptr && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) &&
         !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "permission denied");
+        TLOGE(WmsLogTag::DMS, "permission denied");
         return SCREEN_ID_INVALID;
     }
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
@@ -251,14 +251,14 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "destory virtual screen permission denied!");
+        TLOGE(WmsLogTag::DMS, "destory virtual screen permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (!accessTokenIdMaps_.isExistAndRemove(screenId, IPCSkeleton::GetCallingTokenID())) {
         return DMError::DM_ERROR_INVALID_CALLING;
     }
 
-    TLOGI(WmsLogTag::DMS_DMSERVER, "DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:DestroyVirtualScreen(%" PRIu64")", screenId);
@@ -267,25 +267,25 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 
 DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
         Permission::IsStartByHdcd()) {
         sptr<Surface> pPurface = Surface::CreateSurfaceAsProducer(surface);
         return abstractScreenController_->SetVirtualScreenSurface(screenId, pPurface);
     }
-    TLOGE(WmsLogTag::DMS_DMSERVER, "permission denied");
+    TLOGE(WmsLogTag::DMS, "permission denied");
     return DMError::DM_ERROR_INVALID_CALLING;
 }
 
 DMError DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set orientation permission denied!");
+        TLOGE(WmsLogTag::DMS, "set orientation permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (orientation < Orientation::UNSPECIFIED || orientation > Orientation::REVERSE_HORIZONTAL) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "orientation: %{public}u", static_cast<uint32_t>(orientation));
+        TLOGE(WmsLogTag::DMS, "orientation: %{public}u", static_cast<uint32_t>(orientation));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetOrientation(%" PRIu64")", screenId);
@@ -324,35 +324,35 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(Displ
 DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
 }
 
 DMError DisplayManagerService::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenColorGamut(screenId, colorGamut);
 }
 
 DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenColorGamut(screenId, colorGamutIdx);
 }
 
 DMError DisplayManagerService::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenGamutMap(screenId, gamutMap);
 }
 
 DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenGamutMap(screenId, gamutMap);
@@ -360,14 +360,14 @@ DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutM
 
 DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ScreenId: %{public}" PRIu64 "", screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenColorTransform(screenId);
 }
 
 void DisplayManagerService::OnStop()
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "ready to stop display service.");
+    TLOGI(WmsLogTag::DMS, "ready to stop display service.");
 }
 
 DMError DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -375,11 +375,11 @@ DMError DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayMa
 {
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()
         && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "register display manager agent permission denied!");
+        TLOGE(WmsLogTag::DMS, "register display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "displayManagerAgent invalid");
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return DMError::DM_ERROR_NULLPTR;
     }
     return DisplayManagerAgentController::GetInstance().RegisterDisplayManagerAgent(displayManagerAgent, type);
@@ -390,11 +390,11 @@ DMError DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplay
 {
     if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()
         && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "unregister display manager agent permission denied!");
+        TLOGE(WmsLogTag::DMS, "unregister display manager agent permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "displayManagerAgent invalid");
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return DMError::DM_ERROR_NULLPTR;
     }
     return DisplayManagerAgentController::GetInstance().UnregisterDisplayManagerAgent(displayManagerAgent, type);
@@ -404,7 +404,7 @@ bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:WakeUpBegin(%u)", reason);
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]wake up begin permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]wake up begin permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -415,7 +415,7 @@ bool DisplayManagerService::WakeUpEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:WakeUpEnd");
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]wake up end permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]wake up end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -426,7 +426,7 @@ bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:SuspendBegin(%u)", reason);
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]suspend begin permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]suspend begin permission denied!");
         return false;
     }
     displayPowerController_->SuspendBegin(reason);
@@ -438,7 +438,7 @@ bool DisplayManagerService::SuspendEnd()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]dms:SuspendEnd");
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]suspend end permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]suspend end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
@@ -448,16 +448,16 @@ bool DisplayManagerService::SuspendEnd()
 bool DisplayManagerService::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
-    TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]DMS not support SetSpecifiedScreenPower: screen:%{public}" PRIu64 ", "
+    TLOGE(WmsLogTag::DMS, "[UL_POWER]DMS not support SetSpecifiedScreenPower: screen:%{public}" PRIu64 ", "
         "state:%{public}u", screenId, state);
     return false;
 }
 
 bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "[UL_POWER]SetScreenPowerForAll");
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerForAll");
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]set screen power for all permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]set screen power for all permission denied!");
         return false;
     }
     return abstractScreenController_->SetScreenPowerForAll(state, reason);
@@ -471,7 +471,7 @@ ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]set display state permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]set display state permission denied!");
         return false;
     }
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
@@ -486,7 +486,7 @@ ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) cons
 {
     sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (abstractDisplay == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "GetAbstractDisplay failed");
+        TLOGE(WmsLogTag::DMS, "GetAbstractDisplay failed");
         return SCREEN_ID_INVALID;
     }
     return abstractDisplay->GetAbstractScreenId();
@@ -500,14 +500,14 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 
 bool DisplayManagerService::TryToCancelScreenOff()
 {
-    TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]DMS not support TryToCancelScreenOff");
+    TLOGE(WmsLogTag::DMS, "[UL_POWER]DMS not support TryToCancelScreenOff");
     return false;
 }
 
 bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set screen brightness permission denied!");
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
         return false;
     }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
@@ -517,7 +517,7 @@ bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t leve
 uint32_t DisplayManagerService::GetScreenBrightness(uint64_t screenId)
 {
     uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
-    TLOGI(WmsLogTag::DMS_DMSERVER, "GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
+    TLOGI(WmsLogTag::DMS, "GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
         screenId, level);
     return level;
 }
@@ -525,7 +525,7 @@ uint32_t DisplayManagerService::GetScreenBrightness(uint64_t screenId)
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     if (!Permission::IsSystemServiceCalling()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "[UL_POWER]notify display event permission denied!");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]notify display event permission denied!");
         return;
     }
     displayPowerController_->NotifyDisplayEvent(event);
@@ -534,7 +534,7 @@ void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 bool DisplayManagerService::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set freeze permission denied!");
+        TLOGE(WmsLogTag::DMS, "set freeze permission denied!");
         return false;
     }
     abstractDisplayController_->SetFreeze(displayIds, isFreeze);
@@ -545,10 +545,10 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
                                           ScreenId& screenGroupId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "make mirror permission denied!");
+        TLOGE(WmsLogTag::DMS, "make mirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
+    TLOGI(WmsLogTag::DMS, "MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
     auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
     auto iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
     if (iter != allMirrorScreenIds.end()) {
@@ -556,18 +556,18 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     }
     auto mainScreen = abstractScreenController_->GetAbstractScreen(mainScreenId);
     if (mainScreen == nullptr || allMirrorScreenIds.empty()) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "create mirror fail. main screen :%{public}" PRIu64", screens' size:%{public}u",
+        TLOGI(WmsLogTag::DMS, "create mirror fail. main screen :%{public}" PRIu64", screens' size:%{public}u",
             mainScreenId, static_cast<uint32_t>(allMirrorScreenIds.size()));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror");
     DMError ret = abstractScreenController_->MakeMirror(mainScreenId, allMirrorScreenIds);
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "make mirror failed.");
+        TLOGE(WmsLogTag::DMS, "make mirror failed.");
         return ret;
     }
     if (abstractScreenController_->GetAbstractScreenGroup(mainScreen->groupDmsId_) == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "get screen group failed.");
+        TLOGE(WmsLogTag::DMS, "get screen group failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupId = mainScreen->groupDmsId_;
@@ -577,20 +577,20 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
 DMError DisplayManagerService::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "stop mirror permission denied!");
+        TLOGE(WmsLogTag::DMS, "stop mirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
 
     auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
     if (allMirrorScreenIds.empty()) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "stop mirror done. screens' size:%{public}u",
+        TLOGI(WmsLogTag::DMS, "stop mirror done. screens' size:%{public}u",
             static_cast<uint32_t>(allMirrorScreenIds.size()));
         return DMError::DM_OK;
     }
 
     DMError ret = abstractScreenController_->StopScreens(allMirrorScreenIds, ScreenCombination::SCREEN_MIRROR);
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "stop mirror failed.");
+        TLOGE(WmsLogTag::DMS, "stop mirror failed.");
         return ret;
     }
 
@@ -605,7 +605,7 @@ void DisplayManagerService::RemoveVirtualScreenFromGroup(std::vector<ScreenId> s
 void DisplayManagerService::UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool isMultiDisplay)
 {
-    TLOGD(WmsLogTag::DMS_DMSERVER, "UpdateRSTree, currentDisplayId: %{public}" PRIu64", isAdd: %{public}d, "
+    TLOGD(WmsLogTag::DMS, "UpdateRSTree, currentDisplayId: %{public}" PRIu64", isAdd: %{public}d, "
         "isMultiDisplay: %{public}d, parentDisplayId: %{public}" PRIu64"", displayId, isAdd, isMultiDisplay,
         parentDisplayId);
     ScreenId screenId = GetScreenIdByDisplayId(displayId);
@@ -618,9 +618,9 @@ void DisplayManagerService::UpdateRSTree(DisplayId displayId, DisplayId parentDi
 DMError DisplayManagerService::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "DisplayId: %{public}" PRIu64", onTop: %{public}d", displayId, onTop);
+    TLOGI(WmsLogTag::DMS, "DisplayId: %{public}" PRIu64", onTop: %{public}d", displayId, onTop);
     if (surfaceNode == nullptr) {
-        TLOGW(WmsLogTag::DMS_DMSERVER, "Surface is null");
+        TLOGW(WmsLogTag::DMS, "Surface is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     ScreenId screenId = GetScreenIdByDisplayId(displayId);
@@ -630,9 +630,9 @@ DMError DisplayManagerService::AddSurfaceNodeToDisplay(DisplayId displayId,
 DMError DisplayManagerService::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "DisplayId: %{public}" PRIu64"", displayId);
+    TLOGI(WmsLogTag::DMS, "DisplayId: %{public}" PRIu64"", displayId);
     if (surfaceNode == nullptr) {
-        TLOGW(WmsLogTag::DMS_DMSERVER, "Surface is null");
+        TLOGW(WmsLogTag::DMS, "Surface is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     ScreenId screenId = GetScreenIdByDisplayId(displayId);
@@ -643,7 +643,7 @@ sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
 {
     auto screen = abstractScreenController_->GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot find screenInfo: %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64"", screenId);
         return nullptr;
     }
     return screen->ConvertToScreenInfo();
@@ -653,7 +653,7 @@ sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId scr
 {
     auto screenGroup = abstractScreenController_->GetAbstractScreenGroup(screenId);
     if (screenGroup == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot find screenGroupInfo: %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "cannot find screenGroupInfo: %{public}" PRIu64"", screenId);
         return nullptr;
     }
     return screenGroup->ConvertToScreenGroupInfo();
@@ -663,7 +663,7 @@ ScreenId DisplayManagerService::GetScreenGroupIdByScreenId(ScreenId screenId)
 {
     auto screen = abstractScreenController_->GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "cannot find screenInfo: %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64"", screenId);
         return SCREEN_ID_INVALID;
     }
     return screen->GetScreenGroupId();
@@ -677,14 +677,14 @@ std::vector<DisplayId> DisplayManagerService::GetAllDisplayIds()
 DMError DisplayManagerService::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "get all screen infos permission denied!");
+        TLOGE(WmsLogTag::DMS, "get all screen infos permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     std::vector<ScreenId> screenIds = abstractScreenController_->GetAllScreenIds();
     for (auto screenId: screenIds) {
         auto screenInfo = GetScreenInfoById(screenId);
         if (screenInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "cannot find screenInfo: %{public}" PRIu64"", screenId);
+            TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64"", screenId);
             continue;
         }
         screenInfos.emplace_back(screenInfo);
@@ -696,11 +696,11 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
                                           ScreenId& screenGroupId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "make expand permission denied!");
+        TLOGE(WmsLogTag::DMS, "make expand permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "create expand fail, input params is invalid. "
+        TLOGE(WmsLogTag::DMS, "create expand fail, input params is invalid. "
             "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -714,14 +714,14 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
         pointsMap[expandScreenIds[i]] = startPoints[i];
     }
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    TLOGI(WmsLogTag::DMS_DMSERVER, "MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
+    TLOGI(WmsLogTag::DMS, "MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto allExpandScreenIds = abstractScreenController_->GetAllValidScreenIds(expandScreenIds);
     auto iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
     if (iter != allExpandScreenIds.end()) {
         allExpandScreenIds.erase(iter);
     }
     if (allExpandScreenIds.empty()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "allExpandScreenIds is empty. make expand failed.");
+        TLOGE(WmsLogTag::DMS, "allExpandScreenIds is empty. make expand failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
     std::shared_ptr<RSDisplayNode> rsDisplayNode;
@@ -736,12 +736,12 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
     if (!abstractScreenController_->MakeExpand(allExpandScreenIds, points)) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "make expand failed.");
+        TLOGE(WmsLogTag::DMS, "make expand failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
     auto screen = abstractScreenController_->GetAbstractScreen(allExpandScreenIds[0]);
     if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "get screen group failed.");
+        TLOGE(WmsLogTag::DMS, "get screen group failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenGroupId = screen->groupDmsId_;
@@ -751,19 +751,19 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
 DMError DisplayManagerService::StopExpand(const std::vector<ScreenId>& expandScreenIds)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "stop expand permission denied!");
+        TLOGE(WmsLogTag::DMS, "stop expand permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     auto allExpandScreenIds = abstractScreenController_->GetAllValidScreenIds(expandScreenIds);
     if (allExpandScreenIds.empty()) {
-        TLOGI(WmsLogTag::DMS_DMSERVER, "stop expand done. screens' size:%{public}u",
+        TLOGI(WmsLogTag::DMS, "stop expand done. screens' size:%{public}u",
             static_cast<uint32_t>(allExpandScreenIds.size()));
         return DMError::DM_OK;
     }
 
     DMError ret = abstractScreenController_->StopScreens(allExpandScreenIds, ScreenCombination::SCREEN_EXPAND);
     if (ret != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "stop expand failed.");
+        TLOGE(WmsLogTag::DMS, "stop expand failed.");
         return ret;
     }
 
@@ -773,7 +773,7 @@ DMError DisplayManagerService::StopExpand(const std::vector<ScreenId>& expandScr
 DMError DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set screen active permission denied!");
+        TLOGE(WmsLogTag::DMS, "set screen active permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
@@ -783,7 +783,7 @@ DMError DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t m
 DMError DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set virtual pixel permission denied!");
+        TLOGE(WmsLogTag::DMS, "set virtual pixel permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
@@ -794,7 +794,7 @@ DMError DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float vir
 DMError DisplayManagerService::IsScreenRotationLocked(bool& isLocked)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "is screen rotation locked permission denied!");
+        TLOGE(WmsLogTag::DMS, "is screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     isLocked = ScreenRotationController::IsScreenRotationLocked();
@@ -804,7 +804,7 @@ DMError DisplayManagerService::IsScreenRotationLocked(bool& isLocked)
 DMError DisplayManagerService::SetScreenRotationLocked(bool isLocked)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set screen rotation locked permission denied!");
+        TLOGE(WmsLogTag::DMS, "set screen rotation locked permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     return ScreenRotationController::SetScreenRotationLocked(isLocked);
@@ -813,7 +813,7 @@ DMError DisplayManagerService::SetScreenRotationLocked(bool isLocked)
 DMError DisplayManagerService::SetScreenRotationLockedFromJs(bool isLocked)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "set screen rotation locked from js permission denied!");
+        TLOGE(WmsLogTag::DMS, "set screen rotation locked from js permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     return ScreenRotationController::SetScreenRotationLocked(isLocked);
@@ -822,7 +822,7 @@ DMError DisplayManagerService::SetScreenRotationLockedFromJs(bool isLocked)
 void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
 {
     if (!isAutoRotationOpen_) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "autoRotation is not open");
+        TLOGE(WmsLogTag::DMS, "autoRotation is not open");
         ScreenRotationController::Init();
         return;
     }
@@ -844,7 +844,7 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
     if (allDisplayPhysicalResolution_.empty()) {
         sptr<DisplayInfo> displayInfo = DisplayManagerService::GetDefaultDisplayInfo();
         if (displayInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "default display null");
+            TLOGE(WmsLogTag::DMS, "default display null");
             return allDisplayPhysicalResolution_;
         }
         DisplayPhysicalResolution defaultResolution;

@@ -44,7 +44,7 @@ ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
 void ScreenGroup::UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info) const
 {
     if (info == nullptr) {
-        TLOGE(WmsLogTag::DMS_DM, "ScreenGroupInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "ScreenGroupInfo is nullptr.");
         return;
     }
     Screen::UpdateScreenInfo(info);

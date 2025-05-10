@@ -68,13 +68,13 @@ void SuperFoldSensorManager::RegisterPostureCallback()
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_POSTURE, &postureUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS_SSM,
+    TLOGI(WmsLogTag::DMS,
         "subscribeRet: %{public}d, setBatchRet: %{public}d, activateRet: %{public}d",
         subscribeRet, setBatchRet, activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS_SSM, "RegisterPostureCallback failed.");
+        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
-        TLOGI(WmsLogTag::DMS_SSM, "RegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback success.");
     }
 }
 
@@ -82,10 +82,10 @@ void SuperFoldSensorManager::UnregisterPostureCallback()
 {
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_POSTURE, &postureUser);
-    TLOGI(WmsLogTag::DMS_SSM, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
+    TLOGI(WmsLogTag::DMS, "deactivateRet: %{public}d, unsubscribeRet: %{public}d",
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS_SSM, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
     }
 }
 
@@ -93,13 +93,13 @@ void SuperFoldSensorManager::RegisterHallCallback()
 {
     hallUser.callback = SensorHallDataCallback;
     int32_t subscribeRet = SubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS_SSM, "subscribeRet: %{public}d", subscribeRet);
+    TLOGI(WmsLogTag::DMS, "subscribeRet: %{public}d", subscribeRet);
     int32_t setBatchRet = SetBatch(SENSOR_TYPE_ID_HALL, &hallUser, POSTURE_INTERVAL, POSTURE_INTERVAL);
-    TLOGI(WmsLogTag::DMS_SSM, "setBatchRet: %{public}d", setBatchRet);
+    TLOGI(WmsLogTag::DMS, "setBatchRet: %{public}d", setBatchRet);
     int32_t activateRet = ActivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
-    TLOGI(WmsLogTag::DMS_SSM, "activateRet: %{public}d", activateRet);
+    TLOGI(WmsLogTag::DMS, "activateRet: %{public}d", activateRet);
     if (subscribeRet != SENSOR_SUCCESS || setBatchRet != SENSOR_SUCCESS || activateRet != SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS_SSM, "RegisterHallCallback failed.");
+        TLOGI(WmsLogTag::DMS, "RegisterHallCallback failed.");
     }
 }
 
@@ -108,22 +108,22 @@ void SuperFoldSensorManager::UnregisterHallCallback()
     int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
     int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS_SSM, "UnRegisterHallCallback success.");
+        TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
     }
 }
 
 void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
 {
     if (event == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent is nullptr.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent is nullptr.");
         return;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].data == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent[0].data is nullptr.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(PostureData)) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent dataLen less than posture data size.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent dataLen less than posture data size.");
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
@@ -143,10 +143,10 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
         }
     }
     if (std::isgreater(curAngle_, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_PC)) {
-        TLOGI(WmsLogTag::DMS_SSM, "Invalid value, angle value is: %{public}f.", curAngle_);
+        TLOGI(WmsLogTag::DMS, "Invalid value, angle value is: %{public}f.", curAngle_);
         return;
     }
-    TLOGD(WmsLogTag::DMS_SSM, "angle value is: %{public}f.", curAngle_);
+    TLOGD(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
     NotifyFoldAngleChanged(curAngle_);
 }
 
@@ -154,20 +154,20 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::UNDEFINED;
     if (std::isgreaterequal(foldAngle, ANGLE_FLAT_THRESHOLD)) {
-        TLOGD(WmsLogTag::DMS_SSM, "NotifyFoldAngleChanged is Expanded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     } else if (std::isless(foldAngle, ANGLE_HALF_FOLD_THRESHOLD) &&
         std::isgreater(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGD(WmsLogTag::DMS_SSM, "NotifyFoldAngleChanged is Half Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     } else if (std::islessequal(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGD(WmsLogTag::DMS_SSM, "NotifyFoldAngleChanged is Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
         if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::UNKNOWN) {
             events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
         }
-        TLOGD(WmsLogTag::DMS_SSM, "NotifyFoldAngleChanged is in BufferArea");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is in BufferArea");
     }
     // notify
     std::vector<float> foldAngles;
@@ -182,27 +182,27 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
 {
     if (event == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent is nullptr.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent is nullptr.");
         return;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].data == nullptr) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent[0].data is nullptr.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return;
     }
     if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(HallData)) {
-        TLOGI(WmsLogTag::DMS_SSM, "SensorEvent[0].dataLen is nullptr.");
+        TLOGI(WmsLogTag::DMS, "SensorEvent[0].dataLen is nullptr.");
         return;
     }
     auto data = reinterpret_cast<HallData*>(event->data);
     auto status = static_cast<uint32_t>(data->status);
-    TLOGI(WmsLogTag::DMS_SSM, "HallData status is: %{public}u.", status);
+    TLOGI(WmsLogTag::DMS, "HallData status is: %{public}u.", status);
     
     if (curHall_ == (status & HALL_ACTIVE)) {
-        TLOGI(WmsLogTag::DMS_SSM, "Hall don't change, hall = %{public}u", curHall_);
+        TLOGI(WmsLogTag::DMS, "Hall don't change, hall = %{public}u", curHall_);
         return;
     }
     curHall_ = (status & HALL_ACTIVE);
-    TLOGI(WmsLogTag::DMS_SSM, "Hall change, hall = %{public}u", curHall_);
+    TLOGI(WmsLogTag::DMS, "Hall change, hall = %{public}u", curHall_);
     NotifyHallChanged(curHall_);
 }
 
@@ -210,14 +210,14 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 {
     SuperFoldStatusChangeEvents events;
     if (Hall == HALL_REMOVE_KEYBOARD_THRESHOLD) {
-        TLOGI(WmsLogTag::DMS_SSM, "NotifyHallChanged: Keyboard off!");
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
         events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
-        TLOGI(WmsLogTag::DMS_SSM, "NotifyHallChanged: Keyboard on!");
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard on!");
         events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
         HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
     } else {
-        TLOGI(WmsLogTag::DMS_SSM, "NotifyHallChanged: Invalid Hall Value!");
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Invalid Hall Value!");
         return;
     }
     // notify
@@ -238,7 +238,7 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "Screen connect to stop statemachine.");
+    TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
     if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
             SuperFoldStatusChangeEvents::KEYBOARD_OFF);
@@ -252,7 +252,7 @@ void SuperFoldSensorManager::HandleScreenConnectChange()
 
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
-    TLOGI(WmsLogTag::DMS_SSM, "Screen disconnect to stop statemachine.");
+    TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }

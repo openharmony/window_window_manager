@@ -30,18 +30,18 @@ namespace Rosen {
 
 CJDisplayListener::CJDisplayListener()
 {
-    TLOGD(WmsLogTag::DMS_KITS, "Constructor execution");
+    TLOGD(WmsLogTag::DMS, "Constructor execution");
 }
 
 CJDisplayListener::~CJDisplayListener()
 {
-    TLOGD(WmsLogTag::DMS_KITS, "Destructor execution");
+    TLOGD(WmsLogTag::DMS, "Destructor execution");
 }
 
 void CJDisplayListener::AddCallback(const std::string& type, int64_t callbackObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called with type %{public}s", type.c_str());
+    TLOGI(WmsLogTag::DMS, "called with type %{public}s", type.c_str());
     auto callback = CJLambda::Create(reinterpret_cast<void (*)(void*)>(callbackObject));
     cjCallBack_[type][callbackObject] = callback;
 }
@@ -49,17 +49,17 @@ void CJDisplayListener::AddCallback(const std::string& type, int64_t callbackObj
 void CJDisplayListener::RemoveAllCallback()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGD(WmsLogTag::DMS_KITS, "called");
+    TLOGD(WmsLogTag::DMS, "called");
     cjCallBack_.clear();
 }
 
 void CJDisplayListener::RemoveCallback(const std::string& type, int64_t callbackObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "called with type %{public}s", type.c_str());
+    TLOGI(WmsLogTag::DMS, "called with type %{public}s", type.c_str());
     auto it = cjCallBack_.find(type);
     if (it == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "no callback to remove");
+        TLOGE(WmsLogTag::DMS, "no callback to remove");
         return;
     }
     auto& callbacks = it->second;
@@ -70,7 +70,7 @@ void CJDisplayListener::RemoveCallback(const std::string& type, int64_t callback
             iter++;
         }
     }
-    TLOGI(WmsLogTag::DMS_KITS, "succ cjCallBack_ size %{public}u!",
+    TLOGI(WmsLogTag::DMS, "succ cjCallBack_ size %{public}u!",
         static_cast<uint32_t>(callbacks.size()));
 }
 
@@ -81,13 +81,13 @@ void CJDisplayListener::OnDestroy(DisplayId id) {}
 void CJDisplayListener::OnChange(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "CJDispalyListener::OnChange not register!");
+        TLOGE(WmsLogTag::DMS, "CJDispalyListener::OnChange not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_CHANGE) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnChange not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnChange not this event, return");
         return;
     }
     CallCJMethod(EVENT_CHANGE, &id);
@@ -96,13 +96,13 @@ void CJDisplayListener::OnChange(DisplayId id)
 void CJDisplayListener::OnPrivateWindow(bool hasPrivate)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnPrivateWindow is called");
+    TLOGI(WmsLogTag::DMS, "OnPrivateWindow is called");
     if (cjCallBack_.empty()) {
-        TLOGI(WmsLogTag::DMS_KITS, "OnPrivateWindow not register!");
+        TLOGI(WmsLogTag::DMS, "OnPrivateWindow not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_PRIVATE_MODE_CHANGE) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnPrivateWindow not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnPrivateWindow not this event, return");
         return;
     }
     CallCJMethod(EVENT_PRIVATE_MODE_CHANGE, &hasPrivate);
@@ -111,13 +111,13 @@ void CJDisplayListener::OnPrivateWindow(bool hasPrivate)
 void CJDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnFoldStatusChanged is called");
+    TLOGI(WmsLogTag::DMS, "OnFoldStatusChanged is called");
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnFoldStatusChanged not register!");
+        TLOGE(WmsLogTag::DMS, "OnFoldStatusChanged not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_FOLD_STATUS_CHANGED) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnFoldStatusChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnFoldStatusChanged not this event, return");
         return;
     }
     CallCJMethod(EVENT_FOLD_STATUS_CHANGED, &foldStatus);
@@ -126,13 +126,13 @@ void CJDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
 void CJDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnFoldAngleChanged is called");
+    TLOGI(WmsLogTag::DMS, "OnFoldAngleChanged is called");
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnFoldAngleChanged not register!");
+        TLOGE(WmsLogTag::DMS, "OnFoldAngleChanged not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_FOLD_ANGLE_CHANGED) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnFoldAngleChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnFoldAngleChanged not this event, return");
         return;
     }
     CallCJMethod(EVENT_FOLD_ANGLE_CHANGED, &foldAngles);
@@ -141,13 +141,13 @@ void CJDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 void CJDisplayListener::OnCaptureStatusChanged(bool isCapture)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnCaptureStatusChanged is called!");
+    TLOGI(WmsLogTag::DMS, "OnCaptureStatusChanged is called!");
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnCaptureStatusChanged not register!");
+        TLOGE(WmsLogTag::DMS, "OnCaptureStatusChanged not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_CAPTURE_STATUS_CHANGED) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnCaptureStatusChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnCaptureStatusChanged not this event, return");
         return;
     }
     CallCJMethod(EVENT_CAPTURE_STATUS_CHANGED, &isCapture);
@@ -156,13 +156,13 @@ void CJDisplayListener::OnCaptureStatusChanged(bool isCapture)
 void CJDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS_KITS, "OnDisplayModeChanged is called!");
+    TLOGI(WmsLogTag::DMS, "OnDisplayModeChanged is called!");
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnDisplayModeChanged not register!");
+        TLOGE(WmsLogTag::DMS, "OnDisplayModeChanged not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == cjCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS_KITS, "OnDisplayModeChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "OnDisplayModeChanged not this event, return");
         return;
     }
     CallCJMethod(EVENT_DISPLAY_MODE_CHANGED, &displayMode);
@@ -173,10 +173,10 @@ void CJDisplayListener::OnAvailableAreaChanged(DMRect area) {}
 void CJDisplayListener::CallCJMethod(const std::string& methodName, void* argv)
 {
     if (methodName.empty()) {
-        TLOGE(WmsLogTag::DMS_KITS, "empty method name str, call method failed");
+        TLOGE(WmsLogTag::DMS, "empty method name str, call method failed");
         return;
     }
-    TLOGD(WmsLogTag::DMS_KITS, "CallCJMethod methodName = %{public}s", methodName.c_str());
+    TLOGD(WmsLogTag::DMS, "CallCJMethod methodName = %{public}s", methodName.c_str());
     for (auto callback : cjCallBack_[methodName]) {
         callback.second(argv);
     }

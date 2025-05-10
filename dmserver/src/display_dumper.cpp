@@ -70,7 +70,7 @@ DisplayDumper::DisplayDumper(const sptr<AbstractDisplayController>& abstractDisp
 
 DMError DisplayDumper::Dump(int fd, const std::vector<std::u16string>& args) const
 {
-    TLOGI(WmsLogTag::DMS_DMSERVER, "Dump begin fd: %{public}d", fd);
+    TLOGI(WmsLogTag::DMS, "Dump begin fd: %{public}d", fd);
     if (fd < 0) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -95,10 +95,10 @@ DMError DisplayDumper::Dump(int fd, const std::vector<std::u16string>& args) con
     }
     int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
     if (ret < 0) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "dprintf error");
+        TLOGE(WmsLogTag::DMS, "dprintf error");
         return DMError::DM_ERROR_UNKNOWN;
     }
-    TLOGI(WmsLogTag::DMS_DMSERVER, "Dump end");
+    TLOGI(WmsLogTag::DMS, "Dump end");
     return DMError::DM_OK;
 }
 
@@ -168,7 +168,7 @@ DMError DisplayDumper::DumpAllScreenInfo(std::string& dumpInfo) const
     for (ScreenId screenId : screenIds) {
         auto screen = abstractScreenController_->GetAbstractScreen(screenId);
         if (screen == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "screen is null");
+            TLOGE(WmsLogTag::DMS, "screen is null");
             return DMError::DM_ERROR_NULLPTR;
         }
         if (SCREEN_ID_INVALID == screen->groupDmsId_ || screen->isScreenGroup_) {
@@ -193,7 +193,7 @@ DMError DisplayDumper::DumpAllScreenInfo(std::string& dumpInfo) const
 DMError DisplayDumper::DumpScreenInfo(const sptr<AbstractScreenGroup>& screenGroup, std::string& dumpInfo) const
 {
     if (screenGroup == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screenGroup is null");
+        TLOGE(WmsLogTag::DMS, "screenGroup is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     std::ostringstream oss;
@@ -216,7 +216,7 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
 {
     auto screen = abstractScreenController_->GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screen is null");
+        TLOGE(WmsLogTag::DMS, "screen is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -259,7 +259,7 @@ DMError DisplayDumper::DumpAllDisplayInfo(std::string& dumpInfo) const
     for (DisplayId displayId : displayIds) {
         auto display = abstractDisplayController_->GetAbstractDisplay(displayId);
         if (display == nullptr) {
-            TLOGE(WmsLogTag::DMS_DMSERVER, "display is null");
+            TLOGE(WmsLogTag::DMS, "display is null");
             return DMError::DM_ERROR_NULLPTR;
         }
         GetDisplayInfo(display, oss);
@@ -272,7 +272,7 @@ DMError DisplayDumper::DumpSpecifiedDisplayInfo(DisplayId displayId, std::string
 {
     auto display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "display is null");
+        TLOGE(WmsLogTag::DMS, "display is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     std::ostringstream oss;
@@ -300,7 +300,7 @@ bool DisplayDumper::IsValidDigitString(const std::string& idStr) const
         if ((ch >= '0' && ch <= '9')) {
             continue;
         }
-        TLOGE(WmsLogTag::DMS_DMSERVER, "invalid id");
+        TLOGE(WmsLogTag::DMS, "invalid id");
         return false;
     }
     return true;
@@ -326,7 +326,7 @@ std::string DisplayDumper::TransferTypeToString(ScreenType type) const
 void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostringstream& oss) const
 {
     if (screen == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "screen is null");
+        TLOGE(WmsLogTag::DMS, "screen is null");
         return;
     }
 
@@ -357,7 +357,7 @@ void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostri
 void DisplayDumper::GetDisplayInfo(const sptr<AbstractDisplay>& display, std::ostringstream& oss) const
 {
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS_DMSERVER, "display is null");
+        TLOGE(WmsLogTag::DMS, "display is null");
         return;
     }
     // std::setw is used to set the output width and different width values are set to keep the format aligned.
