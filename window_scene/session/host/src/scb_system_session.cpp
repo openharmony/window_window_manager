@@ -18,7 +18,6 @@
 #include <hisysevent.h>
 #include "pointer_event.h"
 #include "rs_adapter.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_context.h>
 #include "window_manager_hilog.h"
@@ -43,7 +42,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
             // RSUIContext and RSSurfaceNode may be created in different threads,
             // so multi-threads check need to be skipped.
             surfaceNode_->SetSkipCheckInMultiInstance(true);
-            surfaceNode_->SetRSUIContext(GetRSUIContext(__func__));
+            surfaceNode_->SetRSUIContext(GetRSUIContext());
             TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
                   "Skip check in RS multi-instance and set RSUIContext: %{public}s",
                   RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str());

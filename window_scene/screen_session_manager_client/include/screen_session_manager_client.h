@@ -120,8 +120,8 @@ public:
     /*
      * RS Multi Instance
      */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId, const char* caller = "");
-    std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId, const char* caller = "");
+    std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
+    std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
 
 protected:
     ScreenSessionManagerClient() = default;

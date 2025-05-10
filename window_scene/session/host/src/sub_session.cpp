@@ -399,7 +399,7 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
     }
-    RSTransactionAdapter::FlushImplicitTransaction(movedSurfaceNode);
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
 
 std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
@@ -472,7 +472,7 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCount:%{public}d", displayId, GetPersistentId(), cloneNodeCount_);
     }
-    RSTransactionAdapter::FlushImplicitTransaction(currSurfacedNode);
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
 
 void SubSession::RemoveSurfaceNodeFromScreen()

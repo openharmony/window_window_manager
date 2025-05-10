@@ -108,14 +108,15 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
-
-    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
-    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
-    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
-    // as ArkUI knows the host window for this type of window.
-    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId(), __func__);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
-          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    if (RSAdapterUtil::IsMultiInstanceEnabled()) {
+        // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+        // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+        // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+        // as ArkUI knows the host window for this type of window.
+        rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
+              RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    }
 }
 
 Session::~Session()
@@ -211,8 +212,8 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
               RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
     }
     if (g_enableForceUIFirst) {
+        AutoRSTransaction trans(rsUIContext_);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
-            AutoRSTransaction trans(leashWinSurfaceNode_);
             leashWinSurfaceNode_->SetForceUIFirst(false);
         }
     }
@@ -233,8 +234,9 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
 {
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, Session [id: %{public}d], caller: %{public}s",
-          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), caller);
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: %{public}s, Session [id: %{public}d]",
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
     return rsUIContext_;
 }
 

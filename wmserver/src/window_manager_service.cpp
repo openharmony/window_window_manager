@@ -90,13 +90,20 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
-    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+    if (RSAdapterUtil::IsMultiInstanceEnabled()) {
+        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+                PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
+            }, 0, true);
+        rsUiDirector_->Init(false, true);
+        TLOGI(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSUIDirector: %{public}s",
+              RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
+        WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
+    } else {
+        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
             PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-        }, 0, true);
-    rsUiDirector_->Init(false, true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSUIDirector: %{public}s",
-          RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
-    WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
+        });
+        rsUiDirector_->Init(false);
+    }
 }
 
 void WindowManagerService::OnStart()

@@ -632,7 +632,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
         session->isKeyboardSyncTransactionOpen_ = true;
-        RSSyncTransactionAdapter::OpenSyncTransaction(session->GetSurfaceNode(), session->GetEventHandler());
+        RSSyncTransactionAdapter::OpenSyncTransaction(session->GetRSUIContext(), session->GetEventHandler());
         session->PostKeyboardAnimationSyncTimeoutTask();
         return WSError::WS_OK;
     };
@@ -673,14 +673,14 @@ void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSR
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard anim_sync event cancelled");
             handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
         }
-        RSSyncTransactionAdapter::CloseSyncTransaction(session->GetSurfaceNode(), session->GetEventHandler());
+        RSSyncTransactionAdapter::CloseSyncTransaction(session->GetRSUIContext(), handler);
         return WSError::WS_OK;
     }, "CloseKeyboardSyncTransaction");
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
 {
-    return RSSyncTransactionAdapter::GetRSTransaction(GetSurfaceNode());
+    return RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
 }
 
 std::string KeyboardSession::GetSessionScreenName()

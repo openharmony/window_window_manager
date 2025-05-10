@@ -338,7 +338,7 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
             absScreen->rsDisplayNode_->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter));
             absScreen->rsDisplayNode_->SetFrame(x, y, w, h);
             absScreen->rsDisplayNode_->SetBounds(x, y, w, h);
-            RSTransactionAdapter::FlushImplicitTransaction(absScreen->rsDisplayNode_);
+            RSTransactionAdapter::FlushImplicitTransaction(absScreen->GetRSUIContext());
             absScreen->rotation_ = rotationAfter;
             absScreen->SetOrientation(absScreen->screenRequestedOrientation_);
         }
@@ -916,7 +916,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
     WLOGFD("set orientation. rotation %{public}u", rotationAfter);
 
     {
-        AutoRSSyncTransaction syncTrans(screen->rsDisplayNode_);
+        AutoRSSyncTransaction syncTrans(screen->GetRSUIContext());
         SetScreenRotateAnimation(screen, screenId, rotationAfter, withAnimation);
         screen->rotation_ = rotationAfter;
     }

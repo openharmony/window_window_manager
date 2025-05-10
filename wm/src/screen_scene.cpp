@@ -275,6 +275,7 @@ Ace::UIContent* ScreenScene::GetUIContent() const
 
 std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
 {
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
     sptr<Display> display;
     if (displayId_ == DISPLAY_ID_INVALID) {
         display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -287,10 +288,20 @@ std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
         return nullptr;
     }
     auto screenId = display->GetScreenId();
-    auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId, __func__);
+    auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
           RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, GetWindowId());
     return rsUIDirector;
+}
+
+std::shared_ptr<RSUIContext> ScreenScene::GetRSUIContext() const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIDirector = GetRSUIDirector();
+    auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, windowId: %{public}d",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

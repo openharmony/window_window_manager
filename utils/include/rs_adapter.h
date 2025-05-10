@@ -16,12 +16,23 @@
 #ifndef OHOS_ROSEN_RS_ADAPTER_H
 #define OHOS_ROSEN_RS_ADAPTER_H
 
+#include <initializer_list>
+#include <unordered_set>
+
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_sync_transaction_handler.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_node.h>
 #include <ui/rs_ui_context.h>
 #include <ui/rs_ui_director.h>
+
+#define RETURN_IF_RS_MULTI_INSTANCE_DISABLED(...)                                     \
+    do {                                                                              \
+        if (!RSAdapterUtil::IsMultiInstanceEnabled()) {                               \
+            TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "RS multi-instance is disabled"); \
+            return __VA_ARGS__;                                                       \
+        }                                                                             \
+    } while (false)                                                                   \
 
 namespace OHOS {
 namespace Rosen {
@@ -36,8 +47,8 @@ enum class InvokerType {
 class RSTransactionAdapter {
 public:
     explicit RSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext);
-    explicit RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
     explicit RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector);
+    explicit RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
     virtual ~RSTransactionAdapter() = default;
 
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
@@ -45,12 +56,18 @@ public:
     virtual void Commit(uint64_t timestamp = 0);
     void FlushImplicitTransaction(uint64_t timestamp = 0, const std::string& abilityName = "");
 
-    static void FlushImplicitTransaction(
-        const std::shared_ptr<RSUIContext>& rsUIContext, uint64_t timestamp = 0, const std::string& abilityName = "");
-    static void FlushImplicitTransaction(
-        const std::shared_ptr<RSNode>& rsNode, uint64_t timestamp = 0, const std::string& abilityName = "");
-    static void FlushImplicitTransaction(
-        const std::shared_ptr<RSUIDirector>& rsUIDirector, uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(const std::shared_ptr<RSUIContext>& rsUIContext,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(const std::unordered_set<std::shared_ptr<RSUIContext>>& rsUIContexts,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(const std::shared_ptr<RSUIDirector>& rsUIDirector,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(std::initializer_list<std::shared_ptr<RSUIDirector>> rsUIDirectors,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(const std::shared_ptr<RSNode>& rsNode,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(std::initializer_list<std::shared_ptr<RSNode>> rsNodes,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
 
 private:
     void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
@@ -67,6 +84,7 @@ private:
 
 class AutoRSTransaction {
 public:
+    explicit AutoRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable = true);
     explicit AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable = true);
     explicit AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>& rsTransAdapter, bool enable = true);
     ~AutoRSTransaction();
@@ -76,6 +94,7 @@ public:
     AutoRSTransaction& operator=(AutoRSTransaction&&) = delete;
 
 private:
+    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable);
     std::shared_ptr<RSTransactionAdapter> rsTransAdapter_;
 };
 
@@ -112,7 +131,6 @@ private:
         const std::shared_ptr<RSUIContext>& rsUIContext, Func&& func, const char* caller);
 
     static InvokerType invokerType_;
-
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSSyncTransactionController* rsSyncTransController_;
     std::shared_ptr<RSSyncTransactionHandler> rsSyncTransHandler_;
@@ -120,6 +138,9 @@ private:
 
 class AutoRSSyncTransaction {
 public:
+    explicit AutoRSSyncTransaction(const std::shared_ptr<RSUIContext>& rsUIContext,
+                                   bool needFlushImplicitTransaction = true,
+                                   const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
     explicit AutoRSSyncTransaction(const std::shared_ptr<RSNode>& rsNode,
                                    bool needFlushImplicitTransaction = true,
                                    const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
@@ -133,6 +154,8 @@ public:
     AutoRSSyncTransaction& operator=(AutoRSSyncTransaction&&) = delete;
 
 private:
+    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext,
+                           bool needFlushImplicitTransaction);
     std::shared_ptr<RSSyncTransactionAdapter> rsSyncTransAdapter_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
@@ -152,6 +175,7 @@ private:
 
 class RSAdapterUtil {
 public:
+    static bool IsMultiInstanceEnabled();
     static std::string RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext);
     static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);

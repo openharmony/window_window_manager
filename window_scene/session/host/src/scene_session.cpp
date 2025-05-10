@@ -3048,8 +3048,9 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             return WSError::WS_DO_NOTHING;
         }
         if (g_enableForceUIFirst) {
-            if (auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode()) {
-                AutoRSTransaction trans(leashWinSurfaceNode);
+            AutoRSTransaction trans(session->GetRSUIContext());
+            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode) {
                 leashWinSurfaceNode->SetForceUIFirst(true);
                 TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
                     where, session->GetPersistentId());
@@ -3752,7 +3753,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         SetFrameGravity(Gravity::DEFAULT);
         keyFrameCloneNode_->SetBounds(0, 0, rect.width_, rect.height_);
         keyFrameCloneNode_->SetFrame(0, 0, rect.width_, rect.height_);
-        RSTransactionAdapter::FlushImplicitTransaction(keyFrameCloneNode_);
+        RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     } else if (reason == SizeChangeReason::DRAG_END) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
         keyFramePolicy_.running_ = false;
@@ -3907,7 +3908,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         return;
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        AutoRSTransaction trans(movedSurfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
             if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
                 continue;
@@ -4033,18 +4034,16 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
     const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
     const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal)
 {
-    auto surfaceNode = GetSurfaceNode();
-    auto rsUIContext = surfaceNode ? surfaceNode->GetRSUIContext() : nullptr;
-    RSNode::Animate(rsUIContext, animationParam.first, animationParam.second, [weakThis = wptr(this), rect,
-        isGlobal, where = __func__] {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
-            return;
-        }
-        session->SetSurfaceBounds(rect, isGlobal, false);
-        RSTransactionAdapter::FlushImplicitTransaction(session->GetSurfaceNode());
-    }, finishCallback);
+    RSNode::Animate(GetRSUIContext(), animationParam.first, animationParam.second,
+        [weakThis = wptr(this), rect, isGlobal, where = __func__] {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
+                return;
+            }
+            session->SetSurfaceBounds(rect, isGlobal, false);
+            RSTransactionAdapter::FlushImplicitTransaction(session->GetRSUIContext());
+        }, finishCallback);
 }
 
 void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
@@ -4053,39 +4052,38 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
+    AutoRSTransaction trans(GetRSUIContext(), needFlush);
     auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "surfaceNode is null");
-        return;
-    }
-    AutoRSTransaction trans(surfaceNode, needFlush);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     NotifySubAndDialogFollowRectChange(rect, isGlobal, needFlush);
-    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+    if (surfaceNode && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         leashWinSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetBounds(0, 0, rect.width_, rect.height_);
         surfaceNode->SetFrame(0, 0, rect.width_, rect.height_);
-    } else if (WindowHelper::IsPipWindow(GetWindowType())) {
+    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode) {
         TLOGD(WmsLogTag::WMS_PIP, "PipWindow setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSubWindow(GetWindowType())) {
+    } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode) {
         WLOGFD("subwindow setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsDialogWindow(GetWindowType())) {
+    } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSystemWindow(GetWindowType())) {
+    } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode) {
         TLOGD(WmsLogTag::WMS_SYSTEM, "system window setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else {
+        WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
 }
 
@@ -4276,7 +4274,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     property->SetPrivacyMode(isPrivacy);
     property->SetSystemPrivacyMode(isPrivacy);
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetSecurityLayer(isPrivacy);
         auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
@@ -4328,7 +4326,7 @@ WMError SceneSession::SetSnapshotSkip(bool isSkip)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, isSkip: %{public}d", GetWindowId(), isSkip);
     property->SetSnapshotSkip(isSkip);
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetSkipLayer(isSkip);
         auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode != nullptr) {
@@ -4348,7 +4346,7 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
         watermarkName.c_str(), isEnabled, GetPersistentId());
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
         if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
             leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
@@ -4376,7 +4374,7 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
 }
@@ -4392,7 +4390,7 @@ void SceneSession::ResetOcclusionAlpha()
     uint8_t alpha8bit = GetSessionProperty()->GetBackgroundAlpha();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u, windowId=%{public}d", alpha8bit, GetPersistentId());
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
 }
@@ -4400,31 +4398,35 @@ void SceneSession::ResetOcclusionAlpha()
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
-    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
-        AutoRSTransaction trans(leashWinSurfaceNode);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    auto surfaceNode = GetSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    AutoRSTransaction trans(GetRSUIContext());
+    if (leashWinSurfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
             leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
         leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
-    } else if (auto surfaceNode = GetSurfaceNode()) {
-        AutoRSTransaction trans(surfaceNode);
+    } else if (surfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
             surfaceNode->GetName().c_str(), surfaceNode->GetId(), forceUIFirst);
         surfaceNode->SetForceUIFirst(forceUIFirst);
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
     }
 }
 
 void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetUIFirstSwitch");
-    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
-        AutoRSTransaction trans(leashWinSurfaceNode);
+    AutoRSTransaction trans(GetRSUIContext());
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    auto surfaceNode = GetSurfaceNode();
+    if (leashWinSurfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " uiFirstSwitch=%{public}d",
             leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), uiFirstSwitch);
         leashWinSurfaceNode->SetUIFirstSwitch(uiFirstSwitch);
-    } else if (auto surfaceNode = GetSurfaceNode()) {
-        AutoRSTransaction trans(surfaceNode);
+    } else if (surfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " uiFirstSwitch=%{public}d",
             surfaceNode->GetName().c_str(), surfaceNode->GetId(), uiFirstSwitch);
         surfaceNode->SetUIFirstSwitch(uiFirstSwitch);
@@ -4436,8 +4438,8 @@ void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
 void SceneSession::CloneWindow(NodeId surfaceNodeId, bool needOffScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
+    AutoRSTransaction trans(GetRSUIContext());
     if (auto surfaceNode = GetSurfaceNode()) {
-        AutoRSTransaction trans(surfaceNode);
         TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
             surfaceNode->GetName().c_str(), surfaceNode->GetId(), surfaceNodeId);
         surfaceNode->SetClonedNodeInfo(surfaceNodeId, needOffScreen);
@@ -6593,12 +6595,10 @@ void SceneSession::SetSkipDraw(bool skip)
         WLOGFE("surfaceNode_ is null");
         return;
     }
-    {
-        AutoRSTransaction trans(surfaceNode);
-        surfaceNode->SetSkipDraw(skip);
-        if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
-            leashWinSurfaceNode->SetSkipDraw(skip);
-        }
+    AutoRSTransaction trans(GetRSUIContext());
+    surfaceNode->SetSkipDraw(skip);
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        leashWinSurfaceNode->SetSkipDraw(skip);
     }
 }
 
@@ -7076,7 +7076,7 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
-    NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetSurfaceNode()));
+    NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;
 }
 
@@ -7563,7 +7563,7 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
         colorGamut = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
     }
     {
-        AutoRSTransaction trans(surfaceNode);
+        AutoRSTransaction trans(GetRSUIContext());
         surfaceNode->SetColorSpace(colorGamut);
     }
 }
@@ -7579,8 +7579,7 @@ void SceneSession::AddSidebarBlur()
         TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty has value");
         return;
     }
-    auto rsUIContext = surfaceNode->GetRSUIContext();
-    auto getRSNodeInner = [&rsUIContext](NodeId id) {
+    auto getRSNodeInner = [rsUIContext = GetRSUIContext()](NodeId id) {
         return rsUIContext ? rsUIContext->GetNodeMap().GetNode(id) : RSNodeMap::Instance().GetNode(id);
     };
     auto rsNodeTemp = getRSNodeInner(surfaceNode->GetId());
@@ -7753,7 +7752,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
     // sidebar animation duration
     constexpr int32_t duration = 150;
     if (isDefaultSidebarBlur) {
-        auto rsUIContext = GetRSUIContext(__func__);
+        auto rsUIContext = GetRSUIContext();
         if (isNeedAnimation) {
             Rosen::RSAnimationTimingProtocol timingProtocol;
             timingProtocol.SetDuration(duration);
@@ -8159,7 +8158,7 @@ void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDa
     timingProtocol.SetDirection(true);
     timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
     timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-    auto rsUIContext = GetRSUIContext(__func__);
+    auto rsUIContext = GetRSUIContext();
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     if (isMaximize) {
         if (isDark) {

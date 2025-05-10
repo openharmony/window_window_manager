@@ -665,38 +665,38 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const Scree
     return iter->second;
 }
 
-std::shared_ptr<RSUIDirector> ScreenSessionManagerClient::GetRSUIDirector(ScreenId screenId, const char* caller)
+std::shared_ptr<RSUIDirector> ScreenSessionManagerClient::GetRSUIDirector(ScreenId screenId)
 {
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
     if (screenId == SCREEN_ID_INVALID) {
         screenId = GetDefaultScreenId();
         TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "screenId is invalid, use default screenId: %{public}" PRIu64 ", caller: %{public}s",
-              screenId, caller);
+              "screenId is invalid, use default screenId: %{public}" PRIu64, screenId);
     }
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Default screenId is also invalid, caller: %{public}s", caller);
+        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Default screenId is also invalid");
         return nullptr;
     }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Screen session is null, screenId: %{public}" PRIu64 ", caller: %{public}s", screenId, caller);
+              "Screen session is null, screenId: %{public}" PRIu64, screenId);
         return nullptr;
     }
     auto rsUIDirector = screenSession->GetRSUIDirector();
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "%{public}s, screenId: %{public}" PRIu64 ", caller: %{public}s",
-          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, caller);
+          "%{public}s, screenId: %{public}" PRIu64,
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId);
     return rsUIDirector;
 }
 
-std::shared_ptr<RSUIContext> ScreenSessionManagerClient::GetRSUIContext(ScreenId screenId, const char* caller)
+std::shared_ptr<RSUIContext> ScreenSessionManagerClient::GetRSUIContext(ScreenId screenId)
 {
-    auto rsUIDirector = GetRSUIDirector(screenId, caller);
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIDirector = GetRSUIDirector(screenId);
     auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64 ", caller: %{public}s",
-          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), screenId, caller);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64,
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), screenId);
     return rsUIContext;
 }
 
@@ -993,8 +993,7 @@ bool ScreenSessionManagerClient::OnExtendDisplayNodeChange(ScreenId mainScreenId
     /* change rsId */
     innerScreen->SetRSScreenId(externalRSId);
     externalScreen->SetRSScreenId(innerRSId);
-    RSTransactionAdapter::FlushImplicitTransaction(mainNode);
-    RSTransactionAdapter::FlushImplicitTransaction(extendNode);
+    RSTransactionAdapter::FlushImplicitTransaction({mainNode, extendNode});
     oss.str("");
     oss << "innerScreen after screenId: " << mainScreenId
         << ", rsId: " << innerScreen->GetRSScreenId()
@@ -1041,8 +1040,7 @@ bool ScreenSessionManagerClient::OnMainDisplayNodeChange(ScreenId mainScreenId, 
 
     /* change rsId */
     mainScreen->SetRSScreenId(extendRSId);
-    RSTransactionAdapter::FlushImplicitTransaction(mainNode);
-    RSTransactionAdapter::FlushImplicitTransaction(extendNode);
+    RSTransactionAdapter::FlushImplicitTransaction({mainNode, extendNode});
     return true;
 }
 

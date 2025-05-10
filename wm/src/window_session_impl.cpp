@@ -279,10 +279,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
-    rsUIDirector_ = RSUIDirector::Create();
-    rsUIDirector_->Init(true, true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+    InitRSUIDirector();
 
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
@@ -392,7 +389,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
     }
 
     auto surfaceNode = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), rsUIDirector_->GetRSUIContext());
+        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;
@@ -2003,13 +2000,6 @@ std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
     TLOGI(WmsLogTag::DEFAULT, "name:%{public}s, id:%{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
     return surfaceNode_;
-}
-
-std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
-{
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "%{public}s, windowId: %{public}u", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
-    return rsUIDirector_;
 }
 
 const std::shared_ptr<AbilityRuntime::Context> WindowSessionImpl::GetContext() const
@@ -6234,6 +6224,37 @@ nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle
     decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
     decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
     return decorJson;
+}
+
+void WindowSessionImpl::InitRSUIDirector()
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED();
+    if (rsUIDirector_) {
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+              "RSUIDirector already exists: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+        return;
+    }
+    rsUIDirector_ = RSUIDirector::Create();
+    rsUIDirector_->Init(true, true);
+    TLOGI(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+}
+
+std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

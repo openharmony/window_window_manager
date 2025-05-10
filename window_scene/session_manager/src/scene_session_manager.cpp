@@ -12069,9 +12069,11 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
 void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    std::shared_ptr<RSUIContext> rsUIContext;
     if (auto rootSceneSession = GetRootSceneSession()) {
-        rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rootSceneSession->GetRSUIContext());
+        rsUIContext = rootSceneSession->GetRSUIContext();
     }
+    rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rsUIContext);
     auto task = [this, rsTransaction] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {

@@ -57,7 +57,7 @@ WMError WindowGroupMgr::MoveMissionsToForeground(const std::vector<int32_t>& mis
         WLOGFD("raise zOrder, missindId: %{public}d ", topMissionId);
         auto windowNode = windowRoot_->GetWindowNodeByMissionId(topMissionId);
         windowRoot_->RaiseZOrderForAppWindow(windowNode);
-        RSTransactionAdapter::FlushImplicitTransaction(windowNode->surfaceNode_);
+        RSTransactionAdapter::FlushImplicitTransaction(windowNode->GetRSUIContext());
     }
     return res;
 }
