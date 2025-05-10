@@ -81,6 +81,8 @@
           "security_component_manager",
           "libjpeg-turbo",
           "libxml2",
+          "selinux_adapter",
+          "cJSON",
           "bounds_checking_function",
           "device_status"
         ],

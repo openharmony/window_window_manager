@@ -51,6 +51,7 @@ external_deps = [
   "accessibility:accessibility_interface",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
+  "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
