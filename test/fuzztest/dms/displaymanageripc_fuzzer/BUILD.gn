@@ -39,6 +39,7 @@ ohos_fuzztest("DisplayManagerIPCFuzzTest") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

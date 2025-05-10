@@ -141,6 +141,7 @@ test_external_deps = [
   "ability_runtime:session_handler",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
+  "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
   "googletest:gmock",
@@ -156,6 +157,7 @@ test_external_deps = [
   "ipc:ipc_single",
   "libxml2:libxml2",
   "napi:ace_napi",
+  "safwk:system_ability_fwk",
 ]
 
 ohos_unittest("ws_ability_info_manager_test") {
@@ -171,6 +173,7 @@ ohos_unittest("ws_ability_info_manager_test") {
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "hilog:libhilog",
   ]
 }

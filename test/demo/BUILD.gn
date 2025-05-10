@@ -79,12 +79,15 @@ ohos_executable("demo_snapshot_virtual_screen") {
 
   deps = [
     "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dmserver:libdms",
+    "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_static",
     "../../snapshot:libsnapshot_util",
   ]
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
@@ -107,9 +110,11 @@ ohos_executable("demo_system_sub_window") {
   ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 
   part_name = "window_manager"
@@ -144,6 +149,7 @@ ohos_executable("demo_water_mark_listener") {
     "c_utils:utils",
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "image_framework:image_native",
   ]
 
   part_name = "window_manager"

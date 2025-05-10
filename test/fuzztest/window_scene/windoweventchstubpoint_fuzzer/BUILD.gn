@@ -45,6 +45,7 @@ ohos_fuzztest("WindowEventChStubPointFuzzTest") {
     "accessibility:accessibility_interface",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
   ]
 }

@@ -294,6 +294,7 @@ ohos_shared_library("session_manager_lite") {
     "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
