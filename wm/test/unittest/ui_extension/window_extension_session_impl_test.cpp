@@ -28,8 +28,10 @@
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
+#include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "ui_extension/provider_data_handler.h"
 #include "window_extension_session_impl.h"
 #include "wm_common.h"
 
@@ -1967,6 +1969,92 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level0)
 }
 
 /**
+ * @tc.name: NotifyPointerEvent
+ * @tc.desc: NotifyPointerEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPointerEvent");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    EXPECT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    window->NotifyPointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->NotifyPointerEvent(pointerEvent);
+
+    bool isHostWindowDelayRaiseEnabled = true;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    window->NotifyPointerEvent(pointerEvent);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->NotifyPointerEvent(pointerEvent);
+    isHostWindowDelayRaiseEnabled = false;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    window->NotifyPointerEvent(pointerEvent);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->NotifyPointerEvent(pointerEvent);
+
+    window->inputEventConsumer_ = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: ProcessPointerEventWithHostWindowDelayRaise
+ * @tc.desc: ProcessPointerEventWithHostWindowDelayRaise Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayRaise, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ProcessPointerEventWithHostWindowDelayRaise");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    bool isHitTargetDraggable = false;
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    window->dataHandler_ = nullptr;
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    ASSERT_NE(nullptr, window->GetExtensionDataHandler());
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+
+    isHitTargetDraggable = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+}
+
+/**
  * @tc.name: PreNotifyKeyEvent
  * @tc.desc: PreNotifyKeyEvent Test
  * @tc.type: FUNC
@@ -2250,6 +2338,40 @@ HWTEST_F(WindowExtensionSessionImplTest, OnWaterfallModeChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHostWindowDelayRaiseStateChange
+ * @tc.desc: OnHostWindowDelayRaiseStateChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowDelayRaiseStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnHostWindowDelayRaiseStateChange");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    bool isHostWindowDelayRaiseEnabled = true;
+    want.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, isHostWindowDelayRaiseEnabled);
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    EXPECT_EQ(WMError::WM_OK, window->OnHostWindowDelayRaiseStateChange(std::move(want), reply));
+
+    window->property_->SetWindowDelayRaiseEnabled(false);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window->uiContent_);
+    EXPECT_EQ(WMError::WM_OK, window->OnHostWindowDelayRaiseStateChange(std::move(want), reply));
+    EXPECT_TRUE(window->IsWindowDelayRaiseEnabled());
+    isHostWindowDelayRaiseEnabled = false;
+    want.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, isHostWindowDelayRaiseEnabled);
+    EXPECT_EQ(WMError::WM_OK, window->OnHostWindowDelayRaiseStateChange(std::move(want), reply));
+    EXPECT_FALSE(window->IsWindowDelayRaiseEnabled());
+}
+
+/**
  * @tc.name: OnResyncExtensionConfig
  * @tc.desc: OnResyncExtensionConfig Test
  * @tc.type: FUNC
@@ -2262,12 +2384,46 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | Sma
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
     configParam.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(1)));
+    configParam.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(true)));
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want.SetParams(wantParam);
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
     EXPECT_EQ(WMError::WM_OK, window_->OnResyncExtensionConfig(std::move(want), reply));
     EXPECT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
     EXPECT_TRUE(window_->IsWaterfallModeEnabled());
+    EXPECT_TRUE(window_->IsWindowDelayRaiseEnabled());
+}
+
+/**
+ * @tc.name: OnExtensionMessage
+ * @tc.desc: OnExtensionMessage test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnExtensionMessage");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+    window->dataHandler_ = nullptr;
+    auto ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    ASSERT_NE(nullptr, window->GetExtensionDataHandler());
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 }
 
 /**
@@ -2304,6 +2460,10 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateExtensionConfig");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window->hostSession_);
     window->crossAxisState_ = CrossAxisState::STATE_INVALID;
     auto want = std::make_shared<AAFwk::Want>();
     window->UpdateExtensionConfig(want);
@@ -2335,6 +2495,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
+
+    bool isHostWindowDelayRaiseEnabled = true;
+    configParam.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(isHostWindowDelayRaiseEnabled)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->IsWindowDelayRaiseEnabled(), isHostWindowDelayRaiseEnabled);
+    isHostWindowDelayRaiseEnabled = false;
+    configParam.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(isHostWindowDelayRaiseEnabled)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->IsWindowDelayRaiseEnabled(), isHostWindowDelayRaiseEnabled);
 }
 
 /**
