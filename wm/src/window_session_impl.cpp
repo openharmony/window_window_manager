@@ -2243,13 +2243,10 @@ WMError WindowSessionImpl::RaiseToAppTopOnDrag()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    WSError ret = WSError::WS_OK;
     if (WindowHelper::IsSubWindow(GetType())) {
-        ret = hostSession->RaiseToAppTop();
-        return static_cast<WMError>(ret);
+        return static_cast<WMError>(hostSession->RaiseToAppTop());
     }
-    ret = hostSession->RaiseAppMainWindowToTop();
-    return static_cast<WMError>(ret);
+    return static_cast<WMError>(hostSession->RaiseAppMainWindowToTop());
 }
 
 bool WindowSessionImpl::IsMainWindowTopmost() const
