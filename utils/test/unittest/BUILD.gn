@@ -47,6 +47,7 @@ test_external_deps = [
   "graphic_2d:librender_service_base",
   "graphic_2d:librender_service_client",
   "hilog:libhilog",
+  "preferences:native_preferences",
 ]
 
 ohos_unittest("wm_window_frame_trace_impl_test") {

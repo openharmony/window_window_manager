@@ -34,6 +34,7 @@ ohos_unittest("ws_window_recover_session_test") {
     "ability_runtime:session_handler",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "googletest:gmock",

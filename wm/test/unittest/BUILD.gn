@@ -89,6 +89,7 @@ test_external_deps = [
   "c_utils:utils",
   "googletest:gmock",
   "googletest:gtest_main",
+  "graphic_2d:librender_service_base",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hilog:libhilog",
@@ -342,7 +343,10 @@ ohos_unittest("wm_window_scene_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = test_external_deps
-  external_deps += [ "common_event_service:cesfwk_innerkits" ]
+  external_deps += [
+    "ability_runtime:app_context",
+    "common_event_service:cesfwk_innerkits",
+  ]
 }
 
 ohos_unittest("wm_window_test") {
