@@ -110,6 +110,7 @@ public:
     bool IsMainWindowTopmost() const override;
     void SetSubWindowZLevelToProperty();
     int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
+    WMError RaiseToAppTopOnDrag();
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;

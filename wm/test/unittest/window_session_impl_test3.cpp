@@ -691,6 +691,37 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RaiseToAppTopOnDrag
+ * @tc.desc: RaiseToAppTopOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RaiseToAppTopOnDrag, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RaiseToAppTop");
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    windowSessionImpl->property_->SetPersistentId(1);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSessionImpl->hostSession_ = session;
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag end";
+}
+
+/**
  * @tc.name: SetRaiseByClickEnabled
  * @tc.desc: SetRaiseByClickEnabled
  * @tc.type: FUNC
