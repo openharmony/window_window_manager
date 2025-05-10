@@ -290,6 +290,16 @@ bool WindowOption::GetSubWindowMaximizeSupported() const
 {
     return subWindowMaximizeSupported_;
 }
+
+void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
+{
+    subWindowOutlineEnabled_ = outlineEnabled;
+}
+
+bool WindowOption::IsSubWindowOutlineEnabled() const
+{
+    return subWindowOutlineEnabled_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

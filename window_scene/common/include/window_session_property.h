@@ -216,6 +216,8 @@ public:
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    bool IsSubWindowOutlineEnabled() const;
 
     /*
      * Window Hierarchy
@@ -456,6 +458,7 @@ private:
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
+    bool subWindowOutlineEnabled_ = false;
 
     /*
      * Window Hierarchy

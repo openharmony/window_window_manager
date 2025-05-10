@@ -423,6 +423,15 @@ bool WindowOption::IsConstrainedModal() const
     return isConstrainedModal_;
 }
 
+void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
+{
+    subWindowOutlineEnabled_ = outlineEnabled;
+}
+
+bool WindowOption::IsSubWindowOutlineEnabled() const
+{
+   return subWindowOutlineEnabled_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

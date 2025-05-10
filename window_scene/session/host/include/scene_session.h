@@ -400,6 +400,8 @@ public:
         int32_t newParentWindowId) { return WMError::WM_ERROR_INVALID_WINDOW; }
     void UpdateSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetMaxSubWindowLevel() const;
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    bool IsSubWindowOutlineEnabled() const;
 
     /*
      * Window Immersive
@@ -1251,6 +1253,7 @@ private:
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
+    bool subWindowOutlineEnabled_ = false;
 
     /*
      * PC Window Sidebar Blur
