@@ -447,6 +447,13 @@ public:
      */
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
 
+    /**
+     * @brief Set fold status expand and locked, only for super fold display device.
+     *
+     * @param locked wether to set fold status expand and locked.
+     */
+    void SetFoldStatusExpandAndLocked(bool locked);
+
 private:
     ScreenManager();
     ~ScreenManager();

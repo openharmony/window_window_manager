@@ -2280,7 +2280,7 @@ HWTEST_F(ScreenSessionManagerTest, HasPrivateWindow, TestSize.Level1)
  * @tc.desc: GetAvailableArea test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetAvailableArea, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetAvailableArea01, TestSize.Level1)
 {
     DMRect area;
     EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetAvailableArea(SCREEN_ID_INVALID, area));
@@ -2289,6 +2289,42 @@ HWTEST_F(ScreenSessionManagerTest, GetAvailableArea, TestSize.Level1)
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
     EXPECT_EQ(DMError::DM_OK, ssm_->GetAvailableArea(id, area));
+}
+
+/**
+ * @tc.name: GetAvailableArea
+ * @tc.desc: GetAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAvailableArea02, TestSize.Level1)
+{
+    DMRect area;
+    DisplayId id = 999;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetAvailableArea(id, area));
+    ssm_->screenSessionMap_.clear();
+}
+
+
+/**
+ * @tc.name: GetExpandAvailableArea
+ * @tc.desc: GetExpandAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetExpandAvailableArea02, TestSize.Level1)
+{
+    DMRect area;
+    DisplayId id = 0;
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetExpandAvailableArea(id, area));
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    EXPECT_EQ(DMError::DM_OK, ssm_->GetExpandAvailableArea(id, area));
+    ssm_->screenSessionMap_.clear();
 }
 
 /**
@@ -2551,7 +2587,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualDisplayMuteFlag02, Function | Small
  * @tc.desc: GetAllDisplayPhysicalResolution test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution01, TestSize.Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize {};
     if (ssm_ != nullptr) {
@@ -2560,6 +2596,54 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, TestSize.Lev
     } else {
         ASSERT_TRUE(allSize.empty());
     }
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution02, TestSize.Level1)
+{
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    std::vector<DisplayPhysicalResolution> result = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_TRUE(!result.empty());
+    ssm_->allDisplayPhysicalResolution_.clear();
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution03, TestSize.Level1)
+{
+    DisplayPhysicalResolution resolution;
+    resolution.physicalWidth_ = 1920;
+    resolution.physicalHeight_ = 1080;
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.push_back(resolution);
+    std::vector<DisplayPhysicalResolution> result = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].physicalWidth_, 1920);
+    EXPECT_EQ(result[0].physicalHeight_, 1080);
+    ssm_->allDisplayPhysicalResolution_.clear();
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution04, TestSize.Level1)
+{
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    ssm_->allDisplayPhysicalResolution_.back().foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    std::vector<DisplayPhysicalResolution> resolutions = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_EQ(resolutions.back().foldDisplayMode_, FoldDisplayMode::FULL);
+    ssm_->allDisplayPhysicalResolution_.clear();
 }
 
 /**
@@ -5638,7 +5722,7 @@ HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardStatus01, Function | SmallTe
     auto ret = ssm_->SetSystemKeyboardStatus(true);
     ASSERT_NE(ret, DMError::DM_ERROR_UNKNOWN);
 }
- 
+
 /**
  * @tc.name: SetSystemKeyboardStatus
  * @tc.desc: SetSystemKeyboardStatus with false as parameter
@@ -6005,7 +6089,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap, Function | SmallTest
 HWTEST_F(ScreenSessionManagerTest, SetMultiScreenFrameControl, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    
+
     sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetScreenType(ScreenType::REAL);
@@ -6046,7 +6130,7 @@ HWTEST_F(ScreenSessionManagerTest, GetInternalScreenSession, Function | SmallTes
     sptr<ScreenSession> screenSession1 = nullptr;
     ASSERT_EQ(nullptr, screenSession1);
     ssm_->screenSessionMap_[50] = screenSession1;
-    
+
     sptr<ScreenSession> screenSession2 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession2);
     screenSession2->SetScreenType(ScreenType::REAL);
@@ -6092,7 +6176,7 @@ HWTEST_F(ScreenSessionManagerTest, GetInternalAndExternalSession, Function | Sma
     sptr<ScreenSession> screenSession1 = nullptr;
     ASSERT_EQ(nullptr, screenSession1);
     ssm_->screenSessionMap_[50] = screenSession1;
-    
+
     sptr<ScreenSession> screenSession2 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession2);
     screenSession2->SetIsCurrentInUse(false);
@@ -6524,6 +6608,51 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession002, TestSize.Level1)
     ssm_->screenAgentMap_.clear();
     ScreenId screenId = 123;
     EXPECT_EQ(ssm_->GetPhysicalScreenSession(screenId), nullptr);
+}
+
+/**
+ * @tc.name: OnScreenModeChange
+ * @tc.desc: OnScreenModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenModeChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
+    ssm_->OnScreenModeChange(screenModeChangeEvent);
+}
+
+/**
+ * @tc.name: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.desc: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetIsFoldStatusLocked, Function | SmallTest | Level3)
+{
+    ssm_->SetIsFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetIsFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: SetFoldStatusExpandAndLocked
+ * @tc.desc: SetFoldStatusExpandAndLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->SetFoldStatusExpandAndLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetFoldStatusExpandAndLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
 }
 }
 } // namespace Rosen

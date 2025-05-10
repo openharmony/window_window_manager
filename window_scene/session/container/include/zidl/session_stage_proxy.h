@@ -71,11 +71,8 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
-    WSError CompatibleFullScreenRecover() override;
-    WSError CompatibleFullScreenMinimize() override;
-    WSError CompatibleFullScreenClose() override;
     WSError PcAppInPadNormalClose() override;
-    WSError NotifyCompatibleModeEnableInPad(bool enable) override;
+    WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyTargetRotationInfo(OrientationInfo& Info) override;
@@ -99,6 +96,7 @@ public:
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

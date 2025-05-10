@@ -58,6 +58,7 @@ public:
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
     virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
+    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -307,6 +308,7 @@ public:
     bool GetIsEnableRegionRotation();
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
+    void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
 
     DisplayId GetDisplayId();
 
@@ -338,7 +340,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
-    bool isFakeInUse_ = false;  // is fake session in use
+    bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
     bool isScreenAvailable_ = true;
@@ -362,7 +364,6 @@ private:
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
-    void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;

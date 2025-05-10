@@ -2453,6 +2453,7 @@ public:
 
     /**
      * @brief get compatible mode in pc.
+     * @deprecated use IsAdaptToImmersive instead
      *
      * @return True means window is compatible mode in pc, false means the opposite.
      */
@@ -2758,6 +2759,18 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set main window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3280,7 +3293,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() const { return 0; }
 
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
@@ -3543,6 +3556,18 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
+     * @brief Receive async IPC message from UIExtensionComponent.
+     *
+     * @param code the message code.
+     * @param persistentId the persistent id of UIExtension.
+     * @param data the data transfered from UIExtensionComponent.
+     */
+    virtual WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Query whether the waterfall mode is enabled or not.
      *
      * @return true means the waterfall mode is enabled, and false means the opposite.
@@ -3714,6 +3739,26 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WMError::WM_OK if called success, otherwise failed.
+     */
+    virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -516,6 +516,24 @@ HWTEST_F(SuperFoldSensorManagerTest, GetCurAngle, Function | SmallTest | Level3)
     float angle = mgr.GetCurAngle();
     ASSERT_EQ(angle, 110.0F);
 }
+
+/**
+ * @tc.name: HandleFoldStatusLocked
+ * @tc.desc: HandleFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleFoldStatusLocked, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    mgr.HandleFoldStatusLocked();
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+
+    mgr.HandleFoldStatusUnlocked();
+    EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

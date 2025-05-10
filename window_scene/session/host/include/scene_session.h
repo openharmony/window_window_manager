@@ -130,6 +130,7 @@ using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool i
 using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<SceneSession>& session, bool isNewWant)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
+using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -380,6 +381,8 @@ public:
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
     void ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark);
+    void RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func);
+    WSError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * PC Window Layout
@@ -838,6 +841,7 @@ protected:
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
     NotifyUpdateFlagFunc onUpdateFlagFunc_;
+    NotifyUseImplicitAnimationChangeFunc useImplicitAnimationChangeFunc_;
 
     /*
      * PiP Window
@@ -953,13 +957,16 @@ private:
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
+    void WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY);
+    void HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect);
+    bool IsCompatibilityModeScale(float scaleX, float scaleY);
+    void CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isScale);
+    void ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
     DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
     void HandleSessionDragEvent(SessionEvent event);
-    void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
-    void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);

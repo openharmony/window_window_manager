@@ -286,11 +286,18 @@ public:
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
     virtual WMError SetForegroundWindowNum(int32_t windowNum) { return WMError::WM_OK; }
+    virtual WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) { return WSError::WS_OK; }
 
     /*
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
+
+    /*
+     * Compatible Mode
+     */
+    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property) { return WMError::WM_OK; }
 };
 }
 }

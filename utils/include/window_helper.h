@@ -638,9 +638,7 @@ public:
                decorButtonStyle.buttonIconSize >= MIN_BUTTON_ICON_SIZE &&
                decorButtonStyle.buttonIconSize <= MAX_BUTTON_ICON_SIZE &&
                decorButtonStyle.buttonBackgroundCornerRadius >= MIN_BUTTON_BACKGROUND_CORNER_RADIUS &&
-               decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS &&
-               decorButtonStyle.spacingBetweenButtons +
-                decorButtonStyle.buttonBackgroundSize >= MIN_BUTTON_BETWEEN;
+               decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     }
 
 private:

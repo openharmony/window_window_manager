@@ -55,7 +55,6 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
@@ -81,6 +80,11 @@ constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT = 0xf2f1f1f1;
 constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_DARK = 0xf21a1a1a;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
+
+/*
+ * Compatible Mode
+ */
+constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
 }
 
 /**
@@ -484,6 +488,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END,
 };
 

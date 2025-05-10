@@ -140,6 +140,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
+constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -1493,6 +1494,11 @@ AvoidArea SceneSessionManager::GetRootSessionAvoidAreaByType(AvoidAreaType type)
         return rootSession->GetAvoidAreaByType(type);
     }
     return {};
+}
+
+uint32_t SceneSessionManager::GetRootSceneStatusBarHeight() const
+{
+    return static_cast<uint32_t>(rootSceneSession_->GetStatusBarHeight());
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
@@ -10535,9 +10541,14 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     taskScheduler_->PostAsyncTask(task, where);
 }
 
-void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible)
+void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const
 {
-    isVisible = statusBarConstantlyShowMap_[displayId];
+    auto it = statusBarConstantlyShowMap_.find(displayId);
+    if (it != statusBarConstantlyShowMap_.end()) {
+        isVisible = it->second;
+    } else {
+        isVisible = false;
+    }
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
@@ -13409,8 +13420,9 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     bool findAllWindow = windowNumber <= 0;
-    bool checkPoint = (x >= 0 && y >= 0);
     std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    ChangeWindowRectYInVirtualDisplay(displayId, y);
+    bool checkPoint = (x >= 0 && y >= 0);
     auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
         findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
         if (session == nullptr) {
@@ -13439,6 +13451,38 @@ WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32
         TraverseSessionTree(func, true);
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId, int32_t& y)
+{
+    if (displayId != VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "This is not VIRTUAL_DISPLAY_ID");
+        return;
+    }
+    auto defaultScreenDisplay = DisplayManager::GetInstance().GetDisplayById(DEFAULT_DISPLAY_ID);
+    if (defaultScreenDisplay == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get display object failed of defaultScreenDisplay");
+        return;
+    }
+    auto defaultScreenDisplayInfo = defaultScreenDisplay->GetDisplayInfo();
+    if (defaultScreenDisplayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get display info failed of defaultScreenDisplay");
+        return;
+    }
+    int32_t defaultScreenPhyHight = defaultScreenDisplayInfo->GetPhysicalHeight();
+    auto screenDisplay = DisplayManager::GetInstance().GetDisplayById(displayId);
+    int32_t screenHightByDisplayId = defaultScreenPhyHight;
+    if (screenDisplay != nullptr) {
+        if (screenDisplay->GetDisplayInfo() != nullptr) {
+            screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
+        }
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
+        defaultScreenPhyHight, screenHightByDisplayId);
+    if (displayId == VIRTUAL_DISPLAY_ID) {
+        displayId = DEFAULT_DISPLAY_ID;
+        y = y + defaultScreenPhyHight - screenHightByDisplayId;
+    }
 }
 
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
@@ -13731,9 +13775,23 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         return WSError::WS_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+
+    AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
+    
     appForceLandscapeMap_[bundleName] = config;
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s",
-        bundleName.c_str(), config.mode_, config.homePage_.c_str());
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
+        bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
+    
+    if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
+        //Notify the client of the mode change
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+                session->NotifyAppForceLandscapeConfigUpdated();
+            }
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -14626,6 +14684,41 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
+{
+    if (!property || !token) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "property or token is nullptr!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &property, token, where = __func__] {
+        int32_t persistentId = INVALID_SESSION_ID;
+        int32_t parentId = INVALID_SESSION_ID;
+        if (!GetExtensionWindowIds(token, persistentId, parentId)) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s Get UIExtension window ids by token failed", where);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d, parentId=%{public}d",
+            where, persistentId, parentId);
+        auto parentSession = GetSceneSession(parentId);
+        if (!parentSession) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s parentSession is nullptr, parentId=%{public}d",
+                where, parentId);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        auto compatInfo = parentSession->GetSessionProperty()->GetCompatibleModeProperty();
+        if (!compatInfo) {
+            TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info failed",
+                where, persistentId);
+            return WMError::WM_DO_NOTHING;
+        }
+        TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",
+            where, persistentId, compatInfo->ToString().c_str());
+        property->CopyFrom(compatInfo); 
+        return WMError::WM_OK;
+    }, __func__);
+}
+
 WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subSession,
     const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
 {
@@ -14798,5 +14891,29 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
             onSceneSessionDestruct_(persistentId);
         }
     });
+}
+
+void SceneSessionManager::ConfigSupportZLevel()
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "support zLevel");
+    auto task = [this] {
+        systemConfig_.supportZLevel_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
+}
+
+WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d, useImplicit:%{public}d", hostWindowId, useImplicit);
+    auto task = [this, hostWindowId, useImplicit]() {
+        auto sceneSession = GetSceneSession(hostWindowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        return sceneSession->UseImplicitAnimation(useImplicit);
+    };
+ 
+    return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
 }
 } // namespace OHOS::Rosen

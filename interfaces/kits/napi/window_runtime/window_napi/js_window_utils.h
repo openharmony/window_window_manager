@@ -285,6 +285,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 

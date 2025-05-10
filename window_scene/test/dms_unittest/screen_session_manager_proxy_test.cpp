@@ -2071,6 +2071,20 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, TestSize.Level1)
                 screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
     }
 }
+
+/**
+ * @tc.name: SetFoldStatusExpandAndLocked
+ * @tc.desc: SetFoldStatusExpandAndLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusExpandAndLocked, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
+    EXPECT_EQ(ScreenSessionManager::GetInstance().GetIsFoldStatusLocked(), false);
+}
 }
 }
 }
