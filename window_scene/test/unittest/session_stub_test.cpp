@@ -656,6 +656,29 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: HandleSetWindowTransitionAnimation
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowTransitionAnimation, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    data.WriteInt32(10);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    TransitionAnimation animation;
+    data.WriteUint32(static_cast<uint32_t>(WindowTransitionType::DESTROY));
+    data.WriteParcelable(&animation);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetWindowTransitionAnimation(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
