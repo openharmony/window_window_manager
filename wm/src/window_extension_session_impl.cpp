@@ -1442,29 +1442,34 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
 
 void WindowExtensionSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WindowSessionImpl::NotifyPointerEvent(pointerEvent);
-    if (IsWindowDelayRaiseEnabled()) {
-        std::shared_ptr<MMI::PointerEvent> pointerEventBackup;
-        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            pointerEventBackup = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-        } else {
-            pointerEventBackup = pointerEvent;
-        }
-        auto uiContent = GetUIContentSharedPtr();
-        if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is null!");
-            return;
-        }
-        uiContent->ProcessPointerEvent(pointerEvent,
-            [weakThis = wptr(this), pointerEventBackup](bool isHitTargetDraggable) mutable {
-                auto window = weakThis.promote();
-                if (window == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_UIEXT, "window is null!");
-                    return;
-                }
-                window->ProcessPointerEventWithHostWindowDelayRaise(pointerEventBackup, isHitTargetDraggable);
-            });
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        return;
     }
+    WindowSessionImpl::NotifyPointerEvent(pointerEvent);
+    if (!IsWindowDelayRaiseEnabled()) {
+        return;
+    }
+    std::shared_ptr<MMI::PointerEvent> pointerEventBackup;
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        pointerEventBackup = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    } else {
+        pointerEventBackup = pointerEvent;
+    }
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is null!");
+        return;
+    }
+    uiContent->ProcessPointerEvent(pointerEvent,
+        [weakThis = wptr(this), pointerEventBackup](bool isHitTargetDraggable) mutable {
+            auto window = weakThis.promote();
+            if (window == nullptr) {
+                TLOGNE(WmsLogTag::WMS_UIEXT, "window is null!");
+                return;
+            }
+            window->ProcessPointerEventWithHostWindowDelayRaise(pointerEventBackup, isHitTargetDraggable);
+        });
 }
 
 void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(

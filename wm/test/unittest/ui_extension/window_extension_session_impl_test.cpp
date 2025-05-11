@@ -1978,10 +1978,8 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     window->property_->SetPersistentId(1);
     ASSERT_NE(0, window->GetPersistentId());
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
@@ -2023,7 +2021,6 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ProcessPointerEventWithHostWindowDelayRaise");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     bool isHitTargetDraggable = false;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
@@ -2036,7 +2033,6 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
-    ASSERT_NE(nullptr, window->GetExtensionDataHandler());
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
@@ -2347,10 +2343,8 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowDelayRaiseStateChange, Test
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("OnHostWindowDelayRaiseStateChange");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     window->property_->SetPersistentId(1);
     ASSERT_NE(0, window->GetPersistentId());
     AAFwk::Want want;
@@ -2362,7 +2356,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowDelayRaiseStateChange, Test
 
     window->property_->SetWindowDelayRaiseEnabled(false);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, window->uiContent_);
     EXPECT_EQ(WMError::WM_OK, window->OnHostWindowDelayRaiseStateChange(std::move(want), reply));
     EXPECT_TRUE(window->IsWindowDelayRaiseEnabled());
     isHostWindowDelayRaiseEnabled = false;
@@ -2405,10 +2398,8 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("OnExtensionMessage");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     uint32_t code = 9999;
     int32_t persistentId = 1111;
     AAFwk::Want want;
@@ -2421,7 +2412,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
-    ASSERT_NE(nullptr, window->GetExtensionDataHandler());
     ret = window->OnExtensionMessage(code, persistentId, want);
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 }
@@ -2460,10 +2450,8 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateExtensionConfig");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     window->crossAxisState_ = CrossAxisState::STATE_INVALID;
     auto want = std::make_shared<AAFwk::Want>();
     window->UpdateExtensionConfig(want);

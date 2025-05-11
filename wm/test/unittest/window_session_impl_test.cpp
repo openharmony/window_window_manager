@@ -1981,10 +1981,8 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetExtensionConfig");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     window->crossAxisState_ = CrossAxisState::STATE_CROSS;
     AAFwk::WantParams want;
     window->GetExtensionConfig(want);
@@ -2021,7 +2019,6 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("OnExtensionMessage");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     uint32_t code = 9999;
     int32_t persistentId = 1111;
     AAFwk::Want want;
@@ -2035,7 +2032,6 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     SessionInfo sessionInfo;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, window->hostSession_);
     window->property_->SetPersistentId(1);
     ASSERT_FALSE(window->GetPersistentId() == INVALID_SESSION_ID);
     window->state_ = WindowState::STATE_CREATED;
