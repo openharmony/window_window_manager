@@ -1475,7 +1475,7 @@ void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(
         return;
     }
     const int32_t action = pointerEvent->GetPointerAction();
-    bool isPointerButtonDown = action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    bool isPointerButtonDown = (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool isPointerUp = (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     if (!isPointerButtonDown && !isPointerUp) {

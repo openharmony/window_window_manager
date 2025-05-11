@@ -37,6 +37,8 @@ enum class Businesscode : uint32_t {
     SYNC_HOST_GESTURE_BACK_ENABLED,
     SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
 
+    // IPC messages corresponding to the Businesscode between 10000 and 20000
+    // will be forwarded to the host window by the UEC
     TRANSPARENT_TRANSMISSION_TO_HOST_WINDOW_CODE_BEGIN = 10000,
     NOTIFY_HOST_WINDOW_TO_RAISE = 10001,
     TRANSPARENT_TRANSMISSION_TO_HOST_WINDOW_CODE_END = 20000,
