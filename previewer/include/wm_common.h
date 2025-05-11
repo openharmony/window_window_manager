@@ -18,6 +18,7 @@
 
 #include <any>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_set>
