@@ -88,6 +88,9 @@ public:
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ProcessPointerEventWithHostWindowDelayRaise(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isHitTargetDraggable) const;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
@@ -159,6 +162,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -195,6 +199,7 @@ private:
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
