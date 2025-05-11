@@ -1194,7 +1194,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     window->hostSession_ = session;
     property->persistentId_ = 100;
 
-
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window->GetWindowTransitionAnimation(type);
