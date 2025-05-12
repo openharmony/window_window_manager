@@ -91,6 +91,7 @@ ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* proper
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
             propertyName, static_cast<int32_t>(ret));
+        return ret;
     }
 
     ani_boolean isUndefined;
@@ -122,6 +123,7 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
             propertyName, static_cast<int32_t>(ret));
+        return ret;
     }
 
     ani_boolean isUndefined;
