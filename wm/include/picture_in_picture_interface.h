@@ -33,6 +33,14 @@ public:
     virtual void OnPictureInPictureStop() {}
     virtual void OnPictureInPictureOperationError(int32_t errorCode) {}
     virtual void OnRestoreUserInterface() {}
+
+    // native callback
+    virtual void OnPreparePictureInPictureStart(uint32_t controllerId) {}
+    virtual void OnPictureInPictureStart(uint32_t controllerId) {}
+    virtual void OnPreparePictureInPictureStop(uint32_t controllerId) {}
+    virtual void OnPictureInPictureStop(uint32_t controllerId) {}
+    virtual void OnPictureInPictureOperationError(uint32_t controllerId, int32_t errorCode) {}
+    virtual void OnRestoreUserInterface(uint32_t controllerId) {}
 };
 
 /**
@@ -53,6 +61,9 @@ public:
 class IPiPControlObserver : virtual public RefBase {
 public:
     virtual void OnControlEvent(PiPControlType controlType, PiPControlStatus status) {}
+
+    // native callback
+    virtual void OnControlEvent(uint32_t controllerId, PiPControlType controlType, PiPControlStatus status) {}
 };
 
 /**
@@ -63,6 +74,9 @@ public:
 class IPiPWindowSize : virtual public RefBase {
 public:
     virtual void OnPipSizeChange(const PiPWindowSize& size) {}
+
+    // native callback
+    virtual void OnPipSizeChange(uint32_t controllerId, const PiPWindowSize& size) {}
 };
 
 /**
@@ -73,6 +87,12 @@ public:
 class IPiPTypeNodeObserver : virtual public RefBase {
 public:
     virtual void OnPipTypeNodeChange(const napi_ref nodeRef) {}
+};
+
+class IPiPStartObserver : virtual public RefBase {
+public:
+    // native callback
+    virtual void OnPipStart(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId) {}
 };
 } // namespace Rosen
 } // namespace OHOS
