@@ -1456,6 +1456,50 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionRect4
+ * @tc.desc: test for isGlobal is true and multilevel subWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSessionRect4, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRect4";
+    info.bundleName_ = "UpdateSessionRect4";
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    mainSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    mainSession->property_->SetPersistentId(1111);
+    mainSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->property_->SetPersistentId(1122);
+    subSession->SetParentSession(mainSession);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<SceneSession> subSubSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSubSession->property_->SetPersistentId(1133);
+    subSubSession->SetParentSession(subSession);
+    subSubSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    WSRect oldRect1({ 20, 20, 20, 20 });
+    WSRect mainRect({ 10, 10, 10, 10 });
+    mainSession->SetSessionRect(mainRect);
+    bool isGlobal = true;
+    WSError result = subSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    EXPECT_EQ(result, WSError::WS_OK);
+    WSRect newRect1 = subSession->GetSessionRect();
+    EXPECT_EQ(newRect1.posX_, oldRect1.posX_ - mainRect.posX_);
+    EXPECT_EQ(newRect1.posY_, oldRect1.posY_ - mainRect.posY_);
+
+    WSRect oldRect2({ 30, 30, 30, 30 });
+    result = subSubSession->UpdateSessionRect(oldRect2, reason, isGlobal);
+    EXPECT_EQ(result, WSError::WS_OK);
+    WSRect newRect2 = subSubSession->GetSessionRect();
+    EXPECT_EQ(newRect2.posX_, oldRect2.posX_ - mainRect.posX_);
+    EXPECT_EQ(newRect2.posY_, oldRect2.posY_ - mainRect.posY_);
+}
+
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
