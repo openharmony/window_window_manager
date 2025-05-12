@@ -182,7 +182,8 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
     if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
-    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
@@ -2865,15 +2866,14 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
             TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
-        RSTransactionAdapter rsTransAdapter(window->surfaceNode_);
+        auto rsUIContext = window->GetRSUIContext();
         if (rsTransaction) {
-            rsTransAdapter.FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        auto rsUIContext = rsTransAdapter.GetRSUIContext();
         RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve);
         if ((rectToAce != lastOriRect) || (reason != window->lastSizeChangeReason_)) {
             window->NotifySizeChange(rectToAce, reason, rsTransaction);

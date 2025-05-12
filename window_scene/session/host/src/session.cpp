@@ -25,7 +25,6 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
-#include <ui/rs_ui_director.h>
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
@@ -108,15 +107,8 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
-    if (RSAdapterUtil::IsMultiInstanceEnabled()) {
-        // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
-        // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
-        // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
-        // as ArkUI knows the host window for this type of window.
-        rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
-              RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
-    }
+
+    InitRSUIContext();
 }
 
 Session::~Session()
@@ -170,16 +162,7 @@ int32_t Session::GetPersistentId() const
 
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
-    if (surfaceNode && rsUIContext_) {
-        surfaceNode->SetSkipCheckInMultiInstance(true);
-        auto originRSUIContext = surfaceNode->GetRSUIContext();
-        surfaceNode->SetRSUIContext(rsUIContext_);
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Skip check in RS multi-instance and set RSUIContext: %{public}s, "
-              "origin %{public}s, Session [id: %{public}d]",
-              RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(),
-              RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
-    }
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
 }
@@ -201,18 +184,10 @@ std::optional<NodeId> Session::GetSurfaceNodeId() const
 
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
-    if (leashWinSurfaceNode && rsUIContext_) {
-        leashWinSurfaceNode->SetSkipCheckInMultiInstance(true);
-        auto originRSUIContext = leashWinSurfaceNode->GetRSUIContext();
-        leashWinSurfaceNode->SetRSUIContext(rsUIContext_);
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Skip check in RS multi-instance and set RSUIContext: %{public}s, "
-              "origin %{public}s, Session [id: %{public}d]",
-              RSAdapterUtil::RSNodeToStr(leashWinSurfaceNode).c_str(),
-              RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str(), GetPersistentId());
-    }
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(leashWinSurfaceNode, rsUIContext, true);
     if (g_enableForceUIFirst) {
-        AutoRSTransaction trans(rsUIContext_);
+        AutoRSTransaction trans(rsUIContext);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
             leashWinSurfaceNode_->SetForceUIFirst(false);
         }
@@ -230,14 +205,6 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     return leashWinSurfaceNode_;
-}
-
-std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
-{
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: %{public}s, Session [id: %{public}d]",
-          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
-    return rsUIContext_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
@@ -4190,5 +4157,25 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
+}
+
+void Session::InitRSUIContext()
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED();
+    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+    // as ArkUI knows the host window for this type of window.
+    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s: %{public}s, Session [id: %{public}d]",
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    return rsUIContext_;
 }
 } // namespace OHOS::Rosen

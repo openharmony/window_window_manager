@@ -745,10 +745,10 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             }
         }
 
-        RSTransactionAdapter rsTransAdapter(window->GetSurfaceNode());
+        auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
             duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
-            rsTransAdapter.FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         window->rotationAnimationCount_++;
@@ -756,7 +756,6 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        auto rsUIContext = rsTransAdapter.GetRSUIContext();
         RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, [weak]() {
             auto window = weak.promote();
             if (!window) {
@@ -775,7 +774,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (needSync) {
             rsTransaction->Commit();
         } else {
-            rsTransAdapter.FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");

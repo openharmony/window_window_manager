@@ -125,6 +125,21 @@ void RSTransactionAdapter::FlushImplicitTransaction(
 }
 
 void RSTransactionAdapter::FlushImplicitTransaction(
+    std::initializer_list<std::shared_ptr<RSUIContext>> rsUIContexts,
+    uint64_t timestamp, const std::string& abilityName)
+{
+    if (!RSAdapterUtil::IsMultiInstanceEnabled()) {
+        FlushImplicitTransaction(std::shared_ptr<RSUIContext>(nullptr), timestamp, abilityName);
+        return;
+    }
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContextSet;
+    for (const auto& rsUIContext : rsUIContexts) {
+        rsUIContextSet.insert(rsUIContext);
+    }
+    FlushImplicitTransaction(rsUIContextSet, timestamp, abilityName);
+}
+
+void RSTransactionAdapter::FlushImplicitTransaction(
     const std::shared_ptr<RSUIDirector>& rsUIDirector, uint64_t timestamp, const std::string& abilityName)
 {
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str());
@@ -434,6 +449,37 @@ bool RSAdapterUtil::IsMultiInstanceEnabled()
 {
     static bool enabled = system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0";
     return enabled;
+}
+
+bool RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
+                                   const std::shared_ptr<RSUIContext>& rsUIContext,
+                                   bool skipCheckInMultiInstance)
+{
+    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(false);
+    if (!rsNode) {
+        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE, "RSNode is null");
+        return false;
+    }
+    if (!rsUIContext) {
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "RSUIContext is null, %{public}s",
+              RSAdapterUtil::RSNodeToStr(rsNode).c_str());
+        return false;
+    }
+    auto originRSUIContext = rsNode->GetRSUIContext();
+    if (rsUIContext == originRSUIContext) {
+        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "RSNode already has the same RSUIContext, %{public}s",
+              RSAdapterUtil::RSNodeToStr(rsNode).c_str());
+        return false;
+    }
+    // The creation of RSUIContext and the use of RSNode may occur in different
+    // threads, so skip checks can be set.
+    rsNode->SetSkipCheckInMultiInstance(skipCheckInMultiInstance);
+    rsNode->SetRSUIContext(rsUIContext);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+          "%{public}s, skipCheckInMultiInstance = %{public}d, origin %{public}s",
+          RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance,
+          RSAdapterUtil::RSUIContextToStr(originRSUIContext).c_str());
+    return true;
 }
 
 std::string RSAdapterUtil::RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext)

@@ -18,7 +18,6 @@
 #include <event_handler.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
-#include <ui/rs_ui_director.h>
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"

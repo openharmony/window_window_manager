@@ -982,13 +982,11 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     int pid = IPCSkeleton::GetCallingRealPid();
     int uid = IPCSkeleton::GetCallingUid();
     property->isSystemCalling_ = Permission::IsSystemCalling();
+    if (rsUiDirector_) {
+        RSAdapterUtil::SetRSUIContext(surfaceNode, rsUiDirector_->GetRSUIContext(), true);
+    }
     auto task = [this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
-        if (rsUiDirector_) {
-            surfaceNode->SetRSUIContext(rsUiDirector_->GetRSUIContext());
-            TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Set RSUIContext: %{public}s",
-                  RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
-        }
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
     };
     WMError ret = PostSyncTask(task, "CreateWindow");

@@ -993,7 +993,8 @@ bool ScreenSessionManagerClient::OnExtendDisplayNodeChange(ScreenId mainScreenId
     /* change rsId */
     innerScreen->SetRSScreenId(externalRSId);
     externalScreen->SetRSScreenId(innerRSId);
-    RSTransactionAdapter::FlushImplicitTransaction({mainNode, extendNode});
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
     oss.str("");
     oss << "innerScreen after screenId: " << mainScreenId
         << ", rsId: " << innerScreen->GetRSScreenId()

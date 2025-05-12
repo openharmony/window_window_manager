@@ -17,7 +17,6 @@
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
-#include <ui/rs_surface_node.h>
 #include "parameters.h"
 #include "picture_in_picture_manager.h"
 #include "rs_adapter.h"

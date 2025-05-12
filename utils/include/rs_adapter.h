@@ -60,6 +60,8 @@ public:
                                          uint64_t timestamp = 0, const std::string& abilityName = "");
     static void FlushImplicitTransaction(const std::unordered_set<std::shared_ptr<RSUIContext>>& rsUIContexts,
                                          uint64_t timestamp = 0, const std::string& abilityName = "");
+    static void FlushImplicitTransaction(std::initializer_list<std::shared_ptr<RSUIContext>> rsUIContexts,
+                                         uint64_t timestamp = 0, const std::string& abilityName = "");
     static void FlushImplicitTransaction(const std::shared_ptr<RSUIDirector>& rsUIDirector,
                                          uint64_t timestamp = 0, const std::string& abilityName = "");
     static void FlushImplicitTransaction(std::initializer_list<std::shared_ptr<RSUIDirector>> rsUIDirectors,
@@ -176,6 +178,9 @@ private:
 class RSAdapterUtil {
 public:
     static bool IsMultiInstanceEnabled();
+    static bool SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
+                               const std::shared_ptr<RSUIContext>& rsUIContext,
+                               bool skipCheckInMultiInstance = false);
     static std::string RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext);
     static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);
