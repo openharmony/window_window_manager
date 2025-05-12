@@ -6573,18 +6573,36 @@ HWTEST_F(ScreenSessionManagerTest, GetOrCreatePhysicalScreenSession, TestSize.Le
 }
 
 /**
- * @tc.name: GetScreenSessionByRsId
- * @tc.desc: GetScreenSessionByRsId
+ * @tc.name: GetScreenSessionByRsId01
+ * @tc.desc: GetScreenSessionByRsId01
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId01, TestSize.Level1)
 {
+    ssm_->screenSessionMap_.erase(123);
+    ScreenId rsScreenId = 123;
+    sptr<ScreenSession> newSession = new ScreenSession();
+    newSession->SetRSScreenId(rsScreenId);
+    ssm_->screenSessionMap_[rsScreenId] = newSession;
+
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
+    EXPECT_NE(result, nullptr);
+    ssm_->screenSessionMap_.erase(123);
+}
+
+/**
+ * @tc.name: GetScreenSessionByRsId02
+ * @tc.desc: GetScreenSessionByRsId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId02, TestSize.Level1)
+{
+    ssm_->screenSessionMap_.clear();
     ScreenId rsScreenId = 123;
     ssm_->screenSessionMap_[rsScreenId] = nullptr;
-    sptr<ScreenSession> newSession = new ScreenSession();
 
-    sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(rsScreenId);
-    EXPECT_NE(result, nullptr);
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
