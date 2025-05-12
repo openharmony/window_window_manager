@@ -1294,18 +1294,13 @@ void SceneSessionManager::ConfigAppsWithDeduplicatedWindowStatus()
     WindowSceneConfig::ConfigItem item = config["appsWithDeduplicatedWindowStatus"];
     std::vector<std::string> appsWithDeduplicatedWindowStatus;
     if (item.IsStrings()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "IsStrings");
         appsWithDeduplicatedWindowStatus = *item.stringsValue_;
     }
     for (auto app : appsWithDeduplicatedWindowStatus) {
         if (!app.empty()) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "app:%{public}s", app.c_str());
             appsWithDeduplicatedWindowStatus_.insert(std::move(app));
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "app:%{public}s", app.c_str());
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "size:%{public}u",appsWithDeduplicatedWindowStatus_.size());
-    for (auto bundleName : appsWithDeduplicatedWindowStatus_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "appsWithDeduplicatedWindowStatus name:%{public}s", bundleName.c_str());
     }
 }
 
@@ -1314,7 +1309,6 @@ void SceneSessionManager::SetWindowStatusDeduplicationBySystemConfig(const Sessi
 {
     std::string bundleName = sessionInfo.bundleName_;
     bool deduplicationEnabled = false;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "name:%{public}s", bundleName.c_str());
     if (appsWithDeduplicatedWindowStatus_.find(bundleName) != appsWithDeduplicatedWindowStatus_.end()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "need skip redundant windowStatus notifications, name:%{public}s",
             bundleName.c_str());
