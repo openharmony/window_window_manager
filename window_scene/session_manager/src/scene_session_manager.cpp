@@ -605,6 +605,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     }
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
+    ConfigAppsWithDeduplicatedWindowStatus();
     ConfigSnapshotScale();
     ConfigWindowSceneXml(config);
 }
@@ -1287,6 +1288,40 @@ void SceneSessionManager::ConfigSingleHandCompatibleMode(const WindowSceneConfig
     }
 }
 
+void SceneSessionManager::ConfigAppsWithDeduplicatedWindowStatus()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem item = config["appsWithDeduplicatedWindowStatus"];
+    std::vector<std::string> appsWithDeduplicatedWindowStatus;
+    if (item.IsStrings()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "IsStrings");
+        appsWithDeduplicatedWindowStatus = *item.stringsValue_;
+    }
+    for (auto app : appsWithDeduplicatedWindowStatus) {
+        if (!app.empty()) {
+            appsWithDeduplicatedWindowStatus_.insert(std::move(app));
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "app:%{public}s", app.c_str());
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "size:%{public}u",appsWithDeduplicatedWindowStatus_.size());
+    for (auto bundleName : appsWithDeduplicatedWindowStatus_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "appsWithDeduplicatedWindowStatus name:%{public}s", bundleName.c_str());
+    }
+}
+
+void SceneSessionManager::SetWindowStatusDeduplicationBySystemConfig(const SessionInfo& sessionInfo,
+    SystemSessionConfig& systemConfig)
+{
+    std::string bundleName = sessionInfo.bundleName_;
+    bool deduplicationEnabled = false;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "name:%{public}s", bundleName.c_str());
+    if (appsWithDeduplicatedWindowStatus_.find(bundleName) != appsWithDeduplicatedWindowStatus_.end()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "need skip redundant windowStatus notifications, name:%{public}s",
+            bundleName.c_str());
+        deduplicationEnabled = true;
+    }
+    systemConfig.skipRedundantWindowStatusNotifications_ = deduplicationEnabled;
+}
 
 void SceneSessionManager::ConfigWindowSizeLimits()
 {
@@ -2513,7 +2548,9 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (property != nullptr && WindowHelper::IsPipWindow(property->GetWindowType())) {
         sceneSession->SetPiPTemplateInfo(property->GetPiPTemplateInfo());
     }
-    sceneSession->SetSystemConfig(systemConfig_);
+    auto systemConfig = systemConfig_;
+    SetWindowStatusDeduplicationBySystemConfig(sessionInfo, systemConfig);
+    sceneSession->SetSystemConfig(systemConfig);
     sceneSession->SetSnapshotScale(snapshotScale_);
     UpdateParentSessionForDialog(sceneSession, property);
     std::string key = sessionInfo.bundleName_ + "_" + sessionInfo.moduleName_ + "_" + sessionInfo.abilityName_ + "_" +
