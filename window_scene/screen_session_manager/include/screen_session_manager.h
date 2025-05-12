@@ -506,6 +506,8 @@ private:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool& phyMirrorEnable);
+    void HandleMapWhenScreenDisconnect(ScreenId screenId);
     void HandlePCScreenDisconnect(sptr<ScreenSession> screenSession);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
@@ -651,6 +653,7 @@ private:
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
     bool isDeviceShutDown_ = false;
+    bool isScreenConnecting_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
