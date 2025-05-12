@@ -7915,7 +7915,9 @@ void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
             NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
             CalcNewClientRectForSuperFold(winRect);
             SetFrameGravity(Gravity::RESIZE);
-            sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            if (sessionStage_) {
+                sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            }
             winRect_ = winRect;
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
                 "height: %{public}u, Id: %{public}u, displayId: %{public}" PRIu64, winRect.posX_, winRect.posY_,

@@ -1217,9 +1217,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
-    if (surfaceNode_ != nullptr && WindowHelper::IsSubWindow(GetWindowType())) {
-        surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-    }
     return WSError::WS_OK;
 }
 
