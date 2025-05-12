@@ -4920,6 +4920,8 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     if (GetStartingWindowInfoFromRdb(sessionInfo, startingWindowInfo)) {
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
+        UpdateCachedColorToAppSet(
+            sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         return;
     }
     AAFwk::Want want;
@@ -4933,6 +4935,8 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
 
     if (GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
         CacheStartingWindowInfo(
+            sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
+        UpdateCachedColorToAppSet(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         if (startingWindowRdbMgr_ != nullptr) {
             StartingWindowRdbItemKey itemKey = {
@@ -4994,6 +4998,37 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
                                                     startingWindowInfo.backgroundColorEarlyVersion_);
     }
     return res;
+}
+
+void SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, StartingWindowInfo& info)
+{
+    auto key = moduleName + abilityName;
+    auto colorMapIter = startingWindowColorFromAppMap_.find(bundleName);
+    if (colorMapIter == startingWindowColorFromAppMap_.end()) {
+        return;
+    }
+    auto& colorMap = colorMapIter->second;
+    auto colorIter = colorMap.find(key);
+    if (colorIter == colorMap.end()) {
+        return;
+    }
+    uint32_t color = colorIter->second;
+    info.backgroundColor_ = color;
+    info.backgroundColorEarlyVersion_ = color;
+
+    std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+    auto iter = startingWindowMap_.find(bundleName);
+    if (iter == startingWindowMap_.end()) {
+        return;
+    }
+    auto& infoMap = iter->second;
+    auto infoIter = infoMap.find(key);
+    if (infoIter != infoMap.end()) {
+        infoIter->second.backgroundColorEarlyVersion_ = color;
+        infoIter->second.backgroundColor_ = color;
+        TLOGI(WmsLogTag::WMS_PATTERN, "set %{public}s %{public}s, %{public}x", bundleName.c_str(), key.c_str(), color);
+    }
 }
 
 void SceneSessionManager::CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
@@ -14313,6 +14348,38 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d.", where, session->GetPersistentId());
         }
     }, __func__);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid)
+{
+    if (!bundleMgr_) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    std::string bundleName;
+    if (!bundleMgr_->GetBundleNameForUid(uid, bundleName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "get bundle name failed");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    AppExecFwk::AbilityInfo abilityInfo;
+    if (!bundleMgr_->GetAbilityInfo(bundleName, moduleName, abilityName, abilityInfo)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "ability not found %{public}s %{public}s %{public}s",
+            bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    auto key = moduleName + abilityName;
+    auto iter = startingWindowColorFromAppMap_.find(bundleName);
+    if (iter != startingWindowColorFromAppMap_.end()) {
+        iter->second[key] = color;
+    } else {
+        std::map<std::string, uint32_t> colorMap({{ key, color}});
+        startingWindowColorFromAppMap_.emplace(bundleName, colorMap);
+    }
+    StartingWindowInfo info;
+    UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, info);
+    TLOGI(WmsLogTag::WMS_PATTERN, "success %{public}s %{public}s, %{public}x", bundleName.c_str(), key.c_str(), color);
     return WMError::WM_OK;
 }
 
