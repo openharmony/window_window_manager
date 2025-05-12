@@ -108,7 +108,7 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
             action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
             return;
         }
-        int32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
+        uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
         auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is nullptr", where);
