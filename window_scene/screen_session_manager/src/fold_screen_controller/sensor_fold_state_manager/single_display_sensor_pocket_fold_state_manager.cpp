@@ -235,6 +235,11 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
         HandleSensorChange(nextState, angle, foldScreenPolicy);
         TLOGI(WmsLogTag::DMS, "exit tent mode. angle: %{public}f, hall: %{public}d", angle, hall);
         SetTentMode(TENT_MODE_OFF);
+        if (nextState == FoldStatus::FOLDED) {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+        } else {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+        }
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
     }
 }
