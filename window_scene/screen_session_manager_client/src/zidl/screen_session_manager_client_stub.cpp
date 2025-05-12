@@ -414,7 +414,7 @@ int ScreenSessionManagerClientStub::HandleOnExtendDisplayNodeChange(MessageParce
     ScreenId extendScreenId = static_cast<ScreenId>(data.ReadUint64());
     bool changeStatus = OnExtendDisplayNodeChange(mainScreenId, extendScreenId);
     reply.WriteBool(changeStatus);
-    WLOGFI("extend display change status=%{public}d", changeStatus);
+    TLOGI(WmsLogTag::DMS, "extend display change status=%{public}d", changeStatus);
     return ERR_NONE;
 }
 
@@ -436,7 +436,7 @@ int ScreenSessionManagerClientStub::HandleOnMainDisplayNodeChange(MessageParcel&
     ScreenId extendRSId = static_cast<ScreenId>(data.ReadUint64());
     bool changeStatus = OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
     reply.WriteBool(changeStatus);
-    WLOGFI("main node change status=%{public}d", changeStatus);
+    TLOGI(WmsLogTag::DMS, "main node change status=%{public}d", changeStatus);
     return ERR_NONE;
 }
 
