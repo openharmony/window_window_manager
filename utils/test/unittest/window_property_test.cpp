@@ -91,6 +91,7 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
     WindowProperty winPropSrc;
     winPropSrc.SetPrivacyMode(true);
     winPropSrc.SetTransparent(true);
+    winPropSrc.SetFollowScreenChange(true);
 
     Parcel parcel;
     winPropSrc.Marshalling(parcel);
@@ -117,6 +118,7 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
 
     ASSERT_EQ(false, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
+    EXPECT_EQ(false, winPropDst.GetFollowScreenChange());
 }
 
 /**
