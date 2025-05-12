@@ -696,6 +696,8 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid) override;
 
 protected:
     SceneSessionManager();
@@ -1125,6 +1127,7 @@ private:
     std::shared_mutex startingWindowMapMutex_;
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
+    std::map<std::string, std::map<std::string, uint32_t>> startingWindowColorFromAppMap_;
     std::unordered_map<std::string, AppForceLandscapeConfig> appForceLandscapeMap_;
     std::shared_mutex appForceLandscapeMutex_;
 
@@ -1430,6 +1433,8 @@ private:
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    void UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
