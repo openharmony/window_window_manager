@@ -280,6 +280,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
+    containerColorLists_ = system::GetParameter("const.window.containerColorLists", "");
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -3764,6 +3765,10 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
+    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo.bundleName_ != containerColorLists_) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
+        return WM_ERROR_NOT_SYSTEM_APP;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -3783,6 +3788,10 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
         TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!SessionPermission::IsSystemCalling() && (inactiveColorValue & OPAQUE) != OPAQUE) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive alpha value error", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
