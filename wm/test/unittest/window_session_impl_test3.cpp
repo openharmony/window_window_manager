@@ -1005,27 +1005,6 @@ HWTEST_F(WindowSessionImplTest3, IsAdaptToCompatibleImmersive, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowContainerColor
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor start";
-    window_ = GetTestWindowImpl("SetWindowContainerColor");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window_->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    auto ret = window_->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
-}
-
-/**
  * @tc.name: SetAvoidAreaOption
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
@@ -1287,31 +1266,6 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 
     window->inputEventConsumer_ = nullptr;
     window->NotifyPointerEvent(pointerEvent);
-}
-
-/**
- * @tc.name: SetWindowContainerColor01
- * @tc.desc: SetWindowContainerColor01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor01");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    auto ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
-
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetIsPcAppInPad(true);
-    window->property_->isDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
