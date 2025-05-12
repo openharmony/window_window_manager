@@ -115,18 +115,19 @@ static const int32_t ONLY_OUTER_SCREEN_VALUE = 1;
 static const int32_t ROTATION_270 = 3;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
 #endif
-static const int32_t AUTO_ROTATE_OFF = 0;
-static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
-static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
-static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
-static bool g_isPcDevice = false;
-static float g_extendScreenDpiCoef_ = 1.00f;
-static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
+constexpr float EXTEND_SCREEN_DPI_DEFAULT_PARAMETER = 0.85f;
+static const int32_t AUTO_ROTATE_OFF = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
+static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
+static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
+static bool g_isPcDevice = false;
+static float g_extendScreenDpiCoef = EXTEND_SCREEN_DPI_DEFAULT_PARAMETER;
+static uint32_t g_internalWidth = 3120;
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
 constexpr uint32_t NUMBER_OF_PHYSICAL_SCREEN = 2;
 constexpr bool ADD_VOTE = true;
@@ -141,8 +142,6 @@ const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotat
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
-constexpr float EXTEND_SCREEN_DPI_MIN_PARAMETER = 0.85f;
-constexpr float EXTEND_SCREEN_DPI_MAX_PARAMETER = 1.00f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
 const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
@@ -2517,12 +2516,12 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     float curResolution = screenSession->GetScreenProperty().GetDensityInCurResolution();
     float defaultDensity = screenSession->GetScreenProperty().GetDefaultDensity();
     TLOGW(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-    session->SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef_);
-    session->SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef_);
+    session->SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
+    session->SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef);
     session->SetDensityInCurResolution(curResolution);
     ScreenId screenId = session->GetScreenId();
-    property.SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef_);
-    property.SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef_);
+    property.SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
+    property.SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef);
     property.SetDensityInCurResolution(curResolution);
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -3641,7 +3640,7 @@ void ScreenSessionManager::SetDpiFromSettingData()
         }
         SetVirtualPixelRatio(defaultScreenId, dpi);
         if (g_isPcDevice) {
-            SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
+            SetExtendPixelRatio(dpi * g_extendScreenDpiCoef);
         }
     } else {
         TLOGE(WmsLogTag::DMS, "setting dpi error, settingDpi: %{public}d", settingDpi);
@@ -8486,7 +8485,7 @@ DMError ScreenSessionManager::GetSecondaryDisplayCapability(std::string& capabil
 {
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
-    
+
     nlohmann::ordered_json fCapabilityInfo = GetCapabilityJson(FoldStatus::FOLDED, FoldDisplayMode::MAIN,
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
     jsonDisplayCapabilityList["capability"].push_back(std::move(fCapabilityInfo));
@@ -8532,7 +8531,7 @@ DMError ScreenSessionManager::GetSuperFoldCapability(std::string& capabilitInfo)
 {
     nlohmann::ordered_json jsonDisplayCapabilityList;
     jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
-    
+
     nlohmann::ordered_json expandCapabilityInfo = GetCapabilityJson(FoldStatus::EXPAND, FoldDisplayMode::UNKNOWN,
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
     jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
@@ -9525,17 +9524,17 @@ void ScreenSessionManager::RegisterSettingExtendScreenDpiObserver()
 
 void ScreenSessionManager::SetExtendScreenDpi()
 {
-    bool extendScreenDpi = false;
-    bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpi);
+    float extendScreenDpiCoef = EXTEND_SCREEN_DPI_DEFAULT_PARAMETER;
+    bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpiCoef);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "get setting extend screen dpi failed");
-        g_extendScreenDpiCoef_ = EXTEND_SCREEN_DPI_MAX_PARAMETER;
+        g_extendScreenDpiCoef = EXTEND_SCREEN_DPI_DEFAULT_PARAMETER;
     } else {
-        g_extendScreenDpiCoef_ = extendScreenDpi ? EXTEND_SCREEN_DPI_MAX_PARAMETER : EXTEND_SCREEN_DPI_MIN_PARAMETER;
+        g_extendScreenDpiCoef = extendScreenDpiCoef;
     }
     float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
-    SetExtendPixelRatio(dpi * g_extendScreenDpiCoef_);
-    TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef_);
+    SetExtendPixelRatio(dpi * g_extendScreenDpiCoef);
+    TLOGI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef);
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetFakePhysicalScreenSession(ScreenId screenId, ScreenId defScreenId,
