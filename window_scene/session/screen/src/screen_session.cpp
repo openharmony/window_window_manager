@@ -65,11 +65,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     InitRSUIDirector();
-    if (displayNode_) {
-        displayNode_->SetRSUIContext(GetRSUIContext());
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Set RSUIContext: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
-    }
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     Rosen::RSDisplayNodeConfig rsConfig;
     bool isNeedCreateDisplayNode = true;
     property_.SetRsId(rsId_);
@@ -116,7 +112,8 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
         config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.isMirrored));
     {
         std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
+        displayNode_ = Rosen::RSDisplayNode::Create(config);
+        RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
         if (displayNode_) {
@@ -157,11 +154,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
         screenId_);
     property_.SetRsId(rsId_);
     InitRSUIDirector();
-    if (displayNode_) {
-        displayNode_->SetRSUIContext(GetRSUIContext());
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "Set RSUIContext: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
-    }
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -169,7 +162,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
 {
     InitRSUIDirector();
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
-    displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     property_.SetRsId(rsId_);
@@ -195,7 +189,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     InitRSUIDirector();
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
         .isSync = true};
-    displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     if (displayNode_) {
@@ -219,7 +214,8 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     InitRSUIDirector();
     // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
-    displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
+    displayNode_ = Rosen::RSDisplayNode::Create(config);
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     if (displayNode_) {
@@ -1709,11 +1705,12 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
             return;
         }
     } else {
-        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, GetRSUIContext());
+        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
         if (rsDisplayNode == nullptr) {
             TLOGE(WmsLogTag::DMS, "fail to add child. create rsDisplayNode fail!");
             return;
         }
+        RSAdapterUtil::SetRSUIContext(rsDisplayNode, GetRSUIContext(), true);
         displayNode_ = rsDisplayNode;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
@@ -1863,7 +1860,7 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     }
     displayNode = nullptr;
     // attention: make sure reference count 0
-    RSTransactionAdapter::FlushImplicitTransaction(smsScreen->GetRSUIDirector());
+    RSTransactionAdapter::FlushImplicitTransaction(smsScreen->GetRSUIContext());
     return screenSessionMap_.erase(screenId);
 }
 

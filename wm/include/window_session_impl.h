@@ -534,6 +534,7 @@ protected:
     std::shared_ptr<AbilityRuntime::Context> context_;
     mutable std::shared_mutex contextMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+
     sptr<WindowSessionProperty> property_;
     SystemSessionConfig windowSystemConfig_;
     NotifyNativeWinDestroyFunc notifyNativeFunc_;

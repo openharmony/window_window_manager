@@ -898,12 +898,12 @@ void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, con
     WLOGFD("Add maskingSurfaceNode");
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "maskingSurface";
-    maskingSurfaceNode_ = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, true, WindowInnerManager::GetInstance().GetRSUIContext());
+    maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
     if (maskingSurfaceNode_ == nullptr) {
         WLOGFE("Create maskingSurfaceNode failed");
         return;
     }
+    RSAdapterUtil::SetRSUIContext(maskingSurfaceNode_, WindowInnerManager::GetInstance().GetRSUIContext(), true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(maskingSurfaceNode_).c_str());
     auto displayWidth = displayInfo->GetWidth();

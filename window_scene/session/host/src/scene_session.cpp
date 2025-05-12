@@ -30,7 +30,6 @@
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 #include <ui/rs_canvas_node.h>
-#include <ui/rs_ui_context.h>
 
 #include "proxy/include/window_info.h"
 

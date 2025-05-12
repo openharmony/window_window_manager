@@ -238,11 +238,6 @@ public:
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
 
     /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
-
-    /*
      * Window Scene Snapshot
      */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
@@ -678,7 +673,12 @@ public:
      * Specific Window
      */
     void SetWindowAnimationDuration(int32_t duration);
-    
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -744,12 +744,6 @@ protected:
     std::recursive_mutex sessionInfoMutex_;
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
-
-    /*
-     * RS Multi Instance
-     */
-    std::shared_ptr<RSUIContext> rsUIContext_;
-
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
@@ -1046,6 +1040,12 @@ private:
      * Specific Window
      */
     int32_t windowAnimationDuration_;
+
+    /*
+     * RS Multi Instance
+     */
+    void InitRSUIContext();
+    std::shared_ptr<RSUIContext> rsUIContext_;
 };
 } // namespace OHOS::Rosen
 

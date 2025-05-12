@@ -84,8 +84,9 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
-        RSTransactionAdapter::FlushImplicitTransaction({innerNode, externalNode});
     }
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& screenSession,
@@ -124,8 +125,9 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
-        RSTransactionAdapter::FlushImplicitTransaction({innerNode, externalNode});
     }
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,

@@ -154,26 +154,28 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
-    auto rsUIContext = node->GetRSUIContext();
-    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str());
+    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
     if (node->leashWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
+    auto rsUIContext = node->GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(node->leashWinSurfaceNode_, rsUIContext, true);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str());
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(node->startingWinSurfaceNode_, rsUIContext, true);
+    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
         "Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!",
         node->GetWindowId());

@@ -5540,11 +5540,10 @@ sptr<ScreenSessionGroup> ScreenSessionManager::RemoveFromGroupLocked(sptr<Screen
 
 bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup)
 {
+    auto rsUIContext = screen ? screen->GetRSUIContext() : nullptr;
     bool res = screenGroup->RemoveChild(screen);
-    if (screen != nullptr) {
-        RSTransactionAdapter::FlushImplicitTransaction(screen->GetRSUIContext());
-        TLOGI(WmsLogTag::DMS, "remove child and call flush.");
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+    TLOGI(WmsLogTag::DMS, "remove child and call flush.");
     if (!res) {
         TLOGE(WmsLogTag::DMS, "remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
             screen->screenId_, screen->groupSmsId_);
@@ -9308,7 +9307,7 @@ void ScreenSessionManager::SetMultiScreenOuterMode(sptr<ScreenSession>& innerSes
     }
     TLOGI(WmsLogTag::DMS, "free displayNode");
     RSTransactionAdapter::FlushImplicitTransaction(
-        {innerSession->GetRSUIDirector(), outerSession->GetRSUIDirector()});
+        {innerSession->GetRSUIContext(), outerSession->GetRSUIContext()});
     ScreenSettingHelper::SetSettingValue("only_second_screen_info", screenMode);
     CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
     TLOGI(WmsLogTag::DMS, "switch out end.");
