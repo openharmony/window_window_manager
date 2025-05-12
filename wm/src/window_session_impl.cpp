@@ -5567,7 +5567,15 @@ uint32_t WindowSessionImpl::GetStatusBarHeight() const
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
     auto windowStatus = GetWindowStatusInner(mode);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "WindowMode: %{public}d, windowStatus: %{public}d", mode, windowStatus);
+    if (windowSystemConfig_.skipRedundantWindowStatusNotifications_ && lastWindowStatus_.load() == windowStatus) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Duplicate windowStatus:%{public}d, id:%{public}d, WindowMode:%{public}d",
+            windowStatus, GetPersistentId(), mode);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, windowMode:%{public}d, windowStatus:%{public}d, "
+        "lastWindowStatus:%{public}d, skipRedundantWindowStatusNotifications:%{public}d", GetPersistentId(), mode,
+        windowStatus, lastWindowStatus_.load(), windowSystemConfig_.skipRedundantWindowStatusNotifications_);
+    lastWindowStatus_.store(windowStatus);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
     for (auto& listener : windowStatusChangeListeners) {

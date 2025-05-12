@@ -86,6 +86,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "immersiveStatusBarBgColor",                    WindowSceneConfig::ValueType::STRING },
     { "immersiveStatusBarContentColor",               WindowSceneConfig::ValueType::STRING },
     { "supportedMode",                                WindowSceneConfig::ValueType::STRINGS },
+    { "appsWithDeduplicatedWindowStatus",             WindowSceneConfig::ValueType::STRINGS },
     { "minimizeByOther",                              WindowSceneConfig::ValueType::UNDIFINED },
     { "stretchable",                                  WindowSceneConfig::ValueType::UNDIFINED },
     { "remoteAnimation",                              WindowSceneConfig::ValueType::UNDIFINED },
