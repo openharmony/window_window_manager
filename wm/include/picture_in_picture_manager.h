@@ -58,15 +58,15 @@ public:
     static std::shared_ptr<NativeReference> innerCallbackRef_;
 
 private:
-    static sptr<PictureInPictureController> GetActiveController() { return activeController_; }
-    
+    static sptr<PictureInPictureControllerBase> GetActiveController() { return activeController_; }
+
     // controller in use
-    static sptr<PictureInPictureController> activeController_;
+    static sptr<PictureInPictureControllerBase> activeController_;
     static wptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
     static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
-    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
+    static std::map<int32_t, sptr<PictureInPictureControllerBase>> windowToControllerMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

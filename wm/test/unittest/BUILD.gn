@@ -29,6 +29,8 @@ group("unittest") {
     ":wm_root_scene_test",
     ":wm_screen_scene_test",
     ":wm_vsync_station_test",
+    ":wm_web_picture_in_picture_controller_interface_test",
+    ":wm_web_picture_in_picture_controller_test",
     ":wm_window_adapter_lite_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
@@ -546,6 +548,42 @@ ohos_unittest("wm_picture_in_picture_option_test") {
   external_deps += [
     "ability_runtime:runtime",
     "ace_engine:ace_xcomponent_controller",
+  ]
+}
+
+ohos_unittest("wm_web_picture_in_picture_controller_interface_test") {
+  module_out_path = module_out_path
+
+  include_dirs =
+    [ "${window_base_path}/interfaces/innerkits/wm/" ]
+
+  sources = [ "web_picture_in_picture_controller_interface_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/wm:libpip_web",
+   ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_web_picture_in_picture_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "web_picture_in_picture_controller_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

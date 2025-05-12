@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_PICTURE_IN_PICTURE_CONTROLLER_H
-#define OHOS_PICTURE_IN_PICTURE_CONTROLLER_H
+#ifndef OHOS_WEB_PICTURE_IN_PICTURE_CONTROLLER_H
+#define OHOS_WEB_PICTURE_IN_PICTURE_CONTROLLER_H
 
 #include "picture_in_picture_controller_base.h"
 
@@ -22,34 +22,35 @@ namespace OHOS {
 namespace Rosen {
 
 using namespace Ace;
-class PictureInPictureController : public PictureInPictureControllerBase {
+
+struct PiPConfig {
+    uint32_t mainWindowId;
+    uint32_t pipTemplateType;
+    uint32_t width;
+    uint32_t height;
+    std::vector<uint32_t> controlGroup;
+    napi_env env;
+};
+
+class WebPictureInPictureController : public PictureInPictureControllerBase {
 public:
-    PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t mainWindowId, napi_env env);
-    ~PictureInPictureController();
+    WebPictureInPictureController(const PiPConfig& config);
+    ~WebPictureInPictureController() = default;
     WMError StartPictureInPicture(StartPipType startType) override;
-    void SetAutoStartEnabled(bool enable) override;
-    void IsAutoStartEnabled(bool& enable) const override;
     void UpdateContentSize(int32_t width, int32_t height) override;
-    void UpdateContentNodeRef(napi_ref nodeRef) override;
-    void PrepareSource() override;
     void RestorePictureInPictureWindow() override;
-    void NotifyNodeUpdate(napi_ref nodeRef) override;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController) override;
-    napi_ref GetCustomNodeController() override;
-    napi_ref GetTypeNode() const override;
-    bool IsTypeNodeEnabled() const override;
-    bool IsPullPiPAndHandleNavigation();
-    std::string GetPiPNavigationId();
+    uint8_t GetWebRequestId() override;
 
 protected:
     WMError CreatePictureInPictureWindow(StartPipType startType) override;
     void UpdateWinRectByComponent() override;
-    void UpdatePiPSourceRect() const override;
     void SetUIContent() const override;
-    void ResetExtController() override;
-    wptr<PictureInPictureController> weakRef_ = nullptr;
-    std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
-    int32_t firstHandleId_ = -1;
+    void UpdatePiPSourceRect() const override;
+
+private:
+    wptr<WebPictureInPictureController> weakRef_ = nullptr;
+    uint8_t webRequestId_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
