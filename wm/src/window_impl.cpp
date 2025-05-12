@@ -182,8 +182,10 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
     if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
-    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
-    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
+    if (surfaceNode) {
+        surfaceNode->SetSkipCheckInMultiInstance(true);
+    }
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());

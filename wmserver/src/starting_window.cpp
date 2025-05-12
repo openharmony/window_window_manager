@@ -154,25 +154,27 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
-    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    auto rsUIContext = node->GetRSUIContext();
+    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
     if (node->leashWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto rsUIContext = node->GetRSUIContext();
-    RSAdapterUtil::SetRSUIContext(node->leashWinSurfaceNode_, rsUIContext, true);
+    node->leashWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(node->startingWinSurfaceNode_, rsUIContext, true);
+    node->startingWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());
