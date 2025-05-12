@@ -16,6 +16,7 @@
 #ifndef OHOS_PICTURE_IN_PICTURE_INTERFACE_H
 #define OHOS_PICTURE_IN_PICTURE_INTERFACE_H
 
+#include "napi/native_api.h"
 #include "wm_common.h"
 
 namespace OHOS {
