@@ -80,7 +80,7 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
     } else {
         pengdingTask_ --;
         if (pengdingTask_ != 0) {
-            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task left", pengdingTask_.load());
+            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task(s) left", pengdingTask_.load());
             return;
         }
         displayModeChangeRunning_ = false;
