@@ -200,12 +200,12 @@ void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const 
         WLOGFD("RSDisplayNode is not null");
     } else {
         WLOGFD("Create rsDisplayNode");
-        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, GetRSUIContext());
         if (rsDisplayNode == nullptr) {
             WLOGE("fail to add child. create rsDisplayNode fail!");
             return;
         }
-        RSAdapterUtil::SetRSUIContext(rsDisplayNode, GetRSUIContext(), true);
+        rsDisplayNode->SetSkipCheckInMultiInstance(true);
         rsDisplayNode_ = rsDisplayNode;
         TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
@@ -224,12 +224,12 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     }
 
     WLOGFD("Create defaultRSDisplayNode");
-    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, GetRSUIContext());
     if (rsDisplayNode == nullptr) {
         WLOGE("fail to add child. create rsDisplayNode fail!");
         return;
     }
-    RSAdapterUtil::SetRSUIContext(rsDisplayNode, GetRSUIContext(), true);
+    rsDisplayNode->SetSkipCheckInMultiInstance(true);
     rsDisplayNode_ = rsDisplayNode;
     TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
