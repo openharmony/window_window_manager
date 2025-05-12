@@ -632,7 +632,7 @@ protected:
     /*
      * Window Property
      */
-    std::string containerColorLists_;
+    std::string containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();

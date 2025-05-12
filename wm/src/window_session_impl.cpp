@@ -280,7 +280,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
-    containerColorLists_ = system::GetParameter("const.window.containerColorLists", "");
+    containerColorList_ = system::GetParameter("const.window.containerColorList", "");
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -3765,7 +3765,7 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo.bundleName_ != containerColorLists_) {
+    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo.bundleName_ != containerColorList_) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WM_ERROR_NOT_SYSTEM_APP;
     }
