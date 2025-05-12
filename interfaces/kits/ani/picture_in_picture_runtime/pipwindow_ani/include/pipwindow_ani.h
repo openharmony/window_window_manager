@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,12 @@ namespace Rosen {
 class PiPWindowAni {
 public:
     static ani_status Init(ani_env* env, ani_namespace nsp);
-    static ani_boolean isPiPEnabledAni(ani_env* env);
-    sptr<PictureInPictureController> GetPiPController() { return pipControllerToken_; }
-    
-    static void startPiPAni(ani_env* env, ani_object obj, ani_long nativeObj);
-    static void stopPiPAni(ani_env* env, ani_object obj, ani_long nativeObj);
+    sptr<PictureInPictureController> GetPiPController();
+    void SetPiPController(sptr<PictureInPictureController> pipControllerToken);
+
+    static ani_boolean IsPiPEnabledAni(ani_env* env);
+    static void StartPiPAni(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void StopPiPAni(ani_env* env, ani_object obj, ani_long nativeObj);
 
 private:
     void OnstartPiPAni(ani_env* env);

@@ -14,6 +14,8 @@
  */
 import type { AsyncCallback, Callback} from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import { NodeController, XComponentController } from '@ohos.arkui.component';
+import common from '@ohos.app.ability.common';
 
 export default namespace PiPWindow {
   loadLibrary('pipwindowani_kit.z');
@@ -22,6 +24,7 @@ export default namespace PiPWindow {
     startPiP(): Promise<void>;
     stopPiP(): Promise<void>;
   }
+  
   export class PiPControllerInternal implements PiPController {
     static { loadLibrary('pipwindowani_kit.z') };
     private nativeObj: long;
@@ -29,13 +32,13 @@ export default namespace PiPWindow {
         this.nativeObj = nativeObj;
     }
 
-    public native startPiP(nativeObj: long): void;
-    public native stopPiP(nativeObj: long): void;
+    public native startPiPNative(nativeObj: long): void;
+    public native stopPiPNative(nativeObj: long): void;
 
     public startPiP(): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
-                this.startPiP(this.nativeObj);
+                this.startPiPNative(this.nativeObj);
             }).then((ret: NullishType) :void => {
                 resolve(undefined);
             }).catch((err: NullishType) :void => {
@@ -47,7 +50,7 @@ export default namespace PiPWindow {
     public stopPiP(): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
-                this.stopPiP(this.nativeObj);
+                this.stopPiPNative(this.nativeObj);
             }).then((ret: NullishType) :void => {
                 resolve(undefined);
             }).catch((err: NullishType) :void => {
@@ -55,6 +58,50 @@ export default namespace PiPWindow {
             });
         });
     }
+  }
+
+  export enum PiPTemplateType {
+    VIDEO_PLAY,
+    VIDEO_CALL,
+    VIDEO_MEETING,
+    VIDEO_LIVE,
+  }
+
+  export type PiPControlGroup = VideoPlayControlGroup | VideoCallControlGroup | VideoMeetingControlGroup | VideoLiveControlGroup;
+
+  export enum VideoPlayControlGroup {
+    VIDEO_PREVIOUS_NEXT = 101,
+    FAST_FORWARD_BACKWARD = 102,
+  }
+
+  export enum VideoCallControlGroup {
+    MICROPHONE_SWITCH = 201,
+    HANG_UP_BUTTON = 202,
+    CAMERA_SWITCH = 203,
+    MUTE_SWITCH = 204,
+  }
+
+  export enum VideoMeetingControlGroup {
+    HANG_UP_BUTTON = 301,
+    CAMERA_SWITCH = 302,
+    MUTE_SWITCH = 303,
+    MICROPHONE_SWITCH = 304,
+  }
+
+  export enum VideoLiveControlGroup {
+    VIDEO_PLAY_PAUSE = 401,
+    MUTE_SWITCH = 402,
+  }
+
+  export interface PiPConfiguration {
+    context: common.BaseContext;
+    componentController: XComponentController;
+    navigationId?: string;
+    templateType?: PiPTemplateType;
+    contentWidth?: number;
+    contentHeight?: number;
+    controlGroups?: Array<PiPControlGroup>;
+    customUIController?: NodeController;
   }
 
   let nativeObj: long;
