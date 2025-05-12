@@ -8024,7 +8024,7 @@ void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topT
             int32_t dockHeight = GetDockHeight();
             topThreshold = creaseRect.posY_ + creaseRect.height_;
             bottomThreshold = currentScreenHeight - dockHeight - creaseRect.posY_ - creaseRect.height_;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}u, topThreshold: %{public}d, "
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}d, topThreshold: %{public}d, "
                 "bottomThreshold: %{public}d Id: %{public}u", currentScreenHeight, topThreshold,
                 bottomThreshold, GetPersistentId());
         }
