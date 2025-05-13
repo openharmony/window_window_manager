@@ -60,6 +60,12 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
+    static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
+    static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
+    static void Translate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object translateOptions);
+    static void Rotate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object rotateOptions);
+    static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
+        ani_string color, ani_object offsetX, ani_object offsetY);
 
     ani_object Resize(ani_env* env, ani_double width, ani_double height);
     ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
@@ -97,6 +103,14 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_double timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
+    void OnOpacity(ani_env* env, ani_double opacity);
+    void OnScale(ani_env* env, ani_object scaleOptions);
+    void OnTranslate(ani_env* env, ani_object translateOptions);
+    void OnRotate(ani_env* env, ani_object rotateOptions);
+    void OnSetShadow(ani_env* env, ani_double radius, ani_string color, ani_object offsetX, ani_object offsetY);
+    static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
+    static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
+    static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);
