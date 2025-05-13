@@ -508,7 +508,7 @@ WMError PictureInPictureControllerBase::RegisterListener(std::vector<sptr<T>>& h
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "Listener already registered");
@@ -523,7 +523,7 @@ WMError PictureInPictureControllerBase::UnregisterListener(std::vector<sptr<T>>&
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_NULLPTR;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](const sptr<T>& registeredListener) {
