@@ -502,6 +502,9 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
     if (!isConfigOptionWindowTypeValid(env, option)) {
         return false;
     }
+    if (!ParseZIndex(env, jsObject, option)) {
+        return false;
+    }
     napi_value value = nullptr;
     napi_get_named_property(env, jsObject, "ctx", &value);
     if (GetType(env, value) == napi_undefined) {
