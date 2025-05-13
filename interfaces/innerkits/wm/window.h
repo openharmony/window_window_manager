@@ -2310,6 +2310,14 @@ public:
      * @param pixelMap pixel map
      * @return the error code of this operation
      */
+    virtual WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
+
+    /**
+     * @brief window SnapshotIgnorePrivacy
+     *
+     * @param pixelMap pixel map
+     * @return the error code of this operation
+     */
     virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
 
     /**
