@@ -878,15 +878,6 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
 napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]OnGetSuperFoldStatus");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
     WLOGI("[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
@@ -1068,7 +1059,7 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
 napi_value JsScreenSessionManager::OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
     ExtendScreenConnectStatus status = ScreenSessionManagerClient::GetInstance().GetExtendScreenConnectStatus();
-    WLOGI("[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
@@ -1076,7 +1067,7 @@ napi_value JsScreenSessionManager::OnSetDefaultMultiScreenModeWhenSwitchUser(nap
     const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().SetDefaultMultiScreenModeWhenSwitchUser();
-    WLOGI("[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
     return NapiGetUndefined(env);
 }
 
