@@ -2266,6 +2266,25 @@ HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | 
     ASSERT_NE(result, nullptr);
     ASSERT_EQ(result->GetSessionInfo().moduleName_, info.moduleName_);
 }
+
+/**
+ * @tc.name: UpdateAbilityHookState
+ * @tc.desc: test function : UpdateAbilityHookState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "UpdateAbilityHookState_bundle";
+    info.moduleName_ = "UpdateAbilityHookState_module";
+    info.abilityName_ = "UpdateAbilityHookState_ability";
+    info.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->UpdateAbilityHookState(sceneSession, true);
+    EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -784,7 +784,7 @@ private:
     sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
-    void UpdateAbilityHookState(const SessionInfo& sessionInfo, sptr<SceneSession>& sceneSession);
+    void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
 
     /*
      * Window Focus
