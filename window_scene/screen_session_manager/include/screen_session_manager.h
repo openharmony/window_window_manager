@@ -42,6 +42,16 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
+struct ScaleProperty {
+    float scaleX;
+    float scaleY;
+    float pivotX;
+    float pivotY;
+
+    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY), 
+                                                                            pivotX(pivotX), pivotY(pivotY) {}
+};
+
 static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
     {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
     {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
@@ -747,6 +757,9 @@ private:
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
+    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session, 
+                                                        const ScaleProperty& scalep,
+                                                        float& translateX, float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsDefaultMirrorMode(ScreenId screenId);
