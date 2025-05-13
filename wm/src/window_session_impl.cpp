@@ -3765,7 +3765,7 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo.bundleName_ != containerColorList_) {
+    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo().bundleName_ != containerColorList_) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
