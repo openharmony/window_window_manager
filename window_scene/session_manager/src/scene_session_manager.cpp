@@ -1296,7 +1296,7 @@ void SceneSessionManager::ConfigAppsWithDeduplicatedWindowStatus()
     if (item.IsStrings()) {
         appsWithDeduplicatedWindowStatus = *item.stringsValue_;
     }
-    for (auto app : appsWithDeduplicatedWindowStatus) {
+    for (auto&& app : appsWithDeduplicatedWindowStatus) {
         if (!app.empty()) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "app:%{public}s", app.c_str());
             appsWithDeduplicatedWindowStatus_.insert(std::move(app));
