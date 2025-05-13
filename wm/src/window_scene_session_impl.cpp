@@ -6075,5 +6075,44 @@ WMError WindowSceneSessionImpl::SetHookTargetElementInfo(const AppExecFwk::Eleme
     }
     return WMError::WM_OK;
 }
+
+WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfig(config);
+}
+
+void WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    WindowType winType = GetType();
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+            isForceSplit, config.homePage_.c_str());
+        SetForceSplitEnable(isForceSplit, config.homePage_);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
+}
 } // namespace Rosen
 } // namespace OHOS
