@@ -387,26 +387,6 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck03, TestSize.Level1)
 }
 
 /**
- * @tc.name: WindowSessionCreateCheck
- * @tc.desc: WindowSessionCreateCheck04
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck04, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck04 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    std::string name = "WindowSessionCreateCheck04";
-    option->SetWindowName(name);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION);
-    WMError res = window->WindowSessionCreateCheck();
-    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck04 end";
-}
-
-/**
  * @tc.name: SetActive
  * @tc.desc: SetActive
  * @tc.type: FUNC

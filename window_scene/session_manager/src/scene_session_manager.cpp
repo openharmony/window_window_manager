@@ -3210,6 +3210,12 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    if (!isPhoneOrPad && property_->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
+        TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
+        return WMError::WS_ERROR_INVALID_OPERATION;
+    }
+
     if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
         TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
         shouldBlock = false;
@@ -13694,7 +13700,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
         }
         return WMError::WM_OK;
     });
-    
+
 }
 
 void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled,
