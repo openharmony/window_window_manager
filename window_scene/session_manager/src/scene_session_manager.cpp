@@ -5508,8 +5508,9 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+          sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD ||
           sceneSession->GetSessionInfo().isSystem_)) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window can set brightness");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window or wallet swipe card can set brightness");
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();

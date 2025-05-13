@@ -182,6 +182,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
                 type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
+    
+    static inline bool IsWalletSwipeCard(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD;
+    }
 
     static inline bool IsFullScreenWindow(WindowMode mode)
     {
