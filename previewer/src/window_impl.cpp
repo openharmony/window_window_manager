@@ -407,6 +407,11 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
     return nullptr;
 }
 
+WMError WindowImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     return WMError::WM_OK;
