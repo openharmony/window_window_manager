@@ -280,7 +280,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
-    containerColorList_ = system::GetParameter("const.window.containerColorList", "");
+    ParseContainerColorList();
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -3763,11 +3763,24 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
     return WSError::WS_OK;
 }
 
+void WindowSessionImpl::ParseContainerColorList()
+{
+    std::string containerColorStr = system::GetParameter("const.window.containerColorList", "");
+    std::string::itreator start = containerColorStr.begin();
+    std::string::itreator end;
+    // parse the string separated by ','
+    while ((end = std::find(start, containerColorStr.end(), ',')) != containerColorStr.end()) {
+        containerColorList_.insert(std::string(start, end));
+        start = end + 1;
+    }
+    containerColorList_.insert(std::string(start, end));
+}
+
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!SessionPermission::IsSystemCalling() && property_->GetSessionInfo().bundleName_ != containerColorList_) {
+    if (!SessionPermission::IsSystemCalling() && containerColorList_.count(property_->GetSessionInfo().bundleName_)) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
