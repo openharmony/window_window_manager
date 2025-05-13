@@ -1479,7 +1479,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect4, TestSize.Level1)
     subSubSession->property_->SetPersistentId(1133);
     subSubSession->SetParentSession(subSession);
     subSubSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-
+    // Test the changes in the rect value of the first-level subWindow in the phone scenario
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSRect oldRect1({ 20, 20, 20, 20 });
     WSRect mainRect({ 10, 10, 10, 10 });
@@ -1490,7 +1490,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect4, TestSize.Level1)
     WSRect newRect1 = subSession->GetSessionRect();
     EXPECT_EQ(newRect1.posX_, oldRect1.posX_ - mainRect.posX_);
     EXPECT_EQ(newRect1.posY_, oldRect1.posY_ - mainRect.posY_);
-
+    // Test the changes of rect values of multi-level subWindow in the phone scenario
     WSRect oldRect2({ 30, 30, 30, 30 });
     result = subSubSession->UpdateSessionRect(oldRect2, reason, isGlobal);
     EXPECT_EQ(result, WSError::WS_OK);
