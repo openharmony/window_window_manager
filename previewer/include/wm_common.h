@@ -54,6 +54,7 @@ constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
+constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
 }
 
 /**
@@ -116,6 +117,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
+    WINDOW_TYPE_DYNAMIC,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -1325,6 +1327,13 @@ struct RotationChangeInfo {
 struct RotationChangeResult {
     RectType rectType_;
     Rect windowRect_;
+};
+
+/**
+ * @brief default zIndex for specific window.
+ */
+enum DefaultSpecificZIndex {
+    MUTISCREEN_COLLABORATION = 930,
 };
 }
 }
