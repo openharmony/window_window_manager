@@ -155,6 +155,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+
     /*
      * Sub Window
      */
