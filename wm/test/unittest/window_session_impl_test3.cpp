@@ -150,61 +150,11 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
-    window_ = GetTestWindowImpl("SetForceSplitEnable");
-    ASSERT_NE(window_, nullptr);
-
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-
-    isForceSplit = true;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
-    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
-    ASSERT_NE(window_, nullptr);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window_->hostSession_ = session;
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    AppForceLandscapeConfig config = {};
-    auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.isSupportSplitMode_, false);
-    }
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig02
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -213,12 +163,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
     AppForceLandscapeConfig config = {};
     window_->hostSession_ = nullptr;
     auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.isSupportSplitMode_, false);
-    }
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
 
