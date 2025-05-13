@@ -737,7 +737,6 @@ HWTEST_F(DisplayManagerServiceTest, SetScreenBrightness, TestSize.Level1)
 {
     uint64_t screenId = 1;
     uint32_t level = 2;
-    dms_->SetScreenBrightness(screenId, level);
     EXPECT_TRUE(dms_->SetScreenBrightness(screenId, level));
 }
 
