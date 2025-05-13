@@ -153,7 +153,7 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
 
     /*
