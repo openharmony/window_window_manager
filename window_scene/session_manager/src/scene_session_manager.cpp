@@ -3270,12 +3270,13 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         const auto& sessionInfo = extensionParentSession->GetSessionInfo();
-        if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
+        auto hostBundleName = extensionParentSession->IsAnco()?
+            SessionUtils::GetBundleNameBySessionName(hostInfo.sessionName) : hostInfo.elementName_.GetBundleName();
+        if (sessionInfo.bundleName_ != hostBundleName) {
             TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
-                " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
-                hostInfo.elementName_.GetBundleName().c_str());
+                " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(), hostBundleName.c_str());
             ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), sessionInfo.bundleName_,
-                hostInfo.elementName_.GetBundleName());
+                hostBundleName);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         result = WSError::WS_OK;
