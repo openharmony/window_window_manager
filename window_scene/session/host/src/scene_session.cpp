@@ -1742,8 +1742,7 @@ WSError SceneSession::UpdateSessionRect(
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-        auto mainSession = GetMainSession();
-        if (mainSession) {
+        if (auto mainSession = GetMainSession()) {
             auto mainRect = mainSession->GetSessionRect();
             if (!CheckIfRectElementIsTooLarge(mainRect)) {
                 newRect.posX_ -= mainRect.posX_;
