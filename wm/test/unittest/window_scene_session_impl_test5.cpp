@@ -1580,11 +1580,11 @@ HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitEnable, TestSize.Level1)
     bool isForceSplit = false;
     std::string homePage = "MainPage";
     int32_t res = 0;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
+    window->SetForceSplitEnable(isForceSplit, homePage);
     ASSERT_EQ(res, 0);
 
     isForceSplit = true;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
+    window->SetForceSplitEnable(isForceSplit, homePage);
     ASSERT_EQ(res, 0);
 }
 
@@ -1623,10 +1623,10 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Lev
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    window->hostSession_ = session;
+    window->hostSession_ = nullptr;
 
     AppForceLandscapeConfig config = {};
-    auto res = window_->GetAppForceLandscapeConfig(config);
+    auto res = window->GetAppForceLandscapeConfig(config);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
         EXPECT_EQ(config.mode_, 0);
