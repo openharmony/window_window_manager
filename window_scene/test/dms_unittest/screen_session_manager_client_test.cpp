@@ -1429,8 +1429,8 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleScreenConnection, TestSize.Level2
         .name_ = "HiCar",
         .screenId_ = screenId,
     };
-    screenSessionManagerClient_->HandleScreenConnection(option2);
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->HandleScreenConnection(option2);
 }
 
 /**
@@ -1454,8 +1454,8 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleScreenDisconnection, TestSize.Lev
     SessionOption option1 = {
         .screenId_ = 51,
     };
-    client->HandleScreenDisconnection(option1);
     ASSERT_TRUE(client != nullptr);
+    client->HandleScreenDisconnection(option1);
 }
 
 /**
@@ -1466,8 +1466,8 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleScreenDisconnection, TestSize.Lev
 HWTEST_F(ScreenSessionManagerClientTest, OnCreateScreenSessionOnly, TestSize.Level2)
 {
     sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    client->ConnectToServer();
     ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
 
     sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
@@ -1493,8 +1493,8 @@ HWTEST_F(ScreenSessionManagerClientTest, OnCreateScreenSessionOnly, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnExtendDisplayNodeChange, TestSize.Level2)
 {
-    screenSessionManagerClient_->ConnectToServer();
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->ConnectToServer();
 
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
@@ -1539,8 +1539,8 @@ HWTEST_F(ScreenSessionManagerClientTest, OnExtendDisplayNodeChange, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level2)
 {
-    screenSessionManagerClient_->ConnectToServer();
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->ConnectToServer();
 
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
@@ -1581,8 +1581,8 @@ HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level
 HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
 {
     sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    client->ConnectToServer();
     ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
 
     sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
@@ -1607,8 +1607,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
 HWTEST_F(ScreenSessionManagerClientTest, OnDumperClientScreenSessions, TestSize.Level2)
 {
     sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    client->ConnectToServer();
     ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
 
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
