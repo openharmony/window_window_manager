@@ -195,6 +195,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, TestSize.Level
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowParentWindowLayout_ = true;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = sceneSession->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
@@ -227,6 +228,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled02, TestSize.Level
     property->subWindowLevel_ = 1;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowParentWindowLayout_ = true;
     // test set isFollowParentLayout_
     sceneSession->isFollowParentLayout_ = false;
     sceneSession->SetFollowParentWindowLayoutEnabled(true);
@@ -254,6 +256,7 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, TestSize.Level
     property->subWindowLevel_ = 1;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowParentWindowLayout_ = true;
 
     sptr<MainSession> parentSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, parentSession);
