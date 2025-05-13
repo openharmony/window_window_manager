@@ -678,6 +678,31 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyWindowStatusChange02
+ * @tc.desc: NotifyWindowStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange02, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("NotifyWindowStatusChange02");
+    ASSERT_NE(window, nullptr);
+
+    auto listeners = GetListenerList<IWindowStatusChangeListener, MockWindowStatusChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
+
+    WindowMode mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyWindowStatusChange(mode);
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->lastWindowStatus_);
+
+    window->NotifyWindowStatusChange(mode);
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->lastWindowStatus_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
  * @tc.name: UpdatePiPRect
  * @tc.desc: UpdatePiPRect
  * @tc.type: FUNC

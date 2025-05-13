@@ -848,6 +848,7 @@ private:
     Transform currentTransform_;
     std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
+    std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
 
     /*
      * Window Decor
