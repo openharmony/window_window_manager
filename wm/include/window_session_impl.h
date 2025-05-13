@@ -749,8 +749,8 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") {}
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
