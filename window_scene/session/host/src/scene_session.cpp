@@ -3889,11 +3889,8 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
 
 bool SceneSession::KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2)
 {
-    const int MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT = 3;
-    if (std::abs(rect1.posX_ - rect2.posX_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
-        std::abs(rect1.posY_ - rect2.posY_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
-        std::abs(rect1.width_ - rect2.width_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT &&
-        std::abs(rect1.height_ - rect2.height_) <= MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT) {
+    const int32_t MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT = 3;
+    if (rect1.isNearEqual(rect2, MAX_DIFF_THREDHOLD_FOR_TOUCH_EVENT)) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "rect almost same: %{public}s -> %{public}s",
             rect1.ToString().c_str(), rect2.ToString().c_str());
         return true;
