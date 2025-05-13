@@ -1005,6 +1005,28 @@ HWTEST_F(WindowSceneSessionImplTest2, Snapshot01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SnapshotSync
+ * @tc.desc: SnapshotSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Snapshot(pixelMap));
+
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_TIMEOUT, windowSceneSession->Snapshot(pixelMap));
+
+    windowSceneSession->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSceneSession->SnapshotIgnorePrivacy(pixelMap));
+}
+
+/**
  * @tc.name: SnapshotIgnorePrivacy
  * @tc.desc: SnapshotIgnorePrivacy
  * @tc.type: FUNC

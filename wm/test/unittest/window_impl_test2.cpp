@@ -930,6 +930,22 @@ HWTEST_F(WindowImplTest2, Snapshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SnapshotSync
+ * @tc.desc: SnapshotSync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest2, SnapshotSync, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SnapshotSync");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_TIMEOUT, window->Snapshot(pixelMap));
+}
+
+/**
  * @tc.name: SnapshotIgnorePrivacy
  * @tc.desc: SnapshotIgnorePrivacy test
  * @tc.type: FUNC
