@@ -632,11 +632,12 @@ protected:
     /*
      * Window Property
      */
-    std::string containerColorList_;
+    std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
+    void ParseContainerColorList();
 
     /*
      * Window Input Event
