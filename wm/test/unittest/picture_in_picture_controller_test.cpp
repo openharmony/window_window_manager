@@ -34,7 +34,7 @@ public:
     MockWindow() {};
     ~MockWindow() {};
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
-    MOCK_METHOD0(Destroy, WMError());
+    MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
     MOCK_METHOD4(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
@@ -69,31 +69,6 @@ void PictureInPictureControllerTest::SetUp() {}
 void PictureInPictureControllerTest::TearDown() {}
 
 namespace {
-
-/**
- * @tc.name: GetPipPriority
- * @tc.desc: GetPipPriority
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, GetPipPriority, TestSize.Level1)
-{
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<PipOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    uint32_t pipTypeTemplate = 5;
-    uint32_t testValue = 0;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 3;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 0;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-    pipTypeTemplate = 1;
-    testValue = 1;
-    ASSERT_EQ(testValue, pipControl->GetPipPriority(pipTypeTemplate));
-}
-
 /**
  * @tc.name: ShowPictureInPictureWindow01
  * @tc.desc: ShowPictureInPictureWindow
@@ -257,6 +232,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow03, TestSiz
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     pipControl->pipOption_ = option;
+    option->SetDefaultWindowSizeType(1);
     AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
     option->SetContext(contextPtr);
     std::shared_ptr<MockXComponentController> xComponentController = std::make_shared<MockXComponentController>();
@@ -267,6 +243,7 @@ HWTEST_F(PictureInPictureControllerTest, CreatePictureInPictureWindow03, TestSiz
     StartPipType startType = StartPipType::NULL_START;
     EXPECT_CALL(*(mw), GetWindowState()).Times(2).WillOnce(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->CreatePictureInPictureWindow(startType));
+    EXPECT_EQ(1, option->GetDefaultWindowSizeType());
     startType = StartPipType::AUTO_START;
     delete contextPtr;
 }
@@ -957,54 +934,35 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, TestSize.Level
 }
 
 /**
- * @tc.name: RegisterPipContentListenerWithType
- * @tc.desc: RegisterPipContentListenerWithType
+ * @tc.name: RegisterPiPTypeNodeChange
+ * @tc.desc: RegisterPiPTypeNodeChange
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, RegisterPipContentListenerWithType, TestSize.Level1)
+HWTEST_F(PictureInPictureControllerTest, RegisterPiPTypeNodeChange, Function | SmallTest | Level2)
 {
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY,
-        pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
-    pipControl->pipOption_ = option;
-    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
+    auto listener = sptr<IPiPTypeNodeObserver>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->RegisterPiPTypeNodeChange(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPiPTypeNodeChange(listener));
 }
 
 /**
- * @tc.name: UnRegisterPipContentListenerWithType
- * @tc.desc: UnRegisterPipContentListenerWithType
+ * @tc.name: UnRegisterPiPTypeNodeChange
+ * @tc.desc: UnRegisterPiPTypeNodeChange
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureControllerTest, UnRegisterPipContentListenerWithType, TestSize.Level1)
+HWTEST_F(PictureInPictureControllerTest, UnRegisterPiPTypeNodeChange, Function | SmallTest | Level2)
 {
     sptr<MockWindow> mw = new MockWindow();
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
-    pipControl->pipOption_ = option;
-    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
-}
-
-/**
- * @tc.name: GetPipContentCallbackRef
- * @tc.desc: GetPipContentCallbackRef
- * @tc.type: FUNC
- */
-HWTEST_F(PictureInPictureControllerTest, GetPipContentCallbackRef, TestSize.Level1)
-{
-    sptr<MockWindow> mw = new MockWindow();
-    sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->pipOption_ = nullptr;
-    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
-    pipControl->pipOption_ = option;
-    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
+    auto listener = sptr<IPiPTypeNodeObserver>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, pipControl->UnRegisterPiPTypeNodeChange(nullptr));
+    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPiPTypeNodeChange(listener));
 }
 
 /**
@@ -1088,29 +1046,29 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, TestSize
 
     sptr<MockWindow> window = sptr<MockWindow>::MakeSptr();
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->DestroyPictureInPictureWindow());
 
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     pipControl->pipOption_ = nullptr;
     pipControl->mainWindow_ = nullptr;
     pipControl->window_ = window;
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("navId");
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     pipControl->mainWindow_ = nullptr;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
     pipControl->pipOption_->SetNavigationId("");
     pipControl->mainWindow_ = mw;
     pipControl->window_ = window;
-    EXPECT_CALL(*(window), Destroy()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(window), Destroy(0)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->DestroyPictureInPictureWindow());
 }
 

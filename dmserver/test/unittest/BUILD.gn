@@ -45,6 +45,7 @@ ohos_unittest("dmserver_abstract_screen_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
   ]
 }
@@ -76,6 +77,7 @@ ohos_unittest("dmserver_abstract_display_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
   ]
 }
@@ -89,7 +91,9 @@ ohos_unittest("dmserver_display_manager_service_inner_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -101,8 +105,13 @@ ohos_unittest("dmserver_display_manager_service_test") {
   deps = [ ":dmserver_unittest_common" ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "libxml2:libxml2",
+    "safwk:system_ability_fwk",
+    "selinux_adapter:librestorecon",
   ]
 }
 
@@ -134,7 +143,9 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 
   if (window_manager_feature_subscribe_motion) {
@@ -153,7 +164,9 @@ ohos_unittest("dmserver_display_dumper_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -166,7 +179,9 @@ ohos_unittest("dmserver_display_cutout_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -192,6 +207,7 @@ ohos_unittest("dmserver_abstract_screen_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
   ]
 
@@ -210,7 +226,9 @@ ohos_unittest("dmserver_abstract_display_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -220,15 +238,13 @@ ohos_unittest("dmserver_display_manager_config_test") {
 
   sources = [ "display_manager_config_test.cpp" ]
 
-  deps = [
-    ":dmserver_unittest_common",
-    "//third_party/libxml2:libxml2",
-  ]
+  deps = [ ":dmserver_unittest_common" ]
 
   external_deps = [
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "hilog:libhilog",
+    "libxml2:libxml2",
   ]
 }
 

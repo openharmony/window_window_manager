@@ -266,20 +266,6 @@ HWTEST_F(WindowAdapterTest, InitWMSProxy, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterSessionRecoverCallbackFunc
- * @tc.desc: WindowAdapter/RegisterSessionRecoverCallbackFunc
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    int32_t persistentId = 1;
-    auto testFunc = [] { return WMError::WM_OK; };
-    windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
-    ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
-}
-
-/**
  * @tc.name: WindowManagerAndSessionRecover
  * @tc.desc: WindowAdapter/WindowManagerAndSessionRecover
  * @tc.type: FUNC
@@ -471,34 +457,6 @@ HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, TestSize.Level1)
     auto ret = windowAdapter.GetModeChangeHotZones(displayId, hotZones);
     windowAdapter.ReregisterWindowManagerAgent();
     ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    sptr<ISessionStage> iSessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    sptr<ISession> session = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    auto ret1 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
-
-    windowAdapter.isProxyValid_ = true;
-    auto ret2 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
-
-    sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
-    auto ret3 =
-        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);
 }
 
 /**
@@ -903,6 +861,20 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostWindowCompatiblityInfo
+ * @tc.desc: WindowAdapter/GetHostWindowCompatiblityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto err = windowAdapter.GetHostWindowCompatiblityInfo(token, property);
+    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: WindowAdapter/MinimizeByWindowId
  * @tc.type: FUNC
@@ -918,16 +890,19 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetForegroundWindowNum
- * @tc.desc: WindowAdapter/SetForegroundWindowNum
+ * @tc.name: ListWindowInfo01
+ * @tc.desc: WindowAdapter/ListWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, SetForegroundWindowNum, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    int32_t windowNum = 1;
-    auto err = windowAdapter.SetForegroundWindowNum(windowNum);
-    ASSERT_EQ(err, WMError::WM_OK);
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    auto err = windowAdapter.ListWindowInfo(windowInfoOption, infos);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen

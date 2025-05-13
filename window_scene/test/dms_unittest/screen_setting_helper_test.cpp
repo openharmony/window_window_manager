@@ -388,6 +388,48 @@ namespace {
     }
 
     /**
+     * @tc.name: ConvertStrToUInt64Test01
+     * @tc.desc: ConvertStrToUInt64Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test01, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "fvcea";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_FALSE(ret);
+        ASSERT_EQ(num, 0);
+    }
+
+    /**
+     * @tc.name: ConvertStrToUInt64Test02
+     * @tc.desc: ConvertStrToUInt64Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test02, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "2349z";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_FALSE(ret);
+        ASSERT_EQ(num, 0);
+    }
+
+    /**
+     * @tc.name: ConvertStrToUInt64Test03
+     * @tc.desc: ConvertStrToUInt64Test03
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUint64Test03, TestSize.Level1)
+    {
+        uint64_t num = 0;
+        std::string str = "2349";
+        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(num, 2349);
+    }
+
+    /**
      * @tc.name: RegisterSettingWireCastObserver01
      * @tc.desc: RegisterSettingWireCastObserver01
      * @tc.type: FUNC
@@ -625,7 +667,11 @@ namespace {
         MultiScreenInfo info;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+        } else {
+            ASSERT_TRUE(ret);
+        }
     }
 
     /**
@@ -702,8 +748,13 @@ namespace {
         screenSession->isInternal_ = true;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.mainScreenOption.screenId_, 1);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 1);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -728,8 +779,13 @@ namespace {
         info.isExtendMain = false;
         string inputString = "1001 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -754,8 +810,13 @@ namespace {
         info.isExtendMain = true;
         string inputString = "1001 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 
@@ -780,8 +841,13 @@ namespace {
         info.isExtendMain = false;
         string inputString = "1 2 3";
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(info.secondaryScreenOption.screenId_, 1);
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ASSERT_FALSE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
+        } else {
+            ASSERT_TRUE(ret);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1);
+        }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
 

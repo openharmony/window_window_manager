@@ -255,6 +255,17 @@ DMError DisplayManagerAdapterLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
     return displayManagerServiceProxy_->SetSystemKeyboardStatus(isTpKeyboardOn);
 }
 
+sptr<ScreenInfo> ScreenManagerAdapterLite::GetScreenInfo(ScreenId screenId)
+{
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetScreenInfoById(screenId);
+}
+
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
@@ -334,5 +345,12 @@ void BaseAdapterLite::Clear()
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }
     isProxyValid_ = false;
+}
+
+bool DisplayManagerAdapterLite::GetKeyboardState()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->GetKeyboardState();
 }
 } // namespace OHOS::Rosen

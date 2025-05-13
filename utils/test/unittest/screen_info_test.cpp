@@ -30,21 +30,13 @@ public:
     virtual void TearDown() override;
 };
 
-void ScreenInfoTest::SetUpTestCase()
-{
-}
+void ScreenInfoTest::SetUpTestCase() {}
 
-void ScreenInfoTest::TearDownTestCase()
-{
-}
+void ScreenInfoTest::TearDownTestCase() {}
 
-void ScreenInfoTest::SetUp()
-{
-}
+void ScreenInfoTest::SetUp() {}
 
-void ScreenInfoTest::TearDown()
-{
-}
+void ScreenInfoTest::TearDown() {}
 
 namespace {
 /**
@@ -89,10 +81,10 @@ HWTEST_F(ScreenInfoTest, InnerUnmarshalling, TestSize.Level1)
 {
     ScreenInfo screenInfoSrc;
     Parcel parcel;
-    parcel.WriteUint32(21);    // MAX_SUPPORTED_SCREEN_MODES_SIZE + 1
+    parcel.WriteUint32(21); // MAX_SUPPORTED_SCREEN_MODES_SIZE + 1
     bool result = screenInfoSrc.InnerUnmarshalling(parcel);
     ASSERT_FALSE(result);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

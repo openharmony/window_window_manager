@@ -18,10 +18,8 @@
 #include "mock_message_parcel.h"
 #include "session_manager_service_recover_proxy.h"
 
-
 using namespace testing;
 using namespace testing::ext;
-
 
 namespace OHOS {
 namespace Rosen {
@@ -49,7 +47,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover01, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -65,7 +63,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover02, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover02, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -83,7 +81,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover02
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover03, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover03, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -98,7 +96,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover03
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover04, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover04, TestSize.Level1)
 {
     sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
@@ -115,7 +113,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover04
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged01, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged01, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -131,7 +129,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged01, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged02, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged02, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -149,7 +147,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged02, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged03, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged03, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -165,7 +163,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged03, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged04, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged04, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -181,7 +179,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged04, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged05, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged05, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
@@ -199,7 +197,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged05, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged06, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged06, TestSize.Level1)
 {
     sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
@@ -215,7 +213,7 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged06, Functi
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged07, Function | SmallTest | Level2)
+HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged07, TestSize.Level1)
 {
     sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
@@ -226,6 +224,6 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged07, Functi
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 1, true, sessionManagerService);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

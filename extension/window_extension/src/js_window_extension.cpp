@@ -68,8 +68,13 @@ napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
         WLOGFE("Failed to get js window extension context");
         return nullptr;
     }
-    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
-        "application.WindowExtensionContext", &object, 1)->GetNapiValue();
+    auto contextObjRef = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
+        "application.WindowExtensionContext", &object, 1);
+    if (contextObjRef == nullptr) {
+        WLOGFE("Failed to get contextObjRef");
+        return nullptr;
+    }
+    auto contextObj = contextObjRef->GetNapiValue();
     if (contextObj == nullptr) {
         WLOGFE("Failed to get context native object");
         return nullptr;
@@ -124,7 +129,14 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         WLOGFE("Failed to get srcPath");
         return;
     }
-
+    if (Extension::abilityInfo_ == nullptr) {
+        WLOGFE("Failed to get abilityInfo");
+        return;
+    }
+    if (abilityInfo_ == nullptr) {
+        WLOGFE("Failed to get abilityInfo_");
+        return;
+    }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
     WLOGI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
@@ -248,7 +260,16 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     WLOGFD("Create stub successfully!");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), true);
     auto context = GetContext();
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    if (context == nullptr) {
+        WLOGFE("context is nullptr.");
+        return nullptr;
+    }
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        WLOGFE("client is nullptr.");
+        return nullptr;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
     return stub_->AsObject();
 }
@@ -273,7 +294,16 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     WLOGI("called.");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), false);
     auto context = GetContext();
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    if (context == nullptr) {
+        WLOGFE("context is nullptr.");
+        return;
+    }
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        WLOGFE("client is nullptr.");
+        return;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
 }
 

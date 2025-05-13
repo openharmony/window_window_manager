@@ -57,7 +57,6 @@ public:
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
     void SetMainScreenRegion(DMRect& mainScreenRegion);
-    bool GetCameraMode();
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);

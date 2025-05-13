@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void ScenePersistentStorageTest::SetUpTestCase()
-{
-}
+void ScenePersistentStorageTest::SetUpTestCase() {}
 
-void ScenePersistentStorageTest::TearDownTestCase()
-{
-}
+void ScenePersistentStorageTest::TearDownTestCase() {}
 
-void ScenePersistentStorageTest::SetUp()
-{
-}
+void ScenePersistentStorageTest::SetUp() {}
 
-void ScenePersistentStorageTest::TearDown()
-{
-}
+void ScenePersistentStorageTest::TearDown() {}
 
 namespace {
 /**
@@ -51,7 +43,7 @@ namespace {
  * @tc.desc: test function : HasKey
  * @tc.type: FUNC
  */
-HWTEST_F(ScenePersistentStorageTest, HasKey, Function | SmallTest | Level1)
+HWTEST_F(ScenePersistentStorageTest, HasKey, TestSize.Level1)
 {
     ScenePersistentStorage scenePersistentStorage_;
     std::string key = "aspect_ratio";
@@ -68,7 +60,7 @@ HWTEST_F(ScenePersistentStorageTest, HasKey, Function | SmallTest | Level1)
  * @tc.desc: test function : Delete
  * @tc.type: FUNC
  */
-HWTEST_F(ScenePersistentStorageTest, Delete, Function | SmallTest | Level1)
+HWTEST_F(ScenePersistentStorageTest, Delete, TestSize.Level1)
 {
     ScenePersistentStorage scenePersistentStorage_;
     std::string key = "aspect_ratio";
@@ -84,13 +76,13 @@ HWTEST_F(ScenePersistentStorageTest, Delete, Function | SmallTest | Level1)
  * @tc.desc: test function : InitDir
  * @tc.type: FUNC
  */
-HWTEST_F(ScenePersistentStorageTest, InitDir, Function | SmallTest | Level1)
+HWTEST_F(ScenePersistentStorageTest, InitDir, TestSize.Level1)
 {
     ScenePersistentStorage scenePersistentStorage_;
     std::string dir_ = "0/Storage/DownLoad";
     scenePersistentStorage_.InitDir(dir_);
     ASSERT_FALSE(scenePersistentStorage_.HasKey("maximize_state", ScenePersistentStorageType::MAXIMIZE_STATE));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

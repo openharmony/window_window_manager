@@ -187,6 +187,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK):
             return HandleUpdateSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
+            return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -217,6 +221,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetParentWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_FOREGROUND_WINDOW_NUM):
             return HandleSetForegroundWindowNum(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_USE_IMPLICIT_ANIMATION):
+            return HandleUseImplicitAnimation(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO):
+            return HandleGetHostWindowCompatiblityInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1645,6 +1653,58 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenLock(MessageParcel& data, 
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+    static constexpr uint64_t MAX_SIZE = 100;
+    if (size > MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Size too large.");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIds;
+    for (uint64_t i = 0; i < size; i++) {
+        int32_t persistentId = 0;
+        if (!data.ReadInt32(persistentId)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed.");
+            return ERR_INVALID_DATA;
+        }
+        persistentIds.push_back(persistentId);
+    }
+    WMError errCode = RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -1725,6 +1785,26 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "token is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    WMError errCode = GetHostWindowCompatiblityInfo(token, property);
+    if (!reply.WriteParcelable(property)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write property failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1870,6 +1950,27 @@ int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, M
     WMError errCode = SetForegroundWindowNum(windowNum);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PC, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "Handled!");
+    int32_t hostWindowId = 0;
+    if (!data.ReadInt32(hostWindowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read hostWindowId fail");
+        return ERR_INVALID_DATA;
+    }
+    bool useImplicit = false;
+    if (!data.ReadBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read useImplicit failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UseImplicitAnimation(hostWindowId, useImplicit);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

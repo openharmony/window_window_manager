@@ -81,6 +81,8 @@
           "security_component_manager",
           "libjpeg-turbo",
           "libxml2",
+          "selinux_adapter",
+          "cJSON",
           "bounds_checking_function",
           "device_status"
         ],
@@ -403,6 +405,20 @@
               "header_files": [
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/napi/window_runtime"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime:cj_display_ffi",
+            "header": {
+              "header_files": [
+                "cj_display_impl.h",
+                "cj_display_listener.h",
+                "cj_display_manager.h",
+                "display_ffi.h",
+                "display_utils.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/cj/display_runtime"
             }
           },
           {

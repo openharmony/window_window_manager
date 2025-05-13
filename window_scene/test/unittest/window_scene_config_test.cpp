@@ -137,21 +137,13 @@ public:
     ConfigItem ReadConfig(const std::string& xmlStr);
 };
 
-void WindowSceneConfigTest::SetUpTestCase()
-{
-}
+void WindowSceneConfigTest::SetUpTestCase() {}
 
-void WindowSceneConfigTest::TearDownTestCase()
-{
-}
+void WindowSceneConfigTest::TearDownTestCase() {}
 
-void WindowSceneConfigTest::SetUp()
-{
-}
+void WindowSceneConfigTest::SetUp() {}
 
-void WindowSceneConfigTest::TearDown()
-{
-}
+void WindowSceneConfigTest::TearDown() {}
 
 ConfigItem WindowSceneConfigTest::ReadConfig(const std::string& xmlStr)
 {
@@ -181,7 +173,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require issueI5N26H
  */
-HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, AnimationConfig, TestSize.Level1)
 {
     WindowSceneConfig::config_ = ReadConfig(XML_STR);
     ConfigItem item = WindowSceneConfig::config_["windowAnimation"];
@@ -219,9 +211,10 @@ HWTEST_F(WindowSceneConfigTest, AnimationConfig, Function | SmallTest | Level2)
  * @tc.desc: maxAppWindowNumber test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>0</maxAppWindowNumber>"
         "</Configs>";
@@ -235,7 +228,8 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
     ASSERT_EQ(true, value.size() >= 1);
     ASSERT_EQ(0, value[0]);
 
-    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>-2</maxAppWindowNumber>"
         "</Configs>";
@@ -245,7 +239,8 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
     ASSERT_EQ(true, item.IsInts());
     ASSERT_EQ(true, item.intsValue_->size() == 0);
 
-    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>4</maxAppWindowNumber>"
         "</Configs>";
@@ -257,7 +252,8 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
     value = *item.intsValue_;
     ASSERT_EQ(4, value[0]);
 
-    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxAppWindowNumber>1000</maxAppWindowNumber>"
         "</Configs>";
@@ -276,16 +272,18 @@ HWTEST_F(WindowSceneConfigTest, MaxAppWindowNumber, Function | SmallTest | Level
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\"/>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ASSERT_EQ(true, WindowSceneConfig::config_["decor"].GetProp("enable").boolValue_);
 
-    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"false\"/>"
         "</Configs>";
@@ -299,9 +297,10 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig01, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>fullscreen</supportedMode>"
@@ -324,9 +323,10 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig02, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>floating</supportedMode>"
@@ -349,9 +349,10 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig03, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: issueI68QCO
  */
-HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, DecorConfig04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>fullscreen floating</supportedMode>"
@@ -374,7 +375,7 @@ HWTEST_F(WindowSceneConfigTest, DecorConfig04, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, LoadConfigXml, TestSize.Level1)
 {
     auto result = WindowSceneConfig::LoadConfigXml();
     ASSERT_EQ(true, result);
@@ -385,9 +386,9 @@ HWTEST_F(WindowSceneConfigTest, LoadConfigXml, Function | SmallTest | Level2)
  * @tc.desc: ReadFloatNumbersConfigInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, TestSize.Level1)
 {
-    xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST"nodeName");
+    xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST "nodeName");
     auto result = WindowSceneConfig::ReadFloatNumbersConfigInfo(currNode, false);
     ASSERT_EQ(0, result.size());
 }
@@ -397,13 +398,34 @@ HWTEST_F(WindowSceneConfigTest, ReadFloatNumbersConfigInfo, Function | SmallTest
  * @tc.desc: ReadStringConfigInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, TestSize.Level1)
 {
-    xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST"nodeName");
+    xmlNodePtr currNode = xmlNewNode(NULL, BAD_CAST "nodeName");
     auto result = WindowSceneConfig::ReadStringConfigInfo(currNode);
     ASSERT_EQ(0, result.size());
 }
 
+/**
+ * @tc.name: MaxMidSceneNumConfig01
+ * @tc.desc: set maxMidSceneNum with 3.
+ * @tc.type: FUNC
+ * @tc.require: issueI68QCO
+ */
+HWTEST_F(WindowSceneConfigTest, MaxMidSceneNumConfig01, Function | SmallTest | Level2)
+{
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxMidSceneNum>3</maxMidSceneNum>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["maxMidSceneNum"];
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.IsInts());
+    auto value = *item.intsValue_;
+    ASSERT_EQ(true, value.size() >= 1);
+    ASSERT_EQ(3, value[0]);
+}
 
 } // namespace
 } // namespace Rosen

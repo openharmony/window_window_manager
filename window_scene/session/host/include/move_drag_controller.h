@@ -86,6 +86,7 @@ public:
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
+    void ModifyWindowCoordinatesWhenMoveEnd(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect);
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
@@ -120,7 +121,7 @@ public:
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
     void SetOriginalPositionZ(float originalPositionZ) { originalPositionZ_ = originalPositionZ; }
     float GetOriginalPositionZ() const { return originalPositionZ_; }
-    bool isSupportWindowDragCrossDisplay();
+    bool IsSupportWindowDragCrossDisplay();
 
     /*
      * Monitor screen connection status
@@ -204,7 +205,7 @@ private:
             if (IsEmpty()) {
                 return "empty";
             }
-            
+
             std::ostringstream ss;
             ss << "currentDisplayStartX: " << currentDisplayStartX << ","
                << "currentDisplayStartY: " << currentDisplayStartY << ","

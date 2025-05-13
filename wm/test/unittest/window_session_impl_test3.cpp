@@ -150,60 +150,11 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
-    window_ = GetTestWindowImpl("SetForceSplitEnable");
-    ASSERT_NE(window_, nullptr);
-
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-
-    isForceSplit = true;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
-    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
-    ASSERT_NE(window_, nullptr);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window_->hostSession_ = session;
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    AppForceLandscapeConfig config = {};
-    auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig02
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -212,12 +163,29 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
     AppForceLandscapeConfig config = {};
     window_->hostSession_ = nullptr;
     auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
+}
+
+/**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSceneBoardEnabled, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled start";
+    window_ = GetTestWindowImpl("IsSceneBoardEnabled");
+    ASSERT_NE(window_, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    bool result = SceneBoardJudgement::IsSceneBoardEnabled();
+    ASSERT_EQ(result, window_->IsSceneBoardEnabled());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled end";
 }
 
 /**
@@ -274,22 +242,6 @@ HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, TestSize.Level1)
     auto ret = window_->SetMainWindowTopmost(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost end";
-}
-
-/**
- * @tc.name: GetRequestedOrientation
- * @tc.desc: GetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation start";
-    window_ = GetTestWindowImpl("GetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(INVALID_SESSION_ID);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, Orientation::UNSPECIFIED);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation end";
 }
 
 /**
@@ -622,6 +574,40 @@ HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsHorizontalOrientation
+ * @tc.desc: IsHorizontalOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsHorizontalOrientation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation start";
+    window_ = GetTestWindowImpl("IsHorizontalOrientation");
+    ASSERT_NE(window_, nullptr);
+    Orientation orientation = Orientation::HORIZONTAL;
+    auto ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::SENSOR_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::UNSPECIFIED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, false);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation end";
+}
+
+/**
  * @tc.name: MarkProcessed
  * @tc.desc: MarkProcessed
  * @tc.type: FUNC
@@ -774,28 +760,6 @@ HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, TestSize.Lev
     window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded end";
-}
-
-/**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
-    window_ = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    Orientation orientation = Orientation::VERTICAL;
-    window_->property_->requestedOrientation_ = Orientation::VERTICAL;
-    window_->SetRequestedOrientation(orientation);
-    orientation = Orientation::USER_ROTATION_PORTRAIT;
-    window_->SetRequestedOrientation(orientation);
-    auto ret = window_->GetRequestedOrientation();
-    ASSERT_EQ(ret, orientation);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
 /**
@@ -968,20 +932,21 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCompatibleModeInPc
- * @tc.desc: GetCompatibleModeInPc
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, IsAdaptToCompatibleImmersive, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetCompatibleModeInPc");
+    option->SetWindowName("IsAdaptToCompatibleImmersive");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool enable = true;
-    window->property_->SetCompatibleModeInPc(enable);
-    EXPECT_EQ(true, window->GetCompatibleModeInPc());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc end";
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(true, window->IsAdaptToCompatibleImmersive());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive end";
 }
 
 /**
@@ -1379,14 +1344,14 @@ HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSubWindowLevel
- * @tc.desc: UpdateSubWindowLevel
+ * @tc.name: UpdateSubWindowInfo
+ * @tc.desc: UpdateSubWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, UpdateSubWindowLevel, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, UpdateSubWindowInfo, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateSubWindowLevel");
+    option->SetWindowName("UpdateSubWindowInfo");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -1395,20 +1360,23 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowLevel, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
-    subWindowOption->SetWindowName("UpdateSubWindowLevel_subWindow");
+    subWindowOption->SetWindowName("UpdateSubWindowInfo_subWindow");
     sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
     subWindow->property_->SetPersistentId(2);
     subWindow->property_->SetParentPersistentId(1);
     subWindow->hostSession_ = session;
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
         std::vector<sptr<WindowSessionImpl>>>(1, { subWindow }));
 
+    EXPECT_NE(subWindow->context_, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 0);
     int subWindowLevel = 5;
-    window->UpdateSubWindowLevel(subWindowLevel);
-    auto res = subWindow->property_->GetSubWindowLevel();
-    EXPECT_EQ(res, 6);
+    window->UpdateSubWindowInfo(subWindowLevel, nullptr);
+    EXPECT_EQ(subWindow->property_->GetSubWindowLevel(), 6);
+    EXPECT_EQ(subWindow->context_, nullptr);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }

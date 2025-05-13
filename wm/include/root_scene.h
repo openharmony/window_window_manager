@@ -38,6 +38,7 @@ namespace OHOS {
 namespace Rosen {
 class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using GetStatusBarHeightCallback = std::function<uint32_t()>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
@@ -68,6 +69,8 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
+    uint32_t GetStatusBarHeight() const override;
+    void RegisterGetStatusBarHeightCallback(GetStatusBarHeightCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
@@ -76,6 +79,7 @@ public:
     std::string GetClassType() const override { return "RootScene"; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    void GetExtensionConfig(AAFwk::WantParams& want) const override;
 
     /*
      * Keyboard Window
@@ -115,7 +119,13 @@ public:
     uint32_t GetWindowId() const override { return 1; } // 1 for root
 
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
-    
+
+    Ace::UIContent* GetUIContentByDisplayId(DisplayId displayId);
+
+    void AddRootScene(DisplayId displayId, wptr<Window> window);
+
+    void RemoveRootScene(DisplayId displayId);
+
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
     /*
@@ -136,6 +146,7 @@ private:
     void RegisterInputEventListener();
 
     std::unique_ptr<Ace::UIContent> uiContent_;
+    std::unordered_map<DisplayId, wptr<Window>> rootSceneMap_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
@@ -154,6 +165,7 @@ private:
      * Window Immersive
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
+    GetStatusBarHeightCallback getStatusBarHeightCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;

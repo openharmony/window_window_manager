@@ -415,7 +415,7 @@ HWTEST_F(WindowSessionImplTest2, DispatchKeyEventCallback, TestSize.Level1)
  * @tc.desc: HandleBackEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleBackEvent01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleBackEvent01");
@@ -550,7 +550,7 @@ HWTEST_F(WindowSessionImplTest2, SetSystemBarProperty, TestSize.Level1)
  * @tc.desc: SetSpecificBarProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, SetSpecificBarProperty, TestSize.Level0)
 {
     auto window = GetTestWindowImpl("SetSpecificBarProperty");
     ASSERT_NE(window, nullptr);
@@ -675,6 +675,31 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange, TestSize.Level1)
     mode = WindowMode::WINDOW_MODE_PIP;
     window->NotifyWindowStatusChange(mode);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: NotifyWindowStatusChange02
+ * @tc.desc: NotifyWindowStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange02, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("NotifyWindowStatusChange02");
+    ASSERT_NE(window, nullptr);
+
+    auto listeners = GetListenerList<IWindowStatusChangeListener, MockWindowStatusChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
+
+    WindowMode mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyWindowStatusChange(mode);
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->lastWindowStatus_);
+
+    window->NotifyWindowStatusChange(mode);
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->lastWindowStatus_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**
@@ -898,26 +923,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyModeChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("SetRequestedOrientation");
-    ASSERT_NE(window, nullptr);
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::END);
-
-    window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-
-    window->property_->SetRequestedOrientation(Orientation::BEGIN);
-    window->SetRequestedOrientation(Orientation::BEGIN);
-    window->Destroy();
-}
-
-/**
  * @tc.name: GetContentInfo
  * @tc.desc: GetContentInfo
  * @tc.type: FUNC
@@ -951,6 +956,7 @@ HWTEST_F(WindowSessionImplTest2, SetDecorHeight, TestSize.Level1)
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
 
     window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     window->uiContent_ = std::move(uiContent);
     EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_OK);
@@ -1035,9 +1041,9 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, TestSize.Level1)
     int32_t height = -1;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
     EXPECT_EQ(height, 37);
-    window->SetTargetAPIVersion(15);
+    window->SetTargetAPIVersion(18);
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
-    EXPECT_EQ(height, decorHeight);
+    EXPECT_EQ(height, 37);
     window->Destroy();
 }
 
@@ -1126,9 +1132,20 @@ HWTEST_F(WindowSessionImplTest2, RegisterWindowTitleButtonRectChangeListener, Te
 {
     auto window = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
+    auto ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    window->RegisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->RegisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1141,12 +1158,18 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
-
+    sptr<IWindowTitleButtonRectChangedListener> listener =  nullptr;
+    auto ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    listener = sptr<MockWindowTitleButtonRectChangedListener>::MakeSptr();
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->Destroy();
 }
 

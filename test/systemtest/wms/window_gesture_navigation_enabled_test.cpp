@@ -17,9 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "future.h"
+#include "scene_board_judgement.h"
 #include "window_manager.h"
 #include "wm_common.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,8 +28,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int WAIT_FUTURE_RESULT = 20000; // 20s
-constexpr int WAIT_SLEEP_TIME = 1; // 1s
-}
+constexpr int WAIT_SLEEP_TIME = 1;        // 1s
+} // namespace
 
 class TestGestureNavigationEnabledChangedListener : public IGestureNavigationEnabledChangedListener {
 public:
@@ -56,21 +56,15 @@ public:
 sptr<TestGestureNavigationEnabledChangedListener> GestureNavigationEnabledTest::lisenter_ = nullptr;
 void GestureNavigationEnabledTest::SetUpTestCase()
 {
-    lisenter_= new (std::nothrow)TestGestureNavigationEnabledChangedListener();
+    lisenter_ = new (std::nothrow) TestGestureNavigationEnabledChangedListener();
     ASSERT_NE(lisenter_, nullptr);
 }
 
-void GestureNavigationEnabledTest::TearDownTestCase()
-{
-}
+void GestureNavigationEnabledTest::TearDownTestCase() {}
 
-void GestureNavigationEnabledTest::SetUp()
-{
-}
+void GestureNavigationEnabledTest::SetUp() {}
 
-void GestureNavigationEnabledTest::TearDown()
-{
-}
+void GestureNavigationEnabledTest::TearDown() {}
 
 namespace {
 /**
@@ -82,7 +76,7 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, TestSize.Lev
 {
     ASSERT_NE(lisenter_, nullptr);
 
-    auto& windowManager =  WindowManager::GetInstance();
+    auto& windowManager = WindowManager::GetInstance();
     windowManager.SetGestureNavigationEnabled(false);
     sleep(WAIT_SLEEP_TIME);
 
@@ -106,7 +100,6 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, TestSize.Lev
     windowManager.UnregisterGestureNavigationEnabledChangedListener(lisenter_);
     sleep(WAIT_SLEEP_TIME);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
-

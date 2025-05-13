@@ -38,17 +38,14 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void SceneSessionManagerStubLifecycleTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerStubLifecycleTest::SetUpTestCase() {}
 
-void SceneSessionManagerStubLifecycleTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerStubLifecycleTest::TearDownTestCase() {}
 
 void SceneSessionManagerStubLifecycleTest::SetUp()
 {
@@ -66,7 +63,7 @@ namespace {
  * @tc.desc: test HandleRecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -112,7 +109,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
  * @tc.desc: test HandlePendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -129,11 +126,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground,
  * @tc.desc: test HandlePendingSessionToBackgroundForDelegator
  * @tc.type: FUNC
  */
-HWTEST_F(
-    SceneSessionManagerStubLifecycleTest,
-    HandlePendingSessionToBackgroundForDelegator,
-    Function | SmallTest | Level2
-)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -150,7 +143,7 @@ HWTEST_F(
  * @tc.desc: test HandleTerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -166,7 +159,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Functi
  * @tc.desc: test HandleSetSessionContinueState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -185,7 +178,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Fu
  * @tc.desc: test HandleClearSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -209,7 +202,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, Function | Sm
  * @tc.desc: test HandleClearAllSessions
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -227,7 +220,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, Function 
  * @tc.desc: test HandleLockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -249,7 +242,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, Function | Sma
  * @tc.desc: test HandleUnlockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -271,7 +264,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, Function | S
  * @tc.desc: test HandleMoveSessionsToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -283,7 +276,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, F
     auto res = stub_->HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(sessionIds);
     int32_t topSessionId = 1;
     data.WriteInt32(topSessionId);
@@ -296,7 +289,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, F
  * @tc.desc: test HandleMoveSessionsToBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -305,9 +298,9 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, F
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(sessionIds);
-    std::vector<int32_t> result = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> result = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(result);
 
     int res = stub_->HandleMoveSessionsToBackground(data, reply);
@@ -319,11 +312,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, F
  * @tc.desc: test HandleUpdateSessionWindowVisibilityListener
  * @tc.type: FUNC
  */
-HWTEST_F(
-    SceneSessionManagerStubLifecycleTest,
-    HandleUpdateSessionWindowVisibilityListener,
-    Function | SmallTest | Level2
-)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUpdateSessionWindowVisibilityListener, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -340,7 +329,7 @@ HWTEST_F(
  * @tc.desc: test HandleGetVisibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -352,6 +341,6 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, Fu
     int res = stub_->HandleGetVisibilityWindowInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -34,17 +34,26 @@ void RootSceneSession::LoadContent(
 void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<sptr<SceneSession>> statusBarVector;
+    DisplayId displayId = GetSessionProperty()->GetDisplayId();
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
-            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+            WindowType::WINDOW_TYPE_STATUS_BAR, displayId);
     }
     for (auto& statusBar : statusBarVector) {
-        if (!statusBar->IsVisible()) {
+        bool isVisible = statusBar->IsVisible();
+        if (onGetStatusBarConstantlyShowFunc_) {
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                displayId, isVisible);
+        }
+        if (!isVisible) {
+            TLOGI(WmsLogTag::WMS_IMMS, "root scene status bar not visible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "status bar height %{public}d", statusBarRect.height_);
         }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
         TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
@@ -163,6 +172,30 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
         }
     };
     return PostSyncTask(task, __func__);
+}
+
+int32_t RootSceneSession::GetStatusBarHeight()
+{
+    int32_t height = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
+        return height;
+    }
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
+        WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "root scene status bar height %{public}d", statusBarRect.height_);
+        }
+        height = statusBarRect.height_;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene height %{public}d", height);
+    return height;
 }
 
 void RootSceneSession::SetRootSessionRect(const WSRect& rect)

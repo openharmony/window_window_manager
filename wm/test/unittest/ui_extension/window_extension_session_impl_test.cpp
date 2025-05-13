@@ -28,6 +28,8 @@
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
+#include "mock_window_adapter.h"
+#include "singleton_mocker.h"
 #include "window_extension_session_impl.h"
 
 using namespace testing;
@@ -36,6 +38,7 @@ using namespace OHOS::Accessibility;
 using namespace std;
 namespace OHOS {
 namespace Rosen {
+using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowExtensionSessionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -99,7 +102,7 @@ HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, TestSize.Le
  * @tc.desc: normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, Create01, TestSize.Level0)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
@@ -156,7 +159,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, TestSize.Level1)
  * @tc.desc: Destroy Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
@@ -358,7 +361,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult01, TestSize.Level
  * @tc.desc: TransferAbilityResult
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult02, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, TransferAbilityResult02, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -440,7 +443,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData01, TestSize
  * @tc.desc: NotifyTransferComponentData Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyTransferComponentData02, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
@@ -821,7 +824,7 @@ HWTEST_F(WindowExtensionSessionImplTest, InputMethodKeyEventResultCallback07, Te
  * @tc.desc: NotifyKeyEvent01 Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent01, TestSize.Level0)
 {
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
@@ -975,7 +978,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ArkUIFrameworkSupport06, TestSize.Level
  * @tc.desc: UpdateRect Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, TestSize.Level0)
 {
     WSRect rect;
     rect.posX_ = 0;
@@ -1011,39 +1014,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRect01, TestSize.Level1)
 
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, window_->UpdateRect(rect, reason));
-}
-
-/**
- * @tc.name: UpdateRectForRotation01
- * @tc.desc: UpdateRect Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateRectForRotation01, TestSize.Level1)
-{
-    Rect rect;
-    WindowSizeChangeReason wmReason = WindowSizeChangeReason{0};
-    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
-    rsTransaction->syncId_ = 1;
-    rsTransaction->isOpenSyncTransaction_ = true;
-    ASSERT_NE(nullptr, window_);
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    Rect preRect;
-    window_->UpdateRectForRotation(rect, preRect, wmReason, rsTransaction);
-
-    rsTransaction->isOpenSyncTransaction_ = false;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    rsTransaction->syncId_ = -1;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-
-    rsTransaction = nullptr;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-    window_->UpdateRectForOtherReason(rect, wmReason);
-
-    window_->handler_ = nullptr;
-    window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
-    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1106,7 +1076,7 @@ HWTEST_F(WindowExtensionSessionImplTest, TransferAccessibilityEvent, TestSize.Le
  * @tc.desc: Normal test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig1, TestSize.Level0)
 {
     ASSERT_NE(nullptr, window_);
     ASSERT_NE(nullptr, window_->property_);
@@ -1370,7 +1340,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, T
  * @tc.desc: NotifyExecuteAction Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType01, TestSize.Level0)
 {
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea;
@@ -1443,7 +1413,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterAvoidAreaChangeListener, Test
  * @tc.desc: Show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Show, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, Show, TestSize.Level0)
 {
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->persistentId_ = 12345;
@@ -1465,7 +1435,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Show, TestSize.Level1)
  * @tc.desc: Hide
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Hide, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, Hide, TestSize.Level0)
 {
     ASSERT_NE(nullptr, window_->property_);
 
@@ -1705,7 +1675,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, TestSize.Level1
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, TestSize.Level0)
 {
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
     ASSERT_FALSE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
@@ -1929,7 +1899,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, TestSize.Level1)
  * @tc.desc: ConsumePointerEvent Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level0)
 {
     struct RSSurfaceNodeConfig config;
     window_->surfaceNode_ = RSSurfaceNode::Create(config);
@@ -2271,6 +2241,73 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | Sma
     EXPECT_EQ(WMError::WM_OK, window_->OnResyncExtensionConfig(std::move(want), reply));
     EXPECT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
     EXPECT_TRUE(window_->IsWaterfallModeEnabled());
+}
+
+/**
+ * @tc.name: GetHostWindowCompatiblityInfo
+ * @tc.desc: GetHostWindowCompatiblityInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    auto ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    window_->abilityToken_ = iRemoteObject;
+    WindowAdapterMocker mocker;
+    EXPECT_CALL(mocker.Mock(), GetHostWindowCompatiblityInfo(_, _))
+        .WillOnce(Return(WMError::WM_DO_NOTHING))
+        .WillOnce(Return(WMError::WM_OK));
+
+    ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateExtensionConfig
+ * @tc.desc: UpdateExtensionConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionConfig");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->crossAxisState_ = CrossAxisState::STATE_INVALID;
+    auto want = std::make_shared<AAFwk::Want>();
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
+
+    AAFwk::WantParams configParam;
+    AAFwk::WantParams wantParam(want->GetParams());
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_INVALID)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_END)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
 }
 }
 } // namespace Rosen

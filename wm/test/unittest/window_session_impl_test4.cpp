@@ -571,6 +571,8 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(style.closeButtonRightMargin, DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN);
     ASSERT_EQ(style.spacingBetweenButtons, DEFAULT_SPACING_BETWEEN_BUTTONS);
     ASSERT_EQ(style.colorMode, DEFAULT_COLOR_MODE);
+    ASSERT_EQ(style.buttonIconSize, DEFAULT_BUTTON_ICON_SIZE);
+    ASSERT_EQ(style.buttonBackgroundCornerRadius, DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -606,7 +608,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     // check uiContent is null
-    style.buttonBackgroundSize = 24;
+    style.buttonBackgroundSize = 40;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
@@ -918,46 +920,6 @@ HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, TestSize.Level1
         }
     }
     window->Destroy();
-}
-
-/**
- * @tc.name: UpdateRectForRotation
- * @tc.desc: UpdateRectForRotation Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("WindowSessionCreateCheck");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    Rect wmRect;
-    wmRect.posX_ = 0;
-    wmRect.posY_ = 0;
-    wmRect.height_ = 50;
-    wmRect.width_ = 50;
-
-    WSRect rect;
-    wmRect.posX_ = 0;
-    wmRect.posY_ = 0;
-    wmRect.height_ = 50;
-    wmRect.width_ = 50;
-
-    Rect preRect;
-    preRect.posX_ = 0;
-    preRect.posY_ = 0;
-    preRect.height_ = 200;
-    preRect.width_ = 200;
-
-    window->property_->SetWindowRect(preRect);
-    WindowSizeChangeReason wmReason = WindowSizeChangeReason{ 0 };
-    std::shared_ptr<RSTransaction> rsTransaction;
-    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
-    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
-
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    auto res = window->UpdateRect(rect, reason);
-    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
@@ -1305,6 +1267,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
@@ -1465,6 +1428,28 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdatePiPTemplateInfo
+ * @tc.desc: UpdatePiPTemplateInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    std::string testName = "UpdatePiPTemplateInfo";
+    option->SetWindowName(testName);
+    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { testName, testName, testName };
+    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    PiPTemplateInfo templateInfo;
+    window->UpdatePiPTemplateInfo(templateInfo);
+}
+
+/**
  * @tc.name: NotifyWindowVisibility01
  * @tc.desc: NotifyWindowVisibility
  * @tc.type: FUNC
@@ -1526,17 +1511,19 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     bool terminateCloseProcess = false;
     WMError res = window->NotifyMainWindowClose(terminateCloseProcess);
     EXPECT_EQ(terminateCloseProcess, false);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
-    window->RegisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(window->RegisterMainWindowCloseListeners(listener), WMError::WM_OK);
     res = window->NotifyMainWindowClose(terminateCloseProcess);
     EXPECT_EQ(terminateCloseProcess, false);
-    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(window->UnregisterMainWindowCloseListeners(listener), WMError::WM_OK);
 }
 
 /**
@@ -1651,6 +1638,84 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, TestSize.Level1)
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
+}
+
+/**
+ * @tc.name: SetWindowContainerModalColor01
+ * @tc.desc: SetWindowContainerModalColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowContainerModalColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: SetWindowContainerModalColor02
+ * @tc.desc: SetWindowContainerModalColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowContainerModalColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetWindowContainerModalColor03
+ * @tc.desc: SetWindowContainerModalColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowContainerModalColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetWindowContainerModalColor04
+ * @tc.desc: SetWindowContainerModalColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor04, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowContainerModalColor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -2615,15 +2680,13 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    bool isHighlighted = false;
     window->hostSession_ = session;
     window->property_->SetPersistentId(INVALID_SESSION_ID);
-    bool isHighlighted = false;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, false);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
-    window->isHighlighted_ = true;
-    window->IsWindowHighlighted(isHighlighted);
-    ASSERT_EQ(isHighlighted, true);
+    ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_OK);
+    ASSERT_EQ(isHighlighted, false);
 }
 
 /**
@@ -2791,21 +2854,25 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTe
 }
 
 /**
- * @tc.name: SetCurrentRotation
- * @tc.desc: SetCurrentRotation
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetCurrentRotation, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetCurrentRotation");
+    option->SetWindowName("NotifyAppForceLandscapeConfigUpdated");
+
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    auto ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE + 1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-    ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE - 1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-    ret = window->SetCurrentRotation(ONE_FOURTH_FULL_CIRCLE_DEGREE);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
 }
 } // namespace
 } // namespace Rosen

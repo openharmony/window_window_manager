@@ -37,21 +37,13 @@ public:
     sptr<IRemoteObject> iRemoteObjectMocker;
 };
 
-void sceneSessionManagerProxyLifecycleTest::SetUpTestCase()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::SetUpTestCase() {}
 
-void sceneSessionManagerProxyLifecycleTest::TearDownTestCase()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::TearDownTestCase() {}
 
-void sceneSessionManagerProxyLifecycleTest::SetUp()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::SetUp() {}
 
-void sceneSessionManagerProxyLifecycleTest::TearDown()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -59,7 +51,7 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityListener001, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityListener001, TestSize.Level1)
 {
     int32_t persistentId = 0;
     bool haveListener = true;
@@ -68,8 +60,8 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateSessionWindowVisibilityListener(persistentId,
-        haveListener));
+    ASSERT_EQ(WSError::WS_OK,
+              sceneSessionManagerProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener));
 }
 
 /**
@@ -77,7 +69,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -93,7 +85,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Func
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -102,7 +94,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED,
-        sceneSessionManagerProxy->PendingSessionToBackgroundForDelegator(token, true));
+              sceneSessionManagerProxy->PendingSessionToBackgroundForDelegator(token, true));
 }
 
 /**
@@ -110,7 +102,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, TestSize.Level1)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
@@ -120,6 +112,6 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, Functio
     std::vector<sptr<WindowVisibilityInfo>> infos;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->GetVisibilityWindowInfo(infos));
 }
-}  // namespace
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

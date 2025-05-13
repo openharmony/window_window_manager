@@ -183,6 +183,11 @@ public:
                 type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
 
+    static inline bool IsDynamicWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_DYNAMIC;
+    }
+
     static inline bool IsFullScreenWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN;
@@ -629,7 +634,11 @@ public:
                decorButtonStyle.spacingBetweenButtons >= MIN_SPACING_BETWEEN_BUTTONS &&
                decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS &&
                decorButtonStyle.colorMode >= MIN_COLOR_MODE &&
-               decorButtonStyle.colorMode <= MAX_COLOR_MODE;
+               decorButtonStyle.colorMode <= MAX_COLOR_MODE &&
+               decorButtonStyle.buttonIconSize >= MIN_BUTTON_ICON_SIZE &&
+               decorButtonStyle.buttonIconSize <= MAX_BUTTON_ICON_SIZE &&
+               decorButtonStyle.buttonBackgroundCornerRadius >= MIN_BUTTON_BACKGROUND_CORNER_RADIUS &&
+               decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     }
 
 private:

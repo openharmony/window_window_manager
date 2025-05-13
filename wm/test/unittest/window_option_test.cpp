@@ -328,6 +328,20 @@ HWTEST_F(WindowOptionTest, KeepScreenOn, TestSize.Level1)
 }
 
 /**
+ * @tc.name: viewKeepScreenOn
+ * @tc.desc: viewKeepScreenOn setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, ViewKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetViewKeepScreenOn(true);
+    ASSERT_EQ(true, option->IsViewKeepScreenOn());
+    option->SetViewKeepScreenOn(false);
+    ASSERT_EQ(false, option->IsViewKeepScreenOn());
+}
+
+/**
  * @tc.name: TurnScreenOn
  * @tc.desc: TurnScreenOn setter/getter test
  * @tc.type: FUNC

@@ -41,26 +41,20 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr <SceneSession> sceneSession;
+    sptr<SceneSession> sceneSession;
     SessionInfo info;
 };
 
-void SceneSessionLifecycleTest::SetUpTestCase()
-{
-}
+void SceneSessionLifecycleTest::SetUpTestCase() {}
 
-void SceneSessionLifecycleTest::TearDownTestCase()
-{
-}
+void SceneSessionLifecycleTest::TearDownTestCase() {}
 
 void SceneSessionLifecycleTest::SetUp()
 {
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 }
 
-void SceneSessionLifecycleTest::TearDown()
-{
-}
+void SceneSessionLifecycleTest::TearDown() {}
 
 namespace {
 
@@ -69,14 +63,14 @@ namespace {
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
     info.bundleName_ = "Foreground01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
@@ -89,9 +83,9 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
 
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
-        sptr<WindowSessionProperty> property) -> sptr<SceneSession>
-    {
+    specificCallback->onCreate_ = [&resultValue,
+                                   specificCallback](const SessionInfo& info,
+                                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
         sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
@@ -110,14 +104,14 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground02";
     info.bundleName_ = "Foreground02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
 
@@ -134,14 +128,14 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground03, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground03";
     info.bundleName_ = "Foreground03";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
 
@@ -159,7 +153,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
  * @tc.desc: Foreground04 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground04";
@@ -181,7 +175,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground04, Function | SmallTest | Level2)
  * @tc.desc: Foreground05 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground05, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground05";
@@ -195,7 +189,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
@@ -213,7 +207,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
  * @tc.desc: Foreground06 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground06";
@@ -250,14 +244,14 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "Background01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
@@ -267,9 +261,9 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
     sceneSession->isActive_ = true;
     auto result = sceneSession->Background();
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
-        sptr<WindowSessionProperty> property) -> sptr<SceneSession>
-    {
+    specificCallback->onCreate_ = [&resultValue,
+                                   specificCallback](const SessionInfo& info,
+                                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
         sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
@@ -288,14 +282,14 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background02";
     info.bundleName_ = "Background02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -313,7 +307,7 @@ HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Background04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Background04";
@@ -340,13 +334,13 @@ HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask01";
     info.bundleName_ = "BackgroundTask01";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
@@ -358,10 +352,9 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Lev
     sceneSession->isActive_ = true;
     result = sceneSession->BackgroundTask(false);
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ =
-    [&resultValue, specificCallback](const SessionInfo& info,
-                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession>
-    {
+    specificCallback->onCreate_ = [&resultValue,
+                                   specificCallback](const SessionInfo& info,
+                                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
         sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
@@ -384,13 +377,13 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -410,7 +403,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, Function | SmallTest | Lev
  * @tc.desc: BackgroundTask03 function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "BackgroundTask03";
@@ -432,7 +425,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
 
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
 
@@ -458,13 +451,13 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisconnectTask01";
     info.bundleName_ = "DisconnectTask01";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
 
     int resultValue = 0;
@@ -478,9 +471,9 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
     result = sceneSession->DisconnectTask(false, true);
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
-    specificCallback->onCreate_ =
-    [&resultValue, specificCallback](const SessionInfo& info,
-                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
+    specificCallback->onCreate_ = [&resultValue,
+                                   specificCallback](const SessionInfo& info,
+                                                     sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
         sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
@@ -505,13 +498,13 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "DisconnectTask02";
     info.bundleName_ = "DisconnectTask02";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -533,14 +526,14 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask02, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect";
     info.bundleName_ = "Disconnect";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -558,14 +551,14 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect2, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect2";
     info.bundleName_ = "Disconnect2";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -585,14 +578,14 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect2, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Disconnect3, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect3";
     info.bundleName_ = "Disconnect3";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -624,14 +617,14 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus01";
     info.bundleName_ = "UpdateActiveStatus01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -652,14 +645,14 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus02";
     info.bundleName_ = "UpdateActiveStatus02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -677,14 +670,14 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus03";
     info.bundleName_ = "UpdateActiveStatus03";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -726,7 +719,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, Function | SmallTest |
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus04";
@@ -750,7 +743,7 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, Function | SmallTest |
  * @tc.desc: Connect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Connect, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "Connect";
@@ -765,8 +758,7 @@ HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
     SystemSessionConfig systemConfig;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<IRemoteObject> token;
-    WSError res = sceneSession->Connect(sessionStage, eventChannel,
-                                       surfaceNode, systemConfig, property, token);
+    WSError res = sceneSession->Connect(sessionStage, eventChannel, surfaceNode, systemConfig, property, token);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -775,7 +767,7 @@ HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
  * @tc.desc: ConnectInner01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ConnectInner01";
@@ -790,16 +782,15 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
     ASSERT_NE(property, nullptr);
     sceneSession->clientIdentityToken_ = "session1";
 
-    auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
-        property, nullptr, -1, -1, "session2");
+    auto result = sceneSession->ConnectInner(
+        mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1, "session2");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
-        property, nullptr, -1, -1, "session1");
+    result = sceneSession->ConnectInner(
+        mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1, "session1");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
-        property, nullptr, -1, -1);
+    result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -808,7 +799,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
  * @tc.desc: ConnectInner02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ConnectInner02";
@@ -823,15 +814,13 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     ASSERT_NE(property, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     sceneSession->Session::isTerminating_ = false;
-    auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
-        property, nullptr);
+    auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(mockSessionStage);
     ASSERT_NE(eventChannel, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig,
-        property, nullptr);
+    result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig, property, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -840,7 +829,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
  * @tc.desc: Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, Reconnect, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "Reconnect";
@@ -856,8 +845,7 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
     sptr<IRemoteObject> token;
     int32_t pid = -1;
     int32_t uid = -1;
-    WSError res =
-            sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+    WSError res = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 
     property->windowState_ = WindowState::STATE_SHOWN;
@@ -872,7 +860,7 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
  * @tc.desc: ReconnectInner
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ReconnectInner";
@@ -917,14 +905,14 @@ HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "PendingSessionActivation";
     info.bundleName_ = "PendingSessionActivation";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -958,11 +946,30 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
 }
 
 /**
+ * @tc.name: PendingSessionActivation02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "PendingSessionActivation";
+    info.bundleName_ = "PendingSessionActivation";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilitySessionInfo->reuseDelegatorWindow = true;
+    auto result = sceneSession->PendingSessionActivation(abilitySessionInfo);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: TerminateSession
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, TerminateSession, TestSize.Level0)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
@@ -972,8 +979,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
 
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
-    NotifyTerminateSessionFuncNew callback =
-        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
+    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
     session.isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
@@ -990,7 +996,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, TestSize.Level0)
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
@@ -1006,7 +1012,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
  * @tc.desc: NotifySessionForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Foreground01";
@@ -1014,7 +1020,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTes
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1035,14 +1041,14 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTes
  * @tc.desc: NotifySessionFullScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "FullScreen01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -1062,7 +1068,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTes
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -1070,7 +1076,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1086,6 +1092,6 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void DmsReporterTest::SetUpTestCase()
-{
-}
+void DmsReporterTest::SetUpTestCase() {}
 
-void DmsReporterTest::TearDownTestCase()
-{
-}
+void DmsReporterTest::TearDownTestCase() {}
 
-void DmsReporterTest::SetUp()
-{
-}
+void DmsReporterTest::SetUp() {}
 
-void DmsReporterTest::TearDown()
-{
-}
+void DmsReporterTest::TearDown() {}
 
 namespace {
 /**
@@ -85,6 +77,6 @@ HWTEST_F(DmsReporterTest, ReportContinueApp, TestSize.Level1)
     ASSERT_EQ(res, 0);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

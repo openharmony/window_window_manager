@@ -34,21 +34,13 @@ public:
     sptr<SceneSession> GetSceneSession(std::string name);
 };
 
-void HidumpControllerTest::SetUpTestCase()
-{
-}
+void HidumpControllerTest::SetUpTestCase() {}
 
-void HidumpControllerTest::TearDownTestCase()
-{
-}
+void HidumpControllerTest::TearDownTestCase() {}
 
-void HidumpControllerTest::SetUp()
-{
-}
+void HidumpControllerTest::SetUp() {}
 
-void HidumpControllerTest::TearDown()
-{
-}
+void HidumpControllerTest::TearDown() {}
 
 sptr<SceneSession> HidumpControllerTest::GetSceneSession(std::string name)
 {
@@ -72,7 +64,7 @@ namespace {
  * @tc.desc: GetAllSessionDumpDetailedInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo01, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo01, TestSize.Level1)
 {
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
@@ -91,7 +83,7 @@ HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo01, Function | Mediu
  * @tc.desc: GetAllSessionDumpDetailedInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo02, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo02, TestSize.Level1)
 {
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
@@ -110,7 +102,7 @@ HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo02, Function | Mediu
  * @tc.desc: DumpSceneSessionParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSceneSessionParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSceneSessionParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpSceneSessionParamList(oss);
@@ -123,7 +115,7 @@ HWTEST_F(HidumpControllerTest, DumpSceneSessionParamList, Function | MediumTest 
  * @tc.desc: DumpSceneSessionParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSceneSessionParam01, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSceneSessionParam01, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpSceneSessionParam01");
     ASSERT_NE(sceneSession, nullptr);
@@ -140,7 +132,7 @@ HWTEST_F(HidumpControllerTest, DumpSceneSessionParam01, Function | MediumTest | 
  * @tc.desc: DumpSceneSessionParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSceneSessionParam02, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSceneSessionParam02, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpSceneSessionParam02");
     ASSERT_NE(sceneSession, nullptr);
@@ -156,7 +148,7 @@ HWTEST_F(HidumpControllerTest, DumpSceneSessionParam02, Function | MediumTest | 
  * @tc.desc: DumpSessionParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSessionParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSessionParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpSessionParamList(oss);
@@ -169,7 +161,7 @@ HWTEST_F(HidumpControllerTest, DumpSessionParamList, Function | MediumTest | Lev
  * @tc.desc: DumpSessionParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSessionParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSessionParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLayoutRectParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -185,7 +177,7 @@ HWTEST_F(HidumpControllerTest, DumpSessionParam, Function | MediumTest | Level2)
  * @tc.desc: DumpLayoutRectParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLayoutRectParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLayoutRectParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpLayoutRectParamList(oss);
@@ -198,7 +190,7 @@ HWTEST_F(HidumpControllerTest, DumpLayoutRectParamList, Function | MediumTest | 
  * @tc.desc: DumpLayoutRectParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLayoutRectParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLayoutRectParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLayoutRectParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -214,7 +206,7 @@ HWTEST_F(HidumpControllerTest, DumpLayoutRectParam, Function | MediumTest | Leve
  * @tc.desc: DumpLayoutParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLayoutParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLayoutParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpLayoutParamList(oss);
@@ -227,7 +219,7 @@ HWTEST_F(HidumpControllerTest, DumpLayoutParamList, Function | MediumTest | Leve
  * @tc.desc: DumpLayoutParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLayoutParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLayoutParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLayoutParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -243,7 +235,7 @@ HWTEST_F(HidumpControllerTest, DumpLayoutParam, Function | MediumTest | Level2)
  * @tc.desc: DumpAbilityParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpAbilityParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpAbilityParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpAbilityParamList(oss);
@@ -256,7 +248,7 @@ HWTEST_F(HidumpControllerTest, DumpAbilityParamList, Function | MediumTest | Lev
  * @tc.desc: DumpAbilityParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpAbilityParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpAbilityParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLayoutParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -272,7 +264,7 @@ HWTEST_F(HidumpControllerTest, DumpAbilityParam, Function | MediumTest | Level2)
  * @tc.desc: DumpKeyboardParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpKeyboardParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpKeyboardParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpKeyboardParamList(oss);
@@ -285,7 +277,7 @@ HWTEST_F(HidumpControllerTest, DumpKeyboardParamList, Function | MediumTest | Le
  * @tc.desc: DumpKeyboardParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpKeyboardParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpKeyboardParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpKeyboardParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -301,7 +293,7 @@ HWTEST_F(HidumpControllerTest, DumpKeyboardParam, Function | MediumTest | Level2
  * @tc.desc: DumpSysconfigParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSysconfigParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSysconfigParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpSysconfigParamList(oss);
@@ -314,7 +306,7 @@ HWTEST_F(HidumpControllerTest, DumpSysconfigParamList, Function | MediumTest | L
  * @tc.desc: DumpSysconfigParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpSysconfigParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpSysconfigParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpSysconfigParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -330,7 +322,7 @@ HWTEST_F(HidumpControllerTest, DumpSysconfigParam, Function | MediumTest | Level
  * @tc.desc: DumpLifeParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLifeParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLifeParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpLifeParamList(oss);
@@ -343,7 +335,7 @@ HWTEST_F(HidumpControllerTest, DumpLifeParamList, Function | MediumTest | Level2
  * @tc.desc: DumpLifeParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLifeParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLifeParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLifeParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -359,7 +351,7 @@ HWTEST_F(HidumpControllerTest, DumpLifeParam, Function | MediumTest | Level2)
  * @tc.desc: DumpDisplayParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpDisplayParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpDisplayParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpDisplayParamList(oss);
@@ -372,7 +364,7 @@ HWTEST_F(HidumpControllerTest, DumpDisplayParamList, Function | MediumTest | Lev
  * @tc.desc: DumpDisplayParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpDisplayParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpDisplayParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpDisplayParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -388,7 +380,7 @@ HWTEST_F(HidumpControllerTest, DumpDisplayParam, Function | MediumTest | Level2)
  * @tc.desc: DumpFocusParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpFocusParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpFocusParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpFocusParamList(oss);
@@ -401,7 +393,7 @@ HWTEST_F(HidumpControllerTest, DumpFocusParamList, Function | MediumTest | Level
  * @tc.desc: DumpFocusParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpFocusParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpFocusParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpFocusParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -417,7 +409,7 @@ HWTEST_F(HidumpControllerTest, DumpFocusParam, Function | MediumTest | Level2)
  * @tc.desc: DumpInputParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpInputParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpInputParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpInputParamList(oss);
@@ -430,7 +422,7 @@ HWTEST_F(HidumpControllerTest, DumpInputParamList, Function | MediumTest | Level
  * @tc.desc: DumpInputParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpInputParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpInputParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpInputParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -446,7 +438,7 @@ HWTEST_F(HidumpControllerTest, DumpInputParam, Function | MediumTest | Level2)
  * @tc.desc: DumpLakeParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLakeParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLakeParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpLakeParamList(oss);
@@ -459,7 +451,7 @@ HWTEST_F(HidumpControllerTest, DumpLakeParamList, Function | MediumTest | Level2
  * @tc.desc: DumpLakeParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpLakeParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpLakeParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpLakeParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -475,7 +467,7 @@ HWTEST_F(HidumpControllerTest, DumpLakeParam, Function | MediumTest | Level2)
  * @tc.desc: DumpCOMParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpCOMParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpCOMParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpCOMParamList(oss);
@@ -488,7 +480,7 @@ HWTEST_F(HidumpControllerTest, DumpCOMParamList, Function | MediumTest | Level2)
  * @tc.desc: DumpCOMParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpCOMParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpCOMParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpCOMParam");
     ASSERT_NE(sceneSession, nullptr);
@@ -504,7 +496,7 @@ HWTEST_F(HidumpControllerTest, DumpCOMParam, Function | MediumTest | Level2)
  * @tc.desc: DumpVisibleParamList Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpVisibleParamList, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpVisibleParamList, TestSize.Level1)
 {
     std::ostringstream oss;
     HidumpController::GetInstance().DumpVisibleParamList(oss);
@@ -517,7 +509,7 @@ HWTEST_F(HidumpControllerTest, DumpVisibleParamList, Function | MediumTest | Lev
  * @tc.desc: DumpVisibleParam Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, DumpVisibleParam, Function | MediumTest | Level2)
+HWTEST_F(HidumpControllerTest, DumpVisibleParam, TestSize.Level1)
 {
     auto sceneSession = GetSceneSession("DumpVisibleParam");
     ASSERT_NE(sceneSession, nullptr);

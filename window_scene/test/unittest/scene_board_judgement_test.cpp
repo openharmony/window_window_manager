@@ -31,7 +31,7 @@ protected:
     std::string line;
 };
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineEndsWithCR, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineEndsWithCR, TestSize.Level1)
 {
     std::istringstream input("Test\r");
     std::string line;
@@ -43,7 +43,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineEndsWithCR, Function | Sma
     EXPECT_EQ(line, "Test");
 }
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineDoesNotEndWithCR, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineDoesNotEndWithCR, TestSize.Level1)
 {
     std::istringstream input("Test");
     std::string line;
@@ -55,7 +55,7 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineDoesNotEndWithCR, Function
     EXPECT_EQ(line, "Test");
 }
 
-HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineIsEmpty, Function | SmallTest | Level1)
+HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineIsEmpty, TestSize.Level1)
 {
     std::istringstream input("");
     std::string line;
@@ -67,5 +67,5 @@ HWTEST_F(SceneBoardJudgementTest, SafeGetLine_WhenLineIsEmpty, Function | SmallT
     EXPECT_EQ(line, "");
 }
 
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS

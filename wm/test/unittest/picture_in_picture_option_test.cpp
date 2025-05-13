@@ -43,6 +43,29 @@ void PictureInPictureOptionTest::TearDown() {}
 namespace {
 
 /**
+ * @tc.name: ClearNapiRefs
+ * @tc.desc: ClearNapiRefs
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, ClearNapiRefs, Function | SmallTest | Level2)
+{
+    int num = 0;
+    napi_ref ref = reinterpret_cast<napi_ref>(&num);
+    ASSERT_NE(nullptr, ref);
+    sptr<PipOption> option = new PipOption();
+    option->SetNodeControllerRef(ref);
+    ASSERT_NE(nullptr, option->GetNodeControllerRef());
+    option->SetTypeNodeRef(ref);
+    ASSERT_NE(nullptr, option->GetTypeNodeRef());
+    option->SetStorageRef(ref);
+    ASSERT_NE(nullptr, option->GetStorageRef());
+    option->ClearNapiRefs(nullptr);
+    ASSERT_EQ(nullptr, option->GetNodeControllerRef());
+    ASSERT_EQ(nullptr, option->GetTypeNodeRef());
+    ASSERT_EQ(nullptr, option->GetStorageRef());
+}
+
+/**
  * @tc.name: Context
  * @tc.desc: SetContext/GetContext
  * @tc.type: FUNC
@@ -65,6 +88,18 @@ HWTEST_F(PictureInPictureOptionTest, PipTemplate, TestSize.Level1)
     sptr<PipOption> option = new PipOption();
     option->SetPipTemplate(100);
     ASSERT_EQ(100, option->GetPipTemplate());
+}
+
+/**
+ * @tc.name: DefaultWindowSizeType
+ * @tc.desc: SetDefaultWindowSizeType/GetDefaultWindowSizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, DefaultWindowSizeType, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new PipOption();
+    option->SetDefaultWindowSizeType(100);
+    ASSERT_EQ(100, option->GetDefaultWindowSizeType());
 }
 
 /**
@@ -173,15 +208,18 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPipContentCallbackRef
- * @tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
+ * @tc.name: StorageRef
+ * @tc.desc: SetStorageRef/GetStorageRef
  * @tc.type: FUNC
  */
-HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, TestSize.Level1)
+HWTEST_F(PictureInPictureOptionTest, StorageRef, Function | SmallTest | Level2)
 {
+    int num = 0;
+    napi_ref ref = reinterpret_cast<napi_ref>(&num);
+    ASSERT_NE(nullptr, ref);
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
-    option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
+    option->SetStorageRef(ref);
+    ASSERT_EQ(option->GetStorageRef(), ref);
 }
 
 /**
@@ -196,6 +234,26 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, TestSize.Level1)
     ASSERT_TRUE(option->IsTypeNodeEnabled());
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
+}
+
+/**
+ * @tc.name: GetPiPTemplateInfo
+ * @tc.desc: GetPiPTemplateInfo/GetPipPriority
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, GetPiPTemplateInfo, TestSize.Level1)
+{
+    sptr<PipOption> option = new PipOption();
+    uint32_t pipTypeTemplate = 5;
+    uint32_t testValue = 0;
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate));
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate = 3));
+    ASSERT_EQ(testValue, option->GetPipPriority(pipTypeTemplate = 0));
+    ASSERT_EQ(testValue = 1, option->GetPipPriority(pipTypeTemplate = 1));
+    PiPTemplateInfo pipTemplateInfo;
+    option->SetDefaultWindowSizeType(testValue = 2);
+    option->GetPiPTemplateInfo(pipTemplateInfo);
+    ASSERT_EQ(testValue, pipTemplateInfo.defaultWindowSizeType);
 }
 } // namespace
 } // namespace Rosen

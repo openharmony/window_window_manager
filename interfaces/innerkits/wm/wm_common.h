@@ -27,7 +27,7 @@
 
 #include <parcel.h>
 
-#include "../dm/dm_common.h"
+#include "dm_common.h"
 #include "securec.h"
 #include "wm_math.h"
 #include "wm_type.h"
@@ -38,18 +38,27 @@ namespace {
 constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
 constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr uint32_t DEFAULT_BUTTON_ICON_SIZE = 20;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr int32_t DEFAULT_COLOR_MODE = -1;
 constexpr int32_t MIN_COLOR_MODE = -1;
 constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr int32_t LIGHT_COLOR_MODE = 0;
 constexpr int32_t DARK_COLOR_MODE = 1;
-constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 8;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
-constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 6;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
+constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t API_VERSION_INVALID = -1;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
+constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
+constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
 /*
  * PC Window Sidebar Blur
  */
@@ -62,8 +71,21 @@ constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT = 1.0f;
 constexpr float SIDEBAR_DEFAULT_BRIGHTNESS_DARK = 0.4f;
 constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_LIGHT = 0xdbf1f1f1;
 constexpr uint32_t SIDEBAR_DEFAULT_MASKCOLOR_DARK = 0xe61a1a1a;
+constexpr float SIDEBAR_MAXIMIZE_RADIUS_LIGHT = 57.0f;
+constexpr float SIDEBAR_MAXIMIZE_RADIUS_DARK = 57.0f;
+constexpr float SIDEBAR_MAXIMIZE_SATURATION_LIGHT = 2.0f;
+constexpr float SIDEBAR_MAXIMIZE_SATURATION_DARK = 1.0f;
+constexpr float SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT = 1.0f;
+constexpr float SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK = 0.9f;
+constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT = 0xf2f1f1f1;
+constexpr uint32_t SIDEBAR_MAXIMIZE_MASKCOLOR_DARK = 0xf21a1a1a;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT = 0xffe5e5e5;
 constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
+
+/*
+ * Compatible Mode
+ */
+constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
 }
 
 /**
@@ -130,6 +152,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
     WINDOW_TYPE_MUTISCREEN_COLLABORATION,
+    WINDOW_TYPE_DYNAMIC,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -281,6 +304,9 @@ enum class WMError : int32_t {
     WM_ERROR_PIP_CREATE_FAILED,
     WM_ERROR_PIP_INTERNAL_ERROR,
     WM_ERROR_PIP_REPEAT_OPERATION,
+    WM_ERROR_ILLEGAL_PARAM,
+    WM_ERROR_FILTER_ERROR,
+    WM_ERROR_TIMEOUT,
 };
 
 /**
@@ -307,6 +333,9 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
     WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
     WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
+    WM_ERROR_ILLEGAL_PARAM = 1300016,
+    WM_ERROR_FILTER_ERROR = 1300017,
+    WM_ERROR_TIMEOUT = 1300018,
 };
 
 /**
@@ -446,6 +475,12 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
     PAGE_ROTATION,
+    SPLIT_DRAG_START,
+    SPLIT_DRAG,
+    SPLIT_DRAG_END,
+    RESIZE_BY_LIMIT,
+    MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END,
 };
 
@@ -482,7 +517,7 @@ enum class DragResizeType : uint32_t {
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
     RESIZE_KEY_FRAME = 3,
-    RESIZE_MAX_VALUE = 99,
+    RESIZE_MAX_VALUE,  // invalid value begin, add new value above
 };
 
 /**
@@ -994,6 +1029,8 @@ struct ExtensionWindowAbilityInfo {
  */
 struct KeyboardPanelInfo : public Parcelable {
     Rect rect_ = {0, 0, 0, 0};
+    Rect beginRect_ = {0, 0, 0, 0};
+    Rect endRect_ = {0, 0, 0, 0};
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     bool isShowing_ = false;
 
@@ -1001,27 +1038,30 @@ struct KeyboardPanelInfo : public Parcelable {
     {
         return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
                parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
-               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
-               parcel.WriteBool(isShowing_);
+               parcel.WriteInt32(beginRect_.posX_) && parcel.WriteInt32(beginRect_.posY_) &&
+               parcel.WriteUint32(beginRect_.width_) && parcel.WriteUint32(beginRect_.height_) &&
+               parcel.WriteInt32(endRect_.posX_) && parcel.WriteInt32(endRect_.posY_) &&
+               parcel.WriteUint32(endRect_.width_) && parcel.WriteUint32(endRect_.height_) &&
+               parcel.WriteUint32(static_cast<uint32_t>(gravity_)) && parcel.WriteBool(isShowing_);
     }
 
     static KeyboardPanelInfo* Unmarshalling(Parcel& parcel)
     {
-        KeyboardPanelInfo* keyboardPanelInfo = new(std::nothrow)KeyboardPanelInfo;
-        if (keyboardPanelInfo == nullptr) {
-            return nullptr;
-        }
-        bool res = parcel.ReadInt32(keyboardPanelInfo->rect_.posX_) &&
-            parcel.ReadInt32(keyboardPanelInfo->rect_.posY_) && parcel.ReadUint32(keyboardPanelInfo->rect_.width_) &&
-            parcel.ReadUint32(keyboardPanelInfo->rect_.height_);
+        KeyboardPanelInfo* panelInfo = new KeyboardPanelInfo;
+        bool res = parcel.ReadInt32(panelInfo->rect_.posX_) && parcel.ReadInt32(panelInfo->rect_.posY_) &&
+            parcel.ReadUint32(panelInfo->rect_.width_) && parcel.ReadUint32(panelInfo->rect_.height_) &&
+            parcel.ReadInt32(panelInfo->beginRect_.posX_) && parcel.ReadInt32(panelInfo->beginRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->beginRect_.width_) && parcel.ReadUint32(panelInfo->beginRect_.height_) &&
+            parcel.ReadInt32(panelInfo->endRect_.posX_) && parcel.ReadInt32(panelInfo->endRect_.posY_) &&
+            parcel.ReadUint32(panelInfo->endRect_.width_) && parcel.ReadUint32(panelInfo->endRect_.height_);
         if (!res) {
-            delete keyboardPanelInfo;
+            delete panelInfo;
             return nullptr;
         }
-        keyboardPanelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
-        keyboardPanelInfo->isShowing_ = parcel.ReadBool();
+        panelInfo->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        panelInfo->isShowing_ = parcel.ReadBool();
 
-        return keyboardPanelInfo;
+        return panelInfo;
     }
 };
 
@@ -1346,12 +1386,97 @@ struct PiPControlEnableInfo {
     PiPControlStatus enabled;
 };
 
-struct PiPTemplateInfo {
-    uint32_t pipTemplateType;
-    uint32_t priority;
+struct PiPTemplateInfo : public Parcelable {
+    uint32_t pipTemplateType{0};
+    uint32_t priority{0};
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
+    uint32_t defaultWindowSizeType{0};
+
+    PiPTemplateInfo() {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(pipTemplateType) && parcel.WriteUint32(priority))) {
+            return false;
+        }
+        if (controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP || !parcel.WriteUInt32Vector(controlGroup)) {
+            return false;
+        }
+        auto controlStatusSize = pipControlStatusInfoList.size();
+        if (controlStatusSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
+            return false;
+        }
+        for (auto& info : pipControlStatusInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.status))) {
+                return false;
+            }
+        }
+        auto controlEnableSize = pipControlEnableInfoList.size();
+        if (controlEnableSize > MAX_SIZE_PIP_CONTROL || !parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
+            return false;
+        }
+        for (auto& info : pipControlEnableInfoList) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(info.controlType)) ||
+                !parcel.WriteInt32(static_cast<int32_t>(info.enabled))) {
+                return false;
+            }
+        }
+        if (!parcel.WriteUint32(defaultWindowSizeType)) {
+            return false;
+        }
+        return true;
+    }
+
+    static PiPTemplateInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto* pipTemplateInfo = new PiPTemplateInfo();
+        if (!parcel.ReadUint32(pipTemplateInfo->pipTemplateType) || !parcel.ReadUint32(pipTemplateInfo->priority)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        uint32_t controlStatusSize = 0;
+        if (!parcel.ReadUInt32Vector(&pipTemplateInfo->controlGroup) ||
+            pipTemplateInfo->controlGroup.size() > MAX_SIZE_PIP_CONTROL_GROUP ||
+            !parcel.ReadUint32(controlStatusSize) || controlStatusSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlStatusSize; i++) {
+            uint32_t controlType;
+            int32_t status;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
+                break;
+            }
+            PiPControlStatusInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.status = static_cast<PiPControlStatus>(status);
+            pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
+        }
+        uint32_t controlEnableSize = 0;
+        if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < controlEnableSize; i++) {
+            uint32_t controlType;
+            int32_t enabled;
+            if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
+                break;
+            }
+            PiPControlEnableInfo info{};
+            info.controlType = static_cast<PiPControlType>(controlType);
+            info.enabled = static_cast<PiPControlStatus>(enabled);
+            pipTemplateInfo->pipControlEnableInfoList.emplace_back(info);
+        }
+        if (!parcel.ReadUint32(pipTemplateInfo->defaultWindowSizeType)) {
+            delete pipTemplateInfo;
+            return nullptr;
+        }
+        return pipTemplateInfo;
+    }
 };
 
 struct PiPWindowSize {
@@ -1548,18 +1673,20 @@ struct WindowDisplayInfo : public Parcelable {
  */
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
+    uint32_t zOrder = 0;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
+            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
             delete windowLayoutInfo;
             return nullptr;
         }
@@ -1578,21 +1705,37 @@ struct WindowMetaInfo : public Parcelable {
     std::string bundleName;
     std::string abilityName;
     int32_t appIndex = 0;
+    int32_t pid = -1;
+    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    uint32_t parentWindowId = INVALID_WINDOW_ID;
+    uint64_t surfaceNodeId = 0;
+    uint64_t leashWinSurfaceNodeId = 0;
+    bool isPrivacyMode = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
-               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex);
+               parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
+               parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
+               parcel.WriteBool(isPrivacyMode);
     }
+
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
+        uint32_t windowTypeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
-            !parcel.ReadInt32(windowMetaInfo->appIndex)) {
+            !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadInt32(windowMetaInfo->pid) ||
+            !parcel.ReadUint32(windowTypeValue) || !parcel.ReadUint32(windowMetaInfo->parentWindowId) ||
+            !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
+            !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
             delete windowMetaInfo;
             return nullptr;
         }
+        windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         return windowMetaInfo;
     }
 };
@@ -1813,6 +1956,8 @@ struct DecorButtonStyle {
     uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
     uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
     uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
+    uint32_t buttonIconSize = DEFAULT_BUTTON_ICON_SIZE;
+    uint32_t buttonBackgroundCornerRadius = DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS;
 };
 
 struct ExtensionWindowConfig {
@@ -1852,6 +1997,31 @@ struct WindowDensityInfo {
         }
         return str;
     }
+};
+
+/**
+ * @struct WindowPropertyInfo
+ *
+ * @brief Currently available window property
+ */
+struct WindowPropertyInfo {
+    Rect windowRect { 0, 0, 0, 0 };
+    Rect drawableRect { 0, 0, 0, 0 };
+    uint32_t apiCompatibleVersion = 0;
+    WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isLayoutFullScreen = false;
+    bool isFullScreen = false;
+    bool isTouchable = false;
+    bool isFocusable = false;
+    std::string name;
+    bool isPrivacyMode = false;
+    bool isKeepScreenOn = false;
+    float brightness = 0.0f;
+    bool isTransparent = false;
+    bool isRoundCorner = false;
+    float dimBehindValue = 0.0f;
+    uint32_t id = INVALID_WINDOW_ID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
 };
 
 /**
@@ -2153,6 +2323,13 @@ struct RotationChangeInfo {
 struct RotationChangeResult {
     RectType rectType_;
     Rect windowRect_;
+};
+
+/**
+ * @brief default zIndex for specific window.
+ */
+enum DefaultSpecificZIndex {
+    MUTISCREEN_COLLABORATION = 930,
 };
 }
 }

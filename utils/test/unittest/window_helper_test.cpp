@@ -30,21 +30,13 @@ public:
     virtual void TearDown() override;
 };
 
-void WindowHelperTest::SetUpTestCase()
-{
-}
+void WindowHelperTest::SetUpTestCase() {}
 
-void WindowHelperTest::TearDownTestCase()
-{
-}
+void WindowHelperTest::TearDownTestCase() {}
 
-void WindowHelperTest::SetUp()
-{
-}
+void WindowHelperTest::SetUp() {}
 
-void WindowHelperTest::TearDown()
-{
-}
+void WindowHelperTest::TearDown() {}
 
 namespace {
 /**
@@ -54,12 +46,15 @@ namespace {
  */
 HWTEST_F(WindowHelperTest, WindowTypeWindowMode, TestSize.Level1)
 {
-    ASSERT_EQ(true, WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-                                                         WindowMode::WINDOW_MODE_FULLSCREEN));
-    ASSERT_EQ(false, WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
-                                                          WindowMode::WINDOW_MODE_FULLSCREEN));
-    ASSERT_EQ(false, WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-                                                          WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    ASSERT_EQ(true,
+              WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+                                                   WindowMode::WINDOW_MODE_FULLSCREEN));
+    ASSERT_EQ(false,
+              WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+                                                   WindowMode::WINDOW_MODE_FULLSCREEN));
+    ASSERT_EQ(false,
+              WindowHelper::IsMainFullScreenWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+                                                   WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
 
     ASSERT_EQ(true, WindowHelper::IsFloatingWindow(WindowMode::WINDOW_MODE_FLOATING));
     ASSERT_EQ(false, WindowHelper::IsFloatingWindow(WindowMode::WINDOW_MODE_FULLSCREEN));
@@ -78,18 +73,24 @@ HWTEST_F(WindowHelperTest, WindowTypeWindowMode, TestSize.Level1)
  */
 HWTEST_F(WindowHelperTest, WindowModeSupport, TestSize.Level1)
 {
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_FULLSCREEN));
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_FLOATING));
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
-    ASSERT_EQ(true, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                        WindowMode::WINDOW_MODE_PIP));
-    ASSERT_EQ(false, WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
-                                                         WindowMode::WINDOW_MODE_UNDEFINED));
+    ASSERT_EQ(true,
+              WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                  WindowMode::WINDOW_MODE_FULLSCREEN));
+    ASSERT_EQ(true,
+              WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                  WindowMode::WINDOW_MODE_FLOATING));
+    ASSERT_EQ(true,
+              WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                  WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    ASSERT_EQ(true,
+              WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                  WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
+    ASSERT_EQ(
+        true,
+        WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL, WindowMode::WINDOW_MODE_PIP));
+    ASSERT_EQ(false,
+              WindowHelper::IsWindowModeSupported(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL,
+                                                  WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
@@ -99,10 +100,10 @@ HWTEST_F(WindowHelperTest, WindowModeSupport, TestSize.Level1)
  */
 HWTEST_F(WindowHelperTest, WindowRect, TestSize.Level1)
 {
-    Rect rect0 = {0, 0, 0, 0};
+    Rect rect0 = { 0, 0, 0, 0 };
     ASSERT_EQ(true, WindowHelper::IsEmptyRect(rect0));
 
-    Rect rect1 = {0, 0, 1, 1};
+    Rect rect1 = { 0, 0, 1, 1 };
     ASSERT_EQ(false, WindowHelper::IsEmptyRect(rect1));
 }
 
@@ -138,9 +139,9 @@ HWTEST_F(WindowHelperTest, WindowStringUtil, TestSize.Level1)
  */
 HWTEST_F(WindowHelperTest, CalculateOriginPosition, TestSize.Level1)
 {
-    Rect rect1 { 0, 0, 10, 10 }, rect2 { 100, 100, 200, 200 };
-    PointInfo point = WindowHelper::CalculateOriginPosition(rect1, rect2, PointInfo { 200, 200 });
-    PointInfo expectPoint { 5, 5 };
+    Rect rect1{ 0, 0, 10, 10 }, rect2{ 100, 100, 200, 200 };
+    PointInfo point = WindowHelper::CalculateOriginPosition(rect1, rect2, PointInfo{ 200, 200 });
+    PointInfo expectPoint{ 5, 5 };
     ASSERT_EQ(true, point.x == expectPoint.x);
     ASSERT_EQ(true, point.y == expectPoint.y);
 
@@ -151,17 +152,18 @@ HWTEST_F(WindowHelperTest, CalculateOriginPosition, TestSize.Level1)
     transform.translateX_ = 100;
     transform.translateY_ = 200;
     transform.translateZ_ = 50;
-    Rect rect { 50, 50, 240, 320 };
+    Rect rect{ 50, 50, 240, 320 };
     TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
-            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+                                          rect.posY_ + transform.pivotY_ * rect.height_,
+                                          0 };
     TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
     mat *= WindowHelper::ComputeWorldTransformMat4(transform);
     mat *= TransformHelper::CreateTranslation(pivotPos);
 
     TransformHelper::Vector3 expectOriginPoint(0, 0, 0);
     TransformHelper::Vector3 tranformedPoint = TransformHelper::Transform(expectOriginPoint, mat);
-    PointInfo actialOriginPoint = WindowHelper::CalculateOriginPosition(mat,
-        { static_cast<int32_t>(tranformedPoint.x_), static_cast<int32_t>(tranformedPoint.y_) });
+    PointInfo actialOriginPoint = WindowHelper::CalculateOriginPosition(
+        mat, { static_cast<int32_t>(tranformedPoint.x_), static_cast<int32_t>(tranformedPoint.y_) });
     const float errorRange = 2.f;
     ASSERT_LT(std::abs(expectOriginPoint.x_ - actialOriginPoint.x), errorRange);
     ASSERT_LT(std::abs(expectOriginPoint.y_ - actialOriginPoint.y), errorRange);
@@ -175,10 +177,11 @@ HWTEST_F(WindowHelperTest, CalculateOriginPosition, TestSize.Level1)
 HWTEST_F(WindowHelperTest, TransformRect, TestSize.Level1)
 {
     Transform transform;
-    Rect rect { 0, 0, 10, 20 };
+    Rect rect{ 0, 0, 10, 20 };
     transform.scaleX_ = transform.scaleY_ = 2.0f;
     TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
-            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+                                          rect.posY_ + transform.pivotY_ * rect.height_,
+                                          0 };
     TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
     mat *= WindowHelper::ComputeWorldTransformMat4(transform);
     mat *= TransformHelper::CreateTranslation(pivotPos);
@@ -198,9 +201,10 @@ HWTEST_F(WindowHelperTest, CalculateHotZoneScale, TestSize.Level1)
     transform.scaleX_ = 0.66f;
     transform.scaleY_ = 1.5f;
     transform.pivotX_ = transform.pivotY_ = 0.5f;
-    Rect rect { -1, -2, 2, 4 };
+    Rect rect{ -1, -2, 2, 4 };
     TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
-            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+                                          rect.posY_ + transform.pivotY_ * rect.height_,
+                                          0 };
     TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
     mat *= WindowHelper::ComputeWorldTransformMat4(transform);
     mat *= TransformHelper::CreateTranslation(pivotPos);
@@ -228,6 +232,8 @@ HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_DYNAMIC));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_DYNAMIC));
 }
 
 /**
@@ -242,9 +248,10 @@ HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, TestSize.Level1)
     transform1.scaleY_ = 1.5f;
     transform1.translateX_ = 12.f;
     transform1.translateY_ = 45.f;
-    Rect rect1 { 0, 0, 300, 400 };
+    Rect rect1{ 0, 0, 300, 400 };
     TransformHelper::Vector3 pivotPos1 = { rect1.posX_ + transform1.pivotX_ * rect1.width_,
-            rect1.posY_ + transform1.pivotY_ * rect1.height_, 0 };
+                                           rect1.posY_ + transform1.pivotY_ * rect1.height_,
+                                           0 };
     TransformHelper::Matrix4 mat1 = TransformHelper::CreateTranslation(-pivotPos1);
     mat1 *= WindowHelper::ComputeWorldTransformMat4(transform1);
     mat1 *= TransformHelper::CreateTranslation(pivotPos1);
@@ -253,7 +260,8 @@ HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, TestSize.Level1)
     Transform transform2;
     WindowHelper::GetTransformFromWorldMat4(mat1, rect2, transform2);
     TransformHelper::Vector3 pivotPos2 = { rect2.posX_ + transform2.pivotX_ * rect2.width_,
-            rect2.posY_ + transform2.pivotY_ * rect2.height_, 0 };
+                                           rect2.posY_ + transform2.pivotY_ * rect2.height_,
+                                           0 };
     TransformHelper::Matrix4 mat2 = TransformHelper::CreateTranslation(-pivotPos2);
     mat2 *= WindowHelper::ComputeWorldTransformMat4(transform2);
     mat2 *= TransformHelper::CreateTranslation(pivotPos2);
@@ -288,14 +296,30 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
     style.closeButtonRightMargin = MIN_CLOSE_BUTTON_RIGHT_MARGIN;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 
-    // checkout the side of closeButtonRightMargin
+    // checkout the side of spacingBetweenButtons
     style.spacingBetweenButtons = MIN_SPACING_BETWEEN_BUTTONS - 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS + 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of buttonIconSize
+    style.buttonIconSize = MIN_BUTTON_ICON_SIZE - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonIconSize = MAX_BUTTON_ICON_SIZE + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonIconSize = MAX_BUTTON_ICON_SIZE;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of buttonBackgroundCornerRadius
+    style.buttonBackgroundCornerRadius = MIN_BUTTON_BACKGROUND_CORNER_RADIUS - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
