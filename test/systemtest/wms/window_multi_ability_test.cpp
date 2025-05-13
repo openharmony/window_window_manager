@@ -15,8 +15,8 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "window_test_utils.h"
 #include "scene_board_judgement.h"
+#include "window_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,21 +32,13 @@ public:
     virtual void TearDown() override;
 };
 
-void WindowMultiAbilityTest::SetUpTestCase()
-{
-}
+void WindowMultiAbilityTest::SetUpTestCase() {}
 
-void WindowMultiAbilityTest::TearDownTestCase()
-{
-}
+void WindowMultiAbilityTest::TearDownTestCase() {}
 
-void WindowMultiAbilityTest::SetUp()
-{
-}
+void WindowMultiAbilityTest::SetUp() {}
 
-void WindowMultiAbilityTest::TearDown()
-{
-}
+void WindowMultiAbilityTest::TearDown() {}
 
 static void DoSceneResource(sptr<WindowScene> windowscene)
 {
@@ -91,7 +83,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, TestSize.Level1)
         ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
         ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-    }else {
+    } else {
         ASSERT_NE(WMError::WM_OK, scene5->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene4->GoBackground());
         ASSERT_NE(WMError::WM_OK, scene3->GoBackground());

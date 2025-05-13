@@ -54,7 +54,15 @@ public:
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
-
+    bool OnExtendDisplayNodeChange(ScreenId firstId, ScreenId secondId) override;
+    bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId, const std::string& name,
+        bool isExtend) override;
+    bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) override;
+    void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenCombination extendCombination) override;
+    std::string OnDumperClientScreenSessions() override;
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
 };

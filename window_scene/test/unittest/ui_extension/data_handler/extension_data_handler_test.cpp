@@ -38,7 +38,7 @@ public:
  * @tc.desc: Test DataTransferConfig Marshalling with valid data
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigMarshalling01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigMarshalling01, TestSize.Level1)
 {
     DataTransferConfig config;
     config.subSystemId = SubSystemId::WM_UIEXT;
@@ -55,7 +55,7 @@ HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigMarshalling01, Function | S
  * @tc.desc: Test DataTransferConfig Unmarshalling with valid data
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling01, TestSize.Level1)
 {
     MessageParcel parcel;
     parcel.WriteUint8(static_cast<uint8_t>(SubSystemId::WM_UIEXT));
@@ -77,7 +77,7 @@ HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling01, Function |
  * @tc.desc: Test DataTransferConfig Unmarshalling with invalid subSystemId
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling02, TestSize.Level1)
 {
     MessageParcel parcel;
     parcel.WriteUint8(static_cast<uint8_t>(SubSystemId::INVALID));
@@ -94,11 +94,11 @@ HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling02, Function |
  * @tc.desc: Test RegisterDataConsumer with valid callback
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer01, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
 
@@ -111,11 +111,11 @@ HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer01, Function | SmallTest 
  * @tc.desc: Test RegisterDataConsumer with duplicate registration
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer02, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
     auto callback1 = callback;
@@ -131,11 +131,11 @@ HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer02, Function | SmallTest 
  * @tc.desc: Test UnregisterDataConsumer with registered consumer
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, UnregisterDataConsumer01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, UnregisterDataConsumer01, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
     auto callback1 = callback;
@@ -152,7 +152,7 @@ HWTEST_F(ExtensionDataHandlerTest, UnregisterDataConsumer01, Function | SmallTes
  * @tc.desc: Test SendDataSync with mocked behavior
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, SendDataTest01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, SendDataTest01, TestSize.Level1)
 {
     MockDataHandler handler;
     AAFwk::Want data;
@@ -170,12 +170,14 @@ HWTEST_F(ExtensionDataHandlerTest, SendDataTest01, Function | SmallTest | Level2
  * @tc.desc: Test NotifyDataConsumer with sync mode and valid callback
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer01, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer01, TestSize.Level1)
 {
     MockDataHandler handler;
     bool callbackCalled = false;
 
-    auto callback = [&callbackCalled](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+    auto callback = [&callbackCalled](SubSystemId id,
+                                      uint32_t customId,
+                                      AAFwk::Want&& data,
                                       std::optional<AAFwk::Want>& reply) -> int32_t {
         callbackCalled = true;
         EXPECT_EQ(SubSystemId::WM_UIEXT, id);
@@ -212,12 +214,14 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer01, Function | SmallTest | 
  * @tc.desc: Test NotifyDataConsumer with async mode
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer02, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer02, TestSize.Level1)
 {
     MockDataHandler handler;
     bool callbackCalled = false;
 
-    auto callback = [&callbackCalled](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+    auto callback = [&callbackCalled](SubSystemId id,
+                                      uint32_t customId,
+                                      AAFwk::Want&& data,
                                       std::optional<AAFwk::Want>& reply) -> int32_t {
         callbackCalled = true;
         EXPECT_EQ(SubSystemId::WM_UIEXT, id);
@@ -246,7 +250,7 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer02, Function | SmallTest | 
  * @tc.desc: Test NotifyDataConsumer with unregistered consumer
  * @tc.type: FUNC
  */
-HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer03, Function | SmallTest | Level2)
+HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer03, TestSize.Level1)
 {
     MockDataHandler handler;
     AAFwk::Want data;
@@ -259,4 +263,4 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer03, Function | SmallTest | 
     auto ret = handler.NotifyDataConsumer(std::move(data), reply, config);
     ASSERT_EQ(DataHandlerErr::NO_CONSUME_CALLBACK, ret);
 }
-}  // namespace OHOS::Rosen::Extension
+} // namespace OHOS::Rosen::Extension

@@ -189,6 +189,16 @@ bool WindowOption::IsKeepScreenOn() const
     return keepScreenOn_;
 }
 
+void WindowOption::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowOption::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
+}
+
 void WindowOption::SetTurnScreenOn(bool turnScreenOn)
 {
     turnScreenOn_ = turnScreenOn;
@@ -373,6 +383,16 @@ int32_t WindowOption::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowOption::SetZIndex(int32_t zIndex)
+{
+    zIndex_ = zIndex;
+}
+
+int32_t WindowOption::GetZIndex() const
+{
+    return zIndex_;
+}
+
 void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     isSystemKeyboard_ = isSystemKeyboard;
@@ -413,6 +433,15 @@ bool WindowOption::IsConstrainedModal() const
     return isConstrainedModal_;
 }
 
+void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
+{
+    subWindowOutlineEnabled_ = outlineEnabled;
+}
+
+bool WindowOption::IsSubWindowOutlineEnabled() const
+{
+   return subWindowOutlineEnabled_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

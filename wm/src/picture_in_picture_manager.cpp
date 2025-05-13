@@ -15,6 +15,7 @@
 
 #include "picture_in_picture_manager.h"
 
+#include "parameters.h"
 #include "picture_in_picture_controller.h"
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
@@ -164,52 +165,47 @@ sptr<Window> PictureInPictureManager::GetCurrentWindow()
 void PictureInPictureManager::DoPreRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->PreRestorePictureInPicture();
     }
-    activeController_->PreRestorePictureInPicture();
 }
 
 void PictureInPictureManager::DoRestore()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->RestorePictureInPictureWindow();
     }
-    activeController_->RestorePictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoPrepareSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->PrepareSource();
     }
-    activeController_->PrepareSource();
 }
 
 void PictureInPictureManager::DoLocateSource()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->LocateSource();
     }
-    activeController_->LocateSource();
 }
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
     TLOGI(WmsLogTag::WMS_PIP, "destroyWindow:%{public}d, byPriority:%{public}d", destroyWindow, byPriority);
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        StopPipType currentStopType = StopPipType::NULL_STOP;
+        if (!byPriority) {
+            currentStopType = StopPipType::USER_STOP;
+        } else {
+            currentStopType = StopPipType::OTHER_PACKAGE_STOP;
+        }
+        controller->StopPictureInPicture(destroyWindow, currentStopType, !byPriority);
     }
-    StopPipType currentStopType = StopPipType::NULL_STOP;
-    if (!byPriority) {
-        currentStopType = StopPipType::USER_STOP;
-    } else {
-        currentStopType = StopPipType::OTHER_PACKAGE_STOP;
-    }
-    activeController_->StopPictureInPicture(destroyWindow, currentStopType, !byPriority);
 }
 
 void PictureInPictureManager::DoActionClose()
@@ -221,10 +217,9 @@ void PictureInPictureManager::DoActionClose()
 void PictureInPictureManager::DoDestroy()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->DestroyPictureInPictureWindow();
     }
-    activeController_->DestroyPictureInPictureWindow();
 }
 
 void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32_t status)
@@ -305,6 +300,12 @@ void PictureInPictureManager::PipSizeChange(double width, double height, double 
     if (auto controller = GetActiveController()) {
         controller->PipSizeChange(width, height, scale);
     }
+}
+
+bool PictureInPictureManager::IsPcType()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    return multiWindowUIType == "FreeFormMultiWindow";
 }
 
 }

@@ -1,0 +1,137 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../windowmanager_aafwk.gni")
+
+module_out_path =
+    "window_manager/window_manager/window_scene/event_distribution"
+ws_unittest_common = "../:ws_unittest_common"
+
+ohos_unittest("ws_scene_input_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_input_manager_test.cpp" ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "input:libmmi-napi",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("ws_scene_session_dirty_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_dirty_manager_test.cpp" ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:session_handler",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "input:libmmi-napi",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("ws_scene_session_dirty_manager_test2") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_dirty_manager_test2.cpp" ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:session_handler",
+    "ability_runtime:mission_info",
+    "ace_engine:ace_uicontent",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "input:libmmi-napi",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("ws_intention_event_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "intention_event_manager_test.cpp" ]
+
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
+
+  external_deps = [
+    "ability_runtime:mission_info",
+    "ability_runtime:session_handler",
+    "accessibility:accessibility_common",
+    "accessibility:accessibility_interface",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "input:libmmi-napi",
+    "napi:ace_napi",
+  ]
+}

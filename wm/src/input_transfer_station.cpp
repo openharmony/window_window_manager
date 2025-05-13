@@ -15,6 +15,7 @@
 
 #include "input_transfer_station.h"
 
+#include <dlfcn.h>
 #include <thread>
 #include <event_handler.h>
 #include "window_manager_hilog.h"
@@ -28,6 +29,16 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputTransferStation"};
 }
+
+const std::string GAME_CONTROLLER_SO_PATH = "/system/lib64/libgamecontroller_event.z.so";
+
+static std::unique_ptr<void, void(*)(void*)> gameControllerHandle_{nullptr, [](void* handle) {
+    if (handle) {
+        dlclose(handle);
+        TLOGI(WmsLogTag::WMS_EVENT, "[dlclose] GameController unloaded");
+    }
+}};
+
 WM_IMPLEMENT_SINGLE_INSTANCE(InputTransferStation)
 
 InputTransferStation::~InputTransferStation()
@@ -116,6 +127,19 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     HandleInputEvent(pointerEvent);
 }
 
+void InputTransferStation::LoadGameController()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    isGameControllerLoaded_ = true;
+    void* handle = dlopen(GAME_CONTROLLER_SO_PATH.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+    if (handle) {
+        TLOGI(WmsLogTag::WMS_EVENT, "dlopen GameController success");
+        gameControllerHandle_.reset(handle);
+    } else {
+        TLOGW(WmsLogTag::WMS_EVENT, "dlopen %{public}s failed", dlerror());
+    }
+}
+
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
     uint32_t windowId = window->GetWindowId();
@@ -162,6 +186,9 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
     } else {
         auto ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, eventHandler_);
         TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer %{public}u, wid:%{public}u", ret, windowId);
+    }
+    if (!isGameControllerLoaded_) {
+        LoadGameController();
     }
 }
 

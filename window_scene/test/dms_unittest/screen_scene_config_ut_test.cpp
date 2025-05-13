@@ -296,65 +296,6 @@ HWTEST_F(ScreenSceneConfigUtTest, ReadEnableConfigInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReadStringConfigInfo
- * @tc.desc: test function : ReadStringConfigInfo
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSceneConfigUtTest, ReadStringConfigInfo, TestSize.Level1)
-{
-    ScreenSceneConfig::enableConfig_.clear();
-
-    auto configFilePath = ScreenSceneConfig::GetConfigPath("etc/window/resources/display_manager_config.xml");
-    xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
-    if (docPtr == nullptr) {
-        return;
-    }
-
-    xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
-    if (rootPtr == nullptr || rootPtr->name == nullptr ||
-        xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        xmlFreeDoc(docPtr);
-        return;
-    }
-    uint32_t readCount = 0;
-    for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
-        if (!ScreenSceneConfig::IsValidNode(*curNodePtr)) {
-            continue;
-        }
-
-        auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDisplayCutoutPath"))) {
-            ScreenSceneConfig::ReadStringConfigInfo(curNodePtr);
-            readCount++;
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("subDisplayCutoutPath"))) {
-            ScreenSceneConfig::ReadStringConfigInfo(curNodePtr);
-            readCount++;
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi"))) {
-            ScreenSceneConfig::ReadStringConfigInfo(curNodePtr);
-            readCount++;
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("externalScreenDefaultMode"))) {
-            ScreenSceneConfig::ReadStringConfigInfo(curNodePtr);
-            readCount++;
-            continue;
-        }
-    }
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_GT(ScreenSceneConfig::stringConfig_.size(), readCount);
-    } else {
-        ASSERT_EQ(ScreenSceneConfig::stringConfig_.size(), readCount);
-    }
-    ScreenSceneConfig::DumpConfig();
-    xmlFreeDoc(docPtr);
-}
-
-/**
  * @tc.name: GetEnableConfig1
  * @tc.desc: test function : GetEnableConfig
  * @tc.type: FUNC
@@ -684,7 +625,7 @@ HWTEST_F(ScreenSceneConfigUtTest, GetCurvedCompressionAreaInLandscape03, TestSiz
 HWTEST_F(ScreenSceneConfigUtTest, ReadStringListConfigInfo01, Function | SmallTest | Level3)
 {
     xmlNodePtr rootNode = nullptr;
-    ScreenSceneConfig::ReadStringListConfigInfo(nullptr, "");
+    ScreenSceneConfig::ReadStringListConfigInfo(rootNode, "");
     EXPECT_EQ(rootNode, nullptr);
 }
 

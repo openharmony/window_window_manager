@@ -43,17 +43,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<DistributedClient> distributedClient_;
 };
 
-void DistributedClientTest::SetUpTestCase()
-{
-}
+void DistributedClientTest::SetUpTestCase() {}
 
-void DistributedClientTest::TearDownTestCase()
-{
-}
+void DistributedClientTest::TearDownTestCase() {}
 
 void DistributedClientTest::SetUp()
 {
@@ -73,7 +70,7 @@ namespace {
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetMissionInfos, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetMissionInfos, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos start.";
     const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
@@ -94,7 +91,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos, Function | SmallTest | Level2)
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetMissionInfos02, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetMissionInfos02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos02 start.";
     std::vector<AAFwk::MissionInfo> missionInfos;
@@ -110,7 +107,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos02, Function | SmallTest | Level2
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetMissionInfos03, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetMissionInfos03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos03 start.";
     std::vector<AAFwk::MissionInfo> missionInfos;
@@ -119,7 +116,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos03, Function | SmallTest | Level2
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos03 end.";
 }
-}
+} // namespace
 
 /**
  * @tc.name: GetRemoteMissionSnapshotInfo
@@ -127,7 +124,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos03, Function | SmallTest | Level2
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo start.";
     AAFwk::MissionSnapshot missionSnapshot;
@@ -141,7 +138,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo, Function | SmallTe
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo02, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo02 start.";
     std::string deviceID = "123456789";
@@ -158,7 +155,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo02, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo03, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest GetRemoteMissionSnapshotInfo03 start.";
     std::string deviceID = "123456789";
@@ -175,7 +172,7 @@ HWTEST_F(DistributedClientTest, GetRemoteMissionSnapshotInfo03, Function | Small
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, ReadMissionInfosFromParcel, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, ReadMissionInfosFromParcel, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest ReadMissionInfosFromParcel start.";
     std::vector<AAFwk::MissionInfo> missionInfos;
@@ -190,7 +187,7 @@ HWTEST_F(DistributedClientTest, ReadMissionInfosFromParcel, Function | SmallTest
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, SetMissionContinueState, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
@@ -208,7 +205,7 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | 
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, SetMissionContinueState02, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, SetMissionContinueState02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
@@ -226,7 +223,7 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState02, Function | SmallTest 
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
-HWTEST_F(DistributedClientTest, SetMissionContinueState03, Function | SmallTest | Level2)
+HWTEST_F(DistributedClientTest, SetMissionContinueState03, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
@@ -237,5 +234,5 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState03, Function | SmallTest 
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 end.";
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

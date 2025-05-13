@@ -22,8 +22,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
-constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -31,6 +29,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::WriteActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::WriteActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::WriteActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -93,6 +93,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
         &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
+        &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -100,6 +102,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateTurnScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON),
         &WindowSessionProperty::ReadActionUpdateKeepScreenOn),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_VIEW_KEEP_SCREEN_ON),
+        &WindowSessionProperty::ReadActionUpdateViewKeepScreenOn),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE),
         &WindowSessionProperty::ReadActionUpdateFocusable),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE),
@@ -162,6 +166,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
         &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
+        &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -225,6 +231,11 @@ void WindowSessionProperty::SetDragEnabled(bool dragEnabled)
 void WindowSessionProperty::SetHideNonSystemFloatingWindows(bool hide)
 {
     hideNonSystemFloatingWindows_ = hide;
+}
+
+void WindowSessionProperty::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
+{
+    isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
 }
 
 void WindowSessionProperty::SetSkipEventOnCastPlus(bool isSkip)
@@ -349,6 +360,11 @@ bool WindowSessionProperty::GetDragEnabled() const
 bool WindowSessionProperty::GetHideNonSystemFloatingWindows() const
 {
     return hideNonSystemFloatingWindows_;
+}
+
+bool WindowSessionProperty::GetSkipSelfWhenShowOnVirtualScreen() const
+{
+    return isSkipSelfWhenShowOnVirtualScreen_;
 }
 
 bool WindowSessionProperty::GetSkipEventOnCastPlus() const
@@ -516,6 +532,16 @@ bool WindowSessionProperty::IsKeepScreenOn() const
     return keepScreenOn_;
 }
 
+void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
+{
+    viewKeepScreenOn_ = keepScreenOn;
+}
+
+bool WindowSessionProperty::IsViewKeepScreenOn() const
+{
+    return viewKeepScreenOn_;
+}
+
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
 {
     accessTokenId_ = accessTokenId;
@@ -544,6 +570,16 @@ MaximizeMode WindowSessionProperty::GetMaximizeMode() const
 void WindowSessionProperty::SetMaximizeMode(MaximizeMode mode)
 {
     maximizeMode_ = mode;
+}
+
+void WindowSessionProperty::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    isFollowScreenChange_ = isFollowScreenChange;
+}
+
+bool WindowSessionProperty::GetFollowScreenChange() const
+{
+    return isFollowScreenChange_;
 }
 
 void WindowSessionProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
@@ -889,51 +925,7 @@ bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
     if (!WindowHelper::IsPipWindow(type_)) {
         return true;
     }
-    if (!parcel.WriteUint32(pipTemplateInfo_.pipTemplateType)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(pipTemplateInfo_.priority)) {
-        return false;
-    }
-    auto size = pipTemplateInfo_.controlGroup.size();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < size; i++) {
-        if (!parcel.WriteUint32(pipTemplateInfo_.controlGroup[i])) {
-            return false;
-        }
-    }
-    auto controlStatusSize = pipTemplateInfo_.pipControlStatusInfoList.size();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlStatusSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlStatusInfoList[i].status))) {
-            return false;
-        }
-    }
-    auto controlEnableSize = pipTemplateInfo_.pipControlEnableInfoList.size();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return false;
-    }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(controlEnableSize))) {
-        return false;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        if (!parcel.WriteUint32(static_cast<uint32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].controlType)) ||
-            !parcel.WriteInt32(static_cast<int32_t>(pipTemplateInfo_.pipControlEnableInfoList[i].enabled))) {
-            return false;
-        }
-    }
-    return true;
+    return parcel.WriteParcelable(&pipTemplateInfo_);
 }
 
 void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
@@ -941,51 +933,11 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
     if (!WindowHelper::IsPipWindow(property->GetWindowType())) {
         return;
     }
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = parcel.ReadUint32();
-    pipTemplateInfo.priority = parcel.ReadUint32();
-    auto size = parcel.ReadUint32();
-    if (size > MAX_SIZE_PIP_CONTROL_GROUP) {
+    sptr<PiPTemplateInfo> pipTemplateInfo = parcel.ReadParcelable<PiPTemplateInfo>();
+    if (pipTemplateInfo == nullptr) {
         return;
     }
-    for (uint32_t i = 0; i < size; i++) {
-        uint32_t controlGroupId = 0;
-        if (!parcel.ReadUint32(controlGroupId)) {
-            return;
-        }
-        pipTemplateInfo.controlGroup.push_back(controlGroupId);
-    }
-    auto controlStatusSize = parcel.ReadUint32();
-    if (controlStatusSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlStatusSize; i++) {
-        PiPControlStatusInfo pipControlStatusInfo;
-        uint32_t controlType = 0;
-        int32_t status = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(status)) {
-            return;
-        }
-        pipControlStatusInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlStatusInfo.status = static_cast<PiPControlStatus>(status);
-        pipTemplateInfo.pipControlStatusInfoList.push_back(pipControlStatusInfo);
-    }
-    auto controlEnableSize = parcel.ReadUint32();
-    if (controlEnableSize > MAX_SIZE_PIP_CONTROL) {
-        return;
-    }
-    for (uint32_t i = 0; i < controlEnableSize; i++) {
-        PiPControlEnableInfo pipControlEnableInfo;
-        uint32_t controlType = 0;
-        int32_t enabled = 0;
-        if (!parcel.ReadUint32(controlType) || !parcel.ReadInt32(enabled)) {
-            return;
-        }
-        pipControlEnableInfo.controlType = static_cast<PiPControlType>(controlType);
-        pipControlEnableInfo.enabled = static_cast<PiPControlStatus>(enabled);
-        pipTemplateInfo.pipControlEnableInfoList.push_back(pipControlEnableInfo);
-    }
-    property->SetPiPTemplateInfo(pipTemplateInfo);
+    property->SetPiPTemplateInfo(*pipTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -994,6 +946,7 @@ bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
         return false;
     }
     if (isShaped_) {
+        std::lock_guard<std::mutex> lock(windowMaskMutex_);
         if (!windowMask_->Marshalling(parcel)) {
             return false;
         }
@@ -1042,6 +995,9 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (hasWant && !parcel.WriteParcelable(want.get())) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
+        return false;
+    }
     return true;
 }
 
@@ -1080,47 +1036,14 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         }
         info.want = want;
     }
+    bool isFollowParentMultiScreenPolicy = false;
+    if (!parcel.ReadBool(isFollowParentMultiScreenPolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isFollowParentMultiScreenPolicy!");
+        return false;
+    }
+    info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
     property->SetSessionInfo(info);
     return true;
-}
-
-void WindowSessionProperty::SetCompatibleModeInPc(bool compatibleModeInPc)
-{
-    compatibleModeInPc_ = compatibleModeInPc;
-}
-
-bool WindowSessionProperty::GetCompatibleModeInPc() const
-{
-    return compatibleModeInPc_;
-}
-
-void WindowSessionProperty::SetCompatibleWindowSizeInPc(int32_t portraitWidth,
-    int32_t portraitHeight, int32_t landscapeWidth, int32_t landscapeHeight)
-{
-    compatibleInPcPortraitWidth_ = portraitWidth;
-    compatibleInPcPortraitHeight_ = portraitHeight;
-    compatibleInPcLandscapeWidth_ = landscapeWidth;
-    compatibleInPcLandscapeHeight_ = landscapeHeight;
-}
-
-int32_t WindowSessionProperty::GetCompatibleInPcPortraitWidth() const
-{
-    return compatibleInPcPortraitWidth_;
-}
-
-int32_t WindowSessionProperty::GetCompatibleInPcPortraitHeight() const
-{
-    return compatibleInPcPortraitHeight_;
-}
-
-int32_t WindowSessionProperty::GetCompatibleInPcLandscapeWidth() const
-{
-    return compatibleInPcLandscapeWidth_;
-}
-
-int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
-{
-    return compatibleInPcLandscapeHeight_;
 }
 
 void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
@@ -1143,18 +1066,6 @@ bool WindowSessionProperty::GetIsPcAppInPad() const
     return isPcAppInPad_;
 }
 
-void WindowSessionProperty::SetCompatibleModeEnableInPad(bool enable)
-{
-    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
-    compatibleModeEnableInPad_ = enable;
-}
-
-bool WindowSessionProperty::GetCompatibleModeEnableInPad() const
-{
-    std::lock_guard<std::mutex> lock(compatibleModeMutex_);
-    return compatibleModeEnableInPad_;
-}
-
 void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
 {
     subWindowLevel_ = subWindowLevel;
@@ -1175,14 +1086,14 @@ int32_t WindowSessionProperty::GetSubWindowZLevel() const
     return zLevel_;
 }
 
-void WindowSessionProperty::SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode)
+void WindowSessionProperty::SetZIndex(int32_t zIndex)
 {
-    isSupportDragInPcCompatibleMode_ = isSupportDragInPcCompatibleMode;
+    zIndex_ = zIndex;
 }
 
-bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
+int32_t WindowSessionProperty::GetZIndex() const
 {
-    return isSupportDragInPcCompatibleMode_;
+    return zIndex_;
 }
 
 void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
@@ -1195,6 +1106,16 @@ bool WindowSessionProperty::GetIsAtomicService() const
 {
     std::lock_guard lock(atomicServiceMutex_);
     return isAtomicService_;
+}
+
+void WindowSessionProperty::SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled)
+{
+    subWindowOutlineEnabled_ = subWindowOutlineEnabled;
+}
+
+bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
+{
+    return subWindowOutlineEnabled_;
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -1210,7 +1131,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
-        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
@@ -1222,7 +1143,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
-        parcel.WriteInt32(zLevel_) &&
+        parcel.WriteInt32(zLevel_) && parcel.WriteInt32(zIndex_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1240,17 +1161,17 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_) && parcel.WriteBool(compatibleModeInPc_) &&
-        parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
-        parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
-        parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
+        parcel.WriteParcelable(&keyboardLayoutParams_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) &&
+        parcel.WriteBool(isPcAppInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
-        parcel.WriteBool(isFullScreenWaterfallMode_);
+        parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
+        parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
+        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1274,6 +1195,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetViewKeepScreenOn(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
@@ -1293,6 +1215,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTopmost(parcel.ReadBool());
     property->SetMainWindowTopmost(parcel.ReadBool());
     property->SetSubWindowZLevel(parcel.ReadInt32());
+    property->SetZIndex(parcel.ReadInt32());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1323,13 +1246,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
     property->SetKeyboardLayoutParams(*keyboardLayoutParams);
-    property->SetCompatibleModeInPc(parcel.ReadBool());
-    property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
-                                          parcel.ReadInt32(), parcel.ReadInt32());
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
-    property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
-    property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
@@ -1341,6 +1259,11 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAtomicService(parcel.ReadBool());
     property->SetApiVersion(parcel.ReadUint32());
     property->SetIsFullScreenWaterfallMode(parcel.ReadBool());
+    property->SetIsAbilityHookOff(parcel.ReadBool());
+    property->SetIsAbilityHook(parcel.ReadBool());
+    property->SetFollowScreenChange(parcel.ReadBool());
+    property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
+    property->SetSubWindowOutlineEnabled(parcel.ReadBool());
     return property;
 }
 
@@ -1361,9 +1284,11 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    viewKeepScreenOn_ = property->viewKeepScreenOn_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
+    zIndex_ = property->zIndex_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
@@ -1394,6 +1319,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchHotAreas_ = property->touchHotAreas_;
     keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    isSkipSelfWhenShowOnVirtualScreen_ = property->isSkipSelfWhenShowOnVirtualScreen_;
     isSkipEventOnCastPlus_ = property->isSkipEventOnCastPlus_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
@@ -1405,17 +1331,13 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     isShaped_ = property->isShaped_;
     fullScreenStart_ = property->fullScreenStart_;
-    windowMask_ = property->windowMask_;
+    {
+        std::lock_guard<std::mutex> lock(windowMaskMutex_);
+        windowMask_ = property->windowMask_;
+    }
     collaboratorType_ = property->collaboratorType_;
-    compatibleModeInPc_ = property->compatibleModeInPc_;
-    compatibleInPcPortraitWidth_ = property->compatibleInPcPortraitWidth_;
-    compatibleInPcPortraitHeight_ = property->compatibleInPcPortraitHeight_;
-    compatibleInPcLandscapeWidth_ = property->compatibleInPcLandscapeWidth_;
-    compatibleInPcLandscapeHeight_ = property->compatibleInPcLandscapeHeight_;
     isAppSupportPhoneInPc_ = property->isAppSupportPhoneInPc_;
-    isSupportDragInPcCompatibleMode_ = property->isSupportDragInPcCompatibleMode_;
     isPcAppInPad_ = property->isPcAppInPad_;
-    compatibleModeEnableInPad_ = property->compatibleModeEnableInPad_;
     subWindowLevel_ = property->subWindowLevel_;
     realParentId_ = property->realParentId_;
     uiExtensionUsage_ = property->uiExtensionUsage_;
@@ -1434,6 +1356,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAtomicService_ = property->isAtomicService_;
     apiVersion_ = property->apiVersion_;
     isFullScreenWaterfallMode_ = property->isFullScreenWaterfallMode_;
+    isAbilityHookOff_ = property->isAbilityHookOff_;
+    isAbilityHook_ = property->isAbilityHook_;
+    isFollowScreenChange_ = property->isFollowScreenChange_;
+    subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1455,6 +1381,11 @@ bool WindowSessionProperty::WriteActionUpdateTurnScreenOn(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
 {
     return parcel.WriteBool(keepScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    return parcel.WriteBool(viewKeepScreenOn_);
 }
 
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
@@ -1595,6 +1526,11 @@ bool WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted(Parcel& parc
     return parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
+{
+    return parcel.WriteBool(isFollowScreenChange_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1614,6 +1550,11 @@ void WindowSessionProperty::ReadActionUpdateTurnScreenOn(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
 {
     SetKeepScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
+{
+    SetViewKeepScreenOn(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
@@ -1756,6 +1697,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
     SetExclusivelyHighlighted(parcel.ReadBool());
 }
 
+void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
+{
+    SetFollowScreenChange(parcel.ReadBool());
+}
+
 void WindowSessionProperty::SetTransform(const Transform& trans)
 {
     trans_ = trans;
@@ -1863,11 +1809,13 @@ WindowType WindowSessionProperty::GetParentWindowType() const
 
 void WindowSessionProperty::SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask)
 {
+    std::lock_guard<std::mutex> lock(windowMaskMutex_);
     windowMask_ = windowMask;
 }
 
 std::shared_ptr<Media::PixelMap> WindowSessionProperty::GetWindowMask() const
 {
+    std::lock_guard<std::mutex> lock(windowMaskMutex_);
     return windowMask_;
 }
 
@@ -2009,6 +1957,218 @@ void WindowSessionProperty::SetIsFullScreenWaterfallMode(bool isFullScreenWaterf
 bool WindowSessionProperty::GetIsFullScreenWaterfallMode() const
 {
     return isFullScreenWaterfallMode_;
+}
+
+void WindowSessionProperty::SetIsAbilityHookOff(bool isAbilityHookOff)
+{
+    isAbilityHookOff_ = isAbilityHookOff;
+}
+
+bool WindowSessionProperty::GetIsAbilityHookOff() const
+{
+    return isAbilityHookOff_;
+}
+
+void WindowSessionProperty::SetIsAbilityHook(bool isAbilityHook)
+{
+    isAbilityHook_ = isAbilityHook;
+}
+
+bool WindowSessionProperty::GetIsAbilityHook() const
+{
+    return isAbilityHook_;
+}
+
+sptr<CompatibleModeProperty> WindowSessionProperty::GetCompatibleModeProperty() const
+{
+    return compatibleModeProperty_;
+}
+
+void WindowSessionProperty::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> property)
+{
+    compatibleModeProperty_ = property;
+}
+
+bool WindowSessionProperty::IsAdaptToImmersive() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToImmersive();
+}
+
+bool WindowSessionProperty::IsAdaptToEventMapping() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToEventMapping();
+}
+
+bool WindowSessionProperty::IsAdaptToProportionalScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToProportionalScale();
+}
+
+bool WindowSessionProperty::IsAdaptToBackButton() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToBackButton();
+}
+
+bool WindowSessionProperty::IsDragResizeDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsDragResizeDisabled();
+}
+
+bool WindowSessionProperty::IsResizeWithDpiDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsResizeWithDpiDisabled();
+}
+
+bool WindowSessionProperty::IsFullScreenDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsFullScreenDisabled();
+}
+        
+bool WindowSessionProperty::IsWindowLimitDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
+}
+
+bool WindowSessionProperty::IsAdaptToSimulationScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
+void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
+{
+    isAdaptToImmersive_ = isAdaptToImmersive;
+}
+
+bool CompatibleModeProperty::IsAdaptToImmersive() const
+{
+    return isAdaptToImmersive_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToEventMapping(bool isAdaptToEventMapping)
+{
+    isAdaptToEventMapping_ = isAdaptToEventMapping;
+}
+        
+bool CompatibleModeProperty::IsAdaptToEventMapping() const
+{
+    return isAdaptToEventMapping_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToProportionalScale(bool isAdaptToProportionalScale)
+{
+    isAdaptToProportionalScale_ = isAdaptToProportionalScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToProportionalScale() const
+{
+    return isAdaptToProportionalScale_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToBackButton(bool isAdaptToBackButton)
+{
+    isAdaptToBackButton_ = isAdaptToBackButton;
+}
+
+bool CompatibleModeProperty::IsAdaptToBackButton() const
+{
+    return isAdaptToBackButton_;
+}
+
+void CompatibleModeProperty::SetDisableDragResize(bool disableDragResize)
+{
+    disableDragResize_ = disableDragResize;
+}
+
+bool CompatibleModeProperty::IsDragResizeDisabled() const
+{
+    return disableDragResize_;
+}
+
+void CompatibleModeProperty::SetDisableResizeWithDpi(bool disableResizeWithDpi)
+{
+    disableResizeWithDpi_ = disableResizeWithDpi;
+}
+        
+bool CompatibleModeProperty::IsResizeWithDpiDisabled() const
+{
+    return disableResizeWithDpi_;
+}
+
+void CompatibleModeProperty::SetDisableFullScreen(bool disableFullScreen)
+{
+    disableFullScreen_ = disableFullScreen;
+}
+
+bool CompatibleModeProperty::IsFullScreenDisabled() const
+{
+    return disableFullScreen_;
+}
+
+void CompatibleModeProperty::SetDisableWindowLimit(bool disableWindowLimit)
+{
+    disableWindowLimit_ = disableWindowLimit;
+}
+
+bool CompatibleModeProperty::IsWindowLimitDisabled() const
+{
+    return disableWindowLimit_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
+{
+    isAdaptToSimulationScale_ = isAdaptToSimulationScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToSimulationScale() const
+{
+    return isAdaptToSimulationScale_;
+}
+
+bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
+{
+    return parcel.WriteBool(isAdaptToImmersive_) &&
+        parcel.WriteBool(isAdaptToEventMapping_) &&
+        parcel.WriteBool(isAdaptToProportionalScale_) &&
+        parcel.WriteBool(isAdaptToBackButton_) &&
+        parcel.WriteBool(disableDragResize_) &&
+        parcel.WriteBool(disableResizeWithDpi_) &&
+        parcel.WriteBool(disableFullScreen_) &&
+        parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isAdaptToSimulationScale_);
+}
+
+CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
+{
+    CompatibleModeProperty* property = new(std::nothrow) CompatibleModeProperty();
+    if (property == nullptr) {
+        return nullptr;
+    }
+    property->isAdaptToImmersive_ = parcel.ReadBool();
+    property->isAdaptToEventMapping_ = parcel.ReadBool();
+    property->isAdaptToProportionalScale_ = parcel.ReadBool();
+    property->isAdaptToBackButton_ = parcel.ReadBool();
+    property->disableDragResize_ = parcel.ReadBool();
+    property->disableResizeWithDpi_ = parcel.ReadBool();
+    property->disableFullScreen_ = parcel.ReadBool();
+    property->disableWindowLimit_ = parcel.ReadBool();
+    property->isAdaptToSimulationScale_ = parcel.ReadBool();
+    return property;
+}
+
+void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& property)
+{
+    if (property == nullptr) {
+        return;
+    }
+    isAdaptToImmersive_ = property->isAdaptToImmersive_;
+    isAdaptToEventMapping_ = property->isAdaptToEventMapping_;
+    isAdaptToProportionalScale_ = property->isAdaptToProportionalScale_;
+    isAdaptToBackButton_ = property->isAdaptToBackButton_;
+    disableDragResize_ = property->disableDragResize_;
+    disableResizeWithDpi_ = property->disableResizeWithDpi_;
+    disableFullScreen_ = property->disableFullScreen_;
+    disableWindowLimit_ = property->disableWindowLimit_;
+    isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
 }
 } // namespace Rosen
 } // namespace OHOS

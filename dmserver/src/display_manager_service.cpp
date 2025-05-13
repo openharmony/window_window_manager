@@ -35,6 +35,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
+const std::string ACCESS_VIRTUAL_SCREEN_PERMISSION = "ohos.permission.ACCESS_VIRTUAL_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SceneBoardJudgement::IsSceneBoardEnabled() ? false :
@@ -239,7 +240,7 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:CreateVirtualScreen(%s)", option.name_.c_str());
     if (option.surface_ != nullptr && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) &&
-        !Permission::IsStartByHdcd()) {
+        !Permission::IsStartByHdcd() && !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
         WLOGFE("permission denied");
         return SCREEN_ID_INVALID;
     }
@@ -251,11 +252,16 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
 
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd() &&
+        !isCallingByThirdParty) {
         WLOGFE("destory virtual screen permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (!accessTokenIdMaps_.isExistAndRemove(screenId, IPCSkeleton::GetCallingTokenID())) {
+        if (isCallingByThirdParty) {
+            return DMError::DM_ERROR_NULLPTR;
+        }
         return DMError::DM_ERROR_INVALID_CALLING;
     }
 
@@ -269,13 +275,17 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
     WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
+    bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
-        Permission::IsStartByHdcd()) {
+        Permission::IsStartByHdcd() || isCallingByThirdParty) {
         sptr<Surface> pPurface = Surface::CreateSurfaceAsProducer(surface);
         return abstractScreenController_->SetVirtualScreenSurface(screenId, pPurface);
     }
     WLOGFE("permission denied");
+    if (isCallingByThirdParty) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
     return DMError::DM_ERROR_INVALID_CALLING;
 }
 
@@ -306,7 +316,7 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||

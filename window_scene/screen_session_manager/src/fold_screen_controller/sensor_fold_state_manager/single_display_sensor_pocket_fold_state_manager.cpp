@@ -26,6 +26,8 @@
 #include "app_mgr_client.h"
 #include "screen_session_manager/include/screen_rotation_property.h"
 #include "screen_session_manager.h"
+#include "sensor_agent.h"
+#include "sensor_agent_type.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -180,8 +182,10 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
         HandleSensorChange(FoldStatus::FOLDED, currentAngle, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
         if (tentType == TENT_MODE_ON) {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
         } else if (tentType == TENT_MODE_HOVER_ON) {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_TENT_HOVER));
             ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_HOVER);
         }
     } else {
@@ -193,6 +197,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
             nextState = GetNextFoldState(currentAngle, currentHall);
         } else {
             nextState = GetNextFoldState(currentAngle, hall);
+        }
+        if (nextState == FoldStatus::FOLDED) {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+        } else {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
         }
         HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
@@ -226,6 +235,11 @@ void SingleDisplaySensorPocketFoldStateManager::TentModeHandleSensorChange(float
         HandleSensorChange(nextState, angle, foldScreenPolicy);
         TLOGI(WmsLogTag::DMS, "exit tent mode. angle: %{public}f, hall: %{public}d", angle, hall);
         SetTentMode(TENT_MODE_OFF);
+        if (nextState == FoldStatus::FOLDED) {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
+        } else {
+            SetDeviceStatusAndParam(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
+        }
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
     }
 }
@@ -242,11 +256,6 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
-}
-
-bool SingleDisplaySensorPocketFoldStateManager::IsCameraMode()
-{
-    return false;
 }
 
 ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}
@@ -288,5 +297,12 @@ bool ApplicationStatePocketObserver::IsCameraForeground()
 std::string ApplicationStatePocketObserver::GetForegroundApp()
 {
     return foregroundBundleName_;
+}
+
+void SingleDisplaySensorPocketFoldStateManager::SetDeviceStatusAndParam(uint32_t deviceStatus)
+{
+    TLOGI(WmsLogTag::DMS, "Set device status to: %{public}u", deviceStatus);
+    SetDeviceStatus(deviceStatus);
+    system::SetParameter("persist.dms.device.status", std::to_string(deviceStatus));
 }
 } // namespace OHOS::Rosen

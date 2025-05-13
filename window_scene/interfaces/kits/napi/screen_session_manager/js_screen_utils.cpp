@@ -66,6 +66,7 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
     napi_set_named_property(env, objValue, "accessTranslateY", CreateJsValue(env, screenProperty.GetTranslateY()));
     napi_set_named_property(env, objValue, "scaleX", CreateJsValue(env, screenProperty.GetScaleX()));
     napi_set_named_property(env, objValue, "scaleY", CreateJsValue(env, screenProperty.GetScaleY()));
+    napi_set_named_property(env, objValue, "rsId", CreateJsValue(env, static_cast<int64_t>(screenProperty.GetRsId())));
     return objValue;
 }
 
@@ -219,6 +220,24 @@ napi_value JsScreenUtils::CreateJsExtendScreenConnectStatus(napi_env env)
         static_cast<int32_t>(ExtendScreenConnectStatus::CONNECT)));
     napi_set_named_property(env, objValue, "DISCONNECT", CreateJsValue(env,
         static_cast<int32_t>(ExtendScreenConnectStatus::DISCONNECT)));
+    return objValue;
+}
+
+napi_value JsScreenUtils::CreateJsScreenModeChangeEvent(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "SCREEN_MODE_CHANGE_EVENT_UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(ScreenModeChangeEvent::UNKNOWN)));
+    napi_set_named_property(env, objValue, "SCREEN_MODE_CHANGE_EVENT_BEGIN", CreateJsValue(env,
+        static_cast<int32_t>(ScreenModeChangeEvent::BEGIN)));
+    napi_set_named_property(env, objValue, "SCREEN_MODE_CHANGE_EVENT_END", CreateJsValue(env,
+        static_cast<int32_t>(ScreenModeChangeEvent::END)));
     return objValue;
 }
 

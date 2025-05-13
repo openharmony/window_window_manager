@@ -26,11 +26,13 @@ public:
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
+        bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError ShowKeyboard(KeyboardViewMode mode) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
+    WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
@@ -40,6 +42,7 @@ public:
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
     void Resume() override;
+    WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
 
     /*
      * Window Layout
@@ -95,6 +98,7 @@ public:
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
@@ -109,6 +113,7 @@ public:
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
+    virtual bool IsViewKeepScreenOn() const override;
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
@@ -129,6 +134,9 @@ public:
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property) override;
+    void GetSystemBarPropertyForPage(const std::map<WindowType, SystemBarProperty>& properties,
+        std::map<WindowType, SystemBarProperty>& pageProperties);
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
@@ -144,6 +152,9 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
 
     /*
      * Sub Window
@@ -156,6 +167,7 @@ public:
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
     WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
+    WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * PC Window Layout
@@ -166,6 +178,8 @@ public:
     WMError SetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
+    WMError MaximizeForCompatibleMode();
+    WMError RecoverForCompatibleMode();
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
@@ -176,16 +190,15 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    bool haveSetSupportedWindowModes_ = false;
 
     /*
      * Compatible Mode
      */
-    WSError NotifyCompatibleModeEnableInPad(bool enabled) override;
-    WSError CompatibleFullScreenRecover() override;
-    WSError CompatibleFullScreenMinimize() override;
-    WSError CompatibleFullScreenClose() override;
+    WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
+    void HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits);
 
     /*
      * Free Multi Window
@@ -235,6 +248,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*
      * Window Decor
@@ -283,6 +297,10 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -308,6 +326,7 @@ private:
     void UpdateWindowState();
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
+    void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -351,6 +370,8 @@ private:
      * PC Window Layout
      */
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
+    bool isResizedByLimit_ = false;
 
     /*
      * Window Immersive
@@ -411,6 +432,8 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
+    bool CheckCanMoveWindowType();
+    bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
 
     /*
      * PC Window

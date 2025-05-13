@@ -21,6 +21,7 @@
 #include <new>
 #include <transaction/rs_interfaces.h>
 #include "ability_context.h"
+#include "common/include/session_permission.h"
 #include "display_manager.h"
 #include "dm_common.h"
 #include "wm_common.h"
@@ -31,7 +32,9 @@
 #include "window_option.h"
 #include "pixel_map_napi.h"
 #include "permission.h"
+#include "scene_board_judgement.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +49,7 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 constexpr int32_t INVALID_COORDINATE = -1;
+constexpr uint32_t API_VERSION_18 = 18;
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -496,6 +500,9 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         return false;
     }
     if (!isConfigOptionWindowTypeValid(env, option)) {
+        return false;
+    }
+    if (!ParseZIndex(env, jsObject, option)) {
         return false;
     }
     napi_value value = nullptr;
@@ -1238,6 +1245,19 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
 
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "device not support!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+    uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+    if (apiVersion < API_VERSION_18 && !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    } else if (apiVersion >= API_VERSION_18 &&
+               !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!, api%{public}u", apiVersion);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

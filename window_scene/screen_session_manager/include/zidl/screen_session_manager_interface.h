@@ -59,8 +59,8 @@ public:
         return DMError::DM_OK;
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) override { return DMError::DM_OK; }
-    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false) override { return nullptr; }
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
+        bool isUseDma = false, bool isCaptureFullOfScreen = false) override { return nullptr; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
         DmErrorCode* errorCode = nullptr) override
     {
@@ -163,10 +163,10 @@ public:
 
     void SetFoldStatusLocked(bool locked) override {}
     DMError SetFoldStatusLockedFromJs(bool locked) override { return DMError::DM_OK; }
+    void SetFoldStatusExpandAndLocked(bool locked) override {}
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
-    bool IsOrientationNeedChanged() override {return false;};
     bool IsFoldable() override { return false; };
     bool IsCaptured() override { return false; };
 
@@ -174,6 +174,7 @@ public:
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
     virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
+    virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {};
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 
@@ -218,7 +219,7 @@ public:
         return DMError::DM_OK;
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) override {}
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) override {}
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
@@ -249,6 +250,11 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual void SetDefaultMultiScreenModeWhenSwitchUser() {};
+    virtual void NotifyExtendScreenCreateFinish() {};
+    virtual void NotifyExtendScreenDestroyFinish() {};
+    virtual void NotifyScreenMaskAppear() {};
+    virtual bool GetKeyboardState() { return false; };
 };
 } // namespace Rosen
 } // namespace OHOS

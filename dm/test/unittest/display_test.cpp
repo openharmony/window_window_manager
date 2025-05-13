@@ -264,6 +264,22 @@ HWTEST_F(DisplayTest, GetSupportedColorSpaces, TestSize.Level1)
     auto res = defaultDisplay_ -> GetSupportedColorSpaces(colorSpaces);
     ASSERT_EQ(DMError::DM_OK, res);
 }
+
+/**
+ * @tc.name: GetDisplayInfoWithCache01
+ * @tc.desc: test GetDisplayInfoWithCache01
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
+{
+    auto baseInfo = defaultDisplay_->GetDisplayInfo();
+    auto defaultName = baseInfo->GetName();
+    auto defaultDpi = baseInfo->GetName();
+    defaultDisplay_->UpdateDisplayInfo(nullptr);
+
+    auto changedInfo = defaultDisplay_->GetDisplayInfoWithCache();
+    EXPECT_EQ(changedInfo->GetName(), defaultName);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

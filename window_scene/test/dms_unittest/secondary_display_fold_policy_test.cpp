@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <parameter.h>
+#include <parameters.h>
 #include "screen_session_manager.h"
 #include "screen_session_manager/include/fold_screen_controller/secondary_display_fold_policy.h"
 #include "fold_screen_state_internel.h"
@@ -86,6 +88,19 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayMode, TestSize.Level
     displayMode = FoldDisplayMode::GLOBAL_FULL;
     policy.ChangeScreenDisplayMode(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
+
+    ScreenId screenId = 0;
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    if (nullptr == screenSession) {
+        return;
+    }
+    displayMode = FoldDisplayMode::MAIN;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "0");
+
+    displayMode = FoldDisplayMode::GLOBAL_FULL;
+    policy.ChangeScreenDisplayMode(displayMode);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "4");
 }
 
 /**

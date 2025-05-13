@@ -36,6 +36,7 @@ class AxisEvent;
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
+class ElementName;
 enum class SupportWindowMode;
 }
 
@@ -749,7 +750,7 @@ public:
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
-        const std::string& identityToken = "");
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
 
     /**
      * @brief create pip window with session
@@ -943,6 +944,14 @@ public:
      * @return True means window can be touched, false means window cannot be touched.
      */
     virtual bool GetTouchable() const { return false; }
+
+    /**
+     * @brief Set follow screen change property of window.
+     *
+     * @param isFollowScreenChange Window follow screen change.
+     * @return WMError.
+     */
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_OK; }
 
     /**
      * @brief Get SystemBarProperty By WindowType.
@@ -1165,7 +1174,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Destroy() { return WMError::WM_OK; }
+    virtual WMError Destroy(uint32_t reason = 0) { return WMError::WM_OK; }
 
     /**
      * @brief Show window
@@ -1295,6 +1304,21 @@ public:
      * @return True means screen is always on, false means the opposite.
      */
     virtual bool IsKeepScreenOn() const { return false; }
+
+    /**
+     * @brief Set the view screen always on or not.
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError SetViewKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the view screen is always on or not.
+     *
+     * @return True means view screen is always on, false means the opposite.
+     */
+    virtual bool IsViewKeepScreenOn() const { return false; }
 
     /**
      * @brief Set the screen on
@@ -2004,9 +2028,16 @@ public:
     /**
      * @brief Notify caller window orientation set by developer
      *
-     * @param ori Orientation set by developer
+     * @param orientation Orientation set by developer
      */
     virtual void NotifyPreferredOrientationChange(Orientation orientation) {}
+
+    /**
+     * @brief Set developer requested orientation.
+     *
+     * @param orientation Orientation set by developer
+     */
+    virtual void SetPreferredRequestedOrientation(Orientation orientation) {}
 
     /**
      * @brief Register SystemBarProperty listener.
@@ -2414,7 +2445,15 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief Judge whether SceneBoard is enabled.
+     *
+     * @return True means SceneBoard is enabled, false means the opposite.
+     */
+    virtual bool IsSceneBoardEnabled() const { return false; }
+
+    /**
      * @brief get compatible mode in pc.
+     * @deprecated use IsAdaptToImmersive instead
      *
      * @return True means window is compatible mode in pc, false means the opposite.
      */
@@ -2618,6 +2657,18 @@ public:
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
 
+    /*
+     * @brief Set System Bar Property for page
+     *
+     * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_INDICATOR
+     * @param property System Bar Property
+     * @return WMError
+     */
+    virtual WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+    {
+        return WMError::WM_OK;
+    }
+
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
@@ -2708,6 +2759,18 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set main window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3230,7 +3293,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() const { return 0; }
 
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
@@ -3280,6 +3343,20 @@ public:
      * @return Parent window type of UIExtension
      */
     virtual WindowType GetParentWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Get the root host window type of UIExtension.
+     *
+     * @return WindowType of the root host window.
+     */
+    virtual WindowType GetRootHostWindowType() const { return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW; }
+
+    /**
+     * @brief Set the root host window type of UIExtension.
+     *
+     * @param WindowType of the root host window.
+     */
+    virtual void SetRootHostWindowType(WindowType& rootHostWindowType) {}
 
     /**
      * @brief Notify modal UIExtension it may be covered
@@ -3479,6 +3556,18 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
+     * @brief Receive async IPC message from UIExtensionComponent.
+     *
+     * @param code the message code.
+     * @param persistentId the persistent id of UIExtension.
+     * @param data the data transfered from UIExtensionComponent.
+     */
+    virtual WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Query whether the waterfall mode is enabled or not.
      *
      * @return true means the waterfall mode is enabled, and false means the opposite.
@@ -3551,13 +3640,6 @@ public:
     }
 
     /**
-     * @brief Get the api compatible version.
-     *
-     * @return Api compatible version
-     */
-    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
-
-    /**
      * @brief Set the parent window of a sub window.
      *
      * @param newParentWindowId new parent window id.
@@ -3587,6 +3669,13 @@ public:
      * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
+
+    /**
+     * @brief Update the pipTemplateInfo.
+     *
+     * @param pipTemplateInfo the pipTemplateInfo of pip window
+     */
+    virtual void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) {}
 
     /**
      * @brief Register keyboard show animation completion listener.
@@ -3631,6 +3720,45 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Get the window property of current window.
+     *
+     * @param windowPropertyInfo the window property struct.
+     * @return WMError.
+     */
+    virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set the bundleName, moduleName and abilityName of the hooked window.
+     *
+     * @param elementName includes bundleName, moduleName and abilityName of the hooked window.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WMError::WM_OK if called success, otherwise failed.
+     */
+    virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -816,4 +816,64 @@ DMError DisplayManagerLiteProxy::SetSystemKeyboardStatus(bool isTpKeyboardOn)
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+sptr<ScreenInfo> DisplayManagerLiteProxy::GetScreenInfoById(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<ScreenInfo> info = reply.ReadStrongParcelable<ScreenInfo>();
+    if (info == nullptr) {
+        WLOGFW("SendRequest nullptr.");
+        return nullptr;
+    }
+    for (auto& mode : info->GetModes()) {
+        WLOGFI("info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+            mode->id_, mode->width_, mode->height_, mode->refreshRate_);
+    }
+    return info;
+}
+
+bool DisplayManagerLiteProxy::GetKeyboardState()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetKeyboardState: remote is null");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_KEYBOARD_STATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
 } // namespace OHOS::Rosen

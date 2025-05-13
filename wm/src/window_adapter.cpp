@@ -391,7 +391,6 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId=%{public}" PRId32 " is error",
                 it.first);
-            return;
         }
     }
 }
@@ -938,6 +937,16 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetHostWindowRect(hostWindowId, rect));
 }
 
+WMError WindowAdapter::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+    const sptr<CompatibleModeProperty>& property)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->GetHostWindowCompatiblityInfo(token, property));
+}
+
 WMError WindowAdapter::GetFreeMultiWindowEnableState(bool& enable)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
@@ -1133,6 +1142,14 @@ WMError WindowAdapter::SetForegroundWindowNum(int32_t windowNum)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->SetForegroundWindowNum(windowNum);
+}
+
+WMError WindowAdapter::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->UseImplicitAnimation(hostWindowId, useImplicit));
 }
 } // namespace Rosen
 } // namespace OHOS

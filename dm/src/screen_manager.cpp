@@ -617,15 +617,25 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
-DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
-    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+DMError ScreenManager::AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+    return SingletonContainer::Get<ScreenManagerAdapter>().AddVirtualScreenBlockList(persistentIds);
+}
+
+DMError ScreenManager::RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenBlockList(persistentIds);
 }
 
 DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
+}
+
+DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
+    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
 }
 
 DMError ScreenManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotation)
@@ -789,6 +799,11 @@ DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refr
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenMaxRefreshRate(id,
         refreshRate, actualRefreshRate);
+}
+
+void ScreenManager::SetFoldStatusExpandAndLocked(bool locked)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetFoldStatusExpandAndLocked(locked);
 }
 
 DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)

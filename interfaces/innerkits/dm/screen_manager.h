@@ -232,6 +232,22 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
 
     /**
+     * @brief Add black window list in virtual screen
+     *
+     * @param persistentIds Black list window ids.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError AddVirtualScreenBlockList(const std::vector<int32_t>& peristentIds);
+
+    /**
+     * @brief Remove black window list in virtual screen
+     *
+     * @param persistentIds Black list window ids.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& peristentIds);
+
+    /**
      * @brief Set privacy image.
      *
      * @param screenId Screen id.
@@ -430,6 +446,13 @@ public:
      * @return DM_OK means set success, others means failed.
      */
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+
+    /**
+     * @brief Set fold status expand and locked, only for super fold display device.
+     *
+     * @param locked wether to set fold status expand and locked.
+     */
+    void SetFoldStatusExpandAndLocked(bool locked);
 
 private:
     ScreenManager();

@@ -169,6 +169,20 @@ public:
     bool IsKeepScreenOn() const;
 
     /**
+     * @brief Set view keep screen on.
+     *
+     * @param keepScreenOn The view keep screen on or not.
+     */
+    void SetViewKeepScreenOn(bool keepScreenOn);
+
+    /**
+     * @brief Is view keep screen on.
+     *
+     * @return Return true means the view would keep screen on, otherwise not.
+     */
+    bool IsViewKeepScreenOn() const;
+
+    /**
      * @brief Set screen on.
      *
      * @param turnScreenOn mark the window to turn the screen on or not.
@@ -279,6 +293,26 @@ public:
      * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows
      */
     void SetSubWindowZLevel(int32_t zLevel);
+
+    /**
+     * @brief Set zIndex of specific window.
+     *
+     * @param zIndex zIndex of specific window
+     */
+    void SetZIndex(int32_t zIndex);
+
+    /**
+     * @brief Set sub window outline enabled
+     *
+     * @param outlineEnabled whether show sub window outline
+     */
+    void SetSubWindowOutlineEnabled(bool outlineEnabled);
+
+    /**
+     * @brief Get sub window outline enabled
+     *
+     */
+    bool IsSubWindowOutlineEnabled() const;
 
     /**
      * @brief Set real parent id of UIExtension
@@ -484,6 +518,13 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Get zIndex of specific window.
+     *
+     * @return Return zIndex of specific window
+     */
+    int32_t GetZIndex() const;
+
+    /**
      * @brief Get subwindow maximizeSupported
      *
      * @return true means subwindow support maximize, otherwise not.
@@ -593,6 +634,7 @@ private:
     WindowTag windowTag_;
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     bool keepScreenOn_ = false;
+    bool viewKeepScreenOn_ = false;
     bool turnScreenOn_ = false;
     bool isMainHandlerAvailable_ = true;
     float brightness_ = UNDEFINED_BRIGHTNESS;
@@ -605,11 +647,13 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool subWindowMaximizeSupported_ = false;
+    bool subWindowOutlineEnabled_ = false;
     bool onlySupportSceneBoard_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
     bool isSystemKeyboard_ = false;
 
     /*

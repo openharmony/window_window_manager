@@ -191,6 +191,7 @@ public:
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowContainerColor(napi_env env, napi_callback_info info);
+    static napi_value SetWindowContainerModalColor(napi_env env, napi_callback_info info);
     static napi_value SetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value GetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
@@ -226,7 +227,7 @@ public:
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
 
 private:
-    std::string GetWindowName();
+    const std::string& GetWindowName() const;
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -383,6 +384,7 @@ private:
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowContainerModalColor(napi_env env, napi_callback_info info);
     napi_value OnSetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnGetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
@@ -396,6 +398,7 @@ private:
     napi_value OnRestore(napi_env env, napi_callback_info info);
     napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
+    std::string windowName_;
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;

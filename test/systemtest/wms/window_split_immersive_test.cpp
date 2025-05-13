@@ -43,13 +43,9 @@ private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
-void WindowSplitImmersiveTest::SetUpTestCase()
-{
-}
+void WindowSplitImmersiveTest::SetUpTestCase() {}
 
-void WindowSplitImmersiveTest::TearDownTestCase()
-{
-}
+void WindowSplitImmersiveTest::TearDownTestCase() {}
 
 void WindowSplitImmersiveTest::SetUp()
 {
@@ -124,6 +120,6 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -44,6 +44,7 @@ struct Option {
     DisplayId displayId = 0;
     bool isNeedNotify = true;
     bool isNeedPointer = true;
+    bool isCaptureFullOfScreen = false;
 };
 
 struct Param {
@@ -192,6 +193,20 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
+static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: isCaptureFullOfScreen");
+    napi_value isCaptureFullOfScreen;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isCaptureFullOfScreen", &isCaptureFullOfScreen));
+    if (isCaptureFullOfScreen != nullptr && GetType(env, isCaptureFullOfScreen) == napi_boolean) {
+        NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isCaptureFullOfScreen,
+            &param->option.isCaptureFullOfScreen));
+        GNAPI_LOG("isCaptureFullOfScreen: %{public}d", param->option.isCaptureFullOfScreen);
+    } else {
+        GNAPI_LOG("isCaptureFullOfScreen failed, invalid param, use default true.");
+    }
+}
+
 static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     if (param == nullptr) {
@@ -204,6 +219,7 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     GetImageSize(env, param, argv);
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
+    IsCaptureFullOfScreen(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -215,7 +231,8 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
-    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer};
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
+        param->option.isCaptureFullOfScreen};
     if (!param->isPick && (!option.isNeedNotify_ || !option.isNeedPointer_)) {
         if (param->useInputOption) {
             param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
@@ -231,13 +248,15 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
             snapConfig.imageRect_ = param->option.rect;
             snapConfig.imageSize_ = param->option.size;
             snapConfig.rotation_ = param->option.rotation;
+            snapConfig.isCaptureFullOfScreen = param->option.isCaptureFullOfScreen;
             param->image = DisplayManager::GetInstance().GetScreenshotwithConfig(snapConfig, &param->wret, true);
         } else if (param->isPick) {
             GNAPI_LOG("Get Screenshot by picker");
             param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
         } else {
             GNAPI_LOG("Get Screenshot by default option");
-            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true);
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true,
+                param->option.isCaptureFullOfScreen);
         }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {

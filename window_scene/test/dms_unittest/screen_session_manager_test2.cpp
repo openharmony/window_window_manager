@@ -19,6 +19,7 @@
 
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +28,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t M_STATUS_WIDTH = 1008;
+constexpr uint32_t F_STATUS_WIDTH = 2048;
+constexpr uint32_t G_STATUS_WIDTH = 3184;
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -170,6 +174,30 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
 }
 
 /**
+ * @tc.name: AddVirtualScreenBlockList
+ * @tc.desc: AddVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->AddVirtualScreenBlockList(persistentIds));
+}
+
+/**
+ * @tc.name: RemoveVirtualScreenBlockList
+ * @tc.desc: RemoveVirtualScreenBlockList test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlockList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<int32_t> persistentIds {0, 1, 2};
+    ASSERT_EQ(DMError::DM_OK, ssm_->RemoveVirtualScreenBlockList(persistentIds));
+}
+
+/**
  * @tc.name: BlockScreenWaitPictureFrameByCV
  * @tc.desc: BlockScreenWaitPictureFrameByCV test
  * @tc.type: FUNC
@@ -213,6 +241,45 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | Small
     int32_t rotation = 0;
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     ASSERT_NE(cutoutInfo, nullptr);
+}
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChange
+ * @tc.desc: OnBeforeScreenPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnBeforeScreenPropertyChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->OnBeforeScreenPropertyChange(FoldStatus::UNKNOWN);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+}
+
+/**
+ * @tc.name: ScbStatusRecoveryWhenSwitchUser
+ * @tc.desc: ScbStatusRecoveryWhenSwitchUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ScbStatusRecoveryWhenSwitchUser, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        ScreenId id = ssm_->GetDefaultScreenId();
+        sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(id);
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
+        uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
+        std::vector<int32_t> oldScbPids_ = { 100 };
+        int32_t newScbPid = 101;
+        ssm_->ScbStatusRecoveryWhenSwitchUser(oldScbPids_, newScbPid);
+        FoldDisplayMode mode = ssm_->GetFoldDisplayMode();
+        if (mode == FoldDisplayMode::MAIN) {
+            EXPECT_EQ(currentWidth, M_STATUS_WIDTH);
+        } else if (mode == FoldDisplayMode::FULL) {
+            EXPECT_EQ(currentWidth, F_STATUS_WIDTH);
+        } else {
+            EXPECT_EQ(currentWidth, G_STATUS_WIDTH);
+        }
+    }
 }
 }
 }

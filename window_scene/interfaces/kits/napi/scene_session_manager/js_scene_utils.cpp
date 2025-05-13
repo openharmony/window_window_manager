@@ -49,19 +49,55 @@ enum class AceTouchType : int32_t {
     CANCEL,
 };
 
-int32_t GetMMITouchType(int32_t aceType)
+// Refer to OHOS::Ace::SourceType
+enum class AceSourceType : int32_t {
+    NONE = 0,
+    MOUSE = 1,
+    TOUCH = 2,
+    TOUCH_PAD = 3,
+    KEYBOARD = 4
+};
+
+void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
 {
-    switch (aceType) {
-        case static_cast<int32_t>(AceTouchType::DOWN):
-            return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case static_cast<int32_t>(AceTouchType::UP):
-            return MMI::PointerEvent::POINTER_ACTION_UP;
-        case static_cast<int32_t>(AceTouchType::MOVE):
-            return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case static_cast<int32_t>(AceTouchType::CANCEL):
-            return MMI::PointerEvent::POINTER_ACTION_CANCEL;
-        default:
-            return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
+    auto sourceType = pointerEvent.GetSourceType();
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        switch (aceType) {
+            case static_cast<int32_t>(AceTouchType::DOWN):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+                break;
+            case static_cast<int32_t>(AceTouchType::UP):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+                break;
+            case static_cast<int32_t>(AceTouchType::MOVE):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+                break;
+            case static_cast<int32_t>(AceTouchType::CANCEL):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                break;
+            default:
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        }
+    } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        switch (aceType) {
+            case static_cast<int32_t>(AceTouchType::DOWN):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+                break;
+            case static_cast<int32_t>(AceTouchType::UP):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+                break;
+            case static_cast<int32_t>(AceTouchType::MOVE):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+                break;
+            case static_cast<int32_t>(AceTouchType::CANCEL):
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                break;
+            default:
+                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        }
+    } else {
+        pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     }
 }
 } // namespace
@@ -346,6 +382,19 @@ static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseCon
     return true;
 }
 
+static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsAbilityHook) != napi_undefined) {
+        bool isAbilityHook = false;
+        if (!ConvertFromJsValue(env, jsIsAbilityHook, isAbilityHook)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAbilityHook");
+            return false;
+        }
+        sessionInfo.isAbilityHook_ = isAbilityHook;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -368,6 +417,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
     napi_value jsInstanceKey = nullptr;
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
+    napi_value jsIsAbilityHook = nullptr;
+    napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
+
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -383,15 +435,12 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
-    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
+        !IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
-        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
+        !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
         return false;
     }
     return true;
@@ -689,7 +738,7 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         WLOGFE("Failed to convert parameter to touchType");
         return false;
     }
-    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
+    TransferToMMIFormat(touchType, pointerEvent);
     double windowX;
     if (!ConvertFromJsValue(env, jsWindowX, windowX)) {
         WLOGFE("Failed to convert parameter to windowX");
@@ -756,6 +805,16 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
     return true;
 }
 
+int32_t ConvertMMISourceType(int32_t sourceType)
+{
+    if (sourceType == static_cast<int32_t>(AceSourceType::TOUCH)) {
+        return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    } else if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
+        return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    }
+    return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+}
+
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
 {
     napi_value jsSourceType = nullptr;
@@ -771,7 +830,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent.SetSourceType(ConvertMMISourceType(sourceType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");
@@ -965,7 +1024,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.posY_ = posY;
     }
     if (GetType(env, jsWidth_) != napi_undefined) {
-        int32_t width;
+        uint32_t width = 0;
         if (!ConvertFromJsValue(env, jsWidth_, width)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to width_");
             return false;
@@ -973,7 +1032,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.width_ = width;
     }
     if (GetType(env, jsHeight_) != napi_undefined) {
-        int32_t height;
+        uint32_t height = 0;
         if (!ConvertFromJsValue(env, jsHeight_, height)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to height_");
             return false;
@@ -1054,6 +1113,34 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     }
     throwSlipMode = it->second;
     return true;
+}
+
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
+{
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
+        {"isAdaptToImmersive", &CompatibleModeProperty::SetIsAdaptToImmersive},
+        {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
+        {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
+        {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
+    };
+    bool atLeastOneParam = false;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
+    for (iter = funcs.begin(); iter != funcs.end(); ++iter) {
+        std::string paramStr = iter->first;
+        bool ret = false;
+        if (ParseJsValue(env, value, paramStr, ret)) {
+            void (CompatibleModeProperty::*func)(bool) = iter->second;
+            (compatibleModeProperty.*func)(ret);
+            atLeastOneParam = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
+    return atLeastOneParam;
 }
 
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
@@ -1166,7 +1253,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
-        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
     }
     return objValue;
 }
@@ -1380,6 +1467,18 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SPLIT_TO_MAXIMIZE)));
     napi_set_named_property(env, objValue, "PAGE_ROTATION", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::PAGE_ROTATION)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG_START", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_START)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG)));
+    napi_set_named_property(env, objValue, "SPLIT_DRAG_END", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_BY_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
+    napi_set_named_property(env, objValue, "MAXIMIZE_IN_IMPLICT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
+    napi_set_named_property(env, objValue, "RECOVER_IN_IMPLICIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
@@ -1947,6 +2046,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     SetTypeProperty(objValue, env, "TYPE_MUTISCREEN_COLLABORATION", JsSessionType::TYPE_MUTISCREEN_COLLABORATION);
+    SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     return objValue;
 }
 

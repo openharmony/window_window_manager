@@ -35,8 +35,12 @@ namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+const std::string SETTING_WALL_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_100?Proxy=true";
+const std::string WALL_KEY = "wallpaperAodDisplay";
 const std::string SETTING_MULTI_USER_URI = "datashare:///com.ohos.settingsdata/entry/settingsdata/";
 const std::string SETTING_MULTI_USER_TABLE = "USER_SETTINGSDATA_";
+const std::string SETTING_WALL_MULTI_USER_TABLE = "USER_SETTINGSDATA_SECURE_";
 const std::string SETTING_MULTI_USER_PROXY = "?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SettingProvider" };
@@ -201,7 +205,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(AssembleUri(key));
+    Uri uri = (key == WALL_KEY) ? AssembleUriMultiUser(key) : AssembleUri(key);
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
@@ -355,9 +359,16 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;
+        if (key == WALL_KEY) {
+            uriString = SETTING_MULTI_USER_URI + SETTING_WALL_MULTI_USER_TABLE +
+                userIdString + SETTING_MULTI_USER_PROXY + "&key=" + key;
+        }
     } else {
         WLOGFE("invalid userId: %{public}d, use default uri", userId);
         uriString = SETTING_URI_PROXY + "&key=" + key;
+        if (key == WALL_KEY) {
+            uriString = SETTING_WALL_URI + "&key=" + key;
+        }
     }
     Uri uri(uriString);
     return uri;

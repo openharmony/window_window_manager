@@ -49,6 +49,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError AddVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError RemoveVirtualScreenBlockList(
+        const std::vector<int32_t>& persistentIds) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -60,7 +64,7 @@ public:
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false) = 0;
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr)
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -196,7 +200,6 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual bool IsOrientationNeedChanged() {return false;}
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
 
@@ -223,7 +226,10 @@ public:
 
     // unique screen
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
-        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
+        std::vector<DisplayId>& displayIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
@@ -246,7 +252,7 @@ public:
         return DMError::DM_OK;
     }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {}) {}
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {}) {}
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
@@ -292,6 +298,8 @@ public:
     {
         return DMError::DM_OK;
     }
+
+    virtual void SetFoldStatusExpandAndLocked(bool locked) {}
 
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false)
     {

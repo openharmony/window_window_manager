@@ -206,6 +206,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePiPControlStatus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_AUTOSTART_PIP):
             return HandleSetAutoStartPiP(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_TEMPLATE_INFO):
+            return HandleUpdatePiPTemplateInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
@@ -250,6 +252,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
+            return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
@@ -270,6 +274,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateFlag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ROTATION_CHANGE):
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
+            return HandleGetIsHighlighted(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
+            return HandleNotifyDisableDelegatorChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -439,19 +447,14 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.minWindowWidth);
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
-        reply.WriteBool(property->GetCompatibleModeInPc());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
-        reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
-        reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
-        reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
-        reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
+        reply.WriteBool(property->GetIsAbilityHook());
+        reply.WriteParcelable(property->GetCompatibleModeProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -739,6 +742,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadString(abilitySessionInfo->specifiedFlag)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedFlag failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->reuseDelegatorWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reuseDelegatorWindow failed.");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
@@ -1224,6 +1231,23 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
     return ERR_NONE;
 }
 
+int SessionStub::HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    sptr<PiPTemplateInfo> pipTemplateInfo = data.ReadParcelable<PiPTemplateInfo>();
+    if (pipTemplateInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "read pipTemplateInfo error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdatePiPTemplateInfo(*pipTemplateInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PIP, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "in HandleUpdatePiPTemplateInfo");
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = false;
@@ -1562,7 +1586,7 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
 int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    const WSError errCode = KeyFrameAnimateEnd();
+    WSError errCode = KeyFrameAnimateEnd();
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
@@ -1583,7 +1607,7 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get tranaction");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
@@ -1637,6 +1661,17 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    bool useImplicit = false;
+    if (!data.ReadBool(useImplicit)) {
+        TLOGE(WmsLogTag::WMS_PC, "Read useImplicit failed.");
+        return ERR_INVALID_DATA;
+    }
+    UseImplicitAnimation(useImplicit);
     return ERR_NONE;
 }
 
@@ -1730,6 +1765,26 @@ int SessionStub::HandleUpdateRotationChangeListenerRegistered(MessageParcel& dat
     }
     WSError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
     TLOGD(WmsLogTag::WMS_ROTATION, "persistentId: %{public}d, register: %{public}d", persistentId, isRegister);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply)
+{
+    bool isHighlighted = false;
+    GetIsHighlighted(isHighlighted);
+    if (!reply.WriteBool(isHighlighted)) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyDisableDelegatorChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    WMError ret = NotifyDisableDelegatorChange();
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

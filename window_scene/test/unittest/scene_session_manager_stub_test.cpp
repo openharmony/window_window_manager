@@ -38,17 +38,14 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void SceneSessionManagerStubTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerStubTest::SetUpTestCase() {}
 
-void SceneSessionManagerStubTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerStubTest::TearDownTestCase() {}
 
 void SceneSessionManagerStubTest::SetUp()
 {
@@ -66,7 +63,7 @@ namespace {
  * @tc.desc: test TransIdCreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdCreateAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdCreateAndConnectSpecificSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,7 +108,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdCreateAndConnectSpecificSession, Fu
  * @tc.desc: test TransIdRecoverAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndConnectSpecificSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -156,7 +153,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndConnectSpecificSession, F
  * @tc.desc: test TransIdRecoverAndReconnectSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndReconnectSceneSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -201,7 +198,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndReconnectSceneSession, Fu
  * @tc.desc: test TransIdDestroyAndDisconnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -223,8 +220,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSession
  * @tc.desc: test TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback,
-         Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSessionWithDetachCallback, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -249,7 +245,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDestroyAndDisconnectSpecificSession
  * @tc.desc: test TransIdRequestFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdRequestFocus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdRequestFocus, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -272,7 +268,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRequestFocus, Function | SmallTest 
  * @tc.desc: test TransIdGetFocusSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -292,7 +288,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo, Function | Sma
  * @tc.desc: test TransIdGetFocusSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -311,7 +307,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo1, Function | Sm
  * @tc.desc: test TransIdSetSessionLabel
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionLabel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionLabel, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -334,7 +330,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionLabel, Function | SmallTe
  * @tc.desc: test TransIdSetSessionIcon
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionIcon, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionIcon, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -356,14 +352,14 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionIcon, Function | SmallTes
  * @tc.desc: test TransIdIsValidSessionIds
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdIsValidSessionIds, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdIsValidSessionIds, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    std::vector<int32_t> points{0, 0};
+    std::vector<int32_t> points{ 0, 0 };
     data.WriteInt32Vector(points);
 
     uint32_t code =
@@ -378,7 +374,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdIsValidSessionIds, Function | Small
  * @tc.desc: test TransIdPendingSessionToForeground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -401,7 +397,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToForeground, Functio
  * @tc.desc: test TransIdPendingSessionToBackgroundForDelegator
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -425,7 +421,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdPendingSessionToBackgroundForDelega
  * @tc.desc: test TransIdGetFocusSessionToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -445,7 +441,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken, Function | Sm
  * @tc.desc: test TransIdGetFocusSessionToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -464,7 +460,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken1, Function | S
  * @tc.desc: test TransIdGetFocusSessionElement
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -484,7 +480,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement, Function | 
  * @tc.desc: test TransIdGetFocusSessionElement
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -503,7 +499,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement1, Function |
  * @tc.desc: test TransIdCheckWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdCheckWindowId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdCheckWindowId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -530,7 +526,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdCheckWindowId, Function | SmallTest
  * @tc.desc: test TransIdSetGestureNavigationEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdSetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdSetGestureNavigationEnabled, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -551,7 +547,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdSetGestureNavigationEnabled, Functi
  * @tc.desc: test TransIdGetWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetWindowInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -572,7 +568,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetWindowInfo, Function | SmallTest
  * @tc.desc: test TransIdGetUnreliableWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetUnreliableWindowInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -594,7 +590,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetUnreliableWindowInfo, Function |
  * @tc.desc: test TransIdRegisterSessionListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdRegisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdRegisterSessionListener, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -617,7 +613,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRegisterSessionListener, Function |
  * @tc.desc: test TransIdUnRegisterSessionListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdUnRegisterSessionListener, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdUnRegisterSessionListener, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -640,7 +636,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdUnRegisterSessionListener, Function
  * @tc.desc: test TransIdGetMissionInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetMissionInfos, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetMissionInfos, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -662,7 +658,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetMissionInfos, Function | SmallTe
  * @tc.desc: test TransIdGetSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -685,7 +681,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfo, Function | SmallTes
  * @tc.desc: test TransIdGetSessionInfoByContinueSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfoByContinueSessionId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -706,7 +702,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionInfoByContinueSessionId, 
  * @tc.desc: test TransIdDumpSessionAll
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionAll, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionAll, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -725,7 +721,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionAll, Function | SmallTes
  * @tc.desc: test TransIdDumpSessionWithId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionWithId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionWithId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -747,7 +743,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionWithId, Function | Small
  * @tc.desc: test TransIdTerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdTerminateSessionNew, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdTerminateSessionNew, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -771,7 +767,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdTerminateSessionNew, Function | Sma
  * @tc.desc: test TransIdUpdateSessionAvoidAreaListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdUpdateSessionAvoidAreaListener, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdUpdateSessionAvoidAreaListener, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -795,14 +791,14 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdUpdateSessionAvoidAreaListener, Fun
  * @tc.desc: test TransIdGetSessionDump
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionDump, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionDump, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    std::vector<std::string> params = {"-a"};
+    std::vector<std::string> params = { "-a" };
     data.WriteStringVector(params);
     stub_->HandleGetSessionDump(data, reply);
 
@@ -827,7 +823,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionDump, Function | SmallTes
  * @tc.desc: test TransIdGetSessionSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshot, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshot, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -852,7 +848,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshot, Function | Smal
  * @tc.desc: test TransIdGetSessionSnapshotById
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshotById, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshotById, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -874,7 +870,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetSessionSnapshotById, Function | 
  * @tc.desc: test TransIdGetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdGetUIContentRemoteObj, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetUIContentRemoteObj, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -895,7 +891,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetUIContentRemoteObj, Function | S
  * @tc.desc: test TransIdBindDialogTarget
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdBindDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdBindDialogTarget, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -920,7 +916,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdBindDialogTarget, Function | SmallT
  * @tc.desc: test TransIdNotifyDumpInfoResult
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -942,7 +938,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
  * @tc.desc: test TransIdSetSessionContinueState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionContinueState, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionContinueState, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -967,7 +963,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdSetSessionContinueState, Function |
  * @tc.desc: test TransIdClearSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdClearSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdClearSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -988,7 +984,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdClearSession, Function | SmallTest 
  * @tc.desc: test TransIdClearAllSessions
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdClearAllSessions, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdClearAllSessions, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1008,7 +1004,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdClearAllSessions, Function | SmallT
  * @tc.desc: test TransIdLockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdLockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdLockSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1029,7 +1025,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdLockSession, Function | SmallTest |
  * @tc.desc: test TransIdUnlockSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransIdUnlockSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdUnlockSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1050,7 +1046,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdUnlockSession, Function | SmallTest
  * @tc.desc: test TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1062,8 +1058,8 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest01, Function | SmallTest | 
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT);
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -1074,7 +1070,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest01, Function | SmallTest | 
  * @tc.desc: test TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1098,7 +1094,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, Function | SmallTest | 
  * @tc.desc: test HandleCreateAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1141,7 +1137,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, Fun
  * @tc.desc: test HandleRecoverAndConnectSpecificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1185,7 +1181,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Fu
  * @tc.desc: test HandleDestroyAndDisconnectSpcificSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1202,8 +1198,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSession, 
  * @tc.desc: test HandleDestroyAndDisconnectSpcificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback,
-    Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWithDetachCallback, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1222,7 +1217,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWi
  * @tc.desc: test HandleRequestFocusStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1245,7 +1240,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, Function | Small
  * @tc.desc: test HandleRequestFocusStatusBySA
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1268,7 +1263,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, Function | S
  * @tc.desc: test HandleRegisterWindowManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRegisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterWindowManagerAgent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1287,7 +1282,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterWindowManagerAgent, Function
  * @tc.desc: test HandleUnregisterWindowManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1306,7 +1301,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, Functi
  * @tc.desc: test HandleSkipSnapshotForAppProcess
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1323,7 +1318,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, Function 
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1337,7 +1332,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, Function | Smal
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1350,7 +1345,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo1, Function | Sma
  * @tc.desc: test HandleGetFocusSessionElement
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1364,7 +1359,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | S
  * @tc.desc: test HandleGetFocusSessionElement
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1377,7 +1372,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement1, Function | 
  * @tc.desc: test HandleSetSessionLabel
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1395,7 +1390,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTes
  * @tc.desc: test HandleSetSessionIcon
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionIcon, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionIcon, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1416,12 +1411,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionIcon, Function | SmallTest
  * @tc.desc: test HandleIsValidSessionIds
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<int32_t> points {0, 0};
+    std::vector<int32_t> points{ 0, 0 };
     data.WriteInt32Vector(points);
     int res = stub_->HandleIsValidSessionIds(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -1432,7 +1427,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, Function | SmallT
  * @tc.desc: test HandleGetSessionInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1451,7 +1446,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTes
  * @tc.desc: test HandleGetSessionInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1475,7 +1470,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest
  * @tc.desc: test HandleGetSessionInfo2
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo2, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo2, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1491,7 +1486,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo2, Function | SmallTes
  * @tc.desc: test HandleDumpSessionAll
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionAll, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionAll, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1505,7 +1500,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionAll, Function | SmallTest
  * @tc.desc: test HandleDumpSessionWithId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1524,7 +1519,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallT
  * @tc.desc: test HandleGetFocusSessionToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1538,7 +1533,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken, Function | Sma
  * @tc.desc: test HandleGetFocusSessionToken
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1551,7 +1546,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken1, Function | Sm
  * @tc.desc: test HandleCheckWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleCheckWindowId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleCheckWindowId, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1577,7 +1572,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCheckWindowId, Function | SmallTest 
  * @tc.desc: test HandleSetGestureNavigationEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1593,7 +1588,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGestureNavigationEnabled, Functio
  * @tc.desc: test HandleGetAccessibilityWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetAccessibilityWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAccessibilityWindowInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1610,7 +1605,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAccessibilityWindowInfo, Function
  * @tc.desc: test HandleGetUnreliableWindowInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1627,7 +1622,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUnreliableWindowInfo, Function | 
  * @tc.desc: test HandleSetSessionContinueState1
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1646,7 +1641,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, Function |
  * @tc.desc: test HandleGetSessionDump
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1655,7 +1650,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, Function | SmallTest
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<std::string> params = {"-a"};
+    std::vector<std::string> params = { "-a" };
     data.WriteStringVector(params);
     stub_->HandleGetSessionDump(data, reply);
 
@@ -1677,7 +1672,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, Function | SmallTest
  * @tc.desc: test HandleUpdateSessionAvoidAreaListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionAvoidAreaListener, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionAvoidAreaListener, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1700,7 +1695,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionAvoidAreaListener, Func
  * @tc.desc: test HandleGetSessionSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1724,7 +1719,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, Function | Small
  * @tc.desc: test HandleGetSessionSnapshotById
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1742,7 +1737,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, Function | S
  * @tc.desc: test HandleBindDialogTarget
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleBindDialogTarget, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleBindDialogTarget, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1765,7 +1760,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleBindDialogTarget, Function | SmallTe
  * @tc.desc: test HandleNotifyDumpInfoResult
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1778,7 +1773,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     data.WriteUint32(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
 
-    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
+    std::vector<std::string> info = { "-a", "-b123", "-c3456789", "" };
     vectorSize = static_cast<uint32_t>(info.size());
     data.WriteUint32(vectorSize);
     uint32_t curSize;
@@ -1800,7 +1795,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
  * @tc.desc: test HandleUnregisterCollaborator
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1823,7 +1818,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, Function | S
  * @tc.desc: test HandleUpdateSessionTouchOutsideListener
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionTouchOutsideListener, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionTouchOutsideListener, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1846,7 +1841,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionTouchOutsideListener, F
  * @tc.desc: test HandleRaiseWindowToTop
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRaiseWindowToTop, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRaiseWindowToTop, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1867,7 +1862,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRaiseWindowToTop, Function | SmallTe
  * @tc.desc: test HandleNotifyWindowExtensionVisibilityChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChange, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1903,7 +1898,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChang
  * @tc.desc: test HandleGetTopWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetTopWindowId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetTopWindowId, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1924,7 +1919,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetTopWindowId, Function | SmallTest
  * @tc.desc: test HandleShiftAppWindowFocus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -1947,7 +1942,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, Function | Smal
  * @tc.desc: test HandleAddExtensionWindowStageToSCB
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, TestSize.Level1)
 {
     ASSERT_NE(stub_, nullptr);
 
@@ -1991,7 +1986,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
  * @tc.desc: test HandleRemoveExtensionWindowStageFromSCB
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2025,7 +2020,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
  * @tc.desc: test HandleUpdateModalExtensionRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, TestSize.Level1)
 {
     ASSERT_NE(stub_, nullptr);
 
@@ -2034,7 +2029,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function |
 
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
-    Rect rect { 1, 2, 3, 4 };
+    Rect rect{ 1, 2, 3, 4 };
     data.WriteInt32(rect.posX_);
     data.WriteInt32(rect.posY_);
     data.WriteInt32(rect.width_);
@@ -2049,7 +2044,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateModalExtensionRect, Function |
  * @tc.desc: test HandleProcessModalExtensionPointDown
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, TestSize.Level1)
 {
     ASSERT_NE(stub_, nullptr);
 
@@ -2072,7 +2067,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleProcessModalExtensionPointDown, Func
  * @tc.desc: test HandleAddOrRemoveSecureSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2095,7 +2090,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function |
  * @tc.desc: test HandleGetUIContentRemoteObj
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2112,7 +2107,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | Sm
  * @tc.desc: test HandleGetHostWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -2133,7 +2128,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, Function | SmallT
  * @tc.desc: test HandleGetCallingWindowWindowStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowWindowStatus, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowWindowStatus, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -2154,7 +2149,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowWindowStatus, Functi
  * @tc.desc: test HandleGetCallingWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, TestSize.Level1)
 {
     if (stub_ == nullptr) {
         return;
@@ -2175,7 +2170,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, Function | Sma
  * @tc.desc: test HandleGetSessionInfoByContinueSessionId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2192,7 +2187,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
  * @tc.desc: test HandleUpdateExtWindowFlags
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2211,7 +2206,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateExtWindowFlags, Function | Sma
  * @tc.desc: test HandleGetWindowStyleType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2225,7 +2220,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetWindowStyleType, Function | Small
  * @tc.desc: test HandleSetProcessWatermark
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2243,12 +2238,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, Function | Smal
  * @tc.desc: test HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     int32_t pid = 123;
-    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<int32_t> persistentIds = { 1, 2, 3 };
     std::vector<uint64_t> surfaceNodeIds;
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(pid);
@@ -2263,12 +2258,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetProcessSurfaceNodeIdByPersistentI
  * @tc.desc: test HandleSkipSnapshotByUserIdAndBundleNames
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     int32_t userId = 100;
-    std::vector<std::string> bundleNameList = {"a", "b", "c"};
+    std::vector<std::string> bundleNameList = { "a", "b", "c" };
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     data.WriteInt32(userId);
     data.WriteStringVector(bundleNameList);
@@ -2281,7 +2276,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, 
  * @tc.desc: test HandleUpdateSessionScreenLock
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenLock, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2292,11 +2287,41 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenLock, Function | 
 }
 
 /**
+ * @tc.name: HandleAddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test HandleAddSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint64(1u);
+    data.WriteInt32(1);
+    int res = stub_->HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.desc: test HandleRemoveSkipSelfWhenShowOnVirtualScreenList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSkipSelfWhenShowOnVirtualScreenList, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint64(1u);
+    data.WriteInt32(1);
+    int res = stub_->HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleIsPcWindow
  * @tc.desc: test HandleIsPcWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2309,7 +2334,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, Function | SmallTest | L
  * @tc.desc: test HandleIsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2322,7 +2347,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
  * @tc.desc: test HandleIsWindowRectAutoSave
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2339,11 +2364,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | Sma
  * @tc.desc: test HandleGetDisplayIdByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    const std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = { 1, 2 };
     data.WriteUInt64Vector(windowIds);
 
     int res = stub_->HandleGetDisplayIdByWindowId(data, reply);
@@ -2355,7 +2380,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | S
  * @tc.desc: test HandleRegisterCollaborator
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2374,7 +2399,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | Sma
  * @tc.desc: test HandleSetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2389,7 +2414,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, Function | 
  * @tc.desc: test HandleGetGlobalDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2402,7 +2427,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, Function | 
  * @tc.desc: test HandleSetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2419,7 +2444,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | Sma
  * @tc.desc: test HandleSetParentWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2432,11 +2457,26 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, Function | SmallTes
 }
 
 /**
+ * @tc.name: HandleGetHostWindowCompatiblityInfo
+ * @tc.desc: test HandleGetHostWindowCompatiblityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    int res = stub_->HandleGetHostWindowCompatiblityInfo(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetAppDragResizeType
  * @tc.desc: test HandleGetAppDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2451,7 +2491,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
  * @tc.desc: test HandleSetAppKeyFramePolicy
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetAppKeyFramePolicy, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppKeyFramePolicy, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2468,7 +2508,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppKeyFramePolicy, Function | Sma
  * @tc.desc: test HandleMinimizeByWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2483,7 +2523,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleMinimizeByWindowId, Function | Small
  * @tc.desc: test HandleSetForegroundWindowNum
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2492,6 +2532,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, Function | S
     int res = stub_->HandleSetForegroundWindowNum(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

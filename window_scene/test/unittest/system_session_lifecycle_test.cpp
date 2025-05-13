@@ -38,19 +38,16 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr <SystemSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr <SystemSession> systemSession_;
+    sptr<SystemSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SystemSession> systemSession_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
-void SystemSessionLifecycleTest::SetUpTestCase()
-{
-}
+void SystemSessionLifecycleTest::SetUpTestCase() {}
 
-void SystemSessionLifecycleTest::TearDownTestCase()
-{
-}
+void SystemSessionLifecycleTest::TearDownTestCase() {}
 
 void SystemSessionLifecycleTest::SetUp()
 {
@@ -82,7 +79,7 @@ namespace {
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Show01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Show01, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
@@ -95,7 +92,7 @@ HWTEST_F(SystemSessionLifecycleTest, Show01, Function | SmallTest | Level1)
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Show02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Show02, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE((property != nullptr));
@@ -110,7 +107,7 @@ HWTEST_F(SystemSessionLifecycleTest, Show02, Function | SmallTest | Level1)
  * @tc.desc: test function : Show
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Show03, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Show03, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE((property != nullptr));
@@ -125,7 +122,7 @@ HWTEST_F(SystemSessionLifecycleTest, Show03, Function | SmallTest | Level1)
  * @tc.desc: check func Reconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Reconnect01, TestSize.Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -173,7 +170,7 @@ HWTEST_F(SystemSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
  * @tc.desc: test function : Hide
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Hide, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Hide, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
 
@@ -186,7 +183,7 @@ HWTEST_F(SystemSessionLifecycleTest, Hide, Function | SmallTest | Level1)
  * @tc.desc: test function : Disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Disconnect, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Disconnect, TestSize.Level1)
 {
     ASSERT_TRUE(systemSession_ != nullptr);
 
@@ -200,7 +197,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect, Function | SmallTest | Level1)
  * @tc.desc: test function : Disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Disconnect02, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Disconnect02, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect02";
@@ -209,8 +206,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect02, Function | SmallTest | Level1
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
     bool isFromClient = true;
@@ -223,7 +219,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect02, Function | SmallTest | Level1
  * @tc.desc: test function : Disconnect
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionLifecycleTest, Disconnect03, Function | SmallTest | Level1)
+HWTEST_F(SystemSessionLifecycleTest, Disconnect03, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "Disconnect03";
@@ -232,8 +228,7 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect03, Function | SmallTest | Level1
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
-    sptr<SystemSession> sysSession =
-        sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<SystemSession> sysSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -245,6 +240,6 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect03, Function | SmallTest | Level1
     auto ret = sysSession->Disconnect(isFromClient);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -327,5 +327,87 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, TestSize.Leve
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
     screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName);
 }
+
+/**
+ * @tc.name: OnCreateScreenSessionOnly
+ * @tc.desc: OnCreateScreenSessionOnly test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnCreateScreenSessionOnly, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    ScreenId rsId = 0;
+    std::string name = "test";
+    bool isExtend = false;
+
+    screenSessionManagerClientProxy_->OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnExtendDisplayNodeChange
+ * @tc.desc: OnExtendDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnExtendDisplayNodeChange, TestSize.Level1)
+{
+    ScreenId firstId = 0;
+    ScreenId secondId = 12;
+
+    screenSessionManagerClientProxy_->OnExtendDisplayNodeChange(firstId, secondId);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnMainDisplayNodeChange
+ * @tc.desc: OnMainDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnMainDisplayNodeChange, TestSize.Level1)
+{
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 12;
+    ScreenId extendRSId = 12;
+
+    screenSessionManagerClientProxy_->OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: SetScreenCombination
+ * @tc.desc: SetScreenCombination test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetScreenCombination, TestSize.Level1)
+{
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 12;
+    ScreenCombination combination = ScreenCombination::SCREEN_ALONE;
+
+    screenSessionManagerClientProxy_->SetScreenCombination(mainScreenId, extendScreenId, combination);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnDumperClientScreenSessions
+ * @tc.desc: OnDumperClientScreenSessions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnDumperClientScreenSessions, TestSize.Level1)
+{
+    screenSessionManagerClientProxy_->OnDumperClientScreenSessions();
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChanged
+ * @tc.desc: OnBeforeScreenPropertyChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnBeforeScreenPropertyChanged, TestSize.Level1)
+{
+    screenSessionManagerClientProxy_->OnBeforeScreenPropertyChanged(FoldStatus::UNKNOWN);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS

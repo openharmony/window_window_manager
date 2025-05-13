@@ -122,7 +122,8 @@ void FoldScreenController::RecoverDisplayMode()
         return;
     }
     if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
-        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
@@ -187,15 +188,6 @@ bool FoldScreenController::GetTentMode()
         return false;
     }
     return sensorFoldStateManager_->IsTentMode();
-}
-
-bool FoldScreenController::GetCameraMode()
-{
-    if (sensorFoldStateManager_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetCameraMode: sensorFoldStateManager_ is null");
-        return false;
-    }
-    return sensorFoldStateManager_->IsCameraMode();
 }
 
 void FoldScreenController::OnTentModeChanged(int tentType, int32_t hall)

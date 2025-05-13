@@ -116,6 +116,34 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnExtendScreenConnectStatusChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_EXTEND_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnExtendDisplayNodeChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_CREATE_SCREEN_SESSION_ONLY] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnCreateScreenSessionOnly(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_MAIN_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnMainDisplayNodeChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_SCREEN_COMBINATION] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleSyncScreenCombination(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_DUMP_SCREEN_SESSION] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnDumperClientScreenSessions(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_BEFORE_PROPERTY_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnBeforeScreenPropertyChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_MODE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenModeChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -377,6 +405,75 @@ int ScreenSessionManagerClientStub::HandleOnExtendScreenConnectStatusChanged(Mes
     WLOGI("extendScreenConnectStatus screenId=%{public}" PRIu64", extendScreenConnectStatus=%{public}d.",
         screenId, static_cast<uint32_t>(extendScreenConnectStatus));
     OnExtendScreenConnectStatusChanged(screenId, extendScreenConnectStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnExtendDisplayNodeChange(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    bool changeStatus = OnExtendDisplayNodeChange(mainScreenId, extendScreenId);
+    reply.WriteBool(changeStatus);
+    TLOGI(WmsLogTag::DMS, "extend display change status=%{public}d", changeStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnCreateScreenSessionOnly(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto rsId = static_cast<ScreenId>(data.ReadUint64());
+    auto name = data.ReadString();
+    bool isExtend = data.ReadBool();
+    bool refreshStatus = OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
+    reply.WriteBool(refreshStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnMainDisplayNodeChange(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendRSId = static_cast<ScreenId>(data.ReadUint64());
+    bool changeStatus = OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
+    reply.WriteBool(changeStatus);
+    TLOGI(WmsLogTag::DMS, "main node change status=%{public}d", changeStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnDumperClientScreenSessions(MessageParcel& data, MessageParcel& reply)
+{
+    std::string screenInfos = OnDumperClientScreenSessions();
+    reply.WriteString(screenInfos);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleSyncScreenCombination(MessageParcel& data, MessageParcel& reply)
+{
+    auto mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendCombination = static_cast<ScreenCombination>(data.ReadUint32());
+    SetScreenCombination(mainScreenId, extendScreenId, extendCombination);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t status = data.ReadUint32();
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    if (status > static_cast<uint32_t>(FoldStatus::HALF_FOLD)) {
+        return ERR_INVALID_VALUE;
+    }
+    foldStatus = static_cast<FoldStatus>(status);
+    TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
+    OnBeforeScreenPropertyChanged(foldStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
+    TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
+    OnScreenModeChanged(screenModeChangeEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -434,7 +434,7 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask01, TestSize.Level1)
     window->hostSession_ = session;
 
     std::vector<std::vector<uint32_t>> windowMask;
-    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    windowMask = { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } };
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -466,7 +466,7 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask02, TestSize.Level1)
     window->hostSession_ = session;
 
     std::vector<std::vector<uint32_t>> windowMask;
-    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    windowMask = { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } };
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -498,7 +498,7 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask03, TestSize.Level1)
     window->hostSession_ = session;
 
     std::vector<std::vector<uint32_t>> windowMask;
-    windowMask = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    windowMask = { { 1, 1, 1 }, { 1, 0, 1 }, { 1, 1, 1 } };
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMask(windowMask));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -509,6 +509,6 @@ HWTEST_F(WindowSpecialWindowTest, setWindowMask03, TestSize.Level1)
     window->Destroy(true, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -50,9 +50,9 @@ public:
 
     static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const Rect& rect)
     {
-        if ((pointPosX > rect.posX_) &&
+        if ((pointPosX >= rect.posX_) &&
             (pointPosX < (rect.posX_ + static_cast<int32_t>(rect.width_)) - 1) &&
-            (pointPosY > rect.posY_) &&
+            (pointPosY >= rect.posY_) &&
             (pointPosY < (rect.posY_ + static_cast<int32_t>(rect.height_)) - 1)) {
             return true;
         }

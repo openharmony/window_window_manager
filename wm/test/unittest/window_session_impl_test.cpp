@@ -24,6 +24,7 @@
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
 #include "mock_session.h"
+#include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
@@ -342,6 +343,35 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble04, TestS
     window->MakeSubOrDialogWindowDragableAndMoveble();
     ASSERT_TRUE(window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble04 end";
+}
+
+/**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble05
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetSubWindowDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble05");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(true, window->property_->IsDecorEnable());
+    window->property_->SetDecorEnable(false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
+    window->property_->SetIsUIExtensionAbilityProcess(true);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 end";
 }
 
 /**
@@ -739,113 +769,6 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
-}
-
-/**
- * @tc.name: SetRequestedOrientation
- * @tc.desc: SetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetRequestedOrientation");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-
-    window->hostSession_ = session;
-    window->property_->SetPersistentId(1);
-
-    Orientation ori = Orientation::VERTICAL;
-    window->SetRequestedOrientation(ori);
-    Orientation ret = window->GetRequestedOrientation();
-    ASSERT_EQ(ret, ori);
-
-    window->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
-    Orientation ret1 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    Orientation ret2 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
-    Orientation ret3 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-    Orientation ret4 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-    Orientation ret5 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-
-    window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
-    Orientation ret6 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
-}
-
-/**
- * @tc.name: GetRequestedOrientationtest01
- * @tc.desc: GetRequestedOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
-    option->SetWindowName("GetRequestedOrientation");
-
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-
-    window->hostSession_ = session;
-    window->property_->SetPersistentId(1);
-
-    Orientation ori = Orientation::HORIZONTAL;
-    window->SetRequestedOrientation(ori);
-    Orientation ret = window->GetRequestedOrientation();
-    ASSERT_EQ(ret, ori);
-
-    window->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
-    Orientation ret1 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    Orientation ret2 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
-    Orientation ret3 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-    Orientation ret4 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-    Orientation ret5 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-
-    window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
-    Orientation ret6 = window->GetRequestedOrientation();
-    ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientationtest01 end";
 }
 
 /**
@@ -2070,49 +1993,6 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateExtensionConfig
- * @tc.desc: UpdateExtensionConfig test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateExtensionConfig");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->crossAxisState_ = CrossAxisState::STATE_INVALID;
-    auto want = std::make_shared<AAFwk::Want>();
-    window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
-
-    AAFwk::WantParams configParam;
-    AAFwk::WantParams wantParam(want->GetParams());
-    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
-    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    want->SetParams(wantParam);
-    window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
-    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_INVALID)));
-    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    want->SetParams(wantParam);
-    window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
-    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS)));
-    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    want->SetParams(wantParam);
-    window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
-    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_END)));
-    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
-    want->SetParams(wantParam);
-    window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
-}
-
-/**
  * @tc.name: RegisterWaterfallModeChangeListener
  * @tc.desc: RegisterWaterfallModeChangeListener Test
  * @tc.type: FUNC
@@ -2158,6 +2038,26 @@ HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, TestSize.
 }
 
 /**
+ * @tc.name: IsWaterfallModeEnabled
+ * @tc.desc: IsWaterfallModeEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, IsWaterfallModeEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWaterfallModeEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), false);
+
+    auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = mockHostSession;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*mockHostSession, GetWaterfallMode(_)).WillOnce(DoAll(SetArgReferee<0>(true), Return(WSError::WS_OK)));
+    EXPECT_EQ(window->IsWaterfallModeEnabled(), true);
+}
+
+/**
  * @tc.name: NotifyWaterfallModeChange
  * @tc.desc: NotifyWaterfallModeChange Test
  * @tc.type: FUNC
@@ -2172,6 +2072,34 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
     auto ret = window->RegisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     window->NotifyWaterfallModeChange(true);
+}
+
+/**
+ * @tc.name: CreateSubWindowOutlineEnabled
+ * @tc.desc: CreateSubWindowOutlineEnabled Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, CreateSubWindowOutlineEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("CreateSubWindowOutlineEnabled01");
+    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window1 = sptr<WindowSessionImpl>::MakeSptr(option1);
+    ASSERT_EQ(false, window1->property_->IsSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("CreateSubWindowOutlineEnabled02");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option2->SetSubWindowOutlineEnabled(false);
+    sptr<WindowSessionImpl> window2 = sptr<WindowSessionImpl>::MakeSptr(option2);
+    ASSERT_EQ(false, window2->property_->IsSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option3 = sptr<WindowOption>::MakeSptr();
+    option3->SetWindowName("CreateSubWindowOutlineEnabled03");
+    option3->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option3->SetSubWindowOutlineEnabled(true);
+    sptr<WindowSessionImpl> window3 = sptr<WindowSessionImpl>::MakeSptr(option3);
+    ASSERT_EQ(true, window3->property_->IsSubWindowOutlineEnabled());
 }
 } // namespace
 } // namespace Rosen

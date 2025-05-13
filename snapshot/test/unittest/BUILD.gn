@@ -32,8 +32,10 @@ ohos_unittest("snapshot_utils_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 }
 
@@ -45,8 +47,10 @@ ohos_unittest("snapshot_display_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 }
 

@@ -2662,6 +2662,20 @@ HWTEST_F(WindowTest, GetCompatibleModeInPc, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsAdaptToCompatibleImmersive, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->IsAdaptToCompatibleImmersive();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled
  * @tc.type: FUNC
@@ -2671,6 +2685,19 @@ HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, TestSize.Level1)
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
     auto ret = window->IsPcOrPadCapabilityEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsSceneBoardEnabled, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->IsSceneBoardEnabled();
     EXPECT_EQ(false, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }

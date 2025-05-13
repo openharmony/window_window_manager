@@ -50,6 +50,8 @@ private:
     void TriggerScreenDisplayModeUpdate(FoldDisplayMode displayMode);
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
+    void ChangeOnTentMode(FoldStatus currentState) override;
+    void ChangeOffTentMode() override;
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     ScreenId GetScreenIdByDisplayMode(FoldDisplayMode displayMode);
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

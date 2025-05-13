@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStubTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStubTest" };
 }
 class WindowEventChannelStubTest : public testing::Test {
 public:
@@ -51,21 +51,13 @@ public:
     sptr<WindowEventChannelStub> windowEventChannelStub_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
-void WindowEventChannelStubTest::SetUpTestCase()
-{
-}
+void WindowEventChannelStubTest::SetUpTestCase() {}
 
-void WindowEventChannelStubTest::TearDownTestCase()
-{
-}
+void WindowEventChannelStubTest::TearDownTestCase() {}
 
-void WindowEventChannelStubTest::SetUp()
-{
-}
+void WindowEventChannelStubTest::SetUp() {}
 
-void WindowEventChannelStubTest::TearDown()
-{
-}
+void WindowEventChannelStubTest::TearDown() {}
 
 namespace {
 /**
@@ -73,7 +65,7 @@ namespace {
  * @tc.desc: test function : OnRemoteRequest
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, OnRemoteRequest, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, OnRemoteRequest, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -96,7 +88,7 @@ HWTEST_F(WindowEventChannelStubTest, OnRemoteRequest, Function | SmallTest | Lev
  * @tc.desc: test function : HandleTransferKeyEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -111,7 +103,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent01, Function | SmallT
  * @tc.desc: test function : HandleTransferKeyEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent02, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -126,7 +118,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEvent02, Function | SmallT
  * @tc.desc: test function : HandleTransferKeyEventAsync
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEventAsync, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEventAsync, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -141,7 +133,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferKeyEventAsync, Function | Sma
  * @tc.desc: test function : HandleTransferPointerEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -154,7 +146,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent01, Function | Sm
  * @tc.desc: test function : HandleTransferPointerEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent02, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -169,7 +161,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferPointerEvent02, Function | Sm
  * @tc.desc: test function : HandleTransferFocusActiveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusActiveEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusActiveEvent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -184,7 +176,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusActiveEvent, Function | 
  * @tc.desc: test function : HandleTransferFocusStateEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusStateEvent, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusStateEvent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -199,7 +191,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferFocusStateEvent, Function | S
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent01 begin");
     MessageParcel data;
@@ -220,7 +212,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent01, Fu
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent02, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent02, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent02 begin");
     MessageParcel data;
@@ -235,7 +227,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent02, Fu
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent03, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent03, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent03 begin");
     MessageParcel data;
@@ -252,7 +244,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent03, Fu
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent04, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent04, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent04 begin");
     MessageParcel data;
@@ -270,7 +262,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent04, Fu
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent05
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent05, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent05, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent05 begin");
     MessageParcel data;
@@ -289,7 +281,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent05, Fu
  * @tc.desc: test function : HandleTransferAccessibilityHoverEvent06
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent06, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent06, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityHoverEvent06 begin");
     MessageParcel data;
@@ -309,7 +301,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityHoverEvent06, Fu
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister01 begin");
     MessageParcel data;
@@ -328,12 +320,12 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister02, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister02, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 begin");
     MessageParcel data;
     MessageParcel reply;
-    
+
     ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 end");
@@ -344,7 +336,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister03
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister03, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister03, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister03 begin");
     MessageParcel data;
@@ -361,7 +353,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeRegister04
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister04, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegister04, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeRegister04 begin");
     MessageParcel data;
@@ -379,7 +371,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
  * @tc.desc: test function : HandleTransferAccessibilityChildTreeUnregister01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeUnregister01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeUnregister01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityChildTreeUnregister01 begin");
     MessageParcel data;
@@ -394,7 +386,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeUnregis
  * @tc.desc: test function : HandleTransferAccessibilityDumpChildInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityDumpChildInfo01, Function | SmallTest | Level1)
+HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityDumpChildInfo01, TestSize.Level1)
 {
     WLOGI("HandleTransferAccessibilityDumpChildInfo01 begin");
     MessageParcel data;
@@ -406,6 +398,6 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityDumpChildInfo01,
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityDumpChildInfo(data, reply));
     WLOGI("HandleTransferAccessibilityDumpChildInfo01 end");
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
