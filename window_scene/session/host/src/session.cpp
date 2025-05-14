@@ -2263,7 +2263,7 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto property = GetSessionProperty();
+    const auto& property = GetSessionProperty();
     bool raiseEnabled = property->GetRaiseEnabled();
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
