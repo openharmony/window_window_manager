@@ -7595,10 +7595,12 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
                 ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
         } else if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_FULL));
+            OnBeforeScreenPropertyChange(foldStatus);
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
         } else if (foldStatus == FoldStatus::FOLDED) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_MAIN));
+            OnBeforeScreenPropertyChange(foldStatus);
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
         } else {
@@ -9268,6 +9270,9 @@ void ScreenSessionManager::OnSecondaryReflexionChange(ScreenId screenId, bool is
 void ScreenSessionManager::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
 {
     TLOGI(WmsLogTag::DMS, "foldstatus: %{public}d", foldStatus);
+    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        return;
+    }
     if (!clientProxy_) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
