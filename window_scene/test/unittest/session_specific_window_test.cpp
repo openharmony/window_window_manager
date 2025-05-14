@@ -687,7 +687,7 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick06, Function | SmallTest
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
     subSession->SetSessionProperty(property);
     bool isExecuteDelayRaise = false;
-    result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 } // namespace
