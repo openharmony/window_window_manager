@@ -67,17 +67,18 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, const std::vector<st
             return -1;
         }
     }
-    if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
-        auto iterFirst = std::find(controlGroups.begin(), controlGroups.end(),
-            static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
-        auto iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
-            static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
-        if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, %{public}u conflicts with %{public}u in controlGroups",
-                static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
-                static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
-            return -1;
-        }
+    if (pipTemplateType != static_cast<uint32_t>(PiPTemplateType::VIDEO_PLAY)) {
+        return 0;
+    }
+    auto iterFirst = std::find(controlGroups.begin(), controlGroups.end(),
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT));
+    auto iterSecond = std::find(controlGroups.begin(), controlGroups.end(),
+        static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+    if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, %{public}u conflicts with %{public}u in controlGroups",
+        static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
+        static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+        return -1;
     }
     return 0;
 }
@@ -436,7 +437,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
     if (auto pipController = sptrWebPipController_) {
-        return UnregisterAll(ListenerType::STATE_CHANGE_CB);
+        UnregisterAll(ListenerType::STATE_CHANGE_CB);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -450,7 +452,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver(
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
     if (auto pipController = sptrWebPipController_) {
-        return UnregisterAll(ListenerType::CONTROL_EVENT_CB);
+        UnregisterAll(ListenerType::CONTROL_EVENT_CB);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -464,7 +467,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
     if (auto pipController = sptrWebPipController_) {
-        return UnregisterAll(ListenerType::SIZE_CHANGE_CB);
+        UnregisterAll(ListenerType::SIZE_CHANGE_CB);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -478,14 +482,15 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPStart()
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
     if (auto pipController = sptrWebPipController_) {
-        return UnregisterAll(ListenerType::PIP_START_CB);
+        UnregisterAll(ListenerType::PIP_START_CB);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
 }
 
-WMError WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
+void WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
 {
     switch (type) {
         case ListenerType::STATE_CHANGE_CB:
@@ -507,7 +512,6 @@ WMError WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
         default:
             break;
     }
-    return WMError::WM_OK;
 }
 
 bool WebPictureInPictureControllerInterface::IsRegistered(ListenerType type,

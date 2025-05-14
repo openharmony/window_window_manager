@@ -27,7 +27,7 @@ namespace {
     std::map<uint32_t, sptr<WebPictureInPictureControllerInterface>> g_ControllerIds;
 }
 
-inline bool ControllerIdsIsFull()
+inline bool IsIdMapFull()
 {
     if (g_ControllerIds.size() >= static_cast<size_t>(UINT32_MAX - 1)) {
         return true;
@@ -37,7 +37,7 @@ inline bool ControllerIdsIsFull()
 
 inline uint32_t FindNextAvailableId()
 {
-    if (ControllerIdsIsFull()) {
+    if (IsIdMapFull()) {
         return 0;
     }
     uint32_t nextId = 0;
@@ -88,7 +88,10 @@ inline WindowManager_ErrorCode GetErrorCodeFromWMError(WMError error)
 
 int32_t OH_PictureInPicture_CreatePip(PictureInPicture_PiPConfig* pipConfig, uint32_t* controllerId)
 {
-    if (ControllerIdsIsFull()) {
+    if (pipConfig == nullptr || controllerId == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    if (IsIdMapFull()) {
         TLOGE(WmsLogTag::WMS_PIP, "all IDs are used");
         return  WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR;
     }
@@ -96,18 +99,20 @@ int32_t OH_PictureInPicture_CreatePip(PictureInPicture_PiPConfig* pipConfig, uin
     PiPConfig config{pipConfig->mainWindowId, pipConfig->pipTemplateType, pipConfig->width, pipConfig->height,
         GetControlGroup(pipConfig->controlGroup, pipConfig->controlGroupLength), pipConfig->env};
     auto errCode = webPipControllerInterface->Create(config);
-    if (errCode == WMError::WM_OK) {
-        uint32_t id = FindNextAvailableId();
-        *controllerId = id;
-        g_ControllerIds[id] = webPipControllerInterface;
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipInterface create failed");
+        return GetErrorCodeFromWMError(errCode);
     }
-    return GetErrorCodeFromWMError(errCode);
+    uint32_t id = FindNextAvailableId();
+    *controllerId = id;
+    g_ControllerIds[id] = webPipControllerInterface;
+    return WindowManager_ErrorCode::OK;
 }
 
 int32_t OH_PictureInPicture_DeletePip(uint32_t controllerId)
 {
     if (g_ControllerIds.find(controllerId) == g_ControllerIds.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     g_ControllerIds.erase(controllerId);
@@ -118,7 +123,7 @@ int32_t OH_PictureInPicture_StartPip(uint32_t controllerId)
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->StartPip());
@@ -128,7 +133,7 @@ int32_t OH_PictureInPicture_StopPip(uint32_t controllerId)
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->StopPip());
@@ -138,7 +143,7 @@ void OH_PictureInPicture_UpdatePipContentSize(uint32_t controllerId, uint32_t wi
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return;
     }
     pipController->UpdateContentSize(width, height);
@@ -149,7 +154,7 @@ void OH_PictureInPicture_UpdatePipControlStatus(uint32_t controllerId, PictureIn
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return;
     }
     pipController->UpdatePiPControlStatus(static_cast<PiPControlType>(controlType),
@@ -161,7 +166,7 @@ void OH_PictureInPicture_SetPiPControlEnabled(uint32_t controllerId, PictureInPi
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return;
     }
     pipController->setPiPControlEnabled(static_cast<PiPControlType>(controlType), enabled);
@@ -171,7 +176,7 @@ int32_t OH_PictureInPicture_RegisterStartPipCallback(uint32_t controllerId, WebP
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->RegisterStartPipListener(callback));
@@ -181,7 +186,7 @@ int32_t OH_PictureInPicture_UnregisterStartPipCallback(uint32_t controllerId, We
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (callback == nullptr) {
@@ -195,7 +200,7 @@ int32_t OH_PictureInPicture_UnregisterAllStartPipCallbacks(uint32_t controllerId
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->UnregisterAllPiPStart());
@@ -205,7 +210,7 @@ int32_t OH_PictureInPicture_RegisterLifecycleListener(uint32_t controllerId, Web
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->RegisterLifeCycleListener(
@@ -216,7 +221,7 @@ int32_t OH_PictureInPicture_UnregisterLifecycleListener(uint32_t controllerId, W
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (callback == nullptr) {
@@ -231,7 +236,7 @@ int32_t OH_PictureInPicture_UnregisterAllLifecycleListeners(uint32_t controllerI
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->UnregisterAllPiPLifecycle());
@@ -241,7 +246,7 @@ int32_t OH_PictureInPicture_RegisterControlEventListener(uint32_t controllerId, 
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->RegisterControlEventListener(
@@ -252,7 +257,7 @@ int32_t OH_PictureInPicture_UnregisterControlEventListener(uint32_t controllerId
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (callback == nullptr) {
@@ -267,7 +272,7 @@ int32_t OH_PictureInPicture_UnregisterAllControlEventListeners(uint32_t controll
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->UnregisterAllPiPControlObserver());
@@ -277,7 +282,7 @@ int32_t OH_PictureInPicture_RegisterResizeListener(uint32_t controllerId, WebPip
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->RegisterResizeListener(callback));
@@ -287,7 +292,7 @@ int32_t OH_PictureInPicture_UnregisterResizeListener(uint32_t controllerId, WebP
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (callback == nullptr) {
@@ -301,7 +306,7 @@ int32_t OH_PictureInPicture_UnregisterAllResizeListeners(uint32_t controllerId)
 {
     auto pipController = GetControllerFromId(controllerId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found");
+        TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     return GetErrorCodeFromWMError(pipController->UnregisterAllPiPWindowSize());

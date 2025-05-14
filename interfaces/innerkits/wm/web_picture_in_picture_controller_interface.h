@@ -66,7 +66,7 @@ private:
     int32_t ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
     int32_t ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
-    WMError UnregisterAll(ListenerType type);
+    void UnregisterAll(ListenerType type);
     bool isPipPossible_ = false;
     sptr<WebPictureInPictureController> sptrWebPipController_;
     std::set<sptr<NativePiPWindowListener>> lifeCycleCallbackSet_;

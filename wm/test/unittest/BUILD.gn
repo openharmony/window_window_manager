@@ -562,7 +562,7 @@ ohos_unittest("wm_web_picture_in_picture_controller_interface_test") {
   deps = [
     ":wm_unittest_common",
     "${window_base_path}/wm:libpip_web",
-   ]
+  ]
 
   external_deps = [
     "ability_runtime:runtime",
