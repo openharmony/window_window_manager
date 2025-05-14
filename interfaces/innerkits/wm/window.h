@@ -2305,12 +2305,13 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
 
     /**
-     * @brief window SnapshotIgnorePrivacy
+     * @brief window snapshot
      *
      * @param pixelMap pixel map
      * @return the error code of this operation
      */
-    virtual WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
+    virtual WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief window SnapshotIgnorePrivacy
