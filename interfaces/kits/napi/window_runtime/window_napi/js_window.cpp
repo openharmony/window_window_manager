@@ -5397,8 +5397,9 @@ napi_value JsWindow::OnSnapshotSync(napi_env env, napi_callback_info info)
     }
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Snapshot(pixelMap));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window %{public}u, snapshot end, result: %{public}d",
+        windowToken_->GetWindowId(), ret);
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "snapshot failed, result: %{public}d", ret);
         return NapiThrowError(env, ret);
     }
     auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
