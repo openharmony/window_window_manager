@@ -636,6 +636,21 @@ public:
                decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     }
 
+    static void SplitStringByDelimiter(
+        const std::string& inputStr, const std::string& delimiter, std::unordered_set<std::string>& container)
+    {
+        if (inputStr.empty()) {
+            return;
+        }
+        std::string::iterator start = inputStr.begin();
+        std::string::iterator end;
+        while ((end = std::find(start, inputStr.end(), delimiter)) != inputStr.end()) {
+            container.insert(std::string(start, end));
+            start = end + 1;
+        }
+        container.insert(std::string(start, end));
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;

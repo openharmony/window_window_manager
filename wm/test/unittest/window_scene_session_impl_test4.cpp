@@ -1958,23 +1958,6 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo02, TestSize.Level1)
 }
 
 /**
- * @tc.name: ParseContainerList01
- * @tc.desc: ParseContainerList
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, ParseContainerList01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetBundleName("ParseContainerList");
-    option->SetWindowName("ParseContainerList");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    system::SetParameter("const.window.containerColorList", "a,b,c,d");
-    window->ParseContainerColorList();
-    EXPECT_EQ(0, window->containerColorList_.count("e"));
-    EXPECT_EQ(1, window->containerColorList_.count("a"));
-}
-
-/**
  * @tc.name: SetWindowContainerColor01
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC

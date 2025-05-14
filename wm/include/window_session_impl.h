@@ -637,7 +637,6 @@ protected:
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
-    void ParseContainerColorList();
 
     /*
      * Window Input Event
