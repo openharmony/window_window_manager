@@ -227,6 +227,7 @@ public:
     bool GetIsRealScreen();
     void SetIsPcUse(bool isPcUse);
     bool GetIsPcUse();
+    void SetIsFakeSession(bool isFakeSession);
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
     bool GetIsCurrentInUse() const;
@@ -256,6 +257,7 @@ public:
     bool isInUse_ { false };
     bool isReal_ { false };
     bool isPcUse_ { false };
+    bool isFakeSession_ { false };
 
     NodeId nodeId_ {};
 
