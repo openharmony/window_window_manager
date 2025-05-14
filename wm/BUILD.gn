@@ -472,7 +472,7 @@ config("libpip_web_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/wm/include",
-    ]
+  ]
 }
 
 config("libpip_web_private_config") {
@@ -496,7 +496,7 @@ ohos_shared_library("libpip_web") {
   install_enable = true
   sources = [
     "src/web_picture_in_picture_controller_interface.cpp",
-    ]
+  ]
 
   configs = [
     ":libpip_web_private_config",

@@ -113,6 +113,10 @@ void WebPictureInPictureController::UpdateContentSize(int32_t width, int32_t hei
         TLOGE(WmsLogTag::WMS_PIP, "invalid size");
         return;
     }
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is nullptr");
+        return;
+    }
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (curState_ != PiPWindowState::STATE_STARTED) {
         TLOGD(WmsLogTag::WMS_PIP, "UpdateContentSize is disabled when state: %{public}u", curState_);

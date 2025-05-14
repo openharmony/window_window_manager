@@ -199,9 +199,9 @@ HWTEST_F(WebPictureInPictureControllerTest, SetXComponentController, TestSize.Le
     sptr<MockWindow> mw = new MockWindow();
     auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
     webPipControl->window_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, webPipControl->SetXComponentController(xComponentController));
+    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, webPipControl->SetXComponentController(xComponentController));
     webPipControl->window_ = mw;
-    ASSERT_EQ(WMError::WM_OK, webPipControl->SetXComponentController(xComponentController));
+    EXPECT_EQ(WMError::WM_OK, webPipControl->SetXComponentController(xComponentController));
 }
 
 /**
@@ -212,12 +212,12 @@ HWTEST_F(WebPictureInPictureControllerTest, SetXComponentController, TestSize.Le
 HWTEST_F(WebPictureInPictureControllerTest, GetWebRequestId, TestSize.Level1)
 {
     auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
-    ASSERT_EQ(webPipControl->GetWebRequestId(), 0);
-    ASSERT_EQ(webPipControl->GetWebRequestId(), 1);
+    EXPECT_EQ(webPipControl->GetWebRequestId(), 0);
+    EXPECT_EQ(webPipControl->GetWebRequestId(), 1);
     webPipControl->webRequestId_ = UINT8_MAX - 1;
-    ASSERT_EQ(webPipControl->GetWebRequestId(), UINT8_MAX - 1);
-    ASSERT_EQ(webPipControl->GetWebRequestId(), UINT8_MAX);
-    ASSERT_EQ(webPipControl->GetWebRequestId(), 0);
+    EXPECT_EQ(webPipControl->GetWebRequestId(), UINT8_MAX - 1);
+    EXPECT_EQ(webPipControl->GetWebRequestId(), UINT8_MAX);
+    EXPECT_EQ(webPipControl->GetWebRequestId(), 0);
 }
 
 /**
@@ -229,29 +229,29 @@ HWTEST_F(WebPictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.L
 {
     auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
     webPipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(webPipControl->windowRect_.width_, 100);
-    ASSERT_EQ(webPipControl->windowRect_.height_, 150);
+    EXPECT_EQ(webPipControl->windowRect_.width_, 100);
+    EXPECT_EQ(webPipControl->windowRect_.height_, 150);
 
     webPipControl->pipOption_->contentWidth_ = 0;
     webPipControl->pipOption_->contentHeight_ = 0;
     webPipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(webPipControl->windowRect_.width_, 0);
-    ASSERT_EQ(webPipControl->windowRect_.height_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.width_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.height_, 0);
     webPipControl->pipOption_->contentWidth_ = 10;
     webPipControl->pipOption_->contentHeight_ = 0;
     webPipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(webPipControl->windowRect_.width_, 10);
-    ASSERT_EQ(webPipControl->windowRect_.height_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.width_, 10);
+    EXPECT_EQ(webPipControl->windowRect_.height_, 0);
     webPipControl->UpdateWinRectByComponent();
     webPipControl->pipOption_->contentWidth_ = 0;
     webPipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(webPipControl->windowRect_.width_, 0);
-    ASSERT_EQ(webPipControl->windowRect_.height_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.width_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.height_, 0);
     webPipControl->pipOption_->contentWidth_ = 10;
     webPipControl->pipOption_->contentHeight_ = 10;
     webPipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(webPipControl->windowRect_.posX_, 0);
-    ASSERT_EQ(webPipControl->windowRect_.posY_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.posX_, 0);
+    EXPECT_EQ(webPipControl->windowRect_.posY_, 0);
 }
 }
 }
