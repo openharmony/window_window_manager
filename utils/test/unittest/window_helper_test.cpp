@@ -316,6 +316,21 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
     style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 }
+
+/**
+ * @tc.name: SplitStringByDelimiter
+ * @tc.desc: SplitStringByDelimiter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, SplitStringByDelimiter, TestSize.Level1)
+{
+    std::string inputStr = "a,b,c,d";
+    std::string delimiter = ",";
+    std::unordered_set<std::string> container;
+    WindowHelper::SplitStringByDelimiter(inputStr, delimiter, container);
+    EXPECT_EQ(0, container.count("e"));
+    EXPECT_EQ(1, container.count("a"));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

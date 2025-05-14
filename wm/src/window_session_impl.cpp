@@ -280,7 +280,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
-    ParseContainerColorList();
+    WindowHelper::SplitStringByDelimiter(
+        system::GetParameter("const.window.containerColorList", ""), ",", containerColorList_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -3761,22 +3762,6 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_SendContainerModalEvent");
     return WSError::WS_OK;
-}
-
-void WindowSessionImpl::ParseContainerColorList()
-{
-    std::string containerColorStr = system::GetParameter("const.window.containerColorList", "");
-    if (containerColorStr.empty()) {
-        return;
-    }
-    std::string::iterator start = containerColorStr.begin();
-    std::string::iterator end;
-    // parse the string separated by ','
-    while ((end = std::find(start, containerColorStr.end(), ',')) != containerColorStr.end()) {
-        containerColorList_.insert(std::string(start, end));
-        start = end + 1;
-    }
-    containerColorList_.insert(std::string(start, end));
 }
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
