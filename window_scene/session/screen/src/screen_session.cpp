@@ -49,6 +49,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
+constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -310,7 +311,11 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     }
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
     displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
-    displayInfo->SetScreenId(screenId_);
+    if (isFakeSession_) {
+        displayInfo->SetScreenId(SCREEN_ID_DEFAULT);
+    } else {
+        displayInfo->SetScreenId(screenId_);
+    }
     displayInfo->SetDisplayId(screenId_);
     displayInfo->SetRefreshRate(property_.GetRefreshRate());
     displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
@@ -467,6 +472,11 @@ void ScreenSession::SetIsPcUse(bool isPcUse)
 bool ScreenSession::GetIsPcUse()
 {
     return isPcUse_;
+}
+
+void ScreenSession::SetIsFakeSession(bool isFakeSession)
+{
+    isFakeSession_ = isFakeSession;
 }
 
 void ScreenSession::SetValidHeight(uint32_t validHeight)
