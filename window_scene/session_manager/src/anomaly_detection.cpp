@@ -53,12 +53,13 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         // check app session showWhenLocked
         CheckShowWhenLocked(session, keyGuardFlag);
         // wallpaper zOrder check
-        CheckWallpaper(session) return false;
+        CheckWallpaper(session);
+        return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
 }
 
-void AnomalyDetection::CheckCallingSession(sptr<SceneSession> session)
+void AnomalyDetection::CheckCallingSession(sptr<SceneSession>& session)
 {
     if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         uint32_t callingWindowId = session->GetCallingSessionId();
@@ -74,7 +75,7 @@ void AnomalyDetection::CheckCallingSession(sptr<SceneSession> session)
     }
 }
 
-void AnomalyDetection::CheckSubWindow(sptr<SceneSession> session)
+void AnomalyDetection::CheckSubWindow(sptr<SceneSession>& session)
 {
     if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
         session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
@@ -89,7 +90,7 @@ void AnomalyDetection::CheckSubWindow(sptr<SceneSession> session)
     }
 }
 
-void AnomalyDetection::CheckShowWhenLocked(sptr<SceneSession> session, bool& keyGuardFlag)
+void AnomalyDetection::CheckShowWhenLocked(sptr<SceneSession>& session, bool& keyGuardFlag)
 {
     if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         keyGuardFlag = true;
@@ -101,7 +102,7 @@ void AnomalyDetection::CheckShowWhenLocked(sptr<SceneSession> session, bool& key
     }
 }
 
-void AnomalyDetection::CheckWallpaper(sptr<SceneSession> session)
+void AnomalyDetection::CheckWallpaper(sptr<SceneSession>& session)
 {
     if (session->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         constexpr uint32_t defaultWallpaperZOrder = 1;
