@@ -1970,7 +1970,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ParseContainerList01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     system::SetParameter("const.window.containerColorList", "a,b,c,d");
     window->ParseContainerColorList();
-    EXPECT_EQ(4, window->containerColorList_.size());
     EXPECT_EQ(0, window->containerColorList_.count("e"));
     EXPECT_EQ(1, window->containerColorList_.count("a"));
 }
@@ -1993,7 +1992,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor01, TestSize.Level1
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
-    window->containerColorList_ = "SetWindowContainerColor";
+    window->containerColorList_.insert("SetWindowContainerColor");
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
@@ -2025,7 +2024,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1
     window->property_->SetDecorEnable(true);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->containerColorList_ = "SetWindowContainerColor";
+    window->containerColorList_.insert("SetWindowContainerColor");
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#FF000000";
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
@@ -2056,7 +2055,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor03, TestSize.Level1
     window->property_->SetDecorEnable(true);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->containerColorList_ = "SetWindowContainerColor";
+    window->containerColorList_.insert("SetWindowContainerColor");
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#FF000000";
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);

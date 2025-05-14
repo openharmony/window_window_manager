@@ -3766,8 +3766,11 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 void WindowSessionImpl::ParseContainerColorList()
 {
     std::string containerColorStr = system::GetParameter("const.window.containerColorList", "");
-    std::string::itreator start = containerColorStr.begin();
-    std::string::itreator end;
+    if (containerColorStr.empty()) {
+        return;
+    }
+    std::string::iterator start = containerColorStr.begin();
+    std::string::iterator end;
     // parse the string separated by ','
     while ((end = std::find(start, containerColorStr.end(), ',')) != containerColorStr.end()) {
         containerColorList_.insert(std::string(start, end));
@@ -3778,7 +3781,8 @@ void WindowSessionImpl::ParseContainerColorList()
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!SessionPermission::IsSystemCalling() && containerColorList_.count(property_->GetSessionInfo().bundleName_)) {
+    if (!SessionPermission::IsSystemCalling() &&
+        containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
