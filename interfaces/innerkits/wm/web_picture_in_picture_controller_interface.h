@@ -74,7 +74,6 @@ private:
     std::set<sptr<NativePiPWindowListener>> resizeCallbackSet_;
     std::set<sptr<NativePiPWindowListener>> startPipCallbackSet_;
 };
-// };
 } // namespace Rosen
 } // namespace OHOS
 #endif // OHOS_WEB_PICTURE_IN_PICTURE_CONTROLLER_INTERFACE_H
