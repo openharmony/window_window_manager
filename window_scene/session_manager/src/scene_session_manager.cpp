@@ -3420,9 +3420,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
     }
     bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-    if (!isPhoneOrPad && property_->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
+    if (!isPhoneOrPad && property->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
         TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
-        return WMError::WS_ERROR_INVALID_OPERATION;
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
     if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
@@ -8905,7 +8905,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         if (iter == abilityInfoMap.end()) {
             TLOGW(WmsLogTag::DEFAULT, "launcher ability not found, bundle:%{public}s", bundleInfo.name.c_str());
             auto hapModuleListIter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
-                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); }); 
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
             if (hapModuleListIter != hapModulesList.end()) {
                 abilityInfo = hapModuleListIter->abilityInfos[0];
             } else {
@@ -8923,7 +8923,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
         GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
         scbAbilityInfos.push_back(scbAbilityInfo);
-    } 
+    }
 }
 
 void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
@@ -13741,11 +13741,11 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
 
     AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
-    
+
     appForceLandscapeMap_[bundleName] = config;
     TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
         bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
-    
+
     if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
         //Notify the client of the mode change
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -14678,7 +14678,7 @@ WMError SceneSessionManager::GetHostWindowCompatiblityInfo(const sptr<IRemoteObj
         }
         TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",
             where, persistentId, compatInfo->ToString().c_str());
-        property->CopyFrom(compatInfo); 
+        property->CopyFrom(compatInfo);
         return WMError::WM_OK;
     }, __func__);
 }
@@ -14877,7 +14877,7 @@ WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool use
         }
         return sceneSession->UseImplicitAnimation(useImplicit);
     };
- 
+
     return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
 }
 } // namespace OHOS::Rosen
