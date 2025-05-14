@@ -34,7 +34,7 @@ struct PiPConfig {
 
 class WebPictureInPictureController : public PictureInPictureControllerBase {
 public:
-    WebPictureInPictureController(const PiPConfig& config);
+    explicit WebPictureInPictureController(const PiPConfig& config);
     ~WebPictureInPictureController() = default;
     WMError StartPictureInPicture(StartPipType startType) override;
     void UpdateContentSize(int32_t width, int32_t height) override;

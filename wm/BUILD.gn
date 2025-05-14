@@ -446,7 +446,7 @@ ohos_shared_library("libwm_ndk") {
   innerapi_tags = [ "ndk" ]
 
   external_deps = [
-     "ability_base:configuration",
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
@@ -474,16 +474,16 @@ config("libpip_web_public_config") {
     "//foundation/window/window_manager/wm/include",
     ]
 }
- 
+
 config("libpip_web_private_config") {
   visibility = [ ":*" ]
- 
-   include_dirs = [
+
+  include_dirs = [
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/wm/include",
   ]
 }
- 
+
 ## Build libpip_web.so
 ohos_shared_library("libpip_web") {
   branch_protector_ret = "pac_ret"
@@ -497,14 +497,14 @@ ohos_shared_library("libpip_web") {
   sources = [
     "src/web_picture_in_picture_controller_interface.cpp",
     ]
- 
+
   configs = [
     ":libpip_web_private_config",
     "../resources/config/build:coverage_flags",
   ]
- 
+
   public_configs = [ ":libpip_web_public_config" ]
- 
+
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -517,7 +517,7 @@ ohos_shared_library("libpip_web") {
     "${window_base_path}/wm:libwm",
     "${window_base_path}/dm:libdm",
   ]
- 
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
@@ -545,37 +545,37 @@ ohos_shared_library("libpip_web") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
- 
+
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
- 
+
   defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 }
- 
+
 config("libpip_ndk_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/interfaces/kits/ndk/wm",
-    ]
+  ]
 }
- 
+
 ## Build libpip_ndk.so
 ohos_shared_library("libpip_ndk") {
   output_extension = "so"
   branch_protector_ret = "pac_ret"
- 
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
   }
- 
+
   public_configs = [ ":libpip_ndk_public_config" ]
- 
+
   include_dirs = [
     "//foundation/window/window_manager",
     "//foundation/window/window_manager/interfaces/innerkits",
@@ -583,19 +583,19 @@ ohos_shared_library("libpip_ndk") {
     "//foundation/window/window_manager/interfaces/kits/ndk/wm",
     "//foundation/window/window_manager/wm/include",
   ]
- 
+
   sources = [
     "src/oh_window_pip.cpp",
   ]
- 
+
   deps = [
-     ":libwm",
+    ":libwm",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/wm:libpip_web",
   ]
- 
+
   innerapi_tags = [ "ndk" ]
- 
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
@@ -623,7 +623,7 @@ ohos_shared_library("libpip_ndk") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
- 
+
   part_name = "window_manager"
   subsystem_name = "window"
 }

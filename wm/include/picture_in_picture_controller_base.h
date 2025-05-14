@@ -63,9 +63,9 @@ public:
     WMError StopPictureInPictureFromClient();
     WMError DestroyPictureInPictureWindow();
     sptr<Window> GetPipWindow() const;
-    uint32_t GetMainWindowId();
+    uint32_t GetMainWindowId() const;
     void SetControllerId(uint32_t controllerId);
-    uint32_t GetControllerId();
+    uint32_t GetControllerId() const;
     void SetPipWindow(sptr<Window> window);
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
     bool IsContentSizeChanged(float width, float height, float posX, float posY);
@@ -96,10 +96,10 @@ public:
     std::vector<sptr<IPiPControlObserver>> GetPictureInPictureControlObserver() const;
     std::vector<sptr<IPiPWindowSize>> GetPictureInPictureSizeObserver() const;
     std::vector<sptr<IPiPStartObserver>> GetPictureInPictureStartObserver() const;
-    PiPWindowState GetControllerState();
+    PiPWindowState GetControllerState() const;
     void OnPictureInPictureStart();
     void SetSurfaceId(std::string surfaceId);
-    std::string GetSurfaceId();
+    std::string GetSurfaceId() const;
     bool isWeb_ = false;
 
     // diffrent between normal and web

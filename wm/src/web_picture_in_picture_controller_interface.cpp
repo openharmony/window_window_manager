@@ -82,7 +82,7 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, const std::vector<st
     return 0;
 }
 
-static int32_t checkCreatePipParams(PiPConfig config)
+static int32_t checkCreatePipParams(const PiPConfig& config)
 {
     if (config.mainWindowId == 0) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be 0");
@@ -108,9 +108,9 @@ WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config)
 {
     int32_t ret = checkCreatePipParams(config);
     if (ret == -1) {
-        std::string errMsg = "Invalid parameters when createPip, please check if mainWindowId/width/height is zero,"
-            " or env is nullptr, or controlGroup mismatch the corresponding pipTemplateType";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid parameters when createPip, "
+            "please check if mainWindowId/width/height is zero, "
+            "or env is nullptr, or controlGroup mismatch the corresponding pipTemplateType");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config);
