@@ -2264,10 +2264,6 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
     bool raiseEnabled = property->GetRaiseEnabled();
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
