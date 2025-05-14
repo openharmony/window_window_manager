@@ -2428,6 +2428,16 @@ sptr<SceneSession> SceneSessionManager::GetHookedSessionByModuleName(const Sessi
     return session;
 }
 
+void SceneSessionManager::UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook)
+{
+    if (!sceneSession || !isAbilityHook)  {
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is null or isAbilityHook is false");
+        return;
+    }
+    sceneSession->EditSessionInfo().isAbilityHook_ = isAbilityHook;
+    RegisterHookSceneSessionActivationFunc(sceneSession);
+}
+
 sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
     sptr<WindowSessionProperty> property)
 {
@@ -2435,6 +2445,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
             UpdateSessionDisplayIdBySessionInfo(session, sessionInfo);
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
+            UpdateAbilityHookState(session, sessionInfo.isAbilityHook_);
             return session;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: appName: [%{public}s %{public}s %{public}s] "
