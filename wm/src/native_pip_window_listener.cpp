@@ -97,7 +97,7 @@ void NativePiPWindowListener::OnPipStart(uint32_t controllerId, uint8_t requestI
         return;
     }
     TLOGI(WmsLogTag::WMS_PIP, "controllerId:%{public}u, requestId:%{public}u, surfaceId:%{public}llu",
-        controllerId, requestId, surfaceId);
+        controllerId, requestId, static_cast<unsigned long long>(surfaceId));
     pipStartCallback_(controllerId, requestId, surfaceId);
 }
 } // namespace Rosen
