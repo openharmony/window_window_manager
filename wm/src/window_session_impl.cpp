@@ -142,6 +142,7 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
+std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::secureLimitChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, sptr<IPreferredOrientationChangeListener>> WindowSessionImpl::preferredOrientationChangeListener_;
@@ -167,6 +168,7 @@ std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
+std::mutex WindowSessionImpl::secureLimitChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
@@ -2028,6 +2030,22 @@ WindowState WindowSessionImpl::GetRequestWindowState() const
     return requestState_;
 }
 
+WSError WindowSessionImpl::NotifyExtensionSecureLimitChange(bool isLimit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "windowId: %{public}d, isLimite: %{public}u", GetPersistentId(), isLimit);
+    std::vector<sptr<IExtensionSecureLimitChangeListener>> secureLimitChangeListeners;
+    {
+        std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
+        secureLimitChangeListeners = GetListeners<IExtensionSecureLimitChangeListener>();
+    }
+    for (const auto& listener : secureLimitChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnSecureLimitChange(isLimit);
+        }
+    }
+    return WSError::WS_OK;
+}
+
 /** @note @window.focus */
 WMError WindowSessionImpl::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
 {
@@ -3042,6 +3060,31 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
 }
 
 template<typename T>
+EnableIfSame<T, IExtensionSecureLimitChangeListener,
+    std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IExtensionSecureLimitChangeListener>> secureLimitChangeListeners;
+    for (auto& listener : secureLimitChangeListeners_[GetPersistentId()]) {
+        secureLimitChangeListeners.push_back(listener);
+    }
+    return secureLimitChangeListeners;
+}
+
+WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
+    return RegisterListener(secureLimitChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
+    return UnregisterListener(secureLimitChangeListeners_[GetPersistentId()], listener);
+}
+
+template<typename T>
 EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> WindowSessionImpl::GetListeners()
 {
     sptr<ISubWindowCloseListener> subWindowCloseListeners;
@@ -3584,6 +3627,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
+        ClearUselessListeners(secureLimitChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
