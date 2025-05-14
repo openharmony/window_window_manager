@@ -8280,7 +8280,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "translate", moduleName, JsWindow::Translate);
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
-    BindNativeFunction(env, object, "snapshotSync", moduleName, JsWindow::snapshotSync);
+    BindNativeFunction(env, object, "snapshotSync", moduleName, JsWindow::SnapshotSync);
     BindNativeFunction(env, object, "snapshotIgnorePrivacy", moduleName, JsWindow::SnapshotIgnorePrivacy);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
     BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
