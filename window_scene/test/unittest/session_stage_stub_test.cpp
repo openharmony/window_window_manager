@@ -28,6 +28,7 @@
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "ui/rs_canvas_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -933,6 +934,43 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
     data.WriteUint32(info.displayRect_.height_);
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleLinkKeyFrameCanvasNode
+ * @tc.desc: test function : HandleLinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleSetKeyFramePolicy
+ * @tc.desc: test function : HandleSetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetKeyFramePolicy, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    KeyFramePolicy keyFramePolicy;
+    data.WriteParcelable(&keyFramePolicy);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**
