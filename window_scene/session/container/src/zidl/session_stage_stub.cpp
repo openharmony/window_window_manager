@@ -126,6 +126,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleDumpSessionElementInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE):
             return HandleNotifyTouchOutside(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SECURE_LIMIT_CHANGE):
+            return HandleNotifySecureLimitChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE):
             return HandleUpdateWindowMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
@@ -448,6 +450,18 @@ int SessionStageStub::HandleNotifyTouchOutside(MessageParcel& data, MessageParce
 {
     WLOGFD("HandleNotifyTouchOutside!");
     NotifyTouchOutside();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifySecureLimitChange!");
+    bool isLimit = true;
+    if (!data.ReadBool(isLimit)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isLimit failed.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyExtensionSecureLimitChange(isLimit);
     return ERR_NONE;
 }
 
