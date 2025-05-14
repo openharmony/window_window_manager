@@ -171,6 +171,8 @@ public:
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WMError SetIntentParam(const std::string& intentParam, const std::function<void()>&& loadPageCallback,
+        bool isColdStart) override;
 
     /*
      * inherits from session stage
@@ -598,6 +600,9 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
+    std::string intentParam_;
+    std::function<void()> loadPageCallback_;
+    bool isColdStart_ = true;
 
     /*
      * Window Layout
