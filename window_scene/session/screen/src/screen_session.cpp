@@ -49,7 +49,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
-const ScreenId SCREEN_ID_DEFAULT = 0;
+constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
