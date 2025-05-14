@@ -7919,7 +7919,9 @@ void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
             NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
             CalcNewClientRectForSuperFold(winRect);
             SetFrameGravity(Gravity::RESIZE);
-            sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            if (sessionStage_) {
+                sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            }
             winRect_ = winRect;
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
                 "height: %{public}u, Id: %{public}u, displayId: %{public}" PRIu64, winRect.posX_, winRect.posY_,
@@ -8021,11 +8023,12 @@ void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topT
                 TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null");
                 return;
             }
-            uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
+            int32_t currentScreenHeight =
+                static_cast<int32_t>(currentScreenSession->GetScreenProperty().GetBounds().rect_.height_);
             int32_t dockHeight = GetDockHeight();
             topThreshold = creaseRect.posY_ + creaseRect.height_;
             bottomThreshold = currentScreenHeight - dockHeight - creaseRect.posY_ - creaseRect.height_;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}u, topThreshold: %{public}d, "
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}d, topThreshold: %{public}d, "
                 "bottomThreshold: %{public}d Id: %{public}u", currentScreenHeight, topThreshold,
                 bottomThreshold, GetPersistentId());
         }
