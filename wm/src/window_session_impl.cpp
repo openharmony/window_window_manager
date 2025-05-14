@@ -6088,7 +6088,6 @@ void WindowSessionImpl::UpdateSubWindowInfo(uint32_t subWindowLevel,
 bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
 {
     if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Maximize fail not subwindow");
         return false;
     }
     if (windowOption_ != nullptr) {
