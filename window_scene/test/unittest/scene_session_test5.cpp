@@ -927,19 +927,32 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
 
     SizeChangeReason reason = { SizeChangeReason::DRAG };
-    WSRect rect = { 0, 0, 0, 0 };
+    WSRect rect = { 0, 0, 10, 10 };
+    WSRect rectNew = { 100, 100, 100, 100 };
     session->lastKeyFrameRect_ = rect;
     session->lastKeyFrameStamp_ = 0;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), false);
+    // no running
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), false);
     session->keyFramePolicy_.running_ = true;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, SizeChangeReason::DRAG_START), true);
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, SizeChangeReason::DRAG_END), false);
+    // other reason
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_START), true);
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_END), false);
     session->keyFrameAnimating_ = true;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    // for same rect
+    session->keyFrameAnimating_ = false;
+    session->lastKeyFrameRect_ = rect;
+    session->lastKeyFrameStamp_ = 0;
     EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), true);
     session->keyFrameAnimating_ = false;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), false);
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), true);
     session->lastKeyFrameRect_ = rect;
+    session->lastKeyFrameStamp_ = 0;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), false);
+    // not meet time condition
+    session->keyFrameAnimating_ = false;
+    session->lastKeyFrameRect_ = rect;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    // for distance condition
     WSRect moveToRect = {
         0, 0, static_cast<int>(session->keyFramePolicy_.distance_), static_cast<int>(session->keyFramePolicy_.distance_)
     };
@@ -949,6 +962,27 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     session->lastKeyFrameRect_ = rect;
     session->keyFrameAnimating_ = false;
     EXPECT_EQ(session->KeyFrameNotifyFilter(moveToRect, reason), true);
+}
+
+/**
+ * @tc.name: KeyFrameRectAlmostSame
+ * @tc.desc: KeyFrameRectAlmostSame function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, KeyFrameRectAlmostSame, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rect = { 10, 10, 10, 10 };
+    const int32_t DIFF_TEST = 13;
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { DIFF_TEST + 1, 10, 10, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, DIFF_TEST + 1, 10, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, 10, DIFF_TEST + 1, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, 10, 10, DIFF_TEST + 1 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { DIFF_TEST, DIFF_TEST, DIFF_TEST, DIFF_TEST }), true);
 }
 
 /**

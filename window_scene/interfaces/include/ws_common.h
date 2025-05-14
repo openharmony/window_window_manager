@@ -570,6 +570,11 @@ inline bool NearEqual(const int32_t& left, const int32_t& right)
     return left == right;
 }
 
+inline bool NearEqual(const int32_t& left, const int32_t& right, const int32_t threshold)
+{
+    return std::abs(left - right) <= threshold;
+}
+
 inline bool NearZero(const double left)
 {
     constexpr double epsilon = 0.001f;
@@ -592,6 +597,12 @@ struct WSRectT {
     bool operator!=(const WSRectT<T>& a) const
     {
         return !this->operator==(a);
+    }
+
+    inline bool isNearEqual(const WSRectT<T>& rect, const T threshold) const
+    {
+        return (NearEqual(posX_, rect.posX_, threshold) && NearEqual(posY_, rect.posY_, threshold) &&
+                NearEqual(width_, rect.width_, threshold) && NearEqual(height_, rect.height_, threshold));
     }
 
     bool IsEmpty() const
