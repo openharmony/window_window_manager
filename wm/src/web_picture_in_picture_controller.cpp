@@ -151,11 +151,7 @@ void WebPictureInPictureController::UpdateWinRectByComponent()
 
 void WebPictureInPictureController::UpdatePiPSourceRect() const
 {
-    float posX = 0;
-    float posY = 0;
-    float width = 0;
-    float height = 0;
-    Rect rect = { posX, posY, width, height };
+    Rect rect = { 0, 0, 0, 0 };
     TLOGI(WmsLogTag::WMS_PIP, "result rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RESTORE);

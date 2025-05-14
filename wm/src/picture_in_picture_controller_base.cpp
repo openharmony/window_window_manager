@@ -57,7 +57,7 @@ void PictureInPictureControllerBase::SetControllerId(uint32_t controllerId)
     controllerId_ = controllerId;
 }
 
-uint32_t PictureInPictureControllerBase::GetControllerId()
+uint32_t PictureInPictureControllerBase::GetControllerId() const
 {
     return controllerId_;
 }
@@ -275,7 +275,7 @@ sptr<Window> PictureInPictureControllerBase::GetPipWindow() const
     return window_;
 }
 
-uint32_t PictureInPictureControllerBase::GetMainWindowId()
+uint32_t PictureInPictureControllerBase::GetMainWindowId() const
 {
     return mainWindowId_;
 }
@@ -285,7 +285,7 @@ void PictureInPictureControllerBase::SetPipWindow(sptr<Window> window)
     window_ = window;
 }
 
-PiPWindowState PictureInPictureControllerBase::GetControllerState()
+PiPWindowState PictureInPictureControllerBase::GetControllerState() const
 {
     return curState_;
 }
@@ -385,7 +385,7 @@ void PictureInPictureControllerBase::SetSurfaceId(std::string surfaceId)
     surfaceId_ = surfaceId;
 }
 
-std::string PictureInPictureControllerBase::GetSurfaceId()
+std::string PictureInPictureControllerBase::GetSurfaceId() const
 {
     return surfaceId_;
 }
