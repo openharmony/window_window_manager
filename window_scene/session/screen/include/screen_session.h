@@ -117,6 +117,8 @@ public:
     void SetScreenCombination(ScreenCombination combination);
     ScreenCombination GetScreenCombination() const;
 
+    void SetBounds(RRect screenBounds);
+    void SetHorizontalRotation();
     Orientation GetOrientation() const;
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;

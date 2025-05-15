@@ -50,6 +50,7 @@ const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
+constexpr float HORIZONTAL = 270.f;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -1096,6 +1097,26 @@ sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
         return nullptr;
     }
     return modes_[activeIdx_];
+}
+
+void ScreenSession::SetBounds(RRect screenBounds)
+{
+    property_.SetBounds(screenBounds);
+}
+
+void ScreenSession::SetHorizontalRotation()
+{
+    property_.SetRotation(HORIZONTAL);
+    property_.UpdateScreenRotation(Rotation::ROTATION_270);
+    property_.SetScreenRotation(Rotation::ROTATION_270);
+    property_.UpdateDeviceRotation(Rotation::ROTATION_270);
+    property_.SetDisplayOrientation(DisplayOrientation::LANDSCAPE_INVERTED);
+    property_.SetDeviceOrientation(DisplayOrientation::LANDSCAPE_INVERTED);
+    property_.SetScreenComponentRotation(HORIZONTAL);
+    property_.SetPhysicalRotation(HORIZONTAL);
+    currentSensorRotation_ = HORIZONTAL;
+    displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
+    RSTransaction::FlushImplicitTransaction();
 }
 
 Orientation ScreenSession::GetOrientation() const
