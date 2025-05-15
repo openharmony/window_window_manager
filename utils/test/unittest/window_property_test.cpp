@@ -51,6 +51,7 @@ HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, TestSize.Level1)
     winPropSrc.SetPrivacyMode(true);
     winPropSrc.SetTransparent(true);
     winPropSrc.SetTransform(Transform::Identity());
+    winPropSrc.SetFollowScreenChange(true);
 
     Parcel parcel;
     winPropSrc.Marshalling(parcel);
@@ -59,6 +60,7 @@ HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, TestSize.Level1)
     ASSERT_EQ(winPropDst->GetPrivacyMode(), true);
     ASSERT_EQ(winPropDst->GetTransparent(), true);
     ASSERT_EQ(winPropDst->GetTransform(), Transform::Identity());
+    EXPECT_EQ(winPropDst->GetFollowScreenChange(), true);
     delete winPropDst;
 }
 
@@ -91,7 +93,6 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
     WindowProperty winPropSrc;
     winPropSrc.SetPrivacyMode(true);
     winPropSrc.SetTransparent(true);
-    winPropSrc.SetFollowScreenChange(true);
 
     Parcel parcel;
     winPropSrc.Marshalling(parcel);
@@ -118,7 +119,6 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
 
     ASSERT_EQ(false, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
-    EXPECT_EQ(false, winPropDst.GetFollowScreenChange());
 }
 
 /**
