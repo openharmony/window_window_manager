@@ -142,6 +142,12 @@ public:
 
     static sptr<RootScene> staticRootScene_;
 
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 private:
     void RegisterInputEventListener();
 

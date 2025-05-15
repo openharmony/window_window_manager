@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "window_manager_hilog.h"
 #include <power_mgr_client.h>
 
@@ -200,7 +201,7 @@ void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>&
         }
         displayNode = nullptr;
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(screenScreen->GetRSUIContext());
 }
 
 void MultiScreenPowerChangeManager::ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient,
