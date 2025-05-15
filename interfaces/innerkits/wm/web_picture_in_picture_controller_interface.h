@@ -28,7 +28,7 @@ class WebPictureInPictureControllerInterface : virtual public RefBase {
 public:
     WebPictureInPictureControllerInterface() = default;
     ~WebPictureInPictureControllerInterface() = default;
-    WMError Create(const PiPConfig& config);
+    WMError Create(const PiPConfig& config, uint32_t controllerId);
     WMError StartPip();
     WMError StopPip();
     WMError UpdateContentSize(int32_t width, int32_t height);

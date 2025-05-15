@@ -56,7 +56,7 @@ bool isAllDigits(const std::string& surfaceId)
         return false;
     }
     return std::all_of(surfaceId.begin(), surfaceId.end(), [](unsigned char c) {
-        return std::isdight(c);
+        return std::isdigit(c);
     })
 }
 
@@ -159,7 +159,8 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
     }
     TLOGI(WmsLogTag::WMS_PIP, "SetSurfaceId: %{public}s", surfaceId.c_str());
     pipController->SetSurfaceId(surfaceId);
-    if (!isAllDigits(surfaceId)) {
+    if (!isAllDigits(surfaceId) || sizeof(surfaceId) > sizeof(std::to_string(UINT64_MAX)) ||
+        surfaceId > std::to_string(UINT64_MAX)) {
         TLOGE(WmsLogTag::WMS_PIP, "surfaceId error: %{public}s", surfaceId.c_str());
         return NapiGetUndefined(env);
     }
