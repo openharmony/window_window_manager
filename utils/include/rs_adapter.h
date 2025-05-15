@@ -22,14 +22,14 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_sync_transaction_handler.h>
 #include <transaction/rs_transaction.h>
+#include <ui/rs_base_node.h>
 #include <ui/rs_node.h>
 #include <ui/rs_ui_context.h>
 #include <ui/rs_ui_director.h>
 
-#define RETURN_IF_RS_MULTI_INSTANCE_DISABLED(...)                                     \
+#define RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(...)                              \
     do {                                                                              \
-        if (!RSAdapterUtil::IsMultiInstanceEnabled()) {                               \
-            TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "RS multi-instance is disabled"); \
+        if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) {                         \
             return __VA_ARGS__;                                                       \
         }                                                                             \
     } while (false)                                                                   \
@@ -78,7 +78,6 @@ private:
     void InvokeTransaction(Func&& func, const char* caller);
 
     static InvokerType invokerType_;
-
     std::shared_ptr<RSUIContext> rsUIContext_;
     RSTransactionProxy* rsTransProxy_;
     std::shared_ptr<RSTransactionHandler> rsTransHandler_;
@@ -177,10 +176,15 @@ private:
 
 class RSAdapterUtil {
 public:
-    static bool IsMultiInstanceEnabled();
-    static bool SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
+    static bool IsClientMultiInstanceEnabled();
+    static void InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
+                                 bool shouldCreateRenderThread = true,
+                                 bool isMultiInstance = false);
+    static void SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                const std::shared_ptr<RSUIContext>& rsUIContext,
                                bool skipCheckInMultiInstance = false);
+    static const std::shared_ptr<RSBaseNode> GetRSNode(
+        const std::shared_ptr<RSUIContext>& rsUIContext, NodeId id);
     static std::string RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext);
     static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);

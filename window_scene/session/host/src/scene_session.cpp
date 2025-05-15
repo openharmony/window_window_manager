@@ -7578,10 +7578,7 @@ void SceneSession::AddSidebarBlur()
         TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty has value");
         return;
     }
-    auto getRSNodeInner = [rsUIContext = GetRSUIContext()](NodeId id) {
-        return rsUIContext ? rsUIContext->GetNodeMap().GetNode(id) : RSNodeMap::Instance().GetNode(id);
-    };
-    auto rsNodeTemp = getRSNodeInner(surfaceNode->GetId());
+    auto rsNodeTemp = RSAdapterUtil::GetRSNode(GetRSUIContext(), surfaceNode->GetId());
     if (rsNodeTemp) {
         std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
         AbilityRuntime::Context::GetApplicationContext();

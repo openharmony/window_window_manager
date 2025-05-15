@@ -162,7 +162,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         return WMError::WM_ERROR_NULLPTR;
     }
     node->leashWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());
 
@@ -175,7 +175,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         return WMError::WM_ERROR_NULLPTR;
     }
     node->startingWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE,

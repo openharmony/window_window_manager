@@ -364,7 +364,7 @@ public:
     WMError ShowKeyboard(KeyboardViewMode mode) override;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
@@ -563,9 +563,8 @@ private:
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
-    void InitRSUIDirector();
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen

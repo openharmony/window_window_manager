@@ -142,7 +142,7 @@ public:
     bool EnableDefaultAnimation(bool animationPlayed);
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
 

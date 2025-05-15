@@ -335,7 +335,7 @@ public:
     bool GetIsAvailableAreaNeedNotify() const;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
@@ -379,9 +379,8 @@ private:
     bool isAvailableAreaNeedNotify_ = false;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
-    void InitRSUIDirector();
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 

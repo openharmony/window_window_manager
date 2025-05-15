@@ -449,7 +449,7 @@ public:
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
@@ -922,9 +922,8 @@ private:
     bool isKeyboardDidHideRegistered_ = false;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
-    void InitRSUIDirector();
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen

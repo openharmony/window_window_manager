@@ -675,7 +675,7 @@ public:
     void SetWindowAnimationDuration(int32_t duration);
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
 
@@ -1042,7 +1042,7 @@ private:
     int32_t windowAnimationDuration_;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     void InitRSUIContext();
     std::shared_ptr<RSUIContext> rsUIContext_;

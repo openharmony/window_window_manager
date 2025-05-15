@@ -147,7 +147,7 @@ public:
      * @brief Get the associated RSUIDirector instance
      *
      * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
-     *         or nullptr if unavailable.
+     *         or nullptr if RS client multi-instance is disabled.
      */
     virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
 
@@ -155,7 +155,7 @@ public:
      * @brief Get the associated RSUIContext instance
      *
      * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
-     *         or nullptr if unavailable.
+     *         or nullptr if RS client multi-instance is disabled.
      */
     virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
 

@@ -38,7 +38,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(), name.c_str());
         SetIsUseControlSession(info.isUseControlSession);
     }

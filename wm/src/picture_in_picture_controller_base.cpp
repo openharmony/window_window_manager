@@ -18,6 +18,7 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include "parameters.h"
 #include "picture_in_picture_manager.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
@@ -211,19 +212,15 @@ WMError PictureInPictureControllerBase::StopPictureInPictureInner(StopPipType st
             templateType, PipConst::FAILED, "pipController is null");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        syncTransactionController->OpenSyncTransaction();
-    }
-    ResetExtController();
-    if (!withAnim) {
-        TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
-        DestroyPictureInPictureWindow();
-    }
-    if (syncTransactionController) {
-        syncTransactionController->CloseSyncTransaction();
-    }
+    {
+        AutoRSSyncTransaction syncTrans(window_->GetRSUIContext(), false);
+        ResetExtController();
+        if (!withAnim) {
+            TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
+            DestroyPictureInPictureWindow();
+        }
 
+    }
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PipConst::PIP_SUCCESS, "pip window stop success");
     return WMError::WM_OK;

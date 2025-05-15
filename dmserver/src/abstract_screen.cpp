@@ -34,7 +34,7 @@ AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, 
     if (name != "") {
         name_ = name;
     }
-    InitRSUIDirector();
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
 }
 
 AbstractScreen::~AbstractScreen()
@@ -207,7 +207,7 @@ void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const 
         }
         rsDisplayNode->SetSkipCheckInMultiInstance(true);
         rsDisplayNode_ = rsDisplayNode;
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     }
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
@@ -231,7 +231,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     }
     rsDisplayNode->SetSkipCheckInMultiInstance(true);
     rsDisplayNode_ = rsDisplayNode;
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
 
@@ -488,25 +488,11 @@ uint32_t AbstractScreen::GetPhyHeight() const
     return phyHeight_;
 }
 
-void AbstractScreen::InitRSUIDirector()
-{
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED();
-    if (rsUIDirector_) {
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-              "RSUIDirector already exists: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
-        return;
-    }
-    rsUIDirector_ = RSUIDirector::Create();
-    rsUIDirector_->Init(true, true);
-    TLOGI(WmsLogTag::WMS_RS_MULTI_INSTANCE,
-          "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
-}
-
 std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
 {
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
     return rsUIContext;
 }
 
