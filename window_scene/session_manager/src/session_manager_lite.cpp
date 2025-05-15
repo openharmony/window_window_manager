@@ -304,7 +304,8 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
         return;
     }
     RegisterSMSRecoverListener();
-    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetSessionManagerService();
+    sptr<IRemoteObject> remoteObject = nullptr;
+    mockSessionManagerServiceProxy_->GetSessionManagerService(remoteObject);
     if (!remoteObject) {
         WLOGFE("Remote object is nullptr");
         return;
@@ -325,7 +326,8 @@ void SessionManagerLite::InitScreenSessionManagerLiteProxy()
         return;
     }
 
-    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetScreenSessionManagerLite();
+    sptr<IRemoteObject> remoteObject = nullptr;
+    mockSessionManagerServiceProxy_->GetScreenSessionManagerLite(remoteObject);
     if (!remoteObject) {
         WLOGFW("Get screen session manager lite proxy failed, null");
         return;
