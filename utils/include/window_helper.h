@@ -644,11 +644,11 @@ public:
         }
         std::string::size_type start = 0;
         std::string::size_type end = 0;
-        while ((end = inputStr.find(delimiter, inputStr)) != std::string::npos) {
-            container.insert(inputStr.subStr(start, end - start));
+        while ((end = inputStr.find(delimiter, start)) != std::string::npos) {
+            container.insert(inputStr.substr(start, end - start));
             start = end + delimiter.length();
         }
-        container.insert(inputStr.subStr(start));
+        container.insert(inputStr.substr(start));
     }
 
 private:
