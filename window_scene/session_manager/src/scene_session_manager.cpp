@@ -1904,30 +1904,31 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
-const WindowLimits& SceneSessionManager::GetWindowLimits(int32_t windowId)
+WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& windowLimits)
 {
-    WindowLimits windowLimits;
     if (!systemConfig_.IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "not pc device, return.");
-        return windowLimits;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "permission denied!");
-        return windowLimits;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto sceneSession = GetSceneSession(windowId);
     if (!sceneSession) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sceneSession(%{public}d) is nullptr", windowId);
-        return windowLimits;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        windowLimits = sessionProperty->GetWindowLimits();
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "GetWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
-            "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
-            windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionProperty(%{public}d) is nullptr", windowId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return windowLimits;
+    windowLimits = sessionProperty->GetWindowLimits();
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "GetWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
+        "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
+    return WMError::WM_OK;
 }
 
 uint32_t SceneSessionManager::GetLockScreenZOrder()
