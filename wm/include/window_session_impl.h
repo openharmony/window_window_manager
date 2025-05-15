@@ -951,14 +951,6 @@ private:
     Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
-     * keyboard
-     */
-    bool isKeyboardWillShowRegistered_ { false };
-    bool isKeyboardWillHideRegistered_ { false };
-    bool isKeyboardDidShowRegistered_ = false;
-    bool isKeyboardDidHideRegistered_ = false;
-
-    /*
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;

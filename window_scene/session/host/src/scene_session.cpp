@@ -7828,11 +7828,11 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
                 where, session->GetPersistentId());
             return;
         }
-        if (isShowAnimation && !session->isKeyboardDidShowRegistered_.load()) {
+        if (isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did show listener is not registered");
             return;
         }
-        if (!isShowAnimation && !session->isKeyboardDidHideRegistered_.load()) {
+        if (!isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did hide listener is not registered");
             return;
         }
@@ -7860,11 +7860,11 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
                 where, session->GetPersistentId());
             return;
         }
-        if (isKeyboardShow && !session->isKeyboardWillShowRegistered_.load()) {
+        if (isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
             return;
         }
-        if (!isKeyboardShow && !session->isKeyboardWillHideRegistered_.load()) {
+        if (!isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
             return;
         }
@@ -7879,22 +7879,22 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
 
 void SceneSession::NotifyKeyboardWillShowRegistered(bool registered)
 {
-    isKeyboardWillShowRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_ = registered;
 }
 
 void SceneSession::NotifyKeyboardWillHideRegistered(bool registered)
 {
-    isKeyboardWillHideRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_ = registered;
 }
 
 void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 {
-    isKeyboardDidShowRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_ = registered;
 }
 
 void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 {
-    isKeyboardDidHideRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
 }
 
 WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)

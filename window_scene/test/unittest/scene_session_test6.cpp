@@ -524,9 +524,9 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardWillShowRegistered, Function | SmallTe
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->NotifyKeyboardWillShowRegistered(true);
-    EXPECT_EQ(true, sceneSession->isKeyboardWillShowRegistered_.load());
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_);
     sceneSession->NotifyKeyboardWillShowRegistered(false);
-    EXPECT_EQ(false, sceneSession->isKeyboardWillShowRegistered_.load());
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_);
 }
 
 /**
@@ -539,9 +539,9 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardWillHideRegistered, Function | SmallTe
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->NotifyKeyboardWillHideRegistered(true);
-    EXPECT_EQ(true, sceneSession->isKeyboardWillHideRegistered_.load());
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_);
     sceneSession->NotifyKeyboardWillHideRegistered(false);
-    EXPECT_EQ(false, sceneSession->isKeyboardWillHideRegistered_.load());
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_);
 }
 
 } // namespace
