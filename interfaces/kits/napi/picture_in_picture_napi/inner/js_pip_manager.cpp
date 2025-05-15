@@ -57,7 +57,7 @@ bool isAllDigits(const std::string& surfaceId)
     }
     return std::all_of(surfaceId.begin(), surfaceId.end(), [](unsigned char c) {
         return std::isdigit(c);
-    })
+    });
 }
 
 JsPipManager::JsPipManager()

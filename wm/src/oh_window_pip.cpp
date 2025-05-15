@@ -53,6 +53,9 @@ inline uint32_t FindNextAvailableId()
 
 inline std::vector<uint32_t> GetControlGroup(PictureInPicture_PiPControlGroup* controlGroup, uint8_t controlGroupLength)
 {
+    if (controlGroup == nullptr) {
+        return {};
+    }
     return std::vector<uint32_t>(controlGroup, controlGroup + controlGroupLength);
 }
 
