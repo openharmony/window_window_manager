@@ -62,14 +62,17 @@ ohos_static_library("libwm_static") {
     "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
+    "src/native_pip_window_listener.cpp",
     "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_controller_base.cpp",
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
     "src/ui_extension/provider_data_handler.cpp",
+    "src/web_picture_in_picture_controller.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
@@ -202,14 +205,17 @@ ohos_shared_library("libwm") {
     "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
+    "src/native_pip_window_listener.cpp",
     "src/pattern_detach_callback.cpp",
     "src/picture_in_picture_controller.cpp",
+    "src/picture_in_picture_controller_base.cpp",
     "src/picture_in_picture_manager.cpp",
     "src/picture_in_picture_option.cpp",
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
     "src/ui_extension/provider_data_handler.cpp",
+    "src/web_picture_in_picture_controller.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
@@ -428,17 +434,25 @@ ohos_shared_library("libwm_ndk") {
   sources = [
     "src/oh_window.cpp",
     "src/oh_window_event_filter.cpp",
+    "src/oh_window_pip.cpp",
   ]
 
   deps = [
     ":libwm",
     "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/wm:libpip_web",
   ]
 
   innerapi_tags = [ "ndk" ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "graphic_2d:color_manager",
@@ -448,6 +462,166 @@ ohos_shared_library("libwm_ndk") {
     "input:libmmi-client",
     "input:oh_input_manager",
     "ipc:ipc_core",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+config("libpip_web_public_config") {
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/wm/include",
+  ]
+}
+
+config("libpip_web_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/wm/include",
+  ]
+}
+
+## Build libpip_web.so
+ohos_shared_library("libpip_web") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  install_enable = true
+  sources = [
+    "src/web_picture_in_picture_controller_interface.cpp",
+  ]
+
+  configs = [
+    ":libpip_web_private_config",
+    "../resources/config/build:coverage_flags",
+  ]
+
+  public_configs = [ ":libpip_web_public_config" ]
+
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session_manager:session_manager",
+    "${window_base_path}/wm:libwm",
+    "${window_base_path}/dm:libdm",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
+    "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
+  ]
+
+  innerapi_tags = [ "platformsdk_indirect" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
+}
+
+config("libpip_ndk_public_config") {
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/kits/ndk/wm",
+  ]
+}
+
+## Build libpip_ndk.so
+ohos_shared_library("libpip_ndk") {
+  output_extension = "so"
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  public_configs = [ ":libpip_ndk_public_config" ]
+
+  include_dirs = [
+    "//foundation/window/window_manager",
+    "//foundation/window/window_manager/interfaces/innerkits",
+    "//foundation/window/window_manager/interfaces/inner_kits/wm",
+    "//foundation/window/window_manager/interfaces/kits/ndk/wm",
+    "//foundation/window/window_manager/wm/include",
+  ]
+
+  sources = [
+    "src/oh_window_pip.cpp",
+  ]
+
+  deps = [
+    ":libwm",
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/wm:libpip_web",
+  ]
+
+  innerapi_tags = [ "ndk" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:app_manager",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
+    "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "init:libbegetutil",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   part_name = "window_manager"
