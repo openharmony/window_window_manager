@@ -88,32 +88,32 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, Create, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
     config.mainWindowId = 0;
-    WMError ret = controller.Create(config);
+    WMError ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     config.mainWindowId = 100;
     config.pipTemplateType = 5;
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     config.pipTemplateType = 0;
     config.width = 0;
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     config.width = 150;
     config.env = nullptr;
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     int num1 = 0;
     config.env = reinterpret_cast<napi_env>(&num1);
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_OK, ret);
     config.controlGroup = {100, 101, 102, 200};
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     config.controlGroup = {105};
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     config.controlGroup = {101, 102};
-    ret = controller.Create(config);
+    ret = controller.Create(config, 0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
@@ -125,7 +125,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, Create, TestSize.Level1)
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, StartPip, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.StartPip();
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, ret);
     controller.sptrWebPipController_ = nullptr;
@@ -141,7 +141,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, StartPip, TestSize.Level1)
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.StopPip();
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
     controller.sptrWebPipController_ = nullptr;
@@ -157,7 +157,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.UpdateContentSize(10, 20);
     EXPECT_EQ(WMError::WM_OK, ret);
 
@@ -174,7 +174,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto status = PiPControlStatus::PAUSE;
     controller.sptrWebPipController_->pipOption_->pipControlStatusInfoList_.clear();
@@ -194,7 +194,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, Tes
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto controlType = PiPControlType::VIDEO_PREVIOUS;
     controller.setPiPControlEnabled(controlType, true);
     controller.setPiPControlEnabled(controlType, false);
@@ -212,7 +212,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestS
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.RegisterStartPipListener(nullptr);
@@ -232,7 +232,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, T
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterStartPipListener(PipStartPipCallback);
@@ -257,7 +257,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener,
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.RegisterLifeCycleListener(nullptr);
@@ -277,7 +277,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, 
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterLifeCycleListener(PipLifeCycleCallback);
@@ -302,7 +302,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.RegisterControlEventListener(nullptr);
@@ -322,7 +322,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListene
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterControlEventListener(PipControlEventCallback);
@@ -347,7 +347,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListe
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.RegisterResizeListener(nullptr);
@@ -367,7 +367,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, Tes
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterResizeListener(PipResizeCallback);
@@ -392,7 +392,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, T
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterAllPiPStart();
@@ -412,7 +412,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, Test
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterAllPiPLifecycle();
@@ -432,7 +432,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, 
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObserver, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterAllPiPControlObserver();
@@ -452,7 +452,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObse
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPWindowSize, TestSize.Level1)
 {
     WebPictureInPictureControllerInterface controller;
-    controller.Create(config);
+    controller.Create(config, 0);
     auto ret = controller.RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller.UnregisterAllPiPWindowSize();
