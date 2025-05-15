@@ -244,7 +244,8 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
-    void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true,
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -1030,6 +1031,7 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+    void DeletePersistentImageFit();
 
     /*
      * Specific Window

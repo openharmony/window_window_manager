@@ -31,6 +31,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSCanvasNode;
 class RSTransaction;
+enum class ImageFit;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -366,6 +367,15 @@ public:
      */
     virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
+    /**
+     * @brief Callback for set Image for recent.
+     *
+     * @param imgResourceId resourceId of static image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent(int imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+    
     /**
      * @brief Callback for setting to radius of window.
      *

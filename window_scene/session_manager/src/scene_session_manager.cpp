@@ -52,6 +52,7 @@
 #include "distributed_client.h"
 #include "dms_reporter.h"
 #include "hidump_controller.h"
+#include "image_source.h"
 #include "perform_reporter.h"
 #include "rdb/starting_window_rdb_manager.h"
 #include "res_sched_client.h"
@@ -12017,12 +12018,14 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     }
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
+    auto isPersistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
 
     bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
     bool useCurWindow = (snapshotNode == SnapshotNodeType::DEFAULT_NODE) ?
         isPc : (snapshotNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    if (needSnapshot) {
+    if (needSnapshot && !isPersistentImageFit) {
         pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);
     }
     if (!pixelMap) {
@@ -14302,13 +14305,13 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is nullptr", persistentId);
+        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
         return WMError::WM_ERROR_NULLPTR;
     }
 
     auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
     if (abilityInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is nullptr");
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!abilityInfo->applicationInfo.isSystemApp) {
@@ -14322,7 +14325,7 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
     }
     auto scenePersistence = sceneSession->GetScenePersistence();
     if (scenePersistence == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is nullptr");
+        TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     sceneSession->SaveSnapshot(true, true, pixelMap);

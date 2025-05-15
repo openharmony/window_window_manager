@@ -56,6 +56,9 @@
 #include "picture_in_picture_manager.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
+#include "session/host/include/scene_persistence.h"
+#include "session/host/include/scene_persistent_storage.h"
+#include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -3389,6 +3392,13 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     }
 
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetImageForRecent(int imgResourceId, ImageFit imageFit)
+{
+    int persistentId = GetPersistentId();
+    auto ret = SingletonContainer::Get<WindowAdapter>().SetImageForRecent(imgResourceId, imageFit, persistentId);
+    return ret;
 }
 
 /** @note @window.drag */
