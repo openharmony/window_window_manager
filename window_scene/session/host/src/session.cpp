@@ -28,6 +28,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "rs_adapter.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -106,6 +107,8 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
+
+    InitRSUIContext();
 }
 
 Session::~Session()
@@ -159,6 +162,7 @@ int32_t Session::GetPersistentId() const
 
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
 }
@@ -180,16 +184,12 @@ std::optional<NodeId> Session::GetSurfaceNodeId() const
 
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(leashWinSurfaceNode, rsUIContext, true);
     if (g_enableForceUIFirst) {
-        auto rsTransaction = RSTransactionProxy::GetInstance();
-        if (rsTransaction) {
-            rsTransaction->Begin();
-        }
+        AutoRSTransaction trans(rsUIContext);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
             leashWinSurfaceNode_->SetForceUIFirst(false);
-        }
-        if (rsTransaction) {
-            rsTransaction->Commit();
         }
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
@@ -4157,5 +4157,25 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
+}
+
+void Session::InitRSUIContext()
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+    // as ArkUI knows the host window for this type of window.
+    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    return rsUIContext_;
 }
 } // namespace OHOS::Rosen

@@ -48,8 +48,8 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSUIContext;
 class RSTransaction;
-class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
@@ -673,7 +673,12 @@ public:
      * Specific Window
      */
     void SetWindowAnimationDuration(int32_t duration);
-    
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -1035,6 +1040,12 @@ private:
      * Specific Window
      */
     int32_t windowAnimationDuration_;
+
+    /*
+     * RS Client Multi Instance
+     */
+    void InitRSUIContext();
+    std::shared_ptr<RSUIContext> rsUIContext_;
 };
 } // namespace OHOS::Rosen
 

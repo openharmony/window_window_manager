@@ -17,6 +17,7 @@
 #include "display_manager_service_inner.h"
 #include "persistent_storage.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -374,10 +375,9 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
 {
     if (node->GetWindowToken()) {
         auto type = node->GetWindowType();
-        auto syncTransactionController = RSSyncTransactionController::GetInstance();
-        if (reason == WindowSizeChangeReason::ROTATION && syncTransactionController && IsNeedAnimationSync(type)) {
-            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason,
-                syncTransactionController->GetRSTransaction());
+        auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
+        if (reason == WindowSizeChangeReason::ROTATION && rsTransaction && IsNeedAnimationSync(type)) {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason, rsTransaction);
         } else {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
         }
@@ -689,12 +689,13 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
         SetBounds(winNode, winRect, preRect);
     };
 
+    auto rsUIContext = node->GetRSUIContext();
     switch (node->GetWindowSizeChangeReason()) {
         case WindowSizeChangeReason::MAXIMIZE:
             [[fallthrough]];
         case WindowSizeChangeReason::RECOVER: {
             const RSAnimationTimingProtocol timingProtocol(400); // animation time
-            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
+            RSNode::Animate(rsUIContext, timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
@@ -710,13 +711,13 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
             const RSAnimationTimingProtocol timingProtocol(600); // animation time
             const RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(
                 0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-            RSNode::Animate(timingProtocol, curve_, SetBoundsFunc);
+            RSNode::Animate(rsUIContext, timingProtocol, curve_, SetBoundsFunc);
             break;
         }
         case WindowSizeChangeReason::FULL_TO_SPLIT:
         case WindowSizeChangeReason::SPLIT_TO_FULL: {
             const RSAnimationTimingProtocol timingProtocol(350); // animation time
-            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
+            RSNode::Animate(rsUIContext, timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
             break;
         }
         case WindowSizeChangeReason::UNDEFINED:

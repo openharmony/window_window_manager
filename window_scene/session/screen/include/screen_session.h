@@ -23,6 +23,7 @@
 #include <screen_manager/screen_types.h>
 #include <shared_mutex>
 #include <ui/rs_display_node.h>
+#include <ui/rs_ui_director.h>
 
 #include "screen_property.h"
 #include "dm_common.h"
@@ -333,6 +334,12 @@ public:
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
 
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
 private:
     ScreenProperty property_;
     std::shared_ptr<RSDisplayNode> displayNode_;
@@ -370,6 +377,11 @@ private:
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

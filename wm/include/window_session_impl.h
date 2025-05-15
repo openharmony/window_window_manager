@@ -25,6 +25,7 @@
 #include <ui_content.h>
 #include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
 #include "display_manager.h"
 #include "singleton_container.h"
 
@@ -446,6 +447,12 @@ public:
     DisplayOrientation GetDisplayOrientationForRotation() const;
     void SetPreferredRequestedOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 protected:
     WMError Connect();
@@ -913,6 +920,11 @@ private:
      */
     bool isKeyboardDidShowRegistered_ = false;
     bool isKeyboardDidHideRegistered_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -24,6 +24,7 @@
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "rs_adapter.h"
 #include "surface_draw.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
@@ -126,7 +127,7 @@ bool WaterMarkTest::FillColor(sptr<Window> window)
     Rect rect = window->GetRect();
     bool isDrawSuccess = SurfaceDraw::DrawColor(surfaceNode, rect.width_, rect.height_, COLOR_RED);
     surfaceNode->SetAbilityBGAlpha(ALPHA);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     return isDrawSuccess;
 }
 

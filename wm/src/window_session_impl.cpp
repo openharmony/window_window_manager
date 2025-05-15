@@ -37,6 +37,7 @@
 #include "display_manager.h"
 #include "extension/extension_business_info.h"
 #include "hitrace_meter.h"
+#include "rs_adapter.h"
 #include "scene_board_judgement.h"
 #include "session_permission.h"
 #include "key_event.h"
@@ -277,6 +278,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
@@ -383,7 +387,14 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal());
+    auto surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
+    if (surfaceNode) {
+        surfaceNode->SetSkipCheckInMultiInstance(true);
+    }
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
+    return surfaceNode;
 }
 
 WindowSessionImpl::~WindowSessionImpl()
@@ -924,9 +935,10 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
         sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
         window->UpdateVirtualPixelRatio(display);
+        auto rsUIContext = window->GetRSUIContext();
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         window->rotationAnimationCount_++;
@@ -934,7 +946,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         protocol.SetDuration(config.animationDuration_);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, [weak]() {
             auto window = weak.promote();
             if (!window) {
                 return;
@@ -949,11 +961,11 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->lastSizeChangeReason_ = wmReason;
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
-        RSNode::CloseImplicitAnimation();
+        RSNode::CloseImplicitAnimation(rsUIContext);
         if (rsTransaction) {
             rsTransaction->Commit();
         } else {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         }
         window->postTaskDone_ = true;
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
@@ -986,7 +998,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             window->UpdateVirtualPixelRatio(display);
             const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
             if (rsTransaction) {
-                RSTransaction::FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
                 rsTransaction->Begin();
             }
             if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
@@ -1005,7 +1017,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
             if (rsTransaction) {
                 rsTransaction->Commit();
             } else {
-                RSTransaction::FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             }
             window->postTaskDone_ = true;
         },
@@ -1062,7 +1074,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         }
         bool ifNeedCommitRsTransaction = window->CheckIfNeedCommitRsTransaction(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
@@ -1102,25 +1114,26 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
             TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
             return;
         }
+        auto rsUIContext = window->GetRSUIContext();
         if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(rectAnimationConfig.duration);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
             rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
-        RSNode::OpenImplicitAnimation(protocol, curve, nullptr);
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, nullptr);
         if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
-        RSNode::CloseImplicitAnimation();
+        RSNode::CloseImplicitAnimation(rsUIContext);
         if (rsTransaction) {
             rsTransaction->Commit();
         } else {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         }
         window->postTaskDone_ = true;
     };
@@ -2301,7 +2314,7 @@ WMError WindowSessionImpl::SetSingleFrameComposerEnabled(bool enable)
     }
 
     surfaceNode_->MarkNodeSingleFrameComposer(enable);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -5377,7 +5390,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             return;
         }
         if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
@@ -6211,6 +6224,23 @@ nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle
     decorJson.emplace(BUTTON_COLOR_MODE, decorButtonStyle.colorMode);
     decorJson.emplace(BUTTON_SPACING_BETWEEN, decorButtonStyle.spacingBetweenButtons);
     return decorJson;
+}
+
+std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS
