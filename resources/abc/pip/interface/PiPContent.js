@@ -183,7 +183,7 @@ class PiPContent extends ViewPU {
             this.registerStateChangeListener();
         }
         catch (b) {
-            console.error(TAG, `aboutToAppear failed: ${b}`);
+            console.log(`aboutToAppear failed`);
         }
     }
 
@@ -204,7 +204,7 @@ class PiPContent extends ViewPU {
             pip.off('nodeUpdate');
         }
         catch (a) {
-            console.error(TAG, `aboutToDisappear failed: ${a}`);
+            console.log(`aboutToDisappear failed`);
         };
     }
 
