@@ -43,10 +43,10 @@ const std::map<std::string, std::function<void()>> PIP_ACTION_MAP {
 };
 }
 
-sptr<PictureInPictureController> PictureInPictureManager::activeController_ = nullptr;
+sptr<PictureInPictureControllerBase> PictureInPictureManager::activeController_ = nullptr;
 wptr<PictureInPictureController> PictureInPictureManager::autoStartController_ = nullptr;
 std::map<int32_t, wptr<PictureInPictureController>> PictureInPictureManager::autoStartControllerMap_ = {};
-std::map<int32_t, sptr<PictureInPictureController>> PictureInPictureManager::windowToControllerMap_ = {};
+std::map<int32_t, sptr<PictureInPictureControllerBase>> PictureInPictureManager::windowToControllerMap_ = {};
 std::shared_ptr<NativeReference> PictureInPictureManager::innerCallbackRef_ = nullptr;
 
 PictureInPictureManager::PictureInPictureManager()
@@ -67,7 +67,7 @@ bool PictureInPictureManager::ShouldAbortPipStart()
     return activeController_ != nullptr && activeController_->GetControllerState() == PiPWindowState::STATE_STARTING;
 }
 
-void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController)
+void PictureInPictureManager::PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureControllerBase> pipController)
 {
     TLOGI(WmsLogTag::WMS_PIP, "windowId %{public}u", windowId);
     windowToControllerMap_.insert(std::make_pair(windowId, pipController));
@@ -79,7 +79,7 @@ void PictureInPictureManager::RemovePipControllerInfo(int32_t windowId)
     windowToControllerMap_.erase(windowId);
 }
 
-sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
+sptr<PictureInPictureControllerBase> PictureInPictureManager::GetPipControllerInfo(int32_t windowId)
 {
     if (windowToControllerMap_.empty() || windowToControllerMap_.find(windowId) == windowToControllerMap_.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "error, windowId: %{public}d not registered!", windowId);
@@ -94,7 +94,7 @@ bool PictureInPictureManager::HasActiveController()
     return activeController_ != nullptr;
 }
 
-bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController> pipController)
+bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureControllerBase> pipController)
 {
     if (!HasActiveController()) {
         return false;
@@ -104,13 +104,13 @@ bool PictureInPictureManager::IsActiveController(wptr<PictureInPictureController
     return res;
 }
 
-void PictureInPictureManager::SetActiveController(sptr<PictureInPictureController> pipController)
+void PictureInPictureManager::SetActiveController(sptr<PictureInPictureControllerBase> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
     activeController_ = pipController;
 }
 
-void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureController> pipController)
+void PictureInPictureManager::RemoveActiveController(wptr<PictureInPictureControllerBase> pipController)
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
     if (HasActiveController() && pipController.GetRefPtr() == activeController_.GetRefPtr()) {
