@@ -50,6 +50,16 @@ napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "")
     return NapiGetUndefined(env);
 }
 
+bool isAllDigits(const std::string& surfaceId)
+{
+    if (surfaceId.empty()) {
+        return false;
+    }
+    return std::all_of(surfaceId.begin(), surfaceId.end(), [](unsigned char c) {
+        return std::isdight(c);
+    })
+}
+
 JsPipManager::JsPipManager()
 {
     listenerCodeMap_ = {
@@ -111,7 +121,7 @@ napi_value JsPipManager::InitWebXComponentController(napi_env env, napi_callback
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
     return (me != nullptr) ? me->OnInitWebXComponentController(env, info) : nullptr;
 }
- 
+
 napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
@@ -149,6 +159,10 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
     }
     TLOGI(WmsLogTag::WMS_PIP, "SetSurfaceId: %{public}s", surfaceId.c_str());
     pipController->SetSurfaceId(surfaceId);
+    if (!isAllDigits(surfaceId)) {
+        TLOGE(WmsLogTag::WMS_PIP, "surfaceId error: %{public}s", surfaceId.c_str());
+        return NapiGetUndefined(env);
+    }
     for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
         listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(),
             atoll(surfaceId.c_str()));
