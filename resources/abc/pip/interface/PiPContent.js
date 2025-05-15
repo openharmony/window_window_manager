@@ -164,22 +164,27 @@ class PiPContent extends ViewPU {
         pip.on('stateChange', this.stateChangeListener);
     }
     aboutToAppear() {
-        this.nodeController = pip.getCustomUIController();
-        this.registerUpdateNodeListener();
-        this.xComponent = pip.getTypeNode();
-        if (!this.validateNode(this.xComponent)) {
-            return;
+        try {
+            this.nodeController = pip.getCustomUIController();
+            this.registerUpdateNodeListener();
+            this.xComponent = pip.getTypeNode();
+            if (!this.validateNode(this.xComponent)) {
+                return;
+            }
+            if (this.xComponent === null) {
+                console.error(TAG, `validateNode node is null`);
+                return;
+            }
+            this.useNode = true;
+            this.updatePipNodeType(this.xComponent);
+            pip.setTypeNodeEnabled();
+            this.mXCNodeController = new XCNodeController(this.xComponent);
+            console.info(TAG, 'use Node Controller');
+            this.registerStateChangeListener();
         }
-        if (this.xComponent === null) {
-            console.error(TAG, `validateNode node is null`);
-            return;
+        catch (b) {
+            console.error(TAG, `aboutToAppear failed: ${b}`);
         }
-        this.useNode = true;
-        this.updatePipNodeType(this.xComponent);
-        pip.setTypeNodeEnabled();
-        this.mXCNodeController = new XCNodeController(this.xComponent);
-        console.info(TAG, 'use Node Controller');
-        this.registerStateChangeListener();
     }
 
     updatePipNodeType(a2) {
@@ -194,8 +199,13 @@ class PiPContent extends ViewPU {
 
 
     aboutToDisappear() {
-        pip.off('stateChange', this.stateChangeListener);
-        pip.off('nodeUpdate', this.nodeUpdateListener);
+        try {
+            pip.off('stateChange');
+            pip.off('nodeUpdate');
+        }
+        catch (a) {
+            console.error(TAG, `aboutToDisappear failed: ${a}`);
+        };
     }
 
     initialRender() {
