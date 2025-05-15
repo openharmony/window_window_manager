@@ -912,15 +912,33 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnDumperClientScreenSessions,
 }
 
 /**
- * @tc.name: HandleOnBeforeScreenPropertyChange
- * @tc.desc: HandleOnBeforeScreenPropertyChange test
+ * @tc.name: HandleOnBeforeScreenPropertyChange01
+ * @tc.desc: HandleOnBeforeScreenPropertyChange test err
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
+    uint32_t errFoldStatus = 123;
+    data.WriteUint32(errFoldStatus);
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnBeforeScreenPropertyChange(data, reply);
+    EXPECT_EQ(ret, 22);
+}
 
+/**
+ * @tc.name: HandleOnBeforeScreenPropertyChange02
+ * @tc.desc: HandleOnBeforeScreenPropertyChange test normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    FoldStatus foldStatus = FoldStatus::FOLDED;
+    data.WriteUint32(static_cast<uint32_t>(foldStatus));
     data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
     ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
     auto ret = screenSessionManagerClientStub_->HandleOnBeforeScreenPropertyChange(data, reply);
