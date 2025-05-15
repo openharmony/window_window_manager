@@ -97,6 +97,7 @@ class WindowStage {
   setSupportedWindowModes(supportedWindowModes) {
     return this.windowStage_.setSupportedWindowModes(supportedWindowModes);
   }
+  
   setImageForRecent(imgResourceId, value) {
     return this.windowStage_.setImageForRecent(imgResourceId, value);
   }
