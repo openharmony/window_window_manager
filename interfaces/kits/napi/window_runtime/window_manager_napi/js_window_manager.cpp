@@ -1475,6 +1475,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
         JsWindowManager::ShiftAppWindowPointerEvent);
+    BindNativeFunction(env, exportObj, "setStartWindowBackgroundColor", moduleName,
+        JsWindowManager::SetStartWindowBackgroundColor);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
