@@ -20,7 +20,7 @@
 #include "session_manager_service.h"
 #include "ability_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "mock_session_manager_service_interface.h"
+#include "imock_session_manager_interface.h"
 #include "window_manager_hilog.h"
 #include "session_manager/include/scene_session_manager_lite.h"
 

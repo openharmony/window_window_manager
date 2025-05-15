@@ -20,7 +20,7 @@
 #include <shared_mutex>
 
 #include "session_manager_service_interface.h"
-#include "mock_session_manager_service_interface.h"
+#include "imock_session_manager_interface.h"
 #include "zidl/scene_session_manager_lite_interface.h"
 #include "zidl/screen_session_manager_lite_interface.h"
 #include "wm_single_instance.h"
