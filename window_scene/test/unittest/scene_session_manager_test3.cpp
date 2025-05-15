@@ -1138,6 +1138,25 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateBrightness
+ * @tc.desc: SceneSesionManager update brightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
+{
+    int32_t persistentId = 10086;
+    SessionInfo info;
+    info.abilityName_ = "UpdateBrightness";
+    info.bundleName_ = "UpdateBrightness";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, session));
+    result01 = ssm_->UpdateBrightness(persistentId);
+    EXPECT_EQ(result01, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetDisplayBrightness
  * @tc.desc: SceneSesionManager set display brightness
  * @tc.type: FUNC

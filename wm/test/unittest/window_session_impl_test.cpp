@@ -767,6 +767,10 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, TestSize.Level1)
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    res = window->SetBrightness(brightness);
+    ASSERT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
 }
