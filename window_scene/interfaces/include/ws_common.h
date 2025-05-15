@@ -409,6 +409,14 @@ struct SessionInfo {
     bool isAbilityHook_ = false;
 
     /*
+     * Keyboard
+     */
+    bool isKeyboardWillShowRegistered_ { false };
+    bool isKeyboardWillHideRegistered_ { false };
+    bool isKeyboardDidShowRegistered_ { false };
+    bool isKeyboardDidHideRegistered_ { false };
+
+    /*
      * App Use Control
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.

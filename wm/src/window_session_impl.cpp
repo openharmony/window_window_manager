@@ -2579,11 +2579,11 @@ WMError WindowSessionImpl::RegisterKeyboardWillShowListener(const sptr<IKBWillSh
     }
     std::lock_guard<std::recursive_mutex> lockListener(keyboardWillShowListenerMutex_);
     WMError ret = RegisterListener(keyboardWillShowListeners_[GetPersistentId()], listener);
-    if (ret == WMError::WM_OK && isKeyboardWillShowRegistered_ == false) {
+    if (ret == WMError::WM_OK && property_->EditSessionInfo().isKeyboardWillShowRegistered_ == false) {
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardWillShowRegistered(true);
-        isKeyboardWillShowRegistered_ = true;
+        property_->EditSessionInfo().isKeyboardWillShowRegistered_ = true;
     }
     return ret;
 }
@@ -2597,7 +2597,7 @@ WMError WindowSessionImpl::UnregisterKeyboardWillShowListener(const sptr<IKBWill
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardWillShowRegistered(false);
-        isKeyboardWillShowRegistered_ = false;
+        property_->EditSessionInfo().isKeyboardWillShowRegistered_ = false;
     }
     return ret;
 }
@@ -2611,11 +2611,11 @@ WMError WindowSessionImpl::RegisterKeyboardWillHideListener(const sptr<IKBWillHi
     }
     std::lock_guard<std::recursive_mutex> lockListener(keyboardWillHideListenerMutex_);
     WMError ret = RegisterListener(keyboardWillHideListeners_[GetPersistentId()], listener);
-    if (ret == WMError::WM_OK && isKeyboardWillHideRegistered_ == false) {
+    if (ret == WMError::WM_OK && property_->EditSessionInfo().isKeyboardWillHideRegistered_ == false) {
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardWillHideRegistered(true);
-        isKeyboardWillHideRegistered_ = true;
+        property_->EditSessionInfo().isKeyboardWillHideRegistered_ = true;
     }
     return ret;
 }
@@ -2629,7 +2629,7 @@ WMError WindowSessionImpl::UnregisterKeyboardWillHideListener(const sptr<IKBWill
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardWillHideRegistered(false);
-        isKeyboardWillHideRegistered_ = false;
+        property_->EditSessionInfo().isKeyboardWillHideRegistered_ = false;
     }
     return ret;
 }
@@ -2639,11 +2639,11 @@ WMError WindowSessionImpl::RegisterKeyboardDidShowListener(const sptr<IKeyboardD
     TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
     std::lock_guard<std::recursive_mutex> lockListener(keyboardDidShowListenerMutex_);
     WMError ret = RegisterListener(keyboardDidShowListeners_[GetPersistentId()], listener);
-    if (ret == WMError::WM_OK && isKeyboardDidShowRegistered_ == false) {
+    if (ret == WMError::WM_OK && property_->EditSessionInfo().isKeyboardDidShowRegistered_ == false) {
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardDidShowRegistered(true);
-        isKeyboardDidShowRegistered_ = true;
+        property_->EditSessionInfo().isKeyboardDidShowRegistered_ = true;
     }
     return ret;
 }
@@ -2657,7 +2657,7 @@ WMError WindowSessionImpl::UnregisterKeyboardDidShowListener(const sptr<IKeyboar
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardDidShowRegistered(false);
-        isKeyboardDidShowRegistered_ = false;
+        property_->EditSessionInfo().isKeyboardDidShowRegistered_ = false;
     }
     return ret;
 }
@@ -2667,11 +2667,11 @@ WMError WindowSessionImpl::RegisterKeyboardDidHideListener(const sptr<IKeyboardD
     TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
     std::lock_guard<std::recursive_mutex> lockListener(keyboardDidHideListenerMutex_);
     WMError ret = RegisterListener(keyboardDidHideListeners_[GetPersistentId()], listener);
-    if (ret == WMError::WM_OK && isKeyboardDidHideRegistered_ == false) {
+    if (ret == WMError::WM_OK && property_->EditSessionInfo().isKeyboardDidHideRegistered_ == false) {
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardDidHideRegistered(true);
-        isKeyboardDidHideRegistered_ = true;
+        property_->EditSessionInfo().isKeyboardDidHideRegistered_ = true;
     }
     return ret;
 }
@@ -2685,7 +2685,7 @@ WMError WindowSessionImpl::UnregisterKeyboardDidHideListener(const sptr<IKeyboar
         auto hostSession = GetHostSession();
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
         hostSession->NotifyKeyboardDidHideRegistered(false);
-        isKeyboardDidHideRegistered_ = false;
+        property_->EditSessionInfo().isKeyboardDidHideRegistered_ = false;
     }
     return ret;
 }

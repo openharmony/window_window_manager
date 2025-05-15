@@ -924,10 +924,6 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
-    std::atomic<bool> isKeyboardWillShowRegistered_ { false };
-    std::atomic<bool> isKeyboardWillHideRegistered_ { false };
-    std::atomic<bool> isKeyboardDidShowRegistered_ = false;
-    std::atomic<bool> isKeyboardDidHideRegistered_ = false;
 
 private:
     void NotifyAccessibilityVisibilityChange();
