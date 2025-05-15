@@ -362,7 +362,7 @@ public:
         bool isNewWant, bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
-    const WindowLimits& GetWindowLimits(int32_t windowId);
+    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
     /*
      * Compatible Mode
