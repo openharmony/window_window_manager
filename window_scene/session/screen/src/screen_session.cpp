@@ -610,6 +610,7 @@ ScreenShape ScreenSession::GetScreenShape() const
 
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
+    std::lock_guard<std::mutex> lock(propertyMutex_);
     return property_;
 }
 
@@ -1403,11 +1404,13 @@ void ScreenSession::SetScreenCombination(ScreenCombination combination)
 {
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", set combination:%{public}d", screenId_,
         static_cast<int32_t>(combination));
+    std::lock_guard<std::mutex> lock(combinationMutex_);
     combination_ = combination;
 }
 
 ScreenCombination ScreenSession::GetScreenCombination() const
 {
+    std::lock_guard<std::mutex> lock(combinationMutex_);
     return combination_;
 }
 
@@ -2316,6 +2319,7 @@ void ScreenSession::SetRSScreenId(ScreenId rsId)
 
 void ScreenSession::SetScreenProperty(ScreenProperty property)
 {
+    std::lock_guard<std::mutex> lock(propertyMutex_);
     property_ = property;
 }
 

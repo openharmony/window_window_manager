@@ -7672,25 +7672,26 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
     }
     bool extendScreenConnected = false;
     ScreenId extendScreenId = SCREEN_ID_INVALID;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
     {
         std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        for (auto sessionIt : screenSessionMap_) {
-            auto screenSession = sessionIt.second;
-            if (screenSession == nullptr) {
-                TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
-                continue;
-            }
-            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
-                screenSession->GetIsExtend()) {
-                TLOGI(WmsLogTag::DMS, "recover extend screen, screenId = %{public}" PRIu64"", sessionIt.first);
-                extendScreenConnected = true;
-                extendScreenId = sessionIt.first;
-                RecoverMultiScreenMode(screenSession);
-                FlushDisplayNodeWhenSwtichUser(oldScbPids, newScbPid, screenSession);
-            } else if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
-                !screenSession->GetIsExtend()) {
-                SetExtendedScreenFallbackPlan(sessionIt.first);
-            }
+        screenSessionMap = screenSessionMap_;
+    }
+    for (const auto& [screenId, screenSession] : screenSessionMap) {
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+            screenSession->GetIsExtend()) {
+            TLOGI(WmsLogTag::DMS, "recover extend screen, screenId = %{public}" PRIu64, screenId);
+            extendScreenConnected = true;
+            extendScreenId = screenId;
+            RecoverMultiScreenMode(screenSession);
+            FlushDisplayNodeWhenSwtichUser(oldScbPids, newScbPid, screenSession);
+        } else if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+            !screenSession->GetIsExtend()) {
+            SetExtendedScreenFallbackPlan(screenId);
         }
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
