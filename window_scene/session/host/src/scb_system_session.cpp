@@ -41,9 +41,11 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
     if (sessionInfo_.isSystem_) {
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
-        config.surfaceWindowType = surfaceWindowTypeMap.find(name) != surfaceWindowTypeMap.end()
-                                   ? surfaceWindowTypeMap.find(name)->second
-                                   : SurfaceWindowType::SYSTEM_SCB_WINDOW;
+        config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
+        auto iter = surfaceWindowTypeMap.find(name);
+        if (iter != surfaceWindowTypeMap.end()) {
+            config.surfaceWindowType = iter->second;
+        }
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         SetIsUseControlSession(info.isUseControlSession);
     }
