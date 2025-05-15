@@ -21,6 +21,8 @@
 
 using namespace OHOS::Rosen;
 
+std::shared_mutex idMapMutex_;
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -29,6 +31,7 @@ namespace {
 
 inline bool IsIdMapFull()
 {
+    std::shared_lock<std::shared_mutex> lock(idMapMutex_);
     if (g_ControllerIds.size() >= static_cast<size_t>(UINT32_MAX - 1)) {
         return true;
     }
@@ -41,6 +44,7 @@ inline uint32_t FindNextAvailableId()
         return 0;
     }
     uint32_t nextId = 0;
+    std::shared_lock<std::shared_mutex> lock(idMapMutex_);
     while (nextId < UINT32_MAX && g_ControllerIds.find(nextId) != g_ControllerIds.end()) {
         nextId++;
     }
@@ -54,6 +58,7 @@ inline std::vector<uint32_t> GetControlGroup(PictureInPicture_PiPControlGroup* c
 
 inline sptr<WebPictureInPictureControllerInterface> GetControllerFromId(uint32_t controllerId)
 {
+    std::shared_lock<std::shared_mutex> lock(idMapMutex_);
     if (g_ControllerIds.find(controllerId) == g_ControllerIds.end()) {
         return nullptr;
     }
@@ -89,6 +94,7 @@ inline WindowManager_ErrorCode GetErrorCodeFromWMError(WMError error)
 int32_t OH_PictureInPicture_CreatePip(PictureInPicture_PiPConfig* pipConfig, uint32_t* controllerId)
 {
     if (pipConfig == nullptr || controllerId == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "at least one of param is nullptr");
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (IsIdMapFull()) {
@@ -98,19 +104,22 @@ int32_t OH_PictureInPicture_CreatePip(PictureInPicture_PiPConfig* pipConfig, uin
     auto webPipControllerInterface = OHOS::sptr<WebPictureInPictureControllerInterface>::MakeSptr();
     PiPConfig config{pipConfig->mainWindowId, pipConfig->pipTemplateType, pipConfig->width, pipConfig->height,
         GetControlGroup(pipConfig->controlGroup, pipConfig->controlGroupLength), pipConfig->env};
-    auto errCode = webPipControllerInterface->Create(config);
+    uint32_t id = FindNextAvailableId();
+    auto errCode = webPipControllerInterface->Create(config, id);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "pipInterface create failed");
         return GetErrorCodeFromWMError(errCode);
     }
-    uint32_t id = FindNextAvailableId();
     *controllerId = id;
+    std::unique_lock<std::shared_mutex> lock(idMapMutex_);
     g_ControllerIds[id] = webPipControllerInterface;
+    TLOGI(WmsLogTag::WMS_PIP, "create success! controllerId: %{public}u", id);
     return WindowManager_ErrorCode::OK;
 }
 
 int32_t OH_PictureInPicture_DeletePip(uint32_t controllerId)
 {
+    std::unique_lock<std::shared_mutex> lock(idMapMutex_);
     if (g_ControllerIds.find(controllerId) == g_ControllerIds.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "controllerId not found: %{public}d", controllerId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;

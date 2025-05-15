@@ -105,7 +105,7 @@ static int32_t checkCreatePipParams(const PiPConfig& config)
     return checkControlsRules(config.pipTemplateType, config.controlGroup);
 }
 
-WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config)
+WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config, uint32_t controllerId)
 {
     int32_t ret = checkCreatePipParams(config);
     if (ret == -1) {
@@ -115,6 +115,7 @@ WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config);
+    sptrWebPipController_->SetControllerId(controllerId);
     sptrWebPipController_->GetPipPossible(isPipPossible_);
     if (!isPipPossible_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
