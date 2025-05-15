@@ -1122,11 +1122,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, TestSize.
 }
 
 /**
- * @tc.name: UpdateBrightness
+ * @tc.name: UpdateBrightness01
  * @tc.desc: SceneSesionManager update brightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness01, TestSize.Level1)
 {
     int32_t persistentId = 10086;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1138,11 +1138,11 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateBrightness
- * @tc.desc: SceneSesionManager update brightness
+ * @tc.name: UpdateBrightness02
+ * @tc.desc: WINDOW_TYPE_WALLET_SWIPE_CARD
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, TestSize.Level1)
 {
     int32_t persistentId = 10086;
     SessionInfo info;
