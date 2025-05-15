@@ -23,11 +23,13 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SCBSystemSession" };
-constexpr const char* SCB_DESKTOP = "SCBDesktop";
-constexpr const char* SCB_WALLPAPER = "SCBWallpaper";
-constexpr const char* SCB_SCREEN_LOCK = "SCBScreenLock";
-constexpr const char* SCB_NEGATIVE_SCREEN = "SCBNegativeScreen";
-constexpr const char* SCB_DROPDOWN_PANEL = "SCBDropdownPanel";
+const std::unordered_map<std::string, SurfaceWindowType> surfaceWindowTypeMap = {
+    { "SCBDesktop", SurfaceWindowType::SCB_DESKTOP },
+    { "SCBWallpaper", SurfaceWindowType::SCB_WALLPAPER },
+    { "SCBScreenLock", SurfaceWindowType::SCB_SCREEN_LOCK },
+    { "SCBNegativeScreen", SurfaceWindowType::SCB_NEGATIVE_SCREEN },
+    { "SCBDropdownPanel", SurfaceWindowType::SCB_DROPDOWN_PANEL }
+};
 } // namespace
 
 SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -39,19 +41,9 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
     if (sessionInfo_.isSystem_) {
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
-        if (name.find(SCB_DESKTOP) != std::string::npos) {
-            config.surfaceWindowType = SurfaceWindowType::SCB_DESKTOP;
-        } else if (name.find(SCB_WALLPAPER) != std::string::npos) {
-            config.surfaceWindowType = SurfaceWindowType::SCB_WALLPAPER;
-        } else if (name.find(SCB_SCREEN_LOCK) != std::string::npos) {
-            config.surfaceWindowType = SurfaceWindowType::SCB_SCREEN_LOCK;
-        } else if (name.find(SCB_NEGATIVE_SCREEN) != std::string::npos) {
-            config.surfaceWindowType = SurfaceWindowType::SCB_NEGATIVE_SCREEN;
-        } else if (name.find(SCB_DROPDOWN_PANEL) != std::string::npos) {
-            config.surfaceWindowType = SurfaceWindowType::SCB_DROPDOWN_PANEL;
-        } else {
-            config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
-        }
+        config.surfaceWindowType = surfaceWindowTypeMap.find(name) != surfaceWindowTypeMap.end()
+                                   ? surfaceWindowTypeMap.find(name)->second
+                                   : SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         SetIsUseControlSession(info.isUseControlSession);
     }
