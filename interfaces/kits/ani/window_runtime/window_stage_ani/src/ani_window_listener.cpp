@@ -422,6 +422,20 @@ void AniWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& ti
 void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] rect:%{public}s, reason:%{public}d", rect.ToString().c_str(), reason);
+    if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update");
+        return;
+    }
+    RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;
+    if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
+        !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
+        rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
+    }
+    if (rectChangeReason == RectChangeReason::DRAG_END &&
+        currentReason_ != RectChangeReason::DRAG_START && currentReason_ != RectChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
+        rectChangeReason = RectChangeReason::MOVE;
+    }
     auto task = [self = weakRef_, rect, reason, eng = env_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
@@ -438,6 +452,12 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
     eventHandler_->PostTask(task, "wms:AniWindowListener::RectChangeCallBack", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    currRect_ = rect;
+    if (rectChangeReason == RectChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "ignore undefined reason to change last reason");
+    } else {
+        currentReason_ = rectChangeReason;
+    }
 }
 
 void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
