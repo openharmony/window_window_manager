@@ -749,6 +749,8 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
 void WindowNodeContainer::RunInInputMethodSyncTransaction(sptr<WindowNode>& node, std::function<void()> task)
 {
     if (isAnimateTransactionEnabled_) {
+        // Use AutoRSSyncTransaction to automatically manage the Open and Close of RSSyncTransaction,
+        // and perform FlushImplicitTransaction when necessary.
         AutoRSSyncTransaction autoSync(node->GetRSUIContext(), true);
         task();
     } else {

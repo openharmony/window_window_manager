@@ -89,21 +89,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     handler_->PostTask([]() { MemoryGuard cacheGuard; }, "WindowManagerService:cacheGuard", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
-    rsUiDirector_ = RSUIDirector::Create();
-    if (RSAdapterUtil::IsMultiInstanceEnabled()) {
-        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
-                PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-            }, 0, true);
-        rsUiDirector_->Init(false, true);
-        TLOGI(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Create RSUIDirector: %{public}s",
-              RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
-        WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
-    } else {
-        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
-            PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-        });
-        rsUiDirector_->Init(false);
-    }
+    InitRSUIDirector();
 }
 
 void WindowManagerService::OnStart()
@@ -1658,6 +1644,29 @@ void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Displa
 {
     WLOGFD("Get Focus window info in wms");
     windowController_->GetFocusWindowInfo(focusInfo);
+}
+
+void WindowManagerService::InitRSUIDirector()
+{
+    rsUiDirector_ = RSUIDirector::Create();
+    if (!rsUiDirector_) {
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Failed to create RSUIDirector");
+        return;
+    }
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+                PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
+            }, 0, true);
+        rsUiDirector_->Init(false, true);
+        WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
+    } else {
+        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+            PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
+        });
+        rsUiDirector_->Init(false);
+    }
+    TLOGI(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSUIDirector: %{public}s",
+          RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
 }
 } // namespace Rosen
 } // namespace OHOS

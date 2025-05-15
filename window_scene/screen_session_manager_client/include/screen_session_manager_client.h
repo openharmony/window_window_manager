@@ -118,7 +118,7 @@ public:
     void NotifyScreenMaskAppear();
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
     std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);

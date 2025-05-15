@@ -667,24 +667,24 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionById(const Scree
 
 std::shared_ptr<RSUIDirector> ScreenSessionManagerClient::GetRSUIDirector(ScreenId screenId)
 {
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     if (screenId == SCREEN_ID_INVALID) {
         screenId = GetDefaultScreenId();
-        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+        TLOGW(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "screenId is invalid, use default screenId: %{public}" PRIu64, screenId);
     }
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_RS_MULTI_INSTANCE, "Default screenId is also invalid");
+        TLOGW(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Default screenId is also invalid");
         return nullptr;
     }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Screen session is null, screenId: %{public}" PRIu64, screenId);
         return nullptr;
     }
     auto rsUIDirector = screenSession->GetRSUIDirector();
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
           "%{public}s, screenId: %{public}" PRIu64,
           RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId);
     return rsUIDirector;
@@ -692,10 +692,10 @@ std::shared_ptr<RSUIDirector> ScreenSessionManagerClient::GetRSUIDirector(Screen
 
 std::shared_ptr<RSUIContext> ScreenSessionManagerClient::GetRSUIContext(ScreenId screenId)
 {
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIDirector = GetRSUIDirector(screenId);
     auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s, screenId: %{public}" PRIu64,
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64,
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), screenId);
     return rsUIContext;
 }

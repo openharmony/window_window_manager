@@ -202,7 +202,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         if (srcNode->closeWinSurfaceNode_) {
             srcNode->closeWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
         }
-        TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE,
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(srcNode->closeWinSurfaceNode_).c_str());
         auto rect = srcNode->GetWindowRect();
         srcNode->closeWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);

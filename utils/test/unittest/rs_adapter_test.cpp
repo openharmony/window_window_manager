@@ -34,6 +34,7 @@ public:
         rsUIContext_ = rsUIDirector_->GetRSUIContext();
         struct RSSurfaceNodeConfig config;
         rsNode_ = RSSurfaceNode::Create(config, true, rsUIContext_);
+        rsClientMultiInstanceEnabled_ = rsUIContext_ != nullptr;
     }
 
     static void TearDownTestCase() {}
@@ -44,11 +45,13 @@ private:
     static std::shared_ptr<RSNode> rsNode_;
     static std::shared_ptr<RSUIContext> rsUIContext_;
     static std::shared_ptr<RSUIDirector> rsUIDirector_;
+    static bool rsClientMultiInstanceEnabled_;
 };
 
 std::shared_ptr<RSNode> RSAdapterTest::rsNode_ = nullptr;
 std::shared_ptr<RSUIContext> RSAdapterTest::rsUIContext_ = nullptr;
 std::shared_ptr<RSUIDirector> RSAdapterTest::rsUIDirector_ = nullptr;
+bool RSAdapterTest::rsClientMultiInstanceEnabled_ = false;
 
 class MockRSTransactionAdapter : public RSTransactionAdapter {
 public:
@@ -75,7 +78,7 @@ public:
 HWTEST_F(RSAdapterTest, RSTransactionAdapterConstructor, Function | SmallTest | Level1)
 {
     RSTransactionAdapter adapter(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_NE(adapter.rsTransHandler_, nullptr);
         EXPECT_EQ(adapter.rsTransProxy_, nullptr);
     } else {
@@ -93,7 +96,7 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterBegin, Function | SmallTest | Level1
 {
     RSTransactionAdapter adapter(rsUIContext_);
     adapter.Begin();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_PROXY);
@@ -109,7 +112,7 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterCommit, Function | SmallTest | Level
 {
     RSTransactionAdapter adapter(rsUIContext_);
     adapter.Commit();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_PROXY);
@@ -125,7 +128,7 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransaction, Function |
 {
     RSTransactionAdapter adapter(rsUIContext_);
     adapter.FlushImplicitTransaction();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_PROXY);
@@ -140,7 +143,7 @@ HWTEST_F(RSAdapterTest, RSTransactionAdapterFlushImplicitTransaction, Function |
 HWTEST_F(RSAdapterTest, RSTransactionAdapterStaticFlushImplicitTransaction, Function | SmallTest | Level1)
 {
     RSTransactionAdapter::FlushImplicitTransaction(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSTransactionAdapter::invokerType_, InvokerType::RS_TRANSACTION_PROXY);
@@ -173,7 +176,7 @@ HWTEST_F(RSAdapterTest, AutoRSTransactionLifecycle, Function | SmallTest | Level
 HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterConstructor, Function | SmallTest | Level1)
 {
     RSSyncTransactionAdapter adapter(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_NE(adapter.rsSyncTransHandler_, nullptr);
         EXPECT_EQ(adapter.rsSyncTransController_, nullptr);
     } else {
@@ -191,7 +194,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterGetRSTransaction, Function | Sma
 {
     RSSyncTransactionAdapter adapter(rsUIContext_);
     adapter.GetRSTransaction();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -207,7 +210,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterOpenTransaction, Function | Smal
 {
     RSSyncTransactionAdapter adapter(rsUIContext_);
     adapter.OpenSyncTransaction();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -223,7 +226,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterCloseTransaction, Function | Sma
 {
     RSSyncTransactionAdapter adapter(rsUIContext_);
     adapter.CloseSyncTransaction();
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -238,7 +241,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterCloseTransaction, Function | Sma
 HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticGetRSTransaction, Function | SmallTest | Level1)
 {
     RSSyncTransactionAdapter::GetRSTransaction(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -253,7 +256,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticGetRSTransaction, Function
 HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticOpenSyncTransaction, Function | SmallTest | Level1)
 {
     RSSyncTransactionAdapter::OpenSyncTransaction(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -268,7 +271,7 @@ HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticOpenSyncTransaction, Funct
 HWTEST_F(RSAdapterTest, RSSyncTransactionAdapterStaticCloseSyncTransaction, Function | SmallTest | Level1)
 {
     RSSyncTransactionAdapter::CloseSyncTransaction(rsUIContext_);
-    if (rsUIContext_) {
+    if (rsClientMultiInstanceEnabled_) {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_HANDLER);
     } else {
         EXPECT_EQ(RSSyncTransactionAdapter::invokerType_, InvokerType::RS_SYNC_TRANSACTION_CONTROLLER);
@@ -305,6 +308,84 @@ HWTEST_F(RSAdapterTest, AllowInMultiThreadGuardLifecycle, Function | SmallTest |
         EXPECT_TRUE(rsNode_->isSkipCheckInMultiInstance_);
     }
     EXPECT_FALSE(rsNode_->isSkipCheckInMultiInstance_);
+}
+
+/**
+ * @tc.name: RSAdapterUtilIsClientMultiInstanceEnabledTest
+ * @tc.desc: Verify IsClientMultiInstanceEnabled returns correct value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RSAdapterTest, RSAdapterUtilIsClientMultiInstanceEnabledTest, Function | SmallTest | Level1)
+{
+    if (rsClientMultiInstanceEnabled_) {
+        EXPECT_TRUE(RSAdapterUtil::IsClientMultiInstanceEnabled());
+    } else {
+        EXPECT_FALSE(RSAdapterUtil::IsClientMultiInstanceEnabled());
+    }
+}
+
+/**
+ * @tc.name: RSAdapterUtilInitRSUIDirectorTest
+ * @tc.desc: Verify InitRSUIDirector initializes RSUIDirector correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RSAdapterTest, RSAdapterUtilInitRSUIDirectorTest, Function | SmallTest | Level1)
+{
+    std::shared_ptr<RSUIDirector> rsUIDirector;
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector, true, true);
+    if (rsClientMultiInstanceEnabled_) {
+        EXPECT_NE(rsUIDirector, nullptr);
+    } else {
+        EXPECT_EQ(rsUIDirector, nullptr);
+    }
+}
+
+/**
+ * @tc.name: RSAdapterUtilSetRSUIContextTest
+ * @tc.desc: Verify SetRSUIContext behavior in various conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RSAdapterTest, RSAdapterUtilSetRSUIContextTest, Function | SmallTest | Level1)
+{
+    // Case 1: rsNode is nullptr
+    {
+        RSAdapterUtil::SetRSUIContext(nullptr, rsUIContext_, true);
+        // Expect: no crash, no change, just early return
+    }
+
+    // Case 2: rsUIContext is nullptr
+    {
+        struct RSSurfaceNodeConfig config;
+        auto newNode = RSSurfaceNode::Create(config);
+        RSAdapterUtil::SetRSUIContext(newNode, nullptr, true);
+        EXPECT_EQ(newNode->GetRSUIContext(), nullptr);
+    }
+
+    // Case 3: rsUIContext is same as original
+    {
+        RSAdapterUtil::SetRSUIContext(rsNode_, rsUIContext_, true);
+        EXPECT_EQ(rsNode_->GetRSUIContext(), rsUIContext_);
+    }
+
+    // Case 4: normal set case, different RSUIContext
+    {
+        struct RSSurfaceNodeConfig config;
+        auto newNode = RSSurfaceNode::Create(config);
+        RSAdapterUtil::SetRSUIContext(newNode, rsUIContext_, true);
+        EXPECT_EQ(newNode->GetRSUIContext(), rsUIContext_);
+    }
+}
+
+/**
+ * @tc.name: RSAdapterUtilGetRSNodeTest
+ * @tc.desc: Verify GetRSNode returns correct node based on multi-instance flag and context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RSAdapterTest, RSAdapterUtilGetRSNodeTest, Function | SmallTest | Level1)
+{
+    auto node = RSAdapterUtil::GetRSNode(rsUIContext_, rsNode_->GetId());
+    EXPECT_NE(node, nullptr);
+    EXPECT_EQ(node->GetId(), rsNode_->GetId());
 }
 
 /**

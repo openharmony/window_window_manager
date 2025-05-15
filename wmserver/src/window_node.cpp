@@ -441,7 +441,7 @@ bool WindowNode::GetTouchable() const
 
 std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext() const
 {
-    RETURN_IF_RS_MULTI_INSTANCE_DISABLED(nullptr);
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     std::shared_ptr<RSUIContext> rsUIContext;
     for (const auto& node : {surfaceNode_, leashWinSurfaceNode_, startingWinSurfaceNode_, closeWinSurfaceNode_}) {
         if (node) {
@@ -451,7 +451,7 @@ std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext() const
             }
         }
     }
-    TLOGD(WmsLogTag::WMS_RS_MULTI_INSTANCE, "%{public}s",
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
     return rsUIContext;
 }

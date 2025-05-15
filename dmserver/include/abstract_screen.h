@@ -76,7 +76,7 @@ public:
     uint32_t GetPhyHeight() const;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
@@ -107,19 +107,13 @@ protected:
 private:
     void SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNode>& rsDisplayNode,
         const RSDisplayNodeConfig& config, const Point& startPoint);
-
-    /*
-     * RS Multi Instance
-     */
-    void InitRSUIDirector();
-
     std::string name_ { "UNKNOWN" };
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
     mutable std::recursive_mutex mutex_;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 };

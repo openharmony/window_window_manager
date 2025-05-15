@@ -96,6 +96,7 @@ napi_value JsTransactionManager::CloseSyncTransactionWithVsync(napi_env env, nap
 
 ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
 {
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(SCREEN_ID_INVALID);
     size_t argc = 1;
     napi_value argv[1] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -122,7 +123,7 @@ ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
 {
     ScreenId screenId = ParseScreenIdFromArgs(env, info);
-    if (screenId == SCREEN_ID_INVALID) {
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
@@ -144,7 +145,7 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
     ScreenId screenId = ParseScreenIdFromArgs(env, info);
-    if (screenId == SCREEN_ID_INVALID) {
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
@@ -163,7 +164,7 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
 napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
 {
     ScreenId screenId = ParseScreenIdFromArgs(env, info);
-    if (screenId == SCREEN_ID_INVALID) {
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
         return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
     }
 
