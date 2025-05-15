@@ -612,6 +612,15 @@ SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
     return screenSessionManager_->GetSuperFoldStatus();
 }
 
+float ScreenSessionManagerClient::GetSuperRotation()
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return -1.f;
+    }
+    return screenSessionManager_->GetSuperRotation();
+}
+
 void ScreenSessionManagerClient::SetLandscapeLockStatus(bool isLocked)
 {
     if (!screenSessionManager_) {

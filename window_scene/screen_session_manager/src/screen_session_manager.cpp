@@ -774,6 +774,21 @@ void ScreenSessionManager::SetScreenCorrection()
     screenEventTracker_.RecordEvent(oss.str());
 }
 
+void ScreenSessionManager::AdaptSuperHorizonBoot(sptr<ScreenSession> screenSession, ScreenId screenId)
+{
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->isInternal_) {
+        auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
+        int32_t screenWidth = screenMode.GetScreenWidth();
+        int32_t screenHeight = screenMode.GetScreenHeight();
+        RRect screenBounds = RRect({ 0, 0, screenHeight, screenWidth }, 0.0f, 0.0f);
+        screenSession->SetBounds(screenBounds);
+        screenSession->SetHorizontalRotation();
+        screenSession->SetValidWidth(screenHeight);
+        screenSession->SetValidHeight(screenWidth);
+        TLOGI(WmsLogTag::DMS, "AdaptSuperHorizontalBoot finish");
+    }
+}
+
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
 {
     if (reason == ScreenChangeReason::HWCDEAD) {
@@ -804,6 +819,7 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
+    AdaptSuperHorizonBoot(screenSession, screenId);
     if (g_isPcDevice) {
         auto physicalScreenSession = GetOrCreatePhysicalScreenSession(screenId);
         if (!physicalScreenSession) {
@@ -3605,8 +3621,10 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             }
             ScreenId screenId = screenSession->GetScreenId();
             SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+            TLOGI(WmsLogTag::DMS, "SuperFoldStatus: %{public}u", status);
             that.OnSuperFoldStatusChange(screenId, status);
             float sensorRotation = screenSession->GetSensorRotation();
+            TLOGI(WmsLogTag::DMS, "sensorRotation: %{public}f", sensorRotation);
             if (sensorRotation >= 0.0f) {
                 that.OnSensorRotationChange(sensorRotation, screenId);
             }
@@ -7017,6 +7035,34 @@ SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
 #endif
 }
 
+float ScreenSessionManager::GetSuperRotation()
+{
+    DmsXcollie dmsXcollie("DMS:GetSuperRotation", XCOLLIE_TIMEOUT_10S);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return -1.f;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+                continue;
+            }
+            if (screenSession->GetIsInternal()) {
+                float rotation = static_cast<int>(screenSession->GetRotation()) * 90.f;
+                TLOGI(WmsLogTag::DMS, "is internal, screenId = %{public}" PRIu64 ", rotation = %{public}f",
+                    sessionIt.first, rotation);
+                return rotation;
+            } else {
+                TLOGI(WmsLogTag::DMS, "not internal, screenId = %{public}" PRIu64"", sessionIt.first);
+            }
+        }
+    }
+    TLOGE(WmsLogTag::DMS, "all screenSession is nullptr or not internal");
+    return -1.f;
+}
+
 void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -7837,12 +7883,15 @@ void ScreenSessionManager::SetClientInner()
         auto localRotation = iter.second->GetRotation();
         TLOGI(WmsLogTag::DMS, "phyWidth = :%{public}f, phyHeight = :%{public}f, localRotation = :%{public}u",
             phyWidth, phyHeight, localRotation);
-        bool isModeChanged = localRotation != Rotation::ROTATION_0;
-        if (isModeChanged && isReset) {
-            TLOGI(WmsLogTag::DMS, "screen(id:%{public}" PRIu64 ") current is not default mode, reset it", iter.first);
-            SetRotation(iter.first, Rotation::ROTATION_0, false);
-            SetPhysicalRotationClientInner(iter.first, 0);
-            iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            bool isModeChanged = localRotation != Rotation::ROTATION_0;
+            if (isModeChanged && isReset) {
+                TLOGI(WmsLogTag::DMS, "screen(id:%{public}" PRIu64 ") current is not default mode, reset it",
+                    iter.first);
+                SetRotation(iter.first, Rotation::ROTATION_0, false);
+                SetPhysicalRotationClientInner(iter.first, 0);
+                iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
+            }
         }
         auto clientProxy = GetClientProxy();
         if (!clientProxy) {

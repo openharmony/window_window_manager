@@ -172,6 +172,7 @@ public:
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
+    virtual float GetSuperRotation() { return -1.f; };
     virtual void SetLandscapeLockStatus(bool isLocked) {};
     virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
     virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {};

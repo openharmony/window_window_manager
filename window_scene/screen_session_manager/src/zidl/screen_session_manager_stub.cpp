@@ -787,6 +787,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_ROTATION: {
+            static_cast<void>(reply.WriteFloat(GetSuperRotation()));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS: {
             bool isLocked = data.ReadBool();
             SetLandscapeLockStatus(isLocked);

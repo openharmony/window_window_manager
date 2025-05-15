@@ -2641,6 +2641,29 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
 }
 
+float ScreenSessionManagerProxy::GetSuperRotation()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return -1.f;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return -1.f;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return -1.f;
+    }
+    return reply.ReadFloat();
+}
+
 void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
 {
     sptr<IRemoteObject> remote = Remote();
