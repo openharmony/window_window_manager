@@ -5004,27 +5004,33 @@ void SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleNam
     const std::string& abilityName, StartingWindowInfo& info)
 {
     auto key = moduleName + abilityName;
-    auto colorMapIter = startingWindowColorFromAppMap_.find(bundleName);
-    if (colorMapIter == startingWindowColorFromAppMap_.end()) {
-        return;
+    uint32_t color;
+    {
+        std::shared_lock<std::shared_mutex> lock(startingWindowColorFromAppMapMutex_);
+        auto colorMapIter = startingWindowColorFromAppMap_.find(bundleName);
+        if (colorMapIter == startingWindowColorFromAppMap_.end()) {
+            return;
+        }
+        auto& colorMap = colorMapIter->second;
+        auto colorIter = colorMap.find(key);
+        if (colorIter == colorMap.end()) {
+            return;
+        }
+        color = colorIter->second;
     }
-    auto& colorMap = colorMapIter->second;
-    auto colorIter = colorMap.find(key);
-    if (colorIter == colorMap.end()) {
-        return;
-    }
-    uint32_t color = colorIter->second;
     info.backgroundColor_ = color;
     info.backgroundColorEarlyVersion_ = color;
-
-    std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
-    auto iter = startingWindowMap_.find(bundleName);
-    if (iter == startingWindowMap_.end()) {
-        return;
-    }
-    auto& infoMap = iter->second;
-    auto infoIter = infoMap.find(key);
-    if (infoIter != infoMap.end()) {
+    {
+        std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
+        auto iter = startingWindowMap_.find(bundleName);
+        if (iter == startingWindowMap_.end()) {
+            return;
+        }
+        auto& infoMap = iter->second;
+        auto infoIter = infoMap.find(key);
+        if (infoIter == infoMap.end()) {
+            return;
+        }
         infoIter->second.backgroundColorEarlyVersion_ = color;
         infoIter->second.backgroundColor_ = color;
         TLOGI(WmsLogTag::WMS_PATTERN, "set %{public}s %{public}s, %{public}x", bundleName.c_str(), key.c_str(), color);
@@ -14370,12 +14376,15 @@ WMError SceneSessionManager::SetStartWindowBackgroundColor(
         return WMError::WM_ERROR_NO_MEM;
     }
     auto key = moduleName + abilityName;
-    auto iter = startingWindowColorFromAppMap_.find(bundleName);
-    if (iter != startingWindowColorFromAppMap_.end()) {
-        iter->second[key] = color;
-    } else {
-        std::map<std::string, uint32_t> colorMap({{ key, color}});
-        startingWindowColorFromAppMap_.emplace(bundleName, colorMap);
+    {
+        std::unique_lock<std::shared_mutex> lock(startingWindowColorFromAppMapMutex_);
+        auto iter = startingWindowColorFromAppMap_.find(bundleName);
+        if (iter != startingWindowColorFromAppMap_.end()) {
+            iter->second[key] = color;
+        } else {
+            std::unordered_map<std::string, uint32_t> colorMap({{ key, color}});
+            startingWindowColorFromAppMap_.emplace(bundleName, colorMap);
+        }
     }
     StartingWindowInfo info;
     UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, info);
