@@ -642,13 +642,13 @@ public:
         if (inputStr.empty()) {
             return;
         }
-        std::string::iterator start = inputStr.begin();
-        std::string::iterator end;
-        while ((end = std::find(start, inputStr.end(), delimiter)) != inputStr.end()) {
-            container.insert(std::string(start, end));
-            start = end + 1;
+        std::string::size_type start = 0;
+        std::string::size_type end = 0;
+        while ((end = inputStr.find(delimiter, inputStr)) != std::string::npos) {
+            container.insert(inputStr.subStr(start, end - start));
+            start = end + delimiter.length();
         }
-        container.insert(std::string(start, end));
+        container.insert(inputStr.subStr(start));
     }
 
 private:
