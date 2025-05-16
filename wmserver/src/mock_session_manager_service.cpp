@@ -282,7 +282,7 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
         clientUserId = currentWMSUserId_;
     }
     sessionManagerService = GetSessionManagerServiceByUserId(clientUserId);
-    return ERR_OK
+    return ERR_OK;
 }
 
 sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId)
@@ -312,12 +312,12 @@ ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
-        return ERR_OK;
+        return ERR_PERMISSION_DENIED;
     }
     int32_t userId = GetUserIdByCallingUid();
     if (userId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     TLOGI(WmsLogTag::WMS_RECOVER, "scene board is available with userId=%{public}d", userId);
 
@@ -333,13 +333,13 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "listener is nullptr");
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
@@ -352,7 +352,7 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
         smsRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
     if (clientUserId != SYSTEM_USERID) {
-        return ERR_OK;
+        return ERR_WOULD_BLOCK;
     }
     bool isWMSConnected = false;
     {
@@ -365,7 +365,7 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
         auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-            return ERR_OK;
+            return ERR_DEAD_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "WMS ready,notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
@@ -388,7 +388,7 @@ ErrCode MockSessionManagerService::UnregisterSMSRecoverListener()
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
@@ -440,12 +440,12 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Lite listener is nullptr");
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
@@ -458,7 +458,7 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
         smsLiteRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
     if (clientUserId != SYSTEM_USERID) {
-        return ERR_OK;
+        return ERR_WOULD_BLOCK;
     }
     bool isWMSConnected = false;
     {
@@ -471,7 +471,7 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
         auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-            return ERR_OK;
+            return ERR_DEAD_OBJECT;
         }
         TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite wms is already connected, notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
@@ -494,7 +494,7 @@ ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener()
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return ERR_OK;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);

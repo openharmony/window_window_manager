@@ -17,7 +17,7 @@ import("../windowmanager_aafwk.gni")
 
 config("libidl_config") {
   include_dirs = [
-    "{target_gen_dir}",
+    "${target_gen_dir}",
   ]
 }
 
@@ -83,7 +83,7 @@ config("libmockwms_config") {
 }
 
 idl_gen_interface("mock_session_manager_service_interface") {
-  sources = ["IMockSessionManagerInterface.idl"]
+  sources = [ "IMockSessionManagerInterface.idl" ]
   log_domainid = "0xD004201"
   log_tag = "IMockSessionManager"
   part_name = "window_manager"

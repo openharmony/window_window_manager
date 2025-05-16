@@ -19,8 +19,8 @@
 #include <shared_mutex>
 #include <system_ability.h>
 
-#include "wm_single_instance.h"
 #include "mock_session_manager_interface_stub.h"
+#include "wm_single_instance.h"
 #include "zidl/session_manager_service_recover_interface.h"
 
 namespace OHOS {
