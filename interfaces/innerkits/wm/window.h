@@ -223,7 +223,8 @@ public:
 /**
  * @class IWindowStatusDidChangeListener
  *
- * @brief IWindowStatusDidChangeListener is used to observe the window status when window status changed.
+ * @brief IWindowStatusDidChangeListener is used to observe the window status when window status changed
+ *        and layout finished.
  */
 class IWindowStatusDidChangeListener : virtual public RefBase {
 public:
