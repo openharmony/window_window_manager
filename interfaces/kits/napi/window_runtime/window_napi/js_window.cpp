@@ -1147,7 +1147,7 @@ napi_value JsWindow::IsWindowHighlighted(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetDragKeyFramePolicy(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetDragKeyFramePolicy(env, info) : nullptr;
 }
@@ -8079,12 +8079,12 @@ napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info in
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != INDEX_ONE || argv[INDEX_ZERO] == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     KeyFramePolicy keyFramePolicy;
     if (!ParseKeyFramePolicy(env, argv[INDEX_ZERO], keyFramePolicy)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to keyFramePolicy");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to keyFramePolicy");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
@@ -8093,23 +8093,23 @@ napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info in
                       keyFramePolicy, where = __func__] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
         if (!window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s device not support", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s device not support", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
             return;
         }
         if (!WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s only main window is valid", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s only main window is valid", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDragKeyFramePolicy(keyFramePolicy));
         if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s failed, ret %{public}d", where, ret);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s failed, ret %{public}d", where, ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set key frame policy failed."));
             return;
         }
@@ -8117,7 +8117,7 @@ napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info in
         if (objValue != nullptr) {
             task->Resolve(env, objValue);
         } else {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s convert to js value failed", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s convert to js value failed", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         }
     };
