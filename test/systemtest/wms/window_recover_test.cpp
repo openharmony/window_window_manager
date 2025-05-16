@@ -14,17 +14,17 @@
  */
 
 // gtest
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "window_test_utils.h"
+#include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "context_impl.h"
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_window_adapter.h"
-#include "window_session_impl.h"
-#include "window_scene_session_impl.h"
 #include "singleton_mocker.h"
+#include "window_scene_session_impl.h"
+#include "window_session_impl.h"
+#include "window_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -98,9 +98,8 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     sptr<WindowSessionProperty> property = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    EXPECT_CALL(m->Mock(), RecoverAndReconnectSceneSession(_, _, _, _, _, _)).WillOnce(DoAll(
-        SaveArg<2>(&surfaceNode), SaveArg<4>(&property), SaveArg<5>(&token), Return(WMError::WM_OK)
-    ));
+    EXPECT_CALL(m->Mock(), RecoverAndReconnectSceneSession(_, _, _, _, _, _))
+        .WillOnce(DoAll(SaveArg<2>(&surfaceNode), SaveArg<4>(&property), SaveArg<5>(&token), Return(WMError::WM_OK)));
     windowSceneSession->RecoverAndReconnectSceneSession();
     ASSERT_EQ(surfaceNode, windowSceneSession->surfaceNode_);
     ASSERT_EQ(property, windowSceneSession->property_);
@@ -142,9 +141,8 @@ HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     sptr<WindowSessionProperty> property = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    EXPECT_CALL(m->Mock(), RecoverAndConnectSpecificSession(_, _, _, _, _, _)).WillOnce(DoAll(
-        SaveArg<2>(&surfaceNode), SaveArg<3>(&property), SaveArg<5>(&token)
-    ));
+    EXPECT_CALL(m->Mock(), RecoverAndConnectSpecificSession(_, _, _, _, _, _))
+        .WillOnce(DoAll(SaveArg<2>(&surfaceNode), SaveArg<3>(&property), SaveArg<5>(&token)));
     windowSceneSession->RecoverAndConnectSpecificSession();
     ASSERT_EQ(surfaceNode, windowSceneSession->surfaceNode_);
     ASSERT_EQ(property, windowSceneSession->property_);

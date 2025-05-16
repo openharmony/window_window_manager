@@ -18,7 +18,9 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "window_manager_hilog.h"
+#include <power_mgr_client.h>
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(MultiScreenPowerChangeManager)
@@ -199,7 +201,7 @@ void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>&
         }
         displayNode = nullptr;
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(screenScreen->GetRSUIContext());
 }
 
 void MultiScreenPowerChangeManager::ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient,
@@ -280,8 +282,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
     /* step9: inner screen change */
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
         ScreenPowerStatus::POWER_STATUS_OFF);
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(innerScreen->GetRSScreenId(),
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
 
     TLOGW(WmsLogTag::DMS, "inner main and external extend to external main end.");
     return DMError::DM_OK;
@@ -338,8 +339,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalMirrorChange(sptr<
     /* step8: inner screen power change */
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
         ScreenPowerStatus::POWER_STATUS_OFF);
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(innerScreen->GetRSScreenId(),
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
     TLOGW(WmsLogTag::DMS, "inner main and external mirror to external main end.");
     return DMError::DM_OK;
 }
@@ -369,8 +369,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerExtendExternalMainChange(sptr<
     /* step4: screen power change */
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(innerScreen->GetRSScreenId(),
         ScreenPowerStatus::POWER_STATUS_OFF);
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(externalScreen->GetRSScreenId());
     TLOGW(WmsLogTag::DMS, "inner extend and external main to external main end.");
     return DMError::DM_OK;
 }
@@ -403,8 +402,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMirrorExternalMainChange(sptr<
     /* step5: screen power change. */
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(innerScreen->GetRSScreenId(),
         ScreenPowerStatus::POWER_STATUS_OFF);
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(externalScreen->GetRSScreenId());
     TLOGW(WmsLogTag::DMS, "inner mirror and external main to external main end.");
     return DMError::DM_OK;
 }
@@ -501,8 +499,7 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMainExternalExtendChan
     MultiScreenChangeUtils::SetScreenAvailableStatus(innerScreen, true);
 
     /* step10: inner screen power on */
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL,
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     return DMError::DM_OK;
 }
 
@@ -555,8 +552,7 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMainExternalMirrorChan
     MultiScreenChangeUtils::SetScreenAvailableStatus(innerScreen, true);
 
     /* step9: inner screen power on */
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL,
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     TLOGW(WmsLogTag::DMS, "recovery external main to inner main and external mirror end.");
     return DMError::DM_OK;
 }
@@ -592,8 +588,7 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerExtendExternalMainChan
     ScreenToExtendChange(ssmClient, innerScreen);
 
     /* step6: inner screen power on */
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL,
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     TLOGW(WmsLogTag::DMS, "recovery external main to inner extend and external main end.");
     return DMError::DM_OK;
 }
@@ -612,8 +607,7 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMirrorExternalMainChan
     MultiScreenChangeUtils::ScreenCombinationChange(externalScreen, innerScreen, ScreenCombination::SCREEN_MIRROR);
 
     /* step3: inner screen power on */
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL,
-        ScreenPowerStatus::POWER_STATUS_ON);
+    CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     TLOGW(WmsLogTag::DMS, "recovery external main to inner mirror and external main end.");
 
     return DMError::DM_OK;
@@ -624,6 +618,17 @@ void MultiScreenPowerChangeManager::SetInnerAndExternalCombination(ScreenCombina
 {
     innerCombination_ = innerCombination;
     externalCombination_ = externalCombination;
+}
+
+void MultiScreenPowerChangeManager::CallRsSetScreenPowerStatusSyncToOn(ScreenId screenId)
+{
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn() &&
+            ScreenSessionManager::GetInstance().IsSystemSleep()) {
+        TLOGI(WmsLogTag::DMS, "power state IsScreenOn is false");
+        return;
+    }
+    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(screenId,
+        ScreenPowerStatus::POWER_STATUS_ON);
 }
 
 MultiScreenPowerChangeManager::MultiScreenPowerChangeManager()

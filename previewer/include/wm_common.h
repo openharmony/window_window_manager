@@ -52,9 +52,9 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr uint32_t MIN_BUTTON_BETWEEN = 40;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
+constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
 }
 
 /**
@@ -117,6 +117,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
+    WINDOW_TYPE_DYNAMIC,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -181,6 +182,23 @@ enum class WindowMode : uint32_t {
 };
 
 /**
+ * @brief Enumerates global mode of window.
+ */
+enum class GlobalWindowMode : uint32_t {
+    UNKNOWN = 0,
+    FULLSCREEN = 1,
+    SPLIT = 1 << 1,
+    FLOAT = 1 << 2,
+    PIP = 1 << 3,
+    ALL = FULLSCREEN | SPLIT | FLOAT | PIP
+};
+
+inline GlobalWindowMode operator|(GlobalWindowMode lhs, GlobalWindowMode rhs)
+{
+    return static_cast<GlobalWindowMode>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+/**
  * @brief Enumerates status of window.
  */
 enum class WindowStatus : uint32_t {
@@ -228,7 +246,10 @@ enum class WMError : int32_t {
     WM_ERROR_PIP_STATE_ABNORMALLY,
     WM_ERROR_PIP_CREATE_FAILED,
     WM_ERROR_PIP_INTERNAL_ERROR,
-    WM_ERROR_PIP_REPEAT_OPERATION
+    WM_ERROR_PIP_REPEAT_OPERATION,
+    WM_ERROR_ILLEGAL_PARAM,
+    WM_ERROR_FILTER_ERROR,
+    WM_ERROR_TIMEOUT,
 };
 
 /**
@@ -255,7 +276,10 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
     WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
-    WM_ERROR_PIP_REPEAT_OPERATION = 1300015
+    WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
+    WM_ERROR_ILLEGAL_PARAM = 1300016,
+    WM_ERROR_FILTER_ERROR = 1300017,
+    WM_ERROR_TIMEOUT = 1300018,
 };
 
 /**
@@ -378,6 +402,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     PAGE_ROTATION,
     MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
     END
 };
 
@@ -1319,6 +1344,13 @@ struct RotationChangeInfo {
 struct RotationChangeResult {
     RectType rectType_;
     Rect windowRect_;
+};
+
+/**
+ * @brief default zIndex for specific window.
+ */
+enum DefaultSpecificZIndex {
+    MUTISCREEN_COLLABORATION = 930,
 };
 }
 }

@@ -48,6 +48,9 @@ constexpr const char* WM_ERROR_MSG_PIP_STATE_ABNORMALLY = "pip state abnormally"
 constexpr const char* WM_ERROR_MSG_PIP_CREATE_FAILED = "pip create failed";
 constexpr const char* WM_ERROR_MSG_PIP_INTERNAL_ERROR = "pip internal error";
 constexpr const char* WM_ERROR_MSG_PIP_REPEAT_OPERATION = "pip repeat operation";
+constexpr const char* WM_ERROR_MSG_ILLEGAL_PARAM = "parameter validation error";
+constexpr const char* WM_ERROR_MSG_FILTER_ERROR = "Incorrect filter calling";
+constexpr const char* WM_ERROR_MSG_TIMEOUT = "API call timed out";
 
 static std::map<WMError, const char*> WM_ERROR_TO_ERROR_MSG_MAP {
     {WMError::WM_OK,                                    WM_ERROR_MSG_OK                          },
@@ -80,6 +83,9 @@ static std::map<WMError, const char*> WM_ERROR_TO_ERROR_MSG_MAP {
     {WMError::WM_ERROR_PIP_CREATE_FAILED,               WM_ERROR_MSG_PIP_CREATE_FAILED           },
     {WMError::WM_ERROR_PIP_INTERNAL_ERROR,              WM_ERROR_MSG_PIP_INTERNAL_ERROR          },
     {WMError::WM_ERROR_PIP_REPEAT_OPERATION,            WM_ERROR_MSG_PIP_REPEAT_OPERATION        },
+    {WMError::WM_ERROR_ILLEGAL_PARAM,                   WM_ERROR_MSG_ILLEGAL_PARAM               },
+    {WMError::WM_ERROR_FILTER_ERROR,                    WM_ERROR_MSG_FILTER_ERROR                },
+    {WMError::WM_ERROR_TIMEOUT,                         WM_ERROR_MSG_TIMEOUT                     },
 };
 
 constexpr const char* WM_ERROR_CODE_MSG_OK = "ok";
@@ -119,6 +125,14 @@ constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error
     "2.Abnormality in the pip controller.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation. Possible causes: "
     "This pip has either been pulled up or has already been closed.;";
+constexpr const char* WM_ERROR_CODE_MSG_ILLEGAL_PARAM = "Parameter validation error. Possible causes: "
+    "1.The value of the parameter is out of the allowed range;"
+    "2.The length of the parameter exceeds the allowed length;"
+    "3.The parameter format is incorrect.";
+constexpr const char* WM_ERROR_CODE_MSG_FILTER_ERROR = "Incorrect filter calling. Possible causes: "
+    "Must use setBackgroundFilter before animateToBackgroundFilter.";
+constexpr const char* WM_ERROR_CODE_MSG_TIMEOUT = "API call timed out. Possible causes: "
+    "The waiting time for the synchronous interface call exceeded the limit range.";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                       },
@@ -141,6 +155,9 @@ static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {WmErrorCode::WM_ERROR_PIP_CREATE_FAILED,         WM_ERROR_CODE_MSG_PIP_CREATE_FAILED        },
     {WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR,        WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR       },
     {WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION,      WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION     },
+    {WmErrorCode::WM_ERROR_ILLEGAL_PARAM,             WM_ERROR_CODE_MSG_ILLEGAL_PARAM            },
+    {WmErrorCode::WM_ERROR_FILTER_ERROR,              WM_ERROR_CODE_MSG_FILTER_ERROR             },
+    {WmErrorCode::WM_ERROR_TIMEOUT,                   WM_ERROR_CODE_MSG_TIMEOUT                  },
 };
 
 constexpr const char* DM_ERROR_MSG_OK = "ok";

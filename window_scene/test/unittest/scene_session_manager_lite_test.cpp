@@ -31,21 +31,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionManagerLiteTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerLiteTest::SetUpTestCase() {}
 
-void SceneSessionManagerLiteTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerLiteTest::TearDownTestCase() {}
 
-void SceneSessionManagerLiteTest::SetUp()
-{
-}
+void SceneSessionManagerLiteTest::SetUp() {}
 
-void SceneSessionManagerLiteTest::TearDown()
-{
-}
+void SceneSessionManagerLiteTest::TearDown() {}
 
 namespace {
 /**
@@ -60,6 +52,6 @@ HWTEST_F(SceneSessionManagerLiteTest, GetInstance, TestSize.Level1)
     SceneSessionManagerLite& instance2 = SceneSessionManagerLite::GetInstance();
     EXPECT_EQ(&instance1, &instance2);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

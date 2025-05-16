@@ -346,6 +346,35 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble04, TestS
 }
 
 /**
+ * @tc.name: MakeSubOrDialogWindowDragableAndMoveble05
+ * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetSubWindowDecorEnable(true);
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble05");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(true, window->property_->IsDecorEnable());
+    window->property_->SetDecorEnable(false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
+    window->property_->SetIsUIExtensionAbilityProcess(true);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(true, window->property_->IsDecorEnable());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 end";
+}
+
+/**
  * @tc.name: WindowSessionCreateCheck01
  * @tc.desc: WindowSessionCreateCheck01
  * @tc.type: FUNC
@@ -2043,6 +2072,34 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
     auto ret = window->RegisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     window->NotifyWaterfallModeChange(true);
+}
+
+/**
+ * @tc.name: CreateSubWindowOutlineEnabled
+ * @tc.desc: CreateSubWindowOutlineEnabled Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, CreateSubWindowOutlineEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("CreateSubWindowOutlineEnabled01");
+    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window1 = sptr<WindowSessionImpl>::MakeSptr(option1);
+    ASSERT_EQ(false, window1->property_->IsSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("CreateSubWindowOutlineEnabled02");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option2->SetSubWindowOutlineEnabled(false);
+    sptr<WindowSessionImpl> window2 = sptr<WindowSessionImpl>::MakeSptr(option2);
+    ASSERT_EQ(false, window2->property_->IsSubWindowOutlineEnabled());
+
+    sptr<WindowOption> option3 = sptr<WindowOption>::MakeSptr();
+    option3->SetWindowName("CreateSubWindowOutlineEnabled03");
+    option3->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option3->SetSubWindowOutlineEnabled(true);
+    sptr<WindowSessionImpl> window3 = sptr<WindowSessionImpl>::MakeSptr(option3);
+    ASSERT_EQ(true, window3->property_->IsSubWindowOutlineEnabled());
 }
 } // namespace
 } // namespace Rosen

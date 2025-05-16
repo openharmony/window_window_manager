@@ -17,6 +17,7 @@
 
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
@@ -84,7 +85,8 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& screenSession,
@@ -107,9 +109,11 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
         return;
     }
     innerScreen->SetStartPosition(0, 0);
+    innerScreen->SetXYPosition(0, 0);
     innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     externalScreen->SetStartPosition(0, 0);
+    externalScreen->SetXYPosition(0, 0);
     externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     {
@@ -122,7 +126,8 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,
@@ -257,6 +262,17 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     externalScreen->SetScreenProperty(innerPhyProperty);
 }
 
+void MultiScreenChangeUtils::SetScreenNotifyFlag(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
+{
+    if (innerScreen == nullptr || externalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen sessions null.");
+        return;
+    }
+    innerScreen->SetIsAvailableAreaNeedNotify(true);
+    externalScreen->SetIsAvailableAreaNeedNotify(true);
+}
+
 void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
@@ -288,6 +304,9 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
 
     /* change active mode */
     ScreenActiveModesChange(innerScreen, externalScreen);
+
+    /* set notify flag */
+    SetScreenNotifyFlag(innerScreen, externalScreen);
     oss.str("");
     oss << "after innerScreen screenId: " << innerScreen->GetScreenId()
         << ", rsId: " << innerScreen->GetRSScreenId()

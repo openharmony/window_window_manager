@@ -38,16 +38,19 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionTest4" };
+} // namespace
 namespace {
 std::string g_logMsg;
-void SessionTest4LogCallBack(
-    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+void SessionTest4LogCallBack(const LogType type,
+                             const LogLevel level,
+                             const unsigned int domain,
+                             const char* tag,
+                             const char* msg)
 {
     g_logMsg = msg;
 }
-}
+} // namespace
 class WindowSessionTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1088,30 +1091,30 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SafelyGetWant01
- * @tc.desc: SafelyGetWant Test
+ * @tc.name: GetWantSafely01
+ * @tc.desc: GetWantSafely Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SafelyGetWant01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, GetWantSafely01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     ASSERT_EQ(nullptr, sessionInfo.want);
-    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "");
+    EXPECT_EQ(sessionInfo.GetWantSafely().GetBundle(), "");
 }
 
 /**
- * @tc.name: SafelySetWant01
- * @tc.desc: SafelySetWant Test
+ * @tc.name: SetWantSafely01
+ * @tc.desc: SetWantSafely Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetWantSafely01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     AAFwk::Want wantObj;
-    wantObj.SetBundle("SafelySetWantTest");
-    sessionInfo.SafelySetWant(wantObj);
+    wantObj.SetBundle("SetWantSafelyTest");
+    sessionInfo.SetWantSafely(wantObj);
     ASSERT_NE(nullptr, sessionInfo.want);
-    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
+    EXPECT_EQ(sessionInfo.GetWantSafely().GetBundle(), "SetWantSafelyTest");
 }
 
 /**
@@ -1237,7 +1240,7 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_Handler_NOT_NULL, TestSize.Leve
 
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
+                              sceneSessionManager->eventHandler_);
     EXPECT_TRUE(g_logMsg.find("not specific window") == std::string::npos);
     EXPECT_TRUE(g_logMsg.find("handler is null") == std::string::npos);
 }
@@ -1265,7 +1268,7 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSi
     session->PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(sceneSessionManager->taskScheduler_->GetEventHandler(),
-        sceneSessionManager->eventHandler_);
+                              sceneSessionManager->eventHandler_);
     EXPECT_TRUE(g_logMsg.find("handler is null") == std::string::npos);
 
     session->SetWindowAnimationDuration(true);
@@ -1274,6 +1277,23 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSi
     session->SetWindowAnimationDuration(false);
     EXPECT_TRUE(g_logMsg.find("window configured animation") == std::string::npos);
 }
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: check func NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_EQ(WSError::WS_OK, session_->NotifyAppForceLandscapeConfigUpdated());
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyAppForceLandscapeConfigUpdated());
 }
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

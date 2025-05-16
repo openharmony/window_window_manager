@@ -42,13 +42,9 @@ public:
     sptr<Session> session_;
 };
 
-void MoveDragControllerTest::SetUpTestCase()
-{
-}
+void MoveDragControllerTest::SetUpTestCase() {}
 
-void MoveDragControllerTest::TearDownTestCase()
-{
-}
+void MoveDragControllerTest::TearDownTestCase() {}
 
 void MoveDragControllerTest::SetUp()
 {
@@ -210,8 +206,9 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level0)
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
     ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
-    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
-        moveDragController->GetDisplayIdsDuringMoveDrag().end());
+    ASSERT_EQ(true,
+              moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
+                  moveDragController->GetDisplayIdsDuringMoveDrag().end());
     ScreenId screenId = 1;
     ScreenSessionConfig config;
     sptr<ScreenSession> screenSession =
@@ -220,8 +217,9 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level0)
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
     ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
-    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
-        moveDragController->GetDisplayIdsDuringMoveDrag().end());
+    ASSERT_EQ(true,
+              moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
+                  moveDragController->GetDisplayIdsDuringMoveDrag().end());
 }
 
 /**
@@ -340,9 +338,9 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, TestSize.Level1)
 HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, TestSize.Level1)
 {
     moveDragController->InitMoveDragProperty();
-    moveDragController->SetMoveAvailableArea({0, 75, 3120, 1980});
+    moveDragController->SetMoveAvailableArea({ 0, 75, 3120, 1980 });
     moveDragController->SetMoveInputBarStartDisplayId(1);
-    WSRect originalRect = {10, 20, 336, 146};
+    WSRect originalRect = { 10, 20, 336, 146 };
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetTargetDisplayId(1);
@@ -358,10 +356,14 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, TestSize.Level1)
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
     moveDragController->SetOriginalMoveDragPos(pointerEvent->GetPointerId(),
-        pointerEvent->GetSourceType(), pointerPosX, pointerPosY, pointerWindowX,
-        pointerWindowY, originalRect);
+                                               pointerEvent->GetSourceType(),
+                                               pointerPosX,
+                                               pointerPosY,
+                                               pointerWindowX,
+                                               pointerWindowY,
+                                               originalRect);
     moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
-    
+
     ASSERT_EQ(90, moveDragController->moveDragProperty_.targetRect_.posX_);
     ASSERT_EQ(190, moveDragController->moveDragProperty_.targetRect_.posY_);
 }
@@ -373,8 +375,8 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, AdjustTargetPositionByAvailableArea, TestSize.Level1)
 {
-    DMRect moveAvailableArea = {0, 75, 3120, 1980};
-    WSRect originalRect = {10, 20, 336, 146};
+    DMRect moveAvailableArea = { 0, 75, 3120, 1980 };
+    WSRect originalRect = { 10, 20, 336, 146 };
     moveDragController->moveAvailableArea_ = moveAvailableArea;
     moveDragController->moveDragProperty_.originalRect_ = originalRect;
 
@@ -746,9 +748,7 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, TestSize.Level1)
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](DisplayId displayId, int32_t type, SizeChangeReason reason) {
-        type = 0;
-    };
+    auto dragHotAreaFunc = [](DisplayId displayId, int32_t type, SizeChangeReason reason) { type = 0; };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
     moveDragController->windowDragHotAreaFunc_ = dragHotAreaFunc;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
@@ -1008,8 +1008,8 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect001, TestSize.Level1)
     moveDragController->InitMoveDragProperty();
     moveDragController->SetStartMoveFlag(true);
     moveDragController->CalcFirstMoveTargetRect(windowRect, true);
-    WSRect targetRect = moveDragController->GetTargetRect(
-        MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    WSRect targetRect =
+        moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
     ASSERT_EQ(targetRect.posX_, 0);
 }
 
@@ -1033,7 +1033,7 @@ HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, TestSize.Level1)
     ASSERT_EQ(windowRect.posX_, rect.posX_);
     originalRect = { 1, 2, 3, 4 };
     rect = moveDragController->GetFullScreenToFloatingRect(originalRect, windowRect);
-    WSRect targetRect = { 1, 2, 7, 8};
+    WSRect targetRect = { 1, 2, 7, 8 };
     ASSERT_EQ(targetRect.posX_, rect.posX_);
     moveDragController->moveTempProperty_ = preMoveTempProperty;
 }
@@ -1214,9 +1214,7 @@ HWTEST_F(MoveDragControllerTest, ProcessSessionRectChange, TestSize.Level1)
     int32_t res = 0;
     auto preCallback = moveDragController->moveDragCallback_;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    MoveDragCallback callBack = [](SizeChangeReason reason) {
-            return;
-        };
+    MoveDragCallback callBack = [](SizeChangeReason reason) { return; };
     moveDragController->moveDragCallback_ = callBack;
     moveDragController->ProcessSessionRectChange(reason);
     moveDragController->moveDragCallback_ = nullptr;
@@ -1503,8 +1501,7 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     sptr<MoveDragController> followController =
         sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
 
     followController->type_ = AreaType::UNDEFINED;
     moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, nullptr);
@@ -1524,6 +1521,6 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
     ASSERT_NE(gravityIter, surfaceNode->propertyModifiers_.end());
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

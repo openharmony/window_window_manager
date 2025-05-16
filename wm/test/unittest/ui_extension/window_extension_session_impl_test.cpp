@@ -28,6 +28,8 @@
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
+#include "mock_window_adapter.h"
+#include "singleton_mocker.h"
 #include "window_extension_session_impl.h"
 
 using namespace testing;
@@ -36,6 +38,7 @@ using namespace OHOS::Accessibility;
 using namespace std;
 namespace OHOS {
 namespace Rosen {
+using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowExtensionSessionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2238,6 +2241,30 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | Sma
     EXPECT_EQ(WMError::WM_OK, window_->OnResyncExtensionConfig(std::move(want), reply));
     EXPECT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
     EXPECT_TRUE(window_->IsWaterfallModeEnabled());
+}
+
+/**
+ * @tc.name: GetHostWindowCompatiblityInfo
+ * @tc.desc: GetHostWindowCompatiblityInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    auto ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    window_->abilityToken_ = iRemoteObject;
+    WindowAdapterMocker mocker;
+    EXPECT_CALL(mocker.Mock(), GetHostWindowCompatiblityInfo(_, _))
+        .WillOnce(Return(WMError::WM_DO_NOTHING))
+        .WillOnce(Return(WMError::WM_OK));
+
+    ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    ret = window_->GetHostWindowCompatiblityInfo();
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

@@ -24,9 +24,10 @@
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "rs_adapter.h"
 #include "surface_draw.h"
-#include "window_test_utils.h"
 #include "window_manager.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -38,8 +39,8 @@ namespace {
 constexpr uint32_t COLOR_RED = 0xffff0000;
 constexpr uint8_t ALPHA = 255;
 constexpr int NORMAL_SLEEP_TIME = 3; // 1s
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowWaterMarkTest"};
-}
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowWaterMarkTest" };
+} // namespace
 
 using Utils = WindowTestUtils;
 
@@ -76,7 +77,7 @@ public:
 sptr<TestIWaterMarkFlagChangedListener> WaterMarkTest::lisenter_ = nullptr;
 void WaterMarkTest::SetUpTestCase()
 {
-    lisenter_= new TestIWaterMarkFlagChangedListener();
+    lisenter_ = new TestIWaterMarkFlagChangedListener();
     WindowManager::GetInstance().RegisterWaterMarkFlagChangedListener(lisenter_);
     displayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
 }
@@ -100,9 +101,7 @@ void WaterMarkTest::SetUp()
     };
 }
 
-void WaterMarkTest::TearDown()
-{
-}
+void WaterMarkTest::TearDown() {}
 
 sptr<Window> WaterMarkTest::CreateWindow(const Utils::TestWindowInfo& appinfo)
 {
@@ -128,7 +127,7 @@ bool WaterMarkTest::FillColor(sptr<Window> window)
     Rect rect = window->GetRect();
     bool isDrawSuccess = SurfaceDraw::DrawColor(surfaceNode, rect.width_, rect.height_, COLOR_RED);
     surfaceNode->SetAbilityBGAlpha(ALPHA);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     return isDrawSuccess;
 }
 
@@ -142,7 +141,7 @@ namespace {
 HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, TestSize.Level1)
 {
     appInfo_.name = "window1";
-    appInfo_.rect = {200, 200, 300, 300};
+    appInfo_.rect = { 200, 200, 300, 300 };
     sptr<Window> window = CreateWindow(appInfo_);
     if (window == nullptr) {
         return;
@@ -165,7 +164,6 @@ HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, TestSize.Level1)
     window->Destroy();
     sleep(NORMAL_SLEEP_TIME);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
-

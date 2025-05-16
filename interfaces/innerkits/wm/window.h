@@ -76,6 +76,8 @@ using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
+class RSUIContext;
+class RSUIDirector;
 class ISession;
 class Window;
 
@@ -850,6 +852,22 @@ public:
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const { return nullptr; }
 
     /**
+     * @brief Get the associated RSUIDirector instance
+     *
+     * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
+
+    /**
+     * @brief Get the associated RSUIContext instance
+     *
+     * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
+
+    /**
      * @brief Get ability context
      *
      * @return Ability context from AbilityRuntime
@@ -959,6 +977,14 @@ public:
      * @return True means window can be touched, false means window cannot be touched.
      */
     virtual bool GetTouchable() const { return false; }
+
+    /**
+     * @brief Set follow screen change property of window.
+     *
+     * @param isFollowScreenChange Window follow screen change.
+     * @return WMError.
+     */
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_OK; }
 
     /**
      * @brief Get SystemBarProperty By WindowType.
@@ -2460,6 +2486,7 @@ public:
 
     /**
      * @brief get compatible mode in pc.
+     * @deprecated use IsAdaptToImmersive instead
      *
      * @return True means window is compatible mode in pc, false means the opposite.
      */
@@ -2787,6 +2814,18 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set main window container color.
+     *
+     * @param activeColor Background active color.
+     * @param inactiveColor Background active color.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3309,7 +3348,7 @@ public:
      *
      * @return the height of status bar.
      */
-    virtual uint32_t GetStatusBarHeight() { return 0; }
+    virtual uint32_t GetStatusBarHeight() const { return 0; }
 
     /**
      * @brief Get whether the free multi-window mode is enabled or not.
@@ -3572,6 +3611,18 @@ public:
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 
     /**
+     * @brief Receive async IPC message from UIExtensionComponent.
+     *
+     * @param code the message code.
+     * @param persistentId the persistent id of UIExtension.
+     * @param data the data transfered from UIExtensionComponent.
+     */
+    virtual WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Query whether the waterfall mode is enabled or not.
      *
      * @return true means the waterfall mode is enabled, and false means the opposite.
@@ -3743,6 +3794,26 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WMError::WM_OK if called success, otherwise failed.
+     */
+    virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -48,8 +48,8 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSUIContext;
 class RSTransaction;
-class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
@@ -268,6 +268,8 @@ public:
             addSnapshotCallback_ = std::move(task);
         }
     }
+    void SetEnableAddSnapshot(bool enableAddSnapshot = true);
+    bool GetEnableAddSnapshot() const;
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -374,6 +376,7 @@ public:
     std::vector<sptr<Session>> GetDialogVector() const;
     void ClearDialogVector();
     WSError NotifyDestroy();
+    WSError NotifyAppForceLandscapeConfigUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
@@ -385,15 +388,8 @@ public:
     bool GetStateFromManager(const ManagerState key);
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateWindowMode(WindowMode mode);
-    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
-    WSError SetCompatibleModeInPcTitleVisible(bool enableTitleVisible);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
-    WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-        int32_t landscapeWidth, int32_t landscapeHeight);
-    WSError SetCompatibleModeEnableInPad(bool enable);
-    WSError CompatibleFullScreenRecover();
-    WSError CompatibleFullScreenMinimize();
-    WSError CompatibleFullScreenClose();
+    WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
     WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
@@ -681,7 +677,12 @@ public:
      * Specific Window
      */
     void SetWindowAnimationDuration(int32_t duration);
-    
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -761,6 +762,7 @@ protected:
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
+    int32_t currentRotation_ = 0;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -1032,6 +1034,7 @@ private:
     /*
      * Window Scene Snapshot
      */
+    std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
@@ -1048,6 +1051,12 @@ private:
      * Specific Window
      */
     int32_t windowAnimationDuration_;
+
+    /*
+     * RS Client Multi Instance
+     */
+    void InitRSUIContext();
+    std::shared_ptr<RSUIContext> rsUIContext_;
 };
 } // namespace OHOS::Rosen
 

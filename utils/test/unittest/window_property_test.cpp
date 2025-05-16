@@ -31,21 +31,13 @@ public:
     virtual void TearDown() override;
 };
 
-void WindowPropertyTest::SetUpTestCase()
-{
-}
+void WindowPropertyTest::SetUpTestCase() {}
 
-void WindowPropertyTest::TearDownTestCase()
-{
-}
+void WindowPropertyTest::TearDownTestCase() {}
 
-void WindowPropertyTest::SetUp()
-{
-}
+void WindowPropertyTest::SetUp() {}
 
-void WindowPropertyTest::TearDown()
-{
-}
+void WindowPropertyTest::TearDown() {}
 
 namespace {
 /**
@@ -77,7 +69,7 @@ HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, TestSize.Level1)
  */
 HWTEST_F(WindowPropertyTest, CopyFrom, TestSize.Level1)
 {
-    const sptr<WindowProperty> winPropSrc = new(std::nothrow) WindowProperty();
+    const sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
     winPropSrc->SetPrivacyMode(true);
     winPropSrc->SetTransparent(true);
     winPropSrc->SetTransform(Transform::Identity());
@@ -121,6 +113,7 @@ HWTEST_F(WindowPropertyTest, Read, TestSize.Level1)
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
     winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    winPropDst.Read(parcel, PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE);
 
     ASSERT_EQ(false, winPropDst.GetPrivacyMode());
     ASSERT_EQ(false, winPropDst.GetTransparent());
@@ -150,6 +143,7 @@ HWTEST_F(WindowPropertyTest, Write, TestSize.Level1)
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY));
     ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
+    ASSERT_EQ(true, winPropDst.Write(parcel, PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE));
 }
 
 /**
@@ -221,7 +215,7 @@ HWTEST_F(WindowPropertyTest, AddWindowFlag001, TestSize.Level1)
 HWTEST_F(WindowPropertyTest, GetRequestRect001, TestSize.Level1)
 {
     WindowProperty winPropSrc;
-    Rect requestRect { 0, 0, 0, 0 };
+    Rect requestRect{ 0, 0, 0, 0 };
     winPropSrc.SetRequestRect(requestRect);
     Rect res = winPropSrc.GetRequestRect();
     ASSERT_EQ(res, requestRect);
@@ -659,6 +653,20 @@ HWTEST_F(WindowPropertyTest, GetTextFieldHeight36, TestSize.Level1)
     winPropSrc.SetTextFieldHeight(textFieldHeight);
     double res = winPropSrc.GetTextFieldHeight();
     ASSERT_EQ(res, textFieldHeight);
+}
+
+/**
+ * @tc.name: GetFollowScreenChange37
+ * @tc.desc: GetFollowScreenChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPropertyTest, GetFollowScreenChange37, TestSize.Level1)
+{
+    WindowProperty winPropSrc;
+    bool isFollowScreenChange = true;
+    winPropSrc.SetFollowScreenChange(isFollowScreenChange);
+    bool res = winPropSrc.GetFollowScreenChange();
+    ASSERT_EQ(res, isFollowScreenChange);
 }
 }
 } // namespace Rosen
