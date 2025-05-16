@@ -144,7 +144,6 @@ struct PiPContent {
     } catch (err) {
       console.log(`aboutToDisappear failed`);
     }
-
   }
 
   build() {
