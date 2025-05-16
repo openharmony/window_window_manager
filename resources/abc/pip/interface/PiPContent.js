@@ -184,7 +184,6 @@ class PiPContent extends ViewPU {
         } catch (b) {
             console.log(`aboutToAppear failed`);
         }
-
     }
 
     updatePipNodeType(a2) {
@@ -205,7 +204,6 @@ class PiPContent extends ViewPU {
         } catch (a) {
             console.log(`aboutToDisappear failed`);
         }
-
     }
 
     initialRender() {
