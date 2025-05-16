@@ -340,6 +340,17 @@ HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
     WSRect wsRect{ .posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100 };
     sceneSession->winRect_ = wsRect;
     EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
+
+    SessionInfo sessionInfo2;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    EXPECT_NE(sceneSession2, nullptr);
+    WSRect wsRect2{ .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
+    sceneSession2->winRect_ = wsRect2;
+    std::vector<Rect> hotAreas;
+    hotAreas.push_back(Rect::EMPTY_RECT);
+    hotAreas.push_back({.posX_ = 0, .posY_ = 0, .width_ = 10, .height_ = 10});
+    sceneSession2->GetSessionProperty()->SetTouchHotAreas(hotAreas);
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession2), true);
 }
 
 /**
