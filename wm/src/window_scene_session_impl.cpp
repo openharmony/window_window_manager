@@ -6151,7 +6151,7 @@ WSError WindowSceneSessionImpl::CloseSpecificScene()
             return;
         }
         window->Close();
-    }, func);
+    }, __func__);
     return WSError::WS_OK;
 }
 } // namespace Rosen

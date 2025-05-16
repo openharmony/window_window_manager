@@ -7153,7 +7153,7 @@ void JsSceneSession::OnDecorEnableChange(bool isDecorEnable)
 napi_value JsSceneSession::RequestSpecificSessionClose(napi_env env, napi_callback_info info)
 {
     WLOGFI("[NAPI]");
-    JsSceneSession* me = CheckParamsAndGetThis(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRequestSpecificSessionClose(env, info) : nullptr;
 }
 
