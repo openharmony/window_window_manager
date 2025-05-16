@@ -181,8 +181,7 @@ class PiPContent extends ViewPU {
             this.mXCNodeController = new XCNodeController(this.xComponent);
             console.info(TAG, 'use Node Controller');
             this.registerStateChangeListener();
-        }
-        catch (b) {
+        } catch (b) {
             console.log(`aboutToAppear failed`);
         }
     }
@@ -202,10 +201,9 @@ class PiPContent extends ViewPU {
         try {
             pip.off('stateChange');
             pip.off('nodeUpdate');
-        }
-        catch (a) {
+        } catch (a) {
             console.log(`aboutToDisappear failed`);
-        };
+        }
     }
 
     initialRender() {
