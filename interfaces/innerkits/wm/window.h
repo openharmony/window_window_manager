@@ -3786,7 +3786,7 @@ public:
      * @param isColdStart Mark as cold start or not
      * @return WM_OK means set intent param success.
      */
-    virtual WMError SetIntentParam(const std::string& intentParam, const std::function<void()>&& loadPageCallback,
+    virtual WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart)
     {
         return WMError::WM_OK;
