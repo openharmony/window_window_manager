@@ -738,6 +738,25 @@ HWTEST_F(WindowSessionImplTest5, IsAdaptToSubWindow, Function | SmallTest | Leve
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     EXPECT_EQ(window->IsAdaptToSubWindow(), true);
 }
+
+/**
+ * @tc.name: SetIntentParam
+ * @tc.desc: SetIntentParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
+ {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetIntentParam");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "testIntent";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+    EXPECT_EQ(window->isColdStart_, true);
+    EXPECT_EQ(window->intentParam_, intentParam);
+ }
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
