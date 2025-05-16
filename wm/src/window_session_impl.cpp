@@ -5513,12 +5513,12 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
 {
     auto windowStatus = GetWindowStatusInner(mode);
-    if (lastStatusWhenNotifyWindowStatusDidChange_.load() == windowStatus) {
+    auto lastStatus = lastStatusWhenNotifyWindowStatusDidChange_.load();
+    if (lastStatus == windowStatus) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "Duplicate windowStatus:%{public}u, id:%{public}d, windowMode:%{public}u",
             windowStatus, GetPersistentId(), mode);
         return;
     }
-    auto lastStatus = lastStatusWhenNotifyWindowStatusDidChange_.load();
     lastStatusWhenNotifyWindowStatusDidChange_.store(windowStatus);
     std::vector<sptr<IWindowStatusDidChangeListener>> windowStatusDidChangeListeners;
     {
@@ -5527,9 +5527,9 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
     }
     const auto& windowRect = GetRect();
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, WindowMode:%{public}u, windowStatus:%{public}u, "
-        "lastWindowStatus:%{public}u, listenerSize:%{public}zu, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        GetPersistentId(), mode, windowStatus, lastStatus, windowStatusDidChangeListeners.size(), windowRect.posX_,
-        windowRect.posY_, windowRect.width_, windowRect.height_);
+        "lastWindowStatus:%{public}u, listenerSize:%{public}zu, rect:%{public}s",
+        GetPersistentId(), mode, windowStatus, lastStatus, windowStatusDidChangeListeners.size(),
+        windowRect.ToString.c_str());
     for (auto& listener : windowStatusDidChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowStatusDidChange(windowStatus);
