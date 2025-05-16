@@ -25,7 +25,6 @@
 
 #include "window_manager_hilog.h"
 #include "session_permission.h"
-#include "session_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
