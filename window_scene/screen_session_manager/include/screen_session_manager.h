@@ -665,7 +665,6 @@ private:
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
     bool isDeviceShutDown_ = false;
-    bool isScreenConnecting_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;

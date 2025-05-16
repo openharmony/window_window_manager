@@ -828,7 +828,6 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
     }
     OnFoldScreenChange(screenSession);
     if (screenEvent == ScreenEvent::CONNECTED) {
-        isScreenConnecting_ = true;
         connectScreenNumber_ ++;
         HandleScreenConnectEvent(screenSession, screenId, screenEvent);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
@@ -9825,41 +9824,7 @@ void ScreenSessionManager::NotifyExtendScreenCreateFinish()
         TLOGW(WmsLogTag::DMS, "not pc device.");
         return;
     }
-    sptr<ScreenSession> mainScreen = nullptr;
-    sptr<ScreenSession> extendScreen = nullptr;
-    {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        for (auto sessionIt : screenSessionMap_) {
-            auto screenSession = sessionIt.second;
-            if (screenSession == nullptr) {
-                TLOGE(WmsLogTag::DMS, "screenSession is nullptr.");
-                continue;
-            }
-            if (!screenSession->GetIsCurrentInUse()) {
-                continue;
-            }
-            if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
-                mainScreen = screenSession;
-            } else {
-                extendScreen = screenSession;
-            }
-        }
-    }
-    if (isScreenConnecting_) {
-        TLOGW(WmsLogTag::DMS, "screen is connecting, no need to notify.");
-        isScreenConnecting_ = false;
-        return;
-    }
-    if (mainScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS, "main screen is null");
-        return;
-    }
-    NotifyCreatedScreen(mainScreen);
-    if (extendScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS, "extend screen is null");
-        return;
-    }
-    NotifyCreatedScreen(extendScreen);
+    TLOGD(WmsLogTag::DMS, "Notify create funish.");
 }
 
 void ScreenSessionManager::UpdateScreenIdManager(sptr<ScreenSession>& innerScreen,
