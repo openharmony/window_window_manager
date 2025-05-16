@@ -99,6 +99,12 @@ void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& scree
     ScreenId screenId = screenSession->GetScreenId();
     TLOGW(WmsLogTag::DMS, "screenId=%{public}" PRIu64, screenId);
     screenSession->SetScreenAvailableStatus(isScreenAvailable);
+    if (isScreenAvailable) {
+        ScreenSessionManager::GetInstance().NotifyDisplayCreate(
+            screenSession->ConvertToDisplayInfo());
+    } else {
+        ScreenSessionManager::GetInstance().NotifyDisplayDestroy(screenId);
+    }
 }
 
 void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& innerScreen,
