@@ -128,7 +128,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
 
     auto usage = property_->GetUIExtensionUsage();
-    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage) {
+    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage)) {
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
 
