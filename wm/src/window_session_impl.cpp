@@ -1413,7 +1413,7 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
         return;
     }
     if (interactive) {
-        NotifyAfterInactive();
+        NotifyAfterInteractive();
         NotifyAfterResumed();
     } else {
         NotifyAfterPaused();
@@ -1427,7 +1427,7 @@ void WindowSessionImpl::NotifyBackgroundNonInteractiveStatus()
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    if (State_ != WindowState::STETE_SHOWN) {
+    if (state_ != WindowState::STATE_SHOWN) {
         TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d is not shown");
         return;
     }
@@ -4138,7 +4138,7 @@ void WindowSessionImpl::NotifyAfterInteractive()
         return;
     }
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    hasNotifyInteractiveEvent_ = false;
+    hasNotifyInteractiveEvent_ = true;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
 }
@@ -4151,7 +4151,7 @@ void WindowSessionImpl::NotifyAfterNonInteractive()
         return;
     }
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    hasNotifyInteractiveEvent_ = true;
+    hasNotifyInteractiveEvent_ = false;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
 }

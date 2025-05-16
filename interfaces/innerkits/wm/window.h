@@ -1223,7 +1223,7 @@ public:
     /**
      * @brief Interactive window
      */
-     virtual void Interactive() {}
+    virtual void Interactive() {}
 
     /**
      * @brief Hide window

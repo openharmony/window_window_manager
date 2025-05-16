@@ -283,9 +283,10 @@ public:
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
 
     /*
-     * Window Immersive
+     * Window LifeCycle
      */
     void Interactive() override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
