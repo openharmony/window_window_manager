@@ -530,7 +530,7 @@ private:
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
     sptr<ScreenSession> GetInternalScreenSession();
     void ExitOuterOnlyMode(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
-    void AdaptSuperHorizonBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
+    void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
