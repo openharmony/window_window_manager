@@ -5671,7 +5671,7 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, WindowMode:%{public}u, windowStatus:%{public}u, "
         "lastWindowStatus:%{public}u, listenerSize:%{public}zu, rect:%{public}s",
         GetPersistentId(), mode, windowStatus, lastStatus, windowStatusDidChangeListeners.size(),
-        windowRect.ToString.c_str());
+        windowRect.ToString().c_str());
     for (auto& listener : windowStatusDidChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowStatusDidChange(windowStatus);
