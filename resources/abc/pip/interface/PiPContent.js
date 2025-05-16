@@ -184,6 +184,7 @@ class PiPContent extends ViewPU {
         } catch (b) {
             console.log(`aboutToAppear failed`);
         }
+
     }
 
     updatePipNodeType(a2) {
@@ -199,11 +200,12 @@ class PiPContent extends ViewPU {
 
     aboutToDisappear() {
         try {
-            pip.off('stateChange');
-            pip.off('nodeUpdate');
+            pip.off('stateChange', this.stateChangeListener);
+            pip.off('nodeUpdate', this.nodeUpdateListener);
         } catch (a) {
             console.log(`aboutToDisappear failed`);
         }
+
     }
 
     initialRender() {
