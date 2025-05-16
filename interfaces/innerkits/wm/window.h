@@ -3777,6 +3777,14 @@ public:
      * @return Returns WMError::WM_OK if called success, otherwise failed.
      */
     virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the source of subwindow.
+     *
+     * @param source 0 - defalut, 1 - arkui.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
