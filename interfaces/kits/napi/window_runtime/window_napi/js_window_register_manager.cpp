@@ -687,7 +687,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<J
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusDidChangeListener> thisListener(listener);
