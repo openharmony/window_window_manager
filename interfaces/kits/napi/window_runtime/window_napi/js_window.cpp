@@ -7002,7 +7002,7 @@ static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, 
 napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    WmErrorCode enableResult;
+    WmErrorCode enableResult = WmErrorCode::WM_OK;
     if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
         return NapiThrowError(env, enableResult);
     }
@@ -7014,12 +7014,12 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t type = 0;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > static_cast<uint32_t>(WindowTransitionType::END))) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || type >= static_cast<uint32_t>(WindowTransitionType::END)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     TransitionAnimation animation;
-    WmErrorCode convertResult;
+    WmErrorCode convertResult = WmErrorCode::WM_OK;
     if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation, convertResult)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
         return NapiThrowError(env, convertResult);
@@ -7043,7 +7043,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set window transition animation failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7053,7 +7053,7 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
 napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
-    WmErrorCode enableResult;
+    WmErrorCode enableResult = WmErrorCode::WM_OK;
     if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
         return NapiThrowError(env, enableResult);
     }
@@ -7064,8 +7064,8 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowTransitionType type;
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || (type > WindowTransitionType::END)) {
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || type >= WindowTransitionType::END) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }

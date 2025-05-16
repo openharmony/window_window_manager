@@ -5976,12 +5976,12 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     if (!hostSession) {
         TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
-    } else {
-        ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
-        if (ret == WSError::WS_OK) {
-            std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-            transitionAnimationConfig_[transitionType] = config;
-        }
+    }
+    ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
+    if (ret == WSError::WS_OK) {
+        std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
+        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+        transitionAnimationConfig_[transitionType] = config;
     }
 
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
@@ -5999,6 +5999,7 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     if (!WindowHelper::IsMainWindow(GetType())) {
         return nullptr;
     }
+    std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
     if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
         return transitionAnimationConfig_[transitionType];
     } else {

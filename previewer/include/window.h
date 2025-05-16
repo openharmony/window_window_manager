@@ -641,7 +641,7 @@ public:
      *
      * @param transitionType window transition type.
      * @param animation window transition animation.
-     * @return WM_OK means set window transition aniamtion success, others means failed.
+     * @return WM_OK means set window transition animation success, others means failed.
      */
     virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
         const TransitionAnimation& animation)

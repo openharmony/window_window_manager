@@ -3495,7 +3495,7 @@ void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& typ
     auto task = [weakThis = wptr(this), persistentId = persistentId_, type, animation, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_ANIMATION, 
+            TLOGNE(WmsLogTag::WMS_ANIMATION,
                 "OnUpdateTransitionAnimation jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }

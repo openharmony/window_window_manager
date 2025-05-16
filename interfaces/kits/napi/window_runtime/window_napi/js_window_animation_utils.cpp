@@ -62,7 +62,7 @@ napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
-            for (int i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
                 napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
                 napi_set_element(env, params, i, element);
@@ -86,10 +86,18 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
         return false;
     }
     double opacity = 1.0f;
-    ParseJsValue(jsObject, env, "opacity", opacity);
-    if (opacity < 0.0 || opacity > 1.0) {
-        result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
-        return false;
+    napi_value jsOpacityValue = nullptr;
+    napi_get_named_property(env, jsObject, "opacity", &jsOpacityValue);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, jsOpacityValue, &type);
+    if (type != napi_undefined) {
+        if (!AbilityRuntime::ConvertFromJsValue(env, jsOpacityValue, opacity)) {
+            result = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            return false;
+        } else if (opacity < 0.0 || opacity > 1.0) {
+            result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+            return false;
+        }
     }
     transitionAnimation.opacity = static_cast<float>(opacity);
     return true;
@@ -107,7 +115,7 @@ bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animation
             break;
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
-            for (int i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
+            for (uint32_t i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
                 if (animationConfig.param[i] <= 0.0) {
                     TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
                         i, animationConfig.param[i]);
@@ -130,7 +138,7 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
         result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
     }
-    uint32_t curve;
+    uint32_t curve = 0;
     if (!ParseJsValue(jsAnimationConfig, env, "curve", curve)) {
         result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
@@ -150,7 +158,7 @@ bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimati
         case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
-            for (int i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
                 napi_get_element(env, paramsValue, i, &element);
                 if (!ConvertFromJsValue(env, element, params[i])) {
