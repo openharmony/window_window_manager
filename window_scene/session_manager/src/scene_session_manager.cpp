@@ -313,6 +313,14 @@ bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
     return isVisible && diff <= 1;
 }
+
+enum class UpdateStartingWindowColorCacheResult : uint32_t {
+    SUCCESS = 0,
+    COLOR_MAP_BUNDLE_NOT_FOUND,
+    COLOR_MAP_KEY_PAIR_NOT_FOUND,
+    INFO_MAP_BUNDLE_NOT_FOUND,
+    INFO_MAP_KEY_PAIR_NOT_FOUND,
+};
 } // namespace
 
 sptr<SceneSessionManager> SceneSessionManager::CreateInstance()
@@ -4920,8 +4928,10 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     if (GetStartingWindowInfoFromRdb(sessionInfo, startingWindowInfo)) {
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
-        UpdateCachedColorToAppSet(
+        uint32_t updateRes = UpdateCachedColorToAppSet(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
+        TLOGI(WmsLogTag::WMS_PATTERN, "updateRes %{public}u, %{public}x",
+            updateRes, startingWindowInfo.backgroundColor_);
         return;
     }
     AAFwk::Want want;
@@ -4936,8 +4946,6 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     if (GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
-        UpdateCachedColorToAppSet(
-            sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         if (startingWindowRdbMgr_ != nullptr) {
             StartingWindowRdbItemKey itemKey = {
                 .bundleName = sessionInfo.bundleName_,
@@ -4949,6 +4957,10 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
                 TLOGW(WmsLogTag::WMS_PATTERN, "rdb insert faild");
             }
         }
+        uint32_t updateRes = UpdateCachedColorToAppSet(
+            sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
+        TLOGI(WmsLogTag::WMS_PATTERN, "updateRes %{public}u, %{public}x",
+            updateRes, startingWindowInfo.backgroundColor_);
     }
     TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
         startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
@@ -5000,7 +5012,7 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
     return res;
 }
 
-void SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
+uint32_t SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, StartingWindowInfo& info)
 {
     auto key = moduleName + abilityName;
@@ -5009,12 +5021,12 @@ void SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleNam
         std::shared_lock<std::shared_mutex> lock(startingWindowColorFromAppMapMutex_);
         auto colorMapIter = startingWindowColorFromAppMap_.find(bundleName);
         if (colorMapIter == startingWindowColorFromAppMap_.end()) {
-            return;
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_BUNDLE_NOT_FOUND);
         }
         auto& colorMap = colorMapIter->second;
         auto colorIter = colorMap.find(key);
         if (colorIter == colorMap.end()) {
-            return;
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_KEY_PAIR_NOT_FOUND);
         }
         color = colorIter->second;
     }
@@ -5024,17 +5036,17 @@ void SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundleNam
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         auto iter = startingWindowMap_.find(bundleName);
         if (iter == startingWindowMap_.end()) {
-            return;
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_BUNDLE_NOT_FOUND);
         }
         auto& infoMap = iter->second;
         auto infoIter = infoMap.find(key);
         if (infoIter == infoMap.end()) {
-            return;
+            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::INFO_MAP_BUNDLE_NOT_FOUND);
         }
         infoIter->second.backgroundColorEarlyVersion_ = color;
         infoIter->second.backgroundColor_ = color;
-        TLOGI(WmsLogTag::WMS_PATTERN, "set %{public}s %{public}s, %{public}x", bundleName.c_str(), key.c_str(), color);
     }
+    return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::SUCCESS);
 }
 
 void SceneSessionManager::CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
@@ -14387,8 +14399,9 @@ WMError SceneSessionManager::SetStartWindowBackgroundColor(
         }
     }
     StartingWindowInfo info;
-    UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, info);
-    TLOGI(WmsLogTag::WMS_PATTERN, "success %{public}s %{public}s, %{public}x", bundleName.c_str(), key.c_str(), color);
+    uint32_t updateRes = UpdateCachedColorToAppSet(bundleName, moduleName, abilityName, info);
+    TLOGI(WmsLogTag::WMS_PATTERN, "success %{public}s %{public}s, %{public}x, %{public}u",
+        bundleName.c_str(), key.c_str(), color, updateRes);
     return WMError::WM_OK;
 }
 

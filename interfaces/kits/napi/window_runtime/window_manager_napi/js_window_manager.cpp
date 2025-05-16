@@ -1215,15 +1215,24 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
         TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    constexpr uint32_t maxNameLength = 200;
     std::string moduleName;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], moduleName)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to moduleName");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    if (moduleName.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "moduleName length out of range");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
     std::string abilityName;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], abilityName)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to abilityName");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (abilityName.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityName length out of range");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     uint32_t color = 0;
     if (!ParseColorMetrics(env, argv[ARGC_TWO], color)) {

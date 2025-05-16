@@ -3182,7 +3182,11 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
