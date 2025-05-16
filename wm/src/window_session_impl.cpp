@@ -573,6 +573,7 @@ WMError WindowSessionImpl::Connect()
     windowEventChannel->SetIsUIExtension(property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowEventChannel->SetUIExtensionUsage(property_->GetUIExtensionUsage());
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
+    RegisterWindowScaleCallback();
     auto context = GetContext();
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
@@ -584,6 +585,108 @@ WMError WindowSessionImpl::Connect()
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
     return static_cast<WMError>(ret);
+}
+
+sptr<WindowSessionImpl> WindowSessionImpl::GetWindowWithId(uint32_t windowId)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGD(WmsLogTag::WMS_SYSTEM, "Please create mainWindow First!");
+        return nullptr;
+    }
+    for (const auto& [_, pair] : windowSessionMap_) {
+        auto& window = pair.second;
+        if (window && windowId == window->GetWindowId()) {
+            TLOGD(WmsLogTag::WMS_SYSTEM, "find window %{public}s, id %{public}d",
+                window->GetWindowName().c_str(), windowId);
+            return window;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_SYSTEM, "Cannot find Window!");
+    return nullptr;
+}
+
+sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
+{
+    sptr<WindowSessionImpl> window = GetWindowWithId(windowId);
+    if (window) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "find window id:%{public}d", windowId);
+        return window;
+    }
+    if (isUIExtensionAbilityProcess_) {
+        std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+        for (const auto& window : windowExtensionSessionSet_) {
+            if (window && static_cast<uint32_t>(window->GetProperty()->GetParentId()) == windowId) {
+                TLOGD(WmsLogTag::WMS_COMPAT, "find extension window id:%{public}d", window->GetPersistentId());
+                return window;
+            }
+        }
+    }
+    {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        for (const auto& [_, pair] : windowSessionMap_) {
+            auto& window = pair.second;
+            if (window && window->IsFocused()) {
+                TLOGD(WmsLogTag::WMS_COMPAT, "find focus window id:%{public}d", window->GetPersistentId());
+                return window;
+            }
+        }
+    }
+    return nullptr;
+}
+
+WMError WindowSessionImpl::GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId)
+{
+    sptr<WindowSessionImpl> window = GetScaleWindow(windowId);
+    if (!window) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "find window id:%{public}d failed", windowId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto windowType = window->GetType();
+    if (WindowHelper::IsSubWindow(windowType)) {
+        if (window->GetProperty()->GetIsUIExtensionAbilityProcess()) {
+            TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d extension sub window", windowId);
+            return WMError::WM_OK;
+        }
+        window = window->FindMainWindowWithContext();
+    }
+    if (!window->IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "window id:%{public}d not scale", windowId);
+        return WMError::WM_OK;
+    }
+    Rect windowRect = window->GetRect();
+    Transform transform = window->GetCurrentTransform();
+    float scaleX = transform.scaleX_;
+    float scaleY = transform.scaleY_;
+    int32_t cursorX = x - windowRect.posX_;
+    int32_t cursorY = y - windowRect.posY_;
+    // 2: x scale computational formula
+    x = round(windowRect.posX_ + scaleX * cursorX + (1 - scaleX) * windowRect.width_ / 2);
+    // 2: y scale computational formula
+    y = round(windowRect.posY_ + scaleY * cursorY + (1 - scaleY) * windowRect.height_ / 2);
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::RegisterWindowScaleCallback()
+{
+    static bool isRegister = false;
+    if (isRegister) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "not registered");
+        return;
+    }
+#ifdef IMF_ENABLE
+    auto instance = MiscServices::InputMethodController::GetInstance();
+    if (!instance) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "get inputMethod instance failed");
+        return;
+    }
+    auto callback = [] (int32_t& x, int32_t& y, uint32_t windowId) {
+        WMError ret = GetWindowScaleCoordinate(x, y, windowId);
+        return static_cast<int32_t>(ret);
+    };
+    instance->RegisterWindowScaleCallbackHandler(std::move(callback));
+#endif
+    isRegister = true;
 }
 
 void WindowSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
