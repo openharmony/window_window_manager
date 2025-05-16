@@ -97,6 +97,8 @@ enum class ListenerFuncType : uint32_t {
     Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
     UPDATE_PIP_TEMPLATE_INFO_CB,
+    UPDATE_FOLLOW_SCREEN_CHANGE_CB,
+    USE_IMPLICIT_ANIMATION_CB,
 };
 
 class SceneSession;
@@ -124,6 +126,7 @@ private:
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
+    void ProcessSessionUpdateFollowScreenChange();
     void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
@@ -190,11 +193,8 @@ private:
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info);
+    static napi_value ToggleCompatibleMode(napi_env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
-    static napi_value SetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
@@ -204,9 +204,6 @@ private:
     static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
     static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
@@ -216,6 +213,7 @@ private:
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotAsync(napi_env env, napi_callback_info info);
     static napi_value SetBorderUnoccupied(napi_env env, napi_callback_info info);
+    static napi_value SetEnableAddSnapshot(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
@@ -227,6 +225,11 @@ private:
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window
+     */
+    static napi_value GetZOrder(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -269,11 +272,8 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeInPcTitleVisible(napi_env env, napi_callback_info info);
+    napi_value OnToggleCompatibleMode(napi_env env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
@@ -283,9 +283,6 @@ private:
     napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
-    napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
     napi_value OnPcAppInPadNormalClose(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
@@ -298,6 +295,7 @@ private:
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotAsync(napi_env env, napi_callback_info info);
     napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
+    napi_value OnSetEnableAddSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
@@ -312,6 +310,12 @@ private:
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
+    static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
+
+    /*
+     * PC Window
+     */
+    napi_value OnGetZOrder(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -369,6 +373,7 @@ private:
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
+    void ProcessUseImplicitAnimationChangeRegister();
 
     /*
      * Window Property
@@ -447,6 +452,8 @@ private:
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
     void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
+    void OnUpdateFollowScreenChange(bool isFollowScreenChange);
+    void OnUseImplicitAnimationChange(bool useImplicit);
 
     /*
      * Window Property

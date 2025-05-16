@@ -38,8 +38,9 @@ const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
-constexpr int WINDOW_NAME_TYPE_SCREENSHOT = 1;
+constexpr int WINDOW_NAME_TYPE_THUMBNAIL = 1;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
+const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -201,9 +202,15 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     bool isMidScene = sceneSession->GetIsMidScene();
-    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
-    if (isAppMainWindowOrPip && !isMidScene) {
+    bool isAppPipWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    bool isAppMainWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    const auto& singleHandData = GetSingleHandData(sceneSession);
+    sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
+    if (singleHandData.mode != SingleHandMode::MIDDLE &&
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        isAppMainWindow = false;
+    }
+    if ((isAppPipWindow || isAppMainWindow) && !isMidScene) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -738,9 +745,12 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
     std::string windowName = sceneSession->GetWindowNameAllType();
-    std::string prefix = SCREENSHOT_WINDOW_NAME_PREFIX;
-    if (windowName.size() >= prefix.size() && windowName.substr(0, prefix.size()) == prefix) {
-        windowNameType = WINDOW_NAME_TYPE_SCREENSHOT;
+    auto startsWith = [](const std::string& str, const std::string& prefix) {
+        return str.size() >= prefix.size() && 
+            std::equal(prefix.begin(), prefix.end(), str.begin());
+    };
+    if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
+        windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {

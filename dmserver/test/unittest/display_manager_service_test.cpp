@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,12 @@
 
 #include <gtest/gtest.h>
 
+#include "common_test_utils.h"
 #include "display_manager_adapter.h"
 #include "display_manager_config.h"
 #include "display_manager_service.h"
-#include "display_manager_agent_default.h"
-#include "common_test_utils.h"
 #include "mock_rs_display_node.h"
 #include "scene_board_judgement.h"
-
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,17 +37,16 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    void SetAceessTokenPermission(const std::string processName);
-    static sptr<DisplayManagerService> dms_;
+    static std::unique_ptr<DisplayManagerService> dms_;
     static constexpr DisplayId DEFAULT_DISPLAY = 0ULL;
     static constexpr DisplayId DEFAULT_SCREEN = 0ULL;
 };
 
-sptr<DisplayManagerService> DisplayManagerServiceTest::dms_ = nullptr;
+std::unique_ptr<DisplayManagerService> DisplayManagerServiceTest::dms_ = nullptr;
 
 void DisplayManagerServiceTest::SetUpTestCase()
 {
-    dms_ = new DisplayManagerService();
+    dms_ = std::make_unique<DisplayManagerService>();
 
     dms_->abstractScreenController_->defaultRsScreenId_ = 0;
     dms_->abstractScreenController_->screenIdManager_.rs2DmsScreenIdMap_.clear();
@@ -174,6 +171,50 @@ HWTEST_F(DisplayManagerServiceTest, HasPrivateWindow, TestSize.Level1)
 
     dms_->RegisterWindowInfoQueriedListener(nullptr);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, dms_->HasPrivateWindow(1, hasPrivateWindow));
+}
+
+/**
+ * @tc.name: GetScreenIdByDisplayId
+ * @tc.desc: DMS get screen id by display id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenIdByDisplayId, TestSize.Level1)
+{
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    sptr<AbstractScreen> absScreen = new AbstractScreen(dms_->abstractScreenController_, name, 0, 0);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
+    dms_->abstractDisplayController_->abstractDisplayMap_.clear();
+    dms_->abstractDisplayController_->abstractDisplayMap_ = {
+        {0, absDisplay}
+    };
+ 
+    absDisplay->screenId_ = 0;
+    EXPECT_EQ(SCREEN_ID_INVALID, dms_->GetScreenIdByDisplayId(1));
+    EXPECT_EQ(0, dms_->GetScreenIdByDisplayId(0));
+}
+
+/**
+ * @tc.name: GetScreenInfoById01
+ * @tc.desc: DMS get screen info by id
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenInfoById01, TestSize.Level1)
+{
+    ScreenId screenId = dms_->GetScreenIdByDisplayId(1000);
+    auto ret = dms_->GetScreenInfoById(screenId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenBrightness
+ * @tc.desc: DMS get screen brightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetScreenBrightness, TestSize.Level1)
+{
+    auto ret = dms_->GetScreenBrightness(0);
+    EXPECT_GT(static_cast<int32_t>(ret), -1);
 }
 
 /**
@@ -401,23 +442,12 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-   
+
     surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
     std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<MockRSDisplayNode>(RSDisplayNodeConfig{});
     sptr<SupportedScreenModes> info = new SupportedScreenModes;
     sptr<AbstractScreen> absScreen =
         new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
-}
-
-/**
- * @tc.name: OnStop
- * @tc.desc: DMS on stop
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, OnStop, TestSize.Level1)
-{
-    dms_->OnStop();
-    ASSERT_TRUE(true);
 }
 
 /**
@@ -570,9 +600,6 @@ HWTEST_F(DisplayManagerServiceTest, SetOrientation, TestSize.Level1)
     Orientation orientation = Orientation::VERTICAL;
     auto ret = dms_->SetOrientation(screenId, orientation);
     ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
-
-    orientation = Orientation::SENSOR_VERTICAL;
-    ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -653,6 +680,84 @@ HWTEST_F(DisplayManagerServiceTest, StopExpand, TestSize.Level1)
     std::vector<ScreenId> expandScreenIds{0, 1, 2, 3, 4, 5};
     auto ret = dms_->StopExpand(expandScreenIds);
     ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById01
+ * @tc.desc: GetVisibleAreaDisplayInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetVisibleAreaDisplayInfoById01, TestSize.Level1)
+{
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    auto ret = dms_->GetVisibleAreaDisplayInfoById(displayId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById02
+ * @tc.desc: GetVisibleAreaDisplayInfoById
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetVisibleAreaDisplayInfoById02, TestSize.Level1)
+{
+    DisplayId displayId = 2;
+    std::string name = "testDisplay";
+    sptr<SupportedScreenModes> info = new SupportedScreenModes();
+    sptr<AbstractScreen> absScreen = new AbstractScreen(dms_->abstractScreenController_, name, 0, 0);
+    sptr<AbstractDisplay> absDisplay = new AbstractDisplay(0, info, absScreen);
+    dms_->abstractDisplayController_->abstractDisplayMap_.insert({displayId, absDisplay});
+    auto ret = dms_->GetVisibleAreaDisplayInfoById(displayId);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenBrightness
+ * @tc.desc: SetScreenBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetScreenBrightness, TestSize.Level1)
+{
+    uint64_t screenId = 1;
+    uint32_t level = 2;
+    EXPECT_TRUE(dms_->SetScreenBrightness(screenId, level));
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution01
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when allDisplayPhysicalResolution_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution01, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.clear();
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution02
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when allDisplayPhysicalResolution_ is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution02, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution03
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when default display info is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution03, TestSize.Level1)
+{
+    dms_->allDisplayPhysicalResolution_.clear();
+    dms_->GetDefaultDisplayInfo();
+    auto result = dms_->GetAllDisplayPhysicalResolution();
+    EXPECT_FALSE(result.empty());
 }
 }
 } // namespace Rosen

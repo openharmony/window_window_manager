@@ -619,6 +619,106 @@ HWTEST_F(WindowSessionImplTest5, GetRequestedOrientation, Function | SmallTest |
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::FOLLOW_DESKTOP);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetRequestedOrientation end";
 }
+
+/**
+ * @tc.name: SetFollowScreenChange
+ * @tc.desc: SetFollowScreenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFollowScreenChange");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(0);
+    WMError ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    ret = window->SetFollowScreenChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetPropertyByContext
+ * @tc.desc: GetPropertyByContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetPropertyByContext, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPropertyByContext");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    int32_t persistentId = 663;
+    window->property_->SetPersistentId(persistentId);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    auto property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("GetPropertyByContext_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    int32_t mainPersistentId = 666;
+    mainWindow->property_->SetPersistentId(mainPersistentId);
+    window->windowSessionMap_.insert({mainWindow->GetWindowName(),
+        std::pair<int32_t, sptr<WindowSessionImpl>>(mainPersistentId, mainWindow) });
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    mainWindow->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+    mainWindow->context_ = window->context_;
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
+
+    window->property_->SetIsUIExtensionAbilityProcess(true);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+    window->windowExtensionSessionSet_.insert(mainWindow);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
+}
+
+/**
+ * @tc.name: IsAdaptToSimulationScale
+ * @tc.desc: IsAdaptToSimulationScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsAdaptToSimulationScale, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAdaptToSimulationScale");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->property_->SetPersistentId(704);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(window->IsAdaptToSimulationScale(), true);
+
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("IsAdaptToSimulationScale_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    int32_t mainPersistentId = 666;
+    mainWindow->property_->SetPersistentId(mainPersistentId);
+    window->windowSessionMap_.insert({mainWindow->GetWindowName(),
+        std::pair<int32_t, sptr<WindowSessionImpl>>(mainPersistentId, mainWindow) });
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    mainWindow->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindow->context_ = window->context_;
+    EXPECT_EQ(window->IsAdaptToSimulationScale(), false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

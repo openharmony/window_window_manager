@@ -279,6 +279,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyRotationChange);
     BindNativeFunction(env, exportObj, "supportFollowParentWindowLayout", moduleName,
         JsSceneSessionManager::SupportFollowParentWindowLayout);
+    BindNativeFunction(env, exportObj, "supportZLevel", moduleName,
+        JsSceneSessionManager::SupportZLevel);
     return NapiGetUndefined(env);
 }
 
@@ -718,6 +720,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     });
     rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
         return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
+    });
+    rootScene_->RegisterGetStatusBarHeightCallback([]() {
+        return SceneSessionManager::GetInstance().GetRootSceneStatusBarHeight();
     });
     rootScene_->RegisterUpdateRootSceneAvoidAreaCallback([] {
         SceneSessionManager::GetInstance().UpdateRootSceneAvoidArea();
@@ -1369,6 +1374,13 @@ napi_value JsSceneSessionManager::NotifyRotationChange(napi_env env, napi_callba
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyRotationChange(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SupportZLevel(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportZLevel(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3769,7 +3781,14 @@ napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto windowLimits = SceneSessionManager::GetInstance().GetWindowLimits(windowId);
+    WindowLimits windowLimits;
+    WMError ret = SceneSessionManager::GetInstance().GetWindowLimits(windowId, windowLimits);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Get window limits failed, return %{public}d", wmErrorCode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Get window limits failed."));
+        return NapiGetUndefined(env);
+    }
     napi_value jsWindowLimitsObj = JsWindowSceneConfig::CreateWindowLimits(env, windowLimits);
     if (jsWindowLimitsObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsWindowLimitsObj is nullptr");
@@ -3928,7 +3947,7 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3955,7 +3974,18 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     if (argc >= ARGC_THREE && ConvertFromJsValue(env, argv[ARGC_TWO], homePage)) {
         TLOGD(WmsLogTag::DEFAULT, "homePage: %{public}s", homePage.c_str());
     }
-    AppForceLandscapeConfig config = { mode, homePage };
+
+    bool isSupportSplitMode = false;
+    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], isSupportSplitMode)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isSupportSplitMode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
+        bundleName.c_str(), mode, homePage.c_str(), isSupportSplitMode);
+    AppForceLandscapeConfig config = { mode, homePage, isSupportSplitMode };
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
     return NapiGetUndefined(env);
 }
@@ -4629,6 +4659,12 @@ void JsSceneSessionManager::OnSceneSessionDestruct(int32_t persistentId)
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ConfigSupportFollowParentWindowLayout();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSupportZLevel(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportZLevel();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

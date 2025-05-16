@@ -31,8 +31,10 @@ namespace Rosen {
 class MockMockSessionManagerService : public MockSessionManagerService {
 public:
     MOCK_METHOD(sptr<IRemoteObject>, GetSceneSessionManagerByUserId, (int32_t), (override));
-    MOCK_METHOD(int32_t, NotifySCBSnapshotSkipByUserIdAndBundleNames,
-        (int32_t, const std::vector<std::string>&, const sptr<IRemoteObject>&), (override));
+    MOCK_METHOD(ErrCode,
+                NotifySCBSnapshotSkipByUserIdAndBundleNames,
+                (int32_t, const std::vector<std::string>&, const sptr<IRemoteObject>&),
+                (override));
 };
 
 namespace {
@@ -51,17 +53,17 @@ HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByUserIdAndBundleNamesInner
         .WillRepeatedly(Return(mockRemoteObject));
     EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(2)
-        .WillOnce(Return(ERR_TRANSACTION_FAILED))
-        .WillRepeatedly(Return(ERR_NONE));
+        .WillOnce(Return(ERR_INVALID_OPERATION))
+        .WillRepeatedly(Return(ERR_OK));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
-    EXPECT_EQ(ERR_NONE, ret);
+    ErrCode ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
+    EXPECT_EQ(ERR_OK, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
-    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
+    EXPECT_EQ(ERR_INVALID_OPERATION, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
-    EXPECT_EQ(ERR_NONE, ret);
+    ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
+    EXPECT_EQ(ERR_OK, ret);
 }
 
 /**
@@ -79,17 +81,17 @@ HWTEST(MockSessionManagerServiceTest, SetSnapshotSkipByIdNamesMapInner, TestSize
         .WillRepeatedly(Return(mockRemoteObject));
     EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(2)
-        .WillOnce(Return(ERR_TRANSACTION_FAILED))
-        .WillRepeatedly(Return(ERR_NONE));
+        .WillOnce(Return(ERR_INVALID_OPERATION))
+        .WillRepeatedly(Return(ERR_OK));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
-    EXPECT_EQ(ERR_NONE, ret);
+    int32_t ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
+    EXPECT_EQ(ERR_OK, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
-    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
+    EXPECT_EQ(ERR_INVALID_OPERATION, ret);
 
-    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({{100, {"notepad"}}});
-    EXPECT_EQ(ERR_NONE, ret);
+    ret = mockMockSms.SetSnapshotSkipByIdNamesMapInner({ { 100, { "notepad" } } });
+    EXPECT_EQ(ERR_OK, ret);
 }
 
 /**
@@ -108,25 +110,25 @@ HWTEST(MockSessionManagerServiceTest, RecoverSCBSnapshotSkipByUserId, TestSize.L
         .WillRepeatedly(Return(mockRemoteObject));
     EXPECT_CALL(mockMockSms, NotifySCBSnapshotSkipByUserIdAndBundleNames(_, _, _))
         .Times(3)
-        .WillOnce(Return(ERR_NONE))
-        .WillOnce(Return(ERR_TRANSACTION_FAILED))
-        .WillOnce(Return(ERR_NONE));
+        .WillOnce(Return(ERR_OK))
+        .WillOnce(Return(ERR_INVALID_OPERATION))
+        .WillOnce(Return(ERR_OK));
 
-    int32_t ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, {"notepad"});
-    EXPECT_EQ(ERR_NONE, ret);
+    ErrCode ret = mockMockSms.SetSnapshotSkipByUserIdAndBundleNamesInner(100, { "notepad" });
+    EXPECT_EQ(ERR_OK, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(-1);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    EXPECT_EQ(ERR_NULL_OBJECT, ret);
+    EXPECT_EQ(ERR_DEAD_OBJECT, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    EXPECT_EQ(ERR_TRANSACTION_FAILED, ret);
+    EXPECT_EQ(ERR_INVALID_OPERATION, ret);
 
     ret = mockMockSms.RecoverSCBSnapshotSkipByUserId(100);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(ERR_OK, ret);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

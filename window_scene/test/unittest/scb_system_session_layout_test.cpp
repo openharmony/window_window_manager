@@ -38,13 +38,9 @@ public:
     sptr<SCBSystemSession> scbSystemSession_;
 };
 
-void SCBSystemSessionLayoutTest::SetUpTestCase()
-{
-}
+void SCBSystemSessionLayoutTest::SetUpTestCase() {}
 
-void SCBSystemSessionLayoutTest::TearDownTestCase()
-{
-}
+void SCBSystemSessionLayoutTest::TearDownTestCase() {}
 
 void SCBSystemSessionLayoutTest::SetUp()
 {
@@ -71,7 +67,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, TestSize.Level1)
     scbSystemSession_->PresentFocusIfPointDown();
     scbSystemSession_->PresentFoucusIfNeed(2);
     ASSERT_EQ(WSError::WS_OK, scbSystemSession_->SetSystemSceneBlockingFocus(true));
-    WSRect rect = {0, 0, 0, 0};
+    WSRect rect = { 0, 0, 0, 0 };
     scbSystemSession_->UpdatePointerArea(rect);
     auto ret = scbSystemSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
@@ -182,6 +178,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect04, TestSize.Level1
     auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
-} //namespace
-} //namespace Rosen
-} //namespace OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

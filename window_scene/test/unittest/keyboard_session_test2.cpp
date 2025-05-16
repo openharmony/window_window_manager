@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "KeyboardSessionTest2"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "KeyboardSessionTest2" };
 }
 
 constexpr int WAIT_ASYNC_US = 1000000;
@@ -47,30 +47,21 @@ private:
     sptr<KSSceneSessionMocker> GetSceneSessionMocker(const std::string& abilityName, const std::string& bundleName);
 };
 
-void KeyboardSessionTest2::SetUpTestCase()
-{
-}
+void KeyboardSessionTest2::SetUpTestCase() {}
 
-void KeyboardSessionTest2::TearDownTestCase()
-{
-}
+void KeyboardSessionTest2::TearDownTestCase() {}
 
-void KeyboardSessionTest2::SetUp()
-{
-}
+void KeyboardSessionTest2::SetUp() {}
 
-void KeyboardSessionTest2::TearDown()
-{
-}
+void KeyboardSessionTest2::TearDown() {}
 
 sptr<KeyboardSession> KeyboardSessionTest2::GetKeyboardSession(const std::string& abilityName,
-    const std::string& bundleName)
+                                                               const std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
@@ -86,14 +77,12 @@ sptr<KeyboardSession> KeyboardSessionTest2::GetKeyboardSession(const std::string
     return keyboardSession;
 }
 
-sptr<SceneSession> KeyboardSessionTest2::GetSceneSession(const std::string& abilityName,
-    const std::string& bundleName)
+sptr<SceneSession> KeyboardSessionTest2::GetSceneSession(const std::string& abilityName, const std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
 
@@ -101,13 +90,12 @@ sptr<SceneSession> KeyboardSessionTest2::GetSceneSession(const std::string& abil
 }
 
 sptr<KSSceneSessionMocker> KeyboardSessionTest2::GetSceneSessionMocker(const std::string& abilityName,
-    const std::string& bundleName)
+                                                                       const std::string& bundleName)
 {
     SessionInfo info;
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KSSceneSessionMocker> mockSession = sptr<KSSceneSessionMocker>::MakeSptr(info, nullptr);
 
@@ -125,8 +113,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "AdjustKeyboardLayout01";
     info.bundleName_ = "AdjustKeyboardLayout01";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
@@ -143,7 +130,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, TestSize.Level1)
     keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
-    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
+    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params) {};
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 }
 
@@ -157,8 +144,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "AdjustKeyboardLayout02";
     info.bundleName_ = "AdjustKeyboardLayout02";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
@@ -188,8 +174,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "CheckIfNeedRaiseCallingSession";
     info.bundleName_ = "CheckIfNeedRaiseCallingSession";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
@@ -296,7 +281,7 @@ HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, TestSize.Level0)
  */
 HWTEST_F(KeyboardSessionTest2, NotifyKeyboardPanelInfoChange, TestSize.Level1)
 {
-    WSRect rect = {800, 800, 1200, 1200};
+    WSRect rect = { 800, 800, 1200, 1200 };
     SessionInfo info;
     info.abilityName_ = "NotifyKeyboardPanelInfoChange";
     info.bundleName_ = "NotifyKeyboardPanelInfoChange";
@@ -455,9 +440,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, TestSize.Level0)
 
     // for cover GetSceneSession
     keyboardSession->keyboardCallback_->onGetSceneSession =
-        [callingSession](int32_t persistentId)->sptr<SceneSession> {
-        return callingSession;
-    };
+        [callingSession](int32_t persistentId) -> sptr<SceneSession> { return callingSession; };
     keyboardSession->RaiseCallingSession(callingId, keyboardPanelRect, true, rsTransaction);
     // for cover CheckIfNeedRaiseCallingSession
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -663,6 +646,6 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);
 }
-}  // namespace
-}  // namespace Rosen
-}  // namespace OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

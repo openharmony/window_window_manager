@@ -29,8 +29,13 @@ ohos_unittest("window_focus_scene_session_test") {
   deps = [ ws_unittest_common ]
   external_deps = [
     "ability_base:session_info",
+    "ability_runtime:ability_manager",
     "ability_runtime:app_context",
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
     "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-napi",
   ]
 }

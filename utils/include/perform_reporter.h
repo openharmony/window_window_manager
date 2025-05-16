@@ -46,6 +46,8 @@ struct WindowProfileInfo {
     int32_t windowVisibleState = -1;
     int32_t windowLocatedScreen = -1;
     int32_t windowSceneMode = -1;
+    std::string rect = "";
+    int32_t zorder = -1;
 };
 
 enum class KeyboardLifeCycleException {

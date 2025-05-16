@@ -946,10 +946,13 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating01, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetCompatibleModeInPc(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     ret = window->MaximizeFloating();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    window->property_->SetCompatibleModeInPc(false);
+    compatibleModeProperty->SetDisableFullScreen(false);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     EXPECT_CALL(*(session), GetGlobalMaximizeMode(_)).WillRepeatedly(DoAll(
         SetArgReferee<0>(MaximizeMode::MODE_AVOID_SYSTEM_BAR),
         Return(WSError::WS_OK)
@@ -1662,10 +1665,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover01, TestSize.Level1)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->Recover(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    windowSceneSessionImpl->property_->SetCompatibleModeInPc(true);
-    ret = windowSceneSessionImpl->Recover(0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    windowSceneSessionImpl->property_->SetCompatibleModeInPc(false);
     windowSceneSessionImpl->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ret = windowSceneSessionImpl->Recover(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);

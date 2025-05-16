@@ -28,6 +28,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "rs_adapter.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -108,6 +109,8 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
+
+    InitRSUIContext();
 }
 
 Session::~Session()
@@ -161,6 +164,7 @@ int32_t Session::GetPersistentId() const
 
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
 }
@@ -182,16 +186,12 @@ std::optional<NodeId> Session::GetSurfaceNodeId() const
 
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(leashWinSurfaceNode, rsUIContext, true);
     if (g_enableForceUIFirst) {
-        auto rsTransaction = RSTransactionProxy::GetInstance();
-        if (rsTransaction) {
-            rsTransaction->Begin();
-        }
+        AutoRSTransaction trans(rsUIContext);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
             leashWinSurfaceNode_->SetForceUIFirst(false);
-        }
-        if (rsTransaction) {
-            rsTransaction->Commit();
         }
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
@@ -1207,6 +1207,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
     abilityToken_ = token;
@@ -1219,6 +1220,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
+    if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_ != nullptr) {
+        surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+    }
     return WSError::WS_OK;
 }
 
@@ -1259,17 +1263,10 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         " defaultRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
-    property->SetCompatibleModeInPc(GetSessionProperty()->GetCompatibleModeInPc());
-    property->SetCompatibleModeInPcTitleVisible(GetSessionProperty()->GetCompatibleModeInPcTitleVisible());
-    property->SetIsSupportDragInPcCompatibleMode(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
-    if (GetSessionProperty()->GetCompatibleModeInPc()) {
-        property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
+    property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
+    if (property->GetCompatibleModeProperty()) {
+        property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
     }
-    property->SetCompatibleModeEnableInPad(GetSessionProperty()->GetCompatibleModeEnableInPad());
-    property->SetCompatibleWindowSizeInPc(GetSessionProperty()->GetCompatibleInPcPortraitWidth(),
-        GetSessionProperty()->GetCompatibleInPcPortraitHeight(),
-        GetSessionProperty()->GetCompatibleInPcLandscapeWidth(),
-        GetSessionProperty()->GetCompatibleInPcLandscapeHeight());
     property->SetIsAppSupportPhoneInPc(GetSessionProperty()->GetIsAppSupportPhoneInPc());
     std::optional<bool> clientDragEnable = GetClientDragEnable();
     if (clientDragEnable.has_value()) {
@@ -2052,6 +2049,14 @@ WSError Session::NotifyDestroy()
     return sessionStage_->NotifyDestroy();
 }
 
+WSError Session::NotifyAppForceLandscapeConfigUpdated()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+}
+
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {
@@ -2260,7 +2265,8 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    const auto& property = GetSessionProperty();
+    bool raiseEnabled = property->GetRaiseEnabled();
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
@@ -2273,7 +2279,11 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         }
         return WSError::WS_OK;
     }
-    if (raiseEnabled && isPointDown) {
+    bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
+    TLOGD(WmsLogTag::WMS_EVENT,
+          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
+          GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
+    if (raiseEnabled && isPointDown && !isModal) {
         RaiseToAppTopForPointDown();
     } else if (parentSession && !isPointMove) {
         // sub window is forbidden to raise to top after click, but its parent should raise
@@ -2473,6 +2483,17 @@ void Session::ResetSnapshot()
         return;
     }
     scenePersistence_->ResetSnapshotCache();
+}
+
+void Session::SetEnableAddSnapshot(bool enableAddSnapshot)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "enableAddSnapshot: %{public}d", enableAddSnapshot);
+    enableAddSnapshot_ = enableAddSnapshot;
+}
+
+bool Session::GetEnableAddSnapshot() const
+{
+    return enableAddSnapshot_;
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist)
@@ -2870,42 +2891,6 @@ WSError Session::GetIsHighlighted(bool& isHighlighted)
     return WSError::WS_OK;
 }
 
-WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
-{
-    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
-        enable, isSupportDragInPcCompatibleMode);
-    GetSessionProperty()->SetCompatibleModeInPc(enable);
-    GetSessionProperty()->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
-    if (enable) {
-        GetSessionProperty()->SetDragEnabled(isSupportDragInPcCompatibleMode);
-    }
-    return WSError::WS_OK;
-}
-
-WSError Session::SetCompatibleModeInPcTitleVisible(bool enableTitleVisible)
-{
-    TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPcTitleVisible enableTitleVisible: %{public}d", enableTitleVisible);
-    GetSessionProperty()->SetCompatibleModeInPcTitleVisible(enableTitleVisible);
-    return WSError::WS_OK;
-}
-
-WSError Session::SetCompatibleModeEnableInPad(bool enable)
-{
-    TLOGI(WmsLogTag::WMS_SCB, "id: %{public}d, enable: %{public}d", persistentId_, enable);
-    if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_SCB, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    GetSessionProperty()->SetCompatibleModeEnableInPad(enable);
-
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_SCB, "sessionStage is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyCompatibleModeEnableInPad(enable);
-}
-
 WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 {
     TLOGI(WmsLogTag::WMS_SCB, "isSupportPhone: %{public}d", isSupportPhone);
@@ -2913,13 +2898,19 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
     return WSError::WS_OK;
 }
 
-WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-    int32_t landscapeWidth, int32_t landscapeHeight)
+WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "compatible size: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
-    GetSessionProperty()->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
-    return WSError::WS_OK;
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetCompatibleModeProperty(compatibleModeProperty);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyCompatibleModePropertyChange(compatibleModeProperty);
 }
 
 WSError Session::SetIsPcAppInPad(bool enable)
@@ -2927,54 +2918,6 @@ WSError Session::SetIsPcAppInPad(bool enable)
     TLOGI(WmsLogTag::WMS_COMPAT, "SetIsPcAppInPad enable: %{public}d", enable);
     GetSessionProperty()->SetIsPcAppInPad(enable);
     return WSError::WS_OK;
-}
-
-WSError Session::CompatibleFullScreenRecover()
-{
-    TLOGD(WmsLogTag::WMS_COMPAT, "recover compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
-              GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->CompatibleFullScreenRecover();
-}
-
-WSError Session::CompatibleFullScreenMinimize()
-{
-    TLOGD(WmsLogTag::WMS_MAIN, "minimize compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
-              GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->CompatibleFullScreenMinimize();
-}
-
-WSError Session::CompatibleFullScreenClose()
-{
-    TLOGD(WmsLogTag::WMS_COMPAT, "close compatible full screen windowId:%{public}d", GetPersistentId());
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
-              GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->CompatibleFullScreenClose();
 }
 
 WSError Session::PcAppInPadNormalClose()
@@ -4303,5 +4246,25 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
+}
+
+void Session::InitRSUIContext()
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+    // as ArkUI knows the host window for this type of window.
+    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    return rsUIContext_;
 }
 } // namespace OHOS::Rosen

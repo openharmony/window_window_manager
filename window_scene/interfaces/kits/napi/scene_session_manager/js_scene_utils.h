@@ -68,7 +68,8 @@ enum class JsSessionType : uint32_t {
     TYPE_TRANSPARENT_VIEW,
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
-    TYPE_FLOAT_NAVIGATION
+    TYPE_FLOAT_NAVIGATION,
+    TYPE_DYNAMIC = 41
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -111,6 +112,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         JsSessionType::TYPE_FLOAT_NAVIGATION        },
+    { WindowType::WINDOW_TYPE_DYNAMIC,                  JsSessionType::TYPE_DYNAMIC                 },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -153,6 +155,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
     { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
+    { JsSessionType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                 },
 };
 
 enum class ThrowSlipMode;
@@ -219,6 +222,19 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
+template<class T>
+bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+    if (type != napi_undefined) {
+        return AbilityRuntime::ConvertFromJsValue(env, value, data);
+    }
+    return false;
+}
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& property);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;

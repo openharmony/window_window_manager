@@ -19,6 +19,7 @@
 #include <ipc_skeleton.h>
 #include <refbase.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_context.h>
 #include "zidl/window_interface.h"
 #include "window_manager_hilog.h"
 #include "window_node_state_machine.h"
@@ -139,6 +140,12 @@ public:
     bool GetTouchable() const;
 
     bool EnableDefaultAnimation(bool animationPlayed);
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
