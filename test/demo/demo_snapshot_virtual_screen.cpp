@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,40 +28,48 @@ using namespace OHOS::Rosen;
 using namespace OHOS::Media;
 
 namespace {
-const int SLEEP_US = 10 * 1000; // 10ms
-const int MAX_SNAPSHOT_COUNT = 10;
-const int MAX_WAIT_COUNT = 200;
-const float DEFAULT_DENSITY = 2.0;
+constexpr int SLEEP_US = 10 * 1000; // 10ms
+constexpr int MAX_SNAPSHOT_COUNT = 10;
+constexpr int MAX_WAIT_COUNT = 200;
+constexpr float DEFAULT_DENSITY = 2.0;
 const std::string FILE_NAME = "/data/local/tmp/snapshot_virtual_screen";
 }
 
 static ScreenId mainId;
 static ScreenId virtualScreenId;
 
-static VirtualScreenOption InitOption(ScreenId mainId, SurfaceReader& surfaceReader)
+static std::unique_ptr<VirtualScreenOption> InitOption(ScreenId mainId, const SurfaceReader& surfaceReader)
 {
     auto defaultScreen = ScreenManager::GetInstance().GetScreenById(mainId);
-    VirtualScreenOption option = {
-        .name_ = "virtualScreen",
-        .width_ = defaultScreen->GetWidth(),
-        .height_ = defaultScreen->GetHeight(),
-        .density_ = DEFAULT_DENSITY,
-        .surface_ = surfaceReader.GetSurface(),
-        .flags_ = 0,
-        .isForShot_ = true,
-    };
+    std::unique_ptr<VirtualScreenOption> option = std::make_unique<VirtualScreenOption>();
+    if (option == nullptr) {
+        return option;
+    }
+
+    option->name_ = "virtualScreen";
+    option->width_ = defaultScreen->GetWidth();
+    option->height_ = defaultScreen->GetHeight();
+    option->density_ = DEFAULT_DENSITY;
+    option->surface_ = surfaceReader.GetSurface();
+    option->flags_ = 0;
+    option->isForShot_ = true;
     return option;
 }
 
-static bool InitMirror(SurfaceReader& surfaceReader)
+static bool InitMirror(const SurfaceReader& surfaceReader)
 {
     mainId = static_cast<ScreenId>(DisplayManager::GetInstance().GetDefaultDisplayId());
     if (mainId == SCREEN_ID_INVALID) {
         std::cout<< "get default display id failed!" << std::endl;
         return false;
     }
-    VirtualScreenOption option = InitOption(mainId, surfaceReader);
-    virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(option);
+
+    std::unique_ptr<VirtualScreenOption> option = InitOption(mainId, surfaceReader);
+    if (option == nullptr) {
+        return false;
+    }
+
+    virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(*option);
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
     ScreenId screenGroupId = static_cast<ScreenId>(1);

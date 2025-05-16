@@ -773,7 +773,7 @@ void ScreenSessionManager::SetScreenCorrection()
     screenEventTracker_.RecordEvent(oss.str());
 }
 
-void ScreenSessionManager::AdaptSuperHorizonBoot(sptr<ScreenSession> screenSession, ScreenId screenId)
+void ScreenSessionManager::AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->isInternal_) {
         auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
@@ -784,7 +784,6 @@ void ScreenSessionManager::AdaptSuperHorizonBoot(sptr<ScreenSession> screenSessi
         screenSession->SetHorizontalRotation();
         screenSession->SetValidWidth(screenHeight);
         screenSession->SetValidHeight(screenWidth);
-        TLOGI(WmsLogTag::DMS, "AdaptSuperHorizontalBoot finish");
     }
 }
 
@@ -818,7 +817,7 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    AdaptSuperHorizonBoot(screenSession, screenId);
+    AdaptSuperHorizonalBoot(screenSession, screenId);
     if (g_isPcDevice) {
         auto physicalScreenSession = GetOrCreatePhysicalScreenSession(screenId);
         if (!physicalScreenSession) {

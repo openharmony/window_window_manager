@@ -879,17 +879,21 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 
 void SceneSession::HandleSessionDragEvent(SessionEvent event)
 {
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     if (moveDragController_ &&
         (event == SessionEvent::EVENT_DRAG || event == SessionEvent::EVENT_DRAG_START)) {
         WSRect rect = moveDragController_->GetTargetRect(
             MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-        DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-        if (event == SessionEvent::EVENT_DRAG_START) {
+        if (event == SessionEvent::EVENT_DRAG_START && moveDragController_->GetStartDragFlag()) {
             dragResizeType = GetAppDragResizeType();
             SetDragResizeTypeDuringDrag(dragResizeType);
+        } else if (event == SessionEvent::EVENT_DRAG) {
+            dragResizeType = GetDragResizeTypeDuringDrag();
         }
         SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
             static_cast<uint32_t>(dragResizeType)});
+    } else if (event == SessionEvent::EVENT_END_MOVE) {
+        SetDragResizeTypeDuringDrag(dragResizeType);
     }
 }
 
@@ -3618,11 +3622,11 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         UpdateWinRectForSystemBar(rect);
     }
     HandleSubSessionCrossNode(reason);
+    moveDragController_->SetTargetRect(rect);
     if (DragResizeWhenEndFilter(reason)) {
         return;
     }
     UpdateKeyFrameState(reason, rect);
-    moveDragController_->SetTargetRect(rect);
     WSRect relativeRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
@@ -3666,19 +3670,18 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
     bool isReasonMatched = reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END;
-    bool isResizeWhenEnd = isReasonMatched && isPcOrPcModeMainWindow && moveDragController_->GetStartDragFlag() &&
+    bool isResizeWhenEnd = isReasonMatched && isPcOrPcModeMainWindow &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
     if (isResizeWhenEnd) {
         UpdateSizeChangeReason(reason);
         if (reason == SizeChangeReason::DRAG) {
             OnSessionEvent(SessionEvent::EVENT_DRAG);
         } else {
-            if (systemConfig_.IsPcWindow()) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
-                OnSessionEvent(SessionEvent::EVENT_END_MOVE);
-            } else {
-                return false;
-            }
+            TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
+            WSRect relativeRect = moveDragController_->GetTargetRect(
+                MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
+            HandleMoveDragEnd(relativeRect, reason);
+            SetUIFirstSwitch(RSUIFirstSwitch::NONE);
         }
     }
     return isResizeWhenEnd;
