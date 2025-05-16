@@ -99,6 +99,8 @@ using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint3
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
+using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
+using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 
 class ILifecycleListener {
 public:
@@ -636,6 +638,8 @@ public:
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
     virtual bool IsAnyParentSessionDragMoving() const { return false; }
     virtual bool IsAnyParentSessionDragZooming() const { return false; }
+    void SetHasRequestedVsyncFunc(HasRequestedVsyncFunc&& func);
+    void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
 
     /*
      * Screen Lock
@@ -838,6 +842,11 @@ protected:
         DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    HasRequestedVsyncFunc hasRequestedVsyncFunc_;
+    RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
+    WSError RequestNextVsyncWhenModeChange();
+    void OnVsyncReceivedAfterModeChanged();
+    void InitVsyncCallbackForModeChangeAndRequestNextVsync();
 
     /*
      * Window ZOrder
@@ -1014,6 +1023,8 @@ private:
     SingleHandScreenInfo singleHandScreenInfo_;
     DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
+    std::atomic_bool isWindowModeDirty_ = false;
+    std::atomic<int32_t> timesToWaitForVsync_ = 0;
 
     /*
      * Screen Lock
