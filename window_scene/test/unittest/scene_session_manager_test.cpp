@@ -2663,7 +2663,6 @@ HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTes
     EXPECT_EQ(true,
         (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
 }
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
