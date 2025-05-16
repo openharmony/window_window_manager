@@ -849,6 +849,15 @@ public:
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
 
     /**
+     * @brief Get global window mode.
+     *
+     * @param displayId DisplayId of which display to get window mode, DISPLAY_ID_INVALID means all displays.
+     * @param globalWinMode Global window mode.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
