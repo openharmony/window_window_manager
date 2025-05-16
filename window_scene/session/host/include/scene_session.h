@@ -131,6 +131,7 @@ using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<Scene
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
+using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -765,6 +766,8 @@ public:
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
     void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
     bool GetIsAncoForFloatingWindow() const;
+    void SetWindowShadowsCallback(NotifySetWindowCornerRadiusFunc&& func);
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     /*
      * Window Pattern
@@ -1255,6 +1258,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
+    NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
 
     /*
      * PC Window Sidebar Blur

@@ -98,6 +98,7 @@ const std::string UPDATE_FLAG_CB = "updateFlag";
 const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
 const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenChange";
 const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
+const std::string SET_WINDOW_SHADOWS_CB = "setWindowShadows";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -185,6 +186,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
+    {SET_WINDOW_SHADOWS_CB,                 ListenerFuncType::SET_WINDOW_SHADOWS_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2843,6 +2845,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::USE_IMPLICIT_ANIMATION_CB):
             ProcessUseImplicitAnimationChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_SHADOWS_CB):
+            ProcesssSetWindowShadowsRegister();
             break;
         default:
             break;
@@ -6683,6 +6688,50 @@ void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
         }
         napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
         napi_value argv[] = { jsCornerRadius };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSession::ProcessSetWindowCornerRadiusRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetWindowCornerRadiusCallback([weakThis = wptr(this), where](const ShadowsInfo& shadowsInfo) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSetWindowShadows(shadowsInfo);
+    });
+    TLOGD(WmsLogTag::WMS_ANIMATION, "success");
+}
+
+void JsSceneSession::OnSetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    const char* const where = __func__;
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        shadowsInfo, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_ANIMATION, "%{public}s: shadow radius is %{public}f, color is %{public}s, "
+            "offsetX is %{public}f, offsetY is %{public}f ", where, shadowsInfo.radius_, shadowsInfo.color_.c_str(),
+            shadowsInfo.offsetX_, shadowsInfo.offsetY_);
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_CORNER_RADIUS_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsShadowsInfoObj = CreateJsShadowsInfo(env, shadowsInfo);
+        napi_value argv[] = { jsShadowsInfoObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }

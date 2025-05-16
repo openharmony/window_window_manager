@@ -4210,6 +4210,28 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SyncShadowsToComponent(const ShadowsInfo& shadowsInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    TLOGI(WmsLogTag::WMS_ANIMATION, "Sync Shadows To Component %{public}s shadow radius: %{public}f,"
+        " color: %{public}s, offsetX: %{public}f, offsetY: %{public}f", GetWindowName().c_str(),
+        shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_, shadowsInfo.offsetY_);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    property_->SetWindowShadows(shadowsInfo);
+    auto hostSession = GetHostSession();
+    if (hostSession) {
+        hostSession->SetWindowShadows(shadowsInfo);
+    }
+    hostSession->SetWindowCornerRadius(cornerRadius);
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
 {
     if (IsWindowSessionInvalid()) {
