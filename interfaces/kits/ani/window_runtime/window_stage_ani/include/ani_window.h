@@ -67,6 +67,15 @@ public:
     static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
         ani_string color, ani_object offsetX, ani_object offsetY);
 
+    void StartMoving(ani_env* env);
+    void StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY);
+    void SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximizeButtonVisible,
+        ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible);
+    void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
+    ani_int GetWindowStatus(ani_env* env);
+    void Minimize(ani_env* env);
+    void HideWindowFunction(ani_env* env, WmErrorCode errCode);
+    void Maximize(ani_env* env, ani_int presentation);
     ani_object Resize(ani_env* env, ani_double width, ani_double height);
     ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
     ani_object GetGlobalRect(ani_env* env);
