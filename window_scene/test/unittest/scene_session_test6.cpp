@@ -473,6 +473,72 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateFollowScreenChange, TestSize.Level
     auto res = session->HandleActionUpdateFollowScreenChange(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
+
+/**
+ * @tc.name: RegisterDecorEnableChangeCallback
+ * @tc.desc: test RegisterDecorEnableChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterDecorEnableChangeCallback, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->notifyDecorEnableChange_ = nullptr;
+    auto task = [] (bool isDecorEnable) {};
+    sceneSession->RegisterDecorEnableChangeCallback(std::move(task));
+    ASSERT_NE(nullptr, sceneSession->notifyDecorEnableChange_);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test CloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CloseSpecificScene, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sceneSession->sessionStage_ = nullptr;
+    auto res = sceneSession->CloseSpecificScene();
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetSubWindowSourceFunc
+ * @tc.desc: test SetSubWindowSourceFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSubWindowSourceFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sceneSession->SetSubWindowSourceFunc(nullptr);
+    ASSERT_EQ(nullptr, sceneSession->subWindowSourceFunc_);
+
+    NotifySetSubWindowSourceFunc func = [](SubWindowSource source) {};
+    sceneSession->SetSubWindowSourceFunc(std::move(func));
+    ASSERT_NE(nullptr, sceneSession->subWindowSourceFunc_);
+}
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: test SetSubWindowSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sptr property = sptr::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+    // test set SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT
+    sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
+    sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    ASSERT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

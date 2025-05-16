@@ -2330,6 +2330,14 @@ struct RotationChangeResult {
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
 };
+
+/**
+ * @brief Enumerates source of sub session.
+ */
+enum class SubWindowSource : uint32_t {
+    SUB_WINDOW_SOURCE_DEFAULT = 0,
+    SUB_WINDOW_SOURCE_ARKUI
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

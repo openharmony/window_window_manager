@@ -6117,5 +6117,42 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     }
     return WSError::WS_DO_NOTHING;
 }
+
+WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (!GetHostSession()) {
+        TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    TLOGE(WmsLogTag::WMS_SUB, "SetSubWindowSource source: %{public}d", source);
+    WSError ret = GetHostSession()->SetSubWindowSource(source);
+    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::CloseSpecificScene()
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "close specific scene id: %{public}d", GetPersistentId());
+    handler_->PostTask([weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        window->Close();
+    }, func);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

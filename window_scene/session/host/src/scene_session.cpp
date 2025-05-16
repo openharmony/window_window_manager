@@ -8254,4 +8254,76 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
     }
     return false;
 }
+
+void SceneSession::SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_SUB, "func is null");
+        return;
+    }
+    PostTask([weakThis = wptr(this), func = std::move(func), where = func] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->subWindowSource_);
+        session->subWindowSourceFunc_ = std::move(func);
+    });
+}
+
+WSError SceneSession::SetSubWindowSource(SubWindowSource source)
+{
+    auto property = GetSessionProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+    !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    PostTask([weakThis = wptr(this), source = source, where = func] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_SUB, "SetSubWindowSource source: %{public}d", source);
+        session->subWindowSource_ = source;
+        if (session->subWindowSourceFunc_) {
+            session->subWindowSourceFunc_(source);
+        } else {
+            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+        }
+    });
+    return WSError::WS_OK;
+}
+
+/** @notefd @window.decor */
+void SceneSession::RegisterDecorEnableChangeCallback(NotifyDecorEnableChangeFunc&& callback)
+{
+    auto property = GetSessionProperty();
+    if (!property) {
+        return;
+    }
+    notifyDecorEnableChange_ = std::move(callback);
+    property->SetDecorEnableChangeCallback([weakThis = wptr(this)](bool isDecorEnable) {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "session is null");
+            return;
+        }
+        if (session->notifyDecorEnableChange_) {
+            session->notifyDecorEnableChange_(isDecorEnable);
+        }
+    });
+}
+
+WSError SceneSession::CloseSpecificScene()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "close specific scene");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->CloseSpecificScene();
+}
 } // namespace OHOS::Rosen

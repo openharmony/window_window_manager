@@ -210,6 +210,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
+            return HandleCloseSpecificScene(data, reply);    
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -980,6 +982,13 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
     NotifyAppForceLandscapeConfigUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    CloseSpecificScene();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

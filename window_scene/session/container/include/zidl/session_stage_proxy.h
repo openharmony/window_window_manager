@@ -97,6 +97,7 @@ public:
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError CloseSpecificScene() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

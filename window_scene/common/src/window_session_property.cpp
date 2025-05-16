@@ -645,6 +645,9 @@ KeyboardLayoutParams WindowSessionProperty::GetKeyboardLayoutParams() const
 void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
 {
     isDecorEnable_ = isDecorEnable;
+    if (decorEnableChangeCallback_) {
+        decorEnableChangeCallback_(isDecorEnable_);
+    }
 }
 
 bool WindowSessionProperty::IsDecorEnable()
@@ -1360,6 +1363,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAbilityHook_ = property->isAbilityHook_;
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    decorEnableChangeCallback_ = property->decorEnableChangeCallback_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2169,6 +2173,11 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+}
+
+void WindowSessionProperty::SetDecorEnableChangeCallback(OnDecorEnableChangeFunc&& callback)
+{
+    decorEnableChangeCallback_ = std::move(callback);
 }
 } // namespace Rosen
 } // namespace OHOS

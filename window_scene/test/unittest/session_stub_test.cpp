@@ -1386,6 +1386,23 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     result = session_->HandleTransferAccessibilityEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleSetSubWindowSource
+ * @tc.desc: test function : HandleSetSubWindowSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+    data.WriteUint32(1);
+    auto result = session_->HandleSetSubWindowSource(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

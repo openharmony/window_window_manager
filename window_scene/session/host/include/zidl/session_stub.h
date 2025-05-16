@@ -146,6 +146,8 @@ private:
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

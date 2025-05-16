@@ -1445,6 +1445,21 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
     bool isHighlighted = false;
     ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_ERROR_IPC_FAILED);
 }
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
+    ASSERT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
