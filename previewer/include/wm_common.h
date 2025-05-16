@@ -1327,8 +1327,8 @@ enum class WindowAnimationCurve : uint32_t {
     INTERPOLATION_SPRING = 1,
 };
 
-const int32_t ANIMATION_PARAM_SIZE = 4;
-const int32_t ANIMATION_MAX_DURATION = 3000;
+const uint32_t ANIMATION_PARAM_SIZE = 4;
+const uint32_t ANIMATION_MAX_DURATION = 3000;
 
 /*
  * @brief Window transition animation configuration.
@@ -1386,7 +1386,7 @@ struct WindowAnimationOptions : public Parcelable {
  */
 struct TransitionAnimation : public Parcelable {
     WindowAnimationOptions config;
-    float opacity = 1.0;
+    float opacity = 1.0f;
     
     bool Marshalling(Parcel& parcel) const override
     {
@@ -1403,10 +1403,10 @@ struct TransitionAnimation : public Parcelable {
             delete transitionAnimation;
             return nullptr;
         }
-        WindowAnimationOptions* animationConfig = parcel.ReadParcelable<WindowAnimationOptions>();
+        std::shared_ptr<WindowAnimationOptions> animationConfig =
+            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
         if (animationConfig == nullptr) {
             delete transitionAnimation;
-            delete animationConfig;
             return nullptr;
         }
         transitionAnimation->config = *animationConfig;

@@ -1587,20 +1587,20 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
 
 int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t type;
+    uint32_t type = 0;
     if (!data.ReadUint32(type)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed.");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<TransitionAnimation> animation =
         std::shared_ptr<TransitionAnimation>(data.ReadParcelable<TransitionAnimation>());
     if (animation == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed.");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetWindowTransitionAnimation(static_cast<WindowTransitionType>(type), *animation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

@@ -147,7 +147,7 @@ napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
-            for (int i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
                 napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
                 napi_set_element(env, params, i, element);

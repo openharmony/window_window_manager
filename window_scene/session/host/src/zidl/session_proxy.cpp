@@ -2529,7 +2529,7 @@ WSError SessionProxy::SetWindowTransitionAnimation(WindowTransitionType transiti
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "remote is null");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION),
@@ -2539,7 +2539,7 @@ WSError SessionProxy::SetWindowTransitionAnimation(WindowTransitionType transiti
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "read ret failed");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read ret failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
