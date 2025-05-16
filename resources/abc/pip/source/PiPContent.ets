@@ -143,7 +143,7 @@ struct PiPContent {
       pip.off('nodeUpdate');
     } catch (err) {
       console.log(`aboutToDisappear failed`);
-    };
+    }
   }
 
   build() {
