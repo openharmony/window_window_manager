@@ -132,7 +132,7 @@ struct PiPContent {
       this.mXCNodeController = new XCNodeController(this.xComponent);
       console.info(TAG, 'use Node Controller');
       this.registerStateChangeListener();
-    }catch (err) {
+    } catch (err) {
       console.log(`aboutToAppear failed`);
     }
   }
@@ -141,7 +141,7 @@ struct PiPContent {
     try {
       pip.off('stateChange');
       pip.off('nodeUpdate');
-    }catch (err) {
+    } catch (err) {
       console.log(`aboutToDisappear failed`);
     };
   }
