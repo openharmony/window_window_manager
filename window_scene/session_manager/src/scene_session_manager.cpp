@@ -5016,20 +5016,22 @@ uint32_t SceneSessionManager::UpdateCachedColorToAppSet(const std::string& bundl
     const std::string& abilityName, StartingWindowInfo& info)
 {
     auto key = moduleName + abilityName;
-    uint32_t color;
+    uint32_t color = 0;
+    std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> colorFromAppMap;
     {
         std::shared_lock<std::shared_mutex> lock(startingWindowColorFromAppMapMutex_);
-        auto colorMapIter = startingWindowColorFromAppMap_.find(bundleName);
-        if (colorMapIter == startingWindowColorFromAppMap_.end()) {
-            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_BUNDLE_NOT_FOUND);
-        }
-        auto& colorMap = colorMapIter->second;
-        auto colorIter = colorMap.find(key);
-        if (colorIter == colorMap.end()) {
-            return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_KEY_PAIR_NOT_FOUND);
-        }
-        color = colorIter->second;
+        colorFromAppMap = startingWindowColorFromAppMap_;
     }
+    auto colorMapIter = colorFromAppMap.find(bundleName);
+    if (colorMapIter == colorFromAppMap.end()) {
+        return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_BUNDLE_NOT_FOUND);
+    }
+    auto& colorMap = colorMapIter->second;
+    auto colorIter = colorMap.find(key);
+    if (colorIter == colorMap.end()) {
+        return static_cast<uint32_t>(UpdateStartingWindowColorCacheResult::COLOR_MAP_KEY_PAIR_NOT_FOUND);
+    }
+    color = colorIter->second;
     info.backgroundColor_ = color;
     info.backgroundColorEarlyVersion_ = color;
     {
