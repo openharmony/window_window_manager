@@ -1692,6 +1692,11 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
                     break;
                 }
             }
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
+                intentParam_ = "";
+            }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
         }
@@ -3884,6 +3889,16 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         }
     } else if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
         NotifyWaterfallModeChange(isFullScreenWaterfallMode_.load());
+    }
+    if (!intentParam_.empty()) {
+        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isColdStart_);
+            uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
+            intentParam_ = "";
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
+        }
     }
 }
 
@@ -6252,6 +6267,16 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
+    const std::function<void()>& loadPageCallback, bool isColdStart)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    intentParam_ = intentParam;
+    loadPageCallback_ = loadPageCallback;
+    isColdStart_ = isColdStart;
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

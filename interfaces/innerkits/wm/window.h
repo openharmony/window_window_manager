@@ -3777,6 +3777,20 @@ public:
      * @return Returns WMError::WM_OK if called success, otherwise failed.
      */
     virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /** 
+    * @brief Set intent param to arkui.
+     *
+     * @param intentParam intent param from ams.
+     * @param loadPageCallback load page callback after send intent.
+     * @param isColdStart Mark as cold start or not
+     * @return WM_OK means set intent param success.
+     */
+    virtual WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
