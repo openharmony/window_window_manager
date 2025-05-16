@@ -6986,6 +6986,11 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
 
 static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, WmErrorCode& enableResult)
 {
+    if (!windowToken) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        enableResult = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return false;
+    }
     if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
