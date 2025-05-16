@@ -766,7 +766,7 @@ public:
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
     void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
     bool GetIsAncoForFloatingWindow() const;
-    void SetWindowShadowsCallback(NotifySetWindowCornerRadiusFunc&& func);
+    void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     /*

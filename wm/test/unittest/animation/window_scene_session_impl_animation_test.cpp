@@ -508,7 +508,7 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SyncShadowsToComponent, TestSize.L
     option->SetWindowName("SyncShadowsToComponent");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
-    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SyncShadowsToComponent(shadowsInfo));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };

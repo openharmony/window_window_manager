@@ -54,8 +54,8 @@ HWTEST_F(WindowSessionPropertyAnimationTest, SetWindowCornerRadius, TestSize.Lev
  */
 HWTEST_F(WindowSessionPropertyAnimationTest, SetWindowShadows, TestSize.Level1)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();411
-    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
     property->SetWindowShadows(shadowsInfo);
     ASSERT_EQ(shadowsInfo, property->GetWindowShadows());
 }

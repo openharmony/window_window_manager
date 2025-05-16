@@ -4219,7 +4219,7 @@ WMError WindowSceneSessionImpl::SyncShadowsToComponent(const ShadowsInfo& shadow
     TLOGI(WmsLogTag::WMS_ANIMATION, "Sync Shadows To Component %{public}s shadow radius: %{public}f,"
         " color: %{public}s, offsetX: %{public}f, offsetY: %{public}f", GetWindowName().c_str(),
         shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_, shadowsInfo.offsetY_);
-    if (MathHelper::LessNotEqual(radius, 0.0)) {
+    if (MathHelper::LessNotEqual(shadowsInfo.radius_, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
@@ -4228,7 +4228,6 @@ WMError WindowSceneSessionImpl::SyncShadowsToComponent(const ShadowsInfo& shadow
     if (hostSession) {
         hostSession->SetWindowShadows(shadowsInfo);
     }
-    hostSession->SetWindowCornerRadius(cornerRadius);
     return WMError::WM_OK;
 }
 

@@ -59,6 +59,7 @@ constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
+constexpr float POS_ZERO = 0.001f;
 /*
  * PC Window Sidebar Blur
  */
@@ -2371,14 +2372,16 @@ struct ShadowsInfo : public Parcelable {
 
     bool operator==(const ShadowsInfo& other) const
     {
-        return (radius_ == other.radius_ && color_ == other.color_ &&
-            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_);
+        return (NearEqual(radius_, other.radius_) && color_ == other.color_ &&
+            NearEqual(offsetX_, other.offsetX_) && NearEqual(offsetY_, other.offsetY_));
     }
 
     bool operator!=(const ShadowsInfo& other) const
     {
         return !this->operator==(other);
     }
+
+    static inline bool NearEqual(float left, float right) { return std::abs(left - right) < POS_ZERO; }
 
     bool Marshalling(Parcel& parcel) const override
     {
