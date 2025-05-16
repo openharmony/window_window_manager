@@ -1449,6 +1449,25 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
     auto result = property->GetIsAtomicService();
     ASSERT_EQ(result, isAtomicService);
 }
+
+/**
+ * @tc.name: SetDecorEnableChangeCallback
+ * @tc.desc: SetDecorEnableChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetDecorEnableChangeCallback, TestSize.Level0)
+{
+    sptr property = sptr::MakeSptr();
+    property->SetPersistentId(0);
+    property->SetDecorEnableChangeCallback(nullptr);
+    EXPECT_EQ(nullptr, property->decorEnableChangeCallback_);
+
+    OnDecorEnableChangeFunc func = {};
+    property->SetPersistentId(1);
+    property->SetDecorEnableChangeCallback(std::move(func));
+    property->SetDecorEnable(false);
+    EXPECT_NE(nullptr, property->decorEnableChangeCallback_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

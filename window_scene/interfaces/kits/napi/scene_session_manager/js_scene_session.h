@@ -99,6 +99,8 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_PIP_TEMPLATE_INFO_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
+    SET_SUB_WINDOW_SOURCE_CB,
+    UPDATE_DECOR_ENABLE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -225,6 +227,7 @@ private:
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
+    static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -311,7 +314,8 @@ private:
     napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
-
+    napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
+    
     /*
      * PC Window
      */
@@ -374,6 +378,8 @@ private:
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
     void ProcessUseImplicitAnimationChangeRegister();
+    void ProcessSetSubWindowSourceRegister();
+    void ProcessDecorEnableChangeRegister();
 
     /*
      * Window Property
@@ -454,6 +460,8 @@ private:
     void OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo);
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
     void OnUseImplicitAnimationChange(bool useImplicit);
+    void NotifySetSubWindowSource(SubWindowSource source);
+    void OnDecorEnableChange(bool isDecoEnable);
 
     /*
      * Window Property

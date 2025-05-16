@@ -131,6 +131,8 @@ using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<Scene
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
+using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
+using NotifyDecorEnableChangeFunc = std::function<void(bool isDecorEnable)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -771,6 +773,14 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /*
+     * sub window decor and source
+     */
+    void RegisterDecorEnableChangeCallback(NotifyDecorEnableChangeFunc&& callback);
+    WSError CloseSpecificScene();
+    void SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func);
+    WSError SetSubWindowSource(SubWindowSource source) override;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -915,6 +925,10 @@ protected:
     bool keyboardAvoidAreaActive_ = true;
     std::atomic<bool> isKeyboardDidShowRegistered_ = false;
     std::atomic<bool> isKeyboardDidHideRegistered_ = false;
+
+    NotifyDecorEnableChangeFunc notifyDecorEnableChange_;
+    SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
+    NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
 
 private:
     void NotifyAccessibilityVisibilityChange();

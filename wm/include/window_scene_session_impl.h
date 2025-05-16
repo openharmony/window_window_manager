@@ -282,6 +282,8 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WSError CloseSpecificScene() override;
+    WMError SetSubWindowSource(SubWindowSource source) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();

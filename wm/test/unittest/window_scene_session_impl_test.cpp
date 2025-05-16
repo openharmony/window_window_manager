@@ -2268,6 +2268,52 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function 
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: CloseSpecificScene test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
+{
+    sptr option = sptr::MakeSptr();
+    option->SetWindowName("Close01");
+    sptr windowSceneSession = sptr::MakeSptr(option);
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr session = sptr::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+
+    sptr listener = sptr::MakeSptr();
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto res = windowSceneSession->RegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+    res = windowSceneSession->UnRegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+}
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
+{
+    sptr option = sptr::MakeSptr();
+    sptr window = sptr::MakeSptr(option);
+    window->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr session = sptr::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetSubWindowSource");
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

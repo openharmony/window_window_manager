@@ -453,6 +453,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UseImplicitAnimation(bool useImplicit) { return WSError::WS_OK; }
+    
+    /**
+    * @brief Set sub window source
+    *
+    * @param source source
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 
