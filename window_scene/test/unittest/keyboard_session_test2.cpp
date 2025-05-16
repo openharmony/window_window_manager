@@ -231,7 +231,7 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, TestSize.Level1)
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
     keyboardSession->OpenKeyboardSyncTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
-    keyboardSession->CloseKeyboardSyncTransaction(callingId, keyboardPanelRect, isKeyboardShow);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
 

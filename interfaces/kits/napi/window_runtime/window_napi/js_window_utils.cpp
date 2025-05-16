@@ -37,12 +37,8 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
-<<<<<<< HEAD
-=======
-constexpr uint32_t API_VERSION_18 = 18;
 constexpr uint32_t CURVE_TYPE_SPRING = 1;
 constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
->>>>>>> 33d9e0422d (动画开始前回调实现)
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
 const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
