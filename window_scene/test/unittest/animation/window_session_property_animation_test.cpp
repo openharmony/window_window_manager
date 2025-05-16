@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "window_session_property.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,6 +45,19 @@ HWTEST_F(WindowSessionPropertyAnimationTest, SetWindowCornerRadius, TestSize.Lev
     float cornerRadius = 1.0f;
     property->SetWindowCornerRadius(cornerRadius);
     ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
+}
+
+/**
+ * @tc.name: SetWindowShadows
+ * @tc.desc: SetWindowShadows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyAnimationTest, SetWindowShadows, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();411
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    property->SetWindowShadows(shadowsInfo);
+    ASSERT_EQ(shadowsInfo, property->GetWindowShadows());
 }
 } // namespace
 } // namespace Rosen

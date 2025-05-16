@@ -200,6 +200,7 @@ napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);
+napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo);
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);

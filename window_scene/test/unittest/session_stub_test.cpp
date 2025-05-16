@@ -415,6 +415,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
         reply,
         option);
     ASSERT_EQ(ERR_NONE, res);
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    ASSERT_EQ(data.WriteParcelable(&shadowsInfo), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**

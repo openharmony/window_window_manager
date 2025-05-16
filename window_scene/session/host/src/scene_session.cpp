@@ -7541,6 +7541,43 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
     return WSError::WS_OK;
 }
 
+void SceneSession::SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "session or onSetWindowShadowsFunc is null");
+            return;
+        }
+        session->onSetWindowShadowsFunc_ = std::move(func);
+        auto property = session->GetSessionProperty();
+        session->onSetWindowShadowsFunc_(property->GetWindowShadows());
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    }, __func__);
+}
+
+WSError SceneSession::SetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), shadowsInfo, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "session is null");
+            return;
+        }
+        if (session->onSetWindowShadowsFunc_) {
+            TLOGND(WmsLogTag::WMS_ANIMATION, "%{public}s id %{public}d shadow radius: %{public}f, "
+                "color: %{public}s, offsetX: %{public}f, offsetY: %{public}f", where, session->GetPersistentId(),
+                shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_, shadowsInfo.offsetY_);
+            session->onSetWindowShadowsFunc_(shadowsInfo);
+            session->GetSessionProperty()->SetWindowShadows(shadowsInfo);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
 void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
     GetSessionProperty()->SetSubWindowLevel(subWindowLevel);

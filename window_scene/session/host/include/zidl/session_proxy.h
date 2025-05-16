@@ -137,6 +137,7 @@ public:
      * Window Property
      */
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;

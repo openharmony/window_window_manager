@@ -1836,6 +1836,57 @@ static napi_value CreateJsSystemBarPropertyObject(
     return objValue;
 }
 
+napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "CreateJsShadowsInfo.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_status ret = napi_ok;
+    if (shadowsInfo.hasRadiusValue_) {
+        ret = napi_set_named_property(env, objValue, "radius", CreateJsValue(env, shadowsInfo.radius_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasColorValue_) {
+        ret = napi_set_named_property(env, objValue, "color", CreateJsValue(env, shadowsInfo.color_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasOffsetXValue_) {
+        ret = napi_set_named_property(env, objValue, "offsetX", CreateJsValue(env, shadowsInfo.offsetX_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasOffsetYValue_) {
+        ret = napi_set_named_property(env, objValue, "offsetY", CreateJsValue(env, shadowsInfo.offsetY_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (!shadowsInfo.hasRadiusValue_ && !shadowsInfo.hasColorValue_ && !shadowsInfo.hasOffsetXValue_ &&
+        !shadowsInfo.hasOffsetYValue_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Obeject is undefined!");
+        return NapiGetUndefined(env);   
+    }
+    return objValue;
+}
+
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params)
 {
     napi_value objValue = nullptr;

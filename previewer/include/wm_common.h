@@ -1352,6 +1352,120 @@ struct RotationChangeResult {
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
 };
+
+/**
+ * @struct ShadowsInfo
+ *
+ * @brief window shadows info
+ */
+struct ShadowsInfo : public Parcelable {
+    float radius_;
+    std::string color_;
+    float offsetX_;
+    float offsetY_;
+    bool hasRadiusValue_ = false;
+    bool hasColorValue_ = false;
+    bool hasOffsetXValue_ = false;
+    bool hasOffsetYValue_ = false;
+
+    ShadowsInfo() {}
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+        bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
+        offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
+        hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}
+
+    bool operator==(const ShadowsInfo& other) const
+    {
+        return (radius_ == other.radius_ && color_ == other.color_ &&
+                offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_);
+    }
+
+    bool operator!=(const ShadowsInfo& other) const
+    {
+        return !this->operator==(other);
+    }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(hasRadiusValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasColorValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasOffsetXValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasOffsetYValue_)) {
+            return false;
+        }
+
+        if (hasRadiusValue_ && !parcel.WriteFloat(radius_)) {
+            return false;
+        }
+
+        if (hasColorValue_ && !parcel.WriteString(color_)) {
+            return false;
+        }
+
+        if (hasOffsetXValue_ && !parcel.WriteFloat(offsetX_)) {
+            return false;
+        }
+
+        if (hasOffsetYValue_ && !parcel.WriteFloat(offsetY_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static ShadowsInfo* Unmarshalling(Parcel& parcel)
+    {
+        ShadowsInfo* shadowsInfo = new ShadowsInfo();
+        if (!parcel.ReadBool(shadowsInfo->hasRadiusValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasColorValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasOffsetXValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasOffsetYValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasRadiusValue_ && !parcel.ReadFloat(shadowsInfo->radius_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasColorValue_ && !parcel.ReadString(shadowsInfo->color_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasOffsetXValue_ && !parcel.ReadFloat(shadowsInfo->offsetX_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasOffsetYValue_ && !parcel.ReadFloat(shadowsInfo->offsetY_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+        return shadowsInfo;
+    }
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

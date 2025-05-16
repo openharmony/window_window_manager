@@ -180,6 +180,8 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingShadowsInfo(Parcel& parcel) const;
+    static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -232,6 +234,8 @@ public:
      */
     void SetWindowCornerRadius(float cornerRadius);
     float GetWindowCornerRadius() const;
+    void SetWindowShadows(const ShadowsInfo& shadowsInfo);
+    ShadowsInfo GetWindowShadows() const;
 
     /*
      * UIExtension
@@ -516,6 +520,8 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+    ShadowsInfo shadowsInfo_;
+    mutable std::mutex shadowsInfoMutex_;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 };
