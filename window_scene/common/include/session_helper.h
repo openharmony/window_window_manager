@@ -114,6 +114,11 @@ public:
         return IsSubWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG;
     }
 
+    static inline bool IsSecureUIExtension(UIExtensionUsage usage)
+    {
+        return usgae == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
+    }
+
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
         int32_t sourceType, int outside, float vpr, const WSRect& rect)
     {
