@@ -794,7 +794,7 @@ void SessionStageProxy::NotifyForegroundInteractiveStatus(bool interactive)
     }
 }
 
-void SessionStageProxy::NotifyBackgroundInteractiveStatus()
+void SessionStageProxy::NotifyBackgroundNonInteractiveStatus()
 {
     MessageParcel data;
     MessageParcel reply;
@@ -810,7 +810,7 @@ void SessionStageProxy::NotifyBackgroundInteractiveStatus()
         return;
     }
     int sendResult = remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_BACKGROUND_NONINTERACTIVE_STATUS),
         data, reply, option);
     if (sendResult != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendResult);

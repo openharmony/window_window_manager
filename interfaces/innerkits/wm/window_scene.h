@@ -138,6 +138,7 @@ public:
      * @return the error code of window
      */
     WMError GoInteractive();
+
     /**
      * Window handle new want.
      *

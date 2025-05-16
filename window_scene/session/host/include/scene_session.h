@@ -773,8 +773,8 @@ public:
 
     /*
      * Window LifeCycle
-    */
-    void UpdateNonInteractiveInner() override;
+     */
+    void UpdateNonInteractiveInner();
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);

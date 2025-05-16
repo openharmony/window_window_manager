@@ -1551,7 +1551,7 @@ void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
 
 void WindowSceneSessionImpl::Interactive()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{}d", isColdStart_);
     isColdStart_ = false;
     NotifyAfterInteractive();
 }
