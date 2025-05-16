@@ -226,6 +226,7 @@ private:
     napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
+    napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -330,6 +331,7 @@ private:
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
+    static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

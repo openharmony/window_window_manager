@@ -603,6 +603,7 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WMError NotifyDisableDelegatorChange() override;
+    virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
 
     /*
      * Window Decor

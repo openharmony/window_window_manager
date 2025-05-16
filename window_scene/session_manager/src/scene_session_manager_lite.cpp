@@ -329,4 +329,9 @@ WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowIn
 {
     return SceneSessionManager::GetInstance().ListWindowInfo(windowInfoOption, infos);
 }
+
+WSError SceneSessionManagerLite::GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList)
+{
+    return SceneSessionManager::GetInstance().GetRecentMainSessionInfoList(recentSessionInfoList);
+}
 } // namespace OHOS::Rosen
