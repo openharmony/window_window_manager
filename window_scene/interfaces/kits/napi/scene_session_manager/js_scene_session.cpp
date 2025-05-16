@@ -2847,7 +2847,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessUseImplicitAnimationChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_SHADOWS_CB):
-            ProcesssSetWindowShadowsRegister();
+            ProcessSetWindowShadowsRegister();
             break;
         default:
             break;
@@ -6692,7 +6692,7 @@ void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
     }, __func__);
 }
 
-void JsSceneSession::ProcessSetWindowCornerRadiusRegister()
+void JsSceneSession::ProcessSetWindowShadowsRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -6700,7 +6700,7 @@ void JsSceneSession::ProcessSetWindowCornerRadiusRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetWindowCornerRadiusCallback([weakThis = wptr(this), where](const ShadowsInfo& shadowsInfo) {
+    session->SetWindowShadowsCallback([weakThis = wptr(this), where](const ShadowsInfo& shadowsInfo) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: jsSceneSession is null", where);

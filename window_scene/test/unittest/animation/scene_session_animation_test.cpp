@@ -599,7 +599,7 @@ HWTEST_F(SceneSessionAnimationTest, OnSetWindowShadows, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
 
-    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
     EXPECT_EQ(WSError::WS_OK, session->SetWindowShadows(shadowsInfo));
 
     NotifySetWindowShadowsFunc func = [](ShadowsInfo shadowsInfo) {

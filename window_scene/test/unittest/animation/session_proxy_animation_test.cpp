@@ -64,7 +64,7 @@ HWTEST_F(SessionProxyAnimationTest, SetWindowShadows, TestSize.Level1)
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
 
-    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true };
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
     WSError res = sProxy->SetWindowShadows(shadowsInfo);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyAnimationTest: SetWindowShadows end";
