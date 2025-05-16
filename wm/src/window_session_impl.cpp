@@ -165,6 +165,7 @@ std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::windowStatusDidChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
@@ -187,6 +188,7 @@ std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
@@ -2664,6 +2666,20 @@ WMError WindowSessionImpl::UnregisterWindowStatusChangeListener(const sptr<IWind
     return UnregisterListener(windowStatusChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowStatusDidChangeListenerMutex_);
+    return RegisterListener(windowStatusDidChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowStatusDidChangeListenerMutex_);
+    return UnregisterListener(windowStatusDidChangeListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
 {
     if (IsWindowSessionInvalid()) {
@@ -3550,6 +3566,16 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
     return windowStatusChangeListeners;
 }
 
+template<typename T>
+EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowStatusDidChangeListener>> windowStatusDidChangeListeners;
+    for (auto& listener : windowStatusDidChangeListeners_[GetPersistentId()]) {
+        windowStatusDidChangeListeners.push_back(listener);
+    }
+    return windowStatusDidChangeListeners;
+}
+
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called id: %{public}d.", GetPersistentId());
@@ -3584,6 +3610,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
         ClearUselessListeners(windowStatusChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowStatusDidChangeListenerMutex_);
+        ClearUselessListeners(windowStatusDidChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
@@ -5632,6 +5662,34 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
             "WINDOW_MODE", static_cast<int32_t>(mode));
         if (ret) {
             TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret=%{public}d", ret);
+        }
+    }
+}
+
+/** @note @window.layout */
+void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
+{
+    auto windowStatus = GetWindowStatusInner(mode);
+    auto lastStatus = lastStatusWhenNotifyWindowStatusDidChange_.load();
+    if (lastStatus == windowStatus) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Duplicate windowStatus:%{public}u, id:%{public}d, windowMode:%{public}u",
+            windowStatus, GetPersistentId(), mode);
+        return;
+    }
+    lastStatusWhenNotifyWindowStatusDidChange_.store(windowStatus);
+    std::vector<sptr<IWindowStatusDidChangeListener>> windowStatusDidChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowStatusDidChangeListenerMutex_);
+        windowStatusDidChangeListeners = GetListeners<IWindowStatusDidChangeListener>();
+    }
+    const auto& windowRect = GetRect();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, WindowMode:%{public}u, windowStatus:%{public}u, "
+        "lastWindowStatus:%{public}u, listenerSize:%{public}zu, rect:%{public}s",
+        GetPersistentId(), mode, windowStatus, lastStatus, windowStatusDidChangeListeners.size(),
+        windowRect.ToString().c_str());
+    for (auto& listener : windowStatusDidChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowStatusDidChange(windowStatus);
         }
     }
 }

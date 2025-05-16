@@ -377,6 +377,9 @@ public:
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
     WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
+    WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
 
     /*
      * Free Multi Window
@@ -624,6 +627,7 @@ protected:
     bool IsValidCrossState(int32_t state) const;
     template <typename T>
     EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
+    void NotifyWindowStatusDidChange(WindowMode mode);
 
     /*
      * Window Immersive
@@ -702,6 +706,8 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
@@ -798,6 +804,7 @@ private:
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
+    static std::recursive_mutex windowStatusDidChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
@@ -826,6 +833,7 @@ private:
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
     static std::map<int32_t, sptr<IPreferredOrientationChangeListener>> preferredOrientationChangeListener_;
@@ -862,6 +870,7 @@ private:
     std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
 
     /*
      * Window Decor

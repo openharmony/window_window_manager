@@ -2217,6 +2217,13 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
             return this->GetStatusBarConstantlyShow(displayId, isVisible);
         });
+        sceneSession->SetHasRequestedVsyncFunc([this](bool& hasRequestedVsync) {
+            return this->HasRootSceneRequestedVsync(hasRequestedVsync);
+        });
+        sceneSession->SetRequestNextVsyncWhenModeChangeFunc(
+            [this](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+            return this->RequestVsyncByRootSceneWhenModeChange(vsyncCallback);
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -11616,6 +11623,45 @@ void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo
         TLOGE(WmsLogTag::DEFAULT, "AppAnrListener OnAppDebugStoped debugInfos is empty");
         return;
     }
+}
+
+void SceneSessionManager::SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "func is null");
+        return;
+    }
+    hasRootSceneRequestedVsyncFunc_ = std::move(func);
+}
+
+WSError SceneSessionManager::HasRootSceneRequestedVsync(bool& hasRootSceneRequestedVsync)
+{
+    if (!hasRootSceneRequestedVsyncFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "func is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    hasRootSceneRequestedVsync = hasRootSceneRequestedVsyncFunc_();
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
+    RequestVsyncByRootSceneWhenModeChangeFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "func is null");
+        return;
+    }
+    requestVsyncByRootSceneWhenModeChangeFunc_ = std::move(func);
+}
+
+WSError SceneSessionManager::RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback)
+{
+    if (!requestVsyncByRootSceneWhenModeChangeFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "func is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    requestVsyncByRootSceneWhenModeChangeFunc_(vsyncCallback);
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams)

@@ -60,6 +60,11 @@ public:
     MOCK_METHOD1(OnWindowStatusChange, void(WindowStatus status));
 };
 
+class MockWindowStatusDidChangeListener : public IWindowStatusDidChangeListener {
+public:
+    MOCK_METHOD1(OnWindowStatusDidChange, void(WindowStatus status));
+};
+
 class MockIOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,

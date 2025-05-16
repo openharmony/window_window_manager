@@ -701,6 +701,13 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const std::string& id) {
         RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
     });
+    SceneSessionManager::GetInstance().SetHasRootSceneRequestedVsyncFunc([] {
+        return RootScene::staticRootScene_->HasRequestedVsync();
+    });
+    SceneSessionManager::GetInstance().SetRequestVsyncByRootSceneWhenModeChangeFunc(
+        [](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        return RootScene::staticRootScene_->RequestVsync(vsyncCallback);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
