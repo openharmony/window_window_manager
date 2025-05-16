@@ -139,11 +139,12 @@ struct PiPContent {
 
   aboutToDisappear(): void {
     try {
-      pip.off('stateChange');
-      pip.off('nodeUpdate');
+      pip.off('stateChange', this.stateChangeListener);
+      pip.off('nodeUpdate', this.nodeUpdateListener);
     } catch (err) {
       console.log(`aboutToDisappear failed`);
     }
+
   }
 
   build() {
