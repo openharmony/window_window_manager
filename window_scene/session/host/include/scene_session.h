@@ -771,6 +771,11 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /*
+     * Window LifeCycle
+    */
+    void UpdateNonInteractiveInner() override;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -882,6 +887,7 @@ protected:
     /*
      * Window Lifecycle
      */
+    virtual void NotifyClientToUpdateNonInteractive() {}
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;

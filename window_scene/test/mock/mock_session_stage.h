@@ -80,6 +80,7 @@ public:
     MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
+    MOCK_METHOD0(NotifyBackgroundNonInteractiveStatus, void(void));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -454,6 +454,13 @@ public:
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
+    /*
+     * Window LifeCycle
+     */
+    void NotifyAfterInteractive();
+    void NotifyAfterNonInteractive();
+    void NotifyBackgroundNonInteractiveStatus() override;
+    
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -598,6 +605,7 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
+    bool hasNotifyInteractiveEvent_ = false;
 
     /*
      * Window Layout

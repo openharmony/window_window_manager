@@ -143,6 +143,16 @@ public:
     virtual void AfterPaused() {}
 
     /**
+     * @brief Notify caller that window is interactive.
+     */
+     virtual void AfterInteractive() {}
+
+     /**
+      * @brief Notify caller that window is noninteractive.
+      */
+     virtual void AfterNonInteractive() {}
+
+    /**
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
@@ -1209,6 +1219,11 @@ public:
      * @brief resume window
      */
     virtual void Resume() {}
+
+    /**
+     * @brief Interactive window
+     */
+     virtual void Interactive() {}
 
     /**
      * @brief Hide window

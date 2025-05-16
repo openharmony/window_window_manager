@@ -210,6 +210,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_BACKGROUND_INTERACTIVE_STATUS):
+            return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -474,6 +476,13 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     WLOGFD("NotifyForegroundInteractiveStatus!");
     bool interactive = data.ReadBool();
     NotifyForegroundInteractiveStatus(interactive);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyBackgroundNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGFD("HandleNotifyBackgroundNonInteractiveStatus!");
+    NotifyBackgroundInteractiveStatus();
     return ERR_NONE;
 }
 

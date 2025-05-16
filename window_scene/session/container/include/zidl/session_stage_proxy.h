@@ -98,6 +98,9 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
 
+    // Window LifeCycle
+    void NotifyBackgroundNonInteractiveStatus() override;
+
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };

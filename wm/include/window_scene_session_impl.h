@@ -41,7 +41,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
-    void Resume() override;
     WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
 
     /*
@@ -283,6 +282,10 @@ public:
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
 
+    /*
+     * Window Immersive
+     */
+    void Interactive() override;
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -466,7 +469,7 @@ private:
      * Window Lifecycle
      */
     bool isColdStart_ = true;
-    void NotifyFreeMultiWindowModeResume();
+    void NotifyFreeMultiWindowModeInteractive();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 };
