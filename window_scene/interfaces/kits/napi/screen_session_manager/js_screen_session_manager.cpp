@@ -271,7 +271,7 @@ napi_value JsScreenSessionManager::GetSuperFoldStatus(napi_env env, napi_callbac
 
 napi_value JsScreenSessionManager::GetSuperRotation(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetSuperRotation");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetSuperRotation");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSuperRotation(env, info) : nullptr;
 }
@@ -893,18 +893,9 @@ napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callb
 
 napi_value JsScreenSessionManager::OnGetSuperRotation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetFoldStatus");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetSuperRotation");
     float rotation = ScreenSessionManagerClient::GetInstance().GetSuperRotation();
-    TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", getSuperRotation = %{public}f", rotation);
+    TLOGI(WmsLogTag::DMS, "[NAPI] getSuperRotation = %{public}f", rotation);
     return CreateJsValue(env, rotation);
 }
 
