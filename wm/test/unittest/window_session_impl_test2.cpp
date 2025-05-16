@@ -1246,7 +1246,6 @@ HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
     ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, hostSession);
     window->hostSession_ = hostSession;
     KeyFramePolicy keyFramePolicy;
     ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);

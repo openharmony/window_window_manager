@@ -1497,7 +1497,7 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy)
 {
     if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsObject is null");
         return false;
     }
     bool enable = false;
@@ -1505,7 +1505,7 @@ bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyF
         keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
             DragResizeType::RESIZE_TYPE_UNDEFINED;
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enable");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to enable");
         return false;
     }
     int32_t data = 0;
@@ -1513,28 +1513,28 @@ bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyF
         static_cast<int32_t>(keyFramePolicy.interval_)) && data >= 0) {
         keyFramePolicy.interval_ = static_cast<uint32_t>(data);
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to interval");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to interval");
         return false;
     }
     if (ParseJsValueOrGetDefault(jsObject, env, "distance", data,
         static_cast<int32_t>(keyFramePolicy.distance_)) && data >= 0) {
         keyFramePolicy.distance_ = static_cast<uint32_t>(data);
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to distance");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to distance");
         return false;
     }
     if (ParseJsValueOrGetDefault(jsObject, env, "animationDuration", data,
         static_cast<int32_t>(keyFramePolicy.animationDuration_)) && data >= 0) {
         keyFramePolicy.animationDuration_ = static_cast<uint32_t>(data);
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to animationDuration");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDuration");
         return false;
     }
     if (ParseJsValueOrGetDefault(jsObject, env, "animationDelay", data,
         static_cast<int32_t>(keyFramePolicy.animationDelay_)) && data >= 0) {
         keyFramePolicy.animationDelay_ = static_cast<uint32_t>(data);
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to animationDelay");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDelay");
         return false;
     }
     return true;
