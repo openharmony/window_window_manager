@@ -110,8 +110,8 @@ HWTEST_F(MockSessionManagerServiceTest, SetSessionManagerService, TestSize.Level
 HWTEST_F(MockSessionManagerServiceTest, GetSessionManagerService, TestSize.Level1)
 {
     WLOGI("GetSessionManagerService");
-    sptr<IRemoteObject> sessionManagerService =
-    MockSessionManagerService::GetInstance().GetSessionManagerService();
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    MockSessionManagerService::GetInstance().GetSessionManagerService(sessionManagerService);
     ASSERT_EQ(nullptr, sessionManagerService);
 }
 
