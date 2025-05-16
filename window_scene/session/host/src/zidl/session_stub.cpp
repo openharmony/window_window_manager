@@ -1797,7 +1797,7 @@ int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read cornerRadius failed.");
         return ERR_INVALID_DATA;
     }
-    SubWindowSource source = static_cast(sourceType);
+    SubWindowSource source = static_cast<SubWindowSource>(sourceType);
     TLOGD(WmsLogTag::WMS_SUB, "source: %{public}d", source);
     WSError errCode = SetSubWindowSource(source);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
