@@ -98,6 +98,8 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void AfterResumed() override;
+    void AfterInteractive() override;
+    void AfterNonInteractive() override;
     void AfterPaused() override;
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,

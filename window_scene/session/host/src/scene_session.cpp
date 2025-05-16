@@ -7074,6 +7074,11 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     return true;
 }
 
+void SceneSession::UpdateNonInteractiveInner()
+{
+    NotifyClientToUpdateNonInteractive();
+}
+
 bool SceneSession::PipelineNeedNotifyClientToUpdateRect() const
 {
     return IsVisibleForeground() && GetForegroundInteractiveStatus();

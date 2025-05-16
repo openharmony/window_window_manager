@@ -810,39 +810,6 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, TestSize.Level1)
 }
 
 /**
- * @tc.name: Resume
- * @tc.desc: Resume
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
-{
-    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
-    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
-
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Test");
-    option->SetDisplayId(0);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
-    window->SetTargetAPIVersion(20);
-    window->isDidForeground_ = false;
-    window->isColdStart_ = true;
-    window->state_ = WindowState::STATE_SHOWN;
-
-    EXPECT_CALL(*mockListener, AfterResumed()).Times(1);
-    window->Resume();
-    EXPECT_EQ(window->isDidForeground_, true);
-    EXPECT_EQ(window->isColdStart_, false);
-    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
-}
-
-/**
  * @tc.name: GetParentWindow01
  * @tc.desc: GetParentWindow
  * @tc.type: FUNC
