@@ -99,6 +99,7 @@ const std::string Z_LEVEL_CHANGE_CB = "zLevelChange";
 const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenChange";
 const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
 
+
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
 constexpr int ARG_COUNT_3 = 3;
