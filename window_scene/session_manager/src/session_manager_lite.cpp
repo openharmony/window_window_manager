@@ -304,7 +304,11 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
         return;
     }
     RegisterSMSRecoverListener();
-    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetSessionManagerService();
+    sptr<IRemoteObject> remoteObject = nullptr;
+    int32_t errCode = mockSessionManagerServiceProxy_->GetSessionManagerService(remoteObject);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "userId is illegal");
+    }
     if (!remoteObject) {
         WLOGFE("Remote object is nullptr");
         return;
@@ -325,7 +329,8 @@ void SessionManagerLite::InitScreenSessionManagerLiteProxy()
         return;
     }
 
-    sptr<IRemoteObject> remoteObject = mockSessionManagerServiceProxy_->GetScreenSessionManagerLite();
+    sptr<IRemoteObject> remoteObject = nullptr;
+    mockSessionManagerServiceProxy_->GetScreenSessionManagerLite(remoteObject);
     if (!remoteObject) {
         WLOGFW("Get screen session manager lite proxy failed, null");
         return;
