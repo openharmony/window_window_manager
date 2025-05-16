@@ -6270,7 +6270,7 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
 }
 
 WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
-    const std::function<void()>&& loadPageCallback, bool isColdStart)
+    const std::function<void()>& loadPageCallback, bool isColdStart)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     intentParam_ = intentParam;
