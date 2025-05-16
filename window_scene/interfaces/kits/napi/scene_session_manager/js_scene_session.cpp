@@ -7073,7 +7073,7 @@ napi_value JsSceneSession::OnSetCurrentRotation(napi_env env, napi_callback_info
 
 void JsSceneSession::ProcessSetSubWindowSourceRegister()
 {
-    NotifySetSubWindowSourceFunc func = [weakThis = wptr(this), where = func](SubWindowSource source) {
+    NotifySetSubWindowSourceFunc func = [weakThis = wptr(this), where = __func__](SubWindowSource source) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
@@ -7091,7 +7091,7 @@ void JsSceneSession::ProcessSetSubWindowSourceRegister()
 
 void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
 {
-    auto task = [weakThis = wptr(this), source, env = env_, persistentId = persistentId_, where = func] {
+    auto task = [weakThis = wptr(this), source, env = env_, persistentId = persistentId_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession id: %{public}d has been destroyed",
@@ -7131,7 +7131,7 @@ void JsSceneSession::ProcessDecorEnableChangeRegister()
 
 void JsSceneSession::OnDecorEnableChange(bool isDecorEnable)
 {
-    auto task = [weakThis = wptr(this), isDecorEnable, env = env_, persistentId = persistentId_, where = func] {
+    auto task = [weakThis = wptr(this), isDecorEnable, env = env_, persistentId = persistentId_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s: jsSceneSession id: %{public}d has been destroyed",

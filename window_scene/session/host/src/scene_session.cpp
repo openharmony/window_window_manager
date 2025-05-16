@@ -8261,7 +8261,7 @@ void SceneSession::SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func)
         TLOGW(WmsLogTag::WMS_SUB, "func is null");
         return;
     }
-    PostTask([weakThis = wptr(this), func = std::move(func), where = func] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
@@ -8280,7 +8280,7 @@ WSError SceneSession::SetSubWindowSource(SubWindowSource source)
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    PostTask([weakThis = wptr(this), source = source, where = func] {
+    PostTask([weakThis = wptr(this), source = source, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);

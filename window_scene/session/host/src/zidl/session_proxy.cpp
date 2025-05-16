@@ -3003,6 +3003,6 @@ WSError SessionProxy::SetSubWindowSource(SubWindowSource source)
         TLOGE(WmsLogTag::WMS_SUB, "read ret failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast(ret);
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen
