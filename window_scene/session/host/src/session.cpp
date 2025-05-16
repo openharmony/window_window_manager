@@ -3032,6 +3032,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+            return;
         }
         if (!session->isWindowModeDirty_.load()) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: windowMode is not dirty, nothing to do, id:%{public}d",
@@ -3045,7 +3046,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         if (session->timesToWaitForVsync_.load() > 0) {
             session->InitVsyncCallbackForModeChangeAndRequestNextVsync();
         } else if (session->timesToWaitForVsync_.load() < 0) {
-            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, waitVsyncTimes:%{public}d",
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, waitVsyncTimes:%{public}d",
                 funcName, session->GetPersistentId(), session->timesToWaitForVsync_.load());
             session->timesToWaitForVsync_.store(0);
             session->isWindowModeDirty_.store(false);
