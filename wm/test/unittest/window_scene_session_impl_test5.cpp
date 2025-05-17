@@ -830,7 +830,6 @@ HWTEST_F(WindowSceneSessionImplTest5, Interactive, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
-    window->SetTargetAPIVersion(20);
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
