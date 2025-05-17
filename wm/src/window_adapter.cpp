@@ -185,6 +185,33 @@ WMError WindowAdapter::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInf
     return wmsProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
 }
 
+WMError WindowAdapter::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    auto ret = wmsProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (windowManagerAgentMap_.find(type) == windowManagerAgentMap_.end()) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "WINDOW_MANAGER_AGENT_TYPE_PROPERTY not found");
+        return ret;
+    }
+
+    auto& agentSet = windowManagerAgentMap_[type];
+    auto agent = std::find(agentSet.begin(), agentSet.end(), windowManagerAgent);
+    if (agent == agentSet.end()) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Cannot find WINDOW_MANAGER_AGENT_TYPE_PROPERTY");
+        return ret;
+    }
+    agentSet.erase(agent);
+
+    return ret;
+}
+
 WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

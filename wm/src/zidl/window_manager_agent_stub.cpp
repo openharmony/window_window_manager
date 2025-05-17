@@ -276,7 +276,7 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
     }
 
     WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(WindowInfoKeyValue);
-    switch(windowInfoKey) {
+    switch (windowInfoKey) {
         case WindowInfoKey::WINDOW_ID : {
             uint32_t value = 0;
             if (!data.ReadUint32(value)) {
