@@ -143,6 +143,7 @@ public:
      * Compatible Mode
      */
     bool IsAdaptToSimulationScale() const;
+    bool IsAdaptToSubWindow() const;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;

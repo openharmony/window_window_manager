@@ -336,10 +336,16 @@ bool WindowSessionImpl::IsAdaptToSimulationScale() const
     return property->IsAdaptToSimulationScale();
 }
 
+bool WindowSessionImpl::IsAdaptToSubWindow() const
+{
+    auto property = GetPropertyByContext();
+    return property->IsAdaptToSubWindow();
+}
+
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
-    bool isNormalCompatSubWindow = IsAdaptToCompatibleImmersive() &&
+    bool isNormalCompatSubWindow = IsAdaptToSubWindow() &&
         !property_->GetIsUIExtensionAbilityProcess();
     if (IsPcOrPadCapabilityEnabled() && !isNormalCompatSubWindow && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
