@@ -2990,6 +2990,19 @@ void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
     }, __func__);
 }
 
+void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func)
+{
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: session or func is null", where);
+            return;
+        }
+        session->updateTransitionAnimationFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
+}
+
 bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
@@ -8261,5 +8274,17 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
         return sessionProperty->IsSubWindowOutlineEnabled();
     }
     return false;
+}
+
+/**
+ * Window Transition Animation For PC
+ */
+WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    if (updateTransitionAnimationFunc_) {
+        updateTransitionAnimationFunc_(transitionType, animation);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
