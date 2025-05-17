@@ -150,7 +150,7 @@ WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType 
     auto iter = TEMPLATE_CONTROL_MAP.find(pipTemplateType);
     if (iter == TEMPLATE_CONTROL_MAP.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "createPip param error, pipTemplateType %{public}d not exists",
-            reinterpret_cast<int32_t>(pipTemplateType));
+            static_cast<int32_t>(pipTemplateType));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     config_.pipTemplateType = static_cast<uint32_t>(pipTemplateType);
