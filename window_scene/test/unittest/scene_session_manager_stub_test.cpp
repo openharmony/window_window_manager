@@ -18,6 +18,7 @@
 #include <message_parcel.h>
 
 #include "iremote_object_mocker.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session/container/include/window_event_channel.h"
@@ -79,6 +80,8 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdCreateAndConnectSpecificSession, Te
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    surfaceNode->SetRSUIContext(rsUIContext);
     ASSERT_NE(nullptr, surfaceNode);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
@@ -124,6 +127,8 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndConnectSpecificSession, T
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    surfaceNode->SetRSUIContext(rsUIContext);
     ASSERT_NE(nullptr, surfaceNode);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
@@ -169,6 +174,8 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdRecoverAndReconnectSceneSession, Te
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    surfaceNode->SetRSUIContext(rsUIContext);
     ASSERT_NE(nullptr, surfaceNode);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
@@ -1112,6 +1119,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, Tes
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    surfaceNode->SetRSUIContext(rsUIContext);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
     stub_->HandleCreateAndConnectSpecificSession(data, reply);
@@ -1155,6 +1164,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, Te
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     surfaceNodeConfig.SurfaceNodeName = "SurfaceNode";
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    surfaceNode->SetRSUIContext(rsUIContext);
     surfaceNode->Marshalling(data);
     data.WriteBool(false);
     int res = stub_->HandleRecoverAndConnectSpecificSession(data, reply);
@@ -1934,6 +1945,43 @@ HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, TestSize.Level1
     data.WriteInt32(targetPersistentId);
 
     int res = stub_->HandleShiftAppWindowFocus(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetStartWindowBackgroundColor
+ * @tc.desc: test HandleSetStartWindowBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    data.WriteInt32(100);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

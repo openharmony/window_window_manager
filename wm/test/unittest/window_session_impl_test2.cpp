@@ -290,6 +290,90 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateViewportConfig_KeyFrame
+ * @tc.desc: UpdateViewportConfig_KeyFrame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UpdateViewportConfig_KeyFrame, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("UpdateViewportConfig_KeyFrame");
+    ASSERT_NE(window, nullptr);
+    Rect rect{ 10, 10, 10, 10 };
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    KeyFramePolicy keyFramePolicy;
+    window->SetKeyFramePolicy(keyFramePolicy);
+    window->keyFramePolicy_.stopping_ = true;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
+    ASSERT_EQ(window->keyFramePolicy_.stopping_, true);
+    reason = WindowSizeChangeReason::DRAG_END;
+    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
+    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
+    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
+    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
+    reason = WindowSizeChangeReason::UNDEFINED;
+    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
+    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: RegisterKeyFrameCallback
+ * @tc.desc: RegisterKeyFrameCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterKeyFrameCallback, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RegisterKeyFrameCallback");
+    ASSERT_NE(window, nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->RegisterKeyFrameCallback();
+    window->uiContent_ = nullptr;
+    window->RegisterKeyFrameCallback();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: LinkKeyFrameCanvasNode
+ * @tc.desc: LinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, LinkKeyFrameCanvasNode, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("LinkKeyFrameCanvasNode");
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    auto rsCanvasNode = RSCanvasNode::Create();
+    window->uiContent_ = nullptr;
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = nullptr;
+    window->hostSession_ = hostSession;
+    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(window->LinkKeyFrameCanvasNode(rsCanvasNode), WSError::WS_OK);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: SetKeyFramePolicy
+ * @tc.desc: SetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetKeyFramePolicy, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("SetKeyFramePolicy");
+    ASSERT_NE(window, nullptr);
+    KeyFramePolicy keyFramePolicy;
+    ASSERT_EQ(window->SetKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
+    window->Destroy();
+}
+
+/**
  * @tc.name: NotifyUIContentFocusStatus
  * @tc.desc: NotifyUIContentFocusStatus
  * @tc.type: FUNC

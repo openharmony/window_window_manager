@@ -1273,6 +1273,11 @@ WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
     return ret;
 }
 
+WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const
+{
+    return SingletonContainer::Get<WindowAdapter>().GetGlobalWindowMode(displayId, globalWinMode);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
@@ -1661,6 +1666,18 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
         sourceWindowId, targetWindowId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color)
+{
+    int32_t uid = getuid();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetStartWindowBackgroundColor(
+        moduleName, abilityName, color, uid);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed");
     }
     return ret;
 }

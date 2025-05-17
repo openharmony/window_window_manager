@@ -849,6 +849,15 @@ public:
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
 
     /**
+     * @brief Get global window mode.
+     *
+     * @param displayId DisplayId of which display to get window mode, DISPLAY_ID_INVALID means all displays.
+     * @param globalWinMode Global window mode flag of specified display or all displays.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
@@ -923,6 +932,17 @@ public:
      * @return WM_OK means shift window focus success, others means failed.
      */
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+
+    /**
+     * @brief Set start window background color.
+     *
+     * @param moduleName Module name that needs to be set
+     * @param abilityName Ability name that needs to be set
+     * @param color Color metrics
+     * @return WM_OK means set start window background color success, others means failed.
+     */
+    WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color);
 
     /**
      * @brief Get snapshot by window id.
