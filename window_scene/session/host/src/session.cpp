@@ -1004,8 +1004,11 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
           GetPersistentId(), displayId, clientDisplayId_);
-    clientDisplayId_ = displayId;
     sessionStage_->UpdateDisplayId(displayId);
+    if (DisplayIdChangeFunc_ && clientDisplayId_ != displayId) {
+        DisplayIdChangeFunc_(GetWindowId(), displayId);
+    }
+    clientDisplayId_ = displayId;
     return WSError::WS_OK;
 }
 
@@ -4266,5 +4269,9 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
     return rsUIContext_;
+}
+void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
+{
+    DisplayIdChangeFunc_ = func;
 }
 } // namespace OHOS::Rosen
