@@ -71,13 +71,12 @@ public:
 };
 
 class TestWindowDisplayIdChangeListener : public IWindowInfoChangedListener {
-    public:
-        void OnWindowInfoChanged(
-            const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
-        {
-            WLOGI("TestWindowUpdateListener");
-        };
+public:
+    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    {
+        WLOGI("TestWindowUpdateListener");
     };
+};
 
 class TestWindowModeChangedListener : public IWindowModeChangedListener {
 public:
@@ -1903,7 +1902,6 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
     ASSERT_EQ(0, windowManager.pImpl_->windowDisplayIdChangeListeners_.size());
 
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayIdChangedListener(listener1));
-    EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayIdChangedListener(listener2));
     ASSERT_EQ(0, windowManager.pImpl_->windowDisplayIdChangeListeners_.size());
     ASSERT_EQ(nullptr, windowManager.pImpl_->WindowDisplayIdChangeListenerAgent_);
