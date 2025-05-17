@@ -3424,12 +3424,10 @@ bool WindowSceneSessionImpl::IsStartMoving()
 
 bool WindowSceneSessionImpl::CalcWindowShouldMove()
 {
-    WindowType windowType = GetType();
-    if (WindowHelper::IsInputWindow(windowType)) {
-        if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
-            windowSystemConfig_.IsPhoneWindow()) {
+    if ((windowSystemConfig_.IsPhoneWindow() ||
+        (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             return true;
-        }
     }
 
     if (IsPcOrPadCapabilityEnabled()) {
@@ -3447,6 +3445,20 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowType()
         return false;
     }
     return true;
+}
+
+bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
+{
+    WindowType windowType = GetType();
+    bool isPcOrFreeMultiWindowCanMove = IsPcOrPadCapabilityEnabled() && (WindowHelper::IsSystemWindow(windowType) ||
+        WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType));
+    bool isPhoneWindowCanMove = (windowSystemConfig_.IsPhoneWindow() ||
+        (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
+        (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType));
+    if (isPcOrFreeMultiWindowCanMove || isPhoneWindowCanMove) {
+        return true;
+    }
+    return false;
 }
 
 bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
@@ -3495,7 +3507,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
-    if (!CheckCanMoveWindowType()) {
+    if (!CheckCanMoveWindowTypeByDevice()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }

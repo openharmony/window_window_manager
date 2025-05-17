@@ -219,7 +219,7 @@ void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragCon
 /** @note @window.drag */
 void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, 1.0f, 1.0f, {0, 0, 0, 0}, {0, 0, 0, 0}};
 }
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
@@ -250,7 +250,7 @@ void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t 
 /** @note @window.drag */
 void MoveDragController::ResetCrossMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, 1.0f, 1.0f, {0, 0, 0, 0}, {0, 0, 0, 0}};
     DMError error = ScreenManager::GetInstance().UnregisterScreenListener(this);
     if (error != DMError::DM_OK) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Register ScreenListener false.");
@@ -266,6 +266,7 @@ void MoveDragController::ResetCrossMoveDragProperty()
     originalDisplayOffsetX_ = 0;
     originalDisplayOffsetY_ = 0;
     moveDragIsInterrupted_ = false;
+    parentRect_ = {0, 0, 0, 0};
 }
 
 void MoveDragController::SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
@@ -657,6 +658,25 @@ void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
     screenSizeProperty_.height = currentScreenProperty.GetBounds().rect_.height_;
 }
 
+void MoveDragController::SetCale(float scaleX, float scaleY)
+{
+    if (MathHelper::NearZero(moveDragProperty_.scaleX_) || MathHelper::NearZero(moveDragProperty_.scaleY_)) {
+        TLOE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        moveDragProperty_.scaleX_ = 1.0f;
+        moveDragProperty_.scaleY_ = 1.0f;
+        return;
+    }
+    moveDragProperty_.scaleX_ = scaleX;
+    moveDragProperty_.scaleY_ = scaleY;
+}
+
+void MoveDragController::SetParentRect(Rect parentRect)
+{
+    parentRect_ = parentRect;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:[%{public}d %{public}d %{public}d %{public}d]",
+        parentRect_.posX_, parentRect_.posY_, parentRect_.width_, parentRect_.height_);
+}
+
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
@@ -676,7 +696,11 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
         (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
-    return std::make_pair(tranX, tranY);
+    if (MathHelper::NearZero(moveDragProperty_.scaleX_) || MathHelper::NearZero(moveDragProperty_.scaleY_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        return std::make_pair(tranX, tranY);
+    }
+    return std::make_pair(tranX / moveDragProperty_.scaleX_, tranY / moveDragProperty_.scaleY_);
 }
 
 void MoveDragController::AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY)
@@ -767,8 +791,8 @@ void MoveDragController::InitializeMoveDragPropertyNotValid(const std::shared_pt
     int32_t pointerWindowX = pointerItem.GetWindowX();
     int32_t pointerWindowY = pointerItem.GetWindowY();
     moveDragProperty_.originalRect_ = originalRect;
-    moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX;
-    moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
+    moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX - parentRect_.posX_;
+    moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY - parentRect_.posY_;
 }
 
 bool MoveDragController::CheckAndInitializeMoveDragProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -979,8 +1003,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     if (aspectRatio_ <= NEAR_ZERO) {
         CalcFreeformTranslateLimits(type_);
     }
-    moveDragProperty_.originalRect_.posX_ = pointerItem.GetDisplayX() - pointerItem.GetWindowX();
-    moveDragProperty_.originalRect_.posY_ = pointerItem.GetDisplayY() - pointerItem.GetWindowY();
+    moveDragProperty_.originalRect_.posX_ = pointerItem.GetDisplayX() - pointerItem.GetWindowX() - parentRect_.posX_;
+    moveDragProperty_.originalRect_.posY_ = pointerItem.GetDisplayY() - pointerItem.GetWindowY() - parentRect_.posY_;
     mainMoveAxis_ = AxisType::UNDEFINED;
     isStartDrag_ = true;
     NotifyWindowInputPidChange(isStartDrag_);
@@ -1409,8 +1433,8 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     }
 
     WSRect originalRect = {
-        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_,
-        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_,
+        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_,
+        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_ - parentRect_.posY_,
         windowRect.width_,
         windowRect.height_
     };

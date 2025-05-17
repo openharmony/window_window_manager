@@ -6662,14 +6662,6 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since window is not system window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
 
     bool enableDrag = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enableDrag)) {
