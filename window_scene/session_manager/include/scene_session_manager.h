@@ -477,6 +477,7 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
+    void ConfigSupportFunctionType(SupportFunctionType funcType);
 
     /*
      * UIExtension

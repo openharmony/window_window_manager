@@ -7841,11 +7841,11 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
                 where, session->GetPersistentId());
             return;
         }
-        if (isShowAnimation && !session->isKeyboardDidShowRegistered_.load()) {
+        if (isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did show listener is not registered");
             return;
         }
-        if (!isShowAnimation && !session->isKeyboardDidHideRegistered_.load()) {
+        if (!isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did hide listener is not registered");
             return;
         }
@@ -7858,14 +7858,56 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
     }, __func__);
 }
 
+void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const WSRect& beginRect, const WSRect& endRect,
+    bool withAnimation, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    PostTask([weakThis = wptr(this), isKeyboardShow, beginRect, endRect, withAnimation,
+        rsTransaction, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+                where, session->GetPersistentId());
+            return;
+        }
+        if (isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
+            return;
+        }
+        if (!isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
+            return;
+        }
+        KeyboardAnimationInfo keyboardAnimationInfo;
+        keyboardAnimationInfo.beginRect = SessionHelper::TransferToRect(beginRect);
+        keyboardAnimationInfo.endRect = SessionHelper::TransferToRect(endRect);
+        keyboardAnimationInfo.isShow = isKeyboardShow;
+        keyboardAnimationInfo.withAnimation = withAnimation;
+        session->sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+        }, __func__);
+}
+
+void SceneSession::NotifyKeyboardWillShowRegistered(bool registered)
+{
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_ = registered;
+}
+
+void SceneSession::NotifyKeyboardWillHideRegistered(bool registered)
+{
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_ = registered;
+}
+
 void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 {
-    isKeyboardDidShowRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_ = registered;
 }
 
 void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 {
-    isKeyboardDidHideRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
 }
 
 WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)

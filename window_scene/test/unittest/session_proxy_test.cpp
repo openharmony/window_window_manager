@@ -1382,6 +1382,7 @@ HWTEST_F(SessionProxyTest, NotifyFollowParentMultiScreenPolicy, TestSize.Level1)
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFollowParentMultiScreenPolicy end";
 }
 
+
 /**
  * @tc.name: UpdateRotationChangeRegistered
  * @tc.desc: UpdateRotationChangeRegistered test
@@ -1462,6 +1463,35 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
     ASSERT_NE(sProxy, nullptr);
     bool isHighlighted = false;
     ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_ERROR_IPC_FAILED);
+}
+/**
+ * @tc.name: NotifyKeyboardWillShowRegistered
+ * @tc.desc: NotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool registered = true;
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+}
+
+/**
+ * @tc.name: NotifyKeyboardWillHideRegistered
+ * @tc.desc: NotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool registered = true;
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
 }
 } // namespace
 } // namespace Rosen

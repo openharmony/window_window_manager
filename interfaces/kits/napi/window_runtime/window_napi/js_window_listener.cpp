@@ -279,13 +279,69 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     }
 }
 
+void JsWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+}
+
+void JsWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+}
+
+void JsWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+{
+    auto jsCallback = [self = weakRef_, env = env_, keyboardAnimationInfo, curve, callBackName, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.beginRect);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
+            return;
+        }
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.endRect);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+
+        napi_value configObjValue = CreateJsWindowAnimationConfigObject(env, curve);
+        if (configObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert config to jsObject", funcName);
+            return;
+        }
+
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
+        napi_set_named_property(env, objValue, "animated", CreateJsValue(env, keyboardAnimationInfo.withAnimation));
+        napi_set_named_property(env, objValue, "config", configObjValue);
+
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(callBackName.c_str(), argv, ArraySize(argv));
+    };
+    jsCallback();
+}
+
 void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
     auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
         HandleScope handleScope(env);

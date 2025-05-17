@@ -998,6 +998,12 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isKeyboardWillShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardWillHideRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidHideRegistered_)) {
+        return false;
+    }
     return true;
 }
 
@@ -1042,6 +1048,13 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
+    if (!parcel.ReadBool(info.isKeyboardWillShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardWillHideRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidHideRegistered_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read keyboard registered state!");
+        return false;
+    }
     property->SetSessionInfo(info);
     return true;
 }
