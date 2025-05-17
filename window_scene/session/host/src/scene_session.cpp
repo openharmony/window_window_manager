@@ -7076,7 +7076,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     }
     auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (needSaveSnapshot && !GetShowRecent()) {
+    if (needSaveSnapshot && !GetShowRecent()) { // persistent imageFit exist, add snapshot when interactive is false.
         if (interactive) {
             TLOGND(WmsLogTag::WMS_PATTERN, "Remove static image from window");
             PostTask([weakThis = wptr(this), where = __func__] {
