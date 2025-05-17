@@ -453,14 +453,14 @@ void WindowManager::Impl::NotifyWindowPidVisibilityChanged(
 void WindowManager::Impl::NotifyWindowRectChange(
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    std::vector<sptr<IWindowPropertyChangedListener>> windowRectChangeListeners;
+    std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners;
     {
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         windowRectChangeListeners = windowRectChangeListeners_;
     }
     for (auto &listener : windowRectChangeListeners) {
         if (listener != nullptr) {
-            listener->OnWindowPropertyChange(windowInfoList);
+            listener->OnWindowInfoChanged(windowInfoList);
         }
     }
 }
@@ -881,6 +881,10 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
         pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        interestInfo |= (1 << static_cast<uint32_t>(windowInfoKey));
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
         WindowInfoKey::RECT, listener->GetInterestInfo(), pImpl_->windowPropertyChangeAgent_);

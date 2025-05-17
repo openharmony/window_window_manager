@@ -33,7 +33,7 @@ private:
     bool ReadWindowInfoList(MessageParcel& data,
         std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
     bool ReadWindowInfo(MessageParcel& data,
-        const std::unordered_map<WindowInfoKey, std::any>& windowInfo);
+        std::unordered_map<WindowInfoKey, std::any>& windowInfo);
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -1411,7 +1411,7 @@ private:
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
     void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
-    void NotifyWindowPropertyChange();
+    void NotifyWindowPropertyChange(ScreenId screenId);
     uint32_t observedFlags_ = 0;
     uint32_t interestFlags_ = 0;
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
