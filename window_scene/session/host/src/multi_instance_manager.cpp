@@ -413,4 +413,9 @@ bool MultiInstanceManager::ConvertInstanceKeyToInstanceId(const std::string& ins
     instanceId = static_cast<uint32_t>(instanceIdNum);
     return true;
 }
+
+std::unordered_map<std::string, AppExecFwk::ApplicationInfo> MultiInstanceManager::GetApplicationInfos()
+{
+    return appInfoMap_;
+}
 } // namespace OHOS::Rosen
