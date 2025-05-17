@@ -133,6 +133,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "DragResizeType", CreateJsSessionDragResizeType(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", CreateRotationChangeType(env));
     napi_set_named_property(env, exportObj, "RectType", CreateRectType(env));
+    napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
+    napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -700,6 +702,13 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().RegisterSetTopWindowBoundaryByIDFunc(
         [](const std::string& id) {
         RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
+    });
+    SceneSessionManager::GetInstance().SetHasRootSceneRequestedVsyncFunc([] {
+        return RootScene::staticRootScene_->HasRequestedVsync();
+    });
+    SceneSessionManager::GetInstance().SetRequestVsyncByRootSceneWhenModeChangeFunc(
+        [](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        return RootScene::staticRootScene_->RequestVsync(vsyncCallback);
     });
 }
 

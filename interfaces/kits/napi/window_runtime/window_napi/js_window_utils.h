@@ -374,6 +374,8 @@ public:
     napi_value RectChangeReasonInit(napi_env env);
     napi_value RotationChangeTypeInit(napi_env env);
     napi_value RectTypeInit(napi_env env);
+    napi_value WindowTransitionTypeInit(napi_env env);
+    napi_value WindowAnimationCurveInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);

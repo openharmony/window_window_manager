@@ -767,6 +767,36 @@ WSError SessionStageProxy::UpdateWindowMode(WindowMode mode)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::NotifyLayoutFinishAfterWindowModeChange(WindowMode mode)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write mode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t messageCode =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE);
+    if (remote->SendRequest(messageCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 void SessionStageProxy::NotifyForegroundInteractiveStatus(bool interactive)
 {
     MessageParcel data;

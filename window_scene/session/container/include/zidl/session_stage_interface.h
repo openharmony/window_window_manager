@@ -110,6 +110,7 @@ public:
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
+    virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyBackgroundNonInteractiveStatus() = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
