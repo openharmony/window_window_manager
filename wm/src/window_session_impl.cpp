@@ -1432,7 +1432,7 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
         return;
     }
     if (interactive) {
-        // RESUMED事件和INTERACTIVE事件不保序
+        // RESUMED and INTERACTIVE are out of order
         NotifyAfterResumed();
         if (state_ != WindowState::STATE_SHOWN || !isDidForeground_) {
             TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d, isDidForeground: %{public}d", state_, isDidForeground_);
