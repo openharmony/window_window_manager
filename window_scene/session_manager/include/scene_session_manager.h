@@ -703,6 +703,9 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t resourceId,
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
 
@@ -1468,6 +1471,7 @@ private:
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
 };
 } // namespace OHOS::Rosen
 

@@ -125,6 +125,7 @@ private:
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
+    int HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);

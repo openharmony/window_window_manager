@@ -39,6 +39,7 @@
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
+#include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -116,6 +117,7 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 Session::~Session()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    DeletePersistentImageFit();
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
             // do nothing
@@ -468,13 +470,15 @@ void Session::NotifyRemoveBlank()
     }
 }
 
-void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist)
+void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist, bool needSaveSnapshot)
 {
     /*
      * for blankness prolems, persist snapshot could conflict with background process,
      * thus no need to persist snapshot here
      */
-    SaveSnapshot(useFfrt, needPersist);
+    if (needSaveSnapshot) {
+        SaveSnapshot(useFfrt, needPersist);
+    }
     auto task = [weakThis = wptr(this), where = __func__]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -2499,19 +2503,19 @@ bool Session::GetEnableAddSnapshot() const
     return enableAddSnapshot_;
 }
 
-void Session::SaveSnapshot(bool useFfrt, bool needPersist)
+void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist]() {
+    auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        auto pixelMap = session->Snapshot(runInFfrt);
+        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt);
         if (pixelMap == nullptr) {
             return;
         }
@@ -4249,6 +4253,17 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
+}
+
+void Session::DeletePersistentImageFit()
+{
+    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (isPersistentImageFit) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "delete persistent ImageFit");
+        Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
+            Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    }
 }
 
 void Session::InitRSUIContext()
