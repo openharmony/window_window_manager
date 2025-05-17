@@ -1448,7 +1448,7 @@ void WindowSessionImpl::NotifyNonInteractiveStatus()
         return;
     }
     if (state_ != WindowState::STATE_SHOWN) {
-        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d is not shown");
+        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d is not shown", state_);
         return;
     }
     NotifyAfterNonInteractive();
@@ -4242,11 +4242,11 @@ void WindowSessionImpl::NotifyAfterInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    if (!isNotifyInteractiveEvent_) {
+    if (isInteractiveStateFlag_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in interactive status");
         return;
     }
-    isNotifyInteractiveEvent_ = true;
+    isInteractiveStateFlag_ = true;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterInteractive, lifecycleListeners);
 }
@@ -4255,11 +4255,11 @@ void WindowSessionImpl::NotifyAfterNonInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    if (isNotifyInteractiveEvent_) {
+    if (!isInteractiveStateFlag_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
-    isNotifyInteractiveEvent_ = false;
+    isInteractiveStateFlag_ = false;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
 }
