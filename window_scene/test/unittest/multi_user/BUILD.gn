@@ -44,6 +44,7 @@ ohos_unittest("window_scene_user_switch_test") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
+    "image_framework:image_native",
     "input:libmmi-napi",
   ]
 }

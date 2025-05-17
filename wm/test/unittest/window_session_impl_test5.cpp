@@ -648,6 +648,96 @@ HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | L
     ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: GetPropertyByContext
+ * @tc.desc: GetPropertyByContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetPropertyByContext, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPropertyByContext");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    int32_t persistentId = 663;
+    window->property_->SetPersistentId(persistentId);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    auto property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("GetPropertyByContext_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    int32_t mainPersistentId = 666;
+    mainWindow->property_->SetPersistentId(mainPersistentId);
+    window->windowSessionMap_.insert({mainWindow->GetWindowName(),
+        std::pair<int32_t, sptr<WindowSessionImpl>>(mainPersistentId, mainWindow) });
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    mainWindow->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+    mainWindow->context_ = window->context_;
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
+
+    window->property_->SetIsUIExtensionAbilityProcess(true);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), persistentId);
+    window->windowExtensionSessionSet_.insert(mainWindow);
+    property = window->GetPropertyByContext();
+    EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
+}
+
+/**
+ * @tc.name: IsAdaptToSimulationScale
+ * @tc.desc: IsAdaptToSimulationScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsAdaptToSimulationScale, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAdaptToSimulationScale");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->property_->SetPersistentId(704);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(window->IsAdaptToSimulationScale(), true);
+
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("IsAdaptToSimulationScale_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    int32_t mainPersistentId = 666;
+    mainWindow->property_->SetPersistentId(mainPersistentId);
+    window->windowSessionMap_.insert({mainWindow->GetWindowName(),
+        std::pair<int32_t, sptr<WindowSessionImpl>>(mainPersistentId, mainWindow) });
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    mainWindow->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    mainWindow->context_ = window->context_;
+    EXPECT_EQ(window->IsAdaptToSimulationScale(), false);
+}
+
+/**
+ * @tc.name: IsAdaptToSimulationScale
+ * @tc.desc: IsAdaptToSimulationScale
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
+ {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetIntentParam");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "testIntent";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+    EXPECT_EQ(window->isColdStart_, true);
+    EXPECT_EQ(window->intentParam_, intentParam);
+ }
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

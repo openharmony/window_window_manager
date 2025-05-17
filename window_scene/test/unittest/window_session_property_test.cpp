@@ -1341,6 +1341,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetZIndex
+ * @tc.desc: GetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->zIndex_ = zIndex;
+    ASSERT_EQ(zIndex, property->GetZIndex());
+}
+
+/**
+ * @tc.name: SetZIndex
+ * @tc.desc: SetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->SetZIndex(zIndex);
+    ASSERT_EQ(zIndex, property->zIndex_);
+}
+/**
  * @tc.name: SetAndIsSystemKeyboard
  * @tc.desc: SetIsSystemKeyboard and IsSystemKeyboard Test
  * @tc.type: FUNC

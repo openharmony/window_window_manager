@@ -36,6 +36,7 @@
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
+#include "rs_adapter.h"
 #include "session_helper.h"
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
@@ -137,6 +138,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
+constexpr int32_t FORCE_SPLIT_MODE = 5;
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -311,6 +313,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         auto parentWindowId = parentSession->GetPersistentId();
         property_->SetParentPersistentId(parentWindowId);
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+        property_->SetIsUIExtensionAbilityProcess(parentSession->GetProperty()->GetIsUIExtensionAbilityProcess());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
@@ -1461,7 +1464,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr && (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
-        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW)) {
+        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(type))) {
         display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
         if (display != nullptr) {
             property_->SetDisplayId(display->GetId());
@@ -1626,7 +1629,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         animationTransitionController_->AnimationForHidden();
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     }
     NotifyWindowStatusChange(GetWindowMode());
     escKeyEventTriggered_ = false;
@@ -1701,7 +1704,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
         case WindowType::WINDOW_TYPE_PANEL:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
-        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
+        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD:
+        case WindowType::WINDOW_TYPE_DYNAMIC: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
@@ -4139,7 +4143,7 @@ WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
 
     WLOGFI("Set window %{public}s corner radius %{public}f", GetWindowName().c_str(), cornerRadius);
     surfaceNode_->SetCornerRadius(cornerRadius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4202,7 +4206,7 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
     }
 
     surfaceNode_->SetShadowRadius(radius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4231,7 +4235,7 @@ WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
         return WMError::WM_ERROR_NULLPTR;
     }
     surfaceNode_->SetShadowRadius(radius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4249,7 +4253,7 @@ WMError WindowSceneSessionImpl::SetShadowColor(std::string color)
     }
 
     surfaceNode_->SetShadowColor(colorValue);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4262,7 +4266,7 @@ WMError WindowSceneSessionImpl::SetShadowOffsetX(float offsetX)
 
     WLOGFI("Set window %{public}s shadow offsetX %{public}f", GetWindowName().c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4275,7 +4279,7 @@ WMError WindowSceneSessionImpl::SetShadowOffsetY(float offsetY)
 
     WLOGFI("Set window %{public}s shadow offsetY %{public}f", GetWindowName().c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4294,7 +4298,7 @@ WMError WindowSceneSessionImpl::SetBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("Set window %{public}s blur radius after conversion %{public}f", GetWindowName().c_str(), radius);
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4313,7 +4317,7 @@ WMError WindowSceneSessionImpl::SetBackdropBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("Set window %{public}s backdrop blur radius after conversion %{public}f", GetWindowName().c_str(), radius);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4347,7 +4351,7 @@ WMError WindowSceneSessionImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
             static_cast<int>(blurStyle), GetVirtualPixelRatio(displayInfo)));
     }
 
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4524,7 +4528,7 @@ void WindowSceneSessionImpl::TransformSurfaceNode(const Transform& trans)
     surfaceNode_->SetRotation(trans.rotationZ_);
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag != static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     }
 }
 
@@ -4628,7 +4632,7 @@ WMError WindowSceneSessionImpl::SetAlpha(float alpha)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     surfaceNode_->SetAlpha(alpha);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4779,6 +4783,12 @@ void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::strin
         return;
     }
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
+}
+
+WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMode mode)
+{
+    NotifyWindowStatusDidChange(mode);
+    return WSError::WS_OK;
 }
 
 WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
@@ -5280,7 +5290,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     surfaceNode_->SetShadowRadius(0.0f);
     surfaceNode_->SetAbilityBGAlpha(0);
     surfaceNode_->SetMask(rsMask); // RS interface to set mask
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
 
     property_->SetWindowMask(mask);
     property_->SetIsShaped(true);
@@ -5955,6 +5965,54 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcWindow() && !IsPadWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
+    if (ret == WSError::WS_OK) {
+        std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
+        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+        transitionAnimationConfig_[transitionType] = config;
+    }
+
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransitionAnimation(WindowTransitionType
+    transitionType)
+{
+    if (IsWindowSessionInvalid()) {
+        return nullptr;
+    }
+    if (!IsPcWindow() && !IsPadWindow()) {
+        return nullptr;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return nullptr;
+    }
+    std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
+    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
+        return transitionAnimationConfig_[transitionType];
+    } else {
+        return nullptr;
+    }
+}
+
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);
@@ -6073,6 +6131,45 @@ WMError WindowSceneSessionImpl::SetHookTargetElementInfo(const AppExecFwk::Eleme
         property_->EditSessionInfo().abilityName_ = elementName.GetAbilityName();
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppForceLandscapeConfig(config);
+}
+
+void WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    uiContent->SetForceSplitEnable(isForceSplit, homePage);
+}
+
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    WindowType winType = GetType();
+    AppForceLandscapeConfig config = {};
+    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
+        config.isSupportSplitMode_ == true) {
+        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
+        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+            isForceSplit, config.homePage_.c_str());
+        SetForceSplitEnable(isForceSplit, config.homePage_);
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
 }
 } // namespace Rosen
 } // namespace OHOS

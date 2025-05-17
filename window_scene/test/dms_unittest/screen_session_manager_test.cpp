@@ -6573,17 +6573,35 @@ HWTEST_F(ScreenSessionManagerTest, GetOrCreatePhysicalScreenSession, TestSize.Le
 }
 
 /**
- * @tc.name: GetScreenSessionByRsId
- * @tc.desc: GetScreenSessionByRsId
+ * @tc.name: GetScreenSessionByRsId01
+ * @tc.desc: GetScreenSessionByRsId01
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId01, TestSize.Level1)
 {
+    ssm_->screenSessionMap_.erase(123);
+    ScreenId rsScreenId = 123;
+    sptr<ScreenSession> newSession = new ScreenSession();
+    newSession->SetRSScreenId(rsScreenId);
+    ssm_->screenSessionMap_[rsScreenId] = newSession;
+
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
+    EXPECT_NE(result, nullptr);
+    ssm_->screenSessionMap_.erase(123);
+}
+
+/**
+ * @tc.name: GetScreenSessionByRsId02
+ * @tc.desc: GetScreenSessionByRsId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId02, TestSize.Level1)
+{
+    ssm_->screenSessionMap_.clear();
     ScreenId rsScreenId = 123;
     ssm_->screenSessionMap_[rsScreenId] = nullptr;
-    sptr<ScreenSession> newSession = new ScreenSession();
 
-    sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(rsScreenId);
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -6652,6 +6670,89 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked, Function | Smal
     EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
 
     ssm_->SetFoldStatusExpandAndLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap01
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the map is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap01, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> emptyMap;
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(emptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap02
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap02, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, ""));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap03
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is not found in the map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap03, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial456"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap04
+ * @tc.desc: Test CHeckMultiScreenInfoMap function when all checks pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap04, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: AdaptSuperHorizonalBoot
+ * @tc.desc: AdaptSuperHorizonalBoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenSessionConfig config;
+    sptr<ScreenSession> session = new ScreenSession(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ScreenId id = 0;
+    
+    ssm_->AdaptSuperHorizonalBoot(session, id);
+    EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
     EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
 }
 }

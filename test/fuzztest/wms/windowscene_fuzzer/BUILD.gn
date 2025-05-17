@@ -49,6 +49,7 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
     "node:node_header_notice",

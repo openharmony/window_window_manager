@@ -230,6 +230,8 @@ HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_DYNAMIC));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_DYNAMIC));
 }
 
 /**
@@ -315,6 +317,21 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.buttonBackgroundCornerRadius = MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+}
+
+/**
+ * @tc.name: SplitStringByDelimiter
+ * @tc.desc: SplitStringByDelimiter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, SplitStringByDelimiter, TestSize.Level1)
+{
+    std::string inputStr = "a,b,c,d";
+    std::string delimiter = ",";
+    std::unordered_set<std::string> container;
+    WindowHelper::SplitStringByDelimiter(inputStr, delimiter, container);
+    EXPECT_EQ(0, container.count("e"));
+    EXPECT_EQ(1, container.count("a"));
 }
 } // namespace
 } // namespace Rosen

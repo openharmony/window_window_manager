@@ -107,6 +107,7 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
+    BindNativeFunction(env, exportObj, "getSuperRotation", moduleName, JsScreenSessionManager::GetSuperRotation);
     BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
         JsScreenSessionManager::SetLandscapeLockStatus);
     BindNativeFunction(env, exportObj, "setForceCloseHdr", moduleName,
@@ -266,6 +267,13 @@ napi_value JsScreenSessionManager::GetSuperFoldStatus(napi_env env, napi_callbac
     WLOGD("[NAPI]GetSuperFoldStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSuperFoldStatus(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetSuperRotation");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSuperRotation(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_callback_info info)
@@ -878,18 +886,17 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
 napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]OnGetSuperFoldStatus");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
     WLOGI("[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
+}
+
+napi_value JsScreenSessionManager::OnGetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetSuperRotation");
+    float rotation = ScreenSessionManagerClient::GetInstance().GetSuperRotation();
+    TLOGI(WmsLogTag::DMS, "[NAPI] getSuperRotation = %{public}f", rotation);
+    return CreateJsValue(env, rotation);
 }
 
 napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_callback_info info)
@@ -1068,7 +1075,7 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
 napi_value JsScreenSessionManager::OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
     ExtendScreenConnectStatus status = ScreenSessionManagerClient::GetInstance().GetExtendScreenConnectStatus();
-    WLOGI("[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
@@ -1076,7 +1083,7 @@ napi_value JsScreenSessionManager::OnSetDefaultMultiScreenModeWhenSwitchUser(nap
     const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().SetDefaultMultiScreenModeWhenSwitchUser();
-    WLOGI("[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
     return NapiGetUndefined(env);
 }
 
