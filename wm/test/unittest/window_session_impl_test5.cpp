@@ -719,6 +719,25 @@ HWTEST_F(WindowSessionImplTest5, IsAdaptToSimulationScale, Function | SmallTest 
     mainWindow->context_ = window->context_;
     EXPECT_EQ(window->IsAdaptToSimulationScale(), false);
 }
+
+/**
+ * @tc.name: IsAdaptToSimulationScale
+ * @tc.desc: IsAdaptToSimulationScale
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
+ {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetIntentParam");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "testIntent";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+    EXPECT_EQ(window->isColdStart_, true);
+    EXPECT_EQ(window->intentParam_, intentParam);
+ }
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

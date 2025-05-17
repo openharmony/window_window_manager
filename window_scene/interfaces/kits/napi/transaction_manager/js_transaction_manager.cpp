@@ -19,7 +19,9 @@
 #include <transaction/rs_transaction.h>
 
 #include "js_runtime_utils.h"
+#include "rs_adapter.h"
 #include "scene_session_manager.h"
+#include "screen_session_manager_client.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -33,6 +35,12 @@ napi_value NapiGetUndefined(napi_env env)
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     return result;
+}
+
+napi_value NapiThrowError(napi_env env, WSErrorCode err, const std::string& msg)
+{
+    napi_throw(env, CreateJsError(env, static_cast<int32_t>(err), msg));
+    return NapiGetUndefined(env);
 }
 
 napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
@@ -86,14 +94,43 @@ napi_value JsTransactionManager::CloseSyncTransactionWithVsync(napi_env env, nap
     return (me != nullptr) ? me->OnCloseSyncTransactionWithVsync(env, info) : nullptr;
 }
 
+ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(SCREEN_ID_INVALID);
+    size_t argc = 1;
+    napi_value argv[1] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != 1) {
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        return SCREEN_ID_INVALID;
+    }
+
+    int64_t screenIdValue = SCREEN_ID_INVALID;
+    if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to screenId");
+        return SCREEN_ID_INVALID;
+    }
+
+    if (screenIdValue == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid screenId");
+        return SCREEN_ID_INVALID;
+    }
+
+    return static_cast<ScreenId>(screenIdValue);
+}
+
 napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto task = []() {
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
-            RSTransaction::FlushImplicitTransaction();
-            transactionController->OpenSyncTransaction();
-        };
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
+        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
+    }
+
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
+        RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+        RSSyncTransactionAdapter::OpenSyncTransaction(rsUIContext);
     };
     auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
     if (handler) {
@@ -107,10 +144,14 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
 
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto task = [] {
-        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
-            transactionController->CloseSyncTransaction();
-        }
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
+        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
+    }
+
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
+        RSSyncTransactionAdapter::CloseSyncTransaction(rsUIContext);
     };
     if (auto handler = SceneSessionManager::GetInstance().GetTaskScheduler()) {
         handler->PostAsyncTask(task, __func__);
@@ -122,10 +163,14 @@ napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callb
 
 napi_value JsTransactionManager::OnCloseSyncTransactionWithVsync(napi_env env, napi_callback_info info)
 {
-    auto task = [] {
-        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
-            transactionController->CloseSyncTransaction();
-        }
+    ScreenId screenId = ParseScreenIdFromArgs(env, info);
+    if (RSAdapterUtil::IsClientMultiInstanceEnabled() && screenId == SCREEN_ID_INVALID) {
+        return NapiThrowError(env, WSErrorCode::WS_ERROR_INVALID_PARAM, "Input parameter is missing or invalid");
+    }
+
+    auto task = [screenId] {
+        auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
+        RSSyncTransactionAdapter::CloseSyncTransaction(rsUIContext);
     };
     SceneSessionManager::GetInstance().CloseSyncTransaction(task);
     return NapiGetUndefined(env);

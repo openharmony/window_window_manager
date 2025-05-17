@@ -182,6 +182,23 @@ enum class WindowMode : uint32_t {
 };
 
 /**
+ * @brief Enumerates global mode of window.
+ */
+enum class GlobalWindowMode : uint32_t {
+    UNKNOWN = 0,
+    FULLSCREEN = 1,
+    SPLIT = 1 << 1,
+    FLOAT = 1 << 2,
+    PIP = 1 << 3,
+    ALL = FULLSCREEN | SPLIT | FLOAT | PIP
+};
+
+inline GlobalWindowMode operator|(GlobalWindowMode lhs, GlobalWindowMode rhs)
+{
+    return static_cast<GlobalWindowMode>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+/**
  * @brief Enumerates status of window.
  */
 enum class WindowStatus : uint32_t {

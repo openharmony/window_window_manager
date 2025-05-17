@@ -148,6 +148,9 @@ using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(con
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
+using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
+using RequestVsyncByRootSceneWhenModeChangeFunc =
+    std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -362,7 +365,7 @@ public:
         bool isNewWant, bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
-    const WindowLimits& GetWindowLimits(int32_t windowId);
+    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
     /*
      * Compatible Mode
@@ -551,6 +554,8 @@ public:
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
     void ConfigSupportFollowParentWindowLayout();
+    void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
+    void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
 
     /*
      * Window Property
@@ -559,6 +564,7 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
@@ -947,6 +953,7 @@ private:
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
+    bool IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const;
     DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
     void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
@@ -1308,6 +1315,10 @@ private:
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
     void ConfigAppsWithDeduplicatedWindowStatus();
     void SetWindowStatusDeduplicationBySystemConfig(const SessionInfo& sessionInfo, SystemSessionConfig& systemConfig);
+    HasRootSceneRequestedVsyncFunc hasRootSceneRequestedVsyncFunc_;
+    RequestVsyncByRootSceneWhenModeChangeFunc requestVsyncByRootSceneWhenModeChangeFunc_;
+    WSError HasRootSceneRequestedVsync(bool& hasRootSceneRequestedVsync);
+    WSError RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback);
 
     /*
      * Window Snapshot
