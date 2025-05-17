@@ -47,6 +47,10 @@ enum class AceTouchType : int32_t {
     UP,
     MOVE,
     CANCEL,
+    HOVER_ENTER = 9,
+    HOVER_MOVE = 10,
+    HOVER_EXIT = 11,
+    HOVER_CANCEL = 12,
 };
 
 // Refer to OHOS::Ace::SourceType
@@ -58,46 +62,46 @@ enum class AceSourceType : int32_t {
     KEYBOARD = 4
 };
 
+const std::map<int32_t, int32_t> TOUCH_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
+const std::map<int32_t, int32_t> MOUSE_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
 void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
 {
     auto sourceType = pointerEvent.GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        switch (aceType) {
-            case static_cast<int32_t>(AceTouchType::DOWN):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-                break;
-            case static_cast<int32_t>(AceTouchType::UP):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-                break;
-            case static_cast<int32_t>(AceTouchType::MOVE):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-                break;
-            case static_cast<int32_t>(AceTouchType::CANCEL):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                break;
-            default:
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        auto it = TOUCH_ACTION_MAP.find(aceType);
+        if (it == TOUCH_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
         }
+        pointerEvent.SetPointerAction(it->second);
     } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-        switch (aceType) {
-            case static_cast<int32_t>(AceTouchType::DOWN):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-                break;
-            case static_cast<int32_t>(AceTouchType::UP):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-                break;
-            case static_cast<int32_t>(AceTouchType::MOVE):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-                break;
-            case static_cast<int32_t>(AceTouchType::CANCEL):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                break;
-            default:
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        auto it = MOUSE_ACTION_MAP.find(aceType);
+        if (it == MOUSE_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
         }
-    } else {
-        pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        pointerEvent.SetPointerAction(it->second);
     }
 }
 } // namespace
