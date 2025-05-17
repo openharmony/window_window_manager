@@ -285,7 +285,7 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const ch
         }
     }
     TLOGNE(WmsLogTag::WMS_RS_CLI_MULTI_INST,
-          "%{public}s: Failed to invoke RSSyncTransaction", caller);
+           "%{public}s: Failed to invoke RSSyncTransaction", caller);
     if constexpr (!std::is_void_v<ReturnType>) {
         return nullptr;
     }
@@ -350,7 +350,7 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(
         }
     }
     TLOGNE(WmsLogTag::WMS_RS_CLI_MULTI_INST,
-          "%{public}s: Failed to invoke RSSyncTransaction", caller);
+           "%{public}s: Failed to invoke RSSyncTransaction", caller);
     if constexpr (!std::is_void_v<ReturnType>) {
         return nullptr;
     }
