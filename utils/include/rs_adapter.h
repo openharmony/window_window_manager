@@ -27,12 +27,12 @@
 #include <ui/rs_ui_context.h>
 #include <ui/rs_ui_director.h>
 
-#define RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(...)                              \
-    do {                                                                              \
-        if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) {                         \
-            return __VA_ARGS__;                                                       \
-        }                                                                             \
-    } while (false)                                                                   \
+#define RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(...)      \
+    do {                                                      \
+        if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) { \
+            return __VA_ARGS__;                               \
+        }                                                     \
+    } while (false)                                           \
 
 namespace OHOS {
 namespace Rosen {
@@ -189,6 +189,11 @@ public:
     static std::string RSNodeToStr(const std::shared_ptr<RSNode>& rsNode);
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);
 };
+
+inline void RunIfRSClientMultiInstanceEnabled(const std::function<void()>& action) {
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    action();
+}
 } // namespace Rosen
 } // namespace OHOS
 
