@@ -338,7 +338,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyDisplayIdChange, TestSize.Level1)
         resultValue = 1;
     };
     func();
-    ASSERT_EQ(resultValue, 1);
+    EXPECT_EQ(resultValue, 1);
 }
 } // namespace
 } // namespace Rosen
