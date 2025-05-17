@@ -28,6 +28,7 @@
 #include "proxy/include/window_info.h"
 
 #include "common/include/session_permission.h"
+#include "rs_adapter.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -54,6 +55,8 @@ constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
+constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -107,6 +110,8 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
+
+    InitRSUIContext();
 }
 
 Session::~Session()
@@ -161,6 +166,7 @@ int32_t Session::GetPersistentId() const
 
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
 }
@@ -182,16 +188,12 @@ std::optional<NodeId> Session::GetSurfaceNodeId() const
 
 void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode)
 {
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(leashWinSurfaceNode, rsUIContext, true);
     if (g_enableForceUIFirst) {
-        auto rsTransaction = RSTransactionProxy::GetInstance();
-        if (rsTransaction) {
-            rsTransaction->Begin();
-        }
+        AutoRSTransaction trans(rsUIContext);
         if (!leashWinSurfaceNode && leashWinSurfaceNode_) {
             leashWinSurfaceNode_->SetForceUIFirst(false);
-        }
-        if (rsTransaction) {
-            rsTransaction->Commit();
         }
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
@@ -2938,6 +2940,92 @@ WSError Session::PcAppInPadNormalClose()
     return sessionStage_->PcAppInPadNormalClose();
 }
 
+void Session::SetHasRequestedVsyncFunc(HasRequestedVsyncFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, func is null", GetPersistentId());
+        return;
+    }
+    hasRequestedVsyncFunc_ = std::move(func);
+}
+
+void Session::SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, func is null", GetPersistentId());
+        return;
+    }
+    requestNextVsyncWhenModeChangeFunc_ = std::move(func);
+}
+
+WSError Session::RequestNextVsyncWhenModeChange()
+{
+    if (!hasRequestedVsyncFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, func is null", GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    isWindowModeDirty_.store(true);
+    bool hasRequestedVsync = false;
+    hasRequestedVsyncFunc_(hasRequestedVsync);
+    timesToWaitForVsync_.store(hasRequestedVsync ? TIMES_TO_WAIT_FOR_VSYNC_TWICE : TIMES_TO_WAIT_FOR_VSYNC_ONECE);
+    InitVsyncCallbackForModeChangeAndRequestNextVsync();
+    return WSError::WS_OK;
+}
+
+void Session::OnVsyncReceivedAfterModeChanged()
+{
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), funcName] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+            return;
+        }
+        if (!session->isWindowModeDirty_.load()) {
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: windowMode is not dirty, nothing to do, id:%{public}d",
+                funcName, session->GetPersistentId());
+            return;
+        }
+        session->timesToWaitForVsync_.fetch_sub(1);
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, mode:%{public}d, waitVsyncTimes:%{public}d",
+            funcName, session->GetPersistentId(), session->GetWindowMode(), session->timesToWaitForVsync_.load());
+        bool isWindowModeDirty = true;
+        if (session->timesToWaitForVsync_.load() > 0) {
+            session->InitVsyncCallbackForModeChangeAndRequestNextVsync();
+        } else if (session->timesToWaitForVsync_.load() < 0) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, waitVsyncTimes:%{public}d",
+                funcName, session->GetPersistentId(), session->timesToWaitForVsync_.load());
+            session->timesToWaitForVsync_.store(0);
+            session->isWindowModeDirty_.store(false);
+        } else if (session->timesToWaitForVsync_.load() == 0 && session->sessionStage_ &&
+                   session->isWindowModeDirty_.compare_exchange_strong(isWindowModeDirty, false)) {
+            session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+        } else {
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, sessionStage is null or mode is not dirty",
+                funcName, session->GetPersistentId());
+            session->isWindowModeDirty_.store(false);
+        }
+        }, funcName);
+}
+
+void Session::InitVsyncCallbackForModeChangeAndRequestNextVsync()
+{
+    if (!requestNextVsyncWhenModeChangeFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, func is null", GetPersistentId());
+        return;
+    }
+    std::shared_ptr<VsyncCallback> nextVsyncCallback = std::make_shared<VsyncCallback>();
+    nextVsyncCallback->onCallback = [weakThis = wptr(this), funcName = __func__](int64_t, int64_t) {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+            return;
+        }
+        session->OnVsyncReceivedAfterModeChanged();
+    };
+    requestNextVsyncWhenModeChangeFunc_(nextVsyncCallback);
+}
+
 WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
@@ -2952,6 +3040,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         UpdateGestureBackEnabled();
     } else {
         GetSessionProperty()->SetWindowMode(mode);
+        RequestNextVsyncWhenModeChange();
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             GetSessionProperty()->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
@@ -4172,5 +4261,25 @@ void Session::DeletePersistentImageFit()
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+}
+
+void Session::InitRSUIContext()
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+    // as ArkUI knows the host window for this type of window.
+    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    return rsUIContext_;
 }
 } // namespace OHOS::Rosen

@@ -26,6 +26,7 @@
 
 #include "display_manager_service_inner.h"
 #include "permission.h"
+#include "rs_adapter.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -1857,7 +1858,7 @@ WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
             container->RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(node->GetRSUIContext());
     return WMError::WM_OK;
 }
 

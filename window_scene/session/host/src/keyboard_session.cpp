@@ -17,6 +17,7 @@
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
+#include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
 #include <ui/rs_surface_node.h>
@@ -631,10 +632,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
         session->isKeyboardSyncTransactionOpen_ = true;
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
-            transactionController->OpenSyncTransaction(session->GetEventHandler());
-        }
+        RSSyncTransactionAdapter::OpenSyncTransaction(session->GetRSUIContext(), session->GetEventHandler());
         session->PostKeyboardAnimationSyncTimeoutTask();
         return WSError::WS_OK;
     };
@@ -675,22 +673,14 @@ void KeyboardSession::CloseKeyboardSyncTransaction(uint32_t callingId, const WSR
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard anim_sync event cancelled");
             handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
         }
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
-            transactionController->CloseSyncTransaction(session->GetEventHandler());
-        }
+        RSSyncTransactionAdapter::CloseSyncTransaction(session->GetRSUIContext(), handler);
         return WSError::WS_OK;
     }, "CloseKeyboardSyncTransaction");
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
 {
-    auto transactionController = RSSyncTransactionController::GetInstance();
-    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (transactionController) {
-        rsTransaction = transactionController->GetRSTransaction();
-    }
-    return rsTransaction;
+    return RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
 }
 
 std::string KeyboardSession::GetSessionScreenName()
@@ -825,10 +815,6 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
-    auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction != nullptr && needFlush) {
-        rsTransaction->Begin();
-    }
     if (keyboardPanelSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
         return;
@@ -838,13 +824,13 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surfacenode is null");
         return;
     }
-    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        surfaceNode->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    }
-    if (rsTransaction != nullptr && needFlush) {
-        rsTransaction->Commit();
+    {
+        AutoRSTransaction trans(surfaceNode, needFlush);
+        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            surfaceNode->SetGlobalPositionEnabled(isGlobal);
+            surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+            surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     }
 }
 

@@ -544,16 +544,18 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     sceneSession->property_->SetWindowLimits(limits);
 
     int32_t windowId = 1;
+    WindowLimits windowlimits;
     ssm_->sceneSessionMap_.insert({ windowId, sceneSession });
     auto defaultUIType = ssm_->systemConfig_.windowUIType_;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    auto ret = ssm_->GetWindowLimits(windowId);
+    auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
     ssm_->sceneSessionMap_.erase(windowId);
     ssm_->systemConfig_.windowUIType_ = defaultUIType;
-    ASSERT_EQ(ret.maxHeight_, 1000);
-    ASSERT_EQ(ret.minHeight_, 500);
-    ASSERT_EQ(ret.maxWidth_, 1000);
-    ASSERT_EQ(ret.minWidth_, 500);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(windowlimits.maxHeight_, 1000);
+    ASSERT_EQ(windowlimits.minHeight_, 500);
+    ASSERT_EQ(windowlimits.maxWidth_, 1000);
+    ASSERT_EQ(windowlimits.minWidth_, 500);
 }
 
 /**
