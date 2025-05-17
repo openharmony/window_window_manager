@@ -212,8 +212,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_BACKGROUND_NONINTERACTIVE_STATUS):
-            return HandleNotifyBackgroundNonInteractiveStatus(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
+            return HandleNotifyNonInteractiveStatus(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -494,10 +494,10 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyBackgroundNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleNotifyBackgroundNonInteractiveStatus!");
-    NotifyBackgroundNonInteractiveStatus();
+    TLOGD(WmsLogTag::WMS_LIFE, "called");
+    NotifyNonInteractiveStatus();
     return ERR_NONE;
 }
 

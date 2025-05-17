@@ -1545,13 +1545,16 @@ void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
     TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrPadCapabilityEnabled(),
         isColdStart_);
     if (IsPcOrPadCapabilityEnabled() && !isColdStart_) {
+        isDidForeground_ = true;
         NotifyAfterInteractive();
     }
 }
 
 void WindowSceneSessionImpl::Interactive()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{}d", isColdStart_);
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d",
+        isColdStart_, isDidForeground_);
+    isDidForeground_ = true;
     isColdStart_ = false;
     NotifyAfterInteractive();
 }
@@ -1616,6 +1619,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        isDidForeground_ = false;
         if (!interactive_) {
             hasFirstNotifyInteractive_ = false;
         }

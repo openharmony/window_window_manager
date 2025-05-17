@@ -100,7 +100,7 @@ public:
     WSError NotifyAppForceLandscapeConfigUpdated() override;
 
     // Window LifeCycle
-    void NotifyBackgroundNonInteractiveStatus() override;
+    void NotifyNonInteractiveStatus() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

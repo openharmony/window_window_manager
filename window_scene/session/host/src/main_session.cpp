@@ -242,17 +242,6 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-void MainSession::NotifyClientToUpdateNonInteractive()
-{
-    if (!sessionStage_) {
-        return;
-    }
-    const auto state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
-    if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        sessionStage_->NotifyBackgroundNonInteractiveStatus();
-    }
-}
 
 /*
  * Notify when updating highlight instead after hightlight functionality enabled

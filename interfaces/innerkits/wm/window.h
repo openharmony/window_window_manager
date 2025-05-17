@@ -134,11 +134,13 @@ public:
 
     /**
      * @brief Notify caller that window is resumed.
+     * @deprecated deprecated since app version 20, use AfterInteractive instead.
      */
     virtual void AfterResumed() {}
 
     /**
      * @brief Notify caller that window is paused.
+     * @deprecated deprecated since app version 20, use AfterNonInteractive instead.
      */
     virtual void AfterPaused() {}
 

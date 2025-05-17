@@ -465,7 +465,7 @@ public:
      */
     void NotifyAfterInteractive();
     void NotifyAfterNonInteractive();
-    void NotifyBackgroundNonInteractiveStatus() override;
+    void NotifyNonInteractiveStatus() override;
 
 protected:
     WMError Connect();
@@ -611,7 +611,7 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
-    bool hasNotifyInteractiveEvent_ = false;
+    bool isNotifyInteractiveEvent_ = false;
     std::string intentParam_;
     std::function<void()> loadPageCallback_;
     bool isColdStart_ = true;

@@ -126,7 +126,7 @@ public:
     WMError GoDestroyHookWindow();
 
     /**
-     * Window go resume.
+     * Window go resume. GoResume will be deleted later.
      *
      * @return the error code of window
      */

@@ -53,7 +53,7 @@ private:
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyBackgroundNonInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply);

@@ -99,7 +99,7 @@ enum class LifeCycleEventType : uint32_t {
     ACTIVE,
     INACTIVE,
     BACKGROUND,
-    RESUMED,
+    RESUMED, // RESUMED and PAUSED deprecated since api version 20, use INTERACTIVE and NONINTERACTIVE instead.
     PAUSED,
     DESTROYED,
     INTERACTIVE,
