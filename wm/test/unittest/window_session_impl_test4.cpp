@@ -1136,7 +1136,7 @@ HWTEST_F(WindowSessionImplTest4, Notify03, TestSize.Level1)
  HWTEST_F(WindowSessionImplTest4, NotifyAfterInteractive, TestSize.Level1)
  {
      sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-     option->SetWindowName("Notify03");
+     option->SetWindowName("NotifyAfterInteractive");
      sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
 
      SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };

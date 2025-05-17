@@ -4148,11 +4148,11 @@ void WindowSessionImpl::NotifyAfterPaused()
 void WindowSessionImpl::NotifyAfterInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     if (hasNotifyInteractiveEvent_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in interactive status");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     hasNotifyInteractiveEvent_ = true;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
@@ -4161,11 +4161,11 @@ void WindowSessionImpl::NotifyAfterInteractive()
 void WindowSessionImpl::NotifyAfterNonInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     if (hasNotifyInteractiveEvent_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     hasNotifyInteractiveEvent_ = false;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
