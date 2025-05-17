@@ -5964,7 +5964,7 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
     double radius;
-    sptr<ShadowsInfo> shadowsInfo = new ShadowsInfo;
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -5994,7 +5994,7 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     shadowsInfo->radius_ = radius;
     shadowsInfo->hasRadiusValue_ = true;
 
-    ParseShadowOptionalParameters(env, ret, argv, argc, shadowsInfo);
+    ParseShadowOptionalParameters(ret, shadowsInfo, env, argv, argc);
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
     }
@@ -6007,8 +6007,8 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
   
-void JsWindow::ParseShadowOptionalParameters(napi_env env, WmErrorCode& ret, const napi_value* argv, size_t argc,
-    sptr<ShadowsInfo> shadowsInfo)
+void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+    napi_env env, const napi_value* argv, size_t argc)
 {
     std::string color;
     double offsetX;
