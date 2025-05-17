@@ -72,5 +72,11 @@ void WindowManagerAgentLite::NotifyDisplayIdChange(uint32_t windowId, DisplayId 
 {
     SingletonContainer::Get<WindowManagerLite>().NotifyDisplayIdChange(windowId, displayId);
 }
+
+void WindowManagerAgentLite::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    SingletonContainer::Get<WindowManagerLite>().NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
+}
 } // namespace Rosen
 } // namespace OHOS

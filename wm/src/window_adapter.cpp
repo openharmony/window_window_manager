@@ -165,6 +165,26 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return ret;
 }
 
+WMError WindowAdapter::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+        if (windowManagerAgentMap_.find(type) == windowManagerAgentMap_.end()) {
+            windowManagerAgentMap_[type] = std::set<sptr<IWindowManagerAgent>>();
+        }
+        windowManagerAgentMap_[type].insert(windowManagerAgent);
+    }
+
+    return wmsProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+}
+
 WMError WindowAdapter::CheckWindowId(int32_t windowId, int32_t& pid)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

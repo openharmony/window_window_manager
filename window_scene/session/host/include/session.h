@@ -670,6 +670,8 @@ public:
     WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
+    uint32_t GetPropertyDirtyFlags() { return propertyDirtyFlags_; } const;
+    void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
 
     /*
      * Window Pattern
@@ -910,6 +912,11 @@ protected:
      * Keyboard Window
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
+
+    /*
+     * Window Property    
+     */
+    uint32_t propertyDirtyFlags_ = 0;
 
 private:
     void HandleDialogForeground();
