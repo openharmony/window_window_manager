@@ -4584,9 +4584,10 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         return WSError::WS_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_MAIN, "userId: %{public}d, path: %{public}s", userId, fileDir.c_str());
-    taskScheduler_->PostAsyncTask([this, userId, rdbDir = fileDir]() {
+    ffrtQueueHelper_->SubmitTask([this, userId, rdbDir = fileDir] {
+        TLOGNI(WmsLogTag::WMS_MAIN, "init starting window rdb");
         InitStartingWindowRdb(rdbDir + "/StartingWindowRdb/");
-    }, "startingWindowRdbTask");
+    });
     return taskScheduler_->PostSyncTask([this, userId, &fileDir]() {
         if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
             TLOGND(WmsLogTag::WMS_MAIN, "Create snapshot directory failed");
@@ -12237,6 +12238,79 @@ bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& 
     std::smatch matches;
     name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
     return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
+}
+
+WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode)
+{
+    return taskScheduler_->PostSyncTask([this, displayId, &globalWinMode, where = __func__] {
+        globalWinMode = GlobalWindowMode::UNKNOWN;
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: displayId=%{public}" PRIu64, where, displayId);
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session == nullptr) {
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: session is null", where);
+                continue;
+            }
+            if (displayId != DISPLAY_ID_INVALID && !IsSessionInSpecificDisplay(session, displayId)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: not in display, win: [%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                continue;
+            }
+            if (!session->IsSessionForeground()) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], stat: %{public}u",
+                    where, session->GetWindowId(), session->GetWindowName().c_str(),
+                    static_cast<uint32_t>(session->GetSessionState()));
+                continue;
+            }
+            WindowMode winMode = session->GetWindowMode();
+            if (WindowHelper::IsPipWindowMode(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found pip win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                globalWinMode = globalWinMode | GlobalWindowMode::PIP;
+            } else if (WindowHelper::IsFullScreenWindow(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found fullscreen win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                globalWinMode = globalWinMode | GlobalWindowMode::FULLSCREEN;
+            } else if (WindowHelper::IsSplitWindowMode(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found split win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                globalWinMode = globalWinMode | GlobalWindowMode::SPLIT;
+            } else if (WindowHelper::IsFloatingWindow(winMode)) {
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: found floating win=[%{public}d, %{public}s]",
+                    where, session->GetWindowId(), session->GetWindowName().c_str());
+                globalWinMode = globalWinMode | GlobalWindowMode::FLOAT;
+            }
+            if (globalWinMode == GlobalWindowMode::ALL) {
+                break;
+            }
+        }
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const
+{
+    if (session == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+        return false;
+    }
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&
+        (displayId == VIRTUAL_DISPLAY_ID || displayId == DEFAULT_DISPLAY_ID)) {
+        bool isVirtualDisplay = displayId == VIRTUAL_DISPLAY_ID;
+        if (isVirtualDisplay &&
+            session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "not in virtual display, win: [%{public}d, %{public}s]",
+                session->GetWindowId(), session->GetWindowName().c_str());
+            return false;
+        }
+        if (!isVirtualDisplay && session->GetSessionRect().posY_ >= GetFoldLowerScreenPosY()) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in virtual display, win: [%{public}d, %{public}s]",
+                session->GetWindowId(), session->GetWindowName().c_str());
+            return false;
+        }
+        return true;
+    }
+    return displayId == session->GetSessionProperty()->GetDisplayId();
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
