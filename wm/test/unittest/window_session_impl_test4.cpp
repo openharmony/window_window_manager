@@ -1141,16 +1141,16 @@ HWTEST_F(WindowSessionImplTest4, Notify03, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_EQ(WMError::WM_OK, windowSession->Create(nullptr, session));
+    EXPECT_EQ(WMError::WM_OK, windowSession->Create(nullptr, session));
 
     windowSession->NotifyAfterInteractive();
     windowSession->NotifyAfterNonInteractive();
     WSError res = windowSession->NotifyCloseExistPipWindow();
-    ASSERT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(res, WSError::WS_OK);
     AAFwk::WantParams wantParams;
     WSError result = windowSession->NotifyTransferComponentData(wantParams);
-    ASSERT_EQ(result, WSError::WS_OK);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSession->Destroy());
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSession->Destroy());
 }
 
 /**
