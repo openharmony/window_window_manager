@@ -238,7 +238,7 @@ HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(option, screenEvent);
 
-    stpr<MoveDragController> moveDragController = keyboardSession->GetMoveDragController();
+    sptr<MoveDragController> moveDragController = keyboardSession->GetMoveDragController();
     ASSERT_NE(moveDragController, nullptr);
     WSRect rect = { 0, 0, 200, 200 };
     moveDragController->SetTargetRect(rect);
