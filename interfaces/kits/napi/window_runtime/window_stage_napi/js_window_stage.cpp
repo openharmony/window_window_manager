@@ -1030,12 +1030,12 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t imgResourceId = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Get imgResourceId error");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (imgResourceId < MIN_RESOURCE_ID || imgResourceId > MAX_RESOURCE_ID) {
         TLOGE(WmsLogTag::WMS_PATTERN, "imgRsourceId invalid: %{public}d", imgResourceId);
@@ -1044,7 +1044,7 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
     ImageFit imageFit = ImageFit::FILL;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], imageFit)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Get imageFit error");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (imageFit < ImageFit::FILL || imageFit > ImageFit::MATRIX) {
         TLOGE(WmsLogTag::WMS_PATTERN, "imageFit invalid: %{public}d", imageFit);
