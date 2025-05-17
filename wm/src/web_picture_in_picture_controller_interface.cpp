@@ -116,8 +116,8 @@ WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config, 
     }
     sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config);
     sptrWebPipController_->SetControllerId(controllerId);
-    sptrWebPipController_->GetPipPossible(isPipPossible_);
-    if (!isPipPossible_) {
+    sptrWebPipController_->GetPipEnabled(isPipEnabled_);
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -178,7 +178,7 @@ void WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlType
 
 WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativePipStartPipCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -197,7 +197,7 @@ WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativeP
 
 WMError WebPictureInPictureControllerInterface::UnregisterStartPipListener(NativePipStartPipCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -217,7 +217,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterStartPipListener(Nativ
 
 WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(NativePipLifeCycleCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -236,7 +236,7 @@ WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(Native
 
 WMError WebPictureInPictureControllerInterface::UnregisterLifeCycleListener(NativePipLifeCycleCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -255,7 +255,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterLifeCycleListener(Nati
 
 WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(NativePipControlEventCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -274,7 +274,7 @@ WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(Nat
 
 WMError WebPictureInPictureControllerInterface::UnregisterControlEventListener(NativePipControlEventCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -293,7 +293,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterControlEventListener(N
 
 WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePipResizeCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -312,7 +312,7 @@ WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePip
 
 WMError WebPictureInPictureControllerInterface::UnregisterResizeListener(NativePipResizeCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -433,7 +433,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -448,7 +448,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -463,7 +463,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver(
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -478,7 +478,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPStart()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }

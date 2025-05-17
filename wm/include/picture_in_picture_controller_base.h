@@ -75,6 +75,7 @@ public:
     void PipSizeChange(double width, double height, double scale);
     void PreRestorePictureInPicture();
     void GetPipPossible(bool& pipPossible);
+    void GetPipEnabled(bool& isPipEnabled);
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
