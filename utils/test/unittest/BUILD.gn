@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ group("unittest") {
     ":utils_dms_reporter_test",
     ":utils_perform_reporter_test",
     ":utils_persistent_storage_test",
+    ":utils_rs_adapter_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
@@ -263,6 +264,36 @@ ohos_unittest("utils_window_transition_info_test") {
   ]
 }
 
+ohos_unittest("utils_rs_adapter_test") {
+  module_out_path = module_out_path
+
+  sources = [ "rs_adapter_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("utils_dm_virtual_screen_option_test") {
+  module_out_path = module_out_path
+
+  sources = [ "dm_virtual_screen_option_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("utils_dm_rs_surface_node") {
+  module_out_path = module_out_path
+
+  sources = [ "dm_rs_surface_node.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
 ## Build dm_unittest_common.a {{{
 config("utils_unittest_common_public_config") {
   include_dirs = [
@@ -273,6 +304,7 @@ config("utils_unittest_common_public_config") {
     "../../include",
     "../../../wm/include",
     "../../../dm/include",
+    "${dmserver_gen_path}",
   ]
 }
 

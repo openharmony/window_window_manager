@@ -52,6 +52,7 @@ private:
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);

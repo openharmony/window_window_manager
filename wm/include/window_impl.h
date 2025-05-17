@@ -25,6 +25,7 @@
 #include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
 #include <struct_multimodal.h>
 
 #include "prepare_terminate_callback_stub.h"
@@ -362,6 +363,12 @@ public:
      */
     WMError ShowKeyboard(KeyboardViewMode mode) override;
 
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -554,6 +561,11 @@ private:
     std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS
