@@ -1215,6 +1215,10 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
                 GetWindowId(), windowModeSupportType);
         }
+        if (property_->IsSupportRotateFullScreen()) {
+            windowModeSupportType = (WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+                                     WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+        }
         property_->SetWindowModeSupportType(windowModeSupportType);
         // update windowModeSupportType to server
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
@@ -5970,6 +5974,54 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcWindow() && !IsPadWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
+    if (ret == WSError::WS_OK) {
+        std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
+        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
+        transitionAnimationConfig_[transitionType] = config;
+    }
+
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransitionAnimation(WindowTransitionType
+    transitionType)
+{
+    if (IsWindowSessionInvalid()) {
+        return nullptr;
+    }
+    if (!IsPcWindow() && !IsPadWindow()) {
+        return nullptr;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return nullptr;
+    }
+    std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
+    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
+        return transitionAnimationConfig_[transitionType];
+    } else {
+        return nullptr;
+    }
 }
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)

@@ -1949,6 +1949,43 @@ HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, TestSize.Level1
 }
 
 /**
+ * @tc.name: HandleSetStartWindowBackgroundColor
+ * @tc.desc: test HandleSetStartWindowBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    data.WriteInt32(100);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleAddExtensionWindowStageToSCB
  * @tc.desc: test HandleAddExtensionWindowStageToSCB
  * @tc.type: FUNC
