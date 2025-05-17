@@ -1521,7 +1521,7 @@ bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyF
     }
     int32_t data = 0;
     if (ParseJsValueOrGetDefault(jsObject, env, "interval", data,
-        static_cast<int32_t>(keyFramePolicy.interval_)) && data >= 0) {
+        static_cast<int32_t>(keyFramePolicy.interval_)) && data > 0) {
         keyFramePolicy.interval_ = static_cast<uint32_t>(data);
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to interval");
