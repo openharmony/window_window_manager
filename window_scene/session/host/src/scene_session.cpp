@@ -1354,7 +1354,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        AddPropertyDirtyFlags(SessionPropertyFlag::RECT);
+        session->AddPropertyDirtyFlags(SessionPropertyFlag::RECT);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s, "
             "rect:%{public}s, clientRect:%{public}s",
             where, session->GetPersistentId(), session->reason_, updateReason.c_str(),
