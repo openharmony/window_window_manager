@@ -2534,11 +2534,11 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
     return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
-bool WindowSessionImpl::IsWindowShouleDrag()
+bool WindowSessionImpl::IsWindowShouldDrag()
 {
     if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
         !windowSystemConfig_.IsPhoneWindow()) {
-            return false;
+        return false;
     }
     return true;
 }
@@ -2557,7 +2557,7 @@ bool WindowSessionImpl::CheckCanDragWindowType()
  */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
-    if (!IsWindowShouleDrag()) {
+    if (!IsWindowShouldDrag()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

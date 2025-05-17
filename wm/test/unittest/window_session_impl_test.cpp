@@ -1675,17 +1675,17 @@ HWTEST_F(WindowSessionImplTest, EnableDrag, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
     auto result = window->EnableDrag(true);
     ASSERT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     result = window->EnableDrag(true);
-    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     result = window->EnableDrag(true);
     ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }

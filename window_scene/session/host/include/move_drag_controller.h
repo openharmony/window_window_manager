@@ -100,7 +100,7 @@ public:
     void OnLostFocus();
     AreaType GetAreaType() const { return type_; };
     void SetScale(float scalex, float scaley);
-    void SetParentRect(Rect parentRect);
+    void SetParentRect(const Rect& parentRect);
 
     /*
      * Cross Display Move Drag
