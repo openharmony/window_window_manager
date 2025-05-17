@@ -320,6 +320,24 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, TestSize.
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardAnimationWillBegin
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    int32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN);
+    sptr<KeyboardAnimationInfo> keyboardAnimationInfo = sptr<KeyboardAnimationInfo>::MakeSptr();
+    data.WriteParcelable(keyboardAnimationInfo);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleUpdateAvoidArea
  * @tc.desc: test function : HandleUpdateAvoidArea
  * @tc.type: FUNC

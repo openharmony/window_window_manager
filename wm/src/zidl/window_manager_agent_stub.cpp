@@ -115,6 +115,20 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateWindowVisibilityInfo(infos);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID: {
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                WLOGFE("read windowId failed");
+                return ERR_INVALID_DATA;
+            }
+            DisplayId displayId = -1ULL;
+            if (!data.ReadUint64(displayId)) {
+                WLOGFE("read displayId failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyDisplayIdChange(windowId, displayId);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE: {
             std::vector<sptr<WindowDrawingContentInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowDrawingContentInfo>(data, infos)) {
