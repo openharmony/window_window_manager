@@ -974,6 +974,53 @@ HWTEST_F(SceneSessionManagerTest11, GetHostWindowCompatiblityInfo, TestSize.Leve
     res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_OK, res);
 }
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, AnimateTo01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "AnimateToTest";
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    float targetScale = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    sceneSession->RegisterAnimateToCallback([&targetScale, &curve](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        targetScale = animationProperty.targetScale;
+        curve = animationOption.curve;
+    });
+
+    auto persistenId = sceneSession->GetPersistentId();
+    ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
+    WindowAnimationProperty animationProperty;
+    animationProperty.targetScale = 10.5f;
+    WindowAnimationOption animationOption;
+    animationOption.curve = WindowAnimationCurve::INTERPOLATION_SPRING;
+    animationOption.duration = 1000;
+
+    ssm_->AnimateTo(0, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
+    ASSERT_EQ(targetScale, animationProperty.targetScale);
+
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

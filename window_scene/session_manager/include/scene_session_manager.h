@@ -719,6 +719,12 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
 
+    /*
+     * Window Animation
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();

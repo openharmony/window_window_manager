@@ -134,6 +134,8 @@ using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowEnabled)>;
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
+using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -546,6 +548,9 @@ public:
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
+    void RegisterAnimateToCallback(NotifyAnimateToFunc&& callback);
+    WMError AnimateTo(const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
     /*
      * Window Visibility
@@ -1244,6 +1249,7 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+    NotifyAnimateToFunc onAnimateTo_;
 
     /*
      * Window Layout

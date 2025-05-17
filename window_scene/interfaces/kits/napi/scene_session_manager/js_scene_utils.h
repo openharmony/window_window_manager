@@ -240,6 +240,8 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig);
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
+    const WindowAnimationProperty& animationProperty);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);

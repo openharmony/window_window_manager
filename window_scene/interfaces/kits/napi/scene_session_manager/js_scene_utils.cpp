@@ -137,6 +137,14 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     return objValue;
 }
 
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env, const WindowAnimationProperty& animationProperty)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "targetScale", CreateJsValue(env, animationProperty.targetScale));
+    return objValue;
+}
+
 napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig)
 {

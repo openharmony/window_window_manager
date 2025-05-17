@@ -8541,4 +8541,37 @@ WSError SceneSession::CloseSpecificScene()
     }
     return sessionStage_->CloseSpecificScene();
 }
+
+void SceneSession::RegisterAnimateToCallback(NotifyAnimateToFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: Session is null", where);
+            return;
+        }
+        session->onAnimateTo_ = std::move(callback);
+    }, __func__);
+}
+
+WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    PostTask([weakThis = wptr(this), where = __func__, animationProperty, animationOption] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: Session is null", where);
+            return;
+        }
+        if (session->onAnimateTo_) {
+            session->onAnimateTo_(animationProperty, animationOption);
+            return;
+        }
+        TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: onAnimateTo_ is nullptr", where);
+    }, __func__);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "Post AnimateTo task success. windowId: %{public}d, targetScale: %{public}f, \
+        animationOption: %{public}s", GetWindowId(), animationProperty.targetScale, \
+        animationOption.ToString().c_str());
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
