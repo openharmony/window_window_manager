@@ -28,7 +28,7 @@
 #ifndef OH_WINDOW_PIP_H
 #define OH_WINDOW_PIP_H
 
-#include "napi/native_api.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,96 +39,111 @@ extern "C" {
  * @since 20
  */
 typedef enum {
+    /** Video play. */
     VIDEO_PLAY = 0,
+    /** Video call. */
     VIDEO_CALL = 1,
+    /** Video meeting. */
     VIDEO_MEETING = 2,
+    /** Video live. */
     VIDEO_LIVE = 3,
-} PictureInPicture_PiPTemplateType;
+} PictureInPicture_PipTemplateType;
 
 /**
  * @brief Enumerates picture in picture control group.
  * @since 20
  */
 typedef enum {
+    /** Previous/next control group for video play. */
     VIDEO_PLAY_VIDEO_PREVIOUS_NEXT = 101,
+    /** Fast forward/backward control group for video play. */
     VIDEO_PLAY_FAST_FORWARD_BACKWARD = 102,
+    /** Switch on/off the microphone control group for video call. */
     VIDEO_CALL_MICROPHONE_SWITCH = 201,
+    /** Hang up control group for video call. */
     VIDEO_CALL_HANG_UP_BUTTON = 202,
+    /** Switch on/off the camera control group for video call. */
     VIDEO_CALL_CAMERA_SWITCH = 203,
+    /** Mute control group for video call. */
     VIDEO_CALL_MUTE_SWITCH = 204,
+    /** Hang up control group for video meeting. */
     VIDEO_MEETING_HANG_UP_BUTTON = 301,
+    /** Switch on/off the camera control group for video meeting. */
     VIDEO_MEETING_CAMERA_SWITCH = 302,
+    /** Mute control group for video meeting. */
     VIDEO_MEETING_MUTE_SWITCH = 303,
+    /** Switch on/off the microphone control group for video meeting. */
     VIDEO_MEETING_MICROPHONE_SWITCH = 304,
+    /** Video play/pause control group for video live. */
     VIDEO_LIVE_VIDEO_PLAY_PAUSE = 401,
+    /** Mute control group for video live. */
     VIDEO_LIVE_MUTE_SWITCH = 402,
-} PictureInPicture_PiPControlGroup;
+} PictureInPicture_PipControlGroup;
 
 /**
  * @brief Enumerates picture in picture control type.
  * @since 20
  */
 typedef enum {
+    /** Video play/pause. */
     VIDEO_PLAY_PAUSE = 0,
+    /** Video previous. */
     VIDEO_PREVIOUS = 1,
+    /** Video next. */
     VIDEO_NEXT = 2,
+    /** Video fast forward. */
     FAST_FORWARD = 3,
+    /** Video back forward. */
     FAST_BACKWARD = 4,
+    /** Hang up. */
     HANG_UP_BUTTON = 5,
+    /** Microphone switch. */
     MICROPHONE_SWITCH = 6,
+    /** camera switch. */
     CAMERA_SWITCH = 7,
+    /** mute switch. */
     MUTE_SWITCH = 8,
+    /** end. */
     END,
-} PictureInPicture_PiPControlType;
+} PictureInPicture_PipControlType;
 
 /**
  * @brief Enumerates picture in picture control status.
  * @since 20
  */
 typedef enum {
+    /** Play. */
     PLAY = 1,
+    /** Pause. */
     PAUSE = 0,
+    /** Open. */
     OPEN = 1,
+    /** Close. */
     CLOSE = 0,
-} PictureInPicture_PiPControlStatus;
+} PictureInPicture_PipControlStatus;
 
 /**
  * @brief Enumerates picture in picture state.
  * @since 20
  */
 typedef enum {
+    /** About to start. */
     ABOUT_TO_START = 1,
+    /** started. */
     STARTED = 2,
+    /** About to stop. */
     ABOUT_TO_STOP = 3,
+    /** stopped. */
     STOPPED = 4,
+    /** About to restore. */
     ABOUT_TO_RESTORE = 5,
+    /** Error. */
     ERROR = 6,
-} PictureInPicture_PiPState;
-
-/**
- * @brief Defines the PiP config structure.
- *
- * @since 20
- */
-typedef struct {
-    /** WindowId of Corresponding mainWindow. */
-    uint32_t mainWindowId;
-    /** The picture-in-picture template type */
-    PictureInPicture_PiPTemplateType pipTemplateType;
-    /** The picture-in-picture content width */
-    uint32_t width;
-    /** The picture-in-picture content height */
-    uint32_t height;
-    /** The picture-in-picture control group */
-    PictureInPicture_PiPControlGroup* controlGroup;
-    /** The length of picture-in-picture control group */
-    uint8_t controlGroupLength;
-    /** The application environment */
-    napi_env env;
-} PictureInPicture_PiPConfig;
+} PictureInPicture_PipState;
 
 /**
  * @brief Start the picture-in-picture callback
+ * @param controllerId The picture-in-picture controller ID
  * @param requestId The picture-in-picture requestId
  * @param surfaceId The picture-in-picture surfaceId
  * @since 20
@@ -137,22 +152,26 @@ typedef void (*WebPipStartPipCallback)(uint32_t controllerId, uint8_t requestId,
 
 /**
  * @brief The picture-in-picture lifecycle callback
+ * @param controllerId The picture-in-picture controller ID
  * @param state The picture-in-picture state
+ * @param errcode The picture-in-picture error code
  * @since 20
  */
-typedef void (*WebPipLifecycleCallback)(uint32_t controllerId, PictureInPicture_PiPState state, int32_t errcode);
+typedef void (*WebPipLifeCycleCallback)(uint32_t controllerId, PictureInPicture_PipState state, int32_t errcode);
 
 /**
  * @brief The picture-in-picture control event callback
+ * @param controllerId The picture-in-picture controller ID
  * @param controlType The picture-in-picture control type
  * @param status The picture-in-picture control status
  * @since 20
  */
-typedef void (*WebPipControlEventCallback)(uint32_t controllerId, PictureInPicture_PiPControlType controlType,
-    PictureInPicture_PiPControlStatus status);
+typedef void (*WebPipControlEventCallback)(uint32_t controllerId, PictureInPicture_PipControlType controlType,
+    PictureInPicture_PipControlStatus status);
 
 /**
  * @brief The picture-in-picture size change callback
+ * @param controllerId The picture-in-picture controller ID
  * @param width The picture-in-picture window width
  * @param height The picture-in-picture window height
  * @param scale The picture-in-picture window scale
@@ -162,8 +181,6 @@ typedef void (*WebPipResizeCallback)(uint32_t controllerId, uint32_t width, uint
 
 /**
  * @brief Create picture-in-picture controller.
- *
- * @param pipConfig The picture-in-picture configuration
  * @param controllerId The picture-in-picture controller ID
  * @return Return the result code.
  *         {@link OK} the function call is successful.
@@ -172,7 +189,75 @@ typedef void (*WebPipResizeCallback)(uint32_t controllerId, uint32_t width, uint
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
  * @since 20
  */
-int32_t OH_PictureInPicture_CreatePip(PictureInPicture_PiPConfig* pipConfig, uint32_t* controllerId);
+int32_t OH_PictureInPicture_CreatePip(uint32_t* controllerId);
+
+/**
+ * @brief Set picture-in-picture mainWindowId.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param mainWindowId WindowId of corresponding mainWindow
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipMainWindowId(uint32_t controllerId, uint32_t mainWindowId);
+
+/**
+ * @brief Set picture-in-picture templateType.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param pipTemplateType The picture-in-picture template type
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipTemplateType(uint32_t controllerId, PictureInPicture_PipTemplateType pipTemplateType);
+
+/**
+ * @brief Set picture-in-picture rect.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param width The picture-in-picture window width
+ * @param height The picture-in-picture window height
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipRect(uint32_t controllerId, uint32_t width, uint32_t height);
+
+/**
+ * @brief Set picture-in-picture control group.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param controlGroup The picture-in-picture control group
+ * @param controlGroupLength The length of picture-in-picture control group
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipControlGroup(uint32_t controllerId, PictureInPicture_PipControlGroup* controlGroup,
+    uint8_t controlGroupLength);
+
+/**
+ * @brief Set picture-in-picture napi env.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param env The picture-in-picture napi env
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipNapiEnv(uint32_t controllerId, void* env);
 
 /**
  * @brief Delete picture-in-picture controller.
@@ -194,7 +279,7 @@ int32_t OH_PictureInPicture_DeletePip(uint32_t controllerId);
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_STATE_ABNORMAL} the PiP window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED} failed to create the PiP window.
  *         {@link WINDOW_MANAGER_ERRORCODE_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
- *         {@link WINDOW_MANAGER_ERRORCODE_PIP_REPEAT_OPERATION} repeated PiP operation.
+ *         {@link WINDOW_MANAGER_ERRORCODE_PIP_REPEATED_OPERATION} repeated PiP operation.
  * @since 20
  */
 int32_t OH_PictureInPicture_StartPip(uint32_t controllerId);
@@ -208,7 +293,7 @@ int32_t OH_PictureInPicture_StartPip(uint32_t controllerId);
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_DESTROY_FAILED} failed to destroy the PiP window.
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_STATE_ABNORMAL} the PiP window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
- *         {@link WINDOW_MANAGER_ERRORCODE_PIP_REPEAT_OPERATION} repeated PiP operation.
+ *         {@link WINDOW_MANAGER_ERRORCODE_PIP_REPEATED_OPERATION} repeated PiP operation.
  * @since 20
  */
 int32_t OH_PictureInPicture_StopPip(uint32_t controllerId);
@@ -231,8 +316,8 @@ void OH_PictureInPicture_UpdatePipContentSize(uint32_t controllerId, uint32_t wi
  * @param status The picture-in-picture control status.
   * @since 20
  */
-void OH_PictureInPicture_UpdatePipControlStatus(uint32_t controllerId, PictureInPicture_PiPControlType controlType,
-    PictureInPicture_PiPControlStatus status);
+void OH_PictureInPicture_UpdatePipControlStatus(uint32_t controllerId, PictureInPicture_PipControlType controlType,
+    PictureInPicture_PipControlStatus status);
 
 /**
  * @brief Set picture-in-picture controll enable status.
@@ -242,7 +327,7 @@ void OH_PictureInPicture_UpdatePipControlStatus(uint32_t controllerId, PictureIn
  * @param enabled Indicate the picture-in-picture control is enabled.
  * @since 20
  */
-void OH_PictureInPicture_SetPiPControlEnabled(uint32_t controllerId, PictureInPicture_PiPControlType controlType,
+void OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureInPicture_PipControlType controlType,
     bool enabled);
 
 /**
@@ -298,7 +383,7 @@ int32_t OH_PictureInPicture_UnregisterAllStartPipCallbacks(uint32_t controllerId
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
  * @since 20
  */
-int32_t OH_PictureInPicture_RegisterLifecycleListener(uint32_t controllerId, WebPipLifecycleCallback callback);
+int32_t OH_PictureInPicture_RegisterLifeCycleListener(uint32_t controllerId, WebPipLifeCycleCallback callback);
 
 /**
  * @brief Unregister picture-in-picture life cycle listener callback.
@@ -312,7 +397,7 @@ int32_t OH_PictureInPicture_RegisterLifecycleListener(uint32_t controllerId, Web
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
  * @since 20
  */
-int32_t OH_PictureInPicture_UnregisterLifecycleListener(uint32_t controllerId, WebPipLifecycleCallback callback);
+int32_t OH_PictureInPicture_UnregisterLifeCycleListener(uint32_t controllerId, WebPipLifeCycleCallback callback);
 
 /**
  * @brief Unregister all picture-in-picture life cycle listener callbacks.
@@ -325,7 +410,7 @@ int32_t OH_PictureInPicture_UnregisterLifecycleListener(uint32_t controllerId, W
  *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
  * @since 20
  */
-int32_t OH_PictureInPicture_UnregisterAllLifecycleListeners(uint32_t controllerId);
+int32_t OH_PictureInPicture_UnregisterAllLifeCycleListeners(uint32_t controllerId);
 
 /**
  * @brief Register picture-in-picture control event listener callback.
