@@ -1926,6 +1926,8 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         CreateJsSessionRect(env, params.LandscapePanelRect_));
     napi_set_named_property(env, objValue, "portraitPanelRect",
         CreateJsSessionRect(env, params.PortraitPanelRect_));
+    napi_set_named_property(env, objValue, "displayId",
+        CreateJsValue(env, static_cast<int64_t>(params.displayId_)));
     return objValue;
 }
 
