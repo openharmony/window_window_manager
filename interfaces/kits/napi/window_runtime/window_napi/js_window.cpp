@@ -5978,10 +5978,12 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
 napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
-    double result = 0.0;
+    double radius;
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
     if (argc < 1) { // 1: min param num
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -5996,40 +5998,59 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (argv[0] == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_status statusCode = napi_get_value_double(env, argv[0], &result);
+    napi_status statusCode = napi_get_value_double(env, argv[0], &radius);
     if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (MathHelper::LessNotEqual(result, 0.0)) {
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
         return NapiThrowError(env,  WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(result));
-    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
-        std::string color;
-        if (ConvertFromJsValue(env, argv[1], color)) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
-        }
-    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(radius));
+    shadowsInfo->radius_ = radius;
+    shadowsInfo->hasRadiusValue_ = true;
 
-    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
-        if (argv[2] != nullptr) { // 2: the 3rd param
-            napi_get_value_double(env, argv[2], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(result));
-        }
-    }
-
-    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
-        if (argv[3] != nullptr) {  // 3: the 4th param
-            napi_get_value_double(env, argv[3], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(result));
-        }
-    }
-
+    ParseShadowOptionalParameters(ret, shadowsInfo, env, argv, argc);
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
     }
 
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+    }
     return NapiGetUndefined(env);
+}
+  
+void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+    napi_env env, const napi_value* argv, size_t argc)
+{
+    std::string color;
+    double offsetX;
+    double offsetY;
+    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
+        if (ConvertFromJsValue(env, argv[1], color)) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
+            shadowsInfo->color_ = color;
+            shadowsInfo->hasColorValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
+        if (argv[2] != nullptr) { // 2: the 3rd param
+            napi_get_value_double(env, argv[2], &offsetX);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(offsetX));
+            shadowsInfo->offsetX_ = offsetX;
+            shadowsInfo->hasOffsetXValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
+        if (argv[3] != nullptr) {  // 3: the 4th param
+            napi_get_value_double(env, argv[3], &offsetY);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(offsetY));
+            shadowsInfo->offsetY_ = offsetY;
+            shadowsInfo->hasOffsetYValue_ = true;
+        }
+    }
 }
 
 napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)

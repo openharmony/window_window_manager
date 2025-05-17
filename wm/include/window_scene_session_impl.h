@@ -235,6 +235,7 @@ public:
     WMError SetWindowCornerRadius(float cornerRadius) override;
     WMError GetWindowCornerRadius(float& cornerRadius) override;
     WMError SetShadowRadius(float radius) override;
+    WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) override;
     WMError SetShadowColor(std::string color) override;
     WMError SetShadowOffsetX(float offsetX) override;
     WMError SetShadowOffsetY(float offsetY) override;

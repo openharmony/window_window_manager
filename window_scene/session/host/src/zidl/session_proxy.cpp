@@ -2450,6 +2450,35 @@ WSError SessionProxy::SetWindowCornerRadius(float cornerRadius)
     return WSError::WS_OK;
 }
 
+WSError SessionProxy::SetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "shadow radius: %{public}f, color: %{public}s, offsetX: %{public}f, "
+        "offsetY: %{public}f", shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_,
+        shadowsInfo.offsetY_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&shadowsInfo)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write shadowsInfo failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     TLOGD(WmsLogTag::WMS_SUB, "isFollow: %{public}d", isFollow);
