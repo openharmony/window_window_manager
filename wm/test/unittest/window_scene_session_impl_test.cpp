@@ -833,21 +833,20 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_IsDeviceSupportOrNot, TestS
     window->hostSession_ = session;
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
-    window->property_->SetIsPcAppInPad(true);
-    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->property_->SetIsPcAppInPad(false);
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
 }
 
 /**
@@ -866,7 +865,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_02, TestSize.Level1)
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);

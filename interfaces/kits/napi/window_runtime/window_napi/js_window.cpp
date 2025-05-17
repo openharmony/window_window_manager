@@ -6663,6 +6663,11 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
+    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
     bool enableDrag = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enableDrag)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter from jsValue");
@@ -7731,6 +7736,10 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARG_COUNT_ZERO) {
         return OnStartMoveWindowWithCoordinate(env, argc, argv);
+    }
+    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;

@@ -658,10 +658,10 @@ void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
     screenSizeProperty_.height = currentScreenProperty.GetBounds().rect_.height_;
 }
 
-void MoveDragController::SetCale(float scaleX, float scaleY)
+void MoveDragController::SetScale(float scaleX, float scaleY)
 {
     if (MathHelper::NearZero(moveDragProperty_.scaleX_) || MathHelper::NearZero(moveDragProperty_.scaleY_)) {
-        TLOE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
         moveDragProperty_.scaleX_ = 1.0f;
         moveDragProperty_.scaleY_ = 1.0f;
         return;
@@ -670,11 +670,10 @@ void MoveDragController::SetCale(float scaleX, float scaleY)
     moveDragProperty_.scaleY_ = scaleY;
 }
 
-void MoveDragController::SetParentRect(Rect parentRect)
+void MoveDragController::SetParentRect(const Rect& parentRect)
 {
     parentRect_ = parentRect;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:[%{public}d %{public}d %{public}d %{public}d]",
-        parentRect_.posX_, parentRect_.posY_, parentRect_.width_, parentRect_.height_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s",parentRect_.ToString().c_str());
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(

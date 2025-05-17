@@ -3473,7 +3473,7 @@ bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!CheckCanMoveWindowType()) {
+    if (!CheckCanMoveWindowTypeByDevice()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
@@ -3507,7 +3507,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
 {
-    if (!CheckCanMoveWindowTypeByDevice()) {
+    if (!CheckCanMoveWindowType()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }

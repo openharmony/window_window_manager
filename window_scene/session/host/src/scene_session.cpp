@@ -826,11 +826,16 @@ bool SceneSession::IsAnyParentSessionDragZooming() const
 
 void SceneSession::SetParentRect()
 {
-    auto parentSession = GetParentSession();
-    if (parentSession != nullptr && moveDragController_ != nullptr) {
+    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && moveDragController_ != nullptr) {
+        moveDragController_->SetParentRect({0, 0, 0, 0});
+        return;
+    }
+    auto mainSession = GetMainSession();
+    if (mainSession != nullptr && moveDragController_ != nullptr) {
         Rect parentGlobalRect;
-        WMError errorCode = parentSession->GetGlobalScaledRect(parentGlobalRect);
+        WMError errorCode = mainSession->GetGlobalScaledRect(parentGlobalRect);
         if (errorCode != WMError::WM_OK) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d", GetPersistentId(), errorCode);
             return;
         }
         moveDragController_->SetParentRect(parentGlobalRect);
@@ -2932,14 +2937,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         bool isFloatingDragAccessible =
             property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
         bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
-            (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || (property->GetIsPcAppInPad() && !IsMainWindow));
-        bool isPhoneCanDrag = isFloatingDragAccessible &&
+            (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || (property->GetIsPcAppInPad() && !isMainWindow));
+        bool isPhoneWindowCanDrag = isFloatingDragAccessible &&
             (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
             (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
-        WSRect rect = winRect_;
-        moveDragController_->SetScale(GetScaleX(), GetScaleY());
+        moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
-        if ((isPcOrFreeMultiWindowCanDrag || isPhoneCanDrag) &&
+        if ((isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag) &&
             moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
@@ -6704,7 +6708,7 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 
 WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
-    if(!WindowHelper::IsSubWindow(GetWindowType()) && !WindowHelper::IsSystemWindow(GetWindowType())) {
+    if (!WindowHelper::IsSubWindow(GetWindowType()) && !WindowHelper::IsSystemWindow(GetWindowType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, not set enable drag", GetPersistentId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }

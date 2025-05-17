@@ -440,6 +440,7 @@ private:
      */
     bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
+    bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
 
     /*
