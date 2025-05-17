@@ -14454,8 +14454,20 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
     }
     sceneSession->SaveSnapshot(true, true, pixelMap);
     scenePersistence->SetHasSnapshot(true);
-    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<uint32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
     return WMError::WM_OK;
+}
+
+bool GetPersistentImageFit(int persistentId, ImageFit imageFit)
+{
+    auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (persistentImageFit) {
+        ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId), 
+            imageFit, ScenePersistentStorageType::MAXIMIZE_STATE);
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(const uint32_t resourceId,
