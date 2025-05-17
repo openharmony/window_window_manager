@@ -80,6 +80,7 @@ class RSUIContext;
 class RSUIDirector;
 class ISession;
 class Window;
+enum class ImageFit;
 
 /**
  * @class IWindowLifeCycle
@@ -1092,6 +1093,18 @@ public:
      * @return WMError
      */
     virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Sets static Image resource for recent.
+     *
+     * @param imgResourceId resourceId of static Image.
+     * @param imageFit imageFit of static Image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get whether main window is topmost

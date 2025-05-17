@@ -141,6 +141,7 @@ public:
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
         TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
+        TRANS_ID_SET_IMAGE_FOR_RECENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -379,6 +380,9 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
+        int persistentId) override { return WMError::WM_OK; }
+        
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 

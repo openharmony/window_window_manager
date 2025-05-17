@@ -5747,7 +5747,7 @@ napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_PATTERN, "session is null, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->NotifyAddSnapshot(useFfrt, needPersist);
+    session->NotifyAddSnapshot(useFfrt, needPersist, true);
     return NapiGetUndefined(env);
 }
 

@@ -68,6 +68,11 @@ public:
     static napi_value IsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value SetSupportedWindowModes(napi_env env, napi_callback_info info);
 
+    /*
+     * Window Pattern
+     */
+    static napi_value SetImageForRecent(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnSetUIContent(napi_env env, napi_callback_info info);
     napi_value OnGetMainWindow(napi_env env, napi_callback_info info);
@@ -100,6 +105,11 @@ private:
     napi_value OnSetWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnSetSupportedWindowModes(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Pattern
+     */
+    napi_value OnSetImageForRecent(napi_env env, napi_callback_info info);
 
     std::weak_ptr<WindowScene> windowScene_;
 };

@@ -479,7 +479,9 @@ WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
 
 WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 {
-    PostTask([weakThis = wptr(this), isSaveSnapshot, where = __func__] {
+    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    PostTask([weakThis = wptr(this), isSaveSnapshot, needSaveSnapshot, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -493,7 +495,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
+        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
         if (session->specificCallback_ != nullptr) {
@@ -584,7 +586,9 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
 
 WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
 {
-    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot, where = __func__]()
+    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot, needSaveSnapshot, where = __func__]()
         THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto session = weakThis.promote();
         if (!session) {
@@ -599,7 +603,8 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         }
         auto state = session->GetSessionState();
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
-        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) && isSaveSnapshot) {
+        if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
+            isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(false);
         }
         session->Session::Disconnect(isFromClient);
@@ -7094,6 +7099,31 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
 {
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
+    }
+    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (needSaveSnapshot && !GetShowRecent()) { // persistent imageFit exist, add snapshot when interactive is false.
+        if (interactive) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "Remove static image from window");
+            PostTask([weakThis = wptr(this), where = __func__] {
+                auto session = weakThis.promote();
+                if (session == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
+                    return;
+                }
+                session->NotifyRemoveSnapshot();
+            }, __func__);
+        } else {
+            TLOGND(WmsLogTag::WMS_PATTERN, "Add static image for window");
+            PostTask([weakThis = wptr(this), where = __func__] {
+                auto session = weakThis.promote();
+                if (session == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
+                    return;
+                }
+                session->NotifyAddSnapshot(false, false, false);
+            }, __func__);
+        }
     }
     SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);

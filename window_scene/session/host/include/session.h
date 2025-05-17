@@ -208,7 +208,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -248,7 +248,8 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
-    void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true,
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -1051,6 +1052,7 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+    void DeletePersistentImageFit();
 
     /*
      * Specific Window

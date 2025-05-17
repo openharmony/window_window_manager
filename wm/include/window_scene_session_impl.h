@@ -283,6 +283,10 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    /*
+     * Window Pattern
+     */
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit) override;
     /**
      * Window Transition Animation For PC
      */

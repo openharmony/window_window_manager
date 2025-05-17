@@ -1063,6 +1063,14 @@ WMError WindowAdapter::IsWindowRectAutoSave(const std::string& key, bool& enable
     return wmsProxy->IsWindowRectAutoSave(key, enabled, persistentId);
 }
 
+WMError WindowAdapter::SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetImageForRecent(imgResourceId, imageFit, persistentId);
+}
+
 WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
