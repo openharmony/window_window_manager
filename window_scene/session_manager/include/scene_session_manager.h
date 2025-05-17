@@ -1462,7 +1462,8 @@ private:
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
-    WMError SetImageForRecent(int imgResourceId, ImageFit ImageFit, int persistentId) override;
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
+    bool GetPersistentImageFit(int persistentId, ImageFit imageFit);
 };
 } // namespace OHOS::Rosen
 
