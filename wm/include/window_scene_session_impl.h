@@ -469,7 +469,6 @@ private:
     /*
      * Window Lifecycle
      */
-    bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeInteractive();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
