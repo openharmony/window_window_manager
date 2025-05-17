@@ -477,6 +477,7 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
+    void ConfigSupportFunctionType(SupportFunctionType funcType);
 
     /*
      * UIExtension
@@ -1406,6 +1407,7 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);  
 
     /*
      * Move Drag

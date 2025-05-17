@@ -214,6 +214,7 @@ napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& 
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
+napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);

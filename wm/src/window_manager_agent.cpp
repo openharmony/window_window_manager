@@ -83,5 +83,9 @@ void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVi
     SingletonContainer::Get<WindowManager>().NotifyWindowPidVisibilityChanged(info);
 }
 
+void WindowManagerAgent::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    SingletonContainer::Get<WindowManager>().NotifyDisplayIdChange(windowId, displayId);
+}
 } // namespace Rosen
 } // namespace OHOS

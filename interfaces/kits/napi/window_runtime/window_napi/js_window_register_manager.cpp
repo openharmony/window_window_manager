@@ -39,6 +39,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {LIFECYCLE_EVENT_CB, RegisterListenerType::LIFECYCLE_EVENT_CB},
     {WINDOW_EVENT_CB, RegisterListenerType::WINDOW_EVENT_CB},
     {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
+    {KEYBOARD_WILL_SHOW_CB, RegisterListenerType::KEYBOARD_WILL_SHOW_CB},
+    {KEYBOARD_WILL_HIDE_CB, RegisterListenerType::KEYBOARD_WILL_HIDE_CB},
     {KEYBOARD_DID_SHOW_CB, RegisterListenerType::KEYBOARD_DID_SHOW_CB},
     {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
@@ -166,6 +168,38 @@ WmErrorCode JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillShowListener> thisListener(listener);
+    if (isRegister) {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillShowListener(thisListener));
+    } else {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillShowListener(thisListener));
+    }
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<JsWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillHideListener(thisListener));
     }
     return ret;
 }
@@ -497,6 +531,10 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
                 return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_SHOW_CB):
+                return ProcessKeyboardWillShowRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_HIDE_CB):
+                return ProcessKeyboardWillHideRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_SHOW_CB):
                 return ProcessKeyboardDidShowRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_HIDE_CB):

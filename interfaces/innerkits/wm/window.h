@@ -669,6 +669,34 @@ public:
 };
 
 /**
+ * @class IKeyboardWillShowListener
+ *
+ * @brief IKeyboardWillShowListener is used to observe keyboard show animation begins.
+ */
+class IKeyboardWillShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation begins.
+     */
+    virtual void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
+};
+
+/**
+ * @class IKeyboardWillHideListener
+ *
+ * @brief IKeyboardWillHideListener is used to observe keyboard hide animation begins.
+ */
+class IKeyboardWillHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation begins.
+     */
+    virtual void OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
+};
+
+/**
  * @class IKeyboardDidShowListener
  *
  * @brief IKeyboardDidShowListener is used to observe keyboard show animation completion.
@@ -3812,6 +3840,50 @@ public:
      * @param pipTemplateInfo the pipTemplateInfo of pip window
      */
     virtual void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) {}
+    
+    /**
+     * @brief Register a listener for observing keyboard show animation begins.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation start listener.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register a listener for observing keyboard hide animation begins.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+ 
+    /**
+     * @brief Unregister keyboard hide animation start listener.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register keyboard show animation completion listener.

@@ -206,6 +206,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
             return HandleNotifyKeyboardAnimationCompleted(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN):
+            return HandleNotifyKeyboardAnimationWillBegin(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
             return HandleNotifyRotationProperty(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
@@ -1018,6 +1020,20 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
     NotifyAppForceLandscapeConfigUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    sptr<KeyboardAnimationInfo> keyboardAnimationInfo = data.ReadParcelable<KeyboardAnimationInfo>();
+    if (keyboardAnimationInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardAnimationInfo is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
+    NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
