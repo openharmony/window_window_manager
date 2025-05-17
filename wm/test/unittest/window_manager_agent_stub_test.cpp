@@ -437,7 +437,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, TestSize.Level1)
     uint32_t windowId = 0;
     DisplayId displayId = -1ULL;
     data.WriteUint32(windowId);
-    data.WriteUint64(displayId)
+    data.WriteUint64(displayId);
 
     uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
