@@ -21,6 +21,8 @@
 #include "mock/mock_keyboard_session.h"
 #include "session/host/include/session.h"
 #include "session/host/include/scene_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "ui/rs_surface_node.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -31,15 +33,23 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "KeyboardSessionTest2" };
+std::string g_logMsg;
+void KeyboardSessionTest2Callback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_logMsg = msg;
+}
 }
 
 constexpr int WAIT_ASYNC_US = 1000000;
-class KeyboardSessionTest2 : public testing::Test {
+class KeyboardSessionTest2 : public testing::Test, public IScreenConnectionListener {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
+    void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
 
 private:
     sptr<KeyboardSession> GetKeyboardSession(const std::string& abilityName, const std::string& bundleName);
@@ -54,6 +64,10 @@ void KeyboardSessionTest2::TearDownTestCase() {}
 void KeyboardSessionTest2::SetUp() {}
 
 void KeyboardSessionTest2::TearDown() {}
+
+void KeyboardSessionTest2::OnScreenConnected(const sptr<ScreenSession>& screenSession) {}
+
+void KeyboardSessionTest2::OnScreenDisconnected(const sptr<ScreenSession>& screenSession) {}
 
 sptr<KeyboardSession> KeyboardSessionTest2::GetKeyboardSession(const std::string& abilityName,
                                                                const std::string& bundleName)
@@ -161,6 +175,97 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, TestSize.Level1)
     // params gravity is WINDOW_GRAVITY_FLOAT
     params.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: AdjustKeyboardLayout03
+ * @tc.desc: AdjustKeyboardLayout test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout03, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AdjustKeyboardLayout03";
+    info.bundleName_ = "AdjustKeyboardLayout03";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardSession->SetSessionProperty(property);
+
+    KeyboardLayoutParams params;
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    params.displayId_ = 100;
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
+    EXPECT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode01
+ * @tc.desc: HandleMoveDragSurfaceNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest | Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(KeyboardSessionTest2Callback);
+    sptr<KeyboardSession> keyboardSession =
+        GetKeyboardSession("HandleMoveDragSurfaceNode01", "HandleMoveDragSurfaceNode01");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionListener(this);
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+    };
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(option, screenEvent);
+
+    sptr<MoveDragController> moveDragController = keyboardSession->GetMoveDragController();
+    ASSERT_NE(moveDragController, nullptr);
+    WSRect rect = { 0, 0, 200, 200 };
+    moveDragController->SetTargetRect(rect);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    EXPECT_TRUE(g_logMsg.find("keyboard panel session is null") != std::string::npos);
+
+    moveDragController->ResetCrossMoveDragProperty();
+    moveDragController->SetTargetRect(rect);
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode01";
+    info.bundleName_ = "HandleMoveDragSurfaceNode01";
+    sptr<SceneSession> panelSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(panelSession, nullptr);
+    keyboardSession->BindKeyboardPanelSession(panelSession);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    EXPECT_TRUE(g_logMsg.find("keyboard panel surface node is null") != std::string::npos);
+
+    moveDragController->ResetCrossMoveDragProperty();
+    moveDragController->SetTargetRect(rect);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    panelSession->SetSurfaceNode(surfaceNode);
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    EXPECT_TRUE(g_logMsg.find("Add widow") != std::string::npos);
+
+    keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+    EXPECT_TRUE(g_logMsg.find("Remove window") != std::string::npos);
 }
 
 /**

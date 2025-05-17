@@ -2053,6 +2053,7 @@ struct KeyboardLayoutParams : public Parcelable {
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
     Rect PortraitPanelRect_ { 0, 0, 0, 0 };
+    uint64_t displayId_ = DISPLAY_ID_INVALID;
 
     bool operator==(const KeyboardLayoutParams& other) const
     {
@@ -2062,7 +2063,8 @@ struct KeyboardLayoutParams : public Parcelable {
                 LandscapeKeyboardRect_ == other.LandscapeKeyboardRect_ &&
                 PortraitKeyboardRect_ == other.PortraitKeyboardRect_ &&
                 LandscapePanelRect_ == other.LandscapePanelRect_ &&
-                PortraitPanelRect_ == other.PortraitPanelRect_);
+                PortraitPanelRect_ == other.PortraitPanelRect_ &&
+                displayId_ == other.displayId_);
     }
 
     bool operator!=(const KeyboardLayoutParams& params) const
