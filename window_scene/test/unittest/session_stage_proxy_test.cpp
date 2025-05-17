@@ -364,6 +364,36 @@ HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isLimit = false;
+    res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyExtensionSecureLimitChange02
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: test function : NotifyForegroundInteractiveStatus
  * @tc.type: FUNC

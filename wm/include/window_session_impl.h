@@ -350,6 +350,8 @@ public:
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener) override;
+    WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener) override;   
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -453,6 +455,11 @@ public:
     DisplayOrientation GetDisplayOrientationForRotation() const;
     void SetPreferredRequestedOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
+
+    /*
+     * UIExtension
+     */
+    WSError NotifyExtensionSecureLimitChange(bool isLimit) override;
 
     /*
      * RS Client Multi Instance
@@ -712,6 +719,8 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IExtensionSecureLimitChangeListener, std::vector<sptr<IExtensionSecureLimitChangeListener>>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IPreferredOrientationChangeListener, sptr<IPreferredOrientationChangeListener>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowOrientationChangeListener, sptr<IWindowOrientationChangeListener>> GetListeners();
@@ -808,6 +817,7 @@ private:
     static std::recursive_mutex windowStatusDidChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
+    static std::mutex secureLimitChangeListenerMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
     static std::mutex preferredOrientationChangeListenerMutex_;
     static std::mutex windowOrientationChangeListenerMutex_;
@@ -836,6 +846,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> secureLimitChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
     static std::map<int32_t, sptr<IPreferredOrientationChangeListener>> preferredOrientationChangeListener_;
     static std::map<int32_t, sptr<IWindowOrientationChangeListener>> windowOrientationChangeListener_;

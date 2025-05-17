@@ -1873,6 +1873,21 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags02, TestSize.Level1
 }
 
 /**
+ * @tc.name: UpdateExtWindowFlags03
+ * @tc.desc: UpdateExtWindowFlags Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtWindowFlags03, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->UpdateExtWindowFlags(ExtensionWindowFlags(), ExtensionWindowFlags()));
+}
+
+/**
  * @tc.name: GetHostWindowRect01
  * @tc.desc: GetHostWindowRect Test
  * @tc.type: FUNC
