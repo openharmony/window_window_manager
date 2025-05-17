@@ -82,6 +82,7 @@ public:
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
     MOCK_METHOD0(NotifyBackgroundNonInteractiveStatus, void(void));
+    MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
 };
 } // namespace Rosen
 } // namespace OHOS

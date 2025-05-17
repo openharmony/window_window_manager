@@ -141,6 +141,20 @@ HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleNotifySecureLimitChange
+ * @tc.desc: test function : HandleNotifySecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySecureLimitChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySecureLimitChange(data, reply));
+}
+
+/**
  * @tc.name: HandleUpdateDensity01
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC

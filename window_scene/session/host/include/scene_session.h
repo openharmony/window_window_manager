@@ -1086,6 +1086,7 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    void NotifyExtensionSecureLimitChange(bool isLimit);
 
     /*
      * PiP Window

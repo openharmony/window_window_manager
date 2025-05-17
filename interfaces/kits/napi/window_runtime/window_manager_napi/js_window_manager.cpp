@@ -1319,13 +1319,13 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     }
     DisplayId displayId = DISPLAY_ID_INVALID;
     if (argc == ARGC_ONE) {
-        int32_t inputDisplayId = 0;
+        int64_t inputDisplayId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], inputDisplayId)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
         }
         if (inputDisplayId < 0) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}d", inputDisplayId);
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64, inputDisplayId);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
         }
         displayId = static_cast<DisplayId>(inputDisplayId);
