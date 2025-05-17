@@ -28,8 +28,13 @@ class WebPictureInPictureControllerInterface : virtual public RefBase {
 public:
     WebPictureInPictureControllerInterface() = default;
     ~WebPictureInPictureControllerInterface() = default;
-    WMError Create(const PiPConfig& config, uint32_t controllerId);
-    WMError StartPip();
+    WMError Create();
+    WMError SetMainWindowId(uint32_t mainWindowId);
+    WMError SetTemplateType(PiPTemplateType pipTemplateType);
+    WMError SetRect(uint32_t width, uint32_t height);
+    WMError SetControlGroup(const std::vector<uint32_t>& controlGroup);
+    WMError SetNapiEnv(void* env);
+    WMError StartPip(uint32_t controllerId);
     WMError StopPip();
     WMError UpdateContentSize(int32_t width, int32_t height);
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
@@ -67,6 +72,8 @@ private:
     int32_t ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
     void UnregisterAll(ListenerType type);
+    WMError CreateWebPipController();
+    PiPConfig config_{};
     bool isPipEnabled_ = false;
     sptr<WebPictureInPictureController> sptrWebPipController_;
     std::set<sptr<NativePiPWindowListener>> lifeCycleCallbackSet_;

@@ -96,11 +96,11 @@ typedef enum {
      */
     WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR = 1300014,
     /**
-     * @error Picture-In-Picture repeat operation.
+     * @error Picture-In-Picture repeated operation.
      *
      * @since 20
      */
-    WINDOW_MANAGER_ERRORCODE_PIP_REPEAT_OPERATION = 1300015,
+    WINDOW_MANAGER_ERRORCODE_PIP_REPEATED_OPERATION = 1300015,
     /**
      * @error Parameter is incorrect.
      * @since 20
