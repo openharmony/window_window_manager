@@ -11044,7 +11044,7 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
         TLOGE(WmsLogTag::WMS_LIFE, "session cannot be clear, Id %{public}d.", sceneSession->GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    const WSError errCode = sceneSession->Clear();
+    const WSError errCode = sceneSession->Clear(false, true);
     return errCode;
 }
 
