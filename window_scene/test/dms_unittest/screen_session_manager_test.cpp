@@ -6738,6 +6738,23 @@ HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest
     ssm_->AdaptSuperHorizonalBoot(session, id);
     EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
 }
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

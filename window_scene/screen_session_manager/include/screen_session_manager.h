@@ -569,6 +569,7 @@ private:
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
+    void HandleSuperFoldStatusLocked(bool isLocked);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
