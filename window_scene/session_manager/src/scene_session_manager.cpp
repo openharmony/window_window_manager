@@ -13189,10 +13189,8 @@ bool SceneSessionManager::SubtractIntersectArea(std::shared_ptr<SkRegion>& unacc
     auto hotAreas = sceneSession->GetTouchHotAreas();
     WSRect wsRect = sceneSession->GetSessionRect();
     for (auto& rect : hotAreas) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d, rect=[x=%{public}d, y=%{public}d, w=%{public}d, h=%{public}d],"
-            " hotArea=[x=%{public}d, y=%{public}d, w=%{public}d, h=%{public}d]",
-            static_cast<int32_t>(sceneSession->GetPersistentId()), wsRect.posX_, wsRect.posY_, wsRect.width_,
-            wsRect.height_, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d, rect=%{public}s, hotArea=%{public}s",
+            static_cast<int32_t>(sceneSession->GetPersistentId()), wsRect.ToString().c_str(), rect.ToString().c_str());
         if (rect != Rect::EMPTY_RECT) {
             rect.posX_ += wsRect.posX_;
             rect.posY_ += wsRect.posY_;

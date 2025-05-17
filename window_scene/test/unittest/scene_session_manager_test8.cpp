@@ -343,8 +343,8 @@ HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
 
     SessionInfo sessionInfo2;
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
-    EXPECT_NE(sceneSession2, nullptr);
-    WSRect wsRect2{ .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
+    ASSERT_NE(sceneSession2, nullptr);
+    WSRect wsRect2 { .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
     sceneSession2->winRect_ = wsRect2;
     std::vector<Rect> hotAreas;
     hotAreas.push_back(Rect::EMPTY_RECT);
