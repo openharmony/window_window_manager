@@ -507,7 +507,7 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyF
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write PropertyDirtyFlags failed");
         return;
     }
-    if (!data.WriteUint32(static<uint32_t>(windowInfoList.size()))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(windowInfoList.size()))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoList failed");
         return;
     }
@@ -590,11 +590,11 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posY failed");
                 return false;
             }
-            if (!data.WriteUint32(rect.Width_)) {
+            if (!data.WriteUint32(rect.width_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Width failed");
                 return false;
             }
-            if (!data.WriteUint32(rect.Height_)) {
+            if (!data.WriteUint32(rect.height_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
                 return false;
             }

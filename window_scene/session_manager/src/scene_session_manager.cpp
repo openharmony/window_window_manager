@@ -9399,7 +9399,7 @@ WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey win
     observedFlags_ |= (1 << static_cast<int32_t>(windowInfoKey));
     interestFlags_ |= interestInfo;
     return RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PROPERTY, windowManagerAgent);
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
 
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -9424,7 +9424,7 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PROPERTY) {
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
         if (!SessionPermission::IsSACalling()) {
             TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -15233,7 +15233,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
             if (!(sceneSession->GetPropertyDirtyFlags() & observedFlags_)) {
                 continue;
             }
-            propertyDirtyFlags |= sceneSession->GetParamDirtyFlags();
+            propertyDirtyFlags |= sceneSession->GetPropertyDirtyFlags();
             std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
             PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
             windowInfoList.emplace_back(windowPropertyChangeInfo);

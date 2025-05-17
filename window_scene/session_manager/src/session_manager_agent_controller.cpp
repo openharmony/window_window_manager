@@ -275,7 +275,7 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
 }
 
 void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {

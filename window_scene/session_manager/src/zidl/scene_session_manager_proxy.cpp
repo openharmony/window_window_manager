@@ -678,7 +678,7 @@ WMError SceneSessionManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgen
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::RegisterWindowParamChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+WMError SceneSessionManagerProxy::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageOption option;
@@ -710,7 +710,7 @@ WMError SceneSessionManagerProxy::RegisterWindowParamChangeAgent(WindowInfoKey w
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_PARAM_CHANGE_AGENT),
+        SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

@@ -241,13 +241,13 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
     std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     uint32_t WindowInfoListLength = 0;
-    if (!data.ReadUint32(WindowInfoLength)) {
+    if (!data.ReadUint32(WindowInfoListLength)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowInfoLength failed");
         return false;
     }
     size_t WindowInfoListSize = static_cast<size_t>(WindowInfoListLength);
 
-    for (size_t i = 0; i < WindowInfoSize; i++) {
+    for (size_t i = 0; i < WindowInfoListSize; i++) {
         uint32_t windowInfoLength = 0;
         if (!data.ReadUint32(windowInfoLength)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoLength failed");
@@ -255,17 +255,19 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
         }
         size_t windowInfoSize = static_cast<size_t>(windowInfoLength);
         std::unordered_map<WindowInfoKey, std::any> windowInfo;
-        if (!ReadWindowInfo(data, windowInfo)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
-            return false;
+        for (size_t j = 0; j < windowInfoSize; j++) {
+            if (!ReadWindowInfo(data, windowInfo)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
+                return false;
+            }
         }
-        windowInfoList.empalace_back(windowInfo);
+        windowInfoList.emplace_back(windowInfo);
     }
     return true;
 }
 
 bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
-    const std::unordered_map<WindowInfoKey, std::any>& windowInfo)
+    std::unordered_map<WindowInfoKey, std::any>& windowInfo)
 {
     int32_t WindowInfoKeyValue = 0;
     if (!data.ReadInt32(WindowInfoKeyValue)) {
@@ -277,11 +279,11 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
     switch(windowInfoKey) {
         case WindowInfoKey::WINDOW_ID : {
             uint32_t value = 0;
-            if (!data.ReadUint32(windowId)) {
+            if (!data.ReadUint32(value)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read uint32_t failed");
                 return false;
             }
-            windowInfo[windowInfoKey] = windowId;
+            windowInfo[windowInfoKey] = value;
             break;
         }
         case WindowInfoKey::BUNDLE_NAME :
@@ -309,7 +311,7 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowVisibilityState failed");
                 return false;
             }
-            windowInfo[windowInfoKey] = static<WindowVisibilityState>(value);
+            windowInfo[windowInfoKey] = static_cast<WindowVisibilityState>(value);
             break;
         }
         case WindowInfoKey::DISPLAY_ID : {
@@ -328,7 +330,7 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read Rect failed");
                 return false;
             }
-            windowInfo[windowInfoKey] = value;
+            windowInfo[windowInfoKey] = rect;
             break;
         }
         default : {
