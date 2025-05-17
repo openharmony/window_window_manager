@@ -1215,6 +1215,7 @@ private:
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
     std::unordered_set<std::string> isModuleHookOffSet_;
+    std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,

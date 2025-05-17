@@ -914,7 +914,7 @@ protected:
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
     /*
-     * Window Property    
+     * Window Property
      */
     uint32_t propertyDirtyFlags_ = 0;
 

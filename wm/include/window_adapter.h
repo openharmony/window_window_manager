@@ -68,6 +68,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);

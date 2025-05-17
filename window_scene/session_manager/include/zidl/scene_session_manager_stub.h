@@ -43,6 +43,7 @@ private:
     int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);

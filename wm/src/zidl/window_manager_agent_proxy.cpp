@@ -543,7 +543,7 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoKey failed");
         return false;
     }
-    switch(windowInfoPair.first) {
+    switch (windowInfoPair.first) {
         case WindowInfoKey::WINDOW_ID: {
             if (!data.WriteUint32(std::any_cast<uint32_t>(windowInfoPair.second))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint32_t failed");
@@ -603,7 +603,7 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey");
             return false;
-        }    
+        }
     }
     return true;
 }

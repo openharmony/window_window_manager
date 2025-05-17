@@ -884,10 +884,15 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
     }
     uint32_t interestInfo = 0;
     for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 0;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
         interestInfo |= static_cast<uint32_t>(windowInfoKey);
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
-        WindowInfoKey::RECT, listener->GetInterestInfo(), pImpl_->windowPropertyChangeAgent_);
+        WindowInfoKey::RECT, interestInfo, pImpl_->windowPropertyChangeAgent_);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
         pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -899,6 +904,39 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
             return WMError::WM_OK;
         }
         pImpl_->windowRectChangeListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    pImpl_->windowRectChangeListeners_.erase(std::remove_if(pImpl_->windowRectChangeListeners_.begin(),
+        pImpl_->windowRectChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->windowRectChangeListeners_.end());
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::RECT,
+            interestInfo, pImpl_->windowPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
+        }
     }
     return ret;
 }

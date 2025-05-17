@@ -143,6 +143,7 @@ public:
         TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
+        TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -262,6 +263,8 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK;}
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
