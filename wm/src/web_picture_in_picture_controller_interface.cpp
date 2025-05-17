@@ -132,8 +132,6 @@ WMError WebPictureInPictureControllerInterface::SetMainWindowId(uint32_t mainWin
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-
-
     }
     if (mainWindowId == 0) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be zero");
@@ -151,7 +149,8 @@ WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType 
     }
     auto iter = TEMPLATE_CONTROL_MAP.find(pipTemplateType);
     if (iter == TEMPLATE_CONTROL_MAP.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "createPip param error, pipTemplateType not exists");
+        TLOGE(WmsLogTag::WMS_PIP, "createPip param error, pipTemplateType %{public}d not exists",
+            reinterpret_cast<int32_t>(pipTemplateType));
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     config_.pipTemplateType = static_cast<uint32_t>(pipTemplateType);
