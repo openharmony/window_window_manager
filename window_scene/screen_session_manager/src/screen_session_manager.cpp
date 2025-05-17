@@ -1296,10 +1296,17 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     }
 #endif
     if (clientProxy && g_isPcDevice) {
+        clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
+        sptr<ScreenSession> internalSession = GetInternalScreenSession();
         if (!RecoverRestoredMultiScreenMode(screenSession)) {
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
             SetMultiScreenDefaultRelativePosition();
             ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
+        }
+        sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
+        if (newInternalSession != nullptr && internalSession != nullptr &&
+            internalSession->GetScreenId() != newInternalSession->GetScreenId()) {
+            TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
+            screenSession = internalSession;
         }
         SetExtendedScreenFallbackPlan(screenSession->GetScreenId());
     }
