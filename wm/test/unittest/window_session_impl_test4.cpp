@@ -1472,6 +1472,113 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyExtensionSecureLimitChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->NotifyExtensionSecureLimitChange(false);
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    window->RegisterExtensionSecureLimitChangeListener(listener);
+    WSError res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->UnregisterExtensionSecureLimitChangeListener(listener);
+}
+
+/**
+ * @tc.name: RegisterExtensionSecureLimitChangeListener01
+ * @tc.desc: RegisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterExtensionSecureLimitChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterExtensionSecureLimitChangeListener01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RegisterExtensionSecureLimitChangeListener02
+ * @tc.desc: RegisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterExtensionSecureLimitChangeListener02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterExtensionSecureLimitChangeListener02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = nullptr;
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UnregisterExtensionSecureLimitChangeListener01
+ * @tc.desc: UnregisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterExtensionSecureLimitChangeListener01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    WMError res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterExtensionSecureLimitChangeListener02
+ * @tc.desc: UnregisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterExtensionSecureLimitChangeListener02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = nullptr;
+    WMError res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: UpdateVirtualPixelRatio
  * @tc.desc: test UpdateVirtualPixelRatio
  * @tc.type: FUNC

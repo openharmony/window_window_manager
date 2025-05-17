@@ -553,6 +553,21 @@ public:
 };
 
 /**
+ * @class IExtensionSecureLimitChangeListener
+ *
+ * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and its change when limit changed.
+ */
+class IExtensionSecureLimitChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window nonsecure limit changed.
+     *
+     * @param isLimite Whather nonsecure windows is Limite.
+     */
+    virtual void OnSecureLimitChange(bool isLimit) {}
+};
+
+/**
  * @class ISubWindowCloseListener
  *
  * @brief ISubWindowCloseListener is used to observe the window rect and its changing reason when window changed.
@@ -3283,6 +3298,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window nonsecure limit change listener.
+     *
+     * @param listener IExtensionSecureLimitChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window nonsecure limit change listener.
+     *
+     * @param listener IExtensionSecureLimitChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
