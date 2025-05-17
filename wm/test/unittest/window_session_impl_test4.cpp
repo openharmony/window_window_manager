@@ -1557,87 +1557,81 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowWillClose, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowContainerColor01
- * @tc.desc: SetWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor01
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor01, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 end";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 }
 
 /**
- * @tc.name: SetWindowContainerColor02
- * @tc.desc: SetWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor02
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor02, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 end";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
- * @tc.name: SetWindowContainerColor03
- * @tc.desc: SetWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor03
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor03, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 end";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
- * @tc.name: SetWindowContainerColor04
- * @tc.desc: SetWindowContainerColor
+ * @tc.name: SetWindowContainerModalColor04
+ * @tc.desc: SetWindowContainerModalColor
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor04, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerModalColor");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetDecorEnable(true);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    std::string activeColor = "color";
-    std::string inactiveColor = "123";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -2773,6 +2767,28 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTe
     int32_t ret = dialogWindow->GetSubWindowZLevelByFlags(dialogWindow->GetType(),
         dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
     EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigUpdated");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
 }
 } // namespace
 } // namespace Rosen

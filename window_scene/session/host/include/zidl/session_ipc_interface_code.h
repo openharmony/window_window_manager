@@ -113,6 +113,7 @@ enum class SessionInterfaceCode {
 
     // PC Fold Screen
     TRANS_ID_GET_WATERFALL_MODE,
+    TRANS_ID_USE_IMPLICT_ANIMATION,
 
     // PictureInPicture
     TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE = 800,

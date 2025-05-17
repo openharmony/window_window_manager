@@ -42,6 +42,16 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
+struct ScaleProperty {
+    float scaleX;
+    float scaleY;
+    float pivotX;
+    float pivotY;
+
+    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY), 
+                                                                            pivotX(pivotX), pivotY(pivotY) {}
+};
+
 static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
     {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
     {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
@@ -95,7 +105,8 @@ public:
 
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool SetScreenPowerForSuperFoldDevice(ScreenId screenId, ScreenPowerState state);
+    bool SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowerState state);
+    bool SetScreenPowerByIdDefault(ScreenId screenId, ScreenPowerState state);
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
     uint32_t GetScreenBrightness(uint64_t screenId) override;
@@ -259,6 +270,7 @@ public:
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;
+    void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
 
@@ -267,6 +279,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
@@ -274,6 +287,8 @@ public:
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
     void HandleExtendScreenConnect(ScreenId screenId);
     void HandleExtendScreenDisconnect(ScreenId screenId);
+    bool GetIsFoldStatusLocked();
+    void SetIsFoldStatusLocked(bool isFoldStatusLocked);
     bool GetIsOuterOnlyMode();
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
@@ -393,11 +408,14 @@ public:
     void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent,
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
+    void OnScreenChangeForPC(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
     void SetCoordinationFlag(bool isCoordinationFlag);
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
 
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
@@ -441,6 +459,9 @@ public:
     std::string DumperClientScreenSessions();
     void SetMultiScreenModeChangeTracker(std::string changeProc);
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
+    void NotifyScreenMaskAppear() override;
+    bool IsSystemSleep();
+    bool GetKeyboardState() override;
 
 protected:
     ScreenSessionManager();
@@ -496,6 +517,8 @@ private:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool& phyMirrorEnable);
+    void HandleMapWhenScreenDisconnect(ScreenId screenId);
     void HandlePCScreenDisconnect(sptr<ScreenSession> screenSession);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
@@ -507,6 +530,7 @@ private:
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
     sptr<ScreenSession> GetInternalScreenSession();
     void ExitOuterOnlyMode(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
+    void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -536,7 +560,11 @@ private:
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
-    void CalculateXYPosition(sptr<ScreenSession> screenSession);
+    void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
+        sptr<ScreenSession> secondaryScreenSession = nullptr);
+    void CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
+        
+        sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
@@ -636,6 +664,8 @@ private:
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
+    bool isDeviceShutDown_ = false;
+    bool isScreenConnecting_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -658,6 +688,7 @@ private:
     bool isExtendScreenConnected_ = false;
     bool isOuterOnlyMode_ = false;
     bool isOuterOnlyModeBeforePowerOff_ = false;
+    std::atomic<bool> isFoldStatusLocked_ = false;
 
     /**
      * On/Off screen
@@ -685,6 +716,10 @@ private:
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;
+    std::mutex screenPowerMutex_;
+    std::mutex screenChangeMutex_;
+    std::mutex screenMaskMutex_;
+    std::condition_variable screenMaskCV_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -724,6 +759,9 @@ private:
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
+    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session, 
+                                                        const ScaleProperty& scalep,
+                                                        float& translateX, float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsDefaultMirrorMode(ScreenId screenId);

@@ -150,60 +150,11 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
-    window_ = GetTestWindowImpl("SetForceSplitEnable");
-    ASSERT_NE(window_, nullptr);
-
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-
-    isForceSplit = true;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
-    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
-    ASSERT_NE(window_, nullptr);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window_->hostSession_ = session;
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    AppForceLandscapeConfig config = {};
-    auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig02
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -212,11 +163,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
     AppForceLandscapeConfig config = {};
     window_->hostSession_ = nullptr;
     auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
 
@@ -985,41 +932,21 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCompatibleModeInPc
- * @tc.desc: GetCompatibleModeInPc
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, IsAdaptToCompatibleImmersive, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetCompatibleModeInPc");
+    option->SetWindowName("IsAdaptToCompatibleImmersive");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool enable = true;
-    window->property_->SetCompatibleModeInPc(enable);
-    EXPECT_EQ(true, window->GetCompatibleModeInPc());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc end";
-}
-
-/**
- * @tc.name: SetWindowContainerColor
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor start";
-    window_ = GetTestWindowImpl("SetWindowContainerColor");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window_->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    auto ret = window_->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(true, window->IsAdaptToCompatibleImmersive());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive end";
 }
 
 /**
@@ -1284,31 +1211,6 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 
     window->inputEventConsumer_ = nullptr;
     window->NotifyPointerEvent(pointerEvent);
-}
-
-/**
- * @tc.name: SetWindowContainerColor01
- * @tc.desc: SetWindowContainerColor01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor01");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    auto ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
-
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetIsPcAppInPad(true);
-    window->property_->isDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

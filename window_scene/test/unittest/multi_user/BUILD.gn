@@ -35,8 +35,16 @@ ohos_unittest("window_scene_user_switch_test") {
   deps = [ "../:ws_unittest_common" ]
   external_deps = [
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
     "ability_runtime:mission_info",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "image_framework:image_native",
+    "input:libmmi-napi",
   ]
 }

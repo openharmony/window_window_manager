@@ -46,6 +46,7 @@ const std::string ON_SECONDARY_REFLEXION_CHANGE_CALLBACK = "secondaryReflexionCh
 const std::string ON_CAMERA_BACKSELFIE_CHANGE_CALLBACK = "cameraBackSelfieChange";
 const std::string ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGE_CALLBACK = "extendScreenConnectStatusChange";
 const std::string ON_BEFORE_PROPERTY_CHANGE_CALLBACK = "beforeScreenPropertyChange";
+const std::string ON_SCREEN_CHANGE_CALLBACK = "screenModeChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -985,6 +986,40 @@ void JsScreenSession::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
         }
     } else {
         TLOGE(WmsLogTag::DMS, "OnBeforeScreenPropertyChange: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent)
+{
+    const std::string callbackType = ON_SCREEN_CHANGE_CALLBACK;
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+    auto jsCallbackRef = mCallback_[callbackType];
+    auto asyncTask = [jsCallbackRef, callbackType, screenModeChangeEvent, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenModeChange");
+        if (jsCallbackRef == nullptr) {
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, jsCallbackRef is null!");
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, method is null!");
+            return;
+        }
+        napi_value event = CreateJsValue(env, static_cast<std::uint32_t>(screenModeChangeEvent));
+        napi_value argv[] = { event };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::DMS, "OnScreenModeChange: Failed to SendEvent.");
+        }
+    } else {
+        TLOGE(WmsLogTag::DMS, "OnScreenModeChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

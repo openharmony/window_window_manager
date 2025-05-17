@@ -37,21 +37,13 @@ public:
     sptr<IRemoteObject> iRemoteObjectMocker;
 };
 
-void sceneSessionManagerProxyLifecycleTest::SetUpTestCase()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::SetUpTestCase() {}
 
-void sceneSessionManagerProxyLifecycleTest::TearDownTestCase()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::TearDownTestCase() {}
 
-void sceneSessionManagerProxyLifecycleTest::SetUp()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::SetUp() {}
 
-void sceneSessionManagerProxyLifecycleTest::TearDown()
-{
-}
+void sceneSessionManagerProxyLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -68,8 +60,8 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateSessionWindowVisibilityListener(persistentId,
-        haveListener));
+    ASSERT_EQ(WSError::WS_OK,
+              sceneSessionManagerProxy->UpdateSessionWindowVisibilityListener(persistentId, haveListener));
 }
 
 /**
@@ -102,7 +94,7 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED,
-        sceneSessionManagerProxy->PendingSessionToBackgroundForDelegator(token, true));
+              sceneSessionManagerProxy->PendingSessionToBackgroundForDelegator(token, true));
 }
 
 /**
@@ -120,6 +112,6 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, TestSiz
     std::vector<sptr<WindowVisibilityInfo>> infos;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy->GetVisibilityWindowInfo(infos));
 }
-}  // namespace
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,6 +28,7 @@ multimedia_path = "//foundation/multimedia/image_framework"
 multimodalinput_path = "//foundation/multimodalinput"
 sensor_path = "//base/sensors/sensor"
 accessibility_path = "//foundation/barrierfree/accessibility"
+dmserver_gen_path = "${root_gen_dir}/foundation/window/window_manager/dmserver"
 
 declare_args() {
   device_status_enable = true

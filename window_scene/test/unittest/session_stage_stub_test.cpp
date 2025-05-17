@@ -28,6 +28,7 @@
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "ui/rs_canvas_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -391,6 +392,29 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleNotifyLayoutFinishAfterWindowModeChange
+ * @tc.desc: test function : HandleNotifyLayoutFinishAfterWindowModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyLayoutFinishAfterWindowModeChange, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+}
+
+/**
  * @tc.name: HandleNotifyForegroundInteractiveStatus
  * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
  * @tc.type: FUNC
@@ -684,54 +708,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, TestSize.Lev
 }
 
 /**
- * @tc.name: HandleCompatibleFullScreenRecover
- * @tc.desc: test function : HandleCompatibleFullScreenRecover
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenRecover, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-}
-
-/**
- * @tc.name: HandleCompatibleFullScreenMinimize
- * @tc.desc: test function : HandleCompatibleFullScreenMinimize
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenMinimize, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-}
-
-/**
- * @tc.name: HandleCompatibleFullScreenClose
- * @tc.desc: test function : HandleCompatibleFullScreenClose
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleCompatibleFullScreenClose, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    ASSERT_NE(sessionStageStub_, nullptr);
-    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-}
-
-/**
  * @tc.name: HandlePcAppInPadNormalClose
  * @tc.desc: test function : HandlePcAppInPadNormalClose
  * @tc.type: FUNC
@@ -785,18 +761,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifySessionFullScreen, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleNotifyCompatibleModeEnableInPad
- * @tc.desc: test function : HandleNotifyCompatibleModeEnableInPad
+ * @tc.name: HandleNotifyCompatibleModePropertyChange
+ * @tc.desc: test function : HandleNotifyCompatibleModePropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModePropertyChange, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_PROPERTY_CHANGE);
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    data.WriteBool(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    data.WriteParcelable(compatibleModeProperty.GetRefPtr());
     ASSERT_NE(sessionStageStub_, nullptr);
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
@@ -983,6 +960,43 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
 }
 
 /**
+ * @tc.name: HandleLinkKeyFrameCanvasNode
+ * @tc.desc: test function : HandleLinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleSetKeyFramePolicy
+ * @tc.desc: test function : HandleSetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetKeyFramePolicy, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    KeyFramePolicy keyFramePolicy;
+    data.WriteParcelable(&keyFramePolicy);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyRotationProperty
  * @tc.desc: test function : HandleNotifyRotationProperty
  * @tc.type: FUNC
@@ -1002,6 +1016,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationProperty, Function | SmallTes
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY);
     EXPECT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
 }
 } // namespace
 } // namespace Rosen
