@@ -1670,6 +1670,18 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
+WMError WindowManager::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color)
+{
+    int32_t uid = getuid();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetStartWindowBackgroundColor(
+        moduleName, abilityName, color, uid);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
     bool byForeground, WindowFocusChangeReason reason)
 {

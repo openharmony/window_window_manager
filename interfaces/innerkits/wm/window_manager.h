@@ -934,6 +934,17 @@ public:
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
 
     /**
+     * @brief Set start window background color.
+     *
+     * @param moduleName Module name that needs to be set
+     * @param abilityName Ability name that needs to be set
+     * @param color Color metrics
+     * @return WM_OK means set start window background color success, others means failed.
+     */
+    WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color);
+
+    /**
      * @brief Get snapshot by window id.
      *
      * @param windowId Window id which want to snapshot.
