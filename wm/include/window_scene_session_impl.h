@@ -41,7 +41,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
-    void Resume() override;
     WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
 
     /*
@@ -290,6 +289,11 @@ public:
         const TransitionAnimation& animation) override;
     std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
 
+    /*
+     * Window LifeCycle
+     */
+    void Interactive() override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -472,7 +476,7 @@ private:
     /*
      * Window Lifecycle
      */
-    void NotifyFreeMultiWindowModeResume();
+    void NotifyFreeMultiWindowModeInteractive();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 

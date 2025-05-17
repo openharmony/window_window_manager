@@ -250,6 +250,20 @@ void JsWindowListener::AfterPaused()
     }
 }
 
+void JsWindowListener::AfterInteractive()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::INTERACTIVE);
+    }
+}
+
+void JsWindowListener::AfterNonInteractive()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::NONINTERACTIVE);
+    }
+}
+
 void JsWindowListener::AfterDestroyed()
 {
     if (caseType_ == CaseType::CASE_WINDOW) {
