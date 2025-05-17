@@ -434,7 +434,7 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     ani_status ret = ANI_OK;
     ani_namespace aniNamespace{};
     if ((ret = env->FindNamespace(ns, &aniNamespace)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find ns %{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find ns:%{public}s ret:%{public}d", ns, ret);
         return ret;
     }
     ani_function func{};

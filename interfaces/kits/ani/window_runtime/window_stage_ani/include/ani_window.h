@@ -34,6 +34,8 @@ public:
     explicit AniWindow(const sptr<Window>& window);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     sptr<Window> GetWindow() { return windowToken_; }
+    ani_object GetAniObject() { return aniObject_; }
+    void SetAniObject(const ani_object& aniObject) { aniObject_ = aniObject; }
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
@@ -59,6 +61,11 @@ public:
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void ShowWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
     static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
     static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
@@ -66,6 +73,7 @@ public:
     static void Rotate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object rotateOptions);
     static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
         ani_string color, ani_object offsetX, ani_object offsetY);
+    static void Finalizer(ani_env* env, ani_long nativeObj);
 
     ani_object Resize(ani_env* env, ani_double width, ani_double height);
     ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
@@ -102,6 +110,11 @@ private:
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_double timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnShowWindow(ani_env* env);
+    void OnDestroyWindow(ani_env* env);
+    ani_boolean OnIsWindowShowing(ani_env* env);
+    void OnHideWithAnimation(ani_env* env);
+    void OnShowWithAnimation(ani_env* env);
     void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
     void OnOpacity(ani_env* env, ani_double opacity);
     void OnScale(ani_env* env, ani_object scaleOptions);
@@ -121,6 +134,7 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
+    ani_object aniObject_ = nullptr;
 };
 
 /* window obj stored in ANI */
@@ -128,6 +142,7 @@ AniWindow* GetWindowObjectFromAni(void* aniObj);
 ani_object CreateAniWindowObject(ani_env* env, sptr<Window>& window);
 void DropWindowObjectByAni(ani_object obj);
 ani_status ANI_Window_Constructor(ani_vm *vm, uint32_t *result);
+ani_object FindAniWindowObject(const std::string& windowName);
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_ANI_WINDOW_H
