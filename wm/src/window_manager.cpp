@@ -1677,7 +1677,6 @@ WMError WindowManager::SetStartWindowBackgroundColor(
     return ret;
 }
 
-
 WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
     bool byForeground, WindowFocusChangeReason reason)
 {
