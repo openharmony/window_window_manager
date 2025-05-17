@@ -312,31 +312,6 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyClientToUpdateInteractive
- * @tc.desc: check func NotifyClientToUpdateInteractive
- * @tc.type: FUNC
- */
- HWTEST_F(MainSessionTest, NotifyClientToUpdateNonInteractive, TestSize.Level1)
- {
-     SessionInfo info;
-     info.abilityName_ = "NotifyClientToUpdateNonInteractive";
-     info.bundleName_ = "NotifyClientToUpdateNonInteractive";
-     sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
-     ASSERT_NE(testSession, nullptr);
-     testSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-     ASSERT_NE(testSession->sessionStage_, nullptr);
-
-     testSession->SetSessionState(SessionState::STATE_ACTIVE);
-     testSession->NotifyClientToUpdateNonInteractive();
-
-     testSession->SetSessionState(SessionState::STATE_FOREGROUND);
-     testSession->NotifyClientToUpdateNonInteractive();
-
-     testSession->SetSessionState(SessionState::STATE_BACKGROUND);
-     testSession->NotifyClientToUpdateNonInteractive();
- }
-
-/**
  * @tc.name: SetExitSplitOnBackground
  * @tc.desc: check func SetExitSplitOnBackground
  * @tc.type: FUNC

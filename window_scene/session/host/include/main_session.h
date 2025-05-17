@@ -67,7 +67,6 @@ public:
      */
     void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
     void NotifySessionLockStateChange(bool isLockedState) override;
-    void NotifyClientToUpdateNonInteractive() override;
     void SetSessionLockState(bool isLockedState);
     bool GetSessionLockState() const;
     WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;

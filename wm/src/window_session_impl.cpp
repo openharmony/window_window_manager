@@ -1420,15 +1420,20 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
         return;
     }
     if (interactive) {
-        NotifyAfterInteractive();
+        // RESUMED事件和INTERACTIVE事件不保序
         NotifyAfterResumed();
+        if (state_ != WindowState::STATE_SHOWN || !isDidForeground_) {
+            TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d, isDidForeground: %{public}d", state_, isDidForeground_);
+            return;
+        }
+        NotifyAfterInteractive();
     } else {
         NotifyAfterPaused();
         NotifyAfterNonInteractive();
     }
 }
 
-void WindowSessionImpl::NotifyBackgroundNonInteractiveStatus()
+void WindowSessionImpl::NotifyNonInteractiveStatus()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
@@ -4184,24 +4189,24 @@ void WindowSessionImpl::NotifyAfterInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    if (hasNotifyInteractiveEvent_) {
+    if (!isNotifyInteractiveEvent_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in interactive status");
         return;
     }
-    hasNotifyInteractiveEvent_ = true;
+    isNotifyInteractiveEvent_ = true;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterInteractive, lifecycleListeners);
 }
 
 void WindowSessionImpl::NotifyAfterNonInteractive()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-    if (hasNotifyInteractiveEvent_) {
+    if (isNotifyInteractiveEvent_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
-    hasNotifyInteractiveEvent_ = false;
+    isNotifyInteractiveEvent_ = false;
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
 }
