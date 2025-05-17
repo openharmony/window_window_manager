@@ -133,6 +133,7 @@ public:
      */
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
     void SetTopWindowBoundaryByID(const std::string& stringId);
+    bool HasRequestedVsync() const { return vsyncStation_->HasRequestedVsync(); }
 
     /*
      * Window Property

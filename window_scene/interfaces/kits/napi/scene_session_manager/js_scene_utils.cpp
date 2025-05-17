@@ -47,6 +47,10 @@ enum class AceTouchType : int32_t {
     UP,
     MOVE,
     CANCEL,
+    HOVER_ENTER = 9,
+    HOVER_MOVE = 10,
+    HOVER_EXIT = 11,
+    HOVER_CANCEL = 12,
 };
 
 // Refer to OHOS::Ace::SourceType
@@ -58,46 +62,46 @@ enum class AceSourceType : int32_t {
     KEYBOARD = 4
 };
 
+const std::map<int32_t, int32_t> TOUCH_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
+const std::map<int32_t, int32_t> MOUSE_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
 void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
 {
     auto sourceType = pointerEvent.GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        switch (aceType) {
-            case static_cast<int32_t>(AceTouchType::DOWN):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-                break;
-            case static_cast<int32_t>(AceTouchType::UP):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-                break;
-            case static_cast<int32_t>(AceTouchType::MOVE):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-                break;
-            case static_cast<int32_t>(AceTouchType::CANCEL):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                break;
-            default:
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        auto it = TOUCH_ACTION_MAP.find(aceType);
+        if (it == TOUCH_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
         }
+        pointerEvent.SetPointerAction(it->second);
     } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-        switch (aceType) {
-            case static_cast<int32_t>(AceTouchType::DOWN):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-                break;
-            case static_cast<int32_t>(AceTouchType::UP):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-                break;
-            case static_cast<int32_t>(AceTouchType::MOVE):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-                break;
-            case static_cast<int32_t>(AceTouchType::CANCEL):
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                break;
-            default:
-                pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        auto it = MOUSE_ACTION_MAP.find(aceType);
+        if (it == MOUSE_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
         }
-    } else {
-        pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        pointerEvent.SetPointerAction(it->second);
     }
 }
 } // namespace
@@ -114,6 +118,73 @@ napi_valuetype GetType(napi_env env, napi_value value)
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
     return res;
+}
+
+napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
+{
+    napi_value objValue = nullptr;
+    if (!transitionAnimation) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_value configJsValue = ConvertWindowAnimationOptionsToJsValue(env, transitionAnimation->config);
+    if (!configJsValue) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "config", configJsValue);
+    napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, transitionAnimation->opacity));
+
+    return objValue;
+}
+
+napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
+    const WindowAnimationOptions& animationConfig)
+{
+    napi_value configJsValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
+    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, animationConfig.curve));
+    switch (animationConfig.curve) {
+        case WindowAnimationCurve::LINEAR: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            break;
+        }
+        case WindowAnimationCurve::INTERPOLATION_SPRING: {
+            napi_value params = nullptr;
+            napi_create_array(env, &params);
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+                napi_value element;
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_set_element(env, params, i, element);
+            }
+            napi_set_named_property(env, configJsValue, "param", params);
+            break;
+        }
+        default:
+            break;
+    }
+    return configJsValue;
+}
+
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    return objValue;
 }
 
 WSError GetIntValueFromString(const std::string& str, uint32_t& value)
@@ -1126,6 +1197,8 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
+        {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
     };
     bool atLeastOneParam = false;
@@ -1910,6 +1983,8 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         CreateJsSessionRect(env, params.LandscapePanelRect_));
     napi_set_named_property(env, objValue, "portraitPanelRect",
         CreateJsSessionRect(env, params.PortraitPanelRect_));
+    napi_set_named_property(env, objValue, "displayId",
+        CreateJsValue(env, static_cast<int64_t>(params.displayId_)));
     return objValue;
 }
 
@@ -2157,6 +2232,21 @@ napi_value CreateRectType(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
     napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
+    return objValue;
+}
+
+napi_value CreateSupportType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION)));
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION)));
     return objValue;
 }
 

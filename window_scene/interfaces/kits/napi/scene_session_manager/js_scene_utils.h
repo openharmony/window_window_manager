@@ -28,6 +28,24 @@
 #include "hitrace_meter.h"
 
 namespace OHOS::Rosen {
+
+#define CHECK_NAPI_ENV_RETURN_IF_NULL(env)               \
+    do {                                                 \
+        if ((env) == nullptr) {                          \
+            TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
+            return nullptr;                              \
+        }                                                \
+    } while (0)
+
+#define CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue) \
+    do {                                                       \
+        napi_create_object((env), &(objValue));                \
+        if ((objValue) == nullptr) {                           \
+            TLOGE(WmsLogTag::DEFAULT, "Failed to get object"); \
+            return nullptr;                                    \
+        }                                                      \
+    } while (0)
+
 enum class JsSessionType : uint32_t {
     TYPE_UNDEFINED = 0,
     TYPE_APP,
@@ -196,6 +214,7 @@ napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& 
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
+napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
@@ -205,6 +224,8 @@ napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
+napi_value WindowTransitionTypeInit(napi_env env);
+napi_value WindowAnimationCurveInit(napi_env env);
 napi_value CreateResultMapToJsValue(napi_env env,
     const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap);
 napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
@@ -212,6 +233,10 @@ napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t per
 napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
+napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
+    const WindowAnimationOptions& animationConfig);
+napi_value ConvertTransitionAnimationToJsValue(napi_env env,
+    std::shared_ptr<TransitionAnimation> transitionAnimation);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);

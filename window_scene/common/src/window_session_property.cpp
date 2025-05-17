@@ -1010,6 +1010,12 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isKeyboardWillShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardWillHideRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidHideRegistered_)) {
+        return false;
+    }
     return true;
 }
 
@@ -1054,6 +1060,13 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
+    if (!parcel.ReadBool(info.isKeyboardWillShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardWillHideRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidHideRegistered_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read keyboard registered state!");
+        return false;
+    }
     property->SetSessionInfo(info);
     return true;
 }
@@ -2044,6 +2057,16 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsSupportRotateFullScreen() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
+}
+
+bool WindowSessionProperty::IsAdaptToSubWindow() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSubWindow();
+}
+
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
@@ -2129,6 +2152,26 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
+{
+    isSupportRotateFullScreen_ = isSupportRotateFullScreen;
+}
+
+bool CompatibleModeProperty::IsSupportRotateFullScreen() const
+{
+    return isSupportRotateFullScreen_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToSubWindow(bool isAdaptToSubWindow)
+{
+    isAdaptToSubWindow_ = isAdaptToSubWindow;
+}
+
+bool CompatibleModeProperty::IsAdaptToSubWindow() const
+{
+    return isAdaptToSubWindow_;
+}
+
 void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
 {
     isAdaptToSimulationScale_ = isAdaptToSimulationScale;
@@ -2149,6 +2192,8 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
         parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isSupportRotateFullScreen_) &&
+        parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
 }
 
@@ -2166,6 +2211,8 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->isSupportRotateFullScreen_ = parcel.ReadBool();
+    property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
     return property;
 }

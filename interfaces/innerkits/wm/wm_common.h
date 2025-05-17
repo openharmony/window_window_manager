@@ -1901,6 +1901,50 @@ public:
     uint32_t duration_ = 0;
 };
 
+/**
+ * @struct KeyboardAnimationInfo
+ *
+ * @brief Info of keyboard animation
+ */
+struct KeyboardAnimationInfo: public Parcelable {
+    Rect beginRect { 0, 0, 0, 0 };
+    Rect endRect { 0, 0, 0, 0 };
+    bool isShow { false };
+    bool withAnimation { false };
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        bool result = parcel.WriteInt32(beginRect.posX_) &&
+            parcel.WriteInt32(beginRect.posY_) &&
+            parcel.WriteUint32(beginRect.width_) &&
+            parcel.WriteUint32(beginRect.height_) &&
+            parcel.WriteInt32(endRect.posX_) && parcel.WriteInt32(endRect.posY_) &&
+            parcel.WriteUint32(endRect.width_) && parcel.WriteUint32(endRect.height_) &&
+            parcel.WriteBool(isShow) && parcel.WriteBool(withAnimation);
+        return result;
+    }
+
+    static KeyboardAnimationInfo* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardAnimationInfo* animationInfo = new KeyboardAnimationInfo();
+        bool res = parcel.ReadInt32(animationInfo->beginRect.posX_) &&
+            parcel.ReadInt32(animationInfo->beginRect.posY_) &&
+            parcel.ReadUint32(animationInfo->beginRect.width_) &&
+            parcel.ReadUint32(animationInfo->beginRect.height_) &&
+            parcel.ReadInt32(animationInfo->endRect.posX_) &&
+            parcel.ReadInt32(animationInfo->endRect.posY_) &&
+            parcel.ReadUint32(animationInfo->endRect.width_) &&
+            parcel.ReadUint32(animationInfo->endRect.height_) &&
+            parcel.ReadBool(animationInfo->isShow) &&
+            parcel.ReadBool(animationInfo->withAnimation);
+        if (!res) {
+            delete animationInfo;
+            return nullptr;
+        }
+        return animationInfo;
+    }
+};
+
 struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveIn;
     KeyboardAnimationCurve curveOut;
@@ -2054,6 +2098,7 @@ struct KeyboardLayoutParams : public Parcelable {
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
     Rect PortraitPanelRect_ { 0, 0, 0, 0 };
+    uint64_t displayId_ = DISPLAY_ID_INVALID;
 
     bool operator==(const KeyboardLayoutParams& other) const
     {
@@ -2063,7 +2108,8 @@ struct KeyboardLayoutParams : public Parcelable {
                 LandscapeKeyboardRect_ == other.LandscapeKeyboardRect_ &&
                 PortraitKeyboardRect_ == other.PortraitKeyboardRect_ &&
                 LandscapePanelRect_ == other.LandscapePanelRect_ &&
-                PortraitPanelRect_ == other.PortraitPanelRect_);
+                PortraitPanelRect_ == other.PortraitPanelRect_ &&
+                displayId_ == other.displayId_);
     }
 
     bool operator!=(const KeyboardLayoutParams& params) const
@@ -2281,6 +2327,7 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
+    DISPLAY_ID,
 };
 
 /**
@@ -2307,6 +2354,123 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
+};
+
+/*
+ * @brief Enumerates window transition type.
+ */
+enum class WindowTransitionType : uint32_t {
+    /**
+     * window destroy.
+     */
+    DESTROY = 0,
+    
+    /**
+     * end type.
+     */
+    END,
+};
+
+/*
+ * @brief Enumerates window animation curve type.
+ */
+enum class WindowAnimationCurve : uint32_t {
+    /**
+     * animation curve type linear.
+     */
+    LINEAR = 0,
+
+    /**
+     * animation curve type interpolation_spring.
+     */
+    INTERPOLATION_SPRING = 1,
+};
+
+const uint32_t ANIMATION_PARAM_SIZE = 4;
+const uint32_t ANIMATION_MAX_DURATION = 3000;
+
+/*
+ * @brief Window transition animation configuration.
+ */
+struct WindowAnimationOptions : public Parcelable {
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    uint32_t duration = 0;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
+            return false;
+        }
+        if (param.size() > ANIMATION_PARAM_SIZE) {
+            return false;
+        }
+        for (auto p: param) {
+            if (!parcel.WriteFloat(p)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        uint32_t curve = 0;
+        if (!parcel.ReadUint32(curve)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
+        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        for (auto& param: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(param)) {
+                delete windowAnimationConfig;
+                return nullptr;
+            }
+        }
+        return windowAnimationConfig;
+    }
+};
+
+/*
+ * @brief Transition animation configuration.
+ */
+struct TransitionAnimation : public Parcelable {
+    WindowAnimationOptions config;
+    float opacity = 1.0f;
+    
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
+            return false;
+        }
+        return true;
+    }
+
+    static TransitionAnimation* Unmarshalling(Parcel& parcel)
+    {
+        TransitionAnimation* transitionAnimation = new TransitionAnimation();
+        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        std::shared_ptr<WindowAnimationOptions> animationConfig =
+            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
+        if (animationConfig == nullptr) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        transitionAnimation->config = *animationConfig;
+        return transitionAnimation;
+    }
 };
 
 /**
@@ -2347,6 +2511,21 @@ struct RotationChangeResult {
  */
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
+};
+
+/**
+ * @brief Enumerates support function type
+ */
+enum SupportFunctionType : uint32_t {
+    /**
+     * Supports callbacks triggered begore the keyboard show/hide animations begin.
+     */
+    ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
+
+    /**
+     * Supports callbacks triggered after the keyboard show/hide animations complete.
+     */
+    ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION = 1 << 1,
 };
 
 /**

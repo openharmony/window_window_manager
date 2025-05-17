@@ -2348,6 +2348,7 @@ void ScreenSession::SetScreenOffScreenRendering()
     TLOGW(WmsLogTag::DMS, "screen off rendering come in.");
     if (GetIsInternal()) {
         TLOGW(WmsLogTag::DMS, "screen is internal");
+        SetScreenOffScreenRenderingInner();
         return;
     }
     if (!GetScreenProperty().GetCurrentOffScreenRendering()) {
@@ -2370,6 +2371,17 @@ void ScreenSession::SetScreenOffScreenRendering()
     }
     std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
     TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width=%{public}u height=%{public}u %{public}s",
+        rsId_, offWidth, offHeight, offScreenResult.c_str());
+}
+
+void ScreenSession::SetScreenOffScreenRenderingInner()
+{
+    TLOGW(WmsLogTag::DMS, "screen off rendering inner come in.");
+    uint32_t offWidth = GetScreenProperty().GetBounds().rect_.GetWidth();
+    uint32_t offHeight = GetScreenProperty().GetBounds().rect_.GetHeight();
+    int32_t res = RSInterfaces::GetInstance().SetPhysicalScreenResolution(rsId_, offWidth, offHeight);
+    std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
+    TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width = %{public}u height=%{public}u %{public}s",
         rsId_, offWidth, offHeight, offScreenResult.c_str());
 }
 

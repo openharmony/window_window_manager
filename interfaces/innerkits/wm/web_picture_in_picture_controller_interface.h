@@ -67,7 +67,7 @@ private:
     int32_t ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
     void UnregisterAll(ListenerType type);
-    bool isPipPossible_ = false;
+    bool isPipEnabled_ = false;
     sptr<WebPictureInPictureController> sptrWebPipController_;
     std::set<sptr<NativePiPWindowListener>> lifeCycleCallbackSet_;
     std::set<sptr<NativePiPWindowListener>> controlEventCallbackSet_;

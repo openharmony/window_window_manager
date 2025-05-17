@@ -60,10 +60,25 @@ public:
     MOCK_METHOD1(OnWindowStatusChange, void(WindowStatus status));
 };
 
+class MockWindowStatusDidChangeListener : public IWindowStatusDidChangeListener {
+public:
+    MOCK_METHOD1(OnWindowStatusDidChange, void(WindowStatus status));
+};
+
 class MockIOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockIKeyboardWillShowListener : public IKeyboardWillShowListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillShow, void());
+};
+        
+class MockIKeyboardWillHideListener : public IKeyboardWillHideListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillHide, void());
 };
 
 class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {

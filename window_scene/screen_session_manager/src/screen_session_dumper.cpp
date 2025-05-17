@@ -175,17 +175,6 @@ void ScreenSessionDumper::ExecuteInjectCmd()
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
         return;
     }
-    if (params_[0] == ARG_CHANGE_OUTER_CMD && params_.size() == DUMPER_PARAM_INDEX_TWO) {
-        ScreenSessionManager::GetInstance().MultiScreenChangeOuter(params_[1]);
-        return;
-    }
-    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
-        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
-            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
-        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
-            params_[DUMPER_PARAM_INDEX_TWO]);
-        return;
-    }
     if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
         return;
