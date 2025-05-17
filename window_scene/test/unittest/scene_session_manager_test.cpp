@@ -2651,6 +2651,18 @@ HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
     WSError res = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
+
+/**
+ * @tc.name: ConfigSupportFunctionType
+ * @tc.desc: test function : ConfigSupportFunctionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
+{
+    ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
+    EXPECT_EQ(true,
+        (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

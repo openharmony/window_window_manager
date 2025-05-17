@@ -469,6 +469,11 @@ private:
     void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
     void OnUpdateFlag(const std::string& flag);
 
+    bool HandleCloseKeyboardSyncTransactionWSRectParams(napi_env env,
+        napi_value argv[], int index, WSRect& rect);
+    bool HandleCloseKeyboardSyncTransactionBoolParams(napi_env env,
+        napi_value argv[], int index, bool& result);
+
     static void Finalizer(napi_env env, void* data, void* hint);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);

@@ -1063,6 +1063,40 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardWillShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetTargetOrientationConfigInfo
  * @tc.desc: sessionStub HandleGetTargetOrientationConfigInfo
  * @tc.type: FUNC
