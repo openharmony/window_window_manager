@@ -704,6 +704,7 @@ public:
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t resourceId,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
 
 protected:
     SceneSessionManager();
@@ -1463,7 +1464,6 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
-    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
 };
 } // namespace OHOS::Rosen
 
