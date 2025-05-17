@@ -721,11 +721,30 @@ HWTEST_F(WindowSessionImplTest5, IsAdaptToSimulationScale, Function | SmallTest 
 }
 
 /**
- * @tc.name: IsAdaptToSimulationScale
- * @tc.desc: IsAdaptToSimulationScale
+ * @tc.name: IsAdaptToSubWindow
+ * @tc.desc: IsAdaptToSubWindow
  * @tc.type: FUNC
  */
- HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, IsAdaptToSubWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAdaptToSubWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->property_->SetPersistentId(772);
+    EXPECT_EQ(window->IsAdaptToSubWindow(), false);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(window->IsAdaptToSubWindow(), true);
+}
+
+/**
+ * @tc.name: SetIntentParam
+ * @tc.desc: SetIntentParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
  {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetIntentParam");
