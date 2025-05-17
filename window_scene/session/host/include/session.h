@@ -67,7 +67,7 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void(bool requestFocus, bool isClick)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
-    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
@@ -352,7 +352,8 @@ public:
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
-    WSError Clear(bool needStartCaller = false);
+    // Just terminate, not clear session
+    WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
