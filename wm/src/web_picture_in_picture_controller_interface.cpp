@@ -116,7 +116,7 @@ WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config, 
     }
     sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config);
     sptrWebPipController_->SetControllerId(controllerId);
-    sptrWebPipController_->GetPipEnabled(isPipEnabled_);
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
