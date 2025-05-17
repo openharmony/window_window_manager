@@ -147,12 +147,12 @@ public:
     /**
      * @brief Notify caller that window is interactive.
      */
-     virtual void AfterInteractive() {}
+    virtual void AfterInteractive() {}
 
-     /**
-      * @brief Notify caller that window is noninteractive.
-      */
-     virtual void AfterNonInteractive() {}
+    /**
+     * @brief Notify caller that window is noninteractive.
+     */
+    virtual void AfterNonInteractive() {}
 
     /**
      * @brief Notify caller that window is destroyed.
@@ -1247,11 +1247,6 @@ public:
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
                          bool withFocus = true) { return WMError::WM_OK; }
-
-    /**
-     * @brief resume window
-     */
-    virtual void Resume() {}
 
     /**
      * @brief Interactive window

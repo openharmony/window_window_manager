@@ -619,7 +619,7 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
-    bool isNotifyInteractiveEvent_ = false;
+    bool isInteractiveStateFlag_ = false;
     std::string intentParam_;
     std::function<void()> loadPageCallback_;
     bool isColdStart_ = true;
