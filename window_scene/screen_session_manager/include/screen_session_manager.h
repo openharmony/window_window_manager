@@ -42,6 +42,16 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
+struct ScaleProperty {
+    float scaleX;
+    float scaleY;
+    float pivotX;
+    float pivotY;
+
+    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY), 
+                                                                            pivotX(pivotX), pivotY(pivotY) {}
+};
+
 static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
     {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
     {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
@@ -269,6 +279,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
@@ -450,6 +461,7 @@ public:
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
+    bool GetKeyboardState() override;
 
 protected:
     ScreenSessionManager();
@@ -505,6 +517,8 @@ private:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
+    void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool& phyMirrorEnable);
+    void HandleMapWhenScreenDisconnect(ScreenId screenId);
     void HandlePCScreenDisconnect(sptr<ScreenSession> screenSession);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
@@ -516,6 +530,7 @@ private:
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
     sptr<ScreenSession> GetInternalScreenSession();
     void ExitOuterOnlyMode(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
+    void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -554,6 +569,7 @@ private:
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
+    void HandleSuperFoldStatusLocked(bool isLocked);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -650,6 +666,7 @@ private:
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
     bool isDeviceShutDown_ = false;
+    bool isScreenConnecting_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -743,6 +760,9 @@ private:
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
+    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session, 
+                                                        const ScaleProperty& scalep,
+                                                        float& translateX, float& translateY);
     void RegisterApplicationStateObserver();
     void SetPostureAndHallSensorEnabled();
     bool IsDefaultMirrorMode(ScreenId screenId);

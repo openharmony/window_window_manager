@@ -53,6 +53,12 @@ public:
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
 
+    /*
+     * Compatible Mode
+     */
+    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property) override;
+
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -110,6 +116,7 @@ public:
     WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
@@ -151,6 +158,8 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy) override;
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     WMError SetForegroundWindowNum(int32_t windowNum) override;
     WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;

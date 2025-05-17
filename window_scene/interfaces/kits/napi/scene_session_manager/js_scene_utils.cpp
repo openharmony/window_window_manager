@@ -116,6 +116,73 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
+{
+    napi_value objValue = nullptr;
+    if (!transitionAnimation) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_value configJsValue = ConvertWindowAnimationOptionsToJsValue(env, transitionAnimation->config);
+    if (!configJsValue) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "config", configJsValue);
+    napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, transitionAnimation->opacity));
+
+    return objValue;
+}
+
+napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
+    const WindowAnimationOptions& animationConfig)
+{
+    napi_value configJsValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
+    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, animationConfig.curve));
+    switch (animationConfig.curve) {
+        case WindowAnimationCurve::LINEAR: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            break;
+        }
+        case WindowAnimationCurve::INTERPOLATION_SPRING: {
+            napi_value params = nullptr;
+            napi_create_array(env, &params);
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+                napi_value element;
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_set_element(env, params, i, element);
+            }
+            napi_set_named_property(env, configJsValue, "param", params);
+            break;
+        }
+        default:
+            break;
+    }
+    return configJsValue;
+}
+
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    return objValue;
+}
+
 WSError GetIntValueFromString(const std::string& str, uint32_t& value)
 {
     char* end;
@@ -1126,6 +1193,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
     };
     bool atLeastOneParam = false;
     std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
@@ -2044,6 +2112,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
+    SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     return objValue;
 }
 

@@ -24,6 +24,7 @@
 
 #include "display_manager.h"
 #include "input_manager.h"
+#include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/scene_session.h"
@@ -211,7 +212,7 @@ void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragCon
         TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity when follow, gravity:%{public}d, type:%{public}d",
             dragGravity, type);
         surfaceNode->SetFrameGravity(dragGravity);
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     }
 }
 
@@ -455,7 +456,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
         }
         return;
     }

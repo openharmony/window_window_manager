@@ -84,6 +84,7 @@ public:
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    float GetSuperRotation();
     void SetLandscapeLockStatus(bool isLocked);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
@@ -116,6 +117,12 @@ public:
     void NotifyExtendScreenCreateFinish();
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
+    std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
 
 protected:
     ScreenSessionManagerClient() = default;

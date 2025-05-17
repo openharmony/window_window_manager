@@ -39,6 +39,9 @@ constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
+constexpr std::array<DefaultSpecificZIndex, 1> DefaultSpecificZIndexList = {
+    DefaultSpecificZIndex::MUTISCREEN_COLLABORATION
+};
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -100,6 +103,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
     napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
+    napi_set_named_property(env, objValue, "TYPE_DYNAMIC", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_DYNAMIC)));
 
     return objValue;
 }
@@ -1362,6 +1367,28 @@ napi_value RectTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    return objValue;
+}
+
 static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     bool isModal = false;
@@ -1482,9 +1509,15 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to maximizeSupported");
     }
 
+    bool outlineEnabled = false;
+    if (!ParseJsValue(jsObject, env, "outlineEnabled", outlineEnabled)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to outlineEnabled");
+    }
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
+    windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }
@@ -1590,6 +1623,31 @@ bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallba
     napi_value catchArgv[] = { rejectedCallback };
     napi_call_function(env, promiseObj, promiseCatch, ArraySize(catchArgv), catchArgv, nullptr);
 
+    return true;
+}
+
+bool CheckZIndex(int32_t zIndex)
+{
+    DefaultSpecificZIndex zIndexEnum = static_cast<DefaultSpecificZIndex>(zIndex);
+    return std::find(DefaultSpecificZIndexList.begin(), DefaultSpecificZIndexList.end(), zIndexEnum) !=
+        DefaultSpecificZIndexList.end();
+}
+
+bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
+{
+    if (!WindowHelper::IsDynamicWindow(option.GetWindowType())) {
+        return true;
+    }
+    int32_t zIndex = 0;
+    if (!ParseJsValue(jsObject, env, "zIndex", zIndex)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "parse zIndex failed");
+        return true;
+    }
+    if (!CheckZIndex(zIndex)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "check zIndex failed, %{public}d", zIndex);
+        return true;
+    }
+    option.SetZIndex(zIndex);
     return true;
 }
 } // namespace Rosen

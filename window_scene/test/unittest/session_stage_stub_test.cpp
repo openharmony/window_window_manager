@@ -28,6 +28,7 @@
 #include "window_manager_agent.h"
 #include "ws_common.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "ui/rs_canvas_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -388,6 +389,29 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyLayoutFinishAfterWindowModeChange
+ * @tc.desc: test function : HandleNotifyLayoutFinishAfterWindowModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyLayoutFinishAfterWindowModeChange, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
 }
 
 /**
@@ -933,6 +957,43 @@ HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest 
     data.WriteUint32(info.displayRect_.height_);
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleLinkKeyFrameCanvasNode
+ * @tc.desc: test function : HandleLinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleLinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleSetKeyFramePolicy
+ * @tc.desc: test function : HandleSetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetKeyFramePolicy, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    KeyFramePolicy keyFramePolicy;
+    data.WriteParcelable(&keyFramePolicy);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_KEYFRAME_POLICY);
+    EXPECT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**

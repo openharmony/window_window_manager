@@ -569,10 +569,10 @@ HWTEST_F(RootSceneTest, GetStatusBarHeight, TestSize.Level1)
 {
     RootScene rootScene;
     auto height = rootScene.GetStatusBarHeight();
-    ASSERT_EQ(0, height);
+    EXPECT_EQ(0, height);
     rootScene.getStatusBarHeightCallback_ = []() -> uint32_t { return 100; };
     height = rootScene.GetStatusBarHeight();
-    ASSERT_EQ(100, height);
+    EXPECT_EQ(100, height);
 }
 } // namespace
 } // namespace Rosen

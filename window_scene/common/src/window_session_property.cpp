@@ -1086,6 +1086,16 @@ int32_t WindowSessionProperty::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowSessionProperty::SetZIndex(int32_t zIndex)
+{
+    zIndex_ = zIndex;
+}
+
+int32_t WindowSessionProperty::GetZIndex() const
+{
+    return zIndex_;
+}
+
 void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
 {
     std::lock_guard lock(atomicServiceMutex_);
@@ -1096,6 +1106,16 @@ bool WindowSessionProperty::GetIsAtomicService() const
 {
     std::lock_guard lock(atomicServiceMutex_);
     return isAtomicService_;
+}
+
+void WindowSessionProperty::SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled)
+{
+    subWindowOutlineEnabled_ = subWindowOutlineEnabled;
+}
+
+bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
+{
+    return subWindowOutlineEnabled_;
 }
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
@@ -1123,7 +1143,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
-        parcel.WriteInt32(zLevel_) &&
+        parcel.WriteInt32(zLevel_) && parcel.WriteInt32(zIndex_) &&
         parcel.WriteBool(isDecorEnable_) && parcel.WriteBool(dragEnabled_) &&
         parcel.WriteBool(hideNonSystemFloatingWindows_) && parcel.WriteBool(forceHide_) &&
         MarshallingWindowLimits(parcel) && parcel.WriteFloat(brightness_) &&
@@ -1151,7 +1171,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
-        parcel.WriteParcelable(compatibleModeProperty_);
+        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1195,6 +1215,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTopmost(parcel.ReadBool());
     property->SetMainWindowTopmost(parcel.ReadBool());
     property->SetSubWindowZLevel(parcel.ReadInt32());
+    property->SetZIndex(parcel.ReadInt32());
     property->SetDecorEnable(parcel.ReadBool());
     property->SetDragEnabled(parcel.ReadBool());
     property->SetHideNonSystemFloatingWindows(parcel.ReadBool());
@@ -1242,6 +1263,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAbilityHook(parcel.ReadBool());
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
+    property->SetSubWindowOutlineEnabled(parcel.ReadBool());
     return property;
 }
 
@@ -1266,6 +1288,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
+    zIndex_ = property->zIndex_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
@@ -1336,6 +1359,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAbilityHookOff_ = property->isAbilityHookOff_;
     isAbilityHook_ = property->isAbilityHook_;
     isFollowScreenChange_ = property->isFollowScreenChange_;
+    subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2005,6 +2029,11 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsAdaptToSimulationScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
 {
     isAdaptToImmersive_ = isAdaptToImmersive;
@@ -2085,6 +2114,16 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
+{
+    isAdaptToSimulationScale_ = isAdaptToSimulationScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToSimulationScale() const
+{
+    return isAdaptToSimulationScale_;
+}
+
 bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteBool(isAdaptToImmersive_) &&
@@ -2094,7 +2133,8 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableDragResize_) &&
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
-        parcel.WriteBool(disableWindowLimit_);
+        parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isAdaptToSimulationScale_);
 }
 
 CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
@@ -2111,7 +2151,24 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->isAdaptToSimulationScale_ = parcel.ReadBool();
     return property;
+}
+
+void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& property)
+{
+    if (property == nullptr) {
+        return;
+    }
+    isAdaptToImmersive_ = property->isAdaptToImmersive_;
+    isAdaptToEventMapping_ = property->isAdaptToEventMapping_;
+    isAdaptToProportionalScale_ = property->isAdaptToProportionalScale_;
+    isAdaptToBackButton_ = property->isAdaptToBackButton_;
+    disableDragResize_ = property->disableDragResize_;
+    disableResizeWithDpi_ = property->disableResizeWithDpi_;
+    disableFullScreen_ = property->disableFullScreen_;
+    disableWindowLimit_ = property->disableWindowLimit_;
+    isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
 }
 } // namespace Rosen
 } // namespace OHOS

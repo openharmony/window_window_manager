@@ -133,6 +133,7 @@ public:
      */
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
     void SetTopWindowBoundaryByID(const std::string& stringId);
+    bool HasRequestedVsync() const { return vsyncStation_->HasRequestedVsync(); }
 
     /*
      * Window Property
@@ -141,6 +142,12 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     static sptr<RootScene> staticRootScene_;
+
+    /*
+     * RS Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     void RegisterInputEventListener();

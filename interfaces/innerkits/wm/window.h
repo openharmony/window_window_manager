@@ -76,6 +76,8 @@ using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
+class RSUIContext;
+class RSUIDirector;
 class ISession;
 class Window;
 
@@ -216,6 +218,22 @@ public:
      * @param status Mode of the current window.
      */
     virtual void OnWindowStatusChange(WindowStatus status) {}
+};
+
+/**
+ * @class IWindowStatusDidChangeListener
+ *
+ * @brief IWindowStatusDidChangeListener is used to observe the window status when window status changed
+ *        and layout finished.
+ */
+class IWindowStatusDidChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window status changed.
+     *
+     * @param status Mode of the current window.
+     */
+    virtual void OnWindowStatusDidChange(WindowStatus status) {}
 };
 
 /**
@@ -833,6 +851,22 @@ public:
      * @return Surface node from RS
      */
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const { return nullptr; }
+
+    /**
+     * @brief Get the associated RSUIDirector instance
+     *
+     * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
+
+    /**
+     * @brief Get the associated RSUIContext instance
+     *
+     * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
 
     /**
      * @brief Get ability context
@@ -2431,6 +2465,13 @@ public:
     virtual bool IsPcWindow() const { return false; }
 
     /**
+     * @brief Is pad window or not.
+     *
+     * @return True means pad window, false means the opposite.
+     */
+    virtual bool IsPadWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -2643,6 +2684,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3663,6 +3726,30 @@ public:
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set window transition animation success, others means failed.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
+
      /**
      * @brief Get is subwindow support maximize.
      *
@@ -3759,6 +3846,20 @@ public:
      * @return Returns WMError::WM_OK if called success, otherwise failed.
      */
     virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /** 
+    * @brief Set intent param to arkui.
+     *
+     * @param intentParam intent param from ams.
+     * @param loadPageCallback load page callback after send intent.
+     * @param isColdStart Mark as cold start or not
+     * @return WM_OK means set intent param success.
+     */
+    virtual WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

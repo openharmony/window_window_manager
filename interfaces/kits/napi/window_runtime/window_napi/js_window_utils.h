@@ -15,6 +15,7 @@
 
 #ifndef OHOS_JS_WINDOW_UTILS_H
 #define OHOS_JS_WINDOW_UTILS_H
+#include <array>
 #include <map>
 #include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
@@ -89,6 +90,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
+    TYPE_DYNAMIC,
     TYPE_END
 };
 
@@ -128,6 +130,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,    ApiWindowType::TYPE_FLOAT_NAVIGATION  },
+    { WindowType::WINDOW_TYPE_DYNAMIC,             ApiWindowType::TYPE_DYNAMIC           },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -156,6 +159,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
     { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,    WindowType::WINDOW_TYPE_FLOAT_NAVIGATION    },
+    { ApiWindowType::TYPE_DYNAMIC,             WindowType::WINDOW_TYPE_DYNAMIC             },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -368,6 +372,8 @@ public:
     napi_value RectChangeReasonInit(napi_env env);
     napi_value RotationChangeTypeInit(napi_env env);
     napi_value RectTypeInit(napi_env env);
+    napi_value WindowTransitionTypeInit(napi_env env);
+    napi_value WindowAnimationCurveInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
@@ -390,6 +396,8 @@ public:
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
     bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
+    bool CheckZIndex(int32_t zIndex);
+    bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {

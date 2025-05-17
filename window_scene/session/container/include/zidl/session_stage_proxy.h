@@ -54,6 +54,7 @@ public:
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;

@@ -25,6 +25,7 @@
 #include <ui_content.h>
 #include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
 #include "display_manager.h"
 #include "singleton_container.h"
 
@@ -119,6 +120,7 @@ public:
      * PC Window
      */
     bool IsPcWindow() const override;
+    bool IsPadWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;
@@ -135,6 +137,12 @@ public:
     uint32_t GetTargetAPIVersion() const;
     void NotifyClientWindowSize();
     bool IsFullScreenPcAppInPadMode() const;
+    sptr<WindowSessionProperty> GetPropertyByContext() const;
+
+    /*
+     * Compatible Mode
+     */
+    bool IsAdaptToSimulationScale() const;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -164,6 +172,8 @@ public:
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart) override;
 
     /*
      * inherits from session stage
@@ -368,6 +378,9 @@ public:
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
     WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
+    WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
 
     /*
      * Free Multi Window
@@ -441,6 +454,12 @@ public:
     void SetPreferredRequestedOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -482,8 +501,8 @@ protected:
     bool IsVerticalOrientation(Orientation orientation) const;
     bool IsHorizontalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
-    sptr<WindowSessionImpl> FindMainWindowWithContext();
-    sptr<WindowSessionImpl> FindExtensionWindowWithContext();
+    sptr<WindowSessionImpl> FindMainWindowWithContext() const;
+    sptr<WindowSessionImpl> FindExtensionWindowWithContext() const;
 
     WMError RegisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
     WMError UnregisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
@@ -585,6 +604,9 @@ protected:
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
+    std::string intentParam_;
+    std::function<void()> loadPageCallback_;
+    bool isColdStart_ = true;
 
     /*
      * Window Layout
@@ -606,6 +628,7 @@ protected:
     bool IsValidCrossState(int32_t state) const;
     template <typename T>
     EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
+    void NotifyWindowStatusDidChange(WindowMode mode);
 
     /*
      * Window Immersive
@@ -626,6 +649,7 @@ protected:
     /*
      * Window Property
      */
+    std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
@@ -683,6 +707,8 @@ private:
     RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
@@ -743,8 +769,8 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config);
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "");
+    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") {}
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
@@ -779,6 +805,7 @@ private:
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
+    static std::recursive_mutex windowStatusDidChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
@@ -807,6 +834,7 @@ private:
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
     static std::map<int32_t, sptr<IPreferredOrientationChangeListener>> preferredOrientationChangeListener_;
@@ -842,6 +870,8 @@ private:
     Transform currentTransform_;
     std::atomic_bool needRenotifyTransform_ = false;
     KeyFramePolicy keyFramePolicy_;
+    std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
 
     /*
      * Window Decor
@@ -897,9 +927,7 @@ private:
      */
     void NotifyClientOrientationChange();
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
-    void NotifyRotationChangeResultInner(
-            const std::vector<sptr<IWindowRotationChangeListener>>& windowRotationChangeListener,
-            const RotationChangeInfo& rotationChangeInfo);
+    void NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo);
     DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
     Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
@@ -908,6 +936,11 @@ private:
      */
     bool isKeyboardDidShowRegistered_ = false;
     bool isKeyboardDidHideRegistered_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

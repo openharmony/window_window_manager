@@ -216,12 +216,16 @@ public:
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    bool IsSubWindowOutlineEnabled() const;
 
     /*
      * Window Hierarchy
      */
     void SetSubWindowZLevel(int32_t zLevel);
     int32_t GetSubWindowZLevel() const;
+    void SetZIndex(int32_t zIndex);
+    int32_t GetZIndex() const;
 
     /*
      * Window Property
@@ -278,6 +282,7 @@ public:
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsAdaptToSimulationScale() const;
 
     /*
      * Keyboard
@@ -455,11 +460,13 @@ private:
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
+    bool subWindowOutlineEnabled_ = false;
 
     /*
      * Window Hierarchy
      */
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     /*
      * UIExtension
@@ -539,8 +546,13 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
+    bool IsAdaptToSimulationScale() const;
+
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
+
+    void CopyFrom(const sptr<CompatibleModeProperty>& property);
 
     std::string ToString() const
     {
@@ -553,6 +565,7 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
         return ss.str();
     }
 
@@ -565,6 +578,7 @@ private:
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
     bool disableWindowLimit_ { false };
+    bool isAdaptToSimulationScale_ { false };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -670,6 +684,7 @@ struct SystemSessionConfig : public Parcelable {
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
     bool supportZLevel_ = false;
+    bool skipRedundantWindowStatusNotifications_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -719,6 +734,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportZLevel_)) {
             return false;
         }
+        if (!parcel.WriteBool(skipRedundantWindowStatusNotifications_)) {
+            return false;
+        }
         return true;
     }
 
@@ -765,6 +783,7 @@ struct SystemSessionConfig : public Parcelable {
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
+        config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         return config;
     }
 
