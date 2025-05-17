@@ -7078,6 +7078,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
         ScenePersistentStorageType::MAXIMIZE_STATE);
     if (needSaveSnapshot && !GetShowRecent()) {
         if (interactive) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "Remove static image from window");
             PostTask([weakThis = wptr(this), where = __func__] {
                 auto session = weakThis.promote();
                 if (session == nullptr) {
@@ -7087,6 +7088,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
                 session->NotifyRemoveSnapshot();
             }, __func__);
         } else {
+            TLOGND(WmsLogTag::WMS_PATTERN, "Add static image for window");
             PostTask([weakThis = wptr(this), where = __func__] {
                 auto session = weakThis.promote();
                 if (session == nullptr) {
