@@ -583,6 +583,23 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Le
 }
 
 /**
+ * @tc.name: SetStartWindowBackgroundColor
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    EXPECT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
+}
+
+/**
  * @tc.name: RemoveExtensionWindowStageFromSCB
  * @tc.desc: normal function
  * @tc.type: FUNC

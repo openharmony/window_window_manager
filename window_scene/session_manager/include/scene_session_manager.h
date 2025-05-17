@@ -148,6 +148,9 @@ using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(con
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
+using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
+using RequestVsyncByRootSceneWhenModeChangeFunc =
+    std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -474,6 +477,7 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
+    void ConfigSupportFunctionType(SupportFunctionType funcType);
 
     /*
      * UIExtension
@@ -551,6 +555,8 @@ public:
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
     void ConfigSupportFollowParentWindowLayout();
+    void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
+    void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
 
     /*
      * Window Property
@@ -697,6 +703,8 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid) override;
 
 protected:
     SceneSessionManager();
@@ -1128,6 +1136,8 @@ private:
     std::shared_mutex startingWindowMapMutex_;
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
+    std::shared_mutex startingWindowColorFromAppMapMutex_;
+    std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> startingWindowColorFromAppMap_;
     std::unordered_map<std::string, AppForceLandscapeConfig> appForceLandscapeMap_;
     std::shared_mutex appForceLandscapeMutex_;
 
@@ -1308,6 +1318,10 @@ private:
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
     void ConfigAppsWithDeduplicatedWindowStatus();
     void SetWindowStatusDeduplicationBySystemConfig(const SessionInfo& sessionInfo, SystemSessionConfig& systemConfig);
+    HasRootSceneRequestedVsyncFunc hasRootSceneRequestedVsyncFunc_;
+    RequestVsyncByRootSceneWhenModeChangeFunc requestVsyncByRootSceneWhenModeChangeFunc_;
+    WSError HasRootSceneRequestedVsync(bool& hasRootSceneRequestedVsync);
+    WSError RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback);
 
     /*
      * Window Snapshot
@@ -1393,6 +1407,7 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);  
 
     /*
      * Move Drag
@@ -1436,6 +1451,8 @@ private:
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);

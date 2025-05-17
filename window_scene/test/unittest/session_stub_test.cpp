@@ -679,6 +679,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPTemplateInfo, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: HandleSetWindowTransitionAnimation
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowTransitionAnimation, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    data.WriteInt32(10);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    TransitionAnimation animation;
+    data.WriteUint32(static_cast<uint32_t>(WindowTransitionType::DESTROY));
+    data.WriteParcelable(&animation);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetWindowTransitionAnimation(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -1042,6 +1065,40 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
     ASSERT_EQ(result, ERR_NONE);
     result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
 }
 
 /**

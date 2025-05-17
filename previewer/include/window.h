@@ -379,6 +379,7 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcWindow() const { return false; }
+    virtual bool IsPadWindow() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
@@ -636,6 +637,30 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set window transition animation success, others means failed.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
 
       /**
      * @brief Get is subwindow support maximize.

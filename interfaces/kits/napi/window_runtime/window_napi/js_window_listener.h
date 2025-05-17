@@ -38,6 +38,8 @@ const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string KEYBOARD_WILL_SHOW_CB = "keyboardWillShow";
+const std::string KEYBOARD_WILL_HIDE_CB = "keyboardWillHide";
 const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
 const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
@@ -50,11 +52,13 @@ const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
+const std::string WINDOW_STATUS_DID_CHANGE_CB = "windowStatusDidChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
 const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
 const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
@@ -64,8 +68,6 @@ class JsWindowListener : public IWindowChangeListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
                          public IOccupiedAreaChangeListener,
-                         public IKeyboardDidShowListener,
-                         public IKeyboardDidHideListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
                          public IDialogTargetTouchListener,
@@ -77,13 +79,19 @@ class JsWindowListener : public IWindowChangeListener,
                          public ISystemDensityChangeListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener,
+                         public IWindowStatusDidChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
+                         public IExtensionSecureLimitChangeListener,
                          public IWindowWillCloseListener,
                          public IMainWindowCloseListener,
                          public ISubWindowCloseListener,
                          public IWindowHighlightChangeListener,
-                         public IWindowRotationChangeListener {
+                         public IWindowRotationChangeListener,
+                         public IKeyboardWillShowListener,
+                         public IKeyboardWillHideListener,
+                         public IKeyboardDidShowListener,
+                         public IKeyboardDidHideListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -102,6 +110,10 @@ public:
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) override;
+    void OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) override;
     void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
@@ -117,11 +129,13 @@ public:
     void OnSystemDensityChanged(float density) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
+    void OnWindowStatusDidChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnSecureLimitChange(bool isLimit) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
@@ -146,6 +160,9 @@ private:
      * Window Decor listener
      */
     void InitAsyncCloseCallback(sptr<Window> window);
+
+    void KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::string& callBackName, const KeyboardAnimationCurve& curve);
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};

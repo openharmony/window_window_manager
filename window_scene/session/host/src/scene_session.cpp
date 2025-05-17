@@ -2990,6 +2990,19 @@ void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
     }, __func__);
 }
 
+void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func)
+{
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: session or func is null", where);
+            return;
+        }
+        session->updateTransitionAnimationFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
+}
+
 bool SceneSession::IsMovableWindowType()
 {
     auto property = GetSessionProperty();
@@ -4304,6 +4317,15 @@ void SceneSession::NotifyPrivacyModeChange()
     }
 }
 
+void SceneSession::NotifyExtensionSecureLimitChange(bool isLimit)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+}
+
 WMError SceneSession::SetSnapshotSkip(bool isSkip)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -5461,8 +5483,9 @@ WMError SceneSession::HandleActionUpdateTouchable(const sptr<WindowSessionProper
 WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window can set brightness");
+    if (GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        GetWindowType() != WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window or wallet swipe card can set brightness");
         return WMError::WM_OK;
     }
     if (!IsSessionValid()) {
@@ -6424,6 +6447,9 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const Extension
         extWindowFlagsMap_[extPersistentId] = newFlags;
     }
     CalculateCombinedExtWindowFlags();
+    if (oldFlags.hideNonSecureWindowsFlag != newFlags.hideNonSecureWindowsFlag) {
+        NotifyExtensionSecureLimitChange(static_cast<bool>(newFlags.hideNonSecureWindowsFlag));
+    }
 }
 
 ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags()
@@ -7856,11 +7882,11 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
                 where, session->GetPersistentId());
             return;
         }
-        if (isShowAnimation && !session->isKeyboardDidShowRegistered_.load()) {
+        if (isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did show listener is not registered");
             return;
         }
-        if (!isShowAnimation && !session->isKeyboardDidHideRegistered_.load()) {
+        if (!isShowAnimation && !session->GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_) {
             TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did hide listener is not registered");
             return;
         }
@@ -7873,14 +7899,56 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
     }, __func__);
 }
 
+void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const WSRect& beginRect, const WSRect& endRect,
+    bool withAnimation, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    PostTask([weakThis = wptr(this), isKeyboardShow, beginRect, endRect, withAnimation,
+        rsTransaction, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+                where, session->GetPersistentId());
+            return;
+        }
+        if (isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
+            return;
+        }
+        if (!isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
+            return;
+        }
+        KeyboardAnimationInfo keyboardAnimationInfo;
+        keyboardAnimationInfo.beginRect = SessionHelper::TransferToRect(beginRect);
+        keyboardAnimationInfo.endRect = SessionHelper::TransferToRect(endRect);
+        keyboardAnimationInfo.isShow = isKeyboardShow;
+        keyboardAnimationInfo.withAnimation = withAnimation;
+        session->sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+        }, __func__);
+}
+
+void SceneSession::NotifyKeyboardWillShowRegistered(bool registered)
+{
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_ = registered;
+}
+
+void SceneSession::NotifyKeyboardWillHideRegistered(bool registered)
+{
+    GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_ = registered;
+}
+
 void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 {
-    isKeyboardDidShowRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_ = registered;
 }
 
 void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 {
-    isKeyboardDidHideRegistered_.store(registered);
+    GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
 }
 
 WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)
@@ -8297,5 +8365,17 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
         return sessionProperty->IsSubWindowOutlineEnabled();
     }
     return false;
+}
+
+/**
+ * Window Transition Animation For PC
+ */
+WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    if (updateTransitionAnimationFunc_) {
+        updateTransitionAnimationFunc_(transitionType, animation);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
