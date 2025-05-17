@@ -2465,6 +2465,13 @@ public:
     virtual bool IsPcWindow() const { return false; }
 
     /**
+     * @brief Is pad window or not.
+     *
+     * @return True means pad window, false means the opposite.
+     */
+    virtual bool IsPadWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -3718,6 +3725,30 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set window transition animation success, others means failed.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
 
      /**
      * @brief Get is subwindow support maximize.

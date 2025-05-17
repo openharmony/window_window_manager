@@ -453,6 +453,30 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UseImplicitAnimation(bool useImplicit) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set success.
+     */
+    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Rosen
 
