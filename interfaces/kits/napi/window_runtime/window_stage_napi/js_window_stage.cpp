@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace Rosen {
+// methods of filling the image in recent
 enum class ImageFit {
         FILL,
         CONTAIN,

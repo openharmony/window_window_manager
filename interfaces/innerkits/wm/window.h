@@ -1051,7 +1051,7 @@ public:
      */
     virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
-        /**
+    /**
      * @brief Sets static Image resource for recent.
      *
      * @param imgResourceId resourceId of static Image.
