@@ -2321,14 +2321,14 @@ enum class WindowFocusChangeReason : int32_t {
  * @brief Windowinfokey
  */
 enum class WindowInfoKey : int32_t {
-    WINDOW_ID,
-    BUNDLE_NAME,
-    ABILITY_NAME,
-    APP_INDEX,
-    VISIBILITY_STATE,
-    DISPLAY_ID,
-    RECT,
-    END,
+    NONE = 0,
+    WINDOW_ID = 1,
+    BUNDLE_NAME = 1 << 1,
+    ABILITY_NAME = 1 << 2,
+    APP_INDEX = 1 << 3,
+    VISIBILITY_STATE = 1 << 4,
+    DISPLAY_ID = 1 << 5,
+    RECT = 1 << 6,
 };
 
 /**

@@ -884,7 +884,7 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
     }
     uint32_t interestInfo = 0;
     for (auto windowInfoKey : listener->GetInterestInfo()) {
-        interestInfo |= (1 << static_cast<uint32_t>(windowInfoKey));
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
         WindowInfoKey::RECT, listener->GetInterestInfo(), pImpl_->windowPropertyChangeAgent_);
