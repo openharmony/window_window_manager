@@ -284,6 +284,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
             return HandleNotifyDisableDelegatorChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS):
+            return HandleSetWindowShadows(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1570,6 +1572,25 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
     }
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
     SetWindowCornerRadius(cornerRadius);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowShadows(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<ShadowsInfo> shadowsInfo = data.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read shadowsInfo error");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_ANIMATION, "shadow radius is %{public}f, color is %{public}s, "
+        "offsetX is %{public}f, offsetY is %{public}f", shadowsInfo->radius_, shadowsInfo->color_.c_str(),
+        shadowsInfo->offsetX_, shadowsInfo->offsetY_);
+    WSError errCode = SetWindowShadows(*shadowsInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGI(WmsLogTag::WMS_ANIMATION, "HandleSetWindowShadows end");
     return ERR_NONE;
 }
 

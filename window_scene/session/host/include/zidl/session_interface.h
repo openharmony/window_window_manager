@@ -387,6 +387,14 @@ public:
     virtual WSError SetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for setting to shadows of window.
+     *
+     * @param shadowsInfo shadows of window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) { return WSError::WS_OK; }
+
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }

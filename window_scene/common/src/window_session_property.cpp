@@ -806,6 +806,18 @@ float WindowSessionProperty::GetWindowCornerRadius() const
     return cornerRadius_;
 }
 
+void WindowSessionProperty::SetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    shadowsInfo_ = shadowsInfo;
+}
+
+ShadowsInfo WindowSessionProperty::GetWindowShadows() const
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    return shadowsInfo_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -1184,7 +1196,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
-        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_);
+        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
+        MarshallingShadowsInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1277,6 +1290,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    UnmarshallingShadowsInfo(parcel, property);
     return property;
 }
 
@@ -1373,6 +1387,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAbilityHook_ = property->isAbilityHook_;
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    shadowsInfo_ = property->shadowsInfo_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2216,6 +2231,20 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+}
+
+bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const
+{
+    return parcel.WriteParcelable(&shadowsInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<ShadowsInfo> shadowsInfo = parcel.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        return;
+    }
+    property->SetWindowShadows(*shadowsInfo);
 }
 } // namespace Rosen
 } // namespace OHOS

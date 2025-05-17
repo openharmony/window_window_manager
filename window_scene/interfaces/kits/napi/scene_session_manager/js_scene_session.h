@@ -100,6 +100,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_PIP_TEMPLATE_INFO_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
+    SET_WINDOW_SHADOWS_CB,
 };
 
 class SceneSession;
@@ -382,6 +383,7 @@ private:
      * Window Property
     */
     void ProcessSetWindowCornerRadiusRegister();
+    void ProcessSetWindowShadowsRegister();
 
     /*
      * PC Window Layout
@@ -462,6 +464,7 @@ private:
      * Window Property
     */
     void OnSetWindowCornerRadius(float cornerRadius);
+    void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
 
     /*
      * PC Window Layout
