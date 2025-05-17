@@ -88,6 +88,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyExtensionSecureLimitChange(bool isLimit) = 0;
     virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
