@@ -183,6 +183,7 @@ public:
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
+    void SetForceSplitEnable(AppForceLandscapeConfig& config);
 
     /*
      * inherits from session stage
@@ -808,8 +809,7 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") {}
+    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
@@ -982,6 +982,11 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /**
+     * Parallel Type For PAD
+     */
+    int32_t parallelType_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

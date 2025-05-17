@@ -150,6 +150,38 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
+ * @tc.name: SetForceSplitEnable
+ * @tc.desc: SetForceSplitEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    ASSERT_NE(window_, nullptr);
+
+    int32_t FORCE_SPLIT_MODE = 5;
+    int32_t NAV_FORCE_SPLIT_MODE = 6;
+    int32_t res = 0;
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC

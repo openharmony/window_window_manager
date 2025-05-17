@@ -138,7 +138,6 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
-constexpr int32_t FORCE_SPLIT_MODE = 5;
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -6234,18 +6233,6 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-void WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
-        return;
-    }
-    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
-        isForceSplit, homePage.c_str());
-    uiContent->SetForceSplitEnable(isForceSplit, homePage);
-}
-
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
@@ -6253,10 +6240,7 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.isSupportSplitMode_ == true) {
-        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
-        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
-            isForceSplit, config.homePage_.c_str());
-        SetForceSplitEnable(isForceSplit, config.homePage_);
+        SetForceSplitEnable(config);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;

@@ -142,6 +142,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -14084,7 +14085,8 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
         bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
 
-    if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
+    if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
+        preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {
         //Notify the client of the mode change
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& iter : sceneSessionMap_) {
