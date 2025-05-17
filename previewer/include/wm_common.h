@@ -1297,6 +1297,7 @@ enum class WindowInfoKey : int32_t {
     ABILITY_NAME,
     APP_INDEX,
     VISIBILITY_STATE,
+    DISPLAY_ID,
 };
 
 /*

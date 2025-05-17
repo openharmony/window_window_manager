@@ -791,6 +791,15 @@ public:
         float density, DisplayOrientation orientation);
 
     /**
+     * @brief notify display id change.
+     *
+     * @param windowId window id.
+     * @param displayid ID of the display where the window is located.
+     * @return WM_OK means notify success, others means notify failed.
+     */
+    WMError NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
+
+    /**
      * @brief Minimize all app window.
      *
      * @param displayId Display id.
@@ -1210,6 +1219,8 @@ private:
         const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };
