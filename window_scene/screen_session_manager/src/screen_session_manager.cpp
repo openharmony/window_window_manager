@@ -1444,7 +1444,9 @@ void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession> screenSe
                     TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
                     screenSession = internalSession;
                 }
-        } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
+        }
+        screenCombination = screenSession->GetScreenCombination();
+        if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
         } else {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
@@ -9843,11 +9845,6 @@ void ScreenSessionManager::NotifyExtendScreenCreateFinish()
                 extendScreen = screenSession;
             }
         }
-    }
-    if (isScreenConnecting_) {
-        TLOGW(WmsLogTag::DMS, "screen is connecting, no need to notify.");
-        isScreenConnecting_ = false;
-        return;
     }
     if (mainScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "main screen is null");
