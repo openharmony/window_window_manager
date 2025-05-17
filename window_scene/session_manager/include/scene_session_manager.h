@@ -87,6 +87,10 @@ struct SCBAbilityInfo {
     bool isAbilityHook_;
 };
 
+struct SCBApplicationInfo {
+    AppExecFwk::StartMode startMode_;
+};
+
 struct SessionIdentityInfo {
     std::string bundleName_;
     std::string moduleName_;
@@ -690,6 +694,7 @@ public:
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
+    WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
 
     /*
      * Window Pattern

@@ -2133,6 +2133,20 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, TestSize.Level
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
     ASSERT_FALSE(sceneSession->GetRSVisible());
 }
+
+/**
+ * @tc.name: GetApplicationInfo
+ * @tc.desc: GetApplicationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetApplicationInfo, TestSize.Level1)
+{
+    std::string bundleName = "com.ohos.sceneboard";
+    SCBApplicationInfo applicationInfo;
+    ASSERT_NE(nullptr, ssm_);
+    WSError ret = ssm_->GetApplicationInfo(bundleName, applicationInfo);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

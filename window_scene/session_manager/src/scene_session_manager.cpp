@@ -14324,9 +14324,7 @@ std::string SceneSessionManager::GetLastInstanceKey(const std::string& bundleNam
 
 void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
 {
-    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
-        MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
-    }
+    MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
     AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 
@@ -15217,5 +15215,16 @@ WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool use
     };
  
     return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
+}
+
+WSError SceneSessionManager::GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo)
+{
+    auto appInfoMap = MultiInstanceManager::GetInstance().GetApplicationInfos();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    if (!appInfoMap.count(bundleName)) {
+        applicationInfo = appInfoMap[bundleName];
+    }
+    scbApplicationInfo.startMode_ = applicationInfo.startMode;
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
