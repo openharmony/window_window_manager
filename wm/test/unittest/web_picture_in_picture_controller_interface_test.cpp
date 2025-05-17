@@ -34,7 +34,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    PiPConfig config;
+    sptr<WebPictureInPictureControllerInterface> controller = nullptr;
 };
 
 void WebPictureInPictureControllerInterfaceTest::SetUpTestCase()
@@ -48,18 +48,24 @@ void WebPictureInPictureControllerInterfaceTest::TearDownTestCase()
 void WebPictureInPictureControllerInterfaceTest::SetUp()
 {
     uint32_t mainWindowId = 100;
-    uint32_t pipTemplateType = 0;
+    PiPTemplateType pipTemplateType = PiPTemplateType::VIDEO_PLAY;
     uint32_t width = 100;
     uint32_t height = 150;
     std::vector<uint32_t> controlGroup = {101};
     int num = 0;
     napi_env env = reinterpret_cast<napi_env>(&num);
-    config = {mainWindowId, pipTemplateType, width, height, controlGroup, env};
+    controller = sptr<WebPictureInPictureControllerInterface>::MakeSptr();
+    controller->Create();
+    controller->SetMainWindowId(mainWindowId);
+    controller->SetTemplateType(pipTemplateType);
+    controller->SetRect(width, height);
+    controller->SetControlGroup(controlGroup);
+    controller->SetNapiEnv(env);
 }
 
 void WebPictureInPictureControllerInterfaceTest::TearDown()
 {
-    config = {};
+    controller = nullptr;
 }
 
 void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
@@ -77,7 +83,6 @@ void PipControlEventCallback(uint32_t controllerId, PiPControlType controlType, 
 void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, double scale)
 {
 }
-
 namespace {
 /**
  * @tc.name: Create
@@ -86,51 +91,64 @@ namespace {
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, Create, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    config.mainWindowId = 0;
-    WMError ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    config.mainWindowId = 100;
-    config.pipTemplateType = 5;
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    config.pipTemplateType = 0;
-    config.width = 0;
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    config.width = 150;
-    config.env = nullptr;
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    int num1 = 0;
-    config.env = reinterpret_cast<napi_env>(&num1);
-    ret = controller.Create(config, 0);
+    controller->isPipEnabled_ = false;
+    WMError ret = controller->Create();
+    controller->StartPip(0);
+    controller->isPipEnabled_ = true;
     EXPECT_EQ(WMError::WM_OK, ret);
-    config.controlGroup = {100, 101, 102, 200};
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    config.controlGroup = {105};
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    config.controlGroup = {101, 102};
-    ret = controller.Create(config, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
- * @tc.name: StartPip
- * @tc.desc: StartPip
+ * @tc.name: SetMainWindowId
+ * @tc.desc: SetMainWindowId
  * @tc.type: FUNC
  */
-HWTEST_F(WebPictureInPictureControllerInterfaceTest, StartPip, TestSize.Level1)
+HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetMainWindowId, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.StartPip();
-    EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.StartPip();
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
+    controller->Create();
+    controller->isPipEnabled_ = false;
+    WMError ret = controller->SetMainWindowId(0);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    controller->isPipEnabled_ = true;
+    ret = controller->SetMainWindowId(0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = controller->SetMainWindowId(100);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetTemplateType
+ * @tc.desc: SetTemplateType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetTemplateType, TestSize.Level1)
+{
+    controller->Create();
+    controller->isPipEnabled_ = false;
+    PiPTemplateType pipTemplateType = PiPTemplateType::VIDEO_PLAY;
+    WMError ret = controller->SetTemplateType(pipTemplateType);
+    controller->isPipEnabled_ = true;
+    ret = controller->SetTemplateType(pipTemplateType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetRect
+ * @tc.desc: SetRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetRect, TestSize.Level1)
+{
+    controller->Create();
+    controller->isPipEnabled_ = false;
+    WMError ret = controller->SetRect(100, 150);
+    controller->isPipEnabled_ = true;
+    ret = controller->SetRect(0, 150);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = controller->SetRect(100, 0);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = controller->SetRect(100, 150);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -140,12 +158,10 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, StartPip, TestSize.Level1)
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.StopPip();
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.StopPip();
+    controller->StartPip(0);
+    auto ret = controller->StopPip();
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->StopPip();
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -156,13 +172,12 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.UpdateContentSize(10, 20);
+    controller->StartPip(0);
+    auto ret = controller->UpdateContentSize(10, 20);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UpdateContentSize(10, 20);
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UpdateContentSize(10, 20);
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -173,17 +188,16 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
+    controller->StartPip(0);
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto status = PiPControlStatus::PAUSE;
-    controller.sptrWebPipController_->pipOption_->pipControlStatusInfoList_.clear();
-    controller.UpdatePiPControlStatus(controlType, status);
-    EXPECT_EQ(controller.sptrWebPipController_->pipOption_->pipControlStatusInfoList_[0].status,
+    controller->sptrWebPipController_->pipOption_->pipControlStatusInfoList_.clear();
+    controller->UpdatePiPControlStatus(controlType, status);
+    EXPECT_EQ(controller->sptrWebPipController_->pipOption_->pipControlStatusInfoList_[0].status,
         PiPControlStatus::PAUSE);
-    controller.sptrWebPipController_ = nullptr;
-    controller.UpdatePiPControlStatus(controlType, status);
-    EXPECT_EQ(controller.sptrWebPipController_, nullptr);
+    controller->sptrWebPipController_ = nullptr;
+    controller->UpdatePiPControlStatus(controlType, status);
+    EXPECT_EQ(controller->sptrWebPipController_, nullptr);
 }
 
 /**
@@ -193,15 +207,14 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, Tes
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
+    controller->StartPip(0);
     auto controlType = PiPControlType::VIDEO_PREVIOUS;
-    controller.setPiPControlEnabled(controlType, true);
-    controller.setPiPControlEnabled(controlType, false);
+    controller->setPiPControlEnabled(controlType, true);
+    controller->setPiPControlEnabled(controlType, false);
 
-    controller.sptrWebPipController_ = nullptr;
-    controller.setPiPControlEnabled(controlType, true);
-    EXPECT_EQ(controller.sptrWebPipController_, nullptr);
+    controller->sptrWebPipController_ = nullptr;
+    controller->setPiPControlEnabled(controlType, true);
+    EXPECT_EQ(controller->sptrWebPipController_, nullptr);
 }
 
 /**
@@ -211,17 +224,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestS
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.RegisterStartPipListener(nullptr);
+    ret = controller->RegisterStartPipListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller.RegisterStartPipListener(PipStartPipCallback);
+    ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.RegisterStartPipListener(PipStartPipCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -231,22 +240,17 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, T
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterStartPipListener(PipStartPipCallback);
+    ret = controller->UnregisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ret = controller.UnregisterStartPipListener(nullptr);
+    ret = controller->UnregisterStartPipListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    ret = controller.UnregisterStartPipListener(PipStartPipCallback);
+    ret = controller->UnregisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterStartPipListener(PipStartPipCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -256,17 +260,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener,
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.RegisterLifeCycleListener(nullptr);
+    ret = controller->RegisterLifeCycleListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
+    ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -276,21 +276,20 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, 
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterLifeCycleListener(PipLifeCycleCallback);
+    ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ret = controller.UnregisterLifeCycleListener(nullptr);
+    ret = controller->UnregisterLifeCycleListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    ret = controller.UnregisterLifeCycleListener(PipLifeCycleCallback);
+    ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterLifeCycleListener(PipLifeCycleCallback);
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -301,17 +300,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.RegisterControlEventListener(nullptr);
+    ret = controller->RegisterControlEventListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller.RegisterControlEventListener(PipControlEventCallback);
+    ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.RegisterControlEventListener(PipControlEventCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -321,21 +316,20 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListene
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterControlEventListener(PipControlEventCallback);
+    ret = controller->UnregisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ret = controller.UnregisterControlEventListener(nullptr);
+    ret = controller->UnregisterControlEventListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    ret = controller.UnregisterControlEventListener(PipControlEventCallback);
+    ret = controller->UnregisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterControlEventListener(PipControlEventCallback);
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -346,17 +340,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListe
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterResizeListener(PipResizeCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.RegisterResizeListener(nullptr);
+    ret = controller->RegisterResizeListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller.RegisterResizeListener(PipResizeCallback);
+    ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.RegisterResizeListener(PipResizeCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
 /**
@@ -366,21 +356,20 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, Tes
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterResizeListener(PipResizeCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterResizeListener(PipResizeCallback);
+    ret = controller->UnregisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ret = controller.UnregisterResizeListener(nullptr);
+    ret = controller->UnregisterResizeListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    ret = controller.UnregisterResizeListener(PipResizeCallback);
+    ret = controller->UnregisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterResizeListener(PipResizeCallback);
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -391,16 +380,15 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, T
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterStartPipListener(PipStartPipCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterAllPiPStart();
+    ret = controller->UnregisterAllPiPStart();
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(controller.startPipCallbackSet_.size(), 0);
+    EXPECT_EQ(controller->startPipCallbackSet_.size(), 0);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterAllPiPStart();
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterAllPiPStart();
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -411,16 +399,15 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, Test
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterAllPiPLifecycle();
+    ret = controller->UnregisterAllPiPLifecycle();
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(controller.lifeCycleCallbackSet_.size(), 0);
+    EXPECT_EQ(controller->lifeCycleCallbackSet_.size(), 0);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterAllPiPLifecycle();
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterAllPiPLifecycle();
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -431,16 +418,15 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, 
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObserver, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterControlEventListener(PipControlEventCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterAllPiPControlObserver();
+    ret = controller->UnregisterAllPiPControlObserver();
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(controller.controlEventCallbackSet_.size(), 0);
+    EXPECT_EQ(controller->controlEventCallbackSet_.size(), 0);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterAllPiPControlObserver();
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterAllPiPControlObserver();
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 
@@ -451,16 +437,15 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObse
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPWindowSize, TestSize.Level1)
 {
-    WebPictureInPictureControllerInterface controller;
-    controller.Create(config, 0);
-    auto ret = controller.RegisterResizeListener(PipResizeCallback);
+    controller->StartPip(0);
+    auto ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
-    ret = controller.UnregisterAllPiPWindowSize();
+    ret = controller->UnregisterAllPiPWindowSize();
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(controller.resizeCallbackSet_.size(), 0);
+    EXPECT_EQ(controller->resizeCallbackSet_.size(), 0);
 
-    controller.sptrWebPipController_ = nullptr;
-    ret = controller.UnregisterAllPiPWindowSize();
+    controller->sptrWebPipController_ = nullptr;
+    ret = controller->UnregisterAllPiPWindowSize();
     EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
 }
 }
