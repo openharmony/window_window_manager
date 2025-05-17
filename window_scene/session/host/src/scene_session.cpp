@@ -4317,6 +4317,15 @@ void SceneSession::NotifyPrivacyModeChange()
     }
 }
 
+void SceneSession::NotifyExtensionSecureLimitChange(bool isLimit)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+}
+
 WMError SceneSession::SetSnapshotSkip(bool isSkip)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -6438,6 +6447,9 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const Extension
         extWindowFlagsMap_[extPersistentId] = newFlags;
     }
     CalculateCombinedExtWindowFlags();
+    if (oldFlags.hideNonSecureWindowsFlag != newFlags.hideNonSecureWindowsFlag) {
+        NotifyExtensionSecureLimitChange(static_cast<bool>(newFlags.hideNonSecureWindowsFlag));
+    }
 }
 
 ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags()

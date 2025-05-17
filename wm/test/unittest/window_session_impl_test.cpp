@@ -364,7 +364,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestS
     EXPECT_EQ(true, window->property_->IsDecorEnable());
     window->property_->SetDecorEnable(false);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(false, window->property_->IsDecorEnable());
