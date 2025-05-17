@@ -9396,7 +9396,7 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
 WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    observedFlags_ |= (1 << static_cast<int32_t>(windowInfoKey));
+    observedFlags_ |= static_cast<uint32_t>(windowInfoKey);
     interestFlags_ |= interestInfo;
     return RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
