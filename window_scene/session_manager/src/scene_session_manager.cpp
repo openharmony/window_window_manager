@@ -13290,8 +13290,16 @@ bool SceneSessionManager::SubtractIntersectArea(std::shared_ptr<SkRegion>& unacc
         return false;
     }
     auto hotAreas = sceneSession->GetTouchHotAreas();
+    WSRect wsRect = sceneSession->GetSessionRect();
+    for (auto& rect : hotAreas) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d, rect=%{public}s, hotArea=%{public}s",
+            static_cast<int32_t>(sceneSession->GetPersistentId()), wsRect.ToString().c_str(), rect.ToString().c_str());
+        if (rect != Rect::EMPTY_RECT) {
+            rect.posX_ += wsRect.posX_;
+            rect.posY_ += wsRect.posY_;
+        }
+    }
     if (hotAreas.empty()) {
-        WSRect wsRect = sceneSession->GetSessionRect();
         hotAreas.push_back({.posX_ = wsRect.posX_, .posY_ = wsRect.posY_,
                             .width_ = wsRect.width_, .height_ = wsRect.height_});
     }
