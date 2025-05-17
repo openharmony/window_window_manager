@@ -672,7 +672,7 @@ public:
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
     uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
-    void AddPropertyDirtyFlag(SessionPropertyFlag dirtyFlag) { propertyDirtyFlags_ |= dirtyFlag; }
+    void AddPropertyDirtyFlag(uint32_t dirtyFlag) { propertyDirtyFlags_ |= dirtyFlag; }
 
     /*
      * Window Pattern
