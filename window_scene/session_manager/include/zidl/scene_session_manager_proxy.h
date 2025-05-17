@@ -164,6 +164,8 @@ public:
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     WMError SetForegroundWindowNum(int32_t windowNum) override;
     WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;
+    WMError RegisterWindowParamChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
 private:
     template<typename T>

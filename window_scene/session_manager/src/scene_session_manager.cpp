@@ -9393,6 +9393,15 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
     return taskScheduler_->PostSyncTask(task, "GetSurfaceNodeIdsFromMissionIds");
 }
 
+WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    observedFlags_ |= (1 << static_cast<int32_t>(windowInfoKey));
+    interestFlags_ |= interestInfo;
+    return RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PROPERTY, windowManagerAgent);
+}
+
 WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
@@ -9414,7 +9423,8 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID) {
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID ||
+        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PROPERTY) {
         if (!SessionPermission::IsSACalling()) {
             TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -11788,6 +11798,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             PostProcessProperty(sessionMapDirty_);
         }
         FlushWindowInfoToMMI();
+        NotifyWindowPropertyChange(screenId);
         sessionMapDirty_ = 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -15202,6 +15213,60 @@ void SceneSessionManager::ConfigSupportZLevel()
         systemConfig_.supportZLevel_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
+}
+
+void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+    uint32_t propertyDirtyFlags = 0;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                TLOGW(WmsLogTag::WMS_ATTRIBUTE, "sceneSession nullptr");
+                continue;
+            }
+            if (isNotCurrentScreen(sceneSession, screenId)) {
+                continue;
+            }
+            if (!(sceneSession->GetPropertyDirtyFlags() & observedFlags_)) {
+                continue;
+            }
+            propertyDirtyFlags |= sceneSession->GetParamDirtyFlags();
+            std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+            PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
+            windowInfoList.emplace_back(windowPropertyChangeInfo);
+            sceneSession->SetPropertyDirtyFlags(0);
+        }
+    }
+    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+}
+
+void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
+    std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo)
+{
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_ID)) {
+        windowPropertyChangeInfo[WindowInfoKey::WINDOW_ID] = sceneSession->GetWindowId();
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::BUNDLE_NAME)) {
+        windowPropertyChangeInfo[WindowInfoKey::BUNDLE_NAME] = sceneSession->GetSessionInfo().bundleName_;
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::ABILITY_NAME)) {
+        windowPropertyChangeInfo[WindowInfoKey::ABILITY_NAME] = sceneSession->GetSessionInfo().abilityName_;
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::APP_INDEX)) {
+        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetSessionInfo().appIndex_;
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::VISIBILITY_STATE)) {
+        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetVisibilityState();
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
+        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetSessionProperty()->GetDisplayId();
+    }
+    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::RECT)) {
+        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetClientRect();
+    }
 }
 
 WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)

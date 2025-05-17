@@ -72,6 +72,7 @@ public:
     void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
+    void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -108,6 +109,8 @@ public:
     std::shared_mutex visibilityListenerAgentListenerMutex_;
     sptr<WindowManagerAgent> WindowDisplayIdChangeListenerAgent_;
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners_;
+    sptr<WindowManagerAgent> windowPropertyChangeAgent_;
+    std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -443,6 +446,21 @@ void WindowManager::Impl::NotifyWindowPidVisibilityChanged(
     for (auto &listener : windowPidVisibilityListeners) {
         if (listener != nullptr) {
             listener->NotifyWindowPidVisibilityChanged(info);
+        }
+    }
+}
+
+void WindowManager::Impl::NotifyWindowRectChange(
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    std::vector<sptr<IWindowPropertyChangedListener>> windowRectChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowRectChangeListeners = windowRectChangeListeners_;
+    }
+    for (auto &listener : windowRectChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowPropertyChange(windowInfoList);
         }
     }
 }
@@ -849,6 +867,34 @@ WMError WindowManager::UnregisterDisplayIdChangedListener(const sptr<IWindowInfo
         if (ret == WMError::WM_OK) {
             pImpl_->WindowDisplayIdChangeListenerAgent_ = nullptr;
         }
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::RECT, listener->GetInterestInfo(), pImpl_->windowPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowRectChangeListeners_.begin(), pImpl_->windowRectChangeListeners_.end(),
+            listener);
+        if (iter != pImpl_->windowRectChangeListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowRectChangeListeners_.emplace_back(listener);
     }
     return ret;
 }
@@ -1819,6 +1865,8 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
             return RegisterVisibilityStateChangedListener(listener);
         case WindowInfoKey::DISPLAY_ID :
             return RegisterDisplayIdChangedListener(listener);
+        case WindowInfoKey::RECT :
+            return RegisterRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -1914,6 +1962,14 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
         return true;
     }
     return false;
+}
+
+void WindowManager::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    if (PropertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::VISIBILITY_STATE)) {
+        pImpl_->NotifyWindowRectChange(windowInfoList);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
