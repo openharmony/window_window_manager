@@ -89,6 +89,17 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyForegroundInteractiveStatus, Test
 }
 
 /**
+ * @tc.name: NotifyBackgroundNonInteractiveStatus
+ * @tc.desc: test function : NotifyBackgroundNonInteractiveStatus
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SessionStageProxyLifecycleTest, NotifyBackgroundNonInteractiveStatus, TestSize.Level1)
+ {
+     ASSERT_TRUE((sessionStage_ != nullptr));
+     sessionStage_->NotifyBackgroundNonInteractiveStatus();
+ }
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC

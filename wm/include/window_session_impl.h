@@ -460,7 +460,7 @@ public:
     void NotifyAfterInteractive();
     void NotifyAfterNonInteractive();
     void NotifyBackgroundNonInteractiveStatus() override;
-    
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
