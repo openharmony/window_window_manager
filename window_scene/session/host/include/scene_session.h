@@ -771,6 +771,13 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    void SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func);
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -952,7 +959,7 @@ private:
     /*
      * Move Drag
      */
-    void HandleMoveDragSurfaceNode(SizeChangeReason reason);
+    virtual void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
@@ -1073,6 +1080,7 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    void NotifyExtensionSecureLimitChange(bool isLimit);
 
     /*
      * PiP Window
@@ -1165,10 +1173,11 @@ private:
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
     // KeyFrame
     void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
-    void InitKeyFrameState(uint64_t timeStamp, const WSRect& rect);
+    void InitKeyFrameState(const WSRect& rect);
     void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
+    bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
     KeyFramePolicy keyFramePolicy_;
     std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
@@ -1268,6 +1277,11 @@ private:
     */
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
     bool isUserRequestedExit_ = false;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

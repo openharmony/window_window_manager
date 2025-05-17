@@ -202,6 +202,23 @@ enum class WindowModeType : uint8_t {
 };
 
 /**
+ * @brief Enumerates global mode of window.
+ */
+enum class GlobalWindowMode : uint32_t {
+    UNKNOWN = 0,
+    FULLSCREEN = 1,
+    SPLIT = 1 << 1,
+    FLOAT = 1 << 2,
+    PIP = 1 << 3,
+    ALL = FULLSCREEN | SPLIT | FLOAT | PIP
+};
+
+inline GlobalWindowMode operator|(GlobalWindowMode lhs, GlobalWindowMode rhs)
+{
+    return static_cast<GlobalWindowMode>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+}
+
+/**
  * @brief Enumerates modal of sub session.
  */
 enum class SubWindowModalType : uint32_t {
@@ -2036,6 +2053,7 @@ struct KeyboardLayoutParams : public Parcelable {
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
     Rect PortraitPanelRect_ { 0, 0, 0, 0 };
+    uint64_t displayId_ = DISPLAY_ID_INVALID;
 
     bool operator==(const KeyboardLayoutParams& other) const
     {
@@ -2045,7 +2063,8 @@ struct KeyboardLayoutParams : public Parcelable {
                 LandscapeKeyboardRect_ == other.LandscapeKeyboardRect_ &&
                 PortraitKeyboardRect_ == other.PortraitKeyboardRect_ &&
                 LandscapePanelRect_ == other.LandscapePanelRect_ &&
-                PortraitPanelRect_ == other.PortraitPanelRect_);
+                PortraitPanelRect_ == other.PortraitPanelRect_ &&
+                displayId_ == other.displayId_);
     }
 
     bool operator!=(const KeyboardLayoutParams& params) const
@@ -2289,6 +2308,123 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
+};
+
+/*
+ * @brief Enumerates window transition type.
+ */
+enum class WindowTransitionType : uint32_t {
+    /**
+     * window destroy.
+     */
+    DESTROY = 0,
+    
+    /**
+     * end type.
+     */
+    END,
+};
+
+/*
+ * @brief Enumerates window animation curve type.
+ */
+enum class WindowAnimationCurve : uint32_t {
+    /**
+     * animation curve type linear.
+     */
+    LINEAR = 0,
+
+    /**
+     * animation curve type interpolation_spring.
+     */
+    INTERPOLATION_SPRING = 1,
+};
+
+const uint32_t ANIMATION_PARAM_SIZE = 4;
+const uint32_t ANIMATION_MAX_DURATION = 3000;
+
+/*
+ * @brief Window transition animation configuration.
+ */
+struct WindowAnimationOptions : public Parcelable {
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    uint32_t duration = 0;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
+            return false;
+        }
+        if (param.size() > ANIMATION_PARAM_SIZE) {
+            return false;
+        }
+        for (auto p: param) {
+            if (!parcel.WriteFloat(p)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        uint32_t curve = 0;
+        if (!parcel.ReadUint32(curve)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
+        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        for (auto& param: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(param)) {
+                delete windowAnimationConfig;
+                return nullptr;
+            }
+        }
+        return windowAnimationConfig;
+    }
+};
+
+/*
+ * @brief Transition animation configuration.
+ */
+struct TransitionAnimation : public Parcelable {
+    WindowAnimationOptions config;
+    float opacity = 1.0f;
+    
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
+            return false;
+        }
+        return true;
+    }
+
+    static TransitionAnimation* Unmarshalling(Parcel& parcel)
+    {
+        TransitionAnimation* transitionAnimation = new TransitionAnimation();
+        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        std::shared_ptr<WindowAnimationOptions> animationConfig =
+            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
+        if (animationConfig == nullptr) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        transitionAnimation->config = *animationConfig;
+        return transitionAnimation;
+    }
 };
 
 /**

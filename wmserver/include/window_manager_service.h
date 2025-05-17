@@ -195,6 +195,11 @@ private:
     bool ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowManagerConfig::ConfigItem& shadowConfig, WindowShadowParameters& outShadow);
 
+    /*
+     * RS Client Multi Instance
+     */
+    void InitRSUIDirector();
+
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::string name_ = "WindowManagerService";
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;

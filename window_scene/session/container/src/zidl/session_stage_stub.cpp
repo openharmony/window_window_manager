@@ -126,8 +126,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleDumpSessionElementInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE):
             return HandleNotifyTouchOutside(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SECURE_LIMIT_CHANGE):
+            return HandleNotifySecureLimitChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE):
             return HandleUpdateWindowMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
+            return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
             return HandleNotifyForegroundInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE):
@@ -451,11 +455,36 @@ int SessionStageStub::HandleNotifyTouchOutside(MessageParcel& data, MessageParce
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifySecureLimitChange!");
+    bool isLimit = true;
+    if (!data.ReadBool(isLimit)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isLimit failed.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyExtensionSecureLimitChange(isLimit);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdateWindowMode!");
     WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
     WSError errCode = UpdateWindowMode(mode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    uint32_t mode = static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED);
+    if (!data.ReadUint32(mode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyLayoutFinishAfterWindowModeChange(static_cast<WindowMode>(mode));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

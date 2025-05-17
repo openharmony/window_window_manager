@@ -107,6 +107,7 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
+    BindNativeFunction(env, exportObj, "getSuperRotation", moduleName, JsScreenSessionManager::GetSuperRotation);
     BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
         JsScreenSessionManager::SetLandscapeLockStatus);
     BindNativeFunction(env, exportObj, "setForceCloseHdr", moduleName,
@@ -266,6 +267,13 @@ napi_value JsScreenSessionManager::GetSuperFoldStatus(napi_env env, napi_callbac
     WLOGD("[NAPI]GetSuperFoldStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSuperFoldStatus(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetSuperRotation");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSuperRotation(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_callback_info info)
@@ -881,6 +889,14 @@ napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callb
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
     WLOGI("[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
+}
+
+napi_value JsScreenSessionManager::OnGetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetSuperRotation");
+    float rotation = ScreenSessionManagerClient::GetInstance().GetSuperRotation();
+    TLOGI(WmsLogTag::DMS, "[NAPI] getSuperRotation = %{public}f", rotation);
+    return CreateJsValue(env, rotation);
 }
 
 napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_callback_info info)

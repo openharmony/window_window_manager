@@ -17,6 +17,7 @@
 
 #include <ui/rs_surface_node.h>
 #include "marshalling_helper.h"
+#include "rs_adapter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -148,6 +149,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleListWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO):
             return HandleGetAllWindowLayoutInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_WINDOW_MODE):
+            return HandleGetGlobalWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
@@ -215,6 +218,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR):
+            return HandleShiftAppWindowPointerEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
@@ -239,6 +244,8 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Unmarshalling RSSurfaceNode: %{public}s",
+          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
@@ -1283,6 +1290,25 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    if (!reply.WriteInt32(static_cast<int32_t>(GetGlobalWindowMode(displayId, globalWinMode)))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     std::vector<sptr<WindowVisibilityInfo>> infos;
@@ -1922,6 +1948,36 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply)
+{
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read moduleName failed");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read abilityName failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t color;
+    if (!data.ReadUint32(color)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read color failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t uid;
+    if (!data.ReadInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read uid failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetStartWindowBackgroundColor(moduleName, abilityName, color, uid);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

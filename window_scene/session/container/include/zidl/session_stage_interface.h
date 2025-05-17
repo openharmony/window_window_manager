@@ -88,6 +88,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyExtensionSecureLimitChange(bool isLimit) = 0;
     virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
@@ -110,6 +111,7 @@ public:
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
+    virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;

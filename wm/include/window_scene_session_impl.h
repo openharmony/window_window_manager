@@ -57,6 +57,7 @@ public:
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
 
     /*
      * Window Hierarchy
@@ -281,6 +282,12 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    /**
+     * Window Transition Animation For PC
+     */
+    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -464,10 +471,15 @@ private:
     /*
      * Window Lifecycle
      */
-    bool isColdStart_ = true;
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::mutex transitionAnimationConfigMutex_;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

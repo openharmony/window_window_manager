@@ -18,6 +18,7 @@
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
@@ -62,6 +63,8 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession, TestSize
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     int32_t persistentId = 0;
     SessionInfo info;
@@ -145,6 +148,8 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateAndConnectSpecificSession4, TestSiz
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     int32_t persistentId = 0;
     SessionInfo info;
@@ -171,6 +176,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession, TestSiz
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -195,6 +202,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession2, TestSi
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = nullptr;
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -219,6 +228,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndConnectSpecificSession3, TestSi
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -243,6 +254,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession, TestSize
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -267,6 +280,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession2, TestSiz
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = nullptr;
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -291,6 +306,8 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverAndReconnectSceneSession3, TestSiz
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> node = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    auto rsUIContext = ScreenSessionManagerClient::GetInstance().GetRSUIContext(0);
+    node->SetRSUIContext(rsUIContext);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SessionInfo info;
     sptr<ISession> session = sptr<SessionMocker>::MakeSptr(info);
@@ -563,6 +580,23 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Le
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     sceneSessionManagerProxy->AddExtensionWindowStageToSCB(sessionStage, token, 12345);
+}
+
+/**
+ * @tc.name: SetStartWindowBackgroundColor
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    EXPECT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
 }
 
 /**

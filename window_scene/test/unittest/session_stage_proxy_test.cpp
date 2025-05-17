@@ -364,6 +364,36 @@ HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isLimit = false;
+    res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyExtensionSecureLimitChange02
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: test function : NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
@@ -723,6 +753,33 @@ HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | Sma
     bool isAttach = false;
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->NotifyWindowAttachStateChange(isAttach);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: LinkKeyFrameCanvasNode
+ * @tc.desc: test function : LinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, LinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    WSError res = sessionStage_->LinkKeyFrameCanvasNode(rsCanvasNode);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetKeyFramePolicy
+ * @tc.desc: test function : SetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetKeyFramePolicy, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    KeyFramePolicy keyFramePolicy;
+    WSError res = sessionStage_->SetKeyFramePolicy(keyFramePolicy);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
