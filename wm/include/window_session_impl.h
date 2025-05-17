@@ -776,6 +776,8 @@ private:
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
+    bool IsWindowShouldDrag();
+    bool CheckCanDragWindowType();
 
     /*
      * PC Window

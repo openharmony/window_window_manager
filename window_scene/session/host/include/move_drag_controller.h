@@ -99,6 +99,8 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     AreaType GetAreaType() const { return type_; };
+    void SetScale(float scalex, float scaley);
+    void SetParentRect(Rect parentRect);
 
     /*
      * Cross Display Move Drag
@@ -151,6 +153,10 @@ private:
         int32_t originalPointerWindowX_ = -1;
         // the y coordinate of the pointer related to the active window
         int32_t originalPointerWindowY_ = -1;
+        // the x coordinate scale of the active window
+        float scaleX_ = 1.0f;
+        // the y coordinate scale of the active window
+        float scaleY_ = 1.0f;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
 
@@ -304,6 +310,7 @@ private:
     };
     Rect rectExceptFrame_ { 0, 0, 0, 0 };
     Rect rectExceptCorner_ { 0, 0, 0, 0 };
+    Rect parentRect_ { 0, 0, 0, 0};
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     MoveTempProperty moveTempProperty_;
