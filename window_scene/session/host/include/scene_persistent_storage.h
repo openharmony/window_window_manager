@@ -16,8 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_PERSISTENT_STORAGE_H
 #define OHOS_ROSEN_WINDOW_PERSISTENT_STORAGE_H
 
-#include "foundation/distributeddatamgr/preferences/interfaces/inner_api/include/preferences.h"
-#include "foundation/distributeddatamgr/preferences/interfaces/inner_api/include/preferences_helper.h"
+#include "preferences.h"
+#include "preferences_helper.h"
 
 #include "window_manager_hilog.h"
 

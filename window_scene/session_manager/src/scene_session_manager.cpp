@@ -14458,7 +14458,7 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
     return WMError::WM_OK;
 }
 
-bool GetPersistentImageFit(int persistentId, ImageFit imageFit)
+bool GetPersistentImageFit(int persistentId, int32_t& imageFit)
 {
     auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
         ScenePersistentStorageType::MAXIMIZE_STATE);

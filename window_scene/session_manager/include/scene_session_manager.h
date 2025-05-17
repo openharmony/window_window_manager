@@ -1463,7 +1463,7 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
-    bool GetPersistentImageFit(int persistentId, ImageFit imageFit);
+    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
 };
 } // namespace OHOS::Rosen
 
