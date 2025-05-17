@@ -282,6 +282,8 @@ public:
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsSupportRotateFullScreen() const;
+    bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
 
     /*
@@ -546,6 +548,12 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
+    bool IsSupportRotateFullScreen() const;
+
+    void SetIsAdaptToSubWindow(bool isAdaptToSubWindow);
+    bool IsAdaptToSubWindow() const;
+
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
@@ -565,6 +573,8 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
+        ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
         return ss.str();
     }
@@ -578,6 +588,8 @@ private:
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
     bool disableWindowLimit_ { false };
+    bool isSupportRotateFullScreen_ { false };
+    bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
 };
 

@@ -287,6 +287,12 @@ public:
      * Window Pattern
      */
     WMError SetImageForRecent(int imgResourceId, ImageFit imageFit) override;
+    /**
+     * Window Transition Animation For PC
+     */
+    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -473,6 +479,12 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::mutex transitionAnimationConfigMutex_;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

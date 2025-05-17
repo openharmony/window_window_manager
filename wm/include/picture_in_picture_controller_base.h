@@ -99,6 +99,7 @@ public:
     PiPWindowState GetControllerState() const;
     void OnPictureInPictureStart();
     void SetSurfaceId(std::string surfaceId);
+    static bool GetPipEnabled();
     std::string GetSurfaceId() const;
     bool isWeb_ = false;
 

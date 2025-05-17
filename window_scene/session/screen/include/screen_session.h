@@ -328,6 +328,7 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
     void SetScreenAvailableStatus(bool isScreenAvailable);
