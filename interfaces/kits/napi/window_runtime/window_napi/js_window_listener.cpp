@@ -649,6 +649,24 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
 }
 
+void JsWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto jsCallback = [self = weakRef_, isLimit, env = env_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isLimit) };
+        thisListener->CallJsMethod(EXTENSION_SECURE_LIMIT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
+    }
+}
+
 void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 {
     const char* const where = __func__;

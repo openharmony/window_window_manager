@@ -535,5 +535,12 @@ void PictureInPictureControllerBase::GetPipPossible(bool& pipPossible)
     pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
 }
+
+bool PictureInPictureControllerBase::GetPipEnabled()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    return multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
+        multiWindowUIType == "TabletSmartWindow";
+}
 } // namespace Rosen
 } // namespace OHOS
