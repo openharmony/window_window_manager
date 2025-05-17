@@ -158,6 +158,12 @@ napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnShiftAppWindowFocus(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::SetStartWindowBackgroundColor(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnSetStartWindowBackgroundColor(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1210,6 +1216,58 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_THREE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    constexpr uint32_t maxNameLength = 200;
+    std::string moduleName;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], moduleName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to moduleName");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (moduleName.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "moduleName length out of range");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    std::string abilityName;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], abilityName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to abilityName");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (abilityName.length() > maxNameLength) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityName length out of range");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    uint32_t color = 0;
+    if (!ParseColorMetrics(env, argv[ARGC_TWO], color)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to color");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [moduleName, abilityName, color, env, task = napiAsyncTask] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            SetStartWindowBackgroundColor(moduleName, abilityName, color));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "setStartWindowBackground failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -1485,6 +1543,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
         JsWindowManager::ShiftAppWindowPointerEvent);
+    BindNativeFunction(env, exportObj, "setStartWindowBackgroundColor", moduleName,
+        JsWindowManager::SetStartWindowBackgroundColor);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
