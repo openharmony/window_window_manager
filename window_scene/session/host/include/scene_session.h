@@ -771,6 +771,13 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    void SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func);
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -1269,6 +1276,11 @@ private:
     */
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
     bool isUserRequestedExit_ = false;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
