@@ -37,6 +37,7 @@
 #include "common_event_manager.h"
 #include "dm_common.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "starting_window.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -745,36 +746,17 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
     return true;
 }
 
-void WindowNodeContainer::OpenInputMethodSyncTransaction()
+void WindowNodeContainer::RunInInputMethodSyncTransaction(sptr<WindowNode>& node, std::function<void()> task)
 {
-    if (!isAnimateTransactionEnabled_) {
-        WLOGD("InputMethodSyncTransaction is not enabled");
-        return;
+    if (isAnimateTransactionEnabled_) {
+        // Use AutoRSSyncTransaction to automatically manage the Open and Close of RSSyncTransaction,
+        // and perform FlushImplicitTransaction when necessary.
+        AutoRSSyncTransaction autoSync(node->GetRSUIContext(), true);
+        task();
+    } else {
+        TLOGD(WmsLogTag::DEFAULT, "InputMethodSyncTransaction is disabled");
+        task();
     }
-    // Before open transaction, it must flush first.
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (!transactionProxy) {
-        return;
-    }
-    transactionProxy->FlushImplicitTransaction();
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        syncTransactionController->OpenSyncTransaction();
-    }
-    WLOGD("OpenInputMethodSyncTransaction");
-}
-
-void WindowNodeContainer::CloseInputMethodSyncTransaction()
-{
-    if (!isAnimateTransactionEnabled_) {
-        WLOGD("InputMethodSyncTransaction is not enabled while close");
-        return;
-    }
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
-    if (syncTransactionController) {
-        syncTransactionController->CloseSyncTransaction();
-    }
-    WLOGD("CloseInputMethodSyncTransaction");
 }
 
 bool WindowNodeContainer::IsWindowFollowParent(WindowType type)
@@ -834,19 +816,22 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
     WindowGravity windowGravity;
     uint32_t percent;
     node->GetWindowGravity(windowGravity, percent);
+
+    auto rsUIContext = node->GetRSUIContext();
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("Add node with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
-        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+        RSNode::Animate(rsUIContext, animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationIn_.duration_;
-        OpenInputMethodSyncTransaction();
-        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
-        CloseInputMethodSyncTransaction();
+        RunInInputMethodSyncTransaction(node, [&] {
+            RSNode::Animate(
+                rsUIContext, timingProtocol, animationConfig_.keyboardAnimationIn_.curve_, updateRSTreeFunc);
+        });
     } else {
         WLOGFD("add node without animation");
         updateRSTreeFunc();
@@ -896,6 +881,8 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     WindowGravity windowGravity;
     uint32_t percent;
     node->GetWindowGravity(windowGravity, percent);
+
+    auto rsUIContext = node->GetRSUIContext();
     if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFD("remove with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
@@ -903,7 +890,7 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
             node->surfaceNode_->SetFreeze(true);
         }
         wptr<WindowNode> weakNode(node);
-        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+        RSNode::Animate(rsUIContext, animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, [weakNode]() {
             auto weakWindow = weakNode.promote();
             if (weakWindow && weakWindow->surfaceNode_) {
@@ -914,10 +901,11 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         windowGravity != WindowGravity::WINDOW_GRAVITY_FLOAT && !animationPlayed) {
         // remove keyboard with animation
-        OpenInputMethodSyncTransaction();
-        auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
-        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
-        CloseInputMethodSyncTransaction();
+        RunInInputMethodSyncTransaction(node, [&] {
+            auto timingProtocol = animationConfig_.keyboardAnimationOut_.duration_;
+            RSNode::Animate(
+                rsUIContext, timingProtocol, animationConfig_.keyboardAnimationOut_.curve_, updateRSTreeFunc);
+        });
     } else {
         updateRSTreeFunc();
     }
@@ -1442,11 +1430,8 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT,
             overlapRect, textFieldPositionY, textFieldHeight);
         if (isAnimateTransactionEnabled_) {
-            auto syncTransactionController = RSSyncTransactionController::GetInstance();
-            if (syncTransactionController) {
-                callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info,
-                    syncTransactionController->GetRSTransaction());
-            }
+            auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
+            callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info, rsTransaction);
         } else {
             callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
         }

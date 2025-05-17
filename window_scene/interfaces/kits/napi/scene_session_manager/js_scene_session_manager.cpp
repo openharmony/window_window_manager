@@ -133,6 +133,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "DragResizeType", CreateJsSessionDragResizeType(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", CreateRotationChangeType(env));
     napi_set_named_property(env, exportObj, "RectType", CreateRectType(env));
+    napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
+    napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -700,6 +702,13 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().RegisterSetTopWindowBoundaryByIDFunc(
         [](const std::string& id) {
         RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
+    });
+    SceneSessionManager::GetInstance().SetHasRootSceneRequestedVsyncFunc([] {
+        return RootScene::staticRootScene_->HasRequestedVsync();
+    });
+    SceneSessionManager::GetInstance().SetRequestVsyncByRootSceneWhenModeChangeFunc(
+        [](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        return RootScene::staticRootScene_->RequestVsync(vsyncCallback);
     });
 }
 
@@ -3774,7 +3783,14 @@ napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    auto windowLimits = SceneSessionManager::GetInstance().GetWindowLimits(windowId);
+    WindowLimits windowLimits;
+    WMError ret = SceneSessionManager::GetInstance().GetWindowLimits(windowId, windowLimits);
+    if (ret != WMError::WM_OK) {
+        WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Get window limits failed, return %{public}d", wmErrorCode);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(wmErrorCode), "Get window limits failed."));
+        return NapiGetUndefined(env);
+    }
     napi_value jsWindowLimitsObj = JsWindowSceneConfig::CreateWindowLimits(env, windowLimits);
     if (jsWindowLimitsObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsWindowLimitsObj is nullptr");

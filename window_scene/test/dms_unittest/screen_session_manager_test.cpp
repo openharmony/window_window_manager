@@ -6719,6 +6719,42 @@ HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap04, TestSize.Level1)
     nonEmptyMap["serial123"] = MultiScreenInfo();
     EXPECT_TRUE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial123"));
 }
+
+/**
+ * @tc.name: AdaptSuperHorizonalBoot
+ * @tc.desc: AdaptSuperHorizonalBoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenSessionConfig config;
+    sptr<ScreenSession> session = new ScreenSession(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ScreenId id = 0;
+    
+    ssm_->AdaptSuperHorizonalBoot(session, id);
+    EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -209,6 +209,14 @@ WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
     return wmsProxy->GetAllWindowLayoutInfo(displayId, infos);
 }
 
+WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetGlobalWindowMode(displayId, globalWinMode);
+}
+
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -1061,6 +1069,15 @@ WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
+}
+
+WMError WindowAdapter::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetStartWindowBackgroundColor(moduleName, abilityName, color, uid);
 }
 
 WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,

@@ -46,6 +46,7 @@ public:
     MOCK_METHOD0(NotifyScreenshot, void(void));
     MOCK_METHOD0(NotifyTouchOutside, WSError(void));
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
+    MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
