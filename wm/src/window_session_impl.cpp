@@ -64,7 +64,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
@@ -1420,20 +1419,26 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
-    if (state_ != WindowState::STATE_SHOWN) {
-        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d, is not shown", state_);
-        return;
-    }
     if (interactive) {
-        if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && !isDidForeground_) {
-            TLOGI(WmsLogTag::WMS_LIFE, "api version %{public}u, isDidForeground %{public}d", GetTargetAPIVersion(),
-                isDidForeground_);
-            return;
-        }
+        NotifyAfterInteractive();
         NotifyAfterResumed();
     } else {
         NotifyAfterPaused();
+        NotifyAfterNonInteractive();
     }
+}
+
+void WindowSessionImpl::NotifyBackgroundNonInteractiveStatus()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d is not shown");
+        return;
+    }
+    NotifyAfterNonInteractive();
 }
 
 WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
@@ -4173,6 +4178,32 @@ void WindowSessionImpl::NotifyAfterPaused()
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyAfterInteractive()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    if (hasNotifyInteractiveEvent_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "window has been in interactive status");
+        return;
+    }
+    hasNotifyInteractiveEvent_ = true;
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyAfterNonInteractive()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    if (hasNotifyInteractiveEvent_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
+        return;
+    }
+    hasNotifyInteractiveEvent_ = false;
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
 }
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)

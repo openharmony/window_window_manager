@@ -771,6 +771,11 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /*
+     * Window LifeCycle
+     */
+    void UpdateNonInteractiveInner();
+
     /**
      * Window Transition Animation For PC
      */
@@ -889,6 +894,7 @@ protected:
     /*
      * Window Lifecycle
      */
+    virtual void NotifyClientToUpdateNonInteractive() {}
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
