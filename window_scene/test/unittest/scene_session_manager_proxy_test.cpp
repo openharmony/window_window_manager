@@ -1584,6 +1584,29 @@ HWTEST_F(sceneSessionManagerProxyTest, SetForegroundWindowNum, TestSize.Level1)
     res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
+
+/**
+ * @tc.name: AnimateTo
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AnimateTo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t windowId = 1;
+    WindowAnimationProperty animationProperty;
+    WindowAnimationOption animationOption;
+
+    WMError res = sceneSessionManagerProxy->AnimateTo(windowId, animationProperty, animationOption);
+    ASSERT_EQ(WMError::WM_OK, res);
+
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->AnimateTo(windowId, animationProperty, animationOption);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

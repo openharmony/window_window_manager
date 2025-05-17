@@ -137,6 +137,7 @@ private:
     int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply);
+    int HandleAnimateTo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);

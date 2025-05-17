@@ -15372,4 +15372,20 @@ void SceneSessionManager::UpdateRecentMainSessionInfos(const std::vector<int32_t
         }
     }, __func__);
 }
+
+WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Permission denied, only for SA");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto session = GetSceneSession(windowId);
+    if (session == nullptr || SessionHelper::IsSystemWindow(session->GetWindowType())) {
+        TLOGNE(WmsLogTag::WMS_ANIMATION, "Can not find window or is system window");
+        return WMError::WM_DO_NOTHING;
+    }
+    session->AnimateTo(animationProperty, animationOption);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
