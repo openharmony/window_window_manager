@@ -6875,6 +6875,7 @@ void ScreenSessionManager::SetDisplayScale(ScreenId screenId, float scaleX, floa
 void ScreenSessionManager::SetFoldStatusLocked(bool locked)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    HandleSuperFoldStatusLocked(locked);
     if (!g_foldScreenFlag) {
         return;
     }
@@ -7138,6 +7139,22 @@ void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
     SetIsFoldStatusLocked(isLocked);
     if (isLocked == true) {
         SuperFoldSensorManager::GetInstance().HandleFoldStatusLocked();
+    } else {
+        SuperFoldSensorManager::GetInstance().HandleFoldStatusUnlocked();
+    }
+#endif
+}
+
+void ScreenSessionManager::HandleSuperFoldStatusLocked(bool isLocked)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
+    SetIsFoldStatusLocked(isLocked);
+    if (isLocked == true) {
+        TLOGI(WmsLogTag::DMS, "Fold status is locked.");
     } else {
         SuperFoldSensorManager::GetInstance().HandleFoldStatusUnlocked();
     }
