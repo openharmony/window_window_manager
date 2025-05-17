@@ -29,6 +29,7 @@
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
+#include "rs_adapter.h"
 #include "session_permission.h"
 #include "singleton_container.h"
 #include "sys_cap_util.h"
@@ -118,6 +119,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
             property_->GetWindowName().c_str(), GetPersistentId(), ret);
         return ret;
     }
+    GetHostWindowCompatiblityInfo();
     MakeSubOrDialogWindowDragableAndMoveble();
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
@@ -132,9 +134,29 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     state_ = WindowState::STATE_CREATED;
     isUIExtensionAbilityProcess_ = true;
     property_->SetIsUIExtensionAbilityProcess(true);
-    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d success.",
-        property_->GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "Created name:%{public}s %{public}d IsSimulateScale:%{public}u success.",
+        property_->GetWindowName().c_str(), GetPersistentId(), IsAdaptToSimulationScale());
     AddSetUIContentTimeoutCheck();
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::GetHostWindowCompatiblityInfo()
+{
+    if (!abilityToken_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "token is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto compatibleModeProperty = property_->GetCompatibleModeProperty();
+    if (compatibleModeProperty == nullptr) {
+        compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetHostWindowCompatiblityInfo(abilityToken_,
+        compatibleModeProperty);
+    if (ret != WMError::WM_OK) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "get compat info failed");
+        return ret;
+    }
+    property_->SetCompatibleModeProperty(compatibleModeProperty);
     return WMError::WM_OK;
 }
 
@@ -412,7 +434,7 @@ WMError WindowExtensionSessionImpl::SetPrivacyMode(bool isPrivacyMode)
         return WMError::WM_ERROR_NULLPTR;
     }
     surfaceNode_->SetSecurityLayer(isPrivacyMode);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
 
     if (state_ != WindowState::STATE_SHOWN) {
         extensionWindowFlags_.privacyModeFlag = isPrivacyMode;
@@ -656,6 +678,10 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         uiContent->Foreground();
         UpdateTitleButtonVisibility();
     }
+    if (IsAdaptToSimulationScale()) {
+        isDensityFollowHost_ = true;
+        hostDensityValue_ = COMPACT_SIMULATION_SCALE_DPI;
+    }
     UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
     WLOGFD("notify uiContent window size change end");
     return WMError::WM_OK;
@@ -719,9 +745,10 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             }
         }
 
+        auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
             duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         window->rotationAnimationCount_++;
@@ -729,7 +756,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve, [weak]() {
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, [weak]() {
             auto window = weak.promote();
             if (!window) {
                 return;
@@ -743,11 +770,11 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
             window->NotifySizeChange(wmRect, wmReason);
         }
         window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
-        RSNode::CloseImplicitAnimation();
+        RSNode::CloseImplicitAnimation(rsUIContext);
         if (needSync) {
             rsTransaction->Commit();
         } else {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
@@ -797,6 +824,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
         TLOGE(WmsLogTag::WMS_UIEXT, "handler_ is null");
         return;
     }
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return;
+    }
     auto task = [weak = wptr(this)]() {
         auto window = weak.promote();
         if (!window) {
@@ -821,6 +852,10 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
 
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionViewportConfig& config)
 {
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return WSError::WS_OK;
+    }
     if (config.isDensityFollowHost_ && std::islessequal(config.density_, 0.0f)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "invalid density_: %{public}f", config.density_);
         return WSError::WS_ERROR_INVALID_PARAM;
@@ -860,6 +895,10 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
+    if (IsAdaptToSimulationScale()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d adaptToSimulateScale mode not update", GetPersistentId());
+        return;
+    }
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
         hostDensityValue_ = config.density_;
@@ -1611,6 +1650,13 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         return static_cast<int32_t>(DataHandlerErr::OK);
     };
     dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
+}
+
+WMError WindowExtensionSessionImpl::UseImplicitAnimation(bool useImplicit)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "WindowId: %{public}u", GetWindowId());
+    SingletonContainer::Get<WindowAdapter>().UseImplicitAnimation(property_->GetParentId(), useImplicit);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

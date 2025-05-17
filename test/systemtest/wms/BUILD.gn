@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -72,15 +72,18 @@ test_external_deps = [
   "accessibility:accessibility_common",
   "ace_engine:ace_uicontent",
   "bundle_framework:appexecfwk_base",
+  "cJSON:cjson_static",
   "c_utils:utils",
   "common_event_service:cesfwk_innerkits",
   "googletest:gmock",
   "googletest:gtest",
   "googletest:gtest_main",
   "graphic_2d:2d_graphics",
+  "graphic_2d:librender_service_base",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hilog:libhilog",
+  "image_framework:image_native",
   "init:libbegetutil",
   "input:libmmi-client",
   "ipc:ipc_core",
@@ -88,6 +91,7 @@ test_external_deps = [
   "napi:ace_napi",
   "power_manager:powermgr_client",
   "resource_management:global_resmgr",
+  "selinux_adapter:librestorecon",
 ]
 
 ohos_systemtest("wms_window_layout_test") {
@@ -550,6 +554,7 @@ config("wms_systemtest_common_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
     "${window_base_path}/test/common/utils/include",
+    "${dmserver_gen_path}",
   ]
 }
 

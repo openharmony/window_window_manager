@@ -100,6 +100,10 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
         return;
     }
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     if (displayMode == FoldDisplayMode::UNKNOWN) {
         TLOGW(WmsLogTag::DMS, "displayMode is unknown");
     } else {
@@ -109,7 +113,6 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
     if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         TLOGW(WmsLogTag::DMS, "Set device status to STATUS_GLOBAL_FULL");
@@ -267,6 +270,7 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
@@ -288,6 +292,7 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[MAIN_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
@@ -309,6 +314,7 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
         .h = screenParams_[GLOBAL_FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }

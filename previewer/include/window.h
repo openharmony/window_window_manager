@@ -61,6 +61,8 @@ namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode;
 class RSTransaction;
+class RSUIContext;
+class RSUIDirector;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t, const uint64_t);
 using ContentInfoCallback = std::function<void(std::string contentInfo)>;
@@ -140,6 +142,23 @@ public:
        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
+
+    /**
+     * @brief Get the associated RSUIDirector instance
+     *
+     * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
+
+    /**
+     * @brief Get the associated RSUIContext instance
+     *
+     * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
+     *         or nullptr if RS client multi-instance is disabled.
+     */
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
+
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;
@@ -160,6 +179,7 @@ public:
     virtual bool IsFullScreen() const = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowType(WindowType type) = 0;
+    virtual WMError SetFollowScreenChange(bool isFollowScreenChange) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetAlpha(float alpha) = 0;
     virtual WMError SetTransform(const Transform& trans) = 0;
     virtual const Transform& GetTransform() const = 0;
@@ -398,6 +418,10 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -640,6 +664,18 @@ public:
      * @return WMError.
      */
     virtual WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) { return WMError::WM_OK; }
+
+    /**
+     * @brief notify avoid area for compatible mode app
+     */
+    virtual void HookCompatibleModeAvoidAreaNotify() {}
+
+     /**
+     * @brief The comaptible mode app adapt to immersive or not.
+     *
+     * @return true comptbleMode adapt to immersive, others means not.
+     */
+    virtual bool IsAdaptToCompatibleImmersive() const { return false; }
 };
 }
 }

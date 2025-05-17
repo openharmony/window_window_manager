@@ -1115,6 +1115,34 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     return true;
 }
 
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
+{
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
+        {"isAdaptToImmersive", &CompatibleModeProperty::SetIsAdaptToImmersive},
+        {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
+        {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
+        {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
+    };
+    bool atLeastOneParam = false;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
+    for (iter = funcs.begin(); iter != funcs.end(); ++iter) {
+        std::string paramStr = iter->first;
+        bool ret = false;
+        if (ParseJsValue(env, value, paramStr, ret)) {
+            void (CompatibleModeProperty::*func)(bool) = iter->second;
+            (compatibleModeProperty.*func)(ret);
+            atLeastOneParam = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
+    return atLeastOneParam;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
@@ -1225,7 +1253,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
-        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.SafelyGetWant()));
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
     }
     return objValue;
 }
@@ -1449,6 +1477,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
     napi_set_named_property(env, objValue, "MAXIMIZE_IN_IMPLICT", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
+    napi_set_named_property(env, objValue, "RECOVER_IN_IMPLICIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
@@ -2015,6 +2045,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
+    SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     return objValue;
 }
 

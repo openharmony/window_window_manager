@@ -756,6 +756,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED: {
+            bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
+            SetFoldStatusExpandAndLocked(lockDisplayStatus);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto scaleX = data.ReadFloat();
@@ -780,6 +785,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS: {
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_ROTATION: {
+            static_cast<void>(reply.WriteFloat(GetSuperRotation()));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS: {
@@ -1048,9 +1057,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t uid = data.ReadInt32();
             DMHookInfo hookInfo;
             GetDisplayHookInfo(uid, hookInfo);
-            if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
-                !reply.ReadFloat(hookInfo.density_) || !reply.ReadUint32(hookInfo.rotation_) ||
-                !reply.ReadBool(hookInfo.enableHookRotation_)) {
+            if (!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
+                !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_) ||
+                !reply.WriteBool(hookInfo.enableHookRotation_)) {
                 TLOGE(WmsLogTag::DMS, "read reply hookInfo failed!");
             }
             break;
@@ -1162,6 +1171,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_DESTROY_FINISH: {
             NotifyExtendScreenDestroyFinish();
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_MASK_APPEAR: {
+            NotifyScreenMaskAppear();
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_KEYBOARD_STATE: {
+            bool isKeyboardOn = GetKeyboardState();
+            reply.WriteBool(isKeyboardOn);
             break;
         }
         default:

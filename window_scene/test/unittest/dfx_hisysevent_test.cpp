@@ -32,21 +32,13 @@ public:
     void TearDown() override;
 };
 
-void DfxHisyseventTest::SetUpTestCase()
-{
-}
+void DfxHisyseventTest::SetUpTestCase() {}
 
-void DfxHisyseventTest::TearDownTestCase()
-{
-}
+void DfxHisyseventTest::TearDownTestCase() {}
 
-void DfxHisyseventTest::SetUp()
-{
-}
+void DfxHisyseventTest::SetUp() {}
 
-void DfxHisyseventTest::TearDown()
-{
-}
+void DfxHisyseventTest::TearDown() {}
 
 namespace {
 /**
@@ -142,5 +134,5 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail3)
 }
 
 } // namespace
-} // namespace OHOS
 } // namespace Rosen
+} // namespace OHOS

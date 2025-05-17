@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,15 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "mock_display_manager_adapter.h"
+#include "scene_board_judgement.h"
+#include "screen_manager.cpp"
 #include "screen_manager.h"
 #include "screen_manager_utils.h"
-#include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
-#include "screen_manager.cpp"
-#include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -807,8 +807,8 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 
     DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
 
-    EXPECT_EQ(result, DMError::DM_OK);
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

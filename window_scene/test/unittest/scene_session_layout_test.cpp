@@ -44,22 +44,16 @@ private:
     sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
-void SceneSessionLayoutTest::SetUpTestCase()
-{
-}
+void SceneSessionLayoutTest::SetUpTestCase() {}
 
-void SceneSessionLayoutTest::TearDownTestCase()
-{
-}
+void SceneSessionLayoutTest::TearDownTestCase() {}
 
 void SceneSessionLayoutTest::SetUp()
 {
     mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 }
 
-void SceneSessionLayoutTest::TearDown()
-{
-}
+void SceneSessionLayoutTest::TearDown() {}
 
 namespace {
 /**
@@ -79,12 +73,11 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect01, TestSize.Level1)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 }
-
 
 /**
  * @tc.name: UpdateRect02
@@ -103,7 +96,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level0)
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
+    WSRect rect({ 1, 1, 1, 1 });
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
@@ -116,7 +109,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level0)
     result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    WSRect rect2({0, 0, 0, 0});
+    WSRect rect2({ 0, 0, 0, 0 });
     result = sceneSession->UpdateRect(rect2, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -184,9 +177,9 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
     sceneSession->SetForegroundInteractiveStatus(true);
 
     uiParam.needSync_ = true;
-    uiParam.rect_ = {0, 0, 1, 1};
+    uiParam.rect_ = { 0, 0, 1, 1 };
 
-    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->winRect_ = { 1, 1, 1, 1 };
     sceneSession->isVisible_ = true;
     ASSERT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
 }
@@ -211,9 +204,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, TestSize.Level1)
     session->reason_ = SizeChangeReason::DRAG;
     EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr));
 
-    UpdateAvoidAreaCallback func = [](const int32_t& persistentId) {
-        return;
-    };
+    UpdateAvoidAreaCallback func = [](const int32_t& persistentId) { return; };
     auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallback->onUpdateAvoidArea_ = func;
     session->specificCallback_ = specificCallback;
@@ -265,7 +256,7 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, TestSize.Level0)
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
+    WindowLimits limits = { 8, 1, 6, 1, 1, 1.0f, 1.0f };
     property->SetWindowLimits(limits);
     session->SetSessionProperty(property);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->SetAspectRatio(0.1f));
@@ -330,20 +321,20 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
     EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     session->moveDragController_->isStartDrag_ = true;
@@ -352,23 +343,23 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     session->isKeyboardPanelEnabled_ = true;
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 }
 
 /**
@@ -948,5 +939,5 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, TestSize.Level1)
     ASSERT_EQ(sceneSession->IsDragStart(), true);
 }
 } // namespace
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS

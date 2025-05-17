@@ -1046,23 +1046,18 @@ napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info in
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
-            "invalid param"));
-        return result;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t eventFlags = 0;
     if (!ConvertFromJsValue(env, argv[0], eventFlags)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to int32_t");
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
-            "invalid param"));
-        return result;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = std::weak_ptr<ExtensionWindow>(extensionWindow_), eventFlags, env,
         task = napiAsyncTask] {
         auto weakWindow = weakToken.lock();

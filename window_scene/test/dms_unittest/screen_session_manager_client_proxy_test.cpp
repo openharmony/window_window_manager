@@ -340,8 +340,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnCreateScreenSessionOnly, TestSiz
     std::string name = "test";
     bool isExtend = false;
 
-    screenSessionManagerClientProxy_->OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
 }
 
 /**
@@ -354,8 +354,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnExtendDisplayNodeChange, TestSiz
     ScreenId firstId = 0;
     ScreenId secondId = 12;
 
-    screenSessionManagerClientProxy_->OnExtendDisplayNodeChange(firstId, secondId);
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnExtendDisplayNodeChange(firstId, secondId);
 }
 
 /**
@@ -369,8 +369,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnMainDisplayNodeChange, TestSize.
     ScreenId extendScreenId = 12;
     ScreenId extendRSId = 12;
 
-    screenSessionManagerClientProxy_->OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
 }
 
 /**
@@ -384,8 +384,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetScreenCombination, TestSize.Lev
     ScreenId extendScreenId = 12;
     ScreenCombination combination = ScreenCombination::SCREEN_ALONE;
 
-    screenSessionManagerClientProxy_->SetScreenCombination(mainScreenId, extendScreenId, combination);
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->SetScreenCombination(mainScreenId, extendScreenId, combination);
 }
 
 /**
@@ -395,8 +395,8 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetScreenCombination, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerClientProxyTest, OnDumperClientScreenSessions, TestSize.Level1)
 {
-    screenSessionManagerClientProxy_->OnDumperClientScreenSessions();
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnDumperClientScreenSessions();
 }
 
 /**

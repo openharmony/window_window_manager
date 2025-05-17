@@ -446,6 +446,14 @@ public:
      * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
      */
     virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UseImplicitAnimation(bool useImplicit) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

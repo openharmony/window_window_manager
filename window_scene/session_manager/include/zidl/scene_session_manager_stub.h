@@ -65,6 +65,11 @@ private:
      */
     int HandleSetParentWindow(MessageParcel& data, MessageParcel& reply);
 
+    /*
+     * Compatible Mode
+     */
+    int HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply);
+
     int HandleDumpSessionAll(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
@@ -95,6 +100,7 @@ private:
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
@@ -130,6 +136,7 @@ private:
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
+    int HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
