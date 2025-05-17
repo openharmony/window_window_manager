@@ -1424,7 +1424,7 @@ bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
-    WLOGFI("%{public}d", interactive);
+    TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
     if (IsWindowSessionInvalid()) {
         return;
     }
