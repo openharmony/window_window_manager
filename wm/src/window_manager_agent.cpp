@@ -87,6 +87,5 @@ void WindowManagerAgent::NotifyDisplayIdChange(uint32_t windowId, DisplayId disp
 {
     SingletonContainer::Get<WindowManager>().NotifyDisplayIdChange(windowId, displayId);
 }
-
 } // namespace Rosen
 } // namespace OHOS

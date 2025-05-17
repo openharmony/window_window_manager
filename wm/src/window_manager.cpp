@@ -394,12 +394,12 @@ void WindowManager::Impl::NotifyDisplayIdChange(uint32_t windowId, DisplayId dis
     }
 
     static DisplayId preDisplayId = DISPLAY_ID_INVALID;
-    static uint32_t preWindowId = -1;
+    static uint32_t preWindowId = 0;
 
     if (preWindowId == windowId && preDisplayId == displayId) {
         return;
     }
-    for (auto &listener : windowDisplayIdChangeListeners) {
+    for (auto& listener : windowDisplayIdChangeListeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
             continue;
@@ -409,7 +409,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(uint32_t windowId, DisplayId dis
         windowChangeInfo[WindowInfoKey::WINDOW_ID] = windowId;
         windowChangeInfo[WindowInfoKey::DISPLAY_ID] = displayId;
         windowChangeInfos.emplace_back(windowChangeInfo);
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify to caller, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Notify to caller, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
         listener->OnWindowInfoChanged(windowChangeInfos);
     }
     preDisplayId = displayId;
