@@ -1560,6 +1560,16 @@ bool SceneSessionManager::IsMainWindowByPersistentId(int32_t persistentId)
     return false;
 }
 
+sptr<SceneSession> SceneSessionManager::GetMainSessionByPersistentId(int32_t persistentId) const
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    auto it = sceneSessionMap_.find(persistentId);
+    if (it != sceneSessionMap_.end() && it->second && SessionHelper::IsMainWindow(it->second->GetWindowType())) {
+        return it->second;
+    }  
+    return nullptr;
+}
+
 void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
 {
@@ -15212,5 +15222,52 @@ WSError SceneSessionManager::GetApplicationInfo(const std::string& bundleName, S
     }
     scbApplicationInfo.startMode_ = applicationInfo.startMode;
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!recentSessionInfoList.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "the recent session info list is already loaded");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &recentSessionInfoList, where = __func__] {
+        for (auto& recentSessionInfo : this->recentMainSessionInfoList_) {
+            if (auto session = GetMainSessionByPersistentId(recentSessionInfo.missionId)) {
+                session->SetRecentSessionState(recentSessionInfo, session->GetSessionState());
+                TLOGI(WmsLogTag::WMS_LIFE, "get recent main session info of id:%{public}d, bundleName:%{public}s, "
+                    "moduleName:%{public}s, abilityName:%{public}s, sessionState:%{public}d, windowType:%{public}d",
+                    recentSessionInfo.missionId, recentSessionInfo.bundleName.c_str(),
+                    recentSessionInfo.moduleName.c_str(), recentSessionInfo.abilityName.c_str(),
+                    recentSessionInfo.sessionState, recentSessionInfo.windowType);
+                recentSessionInfoList.emplace_back(recentSessionInfo);
+            }
+        }
+        return WSError::WS_OK;
+    });
+}
+
+void SceneSessionManager::UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList)
+{
+    taskScheduler_->PostAsyncTask([this, recentMainSessionIdList, where = __func__]() {
+        this->recentMainSessionInfoList_.clear();
+
+        for (int32_t persistentId : recentMainSessionIdList) {
+            if (auto session = GetMainSessionByPersistentId(persistentId)) {
+                const auto& sessionInfo  = session->GetSessionInfo();
+                RecentSessionInfo info(persistentId);
+                info.bundleName = sessionInfo.bundleName_;
+                info.moduleName = sessionInfo.moduleName_;
+                info.abilityName = sessionInfo.abilityName_;
+                info.appIndex = sessionInfo.appIndex_;
+                info.windowType = session->GetWindowType();
+
+                this->recentMainSessionInfoList_.emplace_back(info);
+            }
+        }
+    }, __func__);
 }
 } // namespace OHOS::Rosen
