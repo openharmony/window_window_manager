@@ -1913,6 +1913,8 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
     windowManager.pImpl_->WindowDisplayIdChangeListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowDisplayIdChangeListeners_ = oldListeners;
 }
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

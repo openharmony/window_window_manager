@@ -9405,8 +9405,8 @@ WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey win
 WMError SceneSessionManager::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    observedFlags_ |= !(static_cast<uint32_t>(windowInfoKey));
-    interestFlags_ |= !interestInfo;
+    observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
+    interestFlags_ &= !interestInfo;
     return UnregisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
