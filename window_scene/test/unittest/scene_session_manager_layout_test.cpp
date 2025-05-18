@@ -228,6 +228,73 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Tes
 }
 
 /**
+ * @tc.name: SetHasRootSceneRequestedVsyncFunc
+ * @tc.desc: SetHasRootSceneRequestedVsyncFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, SetHasRootSceneRequestedVsyncFunc, TestSize.Level1)
+{
+    ssm_->SetHasRootSceneRequestedVsyncFunc(nullptr);
+    ASSERT_EQ(nullptr, ssm_->hasRootSceneRequestedVsyncFunc_);
+    ssm_->SetHasRootSceneRequestedVsyncFunc([] {
+        bool tempBool = false;
+        return tempBool;
+    });
+    ASSERT_NE(nullptr, ssm_->hasRootSceneRequestedVsyncFunc_);
+}
+
+/**
+ * @tc.name: HasRootSceneRequestedVsync
+ * @tc.desc: HasRootSceneRequestedVsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, HasRootSceneRequestedVsync, TestSize.Level1)
+{
+    bool tempBool = false;
+    ssm_->hasRootSceneRequestedVsyncFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->HasRootSceneRequestedVsync(tempBool));
+    EXPECT_EQ(false, tempBool);
+
+    ssm_->SetHasRootSceneRequestedVsyncFunc([] {
+        bool tempInnerBool = true;
+        return tempInnerBool;
+    });
+    EXPECT_EQ(WSError::WS_OK, ssm_->HasRootSceneRequestedVsync(tempBool));
+    EXPECT_EQ(true, tempBool);
+}
+
+/**
+ * @tc.name: SetRequestVsyncByRootSceneWhenModeChangeFunc
+ * @tc.desc: SetRequestVsyncByRootSceneWhenModeChangeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, SetRequestVsyncByRootSceneWhenModeChangeFunc, TestSize.Level1)
+{
+    ssm_->SetRequestVsyncByRootSceneWhenModeChangeFunc(nullptr);
+    ASSERT_EQ(nullptr, ssm_->requestVsyncByRootSceneWhenModeChangeFunc_);
+    ssm_->SetRequestVsyncByRootSceneWhenModeChangeFunc([](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        auto tempCallback = vsyncCallback;
+    });
+    ASSERT_NE(nullptr, ssm_->requestVsyncByRootSceneWhenModeChangeFunc_);
+}
+
+/**
+ * @tc.name: RequestVsyncByRootSceneWhenModeChange
+ * @tc.desc: RequestVsyncByRootSceneWhenModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, RequestVsyncByRootSceneWhenModeChange, TestSize.Level1)
+{
+    std::shared_ptr<VsyncCallback> nextVsyncCallback = std::make_shared<VsyncCallback>();
+    ssm_->requestVsyncByRootSceneWhenModeChangeFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ssm_->RequestVsyncByRootSceneWhenModeChange(nextVsyncCallback));
+    ssm_->SetRequestVsyncByRootSceneWhenModeChangeFunc([](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        auto tempCallback = vsyncCallback;
+    });
+    EXPECT_EQ(WSError::WS_OK, ssm_->RequestVsyncByRootSceneWhenModeChange(nextVsyncCallback));
+}
+
+/**
  * @tc.name: GetDisplaySizeById_TestDisplayId
  * @tc.desc: test function : GetDisplaySizeById
  * @tc.type: FUNC

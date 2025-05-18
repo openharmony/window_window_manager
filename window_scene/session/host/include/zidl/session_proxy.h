@@ -106,6 +106,8 @@ public:
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -137,6 +139,7 @@ public:
      * Window Property
      */
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
@@ -169,6 +172,12 @@ public:
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
 
     /**
      * window rotation

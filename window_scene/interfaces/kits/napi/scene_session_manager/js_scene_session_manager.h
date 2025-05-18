@@ -120,6 +120,8 @@ public:
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
     static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
     static napi_value SupportZLevel(napi_env env, napi_callback_info info);
+    static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
+    static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -223,6 +225,7 @@ private:
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
+    napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -324,6 +327,7 @@ private:
     static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
 

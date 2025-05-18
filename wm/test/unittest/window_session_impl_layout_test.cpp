@@ -62,6 +62,27 @@ void WindowSessionImplLayoutTest::TearDown()
 }
 
 namespace {
+sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName(name);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { name, name, name };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    return window;
+}
+
+template <typename TListener, typename MockListener> std::vector<sptr<TListener>> GetListenerList()
+{
+    std::vector<sptr<TListener>> listeners;
+    sptr<TListener> listener = sptr<TListener>::MakeSptr();
+    listeners.insert(listeners.begin(), listener);
+    return listeners;
+}
+
 /**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect
@@ -332,6 +353,24 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyTransformChange_TestUIContent, TestS
     window->NotifyTransformChange(testTransform);
     ASSERT_EQ(false, window->IsNeedRenotifyTransform());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyTransformChange_TestUIContent end";
+}
+
+/**
+ * @tc.name: NotifyWindowStatusDidChange
+ * @tc.desc: NotifyWindowStatusDidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyWindowStatusDidChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange start";
+    auto window = GetTestWindowImpl("NotifyWindowStatusDidChange");
+    auto listeners = GetListenerList<IWindowStatusDidChangeListener, MockWindowStatusDidChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->windowStatusDidChangeListeners_.insert({ window->GetPersistentId(), listeners });
+    window->NotifyWindowStatusDidChange(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange end";
 }
 
 /**

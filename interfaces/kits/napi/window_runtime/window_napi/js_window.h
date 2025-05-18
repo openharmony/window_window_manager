@@ -178,6 +178,13 @@ public:
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
+
+    /*
+     * Window Transition Animation For PC
+     */
+    static napi_value SetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    static napi_value GetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+
     /*
      * Window Decor
      */
@@ -232,6 +239,8 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    void ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+        napi_env env, const napi_value* argv, size_t argc);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
@@ -370,6 +379,12 @@ private:
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Transition Animation For PC
+     */
+    napi_value OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info);
 
     /*
      * Window Decor

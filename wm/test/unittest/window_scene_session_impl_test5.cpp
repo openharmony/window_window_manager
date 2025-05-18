@@ -810,11 +810,11 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, TestSize.Level1)
 }
 
 /**
- * @tc.name: Resume
- * @tc.desc: Resume
+ * @tc.name: Interactive
+ * @tc.desc: Interactive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, Interactive, TestSize.Level1)
 {
     sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
     sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
@@ -830,13 +830,12 @@ HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
-    window->SetTargetAPIVersion(20);
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
 
-    EXPECT_CALL(*mockListener, AfterResumed()).Times(1);
-    window->Resume();
+    EXPECT_CALL(*mockListener, AfterInteractive()).Times(1);
+    window->Interactive();
     EXPECT_EQ(window->isDidForeground_, true);
     EXPECT_EQ(window->isColdStart_, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
@@ -1315,6 +1314,94 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
     window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+}
+
+/**
+ * @tc.name: SetWindowTransitionAnimation
+ * @tc.desc: SetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowTransitionAnimation01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+    TransitionAnimation animation;
+
+    property->SetWindowState(WindowState::STATE_DESTROYED);
+    WMError ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: GetWindowTransitionAnimation
+ * @tc.desc: GetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowTransitionAnimation01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+
+    property->SetWindowState(WindowState::STATE_DESTROYED);
+    std::shared_ptr<TransitionAnimation> ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    window->transitionAnimationConfig_[type] = std::make_shared<TransitionAnimation>();
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_NE(ret, nullptr);
 }
 
 /**

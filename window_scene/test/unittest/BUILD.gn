@@ -1528,6 +1528,7 @@ ohos_static_library("ws_unittest_common") {
     ":ws_unittest_common_public_config",
     "${window_base_path}/resources/config/build:coverage_flags",
     "${window_base_path}/resources/config/build:testcase_flags",
+    "${window_base_path}/wmserver:libidl_config",
   ]
 
   deps = [
@@ -1545,6 +1546,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wm:libwm_lite",
+    "${window_base_path}/wmserver:mock_session_manager_service_proxy",
   ]
 
   public_deps = [

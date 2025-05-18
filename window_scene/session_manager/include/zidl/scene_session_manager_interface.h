@@ -98,6 +98,7 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
+        TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
@@ -133,12 +134,14 @@ public:
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
+        TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_SET_PARENT_WINDOW,
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
         TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
+        TRANS_ID_SET_IMAGE_FOR_RECENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -269,6 +272,8 @@ public:
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetGlobalWindowMode(DisplayId displayId,
+        GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {
@@ -375,6 +380,9 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
+        int persistentId) override { return WMError::WM_OK; }
+        
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 
@@ -388,6 +396,8 @@ public:
         const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
         int32_t targetPersistentId) override { return WMError::WM_OK; }
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override { return WMError::WM_OK; }
     WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override { return WSError::WS_OK; };

@@ -182,6 +182,8 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingShadowsInfo(Parcel& parcel) const;
+    static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -234,6 +236,8 @@ public:
      */
     void SetWindowCornerRadius(float cornerRadius);
     float GetWindowCornerRadius() const;
+    void SetWindowShadows(const ShadowsInfo& shadowsInfo);
+    ShadowsInfo GetWindowShadows() const;
 
     /*
      * UIExtension
@@ -284,6 +288,8 @@ public:
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsSupportRotateFullScreen() const;
+    bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
 
     /*
@@ -520,6 +526,8 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+    ShadowsInfo shadowsInfo_;
+    mutable std::mutex shadowsInfoMutex_;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 };
@@ -550,6 +558,12 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
+    bool IsSupportRotateFullScreen() const;
+
+    void SetIsAdaptToSubWindow(bool isAdaptToSubWindow);
+    bool IsAdaptToSubWindow() const;
+
     void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
     bool IsAdaptToSimulationScale() const;
 
@@ -569,6 +583,8 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
+        ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
         return ss.str();
     }
@@ -582,6 +598,8 @@ private:
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
     bool disableWindowLimit_ { false };
+    bool isSupportRotateFullScreen_ { false };
+    bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
 };
 
@@ -689,6 +707,7 @@ struct SystemSessionConfig : public Parcelable {
     bool supportFollowParentWindowLayout_ = false;
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
+    uint32_t supportFunctionType_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -735,10 +754,8 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
-        if (!parcel.WriteBool(supportZLevel_)) {
-            return false;
-        }
-        if (!parcel.WriteBool(skipRedundantWindowStatusNotifications_)) {
+        if (!parcel.WriteBool(supportZLevel_) ||
+            !parcel.WriteBool(skipRedundantWindowStatusNotifications_) || !parcel.WriteUint32(supportFunctionType_)) {
             return false;
         }
         return true;
@@ -788,6 +805,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
+        config->supportFunctionType_ = parcel.ReadUint32();
         return config;
     }
 
