@@ -1018,7 +1018,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestFlags_ = 0;
 }
@@ -1037,7 +1037,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
     EXPECT_EQ(0, ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestFlags_ = 0;
 }
@@ -1052,6 +1052,9 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
     ssm_->interestFlags_ = -1;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = false;
+    sessionInfo.bundleName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo.abilityName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo.appIndex_ = 10;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     WSRect rect = { 0, 0, 100, 100 };
