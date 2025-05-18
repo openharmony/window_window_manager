@@ -1949,6 +1949,43 @@ HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, TestSize.Level1
 }
 
 /**
+ * @tc.name: HandleSetStartWindowBackgroundColor
+ * @tc.desc: test HandleSetStartWindowBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    int res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("moduleName");
+    data.WriteString("abilityName");
+    data.WriteUint32(0xffffffff);
+    data.WriteInt32(100);
+    res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleAddExtensionWindowStageToSCB
  * @tc.desc: test HandleAddExtensionWindowStageToSCB
  * @tc.type: FUNC
@@ -2367,6 +2404,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, TestSize.Level
     data.WriteString(key);
     data.WriteInt32(persistentId);
     int res = stub_->HandleIsWindowRectAutoSave(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetImageForRecent
+ * @tc.desc: test HandleSetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int imgResourceId = 1;
+    ImageFit imageFit = ImageFit::FILL;
+    int persistentId = 1;
+    data.WriteInt32(imgResourceId);
+    data.WriteInt32(static_cast<uint32_t>(imageFit));
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

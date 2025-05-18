@@ -1547,6 +1547,20 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSuperRotation
+ * @tc.desc: GetSuperRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->GetSuperRotation();
+}
+
+/**
  * @tc.name: SetLandscapeLockStatus
  * @tc.desc: SetLandscapeLockStatus
  * @tc.type: FUNC

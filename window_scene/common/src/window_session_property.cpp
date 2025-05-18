@@ -809,6 +809,18 @@ float WindowSessionProperty::GetWindowCornerRadius() const
     return cornerRadius_;
 }
 
+void WindowSessionProperty::SetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    shadowsInfo_ = shadowsInfo;
+}
+
+ShadowsInfo WindowSessionProperty::GetWindowShadows() const
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    return shadowsInfo_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -1001,6 +1013,12 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isKeyboardWillShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardWillHideRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidHideRegistered_)) {
+        return false;
+    }
     return true;
 }
 
@@ -1045,6 +1063,13 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
+    if (!parcel.ReadBool(info.isKeyboardWillShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardWillHideRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidHideRegistered_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read keyboard registered state!");
+        return false;
+    }
     property->SetSessionInfo(info);
     return true;
 }
@@ -1174,7 +1199,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
-        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_);
+        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
+        MarshallingShadowsInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1267,6 +1293,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    UnmarshallingShadowsInfo(parcel, property);
     return property;
 }
 
@@ -1363,6 +1390,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAbilityHook_ = property->isAbilityHook_;
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    shadowsInfo_ = property->shadowsInfo_;
     decorEnableChangeCallback_ = property->decorEnableChangeCallback_;
 }
 
@@ -2033,6 +2061,16 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsSupportRotateFullScreen() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
+}
+
+bool WindowSessionProperty::IsAdaptToSubWindow() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSubWindow();
+}
+
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
@@ -2118,6 +2156,26 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
+{
+    isSupportRotateFullScreen_ = isSupportRotateFullScreen;
+}
+
+bool CompatibleModeProperty::IsSupportRotateFullScreen() const
+{
+    return isSupportRotateFullScreen_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToSubWindow(bool isAdaptToSubWindow)
+{
+    isAdaptToSubWindow_ = isAdaptToSubWindow;
+}
+
+bool CompatibleModeProperty::IsAdaptToSubWindow() const
+{
+    return isAdaptToSubWindow_;
+}
+
 void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
 {
     isAdaptToSimulationScale_ = isAdaptToSimulationScale;
@@ -2138,6 +2196,8 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
         parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isSupportRotateFullScreen_) &&
+        parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
 }
 
@@ -2155,6 +2215,8 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->isSupportRotateFullScreen_ = parcel.ReadBool();
+    property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
     return property;
 }
@@ -2175,9 +2237,18 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
 }
 
-void WindowSessionProperty::SetDecorEnableChangeCallback(OnDecorEnableChangeFunc&& callback)
+bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const
 {
-    decorEnableChangeCallback_ = std::move(callback);
+    return parcel.WriteParcelable(&shadowsInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<ShadowsInfo> shadowsInfo = parcel.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        return;
+    }
+    property->SetWindowShadows(*shadowsInfo);
 }
 } // namespace Rosen
 } // namespace OHOS

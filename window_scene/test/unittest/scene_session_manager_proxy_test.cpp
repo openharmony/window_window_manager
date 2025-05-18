@@ -583,6 +583,23 @@ HWTEST_F(sceneSessionManagerProxyTest, AddExtensionWindowStageToSCB, TestSize.Le
 }
 
 /**
+ * @tc.name: SetStartWindowBackgroundColor
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    EXPECT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
+}
+
+/**
  * @tc.name: RemoveExtensionWindowStageFromSCB
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1094,6 +1111,19 @@ HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, TestSize.Level1)
     std::string key = "com.example.recposentryEntryAbility";
     int persistentId = 1;
     ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled, persistentId), WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: SetImageForRecent
+ * @tc.desc: SetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetImageForRecent, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sceneSessionManagerProxy->SetImageForRecent(1, ImageFit::FILL, 1), WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**

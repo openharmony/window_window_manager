@@ -80,6 +80,7 @@ class RSUIContext;
 class RSUIDirector;
 class ISession;
 class Window;
+enum class ImageFit;
 
 /**
  * @class IWindowLifeCycle
@@ -134,13 +135,25 @@ public:
 
     /**
      * @brief Notify caller that window is resumed.
+     * @deprecated deprecated since app version 20, use AfterInteractive instead.
      */
     virtual void AfterResumed() {}
 
     /**
      * @brief Notify caller that window is paused.
+     * @deprecated deprecated since app version 20, use AfterNonInteractive instead.
      */
     virtual void AfterPaused() {}
+
+    /**
+     * @brief Notify caller that window is interactive.
+     */
+    virtual void AfterInteractive() {}
+
+    /**
+     * @brief Notify caller that window is noninteractive.
+     */
+    virtual void AfterNonInteractive() {}
 
     /**
      * @brief Notify caller that window is destroyed.
@@ -218,6 +231,22 @@ public:
      * @param status Mode of the current window.
      */
     virtual void OnWindowStatusChange(WindowStatus status) {}
+};
+
+/**
+ * @class IWindowStatusDidChangeListener
+ *
+ * @brief IWindowStatusDidChangeListener is used to observe the window status when window status changed
+ *        and layout finished.
+ */
+class IWindowStatusDidChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window status changed.
+     *
+     * @param status Mode of the current window.
+     */
+    virtual void OnWindowStatusDidChange(WindowStatus status) {}
 };
 
 /**
@@ -537,6 +566,21 @@ public:
 };
 
 /**
+ * @class IExtensionSecureLimitChangeListener
+ *
+ * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and its change when limit changed.
+ */
+class IExtensionSecureLimitChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window nonsecure limit changed.
+     *
+     * @param isLimite Whather nonsecure windows is Limite.
+     */
+    virtual void OnSecureLimitChange(bool isLimit) {}
+};
+
+/**
  * @class ISubWindowCloseListener
  *
  * @brief ISubWindowCloseListener is used to observe the window rect and its changing reason when window changed.
@@ -623,6 +667,34 @@ public:
      * @param KeyboardPanelInfo keyboardPanelInfo of the keyboard panel;
      */
     virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
+};
+
+/**
+ * @class IKeyboardWillShowListener
+ *
+ * @brief IKeyboardWillShowListener is used to observe keyboard show animation begins.
+ */
+class IKeyboardWillShowListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard show animation begins.
+     */
+    virtual void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
+};
+
+/**
+ * @class IKeyboardWillHideListener
+ *
+ * @brief IKeyboardWillHideListener is used to observe keyboard hide animation begins.
+ */
+class IKeyboardWillHideListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify the caller when keyboard hide animation begins.
+     */
+    virtual void OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve) {}
 };
 
 /**
@@ -1035,6 +1107,18 @@ public:
     virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Sets static Image resource for recent.
+     *
+     * @param imgResourceId resourceId of static Image.
+     * @param imageFit imageFit of static Image.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get whether main window is topmost
      *
      * @return True means main window is topmost
@@ -1206,9 +1290,9 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
-     * @brief resume window
+     * @brief Interactive window
      */
-    virtual void Resume() {}
+    virtual void Interactive() {}
 
     /**
      * @brief Hide window
@@ -1487,6 +1571,15 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowRadius(float radius) { return WMError::WM_OK; }
+
+    /**
+     * @brief Sync shadows to component.
+     *
+     * @param radius Shadows of window
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set shadow radius of window.
@@ -2449,6 +2542,13 @@ public:
     virtual bool IsPcWindow() const { return false; }
 
     /**
+     * @brief Is pad window or not.
+     *
+     * @return True means pad window, false means the opposite.
+     */
+    virtual bool IsPadWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -2661,6 +2761,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window status change listener.
+     *
+     * @param listener IWindowStatusDidChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3243,6 +3365,28 @@ public:
     }
 
     /**
+     * @brief Register window nonsecure limit change listener.
+     *
+     * @param listener IExtensionSecureLimitChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window nonsecure limit change listener.
+     *
+     * @param listener IExtensionSecureLimitChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Flush layout size.
      *
      * @param width The width after layout
@@ -3681,6 +3825,30 @@ public:
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set window transition animation success, others means failed.
+     */
+    virtual WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @return nullptr means get failed.
+     */
+    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
+    {
+        return nullptr;
+    }
+
      /**
      * @brief Get is subwindow support maximize.
      *
@@ -3694,6 +3862,50 @@ public:
      * @param pipTemplateInfo the pipTemplateInfo of pip window
      */
     virtual void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) {}
+    
+    /**
+     * @brief Register a listener for observing keyboard show animation begins.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister keyboard show animation start listener.
+     *
+     * @param listener IKeyboardWillShowListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillShowListener(const sptr<IKeyboardWillShowListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register a listener for observing keyboard hide animation begins.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+ 
+    /**
+     * @brief Unregister keyboard hide animation start listener.
+     *
+     * @param listener IKeyboardWillHideListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterKeyboardWillHideListener(const sptr<IKeyboardWillHideListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register keyboard show animation completion listener.
@@ -3777,6 +3989,20 @@ public:
      * @return Returns WMError::WM_OK if called success, otherwise failed.
      */
     virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /** 
+    * @brief Set intent param to arkui.
+     *
+     * @param intentParam intent param from ams.
+     * @param loadPageCallback load page callback after send intent.
+     * @param isColdStart Mark as cold start or not
+     * @return WM_OK means set intent param success.
+     */
+    virtual WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Set the source of subwindow.

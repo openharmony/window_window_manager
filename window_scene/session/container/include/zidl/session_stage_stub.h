@@ -50,8 +50,11 @@ private:
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply);
@@ -89,6 +92,7 @@ private:
     int HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);

@@ -31,6 +31,7 @@ enum class ListenerFuncType : uint32_t {
     PENDING_SCENE_CB,
     CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR,
     SESSION_STATE_CHANGE_CB,
+    UPDATE_TRANSITION_ANIMATION_CB,
     BUFFER_AVAILABLE_CHANGE_CB,
     SESSION_EVENT_CB,
     SESSION_RECT_CHANGE_CB,
@@ -99,6 +100,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_PIP_TEMPLATE_INFO_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
+    SET_WINDOW_SHADOWS_CB,
     SET_SUB_WINDOW_SOURCE_CB,
     UPDATE_DECOR_ENABLE_CHANGE_CB,
 };
@@ -120,6 +122,7 @@ private:
      */
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessSessionStateChangeRegister();
+    void ProcessUpdateTransitionAnimationRegister();
     void ProcessSessionEventRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -134,6 +137,7 @@ private:
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     void OnSessionStateChange(const SessionState& state);
+    void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
@@ -385,6 +389,7 @@ private:
      * Window Property
     */
     void ProcessSetWindowCornerRadiusRegister();
+    void ProcessSetWindowShadowsRegister();
 
     /*
      * PC Window Layout
@@ -467,12 +472,18 @@ private:
      * Window Property
     */
     void OnSetWindowCornerRadius(float cornerRadius);
+    void OnSetWindowShadows(const ShadowsInfo& shadowsInfo);
 
     /*
      * PC Window Layout
      */
     void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
     void OnUpdateFlag(const std::string& flag);
+
+    bool HandleCloseKeyboardSyncTransactionWSRectParams(napi_env env,
+        napi_value argv[], int index, WSRect& rect);
+    bool HandleCloseKeyboardSyncTransactionBoolParams(napi_env env,
+        napi_value argv[], int index, bool& result);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 
