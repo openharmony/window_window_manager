@@ -1004,6 +1004,66 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestFlags_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestFlags_ = 0;
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    auto ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestFlags_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestFlags_ = 0;
+}
+
+/**
+ * @tc.name: PackWindowPropertyChangeInfo01
+ * @tc.desc: test function : PackWindowPropertyChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
+{
+    ssm_->interestFlags_ = -1ULL;
+    SessionInfo sessionInfo1;
+    sessionInfo1.isSystem_ = false;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->GetSessionProperty()->SetDisplayId(0);
+
+    std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+    ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
+    ASSERT_EQ(windowPropertyChangeInfo.size(), 7);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
