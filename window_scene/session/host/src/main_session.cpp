@@ -234,8 +234,9 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         return;
     }
     const auto state = GetSessionState();
+    TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
     if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        WLOGFI("%{public}d", interactive);
+        TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
         sessionStage_->NotifyForegroundInteractiveStatus(interactive);
         isClientInteractive_ = interactive;
     }

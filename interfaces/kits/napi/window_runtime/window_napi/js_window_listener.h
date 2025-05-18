@@ -107,6 +107,8 @@ public:
     void AfterUnfocused() override;
     void AfterResumed() override;
     void AfterPaused() override;
+    void AfterInteractive() override;
+    void AfterNonInteractive() override;
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;

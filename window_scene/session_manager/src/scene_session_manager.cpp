@@ -139,7 +139,6 @@ constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
@@ -3039,13 +3038,8 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
-
-        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            if (!sceneSession->UpdateInteractiveInner(false)) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
-            }
-        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "Request background, Notify scene session id: %{public}d noninteractive", persistentId);
+        sceneSession->UpdateNonInteractiveInner();
         sceneSession->SetActive(false);
 
         if (isToDesktop) {
@@ -3296,12 +3290,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
-        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            if (!sceneSession->UpdateInteractiveInner(false)) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
-            }
-        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "destruct session, Notify scene session id: %{public}d noninteractive", persistentId);
+        sceneSession->UpdateNonInteractiveInner();
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
@@ -4656,12 +4646,8 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
-        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            if (!sceneSession->UpdateInteractiveInner(false)) {
-                TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
-            }
-        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "MinimizeUIAbilityBySCB, Notify scene session id: %{public}d noninteractive", persistentId);
+        sceneSession->UpdateNonInteractiveInner();
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode == ERR_OK) {

@@ -136,7 +136,6 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 20;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 }
@@ -1519,7 +1518,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
         NotifyAfterDidForeground(reason);
-        NotifyFreeMultiWindowModeResume();
+        NotifyFreeMultiWindowModeInteractive();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1545,24 +1544,23 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
     return Show();
 }
 
-void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
+void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "api version %{public}u, IsPcMode %{public}d, isColdStart %{public}d",
-        GetTargetAPIVersion(), IsPcOrPadCapabilityEnabled(), isColdStart_);
-    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && IsPcOrPadCapabilityEnabled() && !isColdStart_) {
+    TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrPadCapabilityEnabled(),
+        isColdStart_);
+    if (IsPcOrPadCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
-        NotifyForegroundInteractiveStatus(true);
+        NotifyAfterInteractive();
     }
 }
 
-void WindowSceneSessionImpl::Resume()
+void WindowSceneSessionImpl::Interactive()
 {
-    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-        isDidForeground_ = true;
-        isColdStart_ = false;
-        TLOGI(WmsLogTag::WMS_LIFE, "in");
-        NotifyForegroundInteractiveStatus(true);
-    }
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d",
+        isColdStart_, isDidForeground_);
+    isDidForeground_ = true;
+    isColdStart_ = false;
+    NotifyAfterInteractive();
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
