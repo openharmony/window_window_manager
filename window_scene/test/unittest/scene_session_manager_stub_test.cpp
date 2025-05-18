@@ -1101,7 +1101,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
  * @tc.desc: test TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1111,7 +1111,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
     WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
     data.WriteInt32(static_cast<int32_t>(windowInfoKey));
     uint32_t interestInfo = 0;
-    data.WriteUint32(interestInfo)
+    data.WriteUint32(interestInfo);
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
@@ -1127,7 +1127,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
  * @tc.desc: test TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1137,7 +1137,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
     WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
     data.WriteInt32(static_cast<int32_t>(windowInfoKey));
     uint32_t interestInfo = 0;
-    data.WriteUint32(interestInfo)
+    data.WriteUint32(interestInfo);
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
