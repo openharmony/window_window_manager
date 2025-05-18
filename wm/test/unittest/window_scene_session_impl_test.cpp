@@ -2281,6 +2281,7 @@ HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
     sptr windowSceneSession = sptr::MakeSptr(option);
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowSceneSession->property_->SetDecorEnable(true);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr session = sptr::MakeSptr(sessionInfo);
     windowSceneSession->hostSession_ = session;
