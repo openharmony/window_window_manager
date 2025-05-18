@@ -1923,6 +1923,8 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
             return UnregisterVisibilityStateChangedListener(listener);
         case WindowInfoKey::DISPLAY_ID :
             return UnregisterDisplayIdChangedListener(listener);
+        case WindowInfoKey::RECT :
+            return UnregisterRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2009,7 +2011,7 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
 void WindowManager::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    if (PropertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::VISIBILITY_STATE)) {
+    if (PropertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
 }
