@@ -102,7 +102,6 @@ const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
 const std::string SET_WINDOW_SHADOWS_CB = "setWindowShadows";
 const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
 
-
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
 constexpr int ARG_COUNT_3 = 3;
@@ -2880,6 +2879,8 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_SHADOWS_CB):
             ProcessSetWindowShadowsRegister();
+        case static_cast<uint32_t>(ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB):
+            ProcessSetSubWindowSourceRegister();
             break;
         default:
             break;
