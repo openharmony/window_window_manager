@@ -1052,9 +1052,9 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
     ssm_->interestFlags_ = -1;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = false;
-    sessionInfo.bundleName_ = "PackWindowPropertyChangeInfo";
-    sessionInfo.abilityName_ = "PackWindowPropertyChangeInfo";
-    sessionInfo.appIndex_ = 10;
+    sessionInfo1.bundleName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.abilityName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.appIndex_ = 10;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     WSRect rect = { 0, 0, 100, 100 };
