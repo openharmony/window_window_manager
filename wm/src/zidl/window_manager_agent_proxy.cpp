@@ -539,13 +539,13 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyF
 bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
     const std::pair<WindowInfoKey, std::any>& windowInfoPair)
 {
-    if (!data.WriteUint32(static_cast<uint32_t>(windowInfoPair.first))) {
+    if (!data.WriteInt32(static_cast<int32_t>(windowInfoPair.first))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoKey failed");
         return false;
     }
     switch (windowInfoPair.first) {
         case WindowInfoKey::WINDOW_ID: {
-            if (!data.WriteUint32(std::any_cast<uint32_t>(windowInfoPair.second))) {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::any_cast<int32_t>(windowInfoPair.second))  )) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint32_t failed");
                 return false;
             }

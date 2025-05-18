@@ -15270,13 +15270,13 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
         windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetSessionInfo().appIndex_;
     }
     if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::VISIBILITY_STATE)) {
-        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetVisibilityState();
+        windowPropertyChangeInfo[WindowInfoKey::VISIBILITY_STATE] = sceneSession->GetVisibilityState();
     }
     if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
-        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetSessionProperty()->GetDisplayId();
+        windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] = sceneSession->GetSessionProperty()->GetDisplayId();
     }
     if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::RECT)) {
-        windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetClientRect();
+        windowPropertyChangeInfo[WindowInfoKey::RECT] = sceneSession->GetClientRect();
     }
 }
 
