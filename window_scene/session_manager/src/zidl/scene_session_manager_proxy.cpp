@@ -699,6 +699,11 @@ WMError SceneSessionManagerProxy::RegisterWindowPropertyChangeAgent(WindowInfoKe
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
+    if (!windowManagerAgent) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowManagerAgent is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write IWindowManagerAgent failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -738,6 +743,11 @@ WMError SceneSessionManagerProxy::UnregisterWindowPropertyChangeAgent(WindowInfo
     if (!data.WriteUint32(interestInfo)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interestInfo failed");
         return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!windowManagerAgent) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowManagerAgent is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
