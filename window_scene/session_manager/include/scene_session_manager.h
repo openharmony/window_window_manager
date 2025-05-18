@@ -695,6 +695,9 @@ public:
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
+    void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
+    sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
 
     /*
      * Window Pattern
@@ -1452,6 +1455,7 @@ private:
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
     std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
+    std::vector<RecentSessionInfo> recentMainSessionInfoList_;
 
     /*
      * Window Pattern
