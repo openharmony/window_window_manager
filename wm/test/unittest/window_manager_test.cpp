@@ -1930,9 +1930,9 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
 HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManager::GetInstance();
-    auto oldWindowManagerAgent = windowManager.pImpl_->windowRectChangeListeners_;
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
     auto oldListeners = windowManager.pImpl_->windowRectChangeListeners_;
-    windowManager.pImpl_->windowRectChangeListeners_ = nullptr;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
     windowManager.pImpl_->windowRectChangeListeners_.clear();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterRectChangedListener(nullptr));
  
