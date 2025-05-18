@@ -449,7 +449,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
  * @tc.name: OnRemoteRequest22
  * @tc.desc: test TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE success
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest22, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
