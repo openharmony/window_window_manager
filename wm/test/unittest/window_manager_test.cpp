@@ -1957,7 +1957,7 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest 
  * @tc.desc: check UnregisterRectChangedListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
