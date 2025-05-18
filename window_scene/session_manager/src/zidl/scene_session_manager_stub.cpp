@@ -521,7 +521,7 @@ int SceneSessionManagerStub::HandleRegisterWindowPropertyChangeAgent(MessageParc
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-    WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+    WMError errCode = RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -545,7 +545,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowPropertyChangeAgent(MessagePa
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-    WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+    WMError errCode = UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

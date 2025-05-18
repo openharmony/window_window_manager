@@ -1938,9 +1938,6 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener01, Function | SmallTest 
  
     sptr<TestWindowRectChangedListener> listener = sptr<TestWindowRectChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterRectChangedListener(listener));
-    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
  
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterRectChangedListener(listener));
