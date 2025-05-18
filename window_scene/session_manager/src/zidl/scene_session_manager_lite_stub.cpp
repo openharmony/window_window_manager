@@ -147,6 +147,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST):
+            return HandleGetRecentMainSessionInfoList(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1124,6 +1126,27 @@ int SceneSessionManagerLiteStub::HandleUnregisterSessionLifecycleListener(Messag
     }
     WMError ret = UnregisterSessionLifecycleListener(listener);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::vector<RecentSessionInfo> recentSessionInfoList;
+    WSError errCode = GetRecentMainSessionInfoList(recentSessionInfoList);
+    if (!reply.WriteInt32(recentSessionInfoList.size())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write recent main session info list failed");
+        return ERR_INVALID_DATA;
+    }
+    for (auto& sessionInfo : recentSessionInfoList) {
+        if (!reply.WriteParcelable(&sessionInfo)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write recent main session info failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
