@@ -7234,7 +7234,7 @@ void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession id: %{public}d has been destroyed",
                 where, persistentId);
-                return;
+            return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SET_SUB_WINDOW_SOURCE_CB);
         if (!jsCallBack) {
@@ -7250,17 +7250,17 @@ void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
 
 napi_value JsSceneSession::RequestSpecificSessionClose(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRequestSpecificSessionClose(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::OnRequestSpecificSessionClose(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->CloseSpecificScene();

@@ -497,8 +497,7 @@ public:
     {
         return nullptr;
     }
-
-        
+   
     /**
     * @brief Set sub window source
     *

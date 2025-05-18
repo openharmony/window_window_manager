@@ -6218,8 +6218,8 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     WSError ret = GetHostSession()->SetSubWindowSource(source);
-    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    if (ret == WSError::WS_ERROR_INVALID_WINDOW) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
@@ -6227,7 +6227,7 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 WSError WindowSceneSessionImpl::CloseSpecificScene()
 {
     if (!property_->IsDecorEnable()) {
-        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable", 
+        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable.", 
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_OPERATION;
     }

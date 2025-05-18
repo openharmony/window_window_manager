@@ -78,6 +78,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
@@ -190,11 +191,6 @@ public:
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WMError NotifyDisableDelegatorChange() override;
-
-    /*
-     * Window source
-     */
-    WSError SetSubWindowSource(SubWindowSource source) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
