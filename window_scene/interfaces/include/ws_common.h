@@ -870,6 +870,17 @@ enum class SessionUIDirtyFlag {
     GLOBAL_RECT = 1 << 8,
 };
 
+enum class SessionPropertyFlag {
+    NONE = 0,
+    WINDOW_ID = 1,
+    BUNDLE_NAME = 1 << 1,
+    ABILITY_NAME = 1 << 2,
+    APP_INDEX = 1 << 3,
+    VISIBILITY_STATE = 1 << 4,
+    DISPLAY_ID = 1 << 5,
+    RECT = 1 << 6,
+};
+
 /**
  * @brief State for post-process focus
  */

@@ -791,6 +791,16 @@ public:
         float density, DisplayOrientation orientation);
 
     /**
+     * @brief notify window info change.
+     *
+     * @param flags mark the changed value.
+     * @param windowInfoList the changed window info list.
+     * @return WM_OK means notify success, others means notify failed.
+     */
+    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+
+    /**
      * @brief notify display id change.
      *
      * @param windowId window id.
@@ -1205,6 +1215,7 @@ private:
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
     std::unordered_set<std::string> isModuleHookOffSet_;
+    std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
@@ -1232,6 +1243,8 @@ private:
     WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };
