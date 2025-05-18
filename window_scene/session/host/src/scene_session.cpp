@@ -8442,9 +8442,9 @@ WSError SceneSession::SetSubWindowSource(SubWindowSource source)
 {
     auto property = GetSessionProperty();
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
-    !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+        return WSError::WS_ERROR_INVALID_WINDOW;
     }
     PostTask([weakThis = wptr(this), source = source, where = __func__] {
         auto session = weakThis.promote();

@@ -153,7 +153,6 @@ private:
     // Window Transition Animation For PC
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 
-    
     int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

@@ -569,7 +569,6 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSourceFunc, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSubWindowSourceFunc(nullptr);
     ASSERT_EQ(nullptr, sceneSession->subWindowSourceFunc_);
-
     NotifySetSubWindowSourceFunc func = [](SubWindowSource source) {};
     sceneSession->SetSubWindowSourceFunc(std::move(func));
     ASSERT_NE(nullptr, sceneSession->subWindowSourceFunc_);
