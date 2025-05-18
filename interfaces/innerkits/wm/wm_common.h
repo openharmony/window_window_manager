@@ -2645,6 +2645,68 @@ struct ShadowsInfo : public Parcelable {
 };
 
 /**
+ * @brief Enumerates session state of recent session
+ */
+enum class RecentSessionState : uint32_t {
+    DISCONNECT = 0,
+    CONNECT,
+    FOREGROUND,
+    BACKGROUND,
+    ACTIVE,
+    INACTIVE,
+    END,
+};
+
+/**
+ * @struct RecentSessionInfo
+ *
+ * @brief infos of recent sessions
+ */
+struct RecentSessionInfo : public Parcelable {
+    RecentSessionInfo() = default;
+    RecentSessionInfo(int32_t persistentId) : missionId(persistentId) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(missionId) &&
+               parcel.WriteString(bundleName) &&
+               parcel.WriteString(moduleName) &&
+               parcel.WriteString(abilityName) &&
+               parcel.WriteInt32(appIndex) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowType)) &&
+               parcel.WriteUint32(static_cast<uint32_t>(sessionState));
+    }
+
+    static RecentSessionInfo* Unmarshalling(Parcel& parcel)
+    {
+        RecentSessionInfo* recentSessionInfo = new RecentSessionInfo();
+        uint32_t windowType;
+        uint32_t sessionState;
+        if (!parcel.ReadInt32(recentSessionInfo->missionId) ||
+            !parcel.ReadString(recentSessionInfo->bundleName) ||
+            !parcel.ReadString(recentSessionInfo->moduleName) ||
+            !parcel.ReadString(recentSessionInfo->abilityName) ||
+            !parcel.ReadInt32(recentSessionInfo->appIndex) ||
+            !parcel.ReadUint32(windowType) ||
+            !parcel.ReadUint32(sessionState)) {
+            delete recentSessionInfo;
+            return nullptr;
+        }
+        recentSessionInfo->windowType = static_cast<WindowType>(windowType);
+        recentSessionInfo->sessionState = static_cast<RecentSessionState>(sessionState);
+        return recentSessionInfo;
+    }
+
+    int32_t missionId = -1;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    int32_t appIndex = 0;
+    WindowType windowType = WindowType::APP_MAIN_WINDOW_BASE;
+    RecentSessionState sessionState = RecentSessionState::DISCONNECT;
+};
+
+/**
  * @brief Enumerates source of sub session.
  */
 enum class SubWindowSource : uint32_t {

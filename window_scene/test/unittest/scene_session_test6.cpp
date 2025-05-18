@@ -545,22 +545,6 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardWillHideRegistered, Function | SmallTe
 }
 
 /**
- * @tc.name: RegisterDecorEnableChangeCallback
- * @tc.desc: test RegisterDecorEnableChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, RegisterDecorEnableChangeCallback, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->notifyDecorEnableChange_ = nullptr;
-    auto task = [] (bool isDecorEnable) {};
-    sceneSession->RegisterDecorEnableChangeCallback(std::move(task));
-    ASSERT_NE(nullptr, sceneSession->notifyDecorEnableChange_);
-}
-
-/**
  * @tc.name: CloseSpecificScene
  * @tc.desc: test CloseSpecificScene
  * @tc.type: FUNC

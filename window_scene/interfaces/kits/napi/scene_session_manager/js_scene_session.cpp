@@ -101,7 +101,6 @@ const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenCha
 const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
 const std::string SET_WINDOW_SHADOWS_CB = "setWindowShadows";
 const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
-const std::string UPDATE_DECOR_ENABLE_CHANGE_CB = "decorEnableChange";
 
 
 constexpr int ARG_COUNT_1 = 1;
@@ -195,6 +194,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
     {SET_WINDOW_SHADOWS_CB,                 ListenerFuncType::SET_WINDOW_SHADOWS_CB},
+    {SET_SUB_WINDOW_SOURCE_CB,              ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -7244,46 +7244,6 @@ void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "NotifySetSubWindowSource");
-}
-
-void JsSceneSession::ProcessDecorEnableChangeRegister()
-{
-    NotifyDecorEnableChangeFunc func = [weakThis = wptr(this)](bool isDecorEnable) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnDecorEnableChange(isDecorEnable);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "session is nullptr, persistentId:%{public}d", persistentId_);
-        return;
-    }
-    session->RegisterDecorEnableChangeCallback(std::move(func));
-    TLOGD(WmsLogTag::WMS_DECOR, "register success, persistentId:%{public}d", persistentId_);
-}
-
-void JsSceneSession::OnDecorEnableChange(bool isDecorEnable)
-{
-    auto task = [weakThis = wptr(this), isDecorEnable, env = env_, persistentId = persistentId_, where = __func__] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s: jsSceneSession id: %{public}d has been destroyed",
-                where, persistentId);
-                return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_DECOR_ENABLE_CHANGE_CB);
-        if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s: jsCallBack is nullptr", where);
-            return;
-        }
-        napi_value jsSource = CreateJsValue(env, isDecorEnable);
-        napi_value argv[] = { jsSource };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnDecorEnableChange");
 }
 
 napi_value JsSceneSession::RequestSpecificSessionClose(napi_env env, napi_callback_info info)

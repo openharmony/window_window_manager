@@ -8463,26 +8463,6 @@ WSError SceneSession::SetSubWindowSource(SubWindowSource source)
     return WSError::WS_OK;
 }
 
-/** @notefd @window.decor */
-void SceneSession::RegisterDecorEnableChangeCallback(NotifyDecorEnableChangeFunc&& callback)
-{
-    auto property = GetSessionProperty();
-    if (!property) {
-        return;
-    }
-    notifyDecorEnableChange_ = std::move(callback);
-    property->SetDecorEnableChangeCallback([weakThis = wptr(this)](bool isDecorEnable) {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "session is null");
-            return;
-        }
-        if (session->notifyDecorEnableChange_) {
-            session->notifyDecorEnableChange_(isDecorEnable);
-        }
-    });
-}
-
 WSError SceneSession::CloseSpecificScene()
 {
     TLOGI(WmsLogTag::WMS_EVENT, "close specific scene");

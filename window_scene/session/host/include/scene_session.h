@@ -133,7 +133,6 @@ using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChang
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
-using NotifyDecorEnableChangeFunc = std::function<void(bool isDecorEnable)>;
 
 
 struct UIExtensionTokenInfo {
@@ -606,6 +605,7 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WMError NotifyDisableDelegatorChange() override;
+    virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
 
     /*
      * Window Decor
@@ -793,6 +793,13 @@ public:
         const TransitionAnimation& animation) override;
     void SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func);
 
+    /*
+     * sub window source
+     */
+    WSError CloseSpecificScene();
+    void SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func);
+    WSError SetSubWindowSource(SubWindowSource source) override;
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -935,6 +942,9 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
+
+    SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
+    NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
 
 private:
     void NotifyAccessibilityVisibilityChange();

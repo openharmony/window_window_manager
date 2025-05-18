@@ -6227,6 +6227,11 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 
 WSError WindowSceneSessionImpl::CloseSpecificScene()
 {
+    if (!property_->IsDecorEnable()) {
+        TLOGW(WmsLogTag::WMS_DECOR, "specific scene can not close id: %{public}d, decor is not enable", 
+            GetPersistentId());
+        return WSError::WS_DO_NOTHING;
+    }
     TLOGI(WmsLogTag::WMS_DECOR, "close specific scene id: %{public}d", GetPersistentId());
     handler_->PostTask([weakThis = wptr(this)] {
         auto window = weakThis.promote();
