@@ -552,7 +552,7 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardWillHideRegistered, Function | SmallTe
 HWTEST_F(SceneSessionTest6, CloseSpecificScene, TestSize.Level1)
 {
     SessionInfo info;
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->sessionStage_ = nullptr;
     auto res = sceneSession->CloseSpecificScene();
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
@@ -566,7 +566,7 @@ HWTEST_F(SceneSessionTest6, CloseSpecificScene, TestSize.Level1)
 HWTEST_F(SceneSessionTest6, SetSubWindowSourceFunc, TestSize.Level1)
 {
     SessionInfo info;
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSubWindowSourceFunc(nullptr);
     ASSERT_EQ(nullptr, sceneSession->subWindowSourceFunc_);
 
@@ -583,8 +583,8 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSourceFunc, TestSize.Level1)
 HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
 {
     SessionInfo info;
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
-    sptr property = sptr::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;

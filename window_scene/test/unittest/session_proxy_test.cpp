@@ -1501,9 +1501,9 @@ HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTes
  */
 HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
 {
-    auto iRemoteObjectMocker = sptr::MakeSptr();
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr::MakeSptr(iRemoteObjectMocker);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
     ASSERT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
