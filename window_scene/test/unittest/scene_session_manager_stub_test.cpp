@@ -1097,6 +1097,58 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest03
+ * @tc.desc: test TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    uint32_t interestInfo = 0;
+    data.WriteUint32(interestInfo)
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest04
+ * @tc.desc: test TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    uint32_t interestInfo = 0;
+    data.WriteUint32(interestInfo)
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: HandleCreateAndConnectSpecificSession
  * @tc.desc: test HandleCreateAndConnectSpecificSession
  * @tc.type: FUNC
