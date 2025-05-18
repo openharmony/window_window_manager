@@ -2276,17 +2276,17 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function 
  */
 HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
 {
-    sptr option = sptr::MakeSptr();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Close01");
-    sptr windowSceneSession = sptr::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     windowSceneSession->property_->SetDecorEnable(true);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr session = sptr::MakeSptr(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSession->hostSession_ = session;
 
-    sptr listener = sptr::MakeSptr();
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
     windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     auto res = windowSceneSession->RegisterWindowWillCloseListeners(listener);
     ASSERT_EQ(WMError::WM_OK, res);
@@ -2303,12 +2303,12 @@ HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
 {
-    sptr option = sptr::MakeSptr();
-    sptr window = sptr::MakeSptr(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr session = sptr::MakeSptr(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetSubWindowSource");
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));

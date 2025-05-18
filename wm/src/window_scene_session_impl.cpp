@@ -6217,7 +6217,6 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    TLOGE(WmsLogTag::WMS_SUB, "SetSubWindowSource source: %{public}d", source);
     WSError ret = GetHostSession()->SetSubWindowSource(source);
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -6228,15 +6227,15 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 WSError WindowSceneSessionImpl::CloseSpecificScene()
 {
     if (!property_->IsDecorEnable()) {
-        TLOGW(WmsLogTag::WMS_DECOR, "specific scene can not close id: %{public}d, decor is not enable", 
+        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable", 
             GetPersistentId());
         return WSError::WS_DO_NOTHING;
     }
-    TLOGI(WmsLogTag::WMS_DECOR, "close specific scene id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_SUB, "close specific scene id: %{public}d", GetPersistentId());
     handler_->PostTask([weakThis = wptr(this)] {
         auto window = weakThis.promote();
         if (!window) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_SUB, "window is nullptr");
             return;
         }
         window->Close();

@@ -1038,4 +1038,11 @@ int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data
     NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    CloseSpecificScene();
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

@@ -1064,20 +1064,16 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
 }
 
 /**
- * @tc.name: HandleSetSubWindowSource
- * @tc.desc: test function : HandleSetSubWindowSource
+ * @tc.name: HandleCloseSpecificScene
+ * @tc.desc: test function : HandleCloseSpecificScene
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level2)
+HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    Accessibility::AccessibilityEventInfo info;
-    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
-    data.WriteParcelable(&infoParcel);
-    data.WriteUint32(1);
-    auto result = session_->HandleSetSubWindowSource(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->HandleCloseSpecificScene(data, reply));
 }
 } // namespace
 } // namespace Rosen
