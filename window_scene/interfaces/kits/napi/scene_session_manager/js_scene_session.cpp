@@ -2879,6 +2879,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_SHADOWS_CB):
             ProcessSetWindowShadowsRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB):
             ProcessSetSubWindowSourceRegister();
             break;
