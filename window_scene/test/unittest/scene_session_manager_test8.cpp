@@ -1034,7 +1034,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
-    auto ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
     EXPECT_EQ(0, ssm_->interestFlags_);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
@@ -1049,7 +1049,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
  */
 HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
 {
-    ssm_->interestFlags_ = -1ULL;
+    ssm_->interestFlags_ = -1;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = false;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
