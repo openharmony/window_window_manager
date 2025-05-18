@@ -7130,6 +7130,18 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     return true;
 }
 
+void SceneSession::UpdateNonInteractiveInner()
+{
+    if (!sessionStage_) {
+        return;
+    }
+    const auto state = GetSessionState();
+    TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
+    if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
+        sessionStage_->NotifyNonInteractiveStatus();
+    }
+}
+
 bool SceneSession::PipelineNeedNotifyClientToUpdateRect() const
 {
     return IsVisibleForeground() && GetForegroundInteractiveStatus();

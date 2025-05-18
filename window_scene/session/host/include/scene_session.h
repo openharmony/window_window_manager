@@ -778,6 +778,11 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /*
+     * Window LifeCycle
+     */
+    void UpdateNonInteractiveInner();
+
     /**
      * Window Transition Animation For PC
      */

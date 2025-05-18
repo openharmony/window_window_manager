@@ -135,13 +135,25 @@ public:
 
     /**
      * @brief Notify caller that window is resumed.
+     * @deprecated deprecated since app version 20, use AfterInteractive instead.
      */
     virtual void AfterResumed() {}
 
     /**
      * @brief Notify caller that window is paused.
+     * @deprecated deprecated since app version 20, use AfterNonInteractive instead.
      */
     virtual void AfterPaused() {}
+
+    /**
+     * @brief Notify caller that window is interactive.
+     */
+    virtual void AfterInteractive() {}
+
+    /**
+     * @brief Notify caller that window is noninteractive.
+     */
+    virtual void AfterNonInteractive() {}
 
     /**
      * @brief Notify caller that window is destroyed.
@@ -1278,9 +1290,9 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
-     * @brief resume window
+     * @brief Interactive window
      */
-    virtual void Resume() {}
+    virtual void Interactive() {}
 
     /**
      * @brief Hide window
