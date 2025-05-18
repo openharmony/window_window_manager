@@ -1245,7 +1245,11 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != SCREEN_ID_INVALID) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
-    InitSystemSessionDragEnable(property);
+    if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        InitSystemSessionDragEnable(property);
+    } else {
+        property_->SetDragEnabled(false);
+    }
     property->SetSessionPropertyChangeCallback(
         [weakThis = wptr(this)]() {
             auto session = weakThis.promote();

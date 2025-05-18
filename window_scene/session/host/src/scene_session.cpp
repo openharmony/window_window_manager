@@ -829,6 +829,24 @@ bool SceneSession::IsAnyParentSessionDragZooming() const
     return false;
 }
 
+void SceneSession::SetParentRect()
+{
+    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && moveDragController_ != nullptr) {
+        moveDragController_->SetParentRect({0, 0, 0, 0});
+        return;
+    }
+    auto mainSession = GetMainSession();
+    if (mainSession != nullptr && moveDragController_ != nullptr) {
+        Rect parentGlobalRect;
+        WMError errorCode = mainSession->GetGlobalScaledRect(parentGlobalRect);
+        if (errorCode != WMError::WM_OK) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d", GetPersistentId(), errorCode);
+            return;
+        }
+        moveDragController_->SetParentRect(parentGlobalRect);
+    }
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -866,6 +884,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
+                session->SetParentRect();
                 session->moveDragController_->SetStartMoveFlag(true);
                 // use window rect when fullscreen or compatible mode
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, proportionalScale);
@@ -2921,17 +2940,22 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
-        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible()) ||
-            isDragAccessibleSystemWindow) {
-            if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
-                 (property->GetIsPcAppInPad() && !isMainWindow)) &&
-                moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
-                auto surfaceNode = GetSurfaceNode();
-                moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-                PresentFoucusIfNeed(pointerEvent->GetPointerAction());
-                pointerEvent->MarkProcessed();
-                return WSError::WS_OK;
-            }
+        bool isFloatingDragAccessible =
+            property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
+        bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
+            (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || (property->GetIsPcAppInPad() && !isMainWindow));
+        bool isPhoneWindowCanDrag = isFloatingDragAccessible &&
+            (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
+            (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
+        moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
+        SetParentRect();
+        if ((isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag) &&
+            moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+            auto surfaceNode = GetSurfaceNode();
+            moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+            PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+            pointerEvent->MarkProcessed();
+            return WSError::WS_OK;
         }
         if ((WindowHelper::IsMainWindow(windowType) ||
              WindowHelper::IsSubWindow(windowType) ||
@@ -6703,13 +6727,8 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 
 WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, permission denied!", GetPersistentId());
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    if (!WindowHelper::IsSystemWindow(GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, this is not system window", GetPersistentId());
+    if (!WindowHelper::IsSubWindow(GetWindowType()) && !WindowHelper::IsSystemWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, not set enable drag", GetPersistentId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 

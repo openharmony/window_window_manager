@@ -2572,14 +2572,37 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
     return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
+bool WindowSessionImpl::IsWindowShouldDrag()
+{
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+        !windowSystemConfig_.IsPhoneWindow()) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSessionImpl::CheckCanDragWindowType()
+{
+    WindowType windowType = GetType();
+    if (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Currently only supports system windows.
  */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!IsWindowShouldDrag()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!CheckCanDragWindowType()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, invalid window type:%{public}u",
+            GetPersistentId(), GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetDragEnabled(enableDrag);
     auto hostSession = GetHostSession();
