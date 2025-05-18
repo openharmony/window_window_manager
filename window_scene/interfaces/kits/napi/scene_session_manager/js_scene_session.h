@@ -102,7 +102,6 @@ enum class ListenerFuncType : uint32_t {
     USE_IMPLICIT_ANIMATION_CB,
     SET_WINDOW_SHADOWS_CB,
     SET_SUB_WINDOW_SOURCE_CB,
-    UPDATE_DECOR_ENABLE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -383,7 +382,6 @@ private:
     void ProcessUpdatePiPTemplateInfoRegister();
     void ProcessUseImplicitAnimationChangeRegister();
     void ProcessSetSubWindowSourceRegister();
-    void ProcessDecorEnableChangeRegister();
 
     /*
      * Window Property
@@ -466,7 +464,6 @@ private:
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
     void OnUseImplicitAnimationChange(bool useImplicit);
     void NotifySetSubWindowSource(SubWindowSource source);
-    void OnDecorEnableChange(bool isDecoEnable);
 
     /*
      * Window Property

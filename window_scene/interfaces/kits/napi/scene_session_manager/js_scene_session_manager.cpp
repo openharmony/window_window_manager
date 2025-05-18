@@ -288,6 +288,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSupportFunctionType);
     BindNativeFunction(env, exportObj, "getApplicationInfo", moduleName,
         JsSceneSessionManager::GetApplicationInfo);
+    BindNativeFunction(env, exportObj, "updateRecentMainSessionList", moduleName,
+        JsSceneSessionManager::UpdateRecentMainSessionInfos);
     return NapiGetUndefined(env);
 }
 
@@ -4752,5 +4754,33 @@ napi_value JsSceneSessionManager::OnGetApplicationInfo(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     return CreateSCBApplicationInfo(env, scbApplicationInfo);
+}
+
+napi_value JsSceneSessionManager::UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateRecentMainSessionInfos(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::vector<int32_t> recentMainSessionIdList;
+    if (!ConvertInt32ArrayFromJs(env, argv[0], recentMainSessionIdList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to recentMainSessionIdList");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateRecentMainSessionInfos(recentMainSessionIdList);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

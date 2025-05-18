@@ -33,7 +33,6 @@ class WindowSessionProperty;
 class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
-using OnDecorEnableChangeFunc = std::function<void(bool isDecorEnable)>;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -103,7 +102,6 @@ public:
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetIsAtomicService(bool isAtomicService);
-    void SetDecorEnableChangeCallback(OnDecorEnableChangeFunc&& callback);
     
     /*
      * Window Immersive
@@ -447,7 +445,6 @@ private:
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
-    OnDecorEnableChangeFunc decorEnableChangeCallback_;
 
 
     bool isShaped_ = false;

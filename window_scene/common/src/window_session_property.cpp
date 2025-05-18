@@ -645,9 +645,6 @@ KeyboardLayoutParams WindowSessionProperty::GetKeyboardLayoutParams() const
 void WindowSessionProperty::SetDecorEnable(bool isDecorEnable)
 {
     isDecorEnable_ = isDecorEnable;
-    if (decorEnableChangeCallback_) {
-        decorEnableChangeCallback_(isDecorEnable_);
-    }
 }
 
 bool WindowSessionProperty::IsDecorEnable()
@@ -1391,7 +1388,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     shadowsInfo_ = property->shadowsInfo_;
-    decorEnableChangeCallback_ = property->decorEnableChangeCallback_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)

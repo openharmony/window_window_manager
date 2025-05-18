@@ -92,6 +92,7 @@ public:
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
+        TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
     };
 
     /*
@@ -246,6 +247,19 @@ public:
      * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
      */
     virtual WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) = 0;
+
+    /**
+     * @brief Get an ordered recent main session info list
+     *
+     * This function is used to get an ordered recent main session info list
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param recentSessionInfoList the sessionInfo list of recent main sessions
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

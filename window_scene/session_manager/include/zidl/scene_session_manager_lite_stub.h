@@ -84,6 +84,7 @@ private:
     int HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionLifecycleListenerByBundles(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
