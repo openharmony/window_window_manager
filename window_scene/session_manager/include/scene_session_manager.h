@@ -1418,7 +1418,16 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);  
+    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
+    void NotifyWindowPropertyChange(ScreenId screenId);
+    uint32_t observedFlags_ = 0;
+    uint32_t interestFlags_ = 0;
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
+        std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
 
     /*
      * Move Drag

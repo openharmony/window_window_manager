@@ -44,6 +44,8 @@ public:
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override;
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override {};
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
+    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override {};
 };
 } // namespace Rosen
 } // namespace OHOS

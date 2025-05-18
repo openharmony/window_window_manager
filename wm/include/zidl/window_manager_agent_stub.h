@@ -28,6 +28,12 @@ public:
 
     virtual int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
+
+private:
+    bool ReadWindowInfoList(MessageParcel& data,
+        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+    bool ReadWindowInfo(MessageParcel& data,
+        std::unordered_map<WindowInfoKey, std::any>& windowInfo);
 };
 } // namespace Rosen
 } // namespace OHOS

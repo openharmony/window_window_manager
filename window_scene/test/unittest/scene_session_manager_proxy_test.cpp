@@ -524,6 +524,25 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, TestSize.Le
 }
 
 /**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    ASSERT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
+}
+
+/**
  * @tc.name: UpdateModalExtensionRect
  * @tc.desc: normal function
  * @tc.type: FUNC
