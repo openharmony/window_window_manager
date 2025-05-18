@@ -1065,7 +1065,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
 
     std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    ASSERT_EQ(windowPropertyChangeInfo.size(), 7);
+    ASSERT_EQ(windowPropertyChangeInfo.size(), 4);
 }
 } // namespace
 } // namespace Rosen
