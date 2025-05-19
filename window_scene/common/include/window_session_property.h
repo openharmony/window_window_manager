@@ -352,6 +352,7 @@ private:
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateWindowShadowEnabled(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
