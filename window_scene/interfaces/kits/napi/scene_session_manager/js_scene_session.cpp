@@ -2860,6 +2860,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB):
             ProcessDefaultDensityEnabledRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::WINDOW_SHADOW_ENABLE_CHANGE_CB):
+            ProcessWindowShadowEnableChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB):
             ProcessTitleAndDockHoverShowChangeRegister();
             break;

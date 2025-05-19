@@ -8336,7 +8336,7 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set follow parent layout failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set Window Shadow enable failed."));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {

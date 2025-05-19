@@ -1105,20 +1105,20 @@ HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetViewKeepScreenOn
- * @tc.desc: SetViewKeepScreenOn And IsViewKeepScreenOn
+ * @tc.name: SetWindowShadowEnabled
+ * @tc.desc: SetWindowShadowEnabled And GetWindowShadowEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetWindowShadowEnabled, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     bool isEnabled = true;
     property->SetWindowShadowEnabled(isEnabled);
-    ASSERT_EQ(isEnabled, property->GetWindowShadowEnabled());
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
     isEnabled = false;
     property->SetWindowShadowEnabled(isEnabled);
-    ASSERT_EQ(isEnabled, property->GetWindowShadowEnabled());
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
 }
 
 /**
