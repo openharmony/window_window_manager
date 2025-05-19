@@ -6679,8 +6679,12 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
-            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
-            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
+            if (WindowHelper::IsPipWindow(session->GetWindowType())) {
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is pip", where);
+                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            } else {
+                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
+            }
         }
         return;
     }, __func__);
