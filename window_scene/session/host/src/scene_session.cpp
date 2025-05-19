@@ -1171,6 +1171,18 @@ void SceneSession::RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEna
     }, __func__);
 }
 
+void SceneSession::RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return;
+        }
+        session->onWindowShadowEnableChange_ = std::move(callback);
+    }, __func__);
+}
+
 void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -4234,6 +4246,28 @@ bool SceneSession::IsViewKeepScreenOn() const
     return GetSessionProperty()->IsViewKeepScreenOn();
 }
 
+WSError SceneSession::SetWindowShadowEnabled(bool isEnabled)
+{
+    GetSessionProperty()->SetWindowShadowEnabled(isEnabled);
+    PostTask([weakThis = wptr(this), isEnabled, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}d", where, isDefaultDensityEnabled);
+        if (session->onWindowShadowEnableChange_) {
+            session->onWindowShadowEnableChange_(isEnabled);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::GetWindowShadowEnabled() const
+{
+    return GetSessionProperty()->GetWindowShadowEnabled();
+}
+
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
@@ -5443,6 +5477,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateExclusivelyHighlighted(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE):
             return HandleActionUpdateFollowScreenChange(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED):
+            return HandleActionUpdateWindowShadowEnabled(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -5491,6 +5527,15 @@ WMError SceneSession::HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessio
         GetPersistentId(), property->IsViewKeepScreenOn());
     SetViewKeepScreenOn(property->IsViewKeepScreenOn());
     NotifySessionChangeByActionNotifyManager(property, action);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
+        GetPersistentId(), property->GetWindowShadowEnabled());
+    SetWindowShadowEnabled(property->GetWindowShadowEnabled());
     return WMError::WM_OK;
 }
 
