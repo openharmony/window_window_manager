@@ -367,7 +367,8 @@ public:
         const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isNewWant, bool isFromClient = true);
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
@@ -887,7 +888,7 @@ private:
      * PC Window
      */
     WMError ShiftAppWindowPointerEventInner(
-        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId);
 
     /*
      * Sub Window

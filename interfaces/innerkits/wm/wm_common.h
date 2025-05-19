@@ -780,6 +780,7 @@ constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
 constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
 constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
 constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
+constexpr int32_t INVALID_FINGER_ID = -1;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

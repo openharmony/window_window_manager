@@ -1841,10 +1841,10 @@ WMError WindowManager::SetAppKeyFramePolicy(const std::string& bundleName, const
     return ret;
 }
 
-WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
-        sourceWindowId, targetWindowId);
+        sourceWindowId, targetWindowId, fingerId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
     }
