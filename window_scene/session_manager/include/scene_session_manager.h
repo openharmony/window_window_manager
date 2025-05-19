@@ -580,6 +580,7 @@ public:
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
+    void SetBehindWindowFilterEnabled(bool enabled);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);

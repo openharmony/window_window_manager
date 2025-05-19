@@ -511,6 +511,12 @@ void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, 
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
+void SceneSessionManager::SetBehindWindowFilterEnabled(bool enabled)
+{
+    bool isSuccessful = RSInterfaces::GetInstance().SetBehindWindowFilterEnabled(enabled);
+    TLOGI(WmsLogTag::WMS_PC, "is successful:  %{public}d", isSuccessful);
+}
+
 void SceneSessionManager::RegisterAppListener()
 {
     appAnrListener_ = sptr<AppAnrListener>::MakeSptr();

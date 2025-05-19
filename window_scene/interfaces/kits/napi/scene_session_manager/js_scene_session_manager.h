@@ -57,6 +57,7 @@ public:
     static napi_value Init(napi_env env, napi_value exportObj);
     static void Finalizer(napi_env env, void* data, void* hint);
 
+    static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneSession(napi_env env, napi_callback_info info);
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
@@ -152,6 +153,7 @@ public:
     static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
 
 private:
+    napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSession(napi_env env, napi_callback_info info);
