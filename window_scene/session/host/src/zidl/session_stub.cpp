@@ -286,6 +286,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDisableDelegatorChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS):
             return HandleSetWindowShadows(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
+            return HandleSetSubWindowSource(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1855,6 +1857,23 @@ int SessionStub::HandleNotifyDisableDelegatorChange(MessageParcel& data, Message
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WMError ret = NotifyDisableDelegatorChange();
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t sourceType = 0;
+    if (!data.ReadUint32(sourceType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read sourceType failed.");
+        return ERR_INVALID_DATA;
+    }
+    SubWindowSource source = static_cast<SubWindowSource>(sourceType);
+    TLOGD(WmsLogTag::WMS_SUB, "source: %{public}d", source);
+    WSError errCode = SetSubWindowSource(source);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

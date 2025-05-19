@@ -132,6 +132,8 @@ using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
+using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
+
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -403,6 +405,9 @@ public:
     uint32_t GetMaxSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    WSError CloseSpecificScene();
+    void SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func);
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * Window Immersive
@@ -898,6 +903,8 @@ protected:
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
     void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
     MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
+    SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
+    NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
 
     /*
      * Window Lifecycle

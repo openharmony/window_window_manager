@@ -131,6 +131,9 @@ enum class SessionInterfaceCode {
 
     // Window Pattern
     TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED,
+
+    // Window source
+    TRANS_ID_SET_SUBWINDOW_SOURCE,
 };
 } // namespace Rosen
 } // namespace OHOS
