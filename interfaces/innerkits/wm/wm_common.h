@@ -2327,7 +2327,7 @@ const uint32_t ANIMATION_MAX_DURATION = 3000;
 /*
  * @brief Window transition animation configuration.
  */
-struct WindowAnimationOptions : public Parcelable {
+struct WindowAnimationOption : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
     std::array<float, ANIMATION_PARAM_SIZE> param;
@@ -2348,9 +2348,9 @@ struct WindowAnimationOptions : public Parcelable {
         return true;
     }
 
-    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    static WindowAnimationOption* Unmarshalling(Parcel& parcel)
     {
-        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        WindowAnimationOption* windowAnimationConfig = new WindowAnimationOption();
         uint32_t curve = 0;
         if (!parcel.ReadUint32(curve)) {
             delete windowAnimationConfig;
@@ -2379,7 +2379,7 @@ struct WindowAnimationOptions : public Parcelable {
  * @brief Transition animation configuration.
  */
 struct TransitionAnimation : public Parcelable {
-    WindowAnimationOptions config;
+    WindowAnimationOption config;
     float opacity = 1.0f;
     
     bool Marshalling(Parcel& parcel) const override
@@ -2397,8 +2397,8 @@ struct TransitionAnimation : public Parcelable {
             delete transitionAnimation;
             return nullptr;
         }
-        std::shared_ptr<WindowAnimationOptions> animationConfig =
-            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
+        std::shared_ptr<WindowAnimationOption> animationConfig =
+            std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
         if (animationConfig == nullptr) {
             delete transitionAnimation;
             return nullptr;
