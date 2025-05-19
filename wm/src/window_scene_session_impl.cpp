@@ -4535,6 +4535,24 @@ bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
     return property_->IsViewKeepScreenOn();
 }
 
+WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetWindowShadowEnabled(isEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
+}
+
+WMError WindowSceneSessionImpl::GetWindowShadowEnabled(bool isEnabled)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetWindowShadowEnabled(isEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
+}
+
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)
 {
     TLOGI(WmsLogTag::DEFAULT, "Id: %{public}d", property_->GetPersistentId());

@@ -59,6 +59,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetViewKeepScreenOn(bool keepScreenOn);
+    void SetWindowShadowEnabled(bool isEnabled);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -127,6 +128,7 @@ public:
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool GetWindowShadowEnabled() const;
     bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
@@ -318,6 +320,7 @@ private:
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateWindowShadowEnabled(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -394,6 +397,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
+    bool windowShadowEnabled_ { false };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;

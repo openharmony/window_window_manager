@@ -542,6 +542,16 @@ bool WindowSessionProperty::IsViewKeepScreenOn() const
     return viewKeepScreenOn_;
 }
 
+void WindowSessionProperty::SetWindowShadowEnabled(bool isEnabled)
+{
+    windowShadowEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::GetWindowShadowEnabled() const
+{
+    return windowShadowEnabled_;
+}
+
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
 {
     accessTokenId_ = accessTokenId;
@@ -1158,7 +1168,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
-        parcel.WriteBool(isSnapshotSkip_) &&
+        parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
@@ -1312,6 +1322,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     viewKeepScreenOn_ = property->viewKeepScreenOn_;
+    windowShadowEnabled_ = property->windowShadowEnabled_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1414,6 +1425,11 @@ bool WindowSessionProperty::WriteActionUpdateKeepScreenOn(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
 {
     return parcel.WriteBool(viewKeepScreenOn_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    return parcel.WriteBool(windowShadowEnabled_);
 }
 
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
