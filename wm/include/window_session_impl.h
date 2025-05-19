@@ -694,6 +694,11 @@ protected:
     int16_t rotationAnimationCount_ { 0 };
     void NotifyRotationAnimationEnd();
 
+    /*
+     * Window Pattern
+     */
+    WMError NotifySnapshotUpdate() override;
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
