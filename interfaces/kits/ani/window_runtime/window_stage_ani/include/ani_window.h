@@ -68,7 +68,7 @@ public:
         ani_string color, ani_object offsetX, ani_object offsetY);
 
     void StartMoving(ani_env* env);
-    void StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY);
+    void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
     void SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximizeButtonVisible,
         ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible);
     void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
