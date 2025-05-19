@@ -999,7 +999,7 @@ void AniWindow::StartMoving(ani_env* env)
     }
 }
 
-void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY)
+void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is nullptr.");
@@ -1012,7 +1012,7 @@ void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
-    WmErrorCode ret = windowToken_->StartMoveWindowWithCoordinate(offsetX, offsetY);
+    WmErrorCode ret = windowToken_->StartMoveWindowWithCoordinate(static_cast<int>(offsetX), static_cast<int>(offsetY));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Move window failed.");
         AniWindowUtils::AniThrowError(env, ret);
@@ -1594,7 +1594,7 @@ static void StartMoving(ani_env* env, ani_object obj, ani_long nativeObj)
 }
 
 static void StartMoveWindowWithCoordinate(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_int offsetX, ani_int offsetY)
+    ani_double offsetX, ani_double offsetY)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] StartMoveWindowWithCoordinate start");
@@ -1951,7 +1951,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
     std::array methods = {
         ani_native_function {"startMoving", "J:V",
             reinterpret_cast<void *>(StartMoving)},
-        ani_native_function {"startMoveWindowWithCoordinate", "JII:V",
+        ani_native_function {"startMoveWindowWithCoordinate", "JDD:V",
             reinterpret_cast<void *>(StartMoveWindowWithCoordinate)},
         ani_native_function {"setWindowTitleButtonVisible", "JZZZ:V",
             reinterpret_cast<void *>(SetWindowTitleButtonVisible)},

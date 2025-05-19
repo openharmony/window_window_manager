@@ -1570,7 +1570,7 @@ export class WindowInternal implements Window {
     }
 
     private native startMoving(nativeObj: long): void;
-    private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: int, offsetY: int): void;
+    private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: double, offsetY: double): void;
     private native setWindowTitleButtonVisible(nativeObj: long, isMaximizeButtonVisible: boolean,
         isMinimizeButtonVisible: boolean, isCloseButtonVisible: boolean): void;
     private native setDecorButtonStyle(nativeObj: long, decorStyle: DecorButtonStyle): void;
@@ -1633,7 +1633,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public startMoving(offsetX: int, offsetY: int): Promise<void> {
+    public startMoving(offsetX: double, offsetY: double): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.startMoveWindowWithCoordinate(this.nativeObj, offsetX, offsetY);
@@ -2278,7 +2278,7 @@ export class WindowInternal implements Window {
 
 export interface Window {
     startMoving(): Promise<void>;
-    startMoving(offsetX: int, offsetY: int): Promise<void>;
+    startMoving(offsetX: double, offsetY: double): Promise<void>;
     setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
         isCloseButtonVisible?: boolean): void;
     setDecorButtonStyle(dectorStyle: DecorButtonStyle): void;
