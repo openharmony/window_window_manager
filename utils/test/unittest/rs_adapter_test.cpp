@@ -75,7 +75,6 @@ public:
     MOCK_METHOD(void, OpenSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
     MOCK_METHOD(void, CloseSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
 };
-    
 
 /**
  * @tc.name: RSTransactionAdapterConstructor
