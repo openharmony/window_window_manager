@@ -7245,7 +7245,7 @@ void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
         napi_value argv[] = { jsSource };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "NotifySetSubWindowSource");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 napi_value JsSceneSession::RequestSpecificSessionClose(napi_env env, napi_callback_info info)
