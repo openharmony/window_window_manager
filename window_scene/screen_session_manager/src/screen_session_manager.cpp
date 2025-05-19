@@ -4808,10 +4808,16 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
 
 void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
 {
-    mirrorScreenIds_ = mirrorScreenIds;
-    TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
-    ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
+    for (ScreenId screenId : mirrorScreenIds) {
+        auto screenSession = GetScreenSession(screenId);
+        if (GetVirtualScreenFlag(screenId) == VirtualScreenFlag::CAST &&
+            screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            mirrorScreenIds_ = mirrorScreenIds;
+            TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
+            SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
+            ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
+        }
+    }
 }
 
 void ScreenSessionManager::SetCastFromSettingData()
