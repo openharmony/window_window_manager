@@ -4221,16 +4221,6 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
                 sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
-        if (session->GetSessionProperty()->GetApiVersion() >= DISALLOW_ACTIVATION_ISOLATE_VERSION) {
-            bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
-                sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
-            if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
-                sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_, isFromAncoAndToAnco)) {
-                SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
-                    sessionInfo->persistentId_, LifeCycleTaskType::START);
-                return;
-            }
-        }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
