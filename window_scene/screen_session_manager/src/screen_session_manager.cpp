@@ -8926,7 +8926,8 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
         TLOGW(WmsLogTag::DMS, "DisplayNode is null");
     }
     TLOGI(WmsLogTag::DMS, "free displayNode");
-    RSTransactionAdapter::FlushImplicitTransaction({firstDisplayNode, secondDisplayNode});
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {firstScreenSession->GetRSUIContext(), secondScreenSession->GetRSUIContext()});
 #endif
 }
 
