@@ -1493,6 +1493,21 @@ HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTes
     bool registered = true;
     sProxy->NotifyKeyboardWillHideRegistered(registered);
 }
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
+    EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
