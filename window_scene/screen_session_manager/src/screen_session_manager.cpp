@@ -825,7 +825,6 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
     }
     OnFoldScreenChange(screenSession);
     if (screenEvent == ScreenEvent::CONNECTED) {
-        isScreenConnecting_ = true;
         connectScreenNumber_ ++;
         HandleScreenConnectEvent(screenSession, screenId, screenEvent);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
@@ -1440,7 +1439,9 @@ void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession> screenSe
                     TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
                     screenSession = internalSession;
                 }
-        } else if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
+        }
+        screenCombination = screenSession->GetScreenCombination();
+        if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
         } else {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
@@ -9700,11 +9701,6 @@ void ScreenSessionManager::NotifyExtendScreenCreateFinish()
             }
         }
     }
-    if (isScreenConnecting_) {
-        TLOGW(WmsLogTag::DMS, "screen is connecting, no need to notify.");
-        isScreenConnecting_ = false;
-        return;
-    }
     if (mainScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "main screen is null");
         return;
@@ -9762,7 +9758,7 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
     }
     ScreenProperty property = screenSession->GetScreenProperty();
     property.SetPropertyChangeReason("screen mode change");
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
