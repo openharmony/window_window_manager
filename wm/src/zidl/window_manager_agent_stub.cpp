@@ -323,7 +323,7 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
             windowInfo[windowInfoKey] = value;
             break;
         }
-        case WindowInfoKey::RECT : {
+        case WindowInfoKey::WINDOW_RECT : {
             Rect rect = Rect::EMPTY_RECT;
             if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
                 !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
