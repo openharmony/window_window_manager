@@ -96,8 +96,8 @@ void NativePiPWindowListener::OnPipStart(uint32_t controllerId, uint8_t requestI
         TLOGE(WmsLogTag::WMS_PIP, "startCallback is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "controllerId:%{public}u, requestId:%{public}u, surfaceId:%{public}llu",
-        controllerId, requestId, static_cast<unsigned long long>(surfaceId));
+    TLOGI(WmsLogTag::WMS_PIP, "controllerId:%{public}u, requestId:%{public}u, surfaceId:%{public}s",
+        controllerId, requestId, std::to_string(surfaceId).c_str());
     pipStartCallback_(controllerId, requestId, surfaceId);
 }
 } // namespace Rosen

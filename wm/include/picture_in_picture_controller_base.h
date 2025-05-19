@@ -58,7 +58,6 @@ public:
     PictureInPictureControllerBase() { weakRef_ = this; }
     PictureInPictureControllerBase(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t windowId, napi_env env);
     virtual ~PictureInPictureControllerBase();
-    static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc);
     WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim = true);
     WMError StopPictureInPictureFromClient();
     WMError DestroyPictureInPictureWindow();

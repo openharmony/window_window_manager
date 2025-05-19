@@ -165,6 +165,10 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
+            continue;
+        }
         listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(),
             atoll(surfaceId.c_str()));
     }
