@@ -117,6 +117,7 @@ private:
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleSnapshotUpdate(MessageParcel& data, MessageParcel& reply);
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);

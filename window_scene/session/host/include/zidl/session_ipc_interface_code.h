@@ -130,6 +130,7 @@ enum class SessionInterfaceCode {
     TRANS_ID_SET_AUTOSTART_PIP,
 
     // Window Pattern
+    TRANS_ID_NOTIFY_SNAPSHOT_UPDATE,
     TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED,
 
     // Window source

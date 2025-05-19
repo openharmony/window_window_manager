@@ -1220,6 +1220,17 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
     }
 }
 
+WMError WindowSessionImpl::NotifySnapshotUpdate()
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "NotifySnapshotUpdate, id: %u", GetWindowId());
+    TLOGI(WmsLogTag::WMS_PATTERN, "NotifySnapshotUpdate, id: %{public}u", GetWindowId());
+    auto ret = WMError::WM_OK;
+    if (auto session = GetHostSession()) {
+        ret = session->NotifySnapshotUpdate();
+    }
+    return ret;
+}
+
 void WindowSessionImpl::GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton,
     bool& hideSplitButton, bool& hideCloseButton)
 {

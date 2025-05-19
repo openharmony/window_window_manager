@@ -514,6 +514,22 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::NotifySnapshotUpdate()
+{
+    PostTask([weakThis = wptr(this), where = __func__] {
+        auto session = weakThis.promote();
+        TLOGNI(WmsLogTag::WMS_PATTERN, "id: %{public}d", session->GetPersistentId());
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
+            return;
+        }
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            session->SaveSnapshot(true, true, nullptr, true);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
 void SceneSession::ClearSpecificSessionCbMap()
 {
     PostTask([weakThis = wptr(this), where = __func__] {
