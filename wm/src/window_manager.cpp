@@ -885,7 +885,7 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
     uint32_t interestInfo = 0;
     for (auto windowInfoKey : listener->GetInterestInfo()) {
         if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
-            interestInfoMap_[windowInfoKey] = 0;
+            interestInfoMap_[windowInfoKey] = 1;
         } else {
             interestInfoMap_[windowInfoKey]++;
         }
@@ -2008,10 +2008,10 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
     return false;
 }
 
-void WindowManager::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    if (PropertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::RECT)) {
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
 }
