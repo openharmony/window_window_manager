@@ -580,7 +580,7 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             }
             break;
         }
-        case WindowInfoKey::RECT : {
+        case WindowInfoKey::WINDOW_RECT : {
             Rect rect = std::any_cast<Rect>(windowInfoPair.second);
             if (!data.WriteInt32(rect.posX_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");

@@ -15272,7 +15272,7 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
     if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT)) {
         WSRect wsrect = sceneSession->GetClientRect();
         Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
-        windowPropertyChangeInfo[WindowInfoKey::RECT] = rect;
+        windowPropertyChangeInfo[WindowInfoKey::WINDOW_RECT] = rect;
     }
 }
 

@@ -892,7 +892,7 @@ WMError WindowManager::RegisterRectChangedListener(const sptr<IWindowInfoChanged
         interestInfo |= static_cast<uint32_t>(windowInfoKey);
     }
     ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
-        WindowInfoKey::RECT, interestInfo, pImpl_->windowPropertyChangeAgent_);
+        WindowInfoKey::WINDOW_RECT, interestInfo, pImpl_->windowPropertyChangeAgent_);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
         pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -932,7 +932,7 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     }
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::RECT,
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_RECT,
             interestInfo, pImpl_->windowPropertyChangeAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowPropertyChangeAgent_ = nullptr;
@@ -1907,7 +1907,7 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
             return RegisterVisibilityStateChangedListener(listener);
         case WindowInfoKey::DISPLAY_ID :
             return RegisterDisplayIdChangedListener(listener);
-        case WindowInfoKey::RECT :
+        case WindowInfoKey::WINDOW_RECT :
             return RegisterRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
@@ -1923,7 +1923,7 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
             return UnregisterVisibilityStateChangedListener(listener);
         case WindowInfoKey::DISPLAY_ID :
             return UnregisterDisplayIdChangedListener(listener);
-        case WindowInfoKey::RECT :
+        case WindowInfoKey::WINDOW_RECT :
             return UnregisterRectChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
@@ -2011,7 +2011,7 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
 void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::RECT)) {
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
 }
