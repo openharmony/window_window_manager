@@ -7082,9 +7082,9 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
         return;
     }
     SetIsExtendScreenConnected(true);
+    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
     SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
-    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
 #endif
 }
 

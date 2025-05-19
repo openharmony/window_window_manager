@@ -78,6 +78,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
