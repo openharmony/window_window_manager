@@ -63,6 +63,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
+        ani_native_function {"windowDestroyCallback", nullptr, reinterpret_cast<void *>(AniWindow::Finalizer)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
@@ -148,26 +149,28 @@ ani_object AniWindowManager::OnFindWindow(ani_env* env, ani_string windowName)
 
 void AniWindowManager::MinimizeAll(ani_env* env, ani_long nativeObj, ani_double displayId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     if (aniWindowManager != nullptr) {
         aniWindowManager->OnMinimizeAll(env, displayId);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowManager is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowManager is nullptr");
     }
 }
 
 void AniWindowManager::OnMinimizeAll(ani_env* env, ani_double displayId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     if (static_cast<uint64_t>(displayId) < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Minimize all failed, Invalidate params.");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
     if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Minimize all failed, ret:%{public}d", static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, ret, "OnMinimizeAll failed");
         return;
     }
