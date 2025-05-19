@@ -1333,15 +1333,14 @@ WMError WindowExtensionSessionImpl::UpdateSystemBarProperties(
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::UpdateHostSpecificSystemBarEnabled(bool systemBarEnable,
-    bool systemBarEnableAnimation, WindowType type)
+WMError WindowExtensionSessionImpl::UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable,
+    bool enableAnimation)
 {
     AAFwk::WantParams want;
     want.SetParam("ohos.atomicService.window.function", AAFwk::String::Box("setSpecificSystemBarEnabled"));
-    want.SetParam("ohos.atomicService.window.param.systemBarEnable", AAFwk::Boolean::Box(systemBarEnable));
-    want.SetParam("ohos.atomicService.window.param.systemBarEnableAnimation",
-        AAFwk::Boolean::Box(systemBarEnableAnimation));
-    want.SetParam("ohos.atomicService.window.param.type", AAFwk::Integer::Box(static_cast<int32_t>(type)));
+    want.SetParam("ohos.atomicService.window.param.name", AAFwk::String::Box(name));
+    want.SetParam("ohos.atomicService.window.param.enable", AAFwk::Boolean::Box(enable));
+    want.SetParam("ohos.atomicService.window.param.enableAnimation", AAFwk::Boolean::Box(enableAnimation));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
