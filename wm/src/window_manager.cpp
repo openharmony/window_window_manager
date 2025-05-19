@@ -826,18 +826,26 @@ WMError WindowManager::RegisterDisplayIdChangedListener(const sptr<IWindowInfoCh
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
     WMError ret = WMError::WM_OK;
-    if (pImpl_->WindowDisplayIdChangeListenerAgent_ == nullptr) {
-        pImpl_->WindowDisplayIdChangeListenerAgent_ = new WindowManagerAgent();
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID,
-        pImpl_->WindowDisplayIdChangeListenerAgent_);
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 1;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::DISPLAY_ID, interestInfo, pImpl_->windowPropertyChangeAgent_);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowManagerAgent failed!");
-        pImpl_->WindowDisplayIdChangeListenerAgent_ = nullptr;
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
     } else {
-        auto iter = std::find(pImpl_->windowDisplayIdChangeListeners_.begin(), pImpl_->windowDisplayIdChangeListeners_.end(),
-            listener);
+        auto iter = std::find(pImpl_->windowDisplayIdChangeListeners_.begin(),
+            pImpl_->windowDisplayIdChangeListeners_.end(), listener);
         if (iter != pImpl_->windowDisplayIdChangeListeners_.end()) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
             return WMError::WM_OK;
@@ -858,14 +866,23 @@ WMError WindowManager::UnregisterDisplayIdChangedListener(const sptr<IWindowInfo
         pImpl_->windowDisplayIdChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
             return registeredListener == listener;
         }), pImpl_->windowDisplayIdChangeListeners_.end());
-
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
     WMError ret = WMError::WM_OK;
-    if (pImpl_->windowDisplayIdChangeListeners_.empty() && pImpl_->WindowDisplayIdChangeListenerAgent_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
-            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID,
-            pImpl_->WindowDisplayIdChangeListenerAgent_);
+    if (pImpl_->windowDisplayIdChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID,
+            interestInfo, pImpl_->windowPropertyChangeAgent_);
         if (ret == WMError::WM_OK) {
-            pImpl_->WindowDisplayIdChangeListenerAgent_ = nullptr;
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
         }
     }
     return ret;
