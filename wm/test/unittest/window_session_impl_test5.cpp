@@ -659,10 +659,11 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetScaleWindow_window1");
     sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
-    int32_t id = 662;
+    int32_t id = 1;
     mainWindow->property_->SetPersistentId(id);
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSessionImpl::windowSessionMap_.clear();
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
     auto res = mainWindow->GetScaleWindow(id);
@@ -671,10 +672,11 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("GetScaleWindow_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option2);
-    extensionWindow->windowExtensionSessionSet_.insert(extensionWindow);
-    extensionWindow->property_->SetPersistentId(12345678);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
-    int32_t testId = 677;
+    int32_t testId = 3;
     res = mainWindow->GetScaleWindow(testId);
     EXPECT_EQ(res, nullptr);
     extensionWindow->property_->SetParentPersistentId(testId);
@@ -691,6 +693,8 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     mainWindow->isFocused_ = false;
     res = mainWindow->GetScaleWindow(testId);
     EXPECT_EQ(res, nullptr);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
 }
 
 /**
@@ -703,14 +707,14 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetWindowScaleCoordinate01_mainWindow");
     sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
-    int32_t id = 700;
+    int32_t id = 1;
     mainWindow->property_->SetPersistentId(id);
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     int32_t x = 100;
     int32_t y = 100;
     auto res = mainWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-
+    WindowSessionImpl::windowSessionMap_.clear();
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
     res = mainWindow->GetWindowScaleCoordinate(x, y, id);
@@ -725,7 +729,7 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
     subWindowOption->SetWindowName("GetWindowScaleCoordinate01_subWindow");
     sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
-    subWindow->property_->SetPersistentId(721);
+    subWindow->property_->SetPersistentId(2);
     subWindow->property_->SetParentPersistentId(id);
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
@@ -738,6 +742,7 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     subWindow->property_->SetIsUIExtensionAbilityProcess(false);
     res = mainWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
+    WindowSessionImpl::windowSessionMap_.clear();
 }
 
 /**
@@ -750,11 +755,12 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetWindowScaleCoordinate02_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option);
-    extensionWindow->windowExtensionSessionSet_.insert(extensionWindow);
-    extensionWindow->property_->SetPersistentId(12345678);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
     extensionWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    int32_t id = 800;
+    int32_t id = 1;
     int32_t x = 100;
     int32_t y = 100;
     auto res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
@@ -768,6 +774,7 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     extensionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
     res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
 }
 
 /**
