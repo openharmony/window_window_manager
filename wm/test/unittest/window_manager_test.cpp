@@ -1635,8 +1635,10 @@ HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, TestSize.Level1)
 {
     int32_t sourceWindowId = 1;
     int32_t targetWindowId = 1;
-    auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
-    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId), ret);
+    int32_t fingerId = 0;
+    auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
+        sourceWindowId, targetWindowId, fingerId), ret);
 }
 
 /**
