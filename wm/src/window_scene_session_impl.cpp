@@ -4544,13 +4544,9 @@ WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
 }
 
-WMError WindowSceneSessionImpl::GetWindowShadowEnabled(bool isEnabled)
+bool WindowSceneSessionImpl::GetWindowShadowEnabled()
 {
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    property_->SetWindowShadowEnabled(isEnabled);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
+    return property_->GetWindowShadowEnabled();
 }
 
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)

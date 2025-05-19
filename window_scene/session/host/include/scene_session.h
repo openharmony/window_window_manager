@@ -776,6 +776,7 @@ public:
     bool GetIsAncoForFloatingWindow() const;
     void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
+    void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
 
     /*
      * Window Pattern

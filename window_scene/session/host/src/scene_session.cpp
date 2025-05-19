@@ -4255,7 +4255,7 @@ WSError SceneSession::SetWindowShadowEnabled(bool isEnabled)
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}d", where, isDefaultDensityEnabled);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}d", where, isEnabled);
         if (session->onWindowShadowEnableChange_) {
             session->onWindowShadowEnableChange_(isEnabled);
         }
