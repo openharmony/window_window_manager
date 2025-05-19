@@ -7242,6 +7242,10 @@ void JsSceneSession::NotifySetSubWindowSource(SubWindowSource source)
             return;
         }
         napi_value jsSource = CreateJsValue(env, source);
+        if (jsSource == nullptr) {
+             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSource is nullptr", where);
+            return;
+        }
         napi_value argv[] = { jsSource };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };

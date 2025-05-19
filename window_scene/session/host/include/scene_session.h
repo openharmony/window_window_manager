@@ -405,6 +405,9 @@ public:
     uint32_t GetMaxSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    WSError CloseSpecificScene();
+    void SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func);
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * Window Immersive
@@ -793,13 +796,6 @@ public:
         const TransitionAnimation& animation) override;
     void SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func);
 
-    /*
-     * sub window source
-     */
-    WSError CloseSpecificScene();
-    void SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func);
-    WSError SetSubWindowSource(SubWindowSource source) override;
-
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -907,6 +903,8 @@ protected:
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
     void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
     MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
+    SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
+    NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
 
     /*
      * Window Lifecycle
@@ -942,9 +940,6 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
-
-    SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
-    NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
 
 private:
     void NotifyAccessibilityVisibilityChange();

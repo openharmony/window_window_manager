@@ -2288,11 +2288,11 @@ HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
     sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
     windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     auto res = windowSceneSession->RegisterWindowWillCloseListeners(listener);
-    ASSERT_EQ(WMError::WM_OK, res);
-    ASSERT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
     res = windowSceneSession->UnRegisterWindowWillCloseListeners(listener);
-    ASSERT_EQ(WMError::WM_OK, res);
-    ASSERT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
 }
 
 /**
@@ -2310,9 +2310,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetSubWindowSource");
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
     window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    EXPECT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
 }
 } // namespace
 } // namespace Rosen

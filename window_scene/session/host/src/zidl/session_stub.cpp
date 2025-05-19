@@ -1866,7 +1866,7 @@ int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& re
 {
     uint32_t sourceType = 0;
     if (!data.ReadUint32(sourceType)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Read cornerRadius failed.");
+        TLOGE(WmsLogTag::WMS_SUB, "Read sourceType failed.");
         return ERR_INVALID_DATA;
     }
     SubWindowSource source = static_cast<SubWindowSource>(sourceType);

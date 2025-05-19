@@ -8435,7 +8435,7 @@ void SceneSession::SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func)
         }
         func(session->subWindowSource_);
         session->subWindowSourceFunc_ = std::move(func);
-    });
+    }, __func__);
 }
 
 WSError SceneSession::SetSubWindowSource(SubWindowSource source)
@@ -8457,9 +8457,9 @@ WSError SceneSession::SetSubWindowSource(SubWindowSource source)
         if (session->subWindowSourceFunc_) {
             session->subWindowSourceFunc_(source);
         } else {
-            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+            TLOGNE(WmsLogTag::WMS_SUB, "func is null");
         }
-    });
+    }, __func__);
     return WSError::WS_OK;
 }
 

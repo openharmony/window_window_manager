@@ -1073,7 +1073,7 @@ HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    ASSERT_EQ(ERR_NONE, sessionStageStub_->HandleCloseSpecificScene(data, reply));
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleCloseSpecificScene(data, reply));
 }
 } // namespace
 } // namespace Rosen
