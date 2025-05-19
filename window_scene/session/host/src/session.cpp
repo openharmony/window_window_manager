@@ -1772,8 +1772,15 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
             return;
         }
         frontLifeCycleTask = lifeCycleTaskQueue_.front();
+        if (frontLifeCycleTask->running) {
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
+            frontLifeCycleTask->name.c_str(), persistentId_);
+        frontLifeCycleTask->running = true;
+        frontLifeCycleTask->startTime = std::chrono::steady_clock::now();
     }
-    StartLifeCycleTask(frontLifeCycleTask);
+    PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
@@ -1805,20 +1812,15 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
             name.c_str(), persistentId_);
         frontlifeCycleTask = lifeCycleTaskQueue_.front();
+        if (frontlifeCycleTask->running) {
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
+            frontlifeCycleTask->name.c_str(), persistentId_);
+        frontlifeCycleTask->running = true;
+        frontlifeCycleTask->startTime = std::chrono::steady_clock::now();
     }
-    StartLifeCycleTask(frontlifeCycleTask);
-}
-
-void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
-{
-    if (lifeCycleTask->running) {
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
-        lifeCycleTask->name.c_str(), persistentId_);
-    lifeCycleTask->running = true;
-    lifeCycleTask->startTime = std::chrono::steady_clock::now();
-    PostTask(std::move(lifeCycleTask->task), lifeCycleTask->name);
+    PostTask(std::move(frontlifeCycleTask->task), frontlifeCycleTask->name);
 }
 
 WSError Session::TerminateSessionNew(

@@ -701,7 +701,6 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
