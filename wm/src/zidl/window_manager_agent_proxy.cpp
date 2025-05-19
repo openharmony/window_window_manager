@@ -186,6 +186,34 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     }
 }
 
+void WindowManagerAgentProxy::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateWindowDrawingContentInfo(
     const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
 {
@@ -463,6 +491,121 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
     }
+}
+
+void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(PropertyDirtyFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write PropertyDirtyFlags failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(windowInfoList.size()))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoList failed");
+        return;
+    }
+
+    for (const auto& windowInfo : windowInfoList) {
+        if (!data.WriteUint32(static_cast<uint32_t>(windowInfo.size()))) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfo failed");
+            return;
+        }
+
+        for (const auto& pair : windowInfo) {
+            if (!WriteWindowChangeInfoValue(data, pair)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write window change info value failed");
+                return;
+            }
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+    }
+}
+
+bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
+    const std::pair<WindowInfoKey, std::any>& windowInfoPair)
+{
+    if (!data.WriteInt32(static_cast<int32_t>(windowInfoPair.first))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoKey failed");
+        return false;
+    }
+    switch (windowInfoPair.first) {
+        case WindowInfoKey::WINDOW_ID: {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::any_cast<int32_t>(windowInfoPair.second))  )) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint32_t failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::BUNDLE_NAME :
+        case WindowInfoKey::ABILITY_NAME: {
+            if (!data.WriteString(std::any_cast<std::string>(windowInfoPair.second))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write string failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::APP_INDEX : {
+            if (!data.WriteInt32(std::any_cast<int32_t>(windowInfoPair.second))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write int32_t failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::VISIBILITY_STATE : {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::any_cast<WindowVisibilityState>(windowInfoPair.second)))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write WindowVisibilityState failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::DISPLAY_ID : {
+            if (!data.WriteUint64(std::any_cast<uint64_t>(windowInfoPair.second))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint64_t failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::RECT : {
+            Rect rect = std::any_cast<Rect>(windowInfoPair.second);
+            if (!data.WriteInt32(rect.posX_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
+                return false;
+            }
+            if (!data.WriteInt32(rect.posY_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posY failed");
+                return false;
+            }
+            if (!data.WriteUint32(rect.width_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Width failed");
+                return false;
+            }
+            if (!data.WriteUint32(rect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
+                return false;
+            }
+            break;
+        }
+        default : {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

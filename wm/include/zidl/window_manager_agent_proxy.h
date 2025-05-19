@@ -32,6 +32,7 @@ public:
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override;
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
+    void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId) override;
     void UpdateWindowModeTypeInfo(WindowModeType type) override;
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) override;
@@ -44,9 +45,12 @@ public:
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override;
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override;
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
+    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;
+    bool WriteWindowChangeInfoValue(MessageParcel& data, const std::pair<WindowInfoKey, std::any>& windowInfoPair);
 };
 } // namespace Rosen
 } // namespace OHOS

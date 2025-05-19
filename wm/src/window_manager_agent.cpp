@@ -83,5 +83,15 @@ void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVi
     SingletonContainer::Get<WindowManager>().NotifyWindowPidVisibilityChanged(info);
 }
 
+void WindowManagerAgent::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    SingletonContainer::Get<WindowManager>().NotifyDisplayIdChange(windowId, displayId);
+}
+
+void WindowManagerAgent::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
+}
 } // namespace Rosen
 } // namespace OHOS

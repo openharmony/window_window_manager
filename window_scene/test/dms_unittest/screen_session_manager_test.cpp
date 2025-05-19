@@ -5648,23 +5648,6 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, TestSize.L
 }
 
 /**
- * @tc.name: MultiScreenChangeOuter
- * @tc.desc: MultiScreenChangeOuter
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    EXPECT_EQ(ssm_->clientProxy_, nullptr);
-    std::string outerFlag = "2";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "0";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "1";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-}
-
-/**
  * @tc.name: UpdateValidArea
  * @tc.desc: UpdateValidArea
  * @tc.type: FUNC
@@ -6737,6 +6720,23 @@ HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest
     
     ssm_->AdaptSuperHorizonalBoot(session, id);
     EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
 }
 }
 } // namespace Rosen

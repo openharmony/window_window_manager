@@ -17,7 +17,9 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <any>
+#include <cmath>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -55,6 +57,7 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
+constexpr float POS_ZERO = 0.001f;
 }
 
 /**
@@ -1357,11 +1360,14 @@ enum class BackupAndRestoreType : int32_t {
  * @brief Windowinfokey
  */
 enum class WindowInfoKey : int32_t {
-    WINDOW_ID,
-    BUNDLE_NAME,
-    ABILITY_NAME,
-    APP_INDEX,
-    VISIBILITY_STATE,
+    NONE = 0,
+    WINDOW_ID = 1,
+    BUNDLE_NAME = 1 << 1,
+    ABILITY_NAME = 1 << 2,
+    APP_INDEX = 1 << 3,
+    VISIBILITY_STATE = 1 << 4,
+    DISPLAY_ID = 1 << 5,
+    RECT = 1 << 6,
 };
 
 /*
@@ -1377,6 +1383,123 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
+};
+
+/*
+ * @brief Enumerates window transition type.
+ */
+enum class WindowTransitionType : uint32_t {
+    /**
+     * window destroy.
+     */
+    DESTROY = 0,
+    
+    /**
+     * end type.
+     */
+    END,
+};
+
+/*
+ * @brief Enumerates window animation curve type.
+ */
+enum class WindowAnimationCurve : uint32_t {
+    /**
+     * animation curve type linear.
+     */
+    LINEAR = 0,
+
+    /**
+     * animation curve type interpolation_spring.
+     */
+    INTERPOLATION_SPRING = 1,
+};
+
+const uint32_t ANIMATION_PARAM_SIZE = 4;
+const uint32_t ANIMATION_MAX_DURATION = 3000;
+
+/*
+ * @brief Window transition animation configuration.
+ */
+struct WindowAnimationOptions : public Parcelable {
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    uint32_t duration = 0;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
+            return false;
+        }
+        if (param.size() > ANIMATION_PARAM_SIZE) {
+            return false;
+        }
+        for (auto p: param) {
+            if (!parcel.WriteFloat(p)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        uint32_t curve = 0;
+        if (!parcel.ReadUint32(curve)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
+        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
+            delete windowAnimationConfig;
+            return nullptr;
+        }
+        for (auto& param: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(param)) {
+                delete windowAnimationConfig;
+                return nullptr;
+            }
+        }
+        return windowAnimationConfig;
+    }
+};
+
+/*
+ * @brief Transition animation configuration.
+ */
+struct TransitionAnimation : public Parcelable {
+    WindowAnimationOptions config;
+    float opacity = 1.0f;
+    
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
+            return false;
+        }
+        return true;
+    }
+
+    static TransitionAnimation* Unmarshalling(Parcel& parcel)
+    {
+        TransitionAnimation* transitionAnimation = new TransitionAnimation();
+        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        std::shared_ptr<WindowAnimationOptions> animationConfig =
+            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
+        if (animationConfig == nullptr) {
+            delete transitionAnimation;
+            return nullptr;
+        }
+        transitionAnimation->config = *animationConfig;
+        return transitionAnimation;
+    }
 };
 
 /**
@@ -1417,6 +1540,122 @@ struct RotationChangeResult {
  */
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
+};
+
+/**
+ * @struct ShadowsInfo
+ *
+ * @brief window shadows info
+ */
+struct ShadowsInfo : public Parcelable {
+    float radius_;
+    std::string color_;
+    float offsetX_;
+    float offsetY_;
+    bool hasRadiusValue_ = false;
+    bool hasColorValue_ = false;
+    bool hasOffsetXValue_ = false;
+    bool hasOffsetYValue_ = false;
+
+    ShadowsInfo() {}
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+        bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
+        offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
+        hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}
+
+    bool operator==(const ShadowsInfo& other) const
+    {
+        return (NearEqual(radius_, other.radius_) && color_ == other.color_ &&
+            NearEqual(offsetX_, other.offsetX_) && NearEqual(offsetY_, other.offsetY_));
+    }
+
+    bool operator!=(const ShadowsInfo& other) const
+    {
+        return !this->operator==(other);
+    }
+
+    static inline bool NearEqual(float left, float right) { return std::abs(left - right) < POS_ZERO; }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(hasRadiusValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasColorValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasOffsetXValue_)) {
+            return false;
+        }
+
+        if (!parcel.WriteBool(hasOffsetYValue_)) {
+            return false;
+        }
+
+        if (hasRadiusValue_ && !parcel.WriteFloat(radius_)) {
+            return false;
+        }
+
+        if (hasColorValue_ && !parcel.WriteString(color_)) {
+            return false;
+        }
+
+        if (hasOffsetXValue_ && !parcel.WriteFloat(offsetX_)) {
+            return false;
+        }
+
+        if (hasOffsetYValue_ && !parcel.WriteFloat(offsetY_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static ShadowsInfo* Unmarshalling(Parcel& parcel)
+    {
+        ShadowsInfo* shadowsInfo = new ShadowsInfo();
+        if (!parcel.ReadBool(shadowsInfo->hasRadiusValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasColorValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasOffsetXValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (!parcel.ReadBool(shadowsInfo->hasOffsetYValue_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasRadiusValue_ && !parcel.ReadFloat(shadowsInfo->radius_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasColorValue_ && !parcel.ReadString(shadowsInfo->color_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasOffsetXValue_ && !parcel.ReadFloat(shadowsInfo->offsetX_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+
+        if (shadowsInfo->hasOffsetYValue_ && !parcel.ReadFloat(shadowsInfo->offsetY_)) {
+            delete shadowsInfo;
+            return nullptr;
+        }
+        return shadowsInfo;
+    }
 };
 }
 }

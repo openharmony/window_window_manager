@@ -87,6 +87,10 @@ struct SCBAbilityInfo {
     bool isAbilityHook_;
 };
 
+struct SCBApplicationInfo {
+    AppExecFwk::StartMode startMode_;
+};
+
 struct SessionIdentityInfo {
     std::string bundleName_;
     std::string moduleName_;
@@ -477,6 +481,7 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
+    void ConfigSupportFunctionType(SupportFunctionType funcType);
 
     /*
      * UIExtension
@@ -689,6 +694,10 @@ public:
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
+    WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
+    void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
+    sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
 
     /*
      * Window Pattern
@@ -702,6 +711,11 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
+    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t resourceId,
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
+    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid) override;
 
 protected:
     SceneSessionManager();
@@ -1133,6 +1147,8 @@ private:
     std::shared_mutex startingWindowMapMutex_;
     const size_t MAX_CACHE_COUNT = 100;
     std::map<std::string, std::map<std::string, StartingWindowInfo>> startingWindowMap_;
+    std::shared_mutex startingWindowColorFromAppMapMutex_;
+    std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> startingWindowColorFromAppMap_;
     std::unordered_map<std::string, AppForceLandscapeConfig> appForceLandscapeMap_;
     std::shared_mutex appForceLandscapeMutex_;
 
@@ -1402,6 +1418,16 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
+    void NotifyWindowPropertyChange(ScreenId screenId);
+    uint32_t observedFlags_ = 0;
+    uint32_t interestFlags_ = 0;
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
+        std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
 
     /*
      * Move Drag
@@ -1438,6 +1464,7 @@ private:
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
     std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
+    std::vector<RecentSessionInfo> recentMainSessionInfoList_;
 
     /*
      * Window Pattern
@@ -1445,6 +1472,8 @@ private:
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
@@ -1460,6 +1489,7 @@ private:
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
 };
 } // namespace OHOS::Rosen
 

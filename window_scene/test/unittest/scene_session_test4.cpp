@@ -889,9 +889,14 @@ HWTEST_F(SceneSessionTest4, SetSystemWindowEnableDrag01, TestSize.Level1)
     info.bundleName_ = "SetSystemWindowEnableDrag01";
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = session->SetSystemWindowEnableDrag(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = session->SetSystemWindowEnableDrag(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**

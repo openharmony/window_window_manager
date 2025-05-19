@@ -85,6 +85,26 @@
     },
     {
         "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipMainWindowId"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipTemplateType"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipRect"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipControlGroup"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipNapiEnv"
+    },
+    {
+        "first_instroduced":"20",
         "name":"OH_PictureInPicture_DeletePip"
     },
     {
@@ -105,19 +125,19 @@
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_SetPiPControlEnabled"
+        "name":"OH_PictureInPicture_SetPipControlEnabled"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_RegisterStartPipCallBack"
+        "name":"OH_PictureInPicture_RegisterStartPipCallback"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterStartPipCallBack"
+        "name":"OH_PictureInPicture_UnregisterStartPipCallback"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterAllStartPipCallBack"
+        "name":"OH_PictureInPicture_UnregisterAllStartPipCallbacks"
     },
     {
         "first_instroduced":"20",
@@ -129,19 +149,19 @@
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterAllLifeCycleListener"
+        "name":"OH_PictureInPicture_UnregisterAllLifeCycleListeners"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_RegisterPanelActionListener"
+        "name":"OH_PictureInPicture_RegisterControlEventListener"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterPanelActionListener"
+        "name":"OH_PictureInPicture_UnregisterControlEventListener"
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterAllPanelActionListener"
+        "name":"OH_PictureInPicture_UnregisterAllControlEventListeners"
     },
     {
         "first_instroduced":"20",
@@ -153,6 +173,6 @@
     },
     {
         "first_instroduced":"20",
-        "name":"OH_PictureInPicture_UnregisterAllResizeListener"
+        "name":"OH_PictureInPicture_UnregisterAllResizeListeners"
     }
 ]

@@ -364,7 +364,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestS
     EXPECT_EQ(true, window->property_->IsDecorEnable());
     window->property_->SetDecorEnable(false);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(false, window->property_->IsDecorEnable());
@@ -719,23 +719,23 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    ASSERT_NE(nullptr, window->property_);
+    EXPECT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    EXPECT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
     float brightness = -0.5f; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
     brightness = 2.0f; // brightness > 1
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5f;
     window->hostSession_ = session;
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
@@ -754,19 +754,23 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    EXPECT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
-    ASSERT_NE(nullptr, window->property_);
+    EXPECT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     float brightness = 0.5f;
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    res = window->SetBrightness(brightness);
+    EXPECT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
 }
@@ -1675,17 +1679,17 @@ HWTEST_F(WindowSessionImplTest, EnableDrag, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
     auto result = window->EnableDrag(true);
     ASSERT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     result = window->EnableDrag(true);
-    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     result = window->EnableDrag(true);
     ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }

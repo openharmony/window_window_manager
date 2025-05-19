@@ -904,6 +904,42 @@ HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
