@@ -1506,7 +1506,7 @@ HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
-    ASSERT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
+    EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen
