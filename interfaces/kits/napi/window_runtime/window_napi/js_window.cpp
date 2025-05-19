@@ -8332,7 +8332,7 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowShadowEnabled(enable));
-        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, enable: %{public}u, result: %{public}d", where, enable, ret);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, enable: %{public}u, result: %{public}d", where, enable, ret);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
