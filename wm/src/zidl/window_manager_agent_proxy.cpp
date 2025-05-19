@@ -493,7 +493,7 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
     }
 }
 
-void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     MessageParcel data;
@@ -503,8 +503,8 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyF
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint32(PropertyDirtyFlags)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write PropertyDirtyFlags failed");
+    if (!data.WriteUint32(propertyDirtyFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write propertyDirtyFlags failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(windowInfoList.size()))) {
@@ -601,7 +601,8 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             break;
         }
         default : {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey: %{public}d",
+                static_cast<int32_t>(windowInfoPair.first));
             return false;
         }
     }
