@@ -357,6 +357,15 @@ public:
      */
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
 
+    /**
+     * @brief notify display id change.
+     *
+     * @param windowId window id.
+     * @param displayid ID of the display where the window is located.
+     * @return WM_OK means notify success, others means notify failed.
+     */
+    WMError NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();

@@ -16,6 +16,7 @@
 #include "window_session_impl.h"
 
 #include <gtest/gtest.h>
+#include <transaction/rs_transaction.h>
 
 #include "ability_context_impl.h"
 #include "display_info.h"
@@ -27,6 +28,15 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -2057,6 +2067,70 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
     EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
               WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: RegisterKeyboardWillShowListener
+ * @tc.desc: RegisterKeyboardWillShowListener UnregisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+    window_->RegisterKeyboardWillShowListener(listener);
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    window_->RegisterKeyboardWillShowListener(listener);
+
+    EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RegisterKeyboardWillHideListener
+ * @tc.desc: RegisterKeyboardWillHideListener UnregisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->RegisterKeyboardWillHideListener(listener);
+ 
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    window_->RegisterKeyboardWillHideListener(listener);
+ 
+    EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+    window_->RegisterKeyboardWillShowListener(listener);
+    sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->RegisterKeyboardWillHideListener(listener1);
+    
+    KeyboardAnimationInfo animationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);
+    animationInfo.isShow = true;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    animationInfo.isShow = false;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+
+    EXPECT_TRUE(logMsg.find("handler is nullptr") == std::string::npos);
 }
 } // namespace
 } // namespace Rosen

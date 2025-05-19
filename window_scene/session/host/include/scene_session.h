@@ -131,6 +131,7 @@ using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<Scene
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
+using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -254,8 +255,8 @@ public:
     virtual bool IsNeedCrossDisplayRendering() const { return false; }
 
     virtual void OpenKeyboardSyncTransaction() {}
-    virtual void CloseKeyboardSyncTransaction(uint32_t callingId, const WSRect& keyboardPanelRect,
-        bool isKeyboardShow) {}
+    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
+        bool isKeyboardShow, const WindowAnimationInfo& animationInfo) {}
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
@@ -602,6 +603,7 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WMError NotifyDisableDelegatorChange() override;
+    virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
 
     /*
      * Window Decor
@@ -747,6 +749,10 @@ public:
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& beginRect, const WSRect& endRect);
+    void NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const WSRect& beginRect, const WSRect& endRect,
+        bool withAnimation, const std::shared_ptr<RSTransaction>& rsTransaction);
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
 
@@ -766,11 +772,25 @@ public:
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
     void SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow);
     bool GetIsAncoForFloatingWindow() const;
+    void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     /*
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+
+    /*
+     * Window LifeCycle
+     */
+    void UpdateNonInteractiveInner();
+
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    void SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&& func);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -914,8 +934,6 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(uint32_t callingId, const std::shared_ptr<RSTransaction>& rsTransaction) {}
     bool keyboardAvoidAreaActive_ = true;
-    std::atomic<bool> isKeyboardDidShowRegistered_ = false;
-    std::atomic<bool> isKeyboardDidHideRegistered_ = false;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -953,7 +971,7 @@ private:
     /*
      * Move Drag
      */
-    void HandleMoveDragSurfaceNode(SizeChangeReason reason);
+    virtual void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
@@ -1074,6 +1092,7 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    void NotifyExtensionSecureLimitChange(bool isLimit);
 
     /*
      * PiP Window
@@ -1117,6 +1136,7 @@ private:
     void HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId);
     virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
     virtual void RemoveSurfaceNodeFromScreen() {}
+    void SetParentRect();
 
     /*
      * Window Decor
@@ -1256,6 +1276,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
+    NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
 
     /*
      * PC Window Sidebar Blur
@@ -1270,6 +1291,11 @@ private:
     */
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
     bool isUserRequestedExit_ = false;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

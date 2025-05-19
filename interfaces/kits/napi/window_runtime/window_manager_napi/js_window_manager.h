@@ -51,6 +51,7 @@ public:
     static napi_value GetVisibleWindowInfo(napi_env env, napi_callback_info info);
     static napi_value GetWindowsByCoordinate(napi_env env, napi_callback_info info);
     static napi_value ShiftAppWindowPointerEvent(napi_env env, napi_callback_info info);
+    static napi_value SetStartWindowBackgroundColor(napi_env env, napi_callback_info info);
 
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
@@ -73,6 +74,7 @@ private:
     static napi_value OnGetVisibleWindowInfo(napi_env env, napi_callback_info info);
     static napi_value OnGetWindowsByCoordinate(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowPointerEvent(napi_env env, napi_callback_info info);
+    static napi_value OnSetStartWindowBackgroundColor(napi_env env, napi_callback_info info);
     static bool ParseRequiredConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(

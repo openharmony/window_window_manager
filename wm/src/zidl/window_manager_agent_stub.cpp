@@ -115,6 +115,20 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateWindowVisibilityInfo(infos);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID: {
+            uint32_t windowId = 0;
+            if (!data.ReadUint32(windowId)) {
+                WLOGFE("read windowId failed");
+                return ERR_INVALID_DATA;
+            }
+            DisplayId displayId = -1ULL;
+            if (!data.ReadUint64(displayId)) {
+                WLOGFE("read displayId failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyDisplayIdChange(windowId, displayId);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE: {
             std::vector<sptr<WindowDrawingContentInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowDrawingContentInfo>(data, infos)) {
@@ -201,11 +215,130 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyCallingWindowDisplayChanged(*callingWindowInfo);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE: {
+            uint32_t propertyDirtyFlags = 0;
+            if (!data.ReadUint32(propertyDirtyFlags)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read propertyDirtyFlags failed");
+                return ERR_INVALID_DATA;
+            }
+
+            std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+            if (!ReadWindowInfoList(data, windowInfoList)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfoList.");
+                return ERR_INVALID_DATA;
+            }
+            NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return ERR_NONE;
+}
+
+bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
+    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    uint32_t WindowInfoListLength = 0;
+    if (!data.ReadUint32(WindowInfoListLength)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowInfoLength failed");
+        return false;
+    }
+    size_t WindowInfoListSize = static_cast<size_t>(WindowInfoListLength);
+
+    for (size_t i = 0; i < WindowInfoListSize; i++) {
+        uint32_t windowInfoLength = 0;
+        if (!data.ReadUint32(windowInfoLength)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoLength failed");
+            return false;
+        }
+        size_t windowInfoSize = static_cast<size_t>(windowInfoLength);
+        std::unordered_map<WindowInfoKey, std::any> windowInfo;
+        for (size_t j = 0; j < windowInfoSize; j++) {
+            if (!ReadWindowInfo(data, windowInfo)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
+                return false;
+            }
+        }
+        windowInfoList.emplace_back(windowInfo);
+    }
+    return true;
+}
+
+bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
+    std::unordered_map<WindowInfoKey, std::any>& windowInfo)
+{
+    int32_t WindowInfoKeyValue = 0;
+    if (!data.ReadInt32(WindowInfoKeyValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowInfoKeyValue failed");
+        return false;
+    }
+
+    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(WindowInfoKeyValue);
+    switch (windowInfoKey) {
+        case WindowInfoKey::WINDOW_ID : {
+            uint32_t value = 0;
+            if (!data.ReadUint32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read uint32_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::BUNDLE_NAME :
+        case WindowInfoKey::ABILITY_NAME : {
+            std::string value;
+            if (!data.ReadString(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read string failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::APP_INDEX : {
+            int32_t value = 0;
+            if (!data.ReadInt32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read int32_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::VISIBILITY_STATE : {
+            uint32_t value = 0;
+            if (!data.ReadUint32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowVisibilityState failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = static_cast<WindowVisibilityState>(value);
+            break;
+        }
+        case WindowInfoKey::DISPLAY_ID : {
+            uint64_t value = 0;
+            if (!data.ReadUint64(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read uint64_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::RECT : {
+            Rect rect;
+            if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+                !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read Rect failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = rect;
+            break;
+        }
+        default : {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "unknown WindowInfoKey");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

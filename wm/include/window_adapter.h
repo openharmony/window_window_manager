@@ -66,6 +66,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
@@ -141,6 +145,8 @@ public:
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
     virtual WMError SetForegroundWindowNum(int32_t windowNum);
+    virtual WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid);
 
     /*
      * Window Recover
@@ -181,6 +187,10 @@ public:
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
     virtual WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
+    /*
+     * Window Pattern
+     */
+    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

@@ -148,6 +148,14 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
     }
 }
 
+void SessionManagerAgentController::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID)) {
+        agent->NotifyDisplayIdChange(windowId, displayId);
+    }
+}
+
 void SessionManagerAgentController::UpdateVisibleWindowNum(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
@@ -262,6 +270,17 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PIP)) {
         if (agent != nullptr) {
             agent->UpdatePiPWindowStateChanged(bundleName, isForeground);
+        }
+    }
+}
+
+void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {
+        if (agent != nullptr) {
+            agent->NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
         }
     }
 }

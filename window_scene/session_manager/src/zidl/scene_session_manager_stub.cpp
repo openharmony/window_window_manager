@@ -59,6 +59,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRegisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT):
             return HandleUnregisterWindowManagerAgent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT):
+            return HandleRegisterWindowPropertyChangeAgent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT):
+            return HandleUnregisterWindowPropertyChangeAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO):
             return HandleGetFocusSessionInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL):
@@ -218,6 +222,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR):
+            return HandleShiftAppWindowPointerEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
@@ -228,6 +234,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO):
             return HandleGetHostWindowCompatiblityInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
+            return HandleSetImageForRecent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -490,6 +498,54 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRegisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowInfoKeyValue = 0;
+    if (!data.ReadInt32(windowInfoKeyValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window info key value failed");
+        return ERR_INVALID_DATA;
+    }
+    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(windowInfoKeyValue);
+
+    uint32_t interestInfo = 0;
+    if (!data.ReadUint32(interestInfo)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read interest info failed");
+        return ERR_INVALID_DATA;
+    }
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+        iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgentProxy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUnregisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowInfoKeyValue = 0;
+    if (!data.ReadInt32(windowInfoKeyValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window info key value failed");
+        return ERR_INVALID_DATA;
+    }
+    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(windowInfoKeyValue);
+
+    uint32_t interestInfo = 0;
+    if (!data.ReadUint32(interestInfo)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read interest info failed");
+        return ERR_INVALID_DATA;
+    }
+
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+    sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+    sptr<IWindowManagerAgent> windowManagerAgentProxy =
+        iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    WMError errCode = UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1814,6 +1870,31 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply)
+{
+    int imgResourceId = 0;
+    if (!data.ReadInt32(imgResourceId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read imgResourceId failed.");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t imageFit;
+    if (!data.ReadUint32(imageFit)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
+        return ERR_INVALID_DATA;
+    }
+    int persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetImageForRecent(imgResourceId, static_cast<ImageFit>(imageFit), persistentId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -1946,6 +2027,36 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply)
+{
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read moduleName failed");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read abilityName failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t color;
+    if (!data.ReadUint32(color)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read color failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t uid;
+    if (!data.ReadInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read uid failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetStartWindowBackgroundColor(moduleName, abilityName, color, uid);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
