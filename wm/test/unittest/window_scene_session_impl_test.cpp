@@ -1836,9 +1836,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_EQ(false, window->SetWindowShadowEnabled(false));
-    EXPECT_EQ(true, window->SetWindowShadowEnabled(true));
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
+    EXPECT_EQ(true, window->GetWindowShadowEnabled());
 }
 
 /**
