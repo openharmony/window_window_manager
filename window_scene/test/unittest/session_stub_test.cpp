@@ -1463,7 +1463,7 @@ HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level
     data.WriteParcelable(&infoParcel);
     data.WriteUint32(1);
     auto result = session_->HandleSetSubWindowSource(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

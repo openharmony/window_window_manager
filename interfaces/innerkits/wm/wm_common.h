@@ -2710,7 +2710,7 @@ struct RecentSessionInfo : public Parcelable {
  * @brief Enumerates source of sub session.
  */
 enum class SubWindowSource : uint32_t {
-    SUB_WINDOW_SOURCE_DEFAULT = 0,
+    SUB_WINDOW_SOURCE_UNKNOWN = 0,
     SUB_WINDOW_SOURCE_ARKUI = 1,
 };
 }

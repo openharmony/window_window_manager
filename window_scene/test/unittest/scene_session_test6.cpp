@@ -587,8 +587,8 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
-    // test set SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT
-    sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_DEFAULT;
+    // test set SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN
+    sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     ASSERT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
 }
