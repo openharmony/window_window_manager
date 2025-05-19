@@ -834,7 +834,7 @@ HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     sessionStage_->CloseSpecificScene();
-    ASSERT_NE(nullptr, sessionStage_);
+    EXPECT_NE(nullptr, sessionStage_);
 }
 } // namespace
 } // namespace Rosen

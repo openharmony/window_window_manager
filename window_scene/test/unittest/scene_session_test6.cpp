@@ -568,10 +568,10 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSourceFunc, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSubWindowSourceFunc(nullptr);
-    ASSERT_EQ(nullptr, sceneSession->subWindowSourceFunc_);
+    EXPECT_EQ(nullptr, sceneSession->subWindowSourceFunc_);
     NotifySetSubWindowSourceFunc func = [](SubWindowSource source) {};
     sceneSession->SetSubWindowSourceFunc(std::move(func));
-    ASSERT_NE(nullptr, sceneSession->subWindowSourceFunc_);
+    EXPECT_NE(nullptr, sceneSession->subWindowSourceFunc_);
 }
 
 /**
@@ -590,7 +590,7 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     // test set SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN
     sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
-    ASSERT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
 }
 } // namespace
 } // namespace Rosen
