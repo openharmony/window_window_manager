@@ -1232,6 +1232,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetViewKeepScreenOn(parcel.ReadBool());
+    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
@@ -1599,6 +1600,11 @@ void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
 {
     SetViewKeepScreenOn(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
