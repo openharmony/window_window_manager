@@ -6213,11 +6213,12 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (!GetHostSession()) {
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    WSError ret = GetHostSession()->SetSubWindowSource(source);
+    WSError ret = hostSession->SetSubWindowSource(source);
     if (ret == WSError::WS_ERROR_INVALID_WINDOW) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
