@@ -66,10 +66,10 @@ private:
     WMError ProcessControlEventRegister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessSizeChangeRegister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessPipStartRegister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessStateChangeUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessControlEventUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessStateChangeUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessControlEventUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
     void UnregisterAll(ListenerType type);
     WMError CreateWebPipController();
