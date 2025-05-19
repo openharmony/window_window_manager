@@ -824,6 +824,18 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->CloseSpecificScene();
+    EXPECT_NE(nullptr, sessionStage_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

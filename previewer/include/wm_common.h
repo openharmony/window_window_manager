@@ -1591,6 +1591,14 @@ struct ShadowsInfo : public Parcelable {
         return shadowsInfo;
     }
 };
+
+/**
+ * @brief Enumerates source of sub session.
+ */
+enum class SubWindowSource : uint32_t {
+    SUB_WINDOW_SOURCE_UNKNOWN = 0,
+    SUB_WINDOW_SOURCE_ARKUI = 1,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
