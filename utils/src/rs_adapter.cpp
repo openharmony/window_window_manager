@@ -537,6 +537,16 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
           RSAdapterUtil::RSUIContextToStr(originalRSUIContext).c_str());
 }
 
+void RSAdapterUtil::SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
+                                                bool skipCheckInMultiInstance)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    RETURN_IF_PARAM_IS_NULL(rsNode);
+    rsNode->SetSkipCheckInMultiInstance(skipCheckInMultiInstance);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, skipCheckInMultiInstance = %{public}d",
+          RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance);
+}
+
 const std::shared_ptr<RSBaseNode> RSAdapterUtil::GetRSNode(
     const std::shared_ptr<RSUIContext>& rsUIContext, NodeId id)
 {

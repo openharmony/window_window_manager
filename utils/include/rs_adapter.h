@@ -183,6 +183,8 @@ public:
     static void SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                const std::shared_ptr<RSUIContext>& rsUIContext,
                                bool skipCheckInMultiInstance = false);
+    static void SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
+                                            bool skipCheckInMultiInstance);
     static const std::shared_ptr<RSBaseNode> GetRSNode(
         const std::shared_ptr<RSUIContext>& rsUIContext, NodeId id);
     static std::string RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext);
@@ -190,7 +192,8 @@ public:
     static std::string RSUIDirectorToStr(const std::shared_ptr<RSUIDirector>& rsUIDirector);
 };
 
-inline void RunIfRSClientMultiInstanceEnabled(const std::function<void()>& action) {
+inline void RunIfRSClientMultiInstanceEnabled(const std::function<void()>& action)
+{
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
     action();
 }
