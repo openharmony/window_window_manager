@@ -846,13 +846,14 @@ void JsSceneSession::ProcessWindowShadowEnableChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session: %{public}d is null", persistentId_);
         return;
     }
-    session->RegisterWindowShadowEnableChangeCallback([weakThis = wptr(this)](bool isEnabled) {
+    const char* const where = __func__;
+    session->RegisterWindowShadowEnableChangeCallback([weakThis = wptr(this), where](bool isEnabled) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "ProcessWindowShadowEnableChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnWindowShadowEnableChange(isEnabled);
@@ -862,23 +863,26 @@ void JsSceneSession::ProcessWindowShadowEnableChangeRegister()
 
 void JsSceneSession::OnWindowShadowEnableChange(bool isEnabled)
 {
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isEnabled, env = env_] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isEnabled, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnWindowShadowEnableChange id: %{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s jsSceneSession: %{public}d is null", where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(WINDOW_SHADOW_ENABLE_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnWindowShadowEnableChange jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s jsCallBack is nullptr", where);
             return;
         }
         napi_value paramsObj = CreateJsValue(env, isEnabled);
+        if (paramsObj == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s params obj is null", where);
+        }
         napi_value argv[] = {paramsObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnWindowShadowEnableChange");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()

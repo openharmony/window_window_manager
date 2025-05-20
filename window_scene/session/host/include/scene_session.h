@@ -1014,7 +1014,7 @@ private:
     /*
      * Window Property
      */
-    NotifyWindowShadowEnableChangeFunc onWindowShadowEnableChange_;
+    NotifyWindowShadowEnableChangeFunc onWindowShadowEnableChangeFunc_;
     void NotifyPrivacyModeChange();
 
 #ifdef DEVICE_STATUS_ENABLE

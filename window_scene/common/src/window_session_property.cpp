@@ -1432,11 +1432,6 @@ bool WindowSessionProperty::WriteActionUpdateViewKeepScreenOn(Parcel& parcel)
     return parcel.WriteBool(viewKeepScreenOn_);
 }
 
-bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
-{
-    return parcel.WriteBool(windowShadowEnabled_);
-}
-
 bool WindowSessionProperty::WriteActionUpdateFocusable(Parcel& parcel)
 {
     return parcel.WriteBool(focusable_);
@@ -1580,6 +1575,11 @@ bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
     return parcel.WriteBool(isFollowScreenChange_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    return parcel.WriteBool(windowShadowEnabled_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1604,11 +1604,6 @@ void WindowSessionProperty::ReadActionUpdateKeepScreenOn(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateViewKeepScreenOn(Parcel& parcel)
 {
     SetViewKeepScreenOn(parcel.ReadBool());
-}
-
-void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
-{
-    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::ReadActionUpdateFocusable(Parcel& parcel)
@@ -1754,6 +1749,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
 void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 {
     SetFollowScreenChange(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
