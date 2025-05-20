@@ -2797,6 +2797,18 @@ public:
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
 
+    /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param name type of system bar
+     * @param enable is system bar enabled
+     * @param enableAnimation is animation enabled
+     */
+    virtual WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation)
+    {
+        return WMError::WM_OK;
+    }
+
     /*
      * @brief Set System Bar Property for page
      *
@@ -3561,7 +3573,7 @@ public:
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
-    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+    virtual WMError GetGestureBackEnabled(bool& enable) const { return WMError::WM_OK; }
 
     /**
      * @brief this interface is invoked by the ACE to the native host.

@@ -652,6 +652,20 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: WindowAdapter/GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+}
+
+/**
  * @tc.name: GetWindowStyleType
  * @tc.desc: WindowAdapter/GetWindowStyleType
  * @tc.type: FUNC

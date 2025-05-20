@@ -12983,6 +12983,18 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return WSError::WS_OK;
 }
 
+WSError SceneSessionManager::GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
+    auto sceneSession = GetSceneSession(hostWindowId);
+    if (sceneSession == nullptr) {
+        TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    sceneSession->GetGlobalScaledRect(globalScaledRect);
+    return WSError::WS_OK;
+}
+
 int32_t SceneSessionManager::ReclaimPurgeableCleanMem()
 {
 #ifdef MEMMGR_WINDOW_ENABLE
