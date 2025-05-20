@@ -1669,7 +1669,7 @@ int SessionStub::HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel&
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
-    if (!keyFramePolicy) {
+    if (keyFramePolicy == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
         return ERR_INVALID_DATA;
     }
