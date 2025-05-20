@@ -1800,13 +1800,13 @@ HWTEST_F(SceneSessionManagerTest5, SetDelayRemoveSnapshot, TestSize.Level1)
  * @tc.desc: GetTopFloatingSession Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level3)
 {
     ssm_->sceneSessionMap_.clear();
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
-    info.abilityName_ = "RequestSessionUnfocus02";
-    info.bundleName_ = "RequestSessionUnfocus02";
+    info.abilityName_ = "GetTopFloatingSession";
+    info.bundleName_ = "GetTopFloatingSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->persistentId_ = 1;
     sceneSession->zOrder_ = 1;
@@ -1814,17 +1814,17 @@ HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level1)
     ssm_->SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
 
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession1->persistentId_ = 1;
-    sceneSession1->zOrder_ = 1;
+    sceneSession1->persistentId_ = 2;
+    sceneSession1->zOrder_ = 2;
     sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
     sceneSession1->SetFocusable(true);
     sceneSession1->isVisible_ = true;
-    sptr<SceneSession> result = ssm->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
+    sptr<SceneSession> result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
     ASSERT_EQ(result, nullptr);
     sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
-    result = ssm->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
+    result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
     ASSERT_NE(result, nullptr);
     ASSERT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
 }
@@ -1849,11 +1849,11 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist T
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     sptr<SceneSession> result =
-        ssm->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+        ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
-    result = ssm->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(result, nullptr);
@@ -1866,13 +1866,13 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist T
     sceneSession1->isVisible_ = true;
     sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
 
-    sceneSession->property->SetWindowType(WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
-    result = ssm->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_EQ(result, nullptr);
-    sceneSession->property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
-    result = ssm->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_NE(result, nullptr);
     ASSERT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
 }
