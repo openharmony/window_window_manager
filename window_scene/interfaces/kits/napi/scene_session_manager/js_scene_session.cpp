@@ -878,6 +878,7 @@ void JsSceneSession::OnWindowShadowEnableChange(bool isEnabled)
         napi_value paramsObj = CreateJsValue(env, isEnabled);
         if (paramsObj == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s params obj is null", where);
+            return;
         }
         napi_value argv[] = {paramsObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
