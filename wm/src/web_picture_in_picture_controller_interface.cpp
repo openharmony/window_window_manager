@@ -218,7 +218,7 @@ WMError WebPictureInPictureControllerInterface::StopPip()
     if (auto pipController = sptrWebPipController_) {
         return pipController->StopPictureInPictureFromClient();
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
 }
@@ -229,7 +229,7 @@ WMError WebPictureInPictureControllerInterface::UpdateContentSize(int32_t width,
         pipController->UpdateContentSize(width, height);
         return WMError::WM_OK;
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
 }
@@ -239,7 +239,7 @@ void WebPictureInPictureControllerInterface::UpdatePiPControlStatus(PiPControlTy
     if (auto pipController = sptrWebPipController_) {
         pipController->UpdatePiPControlStatus(controlType, status);
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return;
     }
 }
@@ -250,7 +250,7 @@ void WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlType
         pipController->UpdatePiPControlStatus(controlType,
             enabled ? PiPControlStatus::ENABLED : PiPControlStatus::DISABLED);
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return;
     }
 }
@@ -287,13 +287,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterStartPipListener(Nativ
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return UnregisterListenerWithType(ListenerType::PIP_START_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return UnregisterListenerWithType(ListenerType::PIP_START_CB, listener);
 }
 
 
@@ -329,13 +324,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterLifeCycleListener(Nati
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return UnregisterListenerWithType(ListenerType::STATE_CHANGE_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return UnregisterListenerWithType(ListenerType::STATE_CHANGE_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(NativePipControlEventCallback callback)
@@ -370,13 +360,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterControlEventListener(N
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return UnregisterListenerWithType(ListenerType::CONTROL_EVENT_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return UnregisterListenerWithType(ListenerType::CONTROL_EVENT_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePipResizeCallback callback)
@@ -411,13 +396,8 @@ WMError WebPictureInPictureControllerInterface::UnregisterResizeListener(NativeP
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return UnregisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return UnregisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
 }
 
 
@@ -465,6 +445,10 @@ WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(Listene
 WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(ListenerType type,
     const sptr<NativePiPWindowListener>& listener)
 {
+    if (sptrWebPipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "New NativePiPWindowListener failed");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
@@ -505,85 +489,55 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
 {
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
-    if (auto pipController = sptrWebPipController_) {
-        UnregisterAll(ListenerType::STATE_CHANGE_CB);
-        return WMError::WM_OK;
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    return UnregisterAll(ListenerType::STATE_CHANGE_CB);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver()
 {
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
-    if (auto pipController = sptrWebPipController_) {
-        UnregisterAll(ListenerType::CONTROL_EVENT_CB);
-        return WMError::WM_OK;
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    return UnregisterAll(ListenerType::CONTROL_EVENT_CB);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
 {
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
-    if (auto pipController = sptrWebPipController_) {
-        UnregisterAll(ListenerType::SIZE_CHANGE_CB);
-        return WMError::WM_OK;
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
+    return UnregisterAll(ListenerType::SIZE_CHANGE_CB);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPStart()
 {
+    return UnregisterAll(ListenerType::PIP_START_CB);
+}
+
+WMError WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
+{
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
+    }
     if (auto pipController = sptrWebPipController_) {
-        UnregisterAll(ListenerType::PIP_START_CB);
+        switch (type) {
+            case ListenerType::STATE_CHANGE_CB:
+                lifeCycleCallbackSet_.clear();
+                pipController->UnregisterAllPiPLifecycle();
+                break;
+            case ListenerType::CONTROL_EVENT_CB:
+                controlEventCallbackSet_.clear();
+                pipController->UnregisterAllPiPControlObserver();
+                break;
+            case ListenerType::SIZE_CHANGE_CB:
+                resizeCallbackSet_.clear();
+                pipController->UnregisterAllPiPWindowSize();
+                break;
+            case ListenerType::PIP_START_CB:
+                startPipCallbackSet_.clear();
+                pipController->UnregisterAllPiPStart();
+                break;
+            default:
+                break;
+        }
         return WMError::WM_OK;
     } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
-}
-
-void WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
-{
-    switch (type) {
-        case ListenerType::STATE_CHANGE_CB:
-            lifeCycleCallbackSet_.clear();
-            sptrWebPipController_->UnregisterAllPiPLifecycle();
-            break;
-        case ListenerType::CONTROL_EVENT_CB:
-            controlEventCallbackSet_.clear();
-            sptrWebPipController_->UnregisterAllPiPControlObserver();
-            break;
-        case ListenerType::SIZE_CHANGE_CB:
-            resizeCallbackSet_.clear();
-            sptrWebPipController_->UnregisterAllPiPWindowSize();
-            break;
-        case ListenerType::PIP_START_CB:
-            startPipCallbackSet_.clear();
-            sptrWebPipController_->UnregisterAllPiPStart();
-            break;
-        default:
-            break;
     }
 }
 
