@@ -57,6 +57,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
 
     /*
      * Window Hierarchy
