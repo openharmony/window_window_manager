@@ -1179,7 +1179,7 @@ void SceneSession::RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEn
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
             return;
         }
-        session->onWindowShadowEnableChange_ = std::move(callback);
+        session->onWindowShadowEnableChangeFunc_ = std::move(callback);
     }, __func__);
 }
 
@@ -4255,9 +4255,9 @@ WSError SceneSession::SetWindowShadowEnabled(bool isEnabled)
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}d", where, isEnabled);
-        if (session->onWindowShadowEnableChange_) {
-            session->onWindowShadowEnableChange_(isEnabled);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}u", where, isEnabled);
+        if (session->onWindowShadowEnableChangeFunc_) {
+            session->onWindowShadowEnableChangeFunc_(isEnabled);
         }
     }, __func__);
     return WSError::WS_OK;
