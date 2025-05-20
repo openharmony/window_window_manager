@@ -3838,6 +3838,21 @@ public:
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable window shadow.
+     *
+     * @param isEnabled Enable or disable window shadow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window shadow is enabled.
+     *
+     * @return True means window shadow is enabled.
+     */
+    virtual bool GetWindowShadowEnabled() const { return false; }
+
+    /**
      * @brief Set the transition animation.
      *
      * @param transitionType window transition type.

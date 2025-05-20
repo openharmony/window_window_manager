@@ -1806,6 +1806,49 @@ HWTEST_F(WindowSceneSessionImplTest, SetViewKeepScreenOn02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowShadowEnabled01
+ * @tc.desc: Window is Invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetBundleName("SetWindowShadowEnabled");
+    option->SetWindowName("SetWindowShadowEnabled");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = nullptr;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowShadowEnabled(true));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->containerColorList_.insert("abc");
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, window->SetWindowShadowEnabled(true));
+
+    window->containerColorList_.insert("SetWindowShadowEnabled");
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowShadowEnabled(true));
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetWindowShadowEnabled(true));
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
+    EXPECT_EQ(true, window->GetWindowShadowEnabled());
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(false, window->GetWindowShadowEnabled());
+}
+
+/**
  * @tc.name: SetPrivacyMode01
  * @tc.desc: SetPrivacyMode as true
  * @tc.type: FUNC

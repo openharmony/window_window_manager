@@ -95,6 +95,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -168,6 +170,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -540,6 +544,16 @@ void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
 bool WindowSessionProperty::IsViewKeepScreenOn() const
 {
     return viewKeepScreenOn_;
+}
+
+void WindowSessionProperty::SetWindowShadowEnabled(bool isEnabled)
+{
+    windowShadowEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::GetWindowShadowEnabled() const
+{
+    return windowShadowEnabled_;
 }
 
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
@@ -1158,7 +1172,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
-        parcel.WriteBool(isSnapshotSkip_) &&
+        parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
@@ -1225,6 +1239,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
+    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
@@ -1312,6 +1327,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     viewKeepScreenOn_ = property->viewKeepScreenOn_;
+    windowShadowEnabled_ = property->windowShadowEnabled_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1559,6 +1575,11 @@ bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
     return parcel.WriteBool(isFollowScreenChange_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    return parcel.WriteBool(windowShadowEnabled_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1728,6 +1749,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
 void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 {
     SetFollowScreenChange(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
