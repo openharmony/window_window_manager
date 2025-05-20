@@ -1834,7 +1834,7 @@ HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level3)
  * @tc.desc: GetNextFocusableSessionWhenFloatWindowExist Test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, TestSize.Level3)
 {
     ssm_->sceneSessionMap_.clear();
     ASSERT_NE(ssm_, nullptr);
