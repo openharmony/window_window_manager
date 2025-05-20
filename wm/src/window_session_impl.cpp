@@ -1832,7 +1832,7 @@ WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFrameP
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     auto session = GetHostSession();
-    if (!session) {
+    if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
