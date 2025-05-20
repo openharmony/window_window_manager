@@ -419,6 +419,7 @@ public:
         }
         return true;
     }
+
     template<class T>
     bool ParseJsValueOrGetDefault(napi_value jsObject, napi_env env,
         const std::string& name, T& data, const T& defaultVal)
@@ -437,6 +438,7 @@ public:
         }
         return true;
     }
+
     template<class T>
     inline bool ConvertNativeValueToVector(napi_env env, napi_value nativeArray, std::vector<T>& out)
     {
