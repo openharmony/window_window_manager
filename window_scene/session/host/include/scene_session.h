@@ -132,8 +132,8 @@ using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>
 using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChange)>;
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
+using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowEnabled)>;
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
-
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -326,6 +326,7 @@ public:
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     WSError SetViewKeepScreenOn(bool keepScreenOn);
+    WSError SetWindowShadowEnabled(bool isEnabled);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
     void SetPrivacyMode(bool isPrivacy);
@@ -482,6 +483,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     bool IsViewKeepScreenOn() const;
+    bool GetWindowShadowEnabled() const;
     bool IsShowWhenLocked() const;
     bool GetShowWhenLockedFlagValue() const;
     bool IsFloatingWindowAppType() const;
@@ -778,6 +780,7 @@ public:
     bool GetIsAncoForFloatingWindow() const;
     void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
+    void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
 
     /*
      * Window Pattern
@@ -1011,6 +1014,7 @@ private:
     /*
      * Window Property
      */
+    NotifyWindowShadowEnableChangeFunc onWindowShadowEnableChangeFunc_;
     void NotifyPrivacyModeChange();
 
 #ifdef DEVICE_STATUS_ENABLE
@@ -1093,6 +1097,8 @@ private:
     WMError HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateFollowScreenChange(const sptr<WindowSessionProperty>& property,
+            WSPropertyChangeAction action);
+    WMError HandleActionUpdateWindowShadowEnabled(const sptr<WindowSessionProperty>& property,
             WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
