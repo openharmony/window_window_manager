@@ -159,18 +159,15 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
     }
     TLOGI(WmsLogTag::WMS_PIP, "SetSurfaceId: %{public}s", surfaceId.c_str());
     pipController->SetSurfaceId(surfaceId);
-    if (!isAllDigits(surfaceId) || sizeof(surfaceId) > sizeof(std::to_string(UINT64_MAX)) ||
-        surfaceId > std::to_string(UINT64_MAX)) {
-        TLOGE(WmsLogTag::WMS_PIP, "surfaceId error: %{public}s", surfaceId.c_str());
-        return NapiGetUndefined(env);
-    }
+    uint64_t id;
+    std::isstringstream inputStream(surfaceId.c_str());
+    inputStream >> id;
     for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
             continue;
         }
-        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(),
-            atoll(surfaceId.c_str()));
+        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), id);
     }
     return NapiGetUndefined(env);
 }
