@@ -231,6 +231,7 @@ public:
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
 
@@ -440,6 +441,7 @@ private:
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowShadowEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen

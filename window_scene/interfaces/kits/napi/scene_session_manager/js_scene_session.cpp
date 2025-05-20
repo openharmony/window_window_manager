@@ -39,6 +39,7 @@ const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatu
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
 const std::string UPDATE_PIP_TEMPLATE_INFO_CB = "updatePiPTemplateInfo";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
+const std::string WINDOW_ANCHOR_INFO_CHANGE_CB = "windowAnchorInfoChange";
 const std::string FOLLOW_PARENT_RECT_CB = "followParentRect";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
@@ -194,6 +195,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_PIP_TEMPLATE_INFO_CB,           ListenerFuncType::UPDATE_PIP_TEMPLATE_INFO_CB},
     {UPDATE_FOLLOW_SCREEN_CHANGE_CB,        ListenerFuncType::UPDATE_FOLLOW_SCREEN_CHANGE_CB},
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
+    {WINDOW_ANCHOR_INFO_CHANGE_CB,          ListenerFuncType::WINDOW_ANCHOR_INFO_CHANGE_CB},
     {SET_WINDOW_SHADOWS_CB,                 ListenerFuncType::SET_WINDOW_SHADOWS_CB},
     {SET_SUB_WINDOW_SOURCE_CB,              ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB},
 };
@@ -2907,6 +2909,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::HIGHLIGHT_CHANGE_CB):
             ProcessSetHighlightChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::WINDOW_ANCHOR_INFO_CHANGE_CB):
+            ProcessWindowAnchorInfoChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_CORNER_RADIUS_CB):
             ProcessSetWindowCornerRadiusRegister();
@@ -6914,6 +6919,52 @@ void JsSceneSession::NotifyHighlightChange(bool isHighlight)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "NotifyHighlightChange");
+}
+
+void JsSceneSession::ProcessWindowAnchorInfoChangeRegister()
+{
+    NotifyWindowAnchorInfoChangeFunc func =
+    [weakThis = wptr(this), where = __func__](const WindowAnchorInfo& windowAnchorInfo) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->NotifyWindowAnchorInfoChange(windowAnchorInfo);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "session is nullptr");
+        return;
+    }
+    session->SetWindowAnchorInfoChangeFunc(std::move(func));
+}
+
+void JsSceneSession::NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo)
+{
+    TLOGI(WmsLogTag::WMS_SUB, "isAnchorEnabled: %{public}d, id: %{public}d",
+    windowAnchorInfo.isAnchorEnabled_, persistentId_);
+    auto task = [weakThis = wptr(this), windowAnchorInfo,
+    env = env_, persistentId = persistentId_, where = __func__] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession id: %{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(WINDOW_ANCHOR_INFO_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value WindowAnchorInfoObj = CreateJsWindowAnchorInfo(env, windowAnchorInfo);
+        if (WindowAnchorInfoObj == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "window anchor info obj is nullptr");
+        }
+        napi_value argv[] = { WindowAnchorInfoObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "NotifyWindowAnchorInfoChange");
 }
 
 void JsSceneSession::ProcessFollowParentRectRegister()

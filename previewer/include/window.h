@@ -638,6 +638,17 @@ public:
     virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window anchor info.
+     *
+     * @param windowAnchorInfo the windowAnchorInfo of subWindow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
      * @param isFollow true - follow, false - not follow.

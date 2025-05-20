@@ -6967,6 +6967,63 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
 
+void SceneSession::SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_SUB, "func is null");
+        return;
+    }
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->windowAnchorInfo_);
+        session->onWindowAnchorInfoChangeFunc_ = std::move(func);
+    });
+}
+
+WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    auto property = GetSessionProperty();
+    if (!property || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (GetIsFollowParentLayout()) {
+        TLOGE(WmsLogTag::WMS_SUB, "current sub window follow parent layout");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (windowAnchorInfo.windowAnchor_ > WindowAnchor::BOTTOM_END ||
+        windowAnchorInfo.windowAnchor_ < WindowAnchor::TOP_START) {
+        TLOGE(WmsLogTag::WMS_SUB, "Unknown window anchor");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (!systemConfig_.supportFollowRelativePositionToParent_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    PostTask([weakThis = wptr(this), windowAnchorInfo, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        session->windowAnchorInfo_ = windowAnchorInfo;
+        if (session->onWindowAnchorInfoChangeFunc_) {
+            session->onWindowAnchorInfoChangeFunc_(windowAnchorInfo);
+        } else {
+            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+        }
+    });
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
 {
     if (!func) {
@@ -6994,6 +7051,10 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (GetWindowAnchorInfo().isAnchorEnabled_) {
+        TLOGE(WmsLogTag::WMS_SUB, "current sub window follow parent anchor");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     if (!systemConfig_.supportFollowParentWindowLayout_) {

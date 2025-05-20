@@ -148,6 +148,8 @@ private:
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
+    int HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply);
+
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
     
     // Window Transition Animation For PC

@@ -123,6 +123,7 @@ using GetKeyboardOccupiedAreaWithRotationCallback =
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
+using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
@@ -718,6 +719,9 @@ public:
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
+    void SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func);
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
+    WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
     void SetTempRect(WSRect rect)
     {
         tempRect_ = rect;
@@ -889,6 +893,8 @@ protected:
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
     bool isFollowParentLayout_ = false;
+    NotifyWindowAnchorInfoChangeFunc onWindowAnchorInfoChangeFunc_ = nullptr;
+    WindowAnchorInfo windowAnchorInfo_;
     int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySessionRectChange(const WSRect& rect,
