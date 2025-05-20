@@ -8326,11 +8326,6 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
-        if (!WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window type is not supported", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
-            return;
-        }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowShadowEnabled(enable));
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, enable: %{public}u, result: %{public}d", where, enable, ret);
         if (ret == WmErrorCode::WM_OK) {
