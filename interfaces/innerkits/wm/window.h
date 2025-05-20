@@ -3836,7 +3836,7 @@ public:
     /**
      * @brief Get whether window shadow is enabled.
      *
-     * @return True means indow shadow is enabled.
+     * @return True means window shadow is enabled.
      */
     virtual bool GetWindowShadowEnabled() const { return false; }
 
