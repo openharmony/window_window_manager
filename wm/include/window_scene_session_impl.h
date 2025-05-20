@@ -301,6 +301,9 @@ public:
      */
     void Interactive() override;
 
+    WSError CloseSpecificScene() override;
+    WMError SetSubWindowSource(SubWindowSource source) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);

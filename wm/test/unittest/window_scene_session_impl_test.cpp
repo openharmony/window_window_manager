@@ -2304,6 +2304,52 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function 
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: CloseSpecificScene test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Close01");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowSceneSession->property_->SetDecorEnable(true);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto res = windowSceneSession->RegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+    res = windowSceneSession->UnRegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(WSError::WS_OK, windowSceneSession->CloseSpecificScene());
+}
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetSubWindowSource");
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
