@@ -1871,7 +1871,7 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist T
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_EQ(result, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_NE(result, nullptr);
     ASSERT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
