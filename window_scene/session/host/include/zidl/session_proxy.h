@@ -170,6 +170,7 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;

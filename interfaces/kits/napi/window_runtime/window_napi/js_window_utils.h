@@ -365,6 +365,7 @@ public:
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowAnchorInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);

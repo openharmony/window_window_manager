@@ -2250,6 +2250,54 @@ napi_value CreateSupportType(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "isAnchorEnabled",
+        CreateJsValue(env, windowAnchorInfo.isAnchorEnabled_));
+    napi_set_named_property(env, objValue, "windowAnchor",
+        CreateJsValue(env, static_cast<uint32_t>(windowAnchorInfo.windowAnchor_)));
+    napi_set_named_property(env, objValue, "offsetX",
+        CreateJsValue(env, windowAnchorInfo.offsetX_));
+    napi_set_named_property(env, objValue, "offsetY",
+        CreateJsValue(env, windowAnchorInfo.offsetY_));
+    return objValue;
+}
+
+napi_value CreateWindowAnchorType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "TOP_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_END)));
+    return objValue;
+}
+
 MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
