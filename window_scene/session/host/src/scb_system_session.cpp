@@ -52,6 +52,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         } else {
             config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         }
+        
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         SetIsUseControlSession(info.isUseControlSession);
     }
