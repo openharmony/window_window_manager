@@ -71,7 +71,7 @@ private:
     WMError ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
-    void UnregisterAll(ListenerType type);
+    WMError UnregisterAll(ListenerType type);
     WMError CreateWebPipController();
     PiPConfig config_{};
     bool isPipEnabled_ = false;
