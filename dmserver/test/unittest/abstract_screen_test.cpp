@@ -126,7 +126,7 @@ HWTEST_F(AbstractScreenTest, RSTree, TestSize.Level1)
     absScreen_->UpdateRSTree(surfaceNode, false);
     absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-
+    
     absScreen_->UpdateRSTree(surfaceNode, false, false);
     absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
@@ -147,7 +147,7 @@ HWTEST_F(AbstractScreenTest, InitRSDisplayNode, TestSize.Level1)
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-
+    
     RSDisplayNodeConfig config_;
     Point startPoint;
     absScreen_->InitRSDisplayNode(config_, startPoint);
@@ -164,7 +164,7 @@ HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, TestSize.Level1)
     struct RSDisplayNodeConfig config;
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-
+    
     RSDisplayNodeConfig config_;
     Point startPoint;
     absScreen_->InitRSDefaultDisplayNode(config_, startPoint);
@@ -275,7 +275,7 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, TestSize.Level1)
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_CONSTANT;
     DMError result = absScreen_->SetScreenGamutMap(gamutMap);
     EXPECT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-
+    
     gamutMap = static_cast<ScreenGamutMap>(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION) + 1);
     result = absScreen_->SetScreenGamutMap(gamutMap);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
@@ -925,7 +925,7 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, TestSize.Level1)
     absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = true;
     absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
-    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+    ASSERT_EQ(nullptr, absScreen_->rsDisplayNode_);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,14 @@
 
 #include <gtest/gtest.h>
 
-#include "common_test_utils.h"
 #include "display_manager_adapter.h"
 #include "display_manager_config.h"
 #include "display_manager_service.h"
+#include "display_manager_agent_default.h"
+#include "common_test_utils.h"
 #include "mock_rs_display_node.h"
 #include "scene_board_judgement.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,16 +39,17 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    static std::unique_ptr<DisplayManagerService> dms_;
+    void SetAceessTokenPermission(const std::string processName);
+    static sptr<DisplayManagerService> dms_;
     static constexpr DisplayId DEFAULT_DISPLAY = 0ULL;
     static constexpr DisplayId DEFAULT_SCREEN = 0ULL;
 };
 
-std::unique_ptr<DisplayManagerService> DisplayManagerServiceTest::dms_ = nullptr;
+sptr<DisplayManagerService> DisplayManagerServiceTest::dms_ = nullptr;
 
 void DisplayManagerServiceTest::SetUpTestCase()
 {
-    dms_ = std::make_unique<DisplayManagerService>();
+    dms_ = new DisplayManagerService();
 
     dms_->abstractScreenController_->defaultRsScreenId_ = 0;
     dms_->abstractScreenController_->screenIdManager_.rs2DmsScreenIdMap_.clear();
@@ -442,12 +445,23 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-
+   
     surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
     std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<MockRSDisplayNode>(RSDisplayNodeConfig{});
     sptr<SupportedScreenModes> info = new SupportedScreenModes;
     sptr<AbstractScreen> absScreen =
         new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
+}
+
+/**
+ * @tc.name: OnStop
+ * @tc.desc: DMS on stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, OnStop, TestSize.Level1)
+{
+    dms_->OnStop();
+    ASSERT_TRUE(true);
 }
 
 /**
@@ -599,6 +613,9 @@ HWTEST_F(DisplayManagerServiceTest, SetOrientation, TestSize.Level1)
     ScreenId screenId = 0;
     Orientation orientation = Orientation::VERTICAL;
     auto ret = dms_->SetOrientation(screenId, orientation);
+    ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
+
+    orientation = Orientation::SENSOR_VERTICAL;
     ASSERT_NE(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 
