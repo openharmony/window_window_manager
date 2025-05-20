@@ -1505,11 +1505,11 @@ export class WindowStageInternal implements WindowStage {
         });
     }
 
-    public on(eventType: 'windowStageEvent', callback: Object): void {
+    public on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void {
       this.onSync(this.nativeObj, eventType, callback);
     }
 
-    public off(eventType: 'windowStageEvent', callback?: Object): void {
+    public off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void {
       this.offSync(this.nativeObj, eventType, callback);
     }
 }
@@ -1522,8 +1522,8 @@ export interface WindowStage {
     getMainWindow(callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
-    on(eventType: 'windowStageEvent', callback: Object): void;
-    off(eventType: 'windowStageEvent', callback?: Object): void;
+    on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
+    off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
 }
 
 export class WindowInternal implements Window {
