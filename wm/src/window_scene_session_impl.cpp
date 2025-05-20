@@ -6234,5 +6234,47 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     }
     return WSError::WS_DO_NOTHING;
 }
+
+WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    WSError ret = hostSession->SetSubWindowSource(source);
+    if (ret == WSError::WS_ERROR_INVALID_WINDOW) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::CloseSpecificScene()
+{
+    if (!property_->IsDecorEnable()) {
+        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable.", 
+            GetPersistentId());
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "close specific scene id: %{public}d", GetPersistentId());
+    handler_->PostTask([weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_SUB, "window is nullptr");
+            return;
+        }
+        window->Close();
+    }, __func__);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
