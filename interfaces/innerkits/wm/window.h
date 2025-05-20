@@ -4038,6 +4038,17 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the frameRect in a partical zoom-in scene.
+     *
+     * @param frameRect The original rect of frameBuffer before partical zoom-in.
+     * @return WMError::WM_OK means set success, otherwise failed.
+     */
+    virtual WMError SetFrameRectForParticalZoomIn(const Rect& frameRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
