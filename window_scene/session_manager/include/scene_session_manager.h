@@ -844,6 +844,8 @@ private:
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
+    sptr<SceneSession> GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId);
+    sptr<SceneSession> GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId, int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
