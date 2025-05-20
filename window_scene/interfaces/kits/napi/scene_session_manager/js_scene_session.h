@@ -140,7 +140,8 @@ private:
     void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller,
+        bool isFromBroker, bool isForceClean = false);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
