@@ -243,6 +243,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError GetFreeMultiWindowEnableState(bool& enable) { return WSError::WS_OK; }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {

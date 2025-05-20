@@ -2224,6 +2224,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleGetHostGlobalScaledRect
+ * @tc.desc: test HandleGetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetHostGlobalScaledRect, TestSize.Level1)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t hostWindowId = 65535;
+    data.WriteInt32(hostWindowId);
+    int res = stub_->HandleGetHostGlobalScaledRect(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetCallingWindowWindowStatus
  * @tc.desc: test HandleGetCallingWindowWindowStatus
  * @tc.type: FUNC

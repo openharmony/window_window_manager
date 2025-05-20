@@ -129,6 +129,7 @@ public:
     WSError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions) override;
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override;
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;

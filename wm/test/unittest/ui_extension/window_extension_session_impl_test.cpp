@@ -31,6 +31,7 @@
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_extension_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1910,6 +1911,17 @@ HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowRect02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: GetGlobalScaledRect Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetGlobalScaledRect, TestSize.Level1)
+{
+    Rect rect;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, window_->GetGlobalScaledRect(rect));
+}
+
+/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: ConsumePointerEvent Test
  * @tc.type: FUNC
@@ -2323,6 +2335,169 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
+}
+
+/**
+ * @tc.name: IsFocused
+ * @tc.desc: IsFocused test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, IsFocused, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsFocused");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    EXPECT_FALSE(window->IsFocused());
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->focusState_ = false;
+    EXPECT_FALSE(window->IsFocused());
+    window->focusState_ = true;
+    EXPECT_TRUE(window->IsFocused());
+}
+
+/**
+ * @tc.name: GetGestureBackEnabled
+ * @tc.desc: GetGestureBackEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetGestureBackEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("GetGestureBackEnabled");
+    bool enable = false;
+    window->hostGestureBackEnabled_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    EXPECT_EQ(false, enable);
+    window->hostGestureBackEnabled_ = true;
+    EXPECT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    EXPECT_EQ(true, enable);
+}
+
+/**
+ * @tc.name: SetLayoutFullScreen
+ * @tc.desc: SetLayoutFullScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetLayoutFullScreen, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetLayoutFullScreen");
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
+    EXPECT_EQ(false, window->isIgnoreSafeArea_);
+    EXPECT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    EXPECT_EQ(true, window->isIgnoreSafeArea_);
+}
+
+/**
+ * @tc.name: UpdateSystemBarProperties
+ * @tc.desc: UpdateSystemBarProperties test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSystemBarProperties, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("UpdateSystemBarProperties");
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED,
+        window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+}
+
+/**
+ * @tc.name: SetGestureBackEnabled
+ * @tc.desc: SetGestureBackEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetGestureBackEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetGestureBackEnabled");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SetGestureBackEnabled(true));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
+}
+
+/**
+ * @tc.name: SetImmersiveModeEnabledState
+ * @tc.desc: SetImmersiveModeEnabledState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetImmersiveModeEnabledState, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetImmersiveModeEnabledState");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SetImmersiveModeEnabledState(true));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->SetImmersiveModeEnabledState(true));
+}
+
+/**
+ * @tc.name: GetImmersiveModeEnabledState
+ * @tc.desc: GetImmersiveModeEnabledState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetImmersiveModeEnabledState, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("GetImmersiveModeEnabledState");
+    window->hostImmersiveModeEnabled_ = false;
+    EXPECT_EQ(false, window->GetImmersiveModeEnabledState());
+    window->hostImmersiveModeEnabled_ = true;
+    EXPECT_EQ(true, window->GetImmersiveModeEnabledState());
+}
+
+/**
+ * @tc.name: UpdateHostSpecificSystemBarEnabled
+ * @tc.desc: UpdateHostSpecificSystemBarEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("UpdateHostSpecificSystemBarEnabled");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
 }
 }
 } // namespace Rosen

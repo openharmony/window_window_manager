@@ -6433,6 +6433,11 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
                                     GetRootHostWindowType() : GetType();
     want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD,
                   AAFwk::Integer::Box(static_cast<int32_t>(rootHostWindowType)));
+    bool gestureBackEnable = true;
+    GetGestureBackEnabled(gestureBackEnable);
+    want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
+    want.SetParam(Extension::IMMERSIVE_MODE_ENABLED,
+        AAFwk::Integer::Box(static_cast<int32_t>(GetImmersiveModeEnabledState())));
 }
 
 bool WindowSessionImpl::IsValidCrossState(int32_t state) const

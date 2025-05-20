@@ -1412,8 +1412,8 @@ HWTEST_F(WindowSessionImplTest, SetAPPWindowIcon, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     Media::InitializationOptions opts;
-    opts.size.width = 200;  // 200： test width
-    opts.size.height = 300; // 300： test height
+    opts.size.width = 200;  // 200 test width
+    opts.size.height = 300; // 300 test height
     opts.pixelFormat = Media::PixelFormat::ARGB_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     std::unique_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMap::Create(opts);

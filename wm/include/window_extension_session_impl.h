@@ -113,6 +113,24 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
+    bool IsFocused() const override;
+
+    /*
+     * Gesture Back
+     */
+    WMError GetGestureBackEnabled(bool& enable) const override;
+    WMError SetGestureBackEnabled(bool enable) override;
+
+    /*
+     * Immersive
+     */
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetImmersiveModeEnabledState(bool enable) override;
+    bool GetImmersiveModeEnabledState() const override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation) override;
 
     /*
      * Free Multi Window
@@ -176,6 +194,8 @@ private:
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -196,6 +216,9 @@ private:
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
+    AAFwk::WantParams extensionConfig_ {};
+    bool hostGestureBackEnabled_ { true };
+    bool hostImmersiveModeEnabled_ { false };
 
     /*
      * PC Fold Screen
