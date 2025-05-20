@@ -1236,10 +1236,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetViewKeepScreenOn(parcel.ReadBool());
-    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
+    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
