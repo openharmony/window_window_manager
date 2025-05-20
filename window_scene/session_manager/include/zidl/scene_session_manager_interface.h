@@ -144,6 +144,7 @@ public:
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
+        TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -340,6 +341,10 @@ public:
         return WSError::WS_OK;
     }
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override
     {
         return WSError::WS_OK;
     }
