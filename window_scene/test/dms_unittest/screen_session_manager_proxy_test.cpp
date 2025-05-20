@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,52 +13,49 @@
  * limitations under the License.
  */
 
-#include <common/rs_rect.h>
 #include <gtest/gtest.h>
-#include <iremote_broker.h>
+#include <message_option.h>
+#include <message_parcel.h>
+#include <common/rs_rect.h>
 #include <transaction/rs_marshalling_helper.h>
-
+#include <iremote_broker.h>
+#include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/zidl/scene_session_manager_interface.h"
+#include "window_manager_agent.h"
+#include "zidl/screen_session_manager_proxy.h"
+#include "zidl/window_manager_agent_interface.h"
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
-#include "fold_screen_state_internel.h"
 #include "scene_board_judgement.h"
 #include "screen_session_manager/include/screen_session_manager.h"
-#include "session_manager/include/scene_session_manager.h"
-#include "zidl/screen_session_manager_proxy.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
-
-namespace OHOS::Rosen {
+namespace OHOS {
+namespace Rosen {
 class ScreenSessionManagerProxyTest : public testing::Test {
 public:
-    static void SetUpTestSuite();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() override;
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy;
+    void TearDown() override;
 };
 
-void ScreenSessionManagerProxyTest::SetUpTestSuite()
+void ScreenSessionManagerProxyTest::SetUpTestCase()
 {
-    ASSERT_TRUE(SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy());
+}
+
+void ScreenSessionManagerProxyTest::TearDownTestCase()
+{
 }
 
 void ScreenSessionManagerProxyTest::SetUp()
 {
-    if (screenSessionManagerProxy) {
-        return;
-    }
+}
 
-    sptr<IRemoteObject> impl;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
-    } else {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    }
-
-    screenSessionManagerProxy = new (std::nothrow) ScreenSessionManagerProxy(impl);
-    ASSERT_NE(screenSessionManagerProxy, nullptr);
+void ScreenSessionManagerProxyTest::TearDown()
+{
 }
 
 namespace {
@@ -69,8 +66,12 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     DisplayId id = 0;
     bool hasPrivate = false;
+    
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     int resultValue = 0;
     std::function<void()> func = [&]()
@@ -89,8 +90,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     DisplayId id = 0;
     std::vector<std::string> privacyWindowList{"win0", "win1"};
+    
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     int resultValue = 0;
     std::function<void()> func = [&]()
@@ -109,8 +114,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     std::vector<uint64_t> windowIdList{10, 20, 30};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     int resultValue = 0;
     std::function<void()> func = [&]()
@@ -129,8 +138,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, TestSize.Leve
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualDisplayMuteFlag, Function | SmallTest | Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     bool muteFlag = false;
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     screenSessionManagerProxy->SetVirtualDisplayMuteFlag(id, muteFlag);
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -143,8 +155,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualDisplayMuteFlag, Function | Sm
  */
 HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     const std::set<int32_t>& pidList = {1, 2, 3};
     bool isProxy = true;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -162,14 +178,18 @@ HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     VirtualScreenStatus screenStatus = VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
     } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
+        EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
     }
 }
 
@@ -180,9 +200,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     uint32_t pid = 1;
     std::vector<uint64_t> windowIdList{10, 20, 30};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -200,6 +224,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, TestS
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     std::vector<DisplayPhysicalResolution> allSize {};
     std::function<void()> func = [&]()
     {
@@ -220,6 +248,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, TestSiz
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<DisplayInfo> expectation = nullptr;
     sptr<DisplayInfo> res = nullptr;
     std::function<void()> func = [&]()
@@ -241,8 +274,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenActiveMode, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     uint32_t modeId = 1;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -265,8 +302,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenActiveMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -289,8 +330,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -313,8 +358,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetDefaultDensityDpi, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -337,10 +386,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetDefaultDensityDpi, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetResolution, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     uint32_t width = 1024;
     uint32_t height = 1024;
     float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -363,8 +416,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetResolution, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDensityInCurResolution, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -387,8 +444,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDensityInCurResolution, TestSize.Leve
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorGamut, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     ScreenColorGamut colorGamut {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -411,8 +472,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorGamut, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorGamut, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     uint32_t colorGamut = 0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -435,8 +500,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorGamut, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGamutMap, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     ScreenGamutMap colorGamut;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -459,8 +528,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGamutMap, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenGamutMap, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     ScreenGamutMap colorGamut {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -483,7 +556,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenGamutMap, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorTransform, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -506,8 +583,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorTransform, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetPixelFormat, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     GraphicPixelFormat pixelFormat = GraphicPixelFormat {GRAPHIC_PIXEL_FMT_CLUT8};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -530,8 +611,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPixelFormat, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetPixelFormat, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     GraphicPixelFormat pixelFormat = GraphicPixelFormat {GRAPHIC_PIXEL_FMT_CLUT8};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -554,8 +639,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPixelFormat, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedHDRFormats, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     vector<ScreenHDRFormat> hdrFormats;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -578,8 +667,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedHDRFormats, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenHDRFormat, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     ScreenHDRFormat hdrFormatS {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -602,8 +695,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenHDRFormat, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenHDRFormat, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
     ScreenHDRFormat hdrFormatS {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
 
     DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
@@ -626,6 +723,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenHDRFormat, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, RegisterDisplayManagerAgent, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -645,6 +745,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, RegisterDisplayManagerAgent, TestSize.Le
  */
 HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -664,6 +767,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, TestSize.
  */
 HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     PowerStateChangeReason reason {0};
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -680,6 +787,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpEnd());
@@ -695,6 +806,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     PowerStateChangeReason reason {0};
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -711,6 +826,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendEnd());
@@ -726,9 +845,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenPowerState state {0};
     ScreenId id = 1001;
     PowerStateChangeReason reason {1};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -745,6 +868,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetDisplayState, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     DisplayState state {1};
     screenSessionManagerProxy->SetDisplayState(state);
     int resultValue = 0;
@@ -758,6 +885,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetDisplayState, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenPowerState state {0};
     ScreenId id = 1001;
     PowerStateChangeReason reason {1};
@@ -776,6 +907,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenPowerState state {0};
     PowerStateChangeReason reason {1};
     bool expectation = true;
@@ -793,6 +928,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     DisplayId displayId {0};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
@@ -808,11 +947,15 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
     } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
+        EXPECT_EQ(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
     }
 }
 
@@ -823,6 +966,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, NotifyDisplayEvent, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     DisplayEvent event {0};
     int resultValue = 0;
     std::function<void()> func = [&]()
@@ -841,6 +988,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, NotifyDisplayEvent, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId dmsScreenId = 1001;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(ScreenPowerState::INVALID_STATE, screenSessionManagerProxy->GetScreenPower(dmsScreenId));
@@ -856,12 +1007,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, AddVirtualScreenBlockList, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     std::vector<int32_t> persistentIds {0, 1, 2};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->AddVirtualScreenBlockList(persistentIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->AddVirtualScreenBlockList(persistentIds));
-    }
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->AddVirtualScreenBlockList(persistentIds));
 }
 
 /**
@@ -871,12 +1021,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, AddVirtualScreenBlockList, TestSize.Leve
  */
 HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenBlockList, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     std::vector<int32_t> persistentIds {0, 1, 2};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->RemoveVirtualScreenBlockList(persistentIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->RemoveVirtualScreenBlockList(persistentIds));
-    }
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->RemoveVirtualScreenBlockList(persistentIds));
 }
 
 /**
@@ -886,6 +1035,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenBlockList, TestSize.L
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId ScreenId = 1001;
     bool canvasRotation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -904,6 +1057,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Te
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenScaleMode, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId ScreenId = 1001;
     ScreenScaleMode scaleMode {0};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -922,6 +1079,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenScaleMode, TestSiz
  */
 HWTEST_F(ScreenSessionManagerProxyTest, ResizeVirtualScreen, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId ScreenId = 1001;
     uint32_t width = 1024;
     uint32_t height = 1024;
@@ -936,6 +1097,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, ResizeVirtualScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId ScreenId = 1001;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -953,6 +1118,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, MakeMirror, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId Id = 1001;
     std::vector<ScreenId> mirrorScreenIds = {1003, 1004, 1005};
     ScreenId screenGroupId = 1002;
@@ -972,11 +1141,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeMirror, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, StopMirror, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     const std::vector<ScreenId> mirrorScreenIds = {1003, 1004, 1005};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->StopMirror(mirrorScreenIds));
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->StopMirror(mirrorScreenIds));
     } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->StopMirror(mirrorScreenIds));
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->StopMirror(mirrorScreenIds));
     }
 }
 
@@ -987,11 +1162,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopMirror, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DisableMirror, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool disableOrNot = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->DisableMirror(disableOrNot));
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->DisableMirror(disableOrNot));
     } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->DisableMirror(disableOrNot));
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->DisableMirror(disableOrNot));
     }
 }
 
@@ -1002,6 +1183,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, DisableMirror, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, MakeExpand, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     std::vector<ScreenId> screenId = {1003, 1004, 1005};
     std::vector<Point> startPoint {};
     ScreenId screenGroupId = 1001;
@@ -1021,11 +1206,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeExpand, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, StopExpand, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     const std::vector<ScreenId> expandScreenIds = {1003, 1004, 1005};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->StopExpand(expandScreenIds));
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->StopExpand(expandScreenIds));
     } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->StopExpand(expandScreenIds));
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->StopExpand(expandScreenIds));
     }
 }
 
@@ -1036,6 +1227,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopExpand, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGroupInfoById, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<ScreenGroupInfo> expectation = nullptr;
     sptr<ScreenGroupInfo> res = nullptr;
     ScreenId Id {0};
@@ -1054,6 +1250,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGroupInfoById, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenFromGroup, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     std::vector<ScreenId> screens = {1002, 1003, 1004};
     screenSessionManagerProxy->RemoveVirtualScreenFromGroup(screens);
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
@@ -1067,13 +1267,18 @@ HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenFromGroup, TestSize.L
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     std::shared_ptr<Media::PixelMap> expectation = nullptr;
     std::shared_ptr<Media::PixelMap> res = nullptr;
     DisplayId displayId {0};
     DmErrorCode* errorCode = nullptr;
     std::function<void()> func = [&]()
     {
-        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false, false);
+        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false);
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1090,6 +1295,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<DisplayInfo> expectation = nullptr;
     sptr<DisplayInfo> res = nullptr;
     DisplayId displayId {0};
@@ -1112,6 +1322,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<DisplayInfo> expectation = nullptr;
     sptr<DisplayInfo> res = nullptr;
     ScreenId screenId {0};
@@ -1134,6 +1349,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     int resultValue = 0;
     std::function<void()> func = [&]()
     {
@@ -1151,6 +1371,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<ScreenInfo> expectation = nullptr;
     sptr<ScreenInfo> res = nullptr;
     ScreenId Id {0};
@@ -1173,6 +1398,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllScreenInfos, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     std::vector<sptr<ScreenInfo>> screenInfos {};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -1190,6 +1419,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllScreenInfos, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId screenId = 1001;
     std::vector<ScreenColorGamut> colorGamuts {};
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1208,6 +1441,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenSupportedColorGamuts, TestSize.
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId screenId = 1001;
     Orientation orientation = Orientation::BEGIN;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1226,6 +1463,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLocked, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool isLocked = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -1243,6 +1484,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLocked, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool isLocked = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -1260,6 +1505,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, TestSize.
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId mainScreenId = 0;
     ScreenId secondaryScreenId = 1;
     MultiScreenMode screenMode = MultiScreenMode::SCREEN_EXTEND;
@@ -1284,6 +1533,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId testId = 2060;
     ScreenId testId1 = 3060;
     MultiScreenPositionOptions mainScreenOptions = {testId, 100, 100};
@@ -1309,6 +1562,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, TestSize
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId id = 0;
     uint32_t refreshRate = 12;
     uint32_t actualRefreshRate = 0;
@@ -1322,7 +1579,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, TestSize
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
     } else {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
     }
 }
 
@@ -1333,6 +1590,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, TestSize
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool isLocked = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
@@ -1350,6 +1611,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     sptr<CutoutInfo> expectation = nullptr;
     sptr<CutoutInfo> res = nullptr;
     DisplayId displayId = 0;
@@ -1372,11 +1638,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool immersive = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     }
 }
 
@@ -1387,6 +1659,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, ConvertScreenIdToRsScreenId, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId screenId = 1001;
     ScreenId rsScreenId = 1002;
     auto ret = screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
@@ -1400,6 +1676,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, ConvertScreenIdToRsScreenId, TestSize.Le
  */
 HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool hasPrivateWindow = true;
     DisplayId displayId = 0;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1418,13 +1698,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     std::string dumpInfo;
     screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(dumpInfo, "");
-    } else {
-        EXPECT_EQ(dumpInfo, "");
-    }
+    EXPECT_NE(dumpInfo, "");
 }
 
 /**
@@ -1434,14 +1714,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     ScreenId id = 1001;
     std::string dumpInfo;
     screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(dumpInfo, "");
-    } else {
-        EXPECT_EQ(dumpInfo, "");
-    }
+    EXPECT_NE(dumpInfo, "");
 }
 
 /**
@@ -1451,7 +1731,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
 {
-    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    const FoldDisplayMode displayMode {0};
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
@@ -1467,11 +1751,18 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, TestSize.Level1)
 {
-    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    const FoldDisplayMode displayMode {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
     } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
     }
 }
 
@@ -1482,6 +1773,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, TestSize.Level
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     bool locked = true;
     screenSessionManagerProxy->SetFoldStatusLocked(locked);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -1498,7 +1793,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetFoldDisplayMode, TestSize.Level1)
 {
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerProxy->GetFoldDisplayMode());
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN,
+              screenSessionManagerProxy->GetFoldDisplayMode());
 }
 
 /**
@@ -1508,6 +1808,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldDisplayMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsFoldable, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     screenSessionManagerProxy->IsFoldable();
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -1520,6 +1823,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsFoldable, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsCaptured, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     auto ret = screenSessionManagerProxy->IsCaptured();
     EXPECT_EQ(ret, false);
 }
@@ -1531,8 +1837,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsCaptured, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, TestSize.Level1)
 {
-    auto foldStatus = screenSessionManagerProxy->GetFoldStatus();
-    EXPECT_EQ(foldStatus, FoldStatus::UNKNOWN);
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->GetFoldStatus();
 }
 
 /**
@@ -1542,8 +1851,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, TestSize.Level1)
 {
-    auto superFoldStatus = screenSessionManagerProxy->GetSuperFoldStatus();
-    EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->GetSuperFoldStatus();
 }
 
 /**
@@ -1568,8 +1880,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | SmallTest | Level1)
 {
     bool isLocked = false;
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
     screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
-    EXPECT_EQ(isLocked, false);
 }
 
 /**
@@ -1579,8 +1894,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | Small
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetCurrentFoldCreaseRegion, TestSize.Level1)
 {
-    auto foldCreaseRegion = screenSessionManagerProxy->GetCurrentFoldCreaseRegion();
-    EXPECT_EQ(foldCreaseRegion, nullptr);
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    
+    screenSessionManagerProxy->GetCurrentFoldCreaseRegion();
 }
 
 /**
@@ -1590,6 +1910,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCurrentFoldCreaseRegion, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
     EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
@@ -1602,6 +1926,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetClient, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     const sptr<IScreenSessionManagerClient> client = nullptr;
     screenSessionManagerProxy->SetClient(client);
     EXPECT_EQ(client, nullptr);
@@ -1614,6 +1942,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetClient, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SwitchUser, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     screenSessionManagerProxy->SwitchUser();
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -1626,6 +1957,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SwitchUser, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ScreenId screenId = 1001;
     screenSessionManagerProxy->GetScreenProperty(screenId);
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
@@ -1639,6 +1973,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest | Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
     int32_t uid = 0;
     DMHookInfo hookInfo;
     hookInfo.height_ = 1344;
@@ -1649,8 +1987,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest
     };
     func();
 
-    EXPECT_EQ(hookInfo.height_, 1344);
-    EXPECT_EQ(hookInfo.width_, 2772);
+    EXPECT_EQ(hookInfo.height_, 0);
+    EXPECT_EQ(hookInfo.width_, 0);
 }
 
 /**
@@ -1660,6 +1998,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
     std::shared_ptr<Media::PixelMap> res = nullptr;
@@ -1688,6 +2029,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
     sptr<DisplayInfo> res = nullptr;
@@ -1695,11 +2039,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
         res = screenSessionManagerProxy->GetPrimaryDisplayInfo();
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, nullptr);
-    } else {
-        ASSERT_EQ(res, nullptr);
-    }
+    ASSERT_NE(res, nullptr);
 }
 
 /**
@@ -1709,6 +2049,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
     const std::vector<ScreenId> screenIds = {1001, 1002};
@@ -1729,6 +2072,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, TestSize.L
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, TestSize.Level1)
 {
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
     std::string capabilitInfo;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1752,6 +2098,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusExpandAndLocked, Function |
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
     EXPECT_EQ(ScreenSessionManager::GetInstance().GetIsFoldStatusLocked(), false);
+}
 }
 }
 }

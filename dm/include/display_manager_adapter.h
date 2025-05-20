@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,17 @@
 #ifndef FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 #define FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 
+#include <map>
 #include <mutex>
 #include <surface.h>
 
 #include "display.h"
-#include "dm_common.h"
-#include "fold_screen_info.h"
-#include "idisplay_manager.h"
 #include "screen.h"
 #include "screen_group.h"
+#include "dm_common.h"
+#include "display_manager_interface.h"
+#include "fold_screen_info.h"
 #include "singleton_delegator.h"
-#include "zidl/idisplay_manager_agent.h"
-#include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 class BaseAdapter {
@@ -41,11 +40,9 @@ public:
 protected:
     bool InitDMSProxy();
     std::recursive_mutex mutex_;
-    sptr<IScreenSessionManager> screenSessionManagerServiceProxy_ = nullptr;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    bool isProxyValid_ = false;
-    static inline DMError ConvertToDMError(ErrCode errCode, int32_t dmError);
+    bool isProxyValid_ { false };
 };
 
 class DMSDeathRecipient : public IRemoteObject::DeathRecipient {

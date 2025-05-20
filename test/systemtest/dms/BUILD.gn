@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -144,7 +144,6 @@ config("dms_systemtest_common_public_config") {
     "../../../interfaces/innerkits/wm",
     "../../common/utils/include",
     "../../../utils/include",
-    "${dmserver_gen_path}",
   ]
 }
 
@@ -161,7 +160,7 @@ ohos_static_library("dms_systemtest_common") {
   ]
 
   public_deps = [
-    "${window_base_path}/dm:libdm_static",
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
