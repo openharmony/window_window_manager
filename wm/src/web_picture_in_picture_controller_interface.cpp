@@ -119,6 +119,7 @@ WMError WebPictureInPictureControllerInterface::CreateWebPipController()
 
 WMError WebPictureInPictureControllerInterface::Create()
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -128,6 +129,7 @@ WMError WebPictureInPictureControllerInterface::Create()
 
 WMError WebPictureInPictureControllerInterface::SetMainWindowId(uint32_t mainWindowId)
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -142,6 +144,7 @@ WMError WebPictureInPictureControllerInterface::SetMainWindowId(uint32_t mainWin
 
 WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType pipTemplateType)
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -158,6 +161,7 @@ WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType 
 
 WMError WebPictureInPictureControllerInterface::SetRect(uint32_t width, uint32_t height)
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -173,6 +177,7 @@ WMError WebPictureInPictureControllerInterface::SetRect(uint32_t width, uint32_t
 
 WMError WebPictureInPictureControllerInterface::SetControlGroup(const std::vector<uint32_t>& controlGroup)
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -187,6 +192,7 @@ WMError WebPictureInPictureControllerInterface::SetControlGroup(const std::vecto
 
 WMError WebPictureInPictureControllerInterface::SetNapiEnv(void* env)
 {
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
     if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
