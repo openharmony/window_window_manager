@@ -216,7 +216,6 @@ private:
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
-    AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
     bool hostImmersiveModeEnabled_ { false };
 
