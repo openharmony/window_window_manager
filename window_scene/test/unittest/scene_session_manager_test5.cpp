@@ -1820,13 +1820,13 @@ HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level3)
     sceneSession1->SetFocusable(true);
     sceneSession1->isVisible_ = true;
     sptr<SceneSession> result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
     result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
     ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
+    EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
 }
 
 /**
@@ -1850,13 +1850,13 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, 
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     sptr<SceneSession> result =
         ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession1->persistentId_ = 2;
@@ -1869,12 +1869,12 @@ HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
     ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
+    EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
 }
 
 } // namespace
