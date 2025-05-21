@@ -1981,6 +1981,8 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetExtensionConfig");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->crossAxisState_ = CrossAxisState::STATE_CROSS;
     AAFwk::WantParams want;
     window->GetExtensionConfig(want);
@@ -1994,6 +1996,50 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     window->crossAxisState_ = CrossAxisState::STATE_END;
     window->GetExtensionConfig(want);
     EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_END));
+
+    bool isHostWindowDelayRaiseEnabled = true;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0),
+        static_cast<int32_t>(isHostWindowDelayRaiseEnabled));
+    isHostWindowDelayRaiseEnabled = false;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0),
+        static_cast<int32_t>(isHostWindowDelayRaiseEnabled));
+}
+
+/**
+ * @tc.name: OnExtensionMessage
+ * @tc.desc: OnExtensionMessage test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnExtensionMessage");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+    auto ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(nullptr, window->GetHostSession());
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_FALSE(window->GetPersistentId() == INVALID_SESSION_ID);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_FALSE(window->state_ == WindowState::STATE_DESTROYED);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(true, WindowHelper::IsAppWindow(window->GetType()));
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
