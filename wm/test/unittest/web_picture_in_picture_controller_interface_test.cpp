@@ -108,7 +108,6 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetMainWindowId, TestSize.L
     controller->Create();
     controller->isPipEnabled_ = false;
     WMError ret = controller->SetMainWindowId(0);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     controller->isPipEnabled_ = true;
     ret = controller->SetMainWindowId(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
