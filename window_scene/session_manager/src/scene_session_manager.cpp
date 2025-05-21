@@ -144,7 +144,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
-constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
+constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 
