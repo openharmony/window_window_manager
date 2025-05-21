@@ -1488,7 +1488,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     float density = GetVirtualPixelRatio(displayInfo);
     if (!MathHelper::NearZero(virtualPixelRatio_ - density) ||
         !MathHelper::NearZero(property_->GetLastLimitsVpr() - density)) {
-        UpdateDensityInner(displayInfo);
+           
+            (displayInfo);
     }
 
     WMError ret = UpdateAnimationFlagProperty(withAnimation);

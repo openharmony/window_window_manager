@@ -69,7 +69,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
-    void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
+    void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
@@ -388,36 +388,21 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
     }
 }
 
-void WindowManager::Impl::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+void WindowManager::Impl::NotifyDisplayIdChange(
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners;
     {
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         windowDisplayIdChangeListeners = windowDisplayIdChangeListeners_;
     }
-
-    static DisplayId preDisplayId = DISPLAY_ID_INVALID;
-    static uint32_t preWindowId = 0;
-
-    if (preWindowId == windowId && preDisplayId == displayId) {
-        return;
-    }
-    for (auto& listener : windowDisplayIdChangeListeners) {
-        if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
-            continue;
+    for (auto &listener : windowDisplayIdChangeListeners) {
+        if (listener != nullptr) {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "NotifyDisplayIdChange");
+            listener->OnWindowInfoChanged(windowInfoList);
         }
-        std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
-        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
-        windowChangeInfo[WindowInfoKey::WINDOW_ID] = windowId;
-        windowChangeInfo[WindowInfoKey::DISPLAY_ID] = displayId;
-        windowChangeInfos.emplace_back(windowChangeInfo);
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Notify to caller, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
-        listener->OnWindowInfoChanged(windowChangeInfos);
     }
-    preDisplayId = displayId;
-    preWindowId = windowId;
-}
+} 
 
 void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
 {
@@ -2029,6 +2014,9 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_RECT)) {
+        pImpl_->NotifyWindowRectChange(windowInfoList);
+    }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::DISPLAY_ID)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
 }
