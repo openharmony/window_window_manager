@@ -69,8 +69,7 @@ public:
 
     void StartMoving(ani_env* env);
     void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
-    void SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximizeButtonVisible,
-        ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible);
+    void SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam);
     void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
     ani_int GetWindowStatus(ani_env* env);
     void Minimize(ani_env* env);
