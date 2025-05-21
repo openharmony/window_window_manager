@@ -6932,10 +6932,10 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
-    sptr<SceneSession> ret = nullptr;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
     sptr<SceneSession> topFloatingSession = GetNextFocusableSessionWhenFloatWindowExist(displayGroupId, persistentId);
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
+    sptr<SceneSession> nextFocusableSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
@@ -6949,7 +6949,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisible() && IsParentSessionVisible(session)) {
-            ret = session;
+            nextFocusableSession = session;
             return true;
         }
         if (session->GetPersistentId() == persistentId) {
@@ -6958,11 +6958,11 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         return false;
     };
     TraverseSessionTree(func, true);
-    if (topFloatingSession != nullptr && ret != nullptr && ret->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+    if (topFloatingSession != nullptr && nextFocusableSession != nullptr && nextFocusableSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
         TLOGI(WmsLogTag::WMS_FOCUS, "topFloatingSessionId: %{public}d", topFloatingSession->GetPersistentId());
         return topFloatingSession;
     }
-    return ret;
+    return nextFocusableSession;
 }
 
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId,
@@ -6986,9 +6986,9 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowEx
 sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)
 {
     bool previousFocusedSessionFound = false;
-    sptr<SceneSession> ret = nullptr;
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
-        if (session == nullptr || ret != nullptr || previousFocusedSessionFound) {
+    sptr<SceneSession> topFloatingSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &topFloatingSession, displayGroupId](sptr<SceneSession> session) {
+        if (session == nullptr || topFloatingSession != nullptr || previousFocusedSessionFound) {
             return false;
         }
         if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
@@ -7009,7 +7009,7 @@ sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayG
         }
 
         if (session->CheckFocusable() && session->IsVisible()) {
-            ret = session;
+            topFloatingSession = session;
             return true;
         }
         if (session->GetPersistentId() == persistentId) {
@@ -7018,7 +7018,7 @@ sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayG
         return false;
     };
     TraverseSessionTree(func, true);
-    return ret;
+    return topFloatingSession;
 }
 
 /**
