@@ -1248,7 +1248,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
         InitSystemSessionDragEnable(property);
     } else {
-        property_->SetDragEnabled(false);
+        property->SetDragEnabled(false);
     }
     property->SetSessionPropertyChangeCallback(
         [weakThis = wptr(this)]() {
