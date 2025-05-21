@@ -555,6 +555,12 @@ protected:
     WMError ClearTouchEventFilter() override;
 
     /*
+     * UIExtension
+     */
+    std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
+    std::mutex rectChangeUIExtListenerIdsMutex_;
+
+    /*
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
