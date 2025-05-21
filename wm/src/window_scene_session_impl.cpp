@@ -4087,24 +4087,6 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mai
     return nullptr;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
-{
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    if (windowSessionMap_.empty()) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Please create mainWindow First!");
-        return nullptr;
-    }
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && winId == win->GetWindowId()) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "find window %{public}s, id %{public}d", win->GetWindowName().c_str(), winId);
-            return win;
-        }
-    }
-    TLOGE(WmsLogTag::WMS_SYSTEM, "Cannot find Window!");
-    return nullptr;
-}
-
 static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, int32_t windowId, int32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {

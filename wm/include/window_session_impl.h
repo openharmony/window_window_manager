@@ -74,6 +74,7 @@ public:
 
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
+    static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windowId);
 
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession,
@@ -147,6 +148,9 @@ public:
      */
     bool IsAdaptToSimulationScale() const;
     bool IsAdaptToSubWindow() const;
+    static void RegisterWindowScaleCallback();
+    static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
+    static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
