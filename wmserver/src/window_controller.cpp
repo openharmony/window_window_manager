@@ -904,9 +904,7 @@ void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, con
         WLOGFE("Create maskingSurfaceNode failed");
         return;
     }
-    maskingSurfaceNode_->SetSkipCheckInMultiInstance(true);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
-          "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(maskingSurfaceNode_).c_str());
+    RSAdapterUtil::SetSkipCheckInMultiInstance(maskingSurfaceNode_, true);
     auto displayWidth = displayInfo->GetWidth();
     auto displayHeight = displayInfo->GetHeight();
     auto maskingSizeX = displayInfo->GetOffsetX();

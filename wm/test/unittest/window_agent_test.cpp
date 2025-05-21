@@ -209,8 +209,7 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, TestSize.Level1)
     }
     auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rsUIContext);
 
-    WMError err =
-        windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
+    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
