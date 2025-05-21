@@ -990,13 +990,15 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 }
 
 void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                                              const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction,
+    const Rect& callingSessionRect, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
-        info->textFieldPositionY_, info->rect_.height_);
-    if (occupiedAreaChangeListener_) {
-        occupiedAreaChangeListener_->OnSizeChange(info, rsTransaction);
+    if (info != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
+            info->textFieldPositionY_, info->rect_.height_);
     }
+    occupiedAreaInfo_ = info;
+    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
 }
 
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(

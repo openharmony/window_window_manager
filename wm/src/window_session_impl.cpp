@@ -1494,13 +1494,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     // update avoid areas to listeners
-    for (const auto& [type, avoidArea] : avoidAreas) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
-            type, avoidArea.ToString().c_str());
-        if (lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() ||
-            lastAvoidAreaMap_[type] != avoidArea) {
-            lastAvoidAreaMap_[type] = avoidArea;
-            NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
+    if (reason != WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+        for (const auto& [type, avoidArea] : avoidAreas) {
+            TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+                type, avoidArea.ToString().c_str());
+            if (lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() ||
+                lastAvoidAreaMap_[type] != avoidArea) {
+                lastAvoidAreaMap_[type] = avoidArea;
+                NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
+            }
         }
     }
 
@@ -1547,7 +1549,11 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionimpl::UpdateViewportConfig id:%d [%d, %d, %u, %u] reason:%u orientation:%d", GetPersistentId(),
         rect.posX_, rect.posY_, rect.width_, rect.height_, reason, orientation);
-    uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
+    if (reason == WindowSizeChangeReason::OCCUPIED_AREA_CHANGE && !avoidAreas.empty()) {
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
+    } else {
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_, occupiedAreaInfo_);
+    }
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
@@ -5584,16 +5590,20 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
 }
 
 void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                                     const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingWindowRect,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-        ", occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u", rsTransaction != nullptr,
-        info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    if (info != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+            ", occupied rect: x %{public}u, y %{public}u, w %{public}u, h %{public}u, callingWindowRect: %{public}s",
+            rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
+            info->rect_.height_, callingWindowRect.ToString().c_str());
+    }
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
         return;
     }
-    auto task = [weak = wptr(this), info, rsTransaction]() {
+    auto task = [weak = wptr(this), info, rsTransaction, callingWindowRect, avoidAreas]() {
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
@@ -5604,6 +5614,9 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             rsTransaction->Begin();
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
+        window->occupiedAreaInfo_ = info;
+        window->UpdateViewportConfig(callingWindowRect, WindowSizeChangeReason::OCCUPIED_AREA_CHANGE,
+            rsTransaction, nullptr, avoidAreas);
         if (rsTransaction) {
             rsTransaction->Commit();
         }

@@ -47,7 +47,8 @@ public:
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    MOCK_METHOD2(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type));
+    MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info));
 };
 
 class MockTouchOutsideListener : public ITouchOutsideListener {

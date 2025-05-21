@@ -204,8 +204,6 @@ public:
     virtual void BindKeyboardSession(sptr<SceneSession> session) {};
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
-    virtual void OnKeyboardPanelUpdated() {};
-    virtual void OnCallingSessionUpdated() {};
     virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
@@ -752,6 +750,8 @@ public:
     void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
+    virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
+        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) {}
 
     /*
      * Window Focus
