@@ -2017,7 +2017,7 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::DISPLAY_ID)) {
-        pImpl_->NotifyWindowRectChange(windowInfoList);
+        pImpl_->NotifyDisplayIdChange(windowInfoList);
     }
 }
 } // namespace Rosen
