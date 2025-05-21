@@ -213,6 +213,10 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenI
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd() &&
+        !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+        return ERROR_ID_NOT_SYSTEM_APP;
+    }
     if (displayManagerAgent == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return SCREEN_ID_INVALID;
