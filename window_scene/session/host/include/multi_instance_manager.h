@@ -53,6 +53,7 @@ public:
     void FillInstanceKeyIfNeed(const sptr<SceneSession>& sceneSession);
     bool MultiInstancePendingSessionActivation(SessionInfo& sessionInfo);
     std::string CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey = "");
+    void RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
 
     // Locks mutex_
     uint32_t GetInstanceCount(const std::string& bundleName);
@@ -62,7 +63,6 @@ public:
 
 private:
     uint32_t FindMinimumAvailableInstanceId(const std::string& bundleName, uint32_t maxInstanceCount);
-    void RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void AddInstanceId(const std::string& bundleName, uint32_t instanceId);
     void RemoveInstanceId(const std::string& bundleName, uint32_t instanceId);
     bool ConvertInstanceKeyToInstanceId(const std::string& instanceKey, uint32_t& instanceId) const;

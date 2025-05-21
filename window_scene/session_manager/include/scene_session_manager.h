@@ -700,6 +700,8 @@ public:
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
 
     /*
      * Window Pattern
