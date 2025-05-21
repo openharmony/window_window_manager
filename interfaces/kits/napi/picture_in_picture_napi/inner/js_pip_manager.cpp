@@ -143,7 +143,6 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
         TLOGE(WmsLogTag::WMS_PIP, "Failed to set xComponentController");
         return NapiGetUndefined(env);
     }
-    std::string surfaceId;
     napi_value surfaceIdNapiValue = argv[1];
     if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface. Invalidate params");
