@@ -1500,7 +1500,7 @@ void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(
             dataToSend);
         if (sendResult != DataHandlerErr::OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, errCode: "
-                "%{public}d", businessCode, sendResult);
+                "%{public}u", businessCode, sendResult);
             return;
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "Notify host window to raise, id: %{public}d, isHitTargetDraggable: %{public}d, "
@@ -1705,7 +1705,7 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
             auto sendResult = dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, code, data);
             if (sendResult != DataHandlerErr::OK) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, "
-                    "errCode: %{public}d", code, sendResult);
+                    "errCode: %{public}u", code, sendResult);
                 return WMError::WM_ERROR_IPC_FAILED;
             }
             break;
