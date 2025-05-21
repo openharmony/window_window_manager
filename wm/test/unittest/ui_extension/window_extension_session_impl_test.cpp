@@ -2656,15 +2656,14 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, Tes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("UpdateHostSpecificSystemBarEnabled");
-    WindowType type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UpdateHostSpecificSystemBarEnabled(true, true, type));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
 
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
-    EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled(true, true, type));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
 }
 }
 } // namespace Rosen
