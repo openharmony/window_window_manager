@@ -129,10 +129,10 @@ ErrCode DisplayManagerIpcService::SetOrientation(uint64_t screenId, uint32_t ori
 }
 
 ErrCode DisplayManagerIpcService::GetDisplaySnapshot(uint64_t displayId, int32_t& errorCode, bool isUseDma,
-    bool isCaptureFullOfScreen, std::shared_ptr<PixelMap>& pixelMap)
+    bool isFullScreenCapture, std::shared_ptr<PixelMap>& pixelMap)
 {
     DmErrorCode errorCodeOut = DmErrorCode::DM_OK;
-    pixelMap = displayManagerService_.GetDisplaySnapshot(displayId, &errorCodeOut, isUseDma, isCaptureFullOfScreen);
+    pixelMap = displayManagerService_.GetDisplaySnapshot(displayId, &errorCodeOut, isUseDma, isFullScreenCapture);
     errorCode = static_cast<int32_t>(errorCodeOut);
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetDisplaySnapshot failed, displayId: %{public}" PRIu64 ", errorCode: %{public}d",
