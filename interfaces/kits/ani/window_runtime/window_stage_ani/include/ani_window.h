@@ -75,6 +75,14 @@ public:
         ani_string color, ani_object offsetX, ani_object offsetY);
     static void Finalizer(ani_env* env, ani_long nativeObj);
 
+    void StartMoving(ani_env* env);
+    void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
+    void SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam);
+    void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
+    ani_int GetWindowStatus(ani_env* env);
+    void Minimize(ani_env* env);
+    void HideWindowFunction(ani_env* env, WmErrorCode errCode);
+    void Maximize(ani_env* env, ani_int presentation);
     ani_object Resize(ani_env* env, ani_double width, ani_double height);
     ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
     ani_object GetGlobalRect(ani_env* env);
