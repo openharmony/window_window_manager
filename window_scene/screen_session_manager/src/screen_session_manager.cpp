@@ -6002,10 +6002,18 @@ bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agentIter != screenAgentMap_.end()) {
         while (screenAgentMap_[agent].size() > 0) {
             auto diedId = screenAgentMap_[agent][0];
-            TLOGI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64"", diedId);
+            auto screenSession = GetScreenSession(diedId);
+            if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+                std::vector<ScreenId> screenIds;
+                screenIds.emplace_back(diedId);
+                TLOGI(WmsLogTag::DMS, "stop mirror in OnRemoteDied: %{public}" PRIu64, diedId);
+                StopMirror(screenIds);
+            }
+            TLOGI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64, diedId);
             DMError res = DestroyVirtualScreen(diedId);
             if (res != DMError::DM_OK) {
-                TLOGE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64"", diedId);
+                TLOGE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64, diedId);
+                return false;
             }
         }
         screenAgentMap_.erase(agent);
