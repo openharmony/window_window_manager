@@ -5304,6 +5304,32 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
+WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Pointer event is nullptr");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d, ac:%{public}d", pointerEvent->GetId(),
+            pointerEvent->GetPointerAction());
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
+        if (!uiContent->ProcessPointerEvent(pointerEvent)) {
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
+            pointerEvent->MarkProcessed();
+        }
+    } else {
+        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            TLOGW(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerEvent not consumed, windowId:%{public}u", GetWindowId());
+        }
+        pointerEvent->MarkProcessed();
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)
 {
     std::unique_lock<std::mutex> lock(keyEventFilterMutex_);
