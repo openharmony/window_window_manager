@@ -77,9 +77,9 @@ namespace {
 HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenModeChangeMap, TestSize.Level1)
 {
     multiSMCM_.InitMultiScreenModeChangeMap();
-    multiSMCM_.HandleMultiScreenModeChangeMap_.clear();
+    multiSMCM_.handleMultiScreenModeChangeMap_.clear();
     multiSMCM_.InitMultiScreenModeChangeMap();
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenModeChangeMap_.empty());
 }
 
 /**
@@ -122,11 +122,11 @@ HWTEST_F(MultiScreenModeChangeManagerTest, OnMultiScreenModeChangeRequest, TestS
  */
 HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerMainExternalExtendModeModeChangeMap, TestSize.Level1)
 {
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
-    multiSMCM_.HandleMultiScreenInnerMainExternalExtendModeChangeMap_.clear();
-    ASSERT_TRUE(multiSMCM_.HandleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
+    multiSMCM_.handleMultiScreenInnerMainExternalExtendModeChangeMap_.clear();
+    ASSERT_TRUE(multiSMCM_.handleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMainExternalExtendModeModeChangeMap();
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMainExternalExtendModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMainExternalExtendModeModeChangeMap();
 }
 
@@ -137,11 +137,11 @@ HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerMainExternalExten
  */
 HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerMainExternalMirrorModeModeChangeMap, TestSize.Level1)
 {
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
-    multiSMCM_.HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.clear();
-    ASSERT_TRUE(multiSMCM_.HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
+    multiSMCM_.handleMultiScreenInnerMainExternalMirrorModeChangeMap_.clear();
+    ASSERT_TRUE(multiSMCM_.handleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMainExternalMirrorModeModeChangeMap();
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMainExternalMirrorModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMainExternalMirrorModeModeChangeMap();
 }
 
@@ -152,11 +152,11 @@ HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerMainExternalMirro
  */
 HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerExtendExternalMainModeModeChangeMap, TestSize.Level1)
 {
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
-    multiSMCM_.HandleMultiScreenInnerExtendExternalMainModeChangeMap_.clear();
-    ASSERT_TRUE(multiSMCM_.HandleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
+    multiSMCM_.handleMultiScreenInnerExtendExternalMainModeChangeMap_.clear();
+    ASSERT_TRUE(multiSMCM_.handleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerExtendExternalMainModeModeChangeMap();
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerExtendExternalMainModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerExtendExternalMainModeModeChangeMap();
 }
 
@@ -167,11 +167,11 @@ HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerExtendExternalMai
  */
 HWTEST_F(MultiScreenModeChangeManagerTest, InitMultiScreenInnerMirrorExternalMainModeModeChangeMap, TestSize.Level1)
 {
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
-    multiSMCM_.HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.clear();
-    ASSERT_TRUE(multiSMCM_.HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
+    multiSMCM_.handleMultiScreenInnerMirrorExternalMainModeChangeMap_.clear();
+    ASSERT_TRUE(multiSMCM_.handleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMirrorExternalMainModeModeChangeMap();
-    ASSERT_FALSE(multiSMCM_.HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
+    ASSERT_FALSE(multiSMCM_.handleMultiScreenInnerMirrorExternalMainModeChangeMap_.empty());
     multiSMCM_.InitMultiScreenInnerMirrorExternalMainModeModeChangeMap();
 }
 
