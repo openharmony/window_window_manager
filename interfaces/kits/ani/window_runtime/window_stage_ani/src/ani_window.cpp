@@ -1027,17 +1027,34 @@ void AniWindow::SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximize
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
+    ani_boolean isMaximizeButtonVisible = false;
+    if (ANI_OK != env->Object_GetPropertyByName_Boolean(visibleParam,
+        "isMaximizeButtonVisible", &isMaximizeButtonVisible)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    ani_boolean isMinimizeButtonVisible = false;
+    if (ANI_OK != env->Object_GetPropertyByName_Boolean(visibleParam,
+        "isMinimizeButtonVisible", &isMinimizeButtonVisible)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    ani_boolean isCloseButtonVisible = false;
+    if (ANI_OK != env->Object_GetPropertyByName_Boolean(visibleParam,
+        "isCloseButtonVisible", &isCloseButtonVisible)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
+        isMaximizeButtonVisible, isMinimizeButtonVisible, isCloseButtonVisible);
     WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeButtonVisible, isMinimizeButtonVisible,
         isMaximizeButtonVisible, isCloseButtonVisible);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] set title button visible failed!");
         AniWindowUtils::AniThrowError(env, ret);
-        return;
     }
-    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
-        isMaximizeButtonVisible, isMinimizeButtonVisible, isCloseButtonVisible);
 }
 
 void AniWindow::SetDecorButtonStyle(ani_env* env, ani_object decorStyle)
@@ -1064,6 +1081,9 @@ void AniWindow::SetDecorButtonStyle(ani_env* env, ani_object decorStyle)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
+    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] param [%{public}d, %{public}d, %{public}d, %{public}d] to be updated",
+        decorButtonStyle.colorMode, decorButtonStyle.spacingBetweenButtons,
+        decorButtonStyle.closeButtonRightMargin, decorButtonStyle.buttonBackgroundSize);
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] out of range params");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -1607,7 +1627,7 @@ static void StartMoveWindowWithCoordinate(ani_env* env, ani_object obj, ani_long
 }
 
 static void SetWindowTitleButtonVisible(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_boolean isMaximizeButtonVisible, ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible)
+    ani_object visibleParam)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI] start");
@@ -1616,8 +1636,7 @@ static void SetWindowTitleButtonVisible(ani_env* env, ani_object obj, ani_long n
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is null");
         return;
     }
-    aniWindow->SetWindowTitleButtonVisible(env, isMaximizeButtonVisible, isMinimizeButtonVisible,
-        isCloseButtonVisible);
+    aniWindow->SetWindowTitleButtonVisible(env, visibleParam);
 }
 
 static void SetDecorButtonStyle(ani_env* env, ani_object obj, ani_long nativeObj, ani_object decorStyle)
@@ -1953,7 +1972,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(StartMoving)},
         ani_native_function {"startMoveWindowWithCoordinate", "JDD:V",
             reinterpret_cast<void *>(StartMoveWindowWithCoordinate)},
-        ani_native_function {"setWindowTitleButtonVisible", "JZZZ:V",
+        ani_native_function {"setWindowTitleButtonVisible", "JL@ohos/window/window/WindowTitleButtonVisibleParam;:V",
             reinterpret_cast<void *>(SetWindowTitleButtonVisible)},
         ani_native_function {"setDecorButtonStyle", "JL@ohos/window/window/DecorButtonStyle;:V",
             reinterpret_cast<void *>(SetDecorButtonStyle)},

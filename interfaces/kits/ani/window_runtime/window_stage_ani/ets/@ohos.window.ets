@@ -1287,6 +1287,12 @@ export interface DecorButtonStyle {
   closeButtonRightMargin?: number;
 }
 
+export interface WindowTitleButtonVisibleParam {
+  isMaximizeButtonVisible: boolean;
+  isMinimizeButtonVisible: boolean;
+  isCloseButtonVisible: boolean;
+}
+
 /**
  * The information of keyboard
  *
@@ -1571,8 +1577,7 @@ export class WindowInternal implements Window {
 
     private native startMoving(nativeObj: long): void;
     private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: double, offsetY: double): void;
-    private native setWindowTitleButtonVisible(nativeObj: long, isMaximizeButtonVisible: boolean,
-        isMinimizeButtonVisible: boolean, isCloseButtonVisible: boolean): void;
+    private native setWindowTitleButtonVisible(nativeObj: long, visibleParam: WindowTitleButtonVisibleParam): void;
     private native setDecorButtonStyle(nativeObj: long, decorStyle: DecorButtonStyle): void;
     private native getWindowStatus(nativeObj: long): int;
     private native minimize(nativeObj: long): void;
@@ -1647,13 +1652,15 @@ export class WindowInternal implements Window {
 
     public setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
                                        isCloseButtonVisible?: boolean): void {
-      if (isCloseButtonVisible == undefined) {
-        this.setWindowTitleButtonVisible(this.nativeObj, isMaximizeButtonVisible, isMinimizeButtonVisible, true);
+      let visibleParam: window.WindowTitleButtonVisibleParam = {
+        isMaximizeButtonVisible: isMaximizeButtonVisible,
+        isMinimizeButtonVisible: isMinimizeButtonVisible,
+        isCloseButtonVisible: true
+      };
+      if (isCloseButtonVisible != undefined) {
+        visibleParam.isCloseButtonVisible = isCloseButtonVisible;
       }
-      else {
-        this.setWindowTitleButtonVisible(this.nativeObj, isMaximizeButtonVisible,
-          isMinimizeButtonVisible, isCloseButtonVisible);
-      }
+      this.setWindowTitleButtonVisible(this.nativeObj, visibleParam);
     }
 
     public setDecorButtonStyle(decorStyle: DecorButtonStyle): void {
