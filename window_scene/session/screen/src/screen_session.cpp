@@ -32,7 +32,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSession" };
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 // 0: 横扫屏; 1: 竖扫屏. 默认为0
 static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
@@ -861,7 +860,7 @@ void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
-            WLOGFE("screenChangeListener is null.");
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
         listener->OnCameraBackSelfieChange(isCameraBackSelfie, screenId_);
@@ -2176,12 +2175,12 @@ void ScreenSession::ExtendScreenConnectStatusChange(ScreenId screenId,
 {
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
-        WLOGFE("screenChangeListenerList is empty.");
+        TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
     }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
-            WLOGFE("screenChangeListener is null.");
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
         listener->OnExtendScreenConnectStatusChange(screenId, extendScreenConnectStatus);
