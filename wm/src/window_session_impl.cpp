@@ -409,9 +409,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
     }
     auto surfaceNode = RSSurfaceNode::Create(
         rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
-    if (surfaceNode) {
-        surfaceNode->SetSkipCheckInMultiInstance(true);
-    }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;

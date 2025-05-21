@@ -4260,6 +4260,11 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
     PostTask(task, eventName, THRESHOLD);
 }
 
+void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
+{
+    DisplayIdChangeFunc_ = func;
+}
+
 void Session::DeletePersistentImageFit()
 {
     auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
@@ -4289,9 +4294,5 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
     return rsUIContext_;
-}
-void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
-{
-    DisplayIdChangeFunc_ = func;
 }
 } // namespace OHOS::Rosen
