@@ -27,6 +27,11 @@ constexpr const char* const ROOT_HOST_WINDOW_TYPE_FIELD = "rootHostWindowType";
 constexpr const char* const GESTURE_BACK_ENABLED = "gestureBackEnabled";
 constexpr const char* const IMMERSIVE_MODE_ENABLED = "immersiveModeEnabled";
 constexpr const char* const HOST_WINDOW_DELAY_RAISE_STATE_FIELD = "hostWindowDelayRaiseState";
+constexpr const char* const RECT_X = "rectX";
+constexpr const char* const RECT_Y = "rectY";
+constexpr const char* const RECT_WIDTH = "rectWidth";
+constexpr const char* const RECT_HEIGHT = "rectHeight";
+constexpr const char* const RECT_CHANGE_REASON = "rectChangeReason";
 
 enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
@@ -36,11 +41,14 @@ enum class Businesscode : uint32_t {
     SYNC_HOST_IMMERSIVE_MODE_ENABLED,
     SYNC_HOST_GESTURE_BACK_ENABLED,
     SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
+    NOTIFY_HOST_WINDOW_RECT_CHANGE,
 
     // IPC messages corresponding to the Businesscode between 10000 and 20000
     // will be forwarded to the host window by the UEC
     TRANSPARENT_TRANSMISSION_TO_HOST_WINDOW_CODE_BEGIN = 10000,
     NOTIFY_HOST_WINDOW_TO_RAISE = 10001,
+    REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER,
+    UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER,
     TRANSPARENT_TRANSMISSION_TO_HOST_WINDOW_CODE_END = 20000,
 };
 }  // namespace OHOS::Rosen::Extension
