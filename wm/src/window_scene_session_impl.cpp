@@ -934,15 +934,6 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
     newLimits = systemLimits;
-    // calculate new limit size
-    if (systemLimits.minWidth_ <= customizedLimits.maxWidth_ &&
-        customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
-        newLimits.maxWidth_ = customizedLimits.maxWidth_;
-    }
-    if (systemLimits.minHeight_ <= customizedLimits.maxHeight_ &&
-        customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
-        newLimits.maxHeight_ = customizedLimits.maxHeight_;
-    }
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
@@ -952,6 +943,15 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
+    }
+    // calculate new limit size
+    if (limitMinWidth <= customizedLimits.maxWidth_ &&
+        customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
+        newLimits.maxWidth_ = customizedLimits.maxWidth_;
+    }
+    if (limitMinHeight <= customizedLimits.maxHeight_ &&
+        customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
+        newLimits.maxHeight_ = customizedLimits.maxHeight_;
     }
     if (limitMinWidth <= customizedLimits.minWidth_ &&
         customizedLimits.minWidth_ <= newLimits.maxWidth_) {
