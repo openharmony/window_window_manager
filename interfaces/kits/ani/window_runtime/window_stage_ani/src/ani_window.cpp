@@ -981,7 +981,7 @@ __attribute__((no_sanitize("cfi")))
 void AniWindow::StartMoving(ani_env* env)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken_ is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1002,7 +1002,7 @@ void AniWindow::StartMoving(ani_env* env)
 void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is nullptr.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is null.");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1023,7 +1023,7 @@ void AniWindow::SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximize
     ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] WindowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] WindowToken is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1043,7 +1043,7 @@ void AniWindow::SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximize
 void AniWindow::SetDecorButtonStyle(ani_env* env, ani_object decorStyle)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] WindowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] WindowToken is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1080,7 +1080,7 @@ void AniWindow::SetDecorButtonStyle(ani_env* env, ani_object decorStyle)
 ani_int AniWindow::GetWindowStatus(ani_env* env)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_PC, "[ANI] window is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
@@ -1099,7 +1099,7 @@ ani_int AniWindow::GetWindowStatus(ani_env* env)
 void AniWindow::Minimize(ani_env* env)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1126,12 +1126,12 @@ void AniWindow::HideWindowFunction(ani_env* env, WmErrorCode errCode)
         return;
     }
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] window is nullptr or get invalid param");
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] window is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGW(WmsLogTag::WMS_LIFE, "[ANI] window Type %{public}u is not supported, [%{public}u, %{public}s]",
+        TLOGW(WmsLogTag::WMS_LIFE, "[ANI] window type %{public}u is not supported, [%{public}u, %{public}s]",
             static_cast<uint32_t>(windowToken_->GetType()),
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         return;
@@ -1147,7 +1147,7 @@ void AniWindow::HideWindowFunction(ani_env* env, WmErrorCode errCode)
 void AniWindow::Maximize(ani_env* env, ani_int presentation)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1584,10 +1584,10 @@ void AniWindow::HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHid
 static void StartMoving(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] StartMoving start");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
         return;
     }
     aniWindow->StartMoving(env);
@@ -1597,10 +1597,10 @@ static void StartMoveWindowWithCoordinate(ani_env* env, ani_object obj, ani_long
     ani_double offsetX, ani_double offsetY)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] StartMoveWindowWithCoordinate start");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
         return;
     }
     aniWindow->StartMoveWindowWithCoordinate(env, offsetX, offsetY);
@@ -1610,10 +1610,10 @@ static void SetWindowTitleButtonVisible(ani_env* env, ani_object obj, ani_long n
     ani_boolean isMaximizeButtonVisible, ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] SetWindowTitleButtonVisible start");
+    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is null");
         return;
     }
     aniWindow->SetWindowTitleButtonVisible(env, isMaximizeButtonVisible, isMinimizeButtonVisible,
@@ -1623,10 +1623,10 @@ static void SetWindowTitleButtonVisible(ani_env* env, ani_object obj, ani_long n
 static void SetDecorButtonStyle(ani_env* env, ani_object obj, ani_long nativeObj, ani_object decorStyle)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] SetDecorButtonStyle start");
+    TLOGI(WmsLogTag::WMS_DECOR, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] windowToken is null");
         return;
     }
     aniWindow->SetDecorButtonStyle(env, decorStyle);
@@ -1635,10 +1635,10 @@ static void SetDecorButtonStyle(ani_env* env, ani_object obj, ani_long nativeObj
 static ani_int GetWindowStatus(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_PC, "[ANI] GetWindowStatus start");
+    TLOGI(WmsLogTag::WMS_PC, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_PC, "[ANI] windowToken is null");
         return ANI_ERROR;
     }
     return aniWindow->GetWindowStatus(env);
@@ -1647,10 +1647,10 @@ static ani_int GetWindowStatus(ani_env* env, ani_object obj, ani_long nativeObj)
 static void Minimize(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Minimize start");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
         return;
     }
     aniWindow->Minimize(env);
@@ -1659,10 +1659,10 @@ static void Minimize(ani_env* env, ani_object obj, ani_long nativeObj)
 static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj, ani_int presentation)
 {
     using namespace OHOS::Rosen;
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Maximize start");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowToken is null");
         return;
     }
     aniWindow->Maximize(env, presentation);
