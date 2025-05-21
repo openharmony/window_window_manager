@@ -467,19 +467,19 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
     int32_t cbMapSize = -1;
     switch (type) {
         case ListenerType::STATE_CHANGE_CB:
-            ret = ProcessStateChangeUnregister(it);
+            ret = ProcessStateChangeUnregister(listener);
             cbMapSize = lifeCycleCallbackSet_.size();
             break;
         case ListenerType::CONTROL_EVENT_CB:
-            ret = ProcessControlEventUnregister(it);
+            ret = ProcessControlEventUnregister(listener);
             cbMapSize = controlEventCallbackSet_.size();
             break;
         case ListenerType::SIZE_CHANGE_CB:
-            ret = ProcessSizeChangeUnregister(it);
+            ret = ProcessSizeChangeUnregister(listener);
             cbMapSize = resizeCallbackSet_.size();
             break;
         case ListenerType::PIP_START_CB:
-            ret = ProcessPipStartUnregister(it);
+            ret = ProcessPipStartUnregister(listener);
             cbMapSize = startPipCallbackSet_.size();
             break;
         default:
@@ -646,7 +646,7 @@ WMError WebPictureInPictureControllerInterface::ProcessControlEventUnregister(
         if (it->GetControlEventCallbackRef() != listener->GetControlEventCallbackRef()) {
             continue;
         }
-        sptr<IPiPLifeCycle> thisListener(listener);
+        sptr<IPiPControlObserver> thisListener(listener);
         WMError ret = sptrWebPipController_->UnregisterPiPControlObserver(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister controlEvent callback failed");
@@ -683,7 +683,7 @@ WMError WebPictureInPictureControllerInterface::ProcessSizeChangeUnregister(
         if (it->GetResizeCallbackRef() != listener->GetResizeCallbackRef()) {
             continue;
         }
-        sptr<IPiPLifeCycle> thisListener(listener);
+        sptr<IPiPWindowSize> thisListener(listener);
         WMError ret = sptrWebPipController_->UnregisterPiPWindowSize(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister resize callback failed");
@@ -720,7 +720,7 @@ WMError WebPictureInPictureControllerInterface::ProcessPipStartUnregister(
         if (it->GetStartPipCallbackRef() != listener->GetStartPipCallbackRef()) {
             continue;
         }
-        sptr<IPiPLifeCycle> thisListener(listener);
+        sptr<IPiPStartObserver> thisListener(listener);
         WMError ret = sptrWebPipController_->UnregisterPiPStart(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister startPip callback failed");

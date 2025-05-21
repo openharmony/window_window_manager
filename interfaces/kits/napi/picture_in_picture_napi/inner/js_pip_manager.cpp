@@ -14,6 +14,7 @@
  */
 
 #include "js_pip_manager.h"
+#include <sstream>
 #include "window_manager_hilog.h"
 #include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
@@ -160,7 +161,7 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
     TLOGI(WmsLogTag::WMS_PIP, "SetSurfaceId: %{public}s", surfaceId.c_str());
     pipController->SetSurfaceId(surfaceId);
     uint64_t id;
-    std::isstringstream inputStream(surfaceId.c_str());
+    std::istringstream inputStream(surfaceId.c_str());
     inputStream >> id;
     for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
         if (listener == nullptr) {
