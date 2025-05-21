@@ -97,7 +97,7 @@ public:
     std::vector<sptr<IPiPStartObserver>> GetPictureInPictureStartObserver() const;
     PiPWindowState GetControllerState() const;
     void OnPictureInPictureStart();
-    uint64_t SetSurfaceId(uint64_t surfaceId);
+    void SetSurfaceId(uint64_t surfaceId);
     static bool GetPipEnabled();
     uint64_t GetSurfaceId() const;
     bool isWeb_ = false;
