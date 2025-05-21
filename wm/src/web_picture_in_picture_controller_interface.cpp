@@ -616,13 +616,13 @@ WMError WebPictureInPictureControllerInterface::ProcessStateChangeUnregister(
         if (it->GetLifeCycleCallbackRef() != listener->GetLifeCycleCallbackRef()) {
             continue;
         }
-        sptr<IPiPLifeCycle> thisListener(listener);
+        sptr<IPiPLifeCycle> thisListener(it);
         WMError ret = sptrWebPipController_->UnregisterPiPLifecycle(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister lifeCycle callback failed");
             return ret;
         }
-        lifeCycleCallbackSet_.erase(listener);
+        lifeCycleCallbackSet_.erase(it);
         return ret;
     }
     TLOGE(WmsLogTag::WMS_PIP, "lifeCycle callback not found");
@@ -653,13 +653,13 @@ WMError WebPictureInPictureControllerInterface::ProcessControlEventUnregister(
         if (it->GetControlEventCallbackRef() != listener->GetControlEventCallbackRef()) {
             continue;
         }
-        sptr<IPiPControlObserver> thisListener(listener);
+        sptr<IPiPControlObserver> thisListener(it);
         WMError ret = sptrWebPipController_->UnregisterPiPControlObserver(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister controlEvent callback failed");
             return ret;
         }
-        controlEventCallbackSet_.erase(listener);
+        controlEventCallbackSet_.erase(it);
         return ret;
     }
     TLOGE(WmsLogTag::WMS_PIP, "controlEvent callback not found");
@@ -690,13 +690,13 @@ WMError WebPictureInPictureControllerInterface::ProcessSizeChangeUnregister(
         if (it->GetResizeCallbackRef() != listener->GetResizeCallbackRef()) {
             continue;
         }
-        sptr<IPiPWindowSize> thisListener(listener);
+        sptr<IPiPWindowSize> thisListener(it);
         WMError ret = sptrWebPipController_->UnregisterPiPWindowSize(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister resize callback failed");
             return ret;
         }
-        resizeCallbackSet_.erase(listener);
+        resizeCallbackSet_.erase(it);
         return ret;
     }
     TLOGE(WmsLogTag::WMS_PIP, "resize callback not found");
@@ -727,13 +727,13 @@ WMError WebPictureInPictureControllerInterface::ProcessPipStartUnregister(
         if (it->GetStartPipCallbackRef() != listener->GetStartPipCallbackRef()) {
             continue;
         }
-        sptr<IPiPStartObserver> thisListener(listener);
+        sptr<IPiPStartObserver> thisListener(it);
         WMError ret = sptrWebPipController_->UnregisterPiPStart(thisListener);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister startPip callback failed");
             return ret;
         }
-        startPipCallbackSet_.erase(listener);
+        startPipCallbackSet_.erase(it);
         return ret;
     }
     TLOGE(WmsLogTag::WMS_PIP, "startPip callback not found");
