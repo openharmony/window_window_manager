@@ -51,16 +51,6 @@ napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "")
     return NapiGetUndefined(env);
 }
 
-bool isAllDigits(const std::string& surfaceId)
-{
-    if (surfaceId.empty()) {
-        return false;
-    }
-    return std::all_of(surfaceId.begin(), surfaceId.end(), [](unsigned char c) {
-        return std::isdigit(c);
-    });
-}
-
 JsPipManager::JsPipManager()
 {
     listenerCodeMap_ = {
@@ -154,21 +144,27 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     std::string surfaceId;
-    if (!ConvertFromJsValue(env, argv[1], surfaceId)) {
-        TLOGE(WmsLogTag::WMS_PIP, "Faild to convert parameter to string");
+    napi_value surfaceIdNapiValue = argv[1];
+    if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface. Invalidate params");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "SetSurfaceId: %{public}s", surfaceId.c_str());
+    char buffer[PATH_MAX];
+    size_t length = 0;
+    uint64_t surfaceId = 0;
+    if (napi_get_value_string_utf8(env, surfaceIdNapiValue, buffer, PATH_MAX, &length) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface");
+        return NapiGetUndefined(env);;
+    }
+    std::istringstream inputStream(buffer);
+    inputStream >> surfaceId;
     pipController->SetSurfaceId(surfaceId);
-    uint64_t id;
-    std::istringstream inputStream(surfaceId.c_str());
-    inputStream >> id;
     for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one start listener is nullptr");
             continue;
         }
-        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), id);
+        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), surfaceId);
     }
     return NapiGetUndefined(env);
 }

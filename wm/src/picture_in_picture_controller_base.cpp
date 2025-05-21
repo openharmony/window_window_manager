@@ -418,12 +418,12 @@ void PictureInPictureControllerBase::PipSizeChange(double width, double height, 
     }
 }
 
-void PictureInPictureControllerBase::SetSurfaceId(std::string surfaceId)
+void PictureInPictureControllerBase::SetSurfaceId(uint64_t surfaceId)
 {
     surfaceId_ = surfaceId;
 }
 
-std::string PictureInPictureControllerBase::GetSurfaceId() const
+uint64_t PictureInPictureControllerBase::GetSurfaceId() const
 {
     return surfaceId_;
 }
