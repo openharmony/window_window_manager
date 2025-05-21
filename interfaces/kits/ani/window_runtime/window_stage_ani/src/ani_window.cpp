@@ -1019,8 +1019,7 @@ void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, 
     }
 }
 
-void AniWindow::SetWindowTitleButtonVisible(ani_env* env, ani_boolean isMaximizeButtonVisible,
-    ani_boolean isMinimizeButtonVisible, ani_boolean isCloseButtonVisible)
+void AniWindow::SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "[ANI] WindowToken is null");
