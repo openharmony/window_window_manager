@@ -402,7 +402,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(
             listener->OnWindowInfoChanged(windowInfoList);
         }
     }
-} 
+}
 
 void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
 {
