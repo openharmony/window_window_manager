@@ -164,7 +164,8 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
         TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
-        if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::UNKNOWN) {
+        if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::UNKNOWN ||
+        SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::FOLDED) {
             events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
         }
         TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is in BufferArea");
