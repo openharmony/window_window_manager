@@ -228,35 +228,6 @@ HWTEST_F(SceneSessionManagerTest11, GetLastInstanceKey, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateOccupiedAreaIfNeed
- * @tc.desc: SceneSesionManager update occupiedArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, TestSize.Level1)
-{
-    int ret = 0;
-    int32_t persistentId = 0;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.moduleName_ = "test3";
-    info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    persistentId = 1;
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    ssm_->sceneSessionMap_.erase(1);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetAbilityInfo
  * @tc.desc: SceneSesionManager test GetAbilityInfo
  * @tc.type: FUNC

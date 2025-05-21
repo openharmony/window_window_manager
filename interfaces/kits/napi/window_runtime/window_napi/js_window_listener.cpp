@@ -145,7 +145,8 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     }
 }
 
-void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread

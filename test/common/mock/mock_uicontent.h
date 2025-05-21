@@ -54,9 +54,10 @@ public:
     MOCK_METHOD2(UpdateConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager));
     MOCK_METHOD1(UpdateConfigurationSyncForAll, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
-    MOCK_METHOD4(UpdateViewportConfig, void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    MOCK_METHOD5(UpdateViewportConfig, void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas));
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+        const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info));
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD4(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));

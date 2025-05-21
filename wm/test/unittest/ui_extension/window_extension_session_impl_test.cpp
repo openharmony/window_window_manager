@@ -1495,7 +1495,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, TestSize.Lev
     preRect.height_ = 200;
     preRect.width_ = 200;
     window_->property_->SetWindowRect(preRect);
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _, _));
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
@@ -1529,7 +1529,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, TestSize.Lev
     preRect.height_ = 100;
     preRect.width_ = 100;
     window_->property_->SetWindowRect(preRect);
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _, _));
 
     window_->isDensityFollowHost_ = true;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -1552,7 +1552,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, TestSize.Lev
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _, _)).Times(0);
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
@@ -1593,7 +1593,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, TestSize.Lev
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(3);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _, _)).Times(3);
 
     window_->hostDensityValue_ = densityValue;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);

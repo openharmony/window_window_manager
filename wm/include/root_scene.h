@@ -74,7 +74,8 @@ public:
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
-    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }

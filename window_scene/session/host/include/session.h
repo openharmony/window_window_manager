@@ -103,7 +103,6 @@ using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
-
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -410,7 +409,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const Rect& callingSessionRect = {}, const std::map<AvoidAreaType, AvoidArea>& = {});
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);

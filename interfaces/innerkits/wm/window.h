@@ -248,8 +248,10 @@ public:
      *
      * @param avoidArea Area needed to be avoided.
      * @param type Type of avoid area.
+     * @param info Keyboard occupied area information.
      */
-    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) {}
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr) {}
 };
 
 /**

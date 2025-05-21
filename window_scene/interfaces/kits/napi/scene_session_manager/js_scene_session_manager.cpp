@@ -691,12 +691,8 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
     });
     SceneSessionManager::GetInstance().RegisterNotifyRootSceneAvoidAreaChangeFunc(
-        [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
-        RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type);
-    });
-    SceneSessionManager::GetInstance().RegisterNotifyRootSceneOccupiedAreaChangeFunc(
-        [](const sptr<OccupiedAreaChangeInfo>& info) {
-        RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
+        [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type, const sptr<OccupiedAreaChangeInfo>& info = nullptr) {
+        RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type, info);
     });
     SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
         [](const std::string& id) {
