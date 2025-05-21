@@ -2664,12 +2664,11 @@ public:
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
      *
-     * @param systemBarEnable is system bar enabled
-     * @param systemBarEnableAnimation is animation enabled
-     * @param type type of window
+     * @param name type of system bar
+     * @param enable is system bar enabled
+     * @param enableAnimation is animation enabled
      */
-    virtual WMError UpdateHostSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        WindowType type)
+    virtual WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation)
     {
         return WMError::WM_OK;
     }

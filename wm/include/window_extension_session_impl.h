@@ -132,8 +132,7 @@ public:
     bool GetImmersiveModeEnabledState() const override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
-    WMError UpdateHostSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        WindowType type) override;
+    WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation) override;
 
     /*
      * Free Multi Window

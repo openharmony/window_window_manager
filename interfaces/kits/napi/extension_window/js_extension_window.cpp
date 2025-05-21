@@ -540,9 +540,7 @@ napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_c
         TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    auto systemBarType = name.compare("status") == 0 ? WindowType::WINDOW_TYPE_STATUS_BAR :
-                    (name.compare("navigation") == 0 ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-                                                       WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+
     bool systemBarEnable = false;
     bool systemBarEnableAnimation = false;
     if (!GetSpecificBarStatus(env, info, systemBarEnable, systemBarEnableAnimation)) {
@@ -553,14 +551,14 @@ napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_c
     const char* const where = __func__;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakToken = wptr<Window>(extensionWindow_->GetWindow()), env, task = napiAsyncTask,
-        systemBarType, systemBarEnable, systemBarEnableAnimation, where] {
+        name, systemBarEnable, systemBarEnableAnimation, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
-        auto ret = window->UpdateHostSpecificSystemBarEnabled(systemBarEnable, systemBarEnableAnimation, systemBarType);
+        auto ret = window->UpdateHostSpecificSystemBarEnabled(name, systemBarEnable, systemBarEnableAnimation);
         auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
