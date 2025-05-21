@@ -15484,4 +15484,46 @@ WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationPr
     session->AnimateTo(animationProperty, animationOption);
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "empty bundleName");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    uint32_t maxInstanceCount = MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
+    uint32_t instanceCount = GetInstanceCount(bundleName);
+    if (instanceCount < maxInstanceCount) {
+        instanceKey = MultiInstanceManager::GetInstance().CreateNewInstanceKey(bundleName);
+    } else {
+        instanceKey = MultiInstanceManager::GetInstance().GetLastInstanceKey(bundleName);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "create new instanceKey:%{public}s of bundle:%{public}s",
+        instanceKey.c_str(), bundleName.c_str());
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "empty bundleName");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (instanceKey.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "empty instanceKey");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    MultiInstanceManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+    TLOGI(WmsLogTag::WMS_LIFE, "remove instanceKey:%{public}s of bundle:%{public}s",
+        instanceKey.c_str(), bundleName.c_str());
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
