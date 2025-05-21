@@ -80,8 +80,8 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, const std::vector<st
         static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
     if (iterFirst != controlGroups.end() && iterSecond != controlGroups.end()) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, %{public}u conflicts with %{public}u in controlGroups",
-        static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
-        static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
+            static_cast<uint32_t>(PiPControlGroup::VIDEO_PREVIOUS_NEXT),
+            static_cast<uint32_t>(PiPControlGroup::FAST_FORWARD_BACKWARD));
         return -1;
     }
     return 0;
@@ -406,19 +406,31 @@ WMError WebPictureInPictureControllerInterface::UnregisterResizeListener(NativeP
     return UnregisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
 }
 
+WMError WebPictureInPictureControllerInterface::CheckRegisterParam(ListenerType type,
+    const sptr<NativePiPWindowListener>& listener)
+{
+    if (sptrWebPipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "New NativePiPWindowListener failed");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    return WMError::WM_OK;
+}
 
 WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(ListenerType type,
     const sptr<NativePiPWindowListener>& listener)
 {
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "New NativePiPWindowListener failed");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    WMError ret = WMError::WM_OK;
+    if ((ret = CheckRegisterParam(type, listener)) != WMError::WM_OK) {
+        return ret;
     }
     if (IsRegistered(type, listener)) {
         TLOGE(WmsLogTag::WMS_PIP, "Listener already registered");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    WMError ret = WMError::WM_OK;
     int32_t cbMapSize = -1;
     switch (type) {
         case ListenerType::STATE_CHANGE_CB:
@@ -451,19 +463,14 @@ WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(Listene
 WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(ListenerType type,
     const sptr<NativePiPWindowListener>& listener)
 {
-    if (sptrWebPipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "New NativePiPWindowListener failed");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    WMError ret = WMError::WM_OK;
+    if ((ret = CheckRegisterParam(type, listener)) != WMError::WM_OK) {
+        return ret;
     }
     if (!IsRegistered(type, listener)) {
         TLOGE(WmsLogTag::WMS_PIP, "Listener not registered");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
-    WMError ret = WMError::WM_OK;
     int32_t cbMapSize = -1;
     switch (type) {
         case ListenerType::STATE_CHANGE_CB:

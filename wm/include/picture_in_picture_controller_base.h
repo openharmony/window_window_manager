@@ -97,9 +97,9 @@ public:
     std::vector<sptr<IPiPStartObserver>> GetPictureInPictureStartObserver() const;
     PiPWindowState GetControllerState() const;
     void OnPictureInPictureStart();
-    void SetSurfaceId(std::string surfaceId);
+    uint64_t SetSurfaceId(uint64_t surfaceId);
     static bool GetPipEnabled();
-    std::string GetSurfaceId() const;
+    uint64_t GetSurfaceId() const;
     bool isWeb_ = false;
 
     // diffrent between normal and web
@@ -153,7 +153,7 @@ protected:
     napi_env env_ = nullptr;
     bool isStoppedFromClient_ = false;
     int32_t handleId_ = -1;
-    std::string surfaceId_;
+    uint64_t surfaceId_;
 
     // diffrent between normal and web
     virtual WMError CreatePictureInPictureWindow(StartPipType startType) = 0;
