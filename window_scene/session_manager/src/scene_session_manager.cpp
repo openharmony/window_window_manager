@@ -6798,9 +6798,11 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(const sptr<SceneSe
         uint32_t topNearestBlockingZOrder = 0;
         if  (topNearestBlockingFocusSession)  {
             topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
-            TLOGD(WmsLogTag::WMS_FOCUS,  "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
-                topNearestBlockingZOrder:  %{public}d",  requestSessionZOrder,  focusedSessionZOrder,
-                topNearestBlockingZOrder);
+            TLOGI(WmsLogTag::WMS_FOCUS,
+                  "requestSessionZOrder: %{public}d, focusedSessionZOrder: %{public}d\
+                  topNearestBlockingZOrder:  %{public}d, topNearestBlockingId: %{public}d",
+                  requestSessionZOrder, focusedSessionZOrder,
+                  topNearestBlockingZOrder, topNearestBlockingFocusSession->GetPersistentId());
         }
         if  (focusedSessionZOrder >=  topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder)  {
             TLOGD(WmsLogTag::WMS_FOCUS,  "focus pass through, needs to be intercepted");
@@ -6941,9 +6943,9 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
-    sptr<SceneSession> ret = nullptr;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
+    sptr<SceneSession> nextFocusableSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
@@ -6957,7 +6959,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisible() && IsParentSessionVisible(session)) {
-            ret = session;
+            nextFocusableSession = session;
             return true;
         }
         if (session->GetPersistentId() == persistentId) {
@@ -6966,7 +6968,67 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         return false;
     };
     TraverseSessionTree(func, true);
-    return ret;
+    sptr<SceneSession> topFloatingSession = GetNextFocusableSessionWhenFloatWindowExist(displayGroupId, persistentId);
+    if (topFloatingSession != nullptr && nextFocusableSession != nullptr && nextFocusableSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "topFloatingSessionId: %{public}d", topFloatingSession->GetPersistentId());
+        return topFloatingSession;
+    }
+    return nextFocusableSession;
+}
+
+sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId,
+                                                                                    int32_t persistentId)
+{
+    bool isPhoneOrPad =
+        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    if (!isPhoneOrPad) {
+        return nullptr;
+    }
+    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (topFloatingSession != nullptr && SessionHelper::IsMainWindow(sceneSession->GetWindowType()) &&
+        sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        return topFloatingSession;
+    }
+    return nullptr;
+}
+
+sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)
+{
+    bool previousFocusedSessionFound = false;
+    sptr<SceneSession> topFloatingSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &topFloatingSession, displayGroupId](sptr<SceneSession> session) {
+        if (session == nullptr || topFloatingSession != nullptr || previousFocusedSessionFound) {
+            return false;
+        }
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
+            return false;
+        }
+        if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
+            return false;
+        }
+        // need to be floating window
+        if (session->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+            return false;
+        }
+        // need to be main window
+        if (!SessionHelper::IsMainWindow(session->GetWindowType())) {
+            return false;
+        }
+
+        if (session->CheckFocusable() && session->IsVisible()) {
+            topFloatingSession = session;
+            return true;
+        }
+        if (session->GetPersistentId() == persistentId) {
+            previousFocusedSessionFound = true;
+        }
+        return false;
+    };
+    TraverseSessionTree(func, true);
+    return topFloatingSession;
 }
 
 /**
@@ -6996,19 +7058,12 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
         }
         auto parentSession = GetSceneSession(session->GetParentPersistentId());
         if (SessionHelper::IsSubWindow(session->GetWindowType()) && parentSession != nullptr &&
-            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            parentSession->IsTopmost()) {
+            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && parentSession->IsTopmost()) {
             TLOGND(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-        bool isPcOrPcMode = systemConfig_.IsPcWindow() ||
-            (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
-        bool isBlockingType = (includingAppSession && session->IsAppSession() &&
-                               !(isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT)) ||
-                              (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
-                              (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
-        if (IsSessionVisibleForeground(session) && isBlockingType)  {
+
+        if (IsSessionVisibleForeground(session) && CheckBlockingFocus(session, includingAppSession)) {
             ret = session;
             return true;
         }
@@ -7016,6 +7071,38 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
     };
     TraverseSessionTree(func, false);
     return ret;
+}
+
+bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession)
+{
+    if (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "system window blocked");
+        return true;
+    }
+
+    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    if (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION) {
+        return true;
+    }
+    if (includingAppSession && session->IsAppSession()) {
+        TLOGD(WmsLogTag::WMS_FOCUS,
+              "id: %{public}d, isFloatType: %{public}d, isFloatMode: %{public}d", session->GetPersistentId(),
+              session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT,
+              session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+        bool isPcOrPcMode =
+            systemConfig_.IsPcWindow() || (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
+
+        if (isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+            return false;
+        }
+        bool isPhoneAndPadWithoutPcMode =
+            systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+        if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
