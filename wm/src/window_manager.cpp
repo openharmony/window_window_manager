@@ -397,8 +397,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(
         windowDisplayIdChangeListeners = windowDisplayIdChangeListeners_;
     }
     for (auto &listener : windowDisplayIdChangeListeners) {
-        if (listener != nullptr) {
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "NotifyDisplayIdChange");
+        if (listener != nullptr) { 
             listener->OnWindowInfoChanged(windowInfoList);
         }
     }
