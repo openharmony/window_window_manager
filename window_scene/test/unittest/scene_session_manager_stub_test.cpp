@@ -1097,6 +1097,58 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest03
+ * @tc.desc: test TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest03, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    uint32_t interestInfo = 0;
+    data.WriteUint32(interestInfo);
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest04
+ * @tc.desc: test TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest04, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    uint32_t interestInfo = 0;
+    data.WriteUint32(interestInfo);
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: HandleCreateAndConnectSpecificSession
  * @tc.desc: test HandleCreateAndConnectSpecificSession
  * @tc.type: FUNC
@@ -2172,6 +2224,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleGetHostGlobalScaledRect
+ * @tc.desc: test HandleGetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetHostGlobalScaledRect, TestSize.Level1)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t hostWindowId = 65535;
+    data.WriteInt32(hostWindowId);
+    int res = stub_->HandleGetHostGlobalScaledRect(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetCallingWindowWindowStatus
  * @tc.desc: test HandleGetCallingWindowWindowStatus
  * @tc.type: FUNC
@@ -2404,6 +2474,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, TestSize.Level
     data.WriteString(key);
     data.WriteInt32(persistentId);
     int res = stub_->HandleIsWindowRectAutoSave(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetImageForRecent
+ * @tc.desc: test HandleSetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int imgResourceId = 1;
+    ImageFit imageFit = ImageFit::FILL;
+    int persistentId = 1;
+    data.WriteInt32(imgResourceId);
+    data.WriteInt32(static_cast<uint32_t>(imageFit));
+    data.WriteInt32(persistentId);
+    int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

@@ -67,7 +67,7 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void(bool requestFocus, bool isClick)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
-    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
@@ -89,6 +89,7 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
+using NotifyDisplayIdChangeFunc = std::function<void(uint32_t windowId, DisplayId displayId)>;
 using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisible, bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
@@ -207,7 +208,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
@@ -247,7 +248,8 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
-    void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true,
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -350,7 +352,8 @@ public:
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
-    WSError Clear(bool needStartCaller = false);
+    // Just terminate, not clear session
+    WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
@@ -509,6 +512,7 @@ public:
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
+    void SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -667,6 +671,9 @@ public:
     WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
+    uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
+    void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
+    void AddPropertyDirtyFlag(uint32_t dirtyFlag) { propertyDirtyFlags_ |= dirtyFlag; }
 
     /*
      * Window Pattern
@@ -786,6 +793,7 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    NotifyDisplayIdChangeFunc displayIdChnageFunc_;
     std::mutex highlightChangeFuncMutex_;
     NotifyHighlightChangeFunc highlightChangeFunc_;
 
@@ -907,6 +915,11 @@ protected:
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
+    /*
+     * Window Property
+     */
+    uint32_t propertyDirtyFlags_ = 0;
+
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
@@ -1024,6 +1037,7 @@ private:
     SingleHandScreenInfo singleHandScreenInfo_;
     DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
+    NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
 
@@ -1047,6 +1061,7 @@ private:
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+    void DeletePersistentImageFit();
 
     /*
      * Specific Window

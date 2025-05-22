@@ -21,9 +21,32 @@
 
 namespace OHOS {
 namespace Rosen {
+// methods of filling the image in recent
+enum class ImageFit {
+        FILL,
+        CONTAIN,
+        COVER,
+        FIT_WIDTH,
+        FIT_HEIGHT,
+        NONE,
+        SCALE_DOWN,
+        TOP_LEFT,
+        TOP,
+        TOP_RIGHT,
+        LEFT,
+        CENTER,
+        RIGHT,
+        BOTTONM_LEFT,
+        BOTTOM,
+        BOTTOM_RIGHT,
+        COVER_TOP_LEFT,
+        MATRIX,
+};
 using namespace AbilityRuntime;
 namespace {
 const int CONTENT_STORAGE_ARG = 2;
+const uint32_t MIN_RESOURCE_ID = 0x1000000;
+const uint32_t MAX_RESOURCE_ID = 0xffffffff;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
@@ -186,6 +209,13 @@ napi_value JsWindowStage::SetSupportedWindowModes(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetSupportedWindowModes(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::SetImageForRecent(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetImageForRecent(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -987,6 +1017,67 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     return result;
 }
 
+napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t imgResourceId = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], imgResourceId)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Get imgResourceId error");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (imgResourceId < MIN_RESOURCE_ID || imgResourceId > MAX_RESOURCE_ID) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imgRsourceId invalid: %{public}d", imgResourceId);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    ImageFit imageFit = ImageFit::FILL;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], imageFit)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Get imageFit error");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (imageFit < ImageFit::FILL || imageFit > ImageFit::MATRIX) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "imageFit invalid: %{public}d", imageFit);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto window = windowScene->GetMainWindow();
+    const char* const where = __func__;
+    auto asyncTask = [weakWindow = wptr(window), where, env, imgResourceId, imageFit, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetImageForRecent(imgResourceId, imageFit));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set image for recemt failed."));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     auto windowScene = windowScene_.lock();
@@ -1073,6 +1164,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "isWindowRectAutoSave", moduleName, JsWindowStage::IsWindowRectAutoSave);
     BindNativeFunction(env,
         objValue, "setSupportedWindowModes", moduleName, JsWindowStage::SetSupportedWindowModes);
+    BindNativeFunction(env,
+        objValue, "setImageForRecent", moduleName, JsWindowStage::SetImageForRecent);
     return objValue;
 }
 }  // namespace Rosen

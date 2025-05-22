@@ -57,6 +57,7 @@ public:
     static napi_value Init(napi_env env, napi_value exportObj);
     static void Finalizer(napi_env env, void* data, void* hint);
 
+    static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneSession(napi_env env, napi_callback_info info);
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
@@ -120,6 +121,8 @@ public:
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
     static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
     static napi_value SupportZLevel(napi_env env, napi_callback_info info);
+    static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
+    static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -152,6 +155,7 @@ public:
     static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
 
 private:
+    napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSession(napi_env env, napi_callback_info info);
@@ -223,6 +227,8 @@ private:
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
+    napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
+    napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -324,8 +330,10 @@ private:
     static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
+    static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

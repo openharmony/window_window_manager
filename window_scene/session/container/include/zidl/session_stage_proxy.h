@@ -92,12 +92,19 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyExtensionSecureLimitChange(bool isLimit) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError CloseSpecificScene() override;
+
+    // Window LifeCycle
+    void NotifyNonInteractiveStatus() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

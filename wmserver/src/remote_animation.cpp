@@ -199,9 +199,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         RSTransactionAdapter rsTransAdapter(srcNode->leashWinSurfaceNode_);
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
             RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsTransAdapter.GetRSUIContext());
-        if (srcNode->closeWinSurfaceNode_) {
-            srcNode->closeWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
-        }
+        RSAdapterUtil::SetSkipCheckInMultiInstance(srcNode->closeWinSurfaceNode_, true);
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(srcNode->closeWinSurfaceNode_).c_str());
         auto rect = srcNode->GetWindowRect();

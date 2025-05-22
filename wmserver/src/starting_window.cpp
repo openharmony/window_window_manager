@@ -161,7 +161,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->leashWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->leashWinSurfaceNode_, true);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());
@@ -174,7 +174,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->startingWinSurfaceNode_->SetSkipCheckInMultiInstance(true);
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->startingWinSurfaceNode_, true);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
           rsSurfaceNodeConfig.SurfaceNodeName.c_str());

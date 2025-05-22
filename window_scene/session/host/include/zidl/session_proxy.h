@@ -78,6 +78,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
@@ -106,6 +107,8 @@ public:
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -137,6 +140,7 @@ public:
      * Window Property
      */
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;

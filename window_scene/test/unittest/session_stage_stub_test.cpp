@@ -141,6 +141,20 @@ HWTEST_F(SessionStageStubTest, HandleUpdateSessionViewportConfig, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleNotifySecureLimitChange
+ * @tc.desc: test function : HandleNotifySecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifySecureLimitChange, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifySecureLimitChange(data, reply));
+}
+
+/**
  * @tc.name: HandleUpdateDensity01
  * @tc.desc: test function : HandleUpdateDensity
  * @tc.type: FUNC
@@ -302,6 +316,24 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, TestSize.
     data.WriteParcelable(keyboardPanelInfo);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardAnimationWillBegin
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    int32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN);
+    sptr<KeyboardAnimationInfo> keyboardAnimationInfo = sptr<KeyboardAnimationInfo>::MakeSptr();
+    data.WriteParcelable(keyboardAnimationInfo);
     ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
@@ -1029,6 +1061,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
+}
+
+/**
+ * @tc.name: HandleCloseSpecificScene
+ * @tc.desc: test function : HandleCloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleCloseSpecificScene(data, reply));
 }
 } // namespace
 } // namespace Rosen

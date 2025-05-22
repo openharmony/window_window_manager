@@ -95,6 +95,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -168,6 +170,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -542,6 +546,16 @@ bool WindowSessionProperty::IsViewKeepScreenOn() const
     return viewKeepScreenOn_;
 }
 
+void WindowSessionProperty::SetWindowShadowEnabled(bool isEnabled)
+{
+    windowShadowEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::GetWindowShadowEnabled() const
+{
+    return windowShadowEnabled_;
+}
+
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
 {
     accessTokenId_ = accessTokenId;
@@ -806,6 +820,18 @@ float WindowSessionProperty::GetWindowCornerRadius() const
     return cornerRadius_;
 }
 
+void WindowSessionProperty::SetWindowShadows(const ShadowsInfo& shadowsInfo)
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    shadowsInfo_ = shadowsInfo;
+}
+
+ShadowsInfo WindowSessionProperty::GetWindowShadows() const
+{
+    std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
+    return shadowsInfo_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&
@@ -998,6 +1024,12 @@ bool WindowSessionProperty::MarshallingSessionInfo(Parcel& parcel) const
     if (!parcel.WriteBool(sessionInfo_.isFollowParentMultiScreenPolicy)) {
         return false;
     }
+    if (!parcel.WriteBool(sessionInfo_.isKeyboardWillShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardWillHideRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidShowRegistered_) ||
+        !parcel.WriteBool(sessionInfo_.isKeyboardDidHideRegistered_)) {
+        return false;
+    }
     return true;
 }
 
@@ -1042,6 +1074,13 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
         return false;
     }
     info.isFollowParentMultiScreenPolicy = isFollowParentMultiScreenPolicy;
+    if (!parcel.ReadBool(info.isKeyboardWillShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardWillHideRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidShowRegistered_) ||
+        !parcel.ReadBool(info.isKeyboardDidHideRegistered_)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read keyboard registered state!");
+        return false;
+    }
     property->SetSessionInfo(info);
     return true;
 }
@@ -1133,7 +1172,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
-        parcel.WriteBool(isSnapshotSkip_) &&
+        parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
@@ -1171,7 +1210,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
-        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_);
+        parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
+        MarshallingShadowsInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1199,6 +1239,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
+    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
@@ -1264,6 +1305,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    UnmarshallingShadowsInfo(parcel, property);
     return property;
 }
 
@@ -1285,6 +1327,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     viewKeepScreenOn_ = property->viewKeepScreenOn_;
+    windowShadowEnabled_ = property->windowShadowEnabled_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1360,6 +1403,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isAbilityHook_ = property->isAbilityHook_;
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    shadowsInfo_ = property->shadowsInfo_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1531,6 +1575,11 @@ bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
     return parcel.WriteBool(isFollowScreenChange_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    return parcel.WriteBool(windowShadowEnabled_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1700,6 +1749,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
 void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 {
     SetFollowScreenChange(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -2029,6 +2083,16 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsSupportRotateFullScreen() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
+}
+
+bool WindowSessionProperty::IsAdaptToSubWindow() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSubWindow();
+}
+
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
@@ -2114,6 +2178,26 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
+{
+    isSupportRotateFullScreen_ = isSupportRotateFullScreen;
+}
+
+bool CompatibleModeProperty::IsSupportRotateFullScreen() const
+{
+    return isSupportRotateFullScreen_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToSubWindow(bool isAdaptToSubWindow)
+{
+    isAdaptToSubWindow_ = isAdaptToSubWindow;
+}
+
+bool CompatibleModeProperty::IsAdaptToSubWindow() const
+{
+    return isAdaptToSubWindow_;
+}
+
 void CompatibleModeProperty::SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale)
 {
     isAdaptToSimulationScale_ = isAdaptToSimulationScale;
@@ -2134,6 +2218,8 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
         parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(isSupportRotateFullScreen_) &&
+        parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
 }
 
@@ -2151,6 +2237,8 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->isSupportRotateFullScreen_ = parcel.ReadBool();
+    property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
     return property;
 }
@@ -2169,6 +2257,20 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+}
+
+bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const
+{
+    return parcel.WriteParcelable(&shadowsInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<ShadowsInfo> shadowsInfo = parcel.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        return;
+    }
+    property->SetWindowShadows(*shadowsInfo);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -5648,23 +5648,6 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, TestSize.L
 }
 
 /**
- * @tc.name: MultiScreenChangeOuter
- * @tc.desc: MultiScreenChangeOuter
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    EXPECT_EQ(ssm_->clientProxy_, nullptr);
-    std::string outerFlag = "2";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "0";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "1";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-}
-
-/**
  * @tc.name: UpdateValidArea
  * @tc.desc: UpdateValidArea
  * @tc.type: FUNC

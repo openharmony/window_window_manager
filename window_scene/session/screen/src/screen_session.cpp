@@ -117,7 +117,7 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
         if (displayNode_) {
-            displayNode_->SetSkipCheckInMultiInstance(true);
+            RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
             displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
             displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -170,7 +170,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"",
             screenId_);
-        displayNode_->SetSkipCheckInMultiInstance(true);
+        RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -196,7 +196,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"",
             screenId_);
-        displayNode_->SetSkipCheckInMultiInstance(true);
+        RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -220,7 +220,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     if (displayNode_) {
         TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_3, rs id is %{public}" PRIu64"", rsId_);
-        displayNode_->SetSkipCheckInMultiInstance(true);
+        RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -237,9 +237,9 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
-        if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        RunIfRSClientMultiInstanceEnabled([&] {
             RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
-        }
+        });
     }
 }
 
@@ -1125,7 +1125,7 @@ void ScreenSession::SetHorizontalRotation()
     property_.SetPhysicalRotation(HORIZONTAL);
     currentSensorRotation_ = HORIZONTAL;
     displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
 }
 
 Orientation ScreenSession::GetOrientation() const
@@ -1737,7 +1737,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
             TLOGE(WmsLogTag::DMS, "fail to add child. create rsDisplayNode fail!");
             return;
         }
-        rsDisplayNode->SetSkipCheckInMultiInstance(true);
+        RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
         displayNode_ = rsDisplayNode;
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
@@ -2348,6 +2348,7 @@ void ScreenSession::SetScreenOffScreenRendering()
     TLOGW(WmsLogTag::DMS, "screen off rendering come in.");
     if (GetIsInternal()) {
         TLOGW(WmsLogTag::DMS, "screen is internal");
+        SetScreenOffScreenRenderingInner();
         return;
     }
     if (!GetScreenProperty().GetCurrentOffScreenRendering()) {
@@ -2370,6 +2371,17 @@ void ScreenSession::SetScreenOffScreenRendering()
     }
     std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
     TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width=%{public}u height=%{public}u %{public}s",
+        rsId_, offWidth, offHeight, offScreenResult.c_str());
+}
+
+void ScreenSession::SetScreenOffScreenRenderingInner()
+{
+    TLOGW(WmsLogTag::DMS, "screen off rendering inner come in.");
+    uint32_t offWidth = GetScreenProperty().GetBounds().rect_.GetWidth();
+    uint32_t offHeight = GetScreenProperty().GetBounds().rect_.GetHeight();
+    int32_t res = RSInterfaces::GetInstance().SetPhysicalScreenResolution(rsId_, offWidth, offHeight);
+    std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
+    TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width = %{public}u height=%{public}u %{public}s",
         rsId_, offWidth, offHeight, offScreenResult.c_str());
 }
 

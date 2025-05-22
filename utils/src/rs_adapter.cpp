@@ -285,7 +285,7 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const ch
         }
     }
     TLOGNE(WmsLogTag::WMS_RS_CLI_MULTI_INST,
-          "%{public}s: Failed to invoke RSSyncTransaction", caller);
+           "%{public}s: Failed to invoke RSSyncTransaction", caller);
     if constexpr (!std::is_void_v<ReturnType>) {
         return nullptr;
     }
@@ -350,7 +350,7 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(
         }
     }
     TLOGNE(WmsLogTag::WMS_RS_CLI_MULTI_INST,
-          "%{public}s: Failed to invoke RSSyncTransaction", caller);
+           "%{public}s: Failed to invoke RSSyncTransaction", caller);
     if constexpr (!std::is_void_v<ReturnType>) {
         return nullptr;
     }
@@ -535,6 +535,16 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
           "%{public}s, skipCheckInMultiInstance = %{public}d, original %{public}s",
           RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance,
           RSAdapterUtil::RSUIContextToStr(originalRSUIContext).c_str());
+}
+
+void RSAdapterUtil::SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
+                                                bool skipCheckInMultiInstance)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    RETURN_IF_PARAM_IS_NULL(rsNode);
+    rsNode->SetSkipCheckInMultiInstance(skipCheckInMultiInstance);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, skipCheckInMultiInstance = %{public}d",
+          RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance);
 }
 
 const std::shared_ptr<RSBaseNode> RSAdapterUtil::GetRSNode(
