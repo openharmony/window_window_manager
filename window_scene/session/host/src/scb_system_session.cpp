@@ -43,7 +43,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         for (const auto& iter : surfaceWindowTypeMap) {
-            if (name.find(iter.first)) {
+            if (name.find(iter.first) != std::string::npos) {
                 config.surfaceWindowType = iter.second;
                 break;
             }
