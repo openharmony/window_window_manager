@@ -2062,9 +2062,15 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Leve
     window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
     sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
     window_->RegisterKeyboardWillShowListener(listener);
+    KeyboardAnimationInfo animationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    animationInfo.isShow = true;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
 
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     window_->RegisterKeyboardWillShowListener(listener);
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    ASSERT_FALSE(window_->keyboardWillShowListeners_[window_->GetPersistentId()].empty());
 
     EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
 }
@@ -2080,9 +2086,15 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
     window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     window_->RegisterKeyboardWillHideListener(listener);
+    KeyboardAnimationInfo animationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    animationInfo.isShow = false;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
  
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     window_->RegisterKeyboardWillHideListener(listener);
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    ASSERT_FALSE(window_->keyboardWillHideListeners_[window_->GetPersistentId()].empty());
  
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }
