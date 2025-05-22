@@ -2037,7 +2037,14 @@ public:
      *
      * @param orientation Orientation set by developer
      */
-    virtual void SetPreferredRequestedOrientation(Orientation orientation) {}
+    virtual void SetUserRequestedOrientation(Orientation orientation) {}
+
+    /**
+     * @brief Is needed forcibly set orientation.
+     *
+     * @param orientation Requested orientation.
+     */
+    virtual bool isNeededForciblySetOrientation(Orientation orientation) { return false; }
 
     /**
      * @brief Register SystemBarProperty listener.

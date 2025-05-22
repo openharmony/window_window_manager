@@ -4607,7 +4607,12 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         WLOGFI("change rotation success %{public}u", rotation);
     };
-    std::string taskName = "OnReuqestedOrientationChange:orientation";
+    std::string taskName;
+    if (needAnimation) {
+        taskName = "OnReuqestedOrientationChange:orientation";
+    } else {
+        taskName = "OnReuqestedOrientationChange:pageOrientation";
+    }
     taskScheduler_->RemoveMainThreadTaskByName(taskName);
     taskScheduler_->PostMainThreadTask(task, taskName);
 }
@@ -6474,7 +6479,7 @@ napi_value JsSceneSession::OnNotifyRotationProperty(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
 
-    int32_t rotation = 0;
+    uint32_t rotation = 0;
     if (!ConvertFromJsValue(env, argv[0], rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]Failed to convert rotation from js object");
         return NapiGetUndefined(env);
