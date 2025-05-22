@@ -5634,7 +5634,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (IsNeedUpdateBrightness(brightness)) {
+        if (IsNeedUpdateBrightness(sceneSession, brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
@@ -5652,13 +5652,14 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-bool SceneSessionManager::IsNeedUpdateBrightness(float brightness)
+bool SceneSessionManager::IsNeedUpdateBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
     if (std::fabs(brightness - GetDisplayBrightness()) < std::numeric_limits<float>::min()) {
         return false;
     }
-    auto sceneSession = GetSceneSession(brightnessSessionId_);
-    if (sceneSession != nullptr && sceneSession->IsSessionForeground()) {
+    auto brightnessSession = GetSceneSession(brightnessSessionId_);
+    if (brightnessSession != nullptr && (brightnessSession->IsSessionForeground() &&
+        brightnessSessionId_ != sceneSession->GetWindowId())) {
         return false;
     }
     return true;
