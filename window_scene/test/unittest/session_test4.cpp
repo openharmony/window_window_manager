@@ -1294,6 +1294,32 @@ HWTEST_F(WindowSessionTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Leve
     session_->sessionStage_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyAppForceLandscapeConfigUpdated());
 }
+
+/**
+ * @tc.name: SetLifeCycleTaskRunning
+ * @tc.desc: check func SetLifeCycleTaskRunning
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLifeCycleTaskRunning, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    auto task = [](){};
+    std::string name = "testTask";
+    sptr<Session::SessionLifeCycleTask> lifeCycleTask =
+        sptr<Session::SessionLifeCycleTask>::MakeSptr(std::move(task), name, LifeCycleTaskType::STOP);
+
+    bool ret = session_->SetLifeCycleTaskRunning(lifeCycleTask);
+
+    EXPECT_TRUE(lifeCycleTask->running);
+    EXPECT_TRUE(ret);
+
+    ret = session_->SetLifeCycleTaskRunning(lifeCycleTask);
+    EXPECT_FALSE(ret);
+
+    sptr<Session::SessionLifeCycleTask> lifeCycleNullTask = nullptr;
+    ret = session_->SetLifeCycleTaskRunning(lifeCycleNullTask);
+    EXPECT_FALSE(ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
