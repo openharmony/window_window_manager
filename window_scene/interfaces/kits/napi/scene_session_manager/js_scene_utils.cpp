@@ -2173,6 +2173,8 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     SetTypeProperty(objValue, env, "TYPE_MUTISCREEN_COLLABORATION", JsSessionType::TYPE_MUTISCREEN_COLLABORATION);
     SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     return objValue;
 }
 

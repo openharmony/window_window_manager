@@ -403,6 +403,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
         case WindowType::WINDOW_TYPE_PIP:
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
+        case WindowType::WINDOW_TYPE_MAGNIFICATION:
+            rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_MAGNIFICATION_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;

@@ -3828,6 +3828,14 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
         }
     }
+    if (SessionHelper::IsMagnificationWindow(type)) {
+        if (SessionPermission::IsSACalling()) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check sa permission success, create with SA calling.");
+            return true;
+        }
+        TLOGE(WmsLogTag::WMS_SYSTEM, "check sa permission failed");
+        return false;
+    }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
         return true;
