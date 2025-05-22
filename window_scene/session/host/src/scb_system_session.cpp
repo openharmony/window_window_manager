@@ -45,6 +45,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         for (const auto& iter : surfaceWindowTypeMap) {
             if (name.find(iter.first)) {
                 config.surfaceWindowType = iter.second;
+                break;
             }
         }
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
