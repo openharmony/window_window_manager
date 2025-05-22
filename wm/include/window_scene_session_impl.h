@@ -104,6 +104,7 @@ public:
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
