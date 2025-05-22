@@ -58,7 +58,7 @@ public:
     uint32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     bool IsInstanceKeyExist(const std::string& bundleName, const std::string& instanceKey);
-    std::unordered_map<std::string, AppExecFwk::ApplicationInfo> GetApplicationInfos();
+    AppExecFwk::ApplicationInfo GetApplicationInfo(const std::string& bundleName);
 
 private:
     uint32_t FindMinimumAvailableInstanceId(const std::string& bundleName, uint32_t maxInstanceCount);
