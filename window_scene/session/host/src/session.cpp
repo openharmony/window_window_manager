@@ -3461,8 +3461,8 @@ void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-        const std::shared_ptr<RSTransaction>& rsTransaction,
-        const Rect& callingSessionRect, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (!sessionStage_) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");

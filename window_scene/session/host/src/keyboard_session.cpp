@@ -404,15 +404,15 @@ void KeyboardSession::ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool n
         return;
     }
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-    std::shared_ptr<RSTransaction> rsTransaction = GetRSTransaction();
+    std::shared_ptr<RSTransaction> rsTransaction = needCheckRSTransaction ? GetRSTransaction() : nullptr;
     bool occupiedAreaChanged = RaiseCallingSession(callingSession, occupiedAreaInfo, needCheckVisible);
     if (occupiedAreaChanged) {
         NotifyOccupiedAreaChanged(occupiedAreaInfo, needRecalculateAvoidAreas, rsTransaction);
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, needCheckVisible: %{public}d, needRecalculateAvoidAreas: %{public}d"
         ", occupiedAreaChanged: %{public}d", GetCallingSessionId(), needCheckVisible, needRecalculateAvoidAreas,
-        occupiedAreaChanged);   
-    if (needCheckRSTransaction && rsTransaction) {
+        occupiedAreaChanged);
+    if (needCheckRSTransaction) {
         CloseRSTransaction();
     }
 }
