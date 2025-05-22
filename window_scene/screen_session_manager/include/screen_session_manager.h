@@ -289,6 +289,8 @@ public:
     void HandleExtendScreenDisconnect(ScreenId screenId);
     bool GetIsFoldStatusLocked();
     void SetIsFoldStatusLocked(bool isFoldStatusLocked);
+    bool GetIsLandscapeLockStatus();
+    void SetIsLandscapeLockStatus(bool isLandscapeLockStatus);
     bool GetIsOuterOnlyMode();
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
@@ -690,6 +692,7 @@ private:
     bool isOuterOnlyMode_ = false;
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
+    std::atomic<bool> isLandscapeLockStatus_ = false;
 
     /**
      * On/Off screen
