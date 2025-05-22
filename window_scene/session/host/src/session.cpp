@@ -1010,7 +1010,7 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
           GetPersistentId(), displayId, clientDisplayId_);
     sessionStage_->UpdateDisplayId(displayId);
     if (displayId != clientDisplayId_) {
-        AddPropertyDirtyFlags(static_cast<uint32_t>(PropertyDirtyFlag::DISPLAY_ID));
+        AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
     if (DisplayIdChangeFunc_ && clientDisplayId_ != displayId) {
         DisplayIdChangeFunc_(GetWindowId(), displayId);

@@ -9393,7 +9393,7 @@ WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey win
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     observedFlags_ |= static_cast<uint32_t>(windowInfoKey);
-    interestFlags_ |= interestInfo;
+    interestedFlags_ |= interestInfo;
     return RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
@@ -9402,7 +9402,7 @@ WMError SceneSessionManager::UnregisterWindowPropertyChangeAgent(WindowInfoKey w
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
-    interestFlags_ &= !interestInfo;
+    interestedFlags_ &= !interestInfo;
     return UnregisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
@@ -15255,22 +15255,22 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
     std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo)
 {
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_ID)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_ID)) {
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_ID] = sceneSession->GetWindowId();
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::BUNDLE_NAME)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::BUNDLE_NAME)) {
         windowPropertyChangeInfo[WindowInfoKey::BUNDLE_NAME] = sceneSession->GetSessionInfo().bundleName_;
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::ABILITY_NAME)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::ABILITY_NAME)) {
         windowPropertyChangeInfo[WindowInfoKey::ABILITY_NAME] = sceneSession->GetSessionInfo().abilityName_;
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::APP_INDEX)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::APP_INDEX)) {
         windowPropertyChangeInfo[WindowInfoKey::APP_INDEX] = sceneSession->GetSessionInfo().appIndex_;
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::VISIBILITY_STATE)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::VISIBILITY_STATE)) {
         windowPropertyChangeInfo[WindowInfoKey::VISIBILITY_STATE] = sceneSession->GetVisibilityState();
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
         if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(
             sceneSession->GetSessionProperty()->GetDisplayId())) {
             WSRect sessionGlobalRect = sceneSession->GetSessionGlobalRect();
@@ -15280,7 +15280,7 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
             windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] = sceneSession->GetSessionProperty()->GetDisplayId();
         }
     }
-    if (interestFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT)) {
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT)) {
         WSRect wsrect = sceneSession->GetClientRect();
         Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_RECT] = rect;
