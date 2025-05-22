@@ -109,7 +109,8 @@ private:
     void PostKeyboardAnimationSyncTimeoutTask();
     void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
         bool needRecalculateAvoidAreas, bool needCheckRSTransaction) override;
-    void NotifyOccupiedAreaChanged(sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo, bool needRecalculateAvoidAreas,
+    void NotifyOccupiedAreaChanged(const sptr<SceneSession>& callingSession,
+        sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo, bool needRecalculateAvoidAreas,
         std::shared_ptr<RSTransaction> rsTransaction);
     bool RaiseCallingSession(const sptr<SceneSession>& callingSession, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo,
         const bool needCheckVisible);
@@ -120,7 +121,6 @@ private:
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
     NotifyKeyboarViewModeChangeFunc changeKeyboardViewModeFunc_;
-    bool IsInvalidPanelRect(const WSRect& panelRect);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
