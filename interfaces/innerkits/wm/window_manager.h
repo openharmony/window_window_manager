@@ -245,9 +245,15 @@ public:
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
     void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+    void SetInterestWindowIds(const std::unordered_set<int32_t>& interestWindowIds)
+        { interestWindowIds_ = interestWindowIds; }
+    const std::unordered_set<int32_t>& GetInterestWindowIds() const { return interestWindowIds_; }
+    void AddInterestWindowId(int32_t interestWindowId) { interestWindowIds_.insert(interestWindowId); }
+    void RemoveInterestWindowId(int32_t interestWindowId) { interestWindowIds_.erase(interestWindowId); }
 
 private:
     std::unordered_set<WindowInfoKey> interestInfo_;
+    std::unordered_set<int32_t> interestWindowIds_;
 };
 
 /**
