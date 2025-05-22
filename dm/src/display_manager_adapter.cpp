@@ -1627,4 +1627,15 @@ DMError ScreenManagerAdapter::SetScreenSkipProtectedWindow(const std::vector<Scr
 
     return DMError::DM_OK;
 }
+
+DMError DisplayManagerAdapter::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetScreenAreaOfDisplayArea(
+            displayId, displayArea, screenId, screenArea);
+    }
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen
