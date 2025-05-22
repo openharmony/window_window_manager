@@ -180,7 +180,7 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBStatusBar"
 };
 
-const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
+const std::chrono::milliseconds WAIT_TIME(3 * 1000); // 3 * 1000 wait for 3s
 
 std::string GetCurrentTime()
 {
