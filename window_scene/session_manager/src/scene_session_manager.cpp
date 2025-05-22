@@ -11718,7 +11718,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         auto keyboardSession = GetKeyboardSession(screenId, false);
         bool hasCallingSessionRectInfo = false;
         bool hasKeyboardRectInfo = false;
-        uint32_t callingId = 0;
+        uint32_t callingId = (keyboardSession != nullptr) ? keyboardSession->GetCallingSessionId() : 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -11738,10 +11738,8 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     if (keyboardSession != nullptr) {
                         if(keyboardSession->GetPersistentId() == sceneSession->GetPersistentId()) {
                             hasKeyboardRectInfo = true;
-                        } else if (keyboardSession->GetCallingSessionId() ==
-                            static_cast<uint32_t>(sceneSession->GetPersistentId())) {
+                        } else if (callingId == static_cast<uint32_t>(sceneSession->GetPersistentId())) {
                             hasCallingSessionRectInfo = true;
-                            callingId = static_cast<uint32_t>(sceneSession->GetPersistentId());
                         }
                     }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
