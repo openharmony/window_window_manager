@@ -6786,12 +6786,10 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(const sptr<SceneSe
         if  (topNearestBlockingFocusSession)  {
             topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
             TLOGI(WmsLogTag::WMS_FOCUS,
-                  "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
+                  "requestSessionZOrder: %{public}d, focusedSessionZOrder: %{public}d\
                   topNearestBlockingZOrder:  %{public}d, topNearestBlockingId: %{public}d",
-                  requestSessionZOrder,
-                  focusedSessionZOrder,
-                  topNearestBlockingZOrder,
-                  topNearestBlockingFocusSession->GetPersistentId());
+                  requestSessionZOrder, focusedSessionZOrder,
+                  topNearestBlockingZOrder, topNearestBlockingFocusSession->GetPersistentId());
         }
         if  (focusedSessionZOrder >=  topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder)  {
             TLOGD(WmsLogTag::WMS_FOCUS,  "focus pass through, needs to be intercepted");
@@ -6933,7 +6931,6 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
-    sptr<SceneSession> topFloatingSession = GetNextFocusableSessionWhenFloatWindowExist(displayGroupId, persistentId);
     sptr<SceneSession> nextFocusableSession = nullptr;
     auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
@@ -6958,6 +6955,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         return false;
     };
     TraverseSessionTree(func, true);
+    sptr<SceneSession> topFloatingSession = GetNextFocusableSessionWhenFloatWindowExist(displayGroupId, persistentId);
     if (topFloatingSession != nullptr && nextFocusableSession != nullptr && nextFocusableSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
         TLOGI(WmsLogTag::WMS_FOCUS, "topFloatingSessionId: %{public}d", topFloatingSession->GetPersistentId());
         return topFloatingSession;
