@@ -1046,6 +1046,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync01, TestSize.Level1)
 HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync02, TestSize.Level1)
 {
     auto windowSceneSession = InitialWindowState();
+    ASSERT_NE(nullptr, windowSceneSession);
     windowSceneSession->surfaceNode_ = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSceneSession->Snapshot(pixelMap));
@@ -1059,6 +1060,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync02, TestSize.Level1)
 HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync03, TestSize.Level1)
 {
     auto windowSceneSession = InitialWindowState();
+    ASSERT_NE(nullptr, windowSceneSession);
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     auto surfaceNode_mocker = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode_mocker);
