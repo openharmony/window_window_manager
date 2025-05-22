@@ -114,7 +114,7 @@ public:
         return IsSubWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG;
     }
 
-    static inline bool IsSACallingWindow(WindowType type)
+    static inline bool IsMagnificationWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
     }
