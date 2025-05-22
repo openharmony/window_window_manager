@@ -102,6 +102,7 @@ const std::string UPDATE_FOLLOW_SCREEN_CHANGE_CB = "sessionUpdateFollowScreenCha
 const std::string USE_IMPLICITANIMATION_CB = "useImplicitAnimationChange";
 const std::string SET_WINDOW_SHADOWS_CB = "setWindowShadows";
 const std::string SET_SUB_WINDOW_SOURCE_CB = "setSubWindowSource";
+const std::string ANIMATE_TO_CB = "animateToTargetProperty";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -196,6 +197,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {USE_IMPLICITANIMATION_CB,              ListenerFuncType::USE_IMPLICIT_ANIMATION_CB},
     {SET_WINDOW_SHADOWS_CB,                 ListenerFuncType::SET_WINDOW_SHADOWS_CB},
     {SET_SUB_WINDOW_SOURCE_CB,              ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB},
+    {ANIMATE_TO_CB,                         ListenerFuncType::ANIMATE_TO_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2931,6 +2933,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_SUB_WINDOW_SOURCE_CB):
             ProcessSetSubWindowSourceRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::ANIMATE_TO_CB):
+            ProcessAnimateToTargetPropertyRegister();
             break;
         default:
             break;
@@ -7314,5 +7319,49 @@ napi_value JsSceneSession::OnRequestSpecificSessionClose(napi_env env, napi_call
     }
     session->CloseSpecificScene();
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessAnimateToTargetPropertyRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Session is null, id: %{public}d", persistentId_);
+        return;
+    }
+    auto animateToCB = [weakThis = wptr(this), where = __func__](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: JsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnAnimateToTargetProperty(animationProperty, animationOption);
+    };
+    session->RegisterAnimateToCallback(animateToCB);
+}
+
+void JsSceneSession::OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), where = __func__, env = env_,
+        persistentId = persistentId_, animationProperty, animationOption]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: JsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s: Animate to with scale: %{public}f, animationOption: %{public}s",
+            where, animationProperty.targetScale, animationOption.ToString().c_str());
+        auto jsCallback = jsSceneSession->GetJSCallback(ANIMATE_TO_CB);
+        if (!jsCallback) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: JsCallback is null", where);
+            return;
+        }
+        napi_value jsAnimationProperty = ConvertWindowAnimationPropertyToJsValue(env, animationProperty);
+        napi_value jsAnimationOption = ConvertWindowAnimationOptionToJsValue(env, animationOption);
+        napi_value argv[] = { jsAnimationProperty, jsAnimationOption };
+        napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

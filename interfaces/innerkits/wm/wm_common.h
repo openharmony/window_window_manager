@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <any>
+#include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
@@ -2394,6 +2395,28 @@ enum class WindowAnimationCurve : uint32_t {
 const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
 
+struct WindowAnimationProperty : public Parcelable {
+    float targetScale = 0.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteFloat(targetScale)) {
+            return false;
+        }
+        return true;
+    }
+
+    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
+        if (!parcel.ReadFloat(animationProperty->targetScale)) {
+            delete animationProperty;
+            return nullptr;
+        }
+        return animationProperty;
+    }
+};
+
 /*
  * @brief Window transition animation configuration.
  */
@@ -2442,6 +2465,18 @@ struct WindowAnimationOption : public Parcelable {
             }
         }
         return windowAnimationConfig;
+    }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
+            std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
+        for (auto p: param) {
+            oss << std::fixed << std::setprecision(2) << p << ", ";
+        }
+        oss << "]";
+        return oss.str();
     }
 };
 

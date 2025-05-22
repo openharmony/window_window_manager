@@ -193,6 +193,12 @@ public:
      */
     virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
 
+    /*
+     * Window Animation
+     */
+    virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
