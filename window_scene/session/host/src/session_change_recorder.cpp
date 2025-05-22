@@ -127,6 +127,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
         specifiedWindowFlag = true;
     } else {
         oss << "Available args: '-v all/[specified window id]'" << std::endl;
+        dumpInfo.append(oss.str());
         return;
     }
     bool specifiedRecordTypeFlag = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ? true : false;
