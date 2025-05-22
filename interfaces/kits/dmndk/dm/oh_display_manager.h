@@ -356,7 +356,7 @@ typedef void (*OH_NativeDisplayManager_AvailableAreaChangeCallback)(uint64_t dis
  * @param { availableAreaChangeCallback } Available area change callback.
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object. used in register call.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -369,7 +369,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterAvailableAreaChan
  *
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object. used in unregister call.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -377,18 +377,31 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterAvailableAreaChan
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterAvailableAreaChangeListener(uint32_t listenerIndex);
 
 /**
- * @brief obtain available area.
+ * @brief create available area.
  *
  * @param { displayid } displayid.
  * @param { **availableArea } Indicates the pointer to an <b>NativeDisplayManager_Rect</b> object.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
+  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @since 20
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
+    uint64_t displayId, NativeDisplayManager_Rect** availableArea);
+
+/**
+ * @brief destroy available area.
+ *
+ * @param { displayid } displayid.
+ * @param { *availableArea } Indicates the pointer to an <b>NativeDisplayManager_Rect</b> object.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
  */
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetAvailableArea(
-    uint64_t displayId, NativeDisplayManager_Rect **availableArea);
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(NativeDisplayManager_Rect* availableArea);
 
 /**
  * @brief callback function type when display add.
@@ -404,7 +417,7 @@ typedef void (*OH_NativeDisplayManager_DisplayAddCallback)(uint64_t displayId);
  * @param { displayAddCallback } display add callback.
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -417,7 +430,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayAddListene
  *
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object. used in unregister call.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -438,7 +451,7 @@ typedef void (*OH_NativeDisplayManager_DisplayRemoveCallback)(uint64_t displayId
  * @param { displayremoveCallback } display remove callback.
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -451,7 +464,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayRemoveList
  *
  * @param { *listenerIndex } Indicates the pointer to an <b>uint32_t</b> object. used in unregister call.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -464,7 +477,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
  * @param { displayid } displayid.
  * @param { *sourceMode } Indicates the pointer to an <b>NativeDisplayManager_SourceMode</b> object.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20
@@ -479,7 +492,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
  * @param { x } The x-coordinate of the screen's top-left corner relative to the primary screen's origin (in px).
  * @param { y } The y-coordinate of the screen's top-left corner relative to the primary screen's origin (in py).
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
- *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM } If Parameter illegal.
  *         { @link DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORT } device not support.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @since 20

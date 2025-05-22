@@ -124,6 +124,9 @@ typedef enum {
 
     /** @error Operation system abnormal */
     DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL = 1400003,
+
+    /** @error Operation illegal param */
+    DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM = 1400004,
 } NativeDisplayManager_ErrorCode;
 
 /**
