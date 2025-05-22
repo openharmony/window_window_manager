@@ -8256,6 +8256,54 @@ napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info
     return CreateJsValue(env, isHighlighted);
 }
 
+static void SetDragKeyFramePolicyTask(NapiAsyncTask::ExecuteCallback& execute,
+    NapiAsyncTask::CompleteCallback& complete, const wptr<Window>& weakToken, const KeyFramePolicy& keyFramePolicy)
+{
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    execute = [weakToken, keyFramePolicy, errCodePtr, where] {
+        if (errCodePtr == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s errCodePtr is nullptr", where);
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        if (!window->IsPcWindow()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s device not support", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s only main window is valid", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDragKeyFramePolicy(keyFramePolicy));
+    };
+    complete = [keyFramePolicy, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (errCodePtr == nullptr) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            auto objValue = ConvertKeyFramePolicyToJsValue(env, keyFramePolicy);
+            if (objValue != nullptr) {
+                task.Resolve(env, objValue);
+            } else {
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s convert to js value failed", where);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            }
+        } else {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s failed, ret %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set key frame policy failed"));
+        }
+    };
+}
+
 napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -8270,44 +8318,13 @@ napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to keyFramePolicy");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetDragKeyFramePolicyTask(execute, complete, weakToken, keyFramePolicy);
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, env,
-        keyFramePolicy, where = __func__] {
-        auto window = weakToken.promote();
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        if (!window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s device not support", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-            return;
-        }
-        if (!WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s only main window is valid", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
-            return;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDragKeyFramePolicy(keyFramePolicy));
-        if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s failed, ret %{public}d", where, ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set key frame policy failed."));
-            return;
-        }
-        auto objValue = ConvertKeyFramePolicyToJsValue(env, keyFramePolicy);
-        if (objValue != nullptr) {
-            task->Resolve(env, objValue);
-        } else {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s convert to js value failed", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-        }
-    };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
+    NapiAsyncTask::Schedule("JsWindow::OnSetDragKeyFramePolicy",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
