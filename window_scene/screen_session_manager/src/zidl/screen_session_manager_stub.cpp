@@ -1182,6 +1182,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(isKeyboardOn);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_AREA_OF_DISPLAY_AREA: {
+            ProcGetScreenAreaOfDisplayArea(data, reply);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1318,5 +1322,24 @@ void ScreenSessionManagerStub::ProcSetScreenSkipProtectedWindow(MessageParcel& d
     bool isEnable = static_cast<bool>(data.ReadBool());
     DMError ret = SetScreenSkipProtectedWindow(screenIds, isEnable);
     reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+void ScreenSessionManagerStub::ProcGetScreenAreaOfDisplayArea(MessageParcel& data, MessageParcel& reply)
+{
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+    int32_t posX = data.ReadInt32();
+    int32_t posY = data.ReadInt32();
+    uint32_t width = data.ReadUint32();
+    uint32_t height = data.ReadUint32();
+    DMRect displayArea = { posX, posY, width, height };
+    DMRect screenArea = DMRect::NONE();
+    ScreenId screenId = 0;
+    DMError ret = GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    static_cast<void>(reply.WriteUint64(screenId));
+    static_cast<void>(reply.WriteInt32(screenArea.posX_));
+    static_cast<void>(reply.WriteInt32(screenArea.posY_));
+    static_cast<void>(reply.WriteUint32(screenArea.width_));
+    static_cast<void>(reply.WriteUint32(screenArea.height_));
 }
 } // namespace OHOS::Rosen

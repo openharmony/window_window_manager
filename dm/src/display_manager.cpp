@@ -102,7 +102,9 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
-    
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
+
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
@@ -2489,5 +2491,17 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
 
+DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return pImpl_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenAreaOfDisplayArea(
+        displayId, displayArea, screenId, screenArea);
+}
 } // namespace OHOS::Rosen
 
