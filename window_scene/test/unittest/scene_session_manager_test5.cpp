@@ -310,7 +310,6 @@ HWTEST_F(SceneSessionManagerTest5, IsNeedUpdateBrightness, TestSize.Level1)
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession1->persistentId_ = 2;
     sceneSession1->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
 
     bool isNeed = ssm_->IsNeedUpdateBrightness(sceneSession, -1);
