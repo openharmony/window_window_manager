@@ -1283,9 +1283,15 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
 
     property->subWindowLevel_ = 1;
+    window->windowSystemConfig_.supportFollowParentWindowLayout_ = false;
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.supportFollowParentWindowLayout_ = true;
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
+
 
 /**
  * @tc.name: GetTargetOrientationConfigInfo
