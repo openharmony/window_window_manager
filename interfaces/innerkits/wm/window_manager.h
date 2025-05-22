@@ -1207,6 +1207,17 @@ public:
      */
     bool IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName);
 
+    /**
+     * @brief set the animation property and parameter to the corresponding window.
+     *
+     * @param windowId target window id.
+     * @param animationProperty the property of animation.
+     * @param animationOption the option of animation.
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
+
 private:
     WindowManager();
     ~WindowManager();

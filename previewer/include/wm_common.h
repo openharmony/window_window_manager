@@ -1356,6 +1356,31 @@ const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
 
 /*
+ * @brief Window animation property.
+ */
+struct WindowAnimationProperty : public Parcelable {
+    float targetScale = 0.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteFloat(targetScale)) {
+            return false;
+        }
+        return true;
+    }
+
+    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
+        if (!parcel.ReadFloat(animationProperty->targetScale)) {
+            delete animationProperty;
+            return nullptr;
+        }
+        return animationProperty;
+    }
+};
+
+/*
  * @brief Window transition animation configuration.
  */
 struct WindowAnimationOption : public Parcelable {
