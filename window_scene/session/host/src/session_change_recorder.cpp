@@ -1,0 +1,300 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "session/host/include/session_change_recorder.h"
+
+#include <algorithm>
+#include <chrono>
+
+#include "zlib.h"
+
+namespace OHOS::Rosen {
+namespace {
+#define CHUNK 16384
+#define COMPRESS_VERSION 9
+
+constexpr uint32_t MAX_RECORD_TYPE_SIZE = 10;
+constexpr uint32_t MAX_RECORD_LOG_SIZE = 102400;
+constexpr int32_t SCHEDULE_SECONDS = 5;
+
+std::string GetFormattedTime()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t = std::chrono::system_clock::to_time_t(now);
+    struct tm timeBuffer;
+    std::tm* tmPtr = localtime_r(&t, &timeBuffer);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+    
+    std::ostringstream oss;
+    oss << std::put_time(tmPtr, "%m-%d %H:%M:%S") << "."
+    << std::setw(3) << ms.count();
+    return oss.str();
+}
+} // namespace
+
+WM_IMPLEMENT_SINGLE_INSTANCE(SessionChangeRecorder)
+
+void SessionChangeRecorder::Init()
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    stopLogFlag.store(false);
+    mThread = std::thread([this]() {
+        std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
+        while (!stopLogFlag.load()) {
+            {
+                std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+                if (!sceneSessionChangeNeedLogMap_) {
+                    sceneSessionChangeNeedLogMapCopy = sceneSessionChangeNeedLogMap_;
+                    sceneSessionChangeNeedLogMap_.clear();
+                    currentLogSize_ = 0;
+                }
+            }
+            if (!sceneSessionChangeNeedLogMapCopy) {
+                PrintLog(sceneSessionChangeNeedLogMapCopy);
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(SCHEDULE_SECONDS));
+        }
+    });
+}
+
+SessionChangeRecorder::~SessionChangeRecorder()
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    stopLogFlag.store(true);
+    if (mThread.joinable) {
+        mThread.join();
+    }
+}
+
+WSError SessionChangeRecorder::RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo)
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    if (changeInfo.logTag_ == WmsLogTag::DEFAULT || changeInfo.logTag_ >= WmsLogTag::END ||
+        changeInfo.changeInfo_ == "") {
+        TLOGD(WmsLogTag::DEFAULT, "Invalid log tag");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (changeInfo.time_ == "") {
+        changeInfo.time_ = GetFormattedTime();
+    }
+    RecordLog(recordType, changeInfo);
+    RecordDump(recordType, changeInfo);
+    return WSError::WS_OK;
+}
+
+WSError SessionChangeRecorder::SetRecordSize(RecordType recordType, uint32_t recordSize)
+{
+    TLOGD(WmsLogTag::DEFAULT, "recordType: %{public}" PRIu32 ", size: %{public}d", recordType, recordSize);
+    if (recordSize <= 0 || recordSize > MAX_RECORD_TYPE_SIZE) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    {
+        std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+        recordSizeMap_[recordType] = recordSize;
+    }
+    return WSError::WS_OK;
+}
+
+void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params)
+{
+    std::ostringstream oss;
+    oss << "Record session change: " << std::endl;
+
+    bool simplifyFlag = false;
+    auto it = std::find(params.begin(), params.end(), "-simplify");
+    if (it != params.end()) {
+        simplifyFlag = true;
+        params.erase(it);
+    }
+
+    bool specifiedWindowFlag = false;
+    if (params.size() >= 1 && params[0] == "all") {
+        specifiedWindowFlag = false;
+    } else if (params.size() >= 1 && WindowHelper::IsNumber(params[0])) {
+        specifiedWindowFlag = true;
+    } else {
+        oss << "Available args: '-v all/[specified window id]'" << std::endl;
+        return;
+    }
+    bool specifiedRecordTypeFlag = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ? true : false;
+
+    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
+    {
+        std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+        sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
+    }
+
+    nlohmann::json jsonArrayDump = nlohmann::json::array();
+    for (const auto& elem : sceneSessionChangeNeedDumpMapCopy) {
+        if (specifiedRecordTypeFlag && static_cast<uint32_t>(elem.first) != std::stoul(params[1])) {
+            continue;
+        }
+        std::queue<SceneSessionChangeInfo>> tempDumpQueue = elem.second;
+        while (!tempDumpQueue.empty()) {
+            auto tempQueue = tempDumpQueue.front();
+            if (specifiedWindowFlag && tempQueue.persistentId_ != std::stoi(params[0])) {
+                tempDumpQueue.pop();
+                continue;
+            }
+            jsonArrayDump.push_back({{"winId", tempQueue.persistentId_},
+                {"changeInfo", tempQueue.changeInfo_}, {"time", tempQueue.time_}});
+            tempDumpQueue.pop();
+        }
+    }
+    oss << jsonArrayDump.dump();
+    if (simplifyFlag && oss.str().size() > 1024 * 1024) {
+        dumpInfo.append("wmsDumpSimplify\n");
+        SimplifyDumpInfo(dumpInfo, oss.str());
+    } else {
+        dumpInfo.append(oss.str());
+    }
+}
+
+void SessionChangeRecorder::SimplifyDumpInfo(std::string& dumpInfo, std::string& preCompressInfo)
+{
+    std::unique_ptr<std::ostringstream> compressOstream = std::make_unique<std::ostringstream>();
+    std::string compressInfo;
+    if (CompressString(preCompressInfo.c_str(), preCompressInfo.size(), compressInfo, COMPRESS_VERSION) == Z_OK) {
+        compressOstream->write(compressInfo.c_str(), compressInfo.length());
+    } else {
+        compressOstream->write(preCompressInfo.c_str(), preCompressInfo.length());
+    }
+    preCompressInfo.clear();
+    compressOstream->flush();
+
+    dumpInfo.append(compressOstream->str());
+}
+int SessionChangeRecorder::CompressString(const char* in_str, size_t in_len, std::string& out_str, int level)
+{
+    if (!in_str)
+        return Z_DATA_ERROR;
+
+    int ret, flush;
+    unsigned have;
+    z_stream strm;
+
+    unsigned char out[CHUNK];
+
+    /* allocate deflate state */
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, level);
+    if (ret != Z_OK)
+        return ret;
+
+    std::shared_ptr<z_stream> sp_strm(&strm, [](z_stream* strm) { (void)deflateEnd(strm); });
+    const char* end = in_str + in_len;
+
+    size_t distance = 0;
+    /* compress until end of file */
+    do {
+        distance = end - in_str;
+        strm.avail_in = (distance >= CHUNK) ? CHUNK : distance;
+        strm.next_in = (Bytef*)in_str;
+        in_str += strm.avail_in;
+        flush = (in_str == end) ? Z_FINISH : Z_NO_FLUSH;
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = deflate(&strm, flush);
+            if (ret == Z_STREAM_ERROR)
+                break;
+            have = CHUNK - strm.avail_out;
+            out_str.append((const char*)out, have);
+        } while (strm.avail_out == 0);
+        if (strm.avail_in != 0) {
+            break;
+        }
+    } while (flush != Z_FINISH);
+    if (ret != Z_STREAM_END)
+        return Z_STREAM_ERROR;
+    return Z_OK;
+}
+
+void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChangeInfo& changeInfo)
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    {
+        std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+        if (sceneSessionChangeNeedDumpMap_.find(recordType) == sceneSessionChangeNeedDumpMap_.end()) {
+            std::queue<SceneSessionChangeInfo> dumpQueue;
+            dumpQueue.push(changeInfo);
+            sceneSessionChangeNeedDumpMap_[recordType] = dumpQueue;
+        } else {
+            sceneSessionChangeNeedDumpMap_[recordType].push(changeInfo);
+        }
+        
+    }
+
+    uint32_t maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
+        recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
+    if (sceneSessionChangeNeedDumpMap_[recordType].size() > maxRecordTypeSize) {
+        {
+            std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+            uint32_t diff = sceneSessionChangeNeedDumpMap_[recordType].size() - maxRecordTypeSize;
+            while (diff > 0) {
+                sceneSessionChangeNeedDumpMap_[recordType].pop();
+                diff--;
+            }
+            
+        }
+    }
+}
+
+void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeInfo& changeInfo)
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    {
+        std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+        if (sceneSessionChangeNeedLogMap_.find(recordType) == sceneSessionChangeNeedLogMap_.end()) {
+            std::queue<SceneSessionChangeInfo> logQueue;
+            logQueue.push(changeInfo);
+            sceneSessionChangeNeedLogMap_[recordType] = logQueue;
+        } else {
+            sceneSessionChangeNeedLogMap_[recordType].push(changeInfo);
+        }
+        currentLogSize_ += changeInfo.size();
+    }
+    uint32_t maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
+        recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
+    if (currentLogSize_ >= MAX_RECORD_LOG_SIZE ||
+        sceneSessionChangeNeedLogMap_[recordType].size() > maxRecordTypeSize) {
+        TLOGD(WmsLogTag::DEFAULT, "currentLogSize: %{public}d", currentLogSize_);
+        std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
+        {
+            std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+            sceneSessionChangeNeedLogMapCopy = sceneSessionChangeNeedLogMap_;
+            sceneSessionChangeNeedLogMap_.clear();
+            currentLogSize_ = 0;
+        }
+        PrintLog(sceneSessionChangeNeedLogMapCopy);
+    }
+}
+
+void SessionChangeRecorder::PrintLog(
+    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap)
+{
+    TLOGD(WmsLogTag::DEFAULT, "In");
+    for(const auto& [_, q] : sceneSessionChangeNeedLogMap) {
+        while (q.empty()) {
+            SceneSessionChangeInfo curChange = q.front();
+            TLOGD(curChange.logTag_, "winId: %{public}d, changeInfo: %{public}s, time: %{public}s",
+                curChange.persistentId_, curChange.changeInfo_.c_str(), curChange.time_.c_str());
+            q.pop();
+        }
+    }
+}
+} // namespace OHOS::Rosen

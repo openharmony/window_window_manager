@@ -44,6 +44,7 @@
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "session/host/include/session_change_recorder.h"
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
 #include "session_helper.h"
@@ -4296,6 +4297,12 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         int32_t persistentId = session->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_SCB, "%{public}s name: %{public}s, id: %{public}u, visible: %{public}u",
             where, session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        SceneSessionChangeInfo changeInfo {
+            .persistentId_ = persistentId,
+            .changeInfo_ = "Visibility change to " + std::to_string(visible),
+            .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+        };
+        SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
         bool oldVisibleState = session->isVisible_;
         session->isVisible_ = visible;
         if (session->visibilityChangedDetectFunc_) {
@@ -5582,6 +5589,14 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
     WSPropertyChangeAction action)
 {
     SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestedAnimation());
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = property->GetPersistentId(),
+        .changeInfo_ = "Orientation change to " +
+            std::to_string(static_cast<uint32_t>(property->GetRequestedOrientation())) + ", animation change to "+
+            std::to_string(static_cast<uint32_t>(property->GetRequestedAnimation())),
+        .logTag_ = WmsLogTag::WMS_ROTATION;
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return WMError::WM_OK;
 }
 
@@ -5591,6 +5606,12 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
     bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     SetPrivacyMode(isPrivacyMode);
     NotifySessionChangeByActionNotifyManager(property, action);
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = property->GetPersistentId(),
+        .changeInfo_ = "Privacy mode change to " + std::to_string(isPrivacyMode),
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return WMError::WM_OK;
 }
 
@@ -7161,6 +7182,12 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (notifyVisibleChangeFunc_ != nullptr) {
         notifyVisibleChangeFunc_(GetPersistentId());
     }
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = GetPersistentId(),
+        .changeInfo_ = "Visibility change to " + std::to_string(visibility),
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return true;
 }
 
