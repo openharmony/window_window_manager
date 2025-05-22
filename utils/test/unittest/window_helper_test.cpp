@@ -234,6 +234,10 @@ HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_DYNAMIC));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MAGNIFICATION));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MAGNIFICATION));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU));
 }
 
 /**
