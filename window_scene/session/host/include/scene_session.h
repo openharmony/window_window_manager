@@ -524,7 +524,7 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
-    WSError NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height);
+    WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);

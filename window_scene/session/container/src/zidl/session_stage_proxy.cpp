@@ -1703,7 +1703,7 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteInt32(info.rotation)) {
+    if (!data.WriteUint32(info.rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write rotation failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
