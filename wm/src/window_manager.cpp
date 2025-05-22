@@ -407,7 +407,6 @@ void WindowManager::Impl::NotifyDisplayIdChange(
                         interestWindowIds.end()) {
                         continue;
                     }
-                    listener->OnWindowInfoChanged(windowInfo);
                 }
             }
             listener->OnWindowInfoChanged(windowInfoList);
