@@ -36,14 +36,14 @@ enum class RecordType : uint32_t {
     VISIBLE_RECORD,
     ORIENTAION_RECORD,
     RECORD_TYPE_END,
-}
+};
 
 /**
  * @brief Scene session change info
  */
 struct SceneSessionChangeInfo {
     int32_t persistentId_ = INVALID_SESSION_ID;
-    std::string changeInfo_ "";
+    std::string changeInfo_ = "";
     WmsLogTag logTag_ = WmsLogTag::DEFAULT;
     std::string time_ = "";
 };
@@ -54,12 +54,12 @@ public:
     void Init();
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
-    void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params);
+    void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string> params);
     void SimplifyDumpInfo(std::string& dumpInfo, std::string& preCompressInfo);
     int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap() {
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap() {
         return sceneSessionChangeNeedLogMap_; }
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> const GetNeedDumpMap() {
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedDumpMap() {
         return sceneSessionChangeNeedDumpMap_; }
     uint32_t GetLogSize() { return currentLogSize_; }
     std::atomic<bool> stopLogFlag { false };
@@ -68,15 +68,15 @@ private:
     SessionChangeRecorder() = default;
     virtual ~SessionChangeRecorder();
     void RecordLog(RecordType recordType, SceneSessionChangeInfo& changeInfo);
-    void PrintLog(std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap);
+    void PrintLog(std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap);
     void RecordDump(RecordType recordType, SceneSessionChangeInfo& changeInfo);
 
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap_;
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap_;
-    std::unordered_map<RecordType recordType, uint32_t> recordSizeMap_;
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap_;
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap_;
+    std::unordered_map<RecordType, uint32_t> recordSizeMap_;
     std::mutex sessionChangeRecorderMutex_;
     uint32_t currentLogSize_ = 0;
     std::thread mThread;
-}
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SESSION_CHANGE_RECORDER_H

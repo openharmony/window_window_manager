@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS::Rosen {
 constexpr uint32_t MAX_RECORD_TYPE_SIZE = 10;
 
-class SessionChangeRecorderTest : public testing:Test {
+class SessionChangeRecorderTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -104,25 +104,25 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
     std::vector<std::string> params;
     std::string dumpInfo;
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
-    auto result1 = dumpInfo.find("Available args") != std::string::nops;
+    auto result1 = dumpInfo.find("Available args") != std::string::npos;
     EXPECT_TRUE(result1);
 
     SceneSessionChangeInfo changeInfo1 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo1",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
 
     SceneSessionChangeInfo changeInfo2 {
         .persistentId_ = 124,
         .changeInfo_ = "changeInfo2",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
 
     SceneSessionChangeInfo changeInfo3 {
         .persistentId_ = 125,
         .changeInfo_ = "changeInfo3",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
 
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo1);
@@ -131,23 +131,23 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
 
     params.push_back("all");
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
-    auto result2 = (dumpInfo.find("123") != std::string::nops) && (dumpInfo.find("124") != std::string::nops) &&
-        (dumpInfo.find("125") != std::string::nops);
+    auto result2 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
+        (dumpInfo.find("125") != std::string::npos);
     dumpInfo.clear();
     EXPECT_TRUE(result2);
 
     params.push_back("0");
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
-    auto result3 = (dumpInfo.find("123") != std::string::nops) && (dumpInfo.find("124") != std::string::nops) &&
-        (dumpInfo.find("125") == std::string::nops);
+    auto result3 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
+        (dumpInfo.find("125") == std::string::npos);
     dumpInfo.clear();
     EXPECT_TRUE(result3);
 
     params.pop_back();
     params[0] = "123";
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
-    auto result4 = (dumpInfo.find("123") != std::string::nops) && (dumpInfo.find("124") == std::string::nops) &&
-        (dumpInfo.find("125") == std::string::nops);
+    auto result4 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") == std::string::npos) &&
+        (dumpInfo.find("125") == std::string::npos);
     dumpInfo.clear();
     EXPECT_TRUE(result4);
 }
@@ -163,7 +163,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordDump, TestSize.Level1)
     SceneSessionChangeInfo changeInfo1 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo1",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().RecordDump(RecordType::RECORD_TYPE_BEGIN, changeInfo1);
     auto result1 = SessionChangeRecorder::GetInstance().sceneSessionChangeNeedDumpMap_;
@@ -172,7 +172,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordDump, TestSize.Level1)
     SceneSessionChangeInfo changeInfo2 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo2",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().RecordDump(RecordType::RECORD_TYPE_BEGIN, changeInfo2);
     auto result2 = SessionChangeRecorder::GetInstance().sceneSessionChangeNeedDumpMap_;
@@ -181,7 +181,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordDump, TestSize.Level1)
     SceneSessionChangeInfo changeInfo3 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo3",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, 2);
     SessionChangeRecorder::GetInstance().RecordDump(RecordType::RECORD_TYPE_BEGIN, changeInfo3);
@@ -201,7 +201,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordLog, TestSize.Level1)
     SceneSessionChangeInfo changeInfo1 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo1",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().RecordLog(RecordType::RECORD_TYPE_BEGIN, changeInfo1);
     auto result1 = SessionChangeRecorder::GetInstance().sceneSessionChangeNeedLogMap_;
@@ -210,7 +210,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordLog, TestSize.Level1)
     SceneSessionChangeInfo changeInfo2 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo2",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().RecordLog(RecordType::RECORD_TYPE_BEGIN, changeInfo2);
     auto result2 = SessionChangeRecorder::GetInstance().sceneSessionChangeNeedLogMap_;
@@ -219,7 +219,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordLog, TestSize.Level1)
     SceneSessionChangeInfo changeInfo3 {
         .persistentId_ = 123,
         .changeInfo_ = "changeInfo3",
-        .logTag_ = WmsLogTag::WMS_MAIN;
+        .logTag_ = WmsLogTag::WMS_MAIN,
     };
     SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, 2);
     SessionChangeRecorder::GetInstance().RecordLog(RecordType::RECORD_TYPE_BEGIN, changeInfo3);

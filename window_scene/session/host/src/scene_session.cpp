@@ -4300,7 +4300,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         SceneSessionChangeInfo changeInfo {
             .persistentId_ = persistentId,
             .changeInfo_ = "Visibility change to " + std::to_string(visible),
-            .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+            .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
         };
         SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
         bool oldVisibleState = session->isVisible_;
@@ -5594,7 +5594,7 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
         .changeInfo_ = "Orientation change to " +
             std::to_string(static_cast<uint32_t>(property->GetRequestedOrientation())) + ", animation change to "+
             std::to_string(static_cast<uint32_t>(property->GetRequestedAnimation())),
-        .logTag_ = WmsLogTag::WMS_ROTATION;
+        .logTag_ = WmsLogTag::WMS_ROTATION,
     };
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return WMError::WM_OK;
@@ -5609,7 +5609,7 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
     SceneSessionChangeInfo changeInfo {
         .persistentId_ = property->GetPersistentId(),
         .changeInfo_ = "Privacy mode change to " + std::to_string(isPrivacyMode),
-        .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
     };
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return WMError::WM_OK;
@@ -7185,7 +7185,7 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     SceneSessionChangeInfo changeInfo {
         .persistentId_ = GetPersistentId(),
         .changeInfo_ = "Visibility change to " + std::to_string(visibility),
-        .logTag_ = WmsLogTag::WMS_ATTRIBUTE;
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
     };
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return true;

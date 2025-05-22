@@ -1600,8 +1600,7 @@ ohos_unittest("ws_session_change_recorder_test") {
 
   deps = [ ":ws_unittest_common" ]
 
-  external_deps = test_external_deps
-  external_deps += [
+  external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
