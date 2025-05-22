@@ -710,7 +710,7 @@ public:
      * @param pointerEvent PointerEvent of Multi-Model Input.
      * @return WM_OK means set success.
      */
-     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::OK; }
+     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
 };
 }
 }
