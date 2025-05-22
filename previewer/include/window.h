@@ -703,14 +703,6 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief inject a pointerEvent to arkui.
-     *
-     * @param pointerEvent PointerEvent of Multi-Model Input.
-     * @return WM_OK means set success.
-     */
-     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
 };
 }
 }
