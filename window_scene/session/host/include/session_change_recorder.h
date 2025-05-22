@@ -54,8 +54,8 @@ public:
     void Init();
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
-    void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string> params);
-    void SimplifyDumpInfo(std::string& dumpInfo, std::string& preCompressInfo);
+    void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params);
+    void SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo);
     int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap() {
         return sceneSessionChangeNeedLogMap_; }
