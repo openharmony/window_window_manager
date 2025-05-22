@@ -6976,9 +6976,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowEx
     if (topFloatingSession != nullptr && SessionHelper::IsMainWindow(sceneSession->GetWindowType()) &&
         sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return topFloatingSession;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)
@@ -7046,13 +7045,12 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
         }
         auto parentSession = GetSceneSession(session->GetParentPersistentId());
         if (SessionHelper::IsSubWindow(session->GetWindowType()) && parentSession != nullptr &&
-            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            parentSession->IsTopmost()) {
+            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && parentSession->IsTopmost()) {
             TLOGND(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        
-        if (IsSessionVisibleForeground(session) && CheckBlockingFocus(session,includingAppSession)){
+
+        if (IsSessionVisibleForeground(session) && CheckBlockingFocus(session, includingAppSession)) {
             ret = session;
             return true;
         }
@@ -7075,8 +7073,7 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
     }
     if (includingAppSession && session->IsAppSession()) {
         TLOGD(WmsLogTag::WMS_FOCUS,
-              "id: %{public}d, isFloatType: %{public}d, isFloatMode: %{public}d",
-              session->GetPersistentId(),
+              "id: %{public}d, isFloatType: %{public}d, isFloatMode: %{public}d", session->GetPersistentId(),
               session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT,
               session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
         bool isPcOrPcMode =
