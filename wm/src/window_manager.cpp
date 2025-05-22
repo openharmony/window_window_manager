@@ -398,6 +398,18 @@ void WindowManager::Impl::NotifyDisplayIdChange(
     }
     for (auto &listener : windowDisplayIdChangeListeners) {
         if (listener != nullptr) { 
+            auto interestWindowIds = listener->GetInterestWindowIds();
+            if (!interestWindowIds.empty()) {
+                for (const auto& item : windowInfoList) {
+                    auto windowInfo = item;
+                    if (windowInfo.find(WindowInfoKey::WINDOW_ID) == windowInfo.end() ||
+                        interestWindowIds.find(std::any_cast<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
+                        interestWindowIds.end()) {
+                        continue;
+                    }
+                    listener->OnWindowInfoChanged(windowInfo);
+                }
+            }
             listener->OnWindowInfoChanged(windowInfoList);
         }
     }
@@ -1341,7 +1353,6 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
 
 WMError WindowManager::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
 {
-    pImpl_->NotifyDisplayIdChange(windowId, displayId);
     return WMError::WM_OK;
 }
 
@@ -1947,6 +1958,9 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set
         if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
             listener->AddInterestInfo(info);
         }
+        if (!listener->GetInterestWindowIds.empty()) {
+            listener->AddInterestWindowIds(WindowInfoKey::WINDOW_ID);
+        }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
             observedInfoForLog << "failed";
@@ -1971,6 +1985,9 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
         observedInfoForLog << static_cast<uint32_t>(info) << ", ";
         if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
             listener->AddInterestInfo(info);
+        }
+        if (!listener->GetInterestWindowIds.empty()) {
+            listener->AddInterestWindowIds(WindowInfoKey::WINDOW_ID);
         }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {

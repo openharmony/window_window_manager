@@ -336,7 +336,7 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
         default : {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "unknown WindowInfoKey");
             return false;
-        } 
+        }
     }
     return true;
 }
