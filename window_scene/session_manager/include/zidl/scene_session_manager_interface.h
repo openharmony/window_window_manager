@@ -309,7 +309,7 @@ public:
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
-    WMError SetForegroundWindowNum(int32_t windowNum) override { return WMError::WM_OK; }
+    WMError SetForegroundWindowNum(uint32_t windowNum) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.

@@ -3417,7 +3417,7 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
+WMError SceneSessionManagerProxy::SetForegroundWindowNum(uint32_t windowNum)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3426,7 +3426,7 @@ WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
         TLOGE(WmsLogTag::WMS_PC, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(windowNum)) {
+    if (!data.WriteUint32(windowNum)) {
         TLOGE(WmsLogTag::WMS_PC, "Write windowNum failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

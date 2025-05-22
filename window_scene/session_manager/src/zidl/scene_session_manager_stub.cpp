@@ -2097,8 +2097,8 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
 
 int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t windowNum = 0;
-    if (!data.ReadInt32(windowNum)) {
+    uint32_t windowNum = 0;
+    if (!data.ReadUint32(windowNum)) {
         TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
         return ERR_INVALID_DATA;
     }
