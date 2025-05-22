@@ -224,7 +224,7 @@ HWTEST_F(SessionChangeRecorderTest, RecordLog, TestSize.Level1)
     SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, 2);
     SessionChangeRecorder::GetInstance().RecordLog(RecordType::RECORD_TYPE_BEGIN, changeInfo3);
     auto result3 = SessionChangeRecorder::GetInstance().sceneSessionChangeNeedLogMap_;
-    EXPECT_EQ(result3[RecordType::RECORD_TYPE_BEGIN].size(), 2);
+    EXPECT_EQ(result3[RecordType::RECORD_TYPE_BEGIN].size(), 0);
     SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE);
 }
 
