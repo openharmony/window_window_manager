@@ -6075,9 +6075,8 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     if (ret == WSError::WS_OK) {
         std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
         std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-        transitionAnimationConfig_[transitionType] = config;
+        property_->transitionAnimationConfig_[transitionType] = config;
     }
-
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
@@ -6094,8 +6093,8 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
         return nullptr;
     }
     std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
-    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
-        return transitionAnimationConfig_[transitionType];
+    if (property_->transitionAnimationConfig_.find(transitionType) != property_->transitionAnimationConfig_.end()) {
+        return property_->transitionAnimationConfig_[transitionType];
     } else {
         return nullptr;
     }

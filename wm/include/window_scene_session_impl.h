@@ -495,7 +495,6 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
-    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

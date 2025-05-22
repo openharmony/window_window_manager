@@ -1085,6 +1085,49 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
     return true;
 }
 
+bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
+{
+    if (!parcel.WriteUint32(transitionAnimationConfig_.size())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
+        return false;
+    }
+    for (const auto& [transitionType, animation] : transitionAnimationConfig_) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(transitionType))) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionType");
+            return false;
+        }
+        if (!parcel.WriteParcelable(&(*animation))) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimation");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property)
+{
+    uint32_t transitionAnimationMapSize = 0;
+    if (!parcel.ReadUint32(transitionAnimationMapSize)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
+        return false;
+    }
+    uint32_t transitionType = 0;
+    std::shared_ptr<TransitionAnimation> animation = nullptr;
+    for (uint32_t i = 0; i < transitionAnimationMapSize; ++i) {
+        if (!parcel.ReadUint32(transitionType)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionType");
+            return false;
+        }
+        animation = std::shared_ptr<TransitionAnimation>(parcel.ReadParcelable<TransitionAnimation>());
+        if (animation == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimation");
+            return false;
+        }
+        property->transitionAnimationConfig_[static_cast<WindowTransitionType>(transitionType)] = animation;
+    }
+    return true;
+}
+
 void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
 {
     isAppSupportPhoneInPc_ = isSupportPhone;
@@ -1175,6 +1218,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
+        MarshallingTransitionAnimationMap(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -1243,6 +1287,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
+        delete property;
+        return nullptr;
+    }
+    if (!UnmarshallingTransitionAnimationMap(parcel, property)) {
         delete property;
         return nullptr;
     }

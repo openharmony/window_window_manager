@@ -1399,7 +1399,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
-    window->transitionAnimationConfig_[type] = std::make_shared<TransitionAnimation>();
+    property->transitionAnimationConfig_[type] = std::make_shared<TransitionAnimation>();
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_NE(ret, nullptr);
 }
