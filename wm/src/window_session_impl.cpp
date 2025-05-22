@@ -2413,7 +2413,7 @@ void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
         GetPersistentId(), orientation, state_);
     property_->SetUserRequestedOrientation(orientation);
 }
-f
+
 bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
 {
     bool isUserOrientation = IsUserOrientation(orientation);
