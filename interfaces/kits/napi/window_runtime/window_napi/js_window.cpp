@@ -1174,6 +1174,13 @@ napi_value JsWindow::SetFollowParentWindowLayoutEnabled(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSetFollowParentWindowLayoutEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowShadowEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowShadowEnabled(env, info) : nullptr;
+}
+
 WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
 {
     if (window == nullptr) {
@@ -5978,10 +5985,12 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
 napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
-    double result = 0.0;
+    double radius;
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
     if (argc < 1) { // 1: min param num
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -5996,40 +6005,59 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (argv[0] == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_status statusCode = napi_get_value_double(env, argv[0], &result);
+    napi_status statusCode = napi_get_value_double(env, argv[0], &radius);
     if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (MathHelper::LessNotEqual(result, 0.0)) {
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
         return NapiThrowError(env,  WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(result));
-    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
-        std::string color;
-        if (ConvertFromJsValue(env, argv[1], color)) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
-        }
-    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(radius));
+    shadowsInfo->radius_ = radius;
+    shadowsInfo->hasRadiusValue_ = true;
 
-    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
-        if (argv[2] != nullptr) { // 2: the 3rd param
-            napi_get_value_double(env, argv[2], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(result));
-        }
-    }
-
-    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
-        if (argv[3] != nullptr) {  // 3: the 4th param
-            napi_get_value_double(env, argv[3], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(result));
-        }
-    }
-
+    ParseShadowOptionalParameters(ret, shadowsInfo, env, argv, argc);
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
     }
 
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+    }
     return NapiGetUndefined(env);
+}
+  
+void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+    napi_env env, const napi_value* argv, size_t argc)
+{
+    std::string color;
+    double offsetX;
+    double offsetY;
+    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
+        if (ConvertFromJsValue(env, argv[1], color)) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
+            shadowsInfo->color_ = color;
+            shadowsInfo->hasColorValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
+        if (argv[2] != nullptr) { // 2: the 3rd param
+            napi_get_value_double(env, argv[2], &offsetX);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(offsetX));
+            shadowsInfo->offsetX_ = offsetX;
+            shadowsInfo->hasOffsetXValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
+        if (argv[3] != nullptr) {  // 3: the 4th param
+            napi_get_value_double(env, argv[3], &offsetY);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(offsetY));
+            shadowsInfo->offsetY_ = offsetY;
+            shadowsInfo->hasOffsetYValue_ = true;
+        }
+    }
 }
 
 napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)
@@ -6060,9 +6088,17 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
+    shadowsInfo->radius = result;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
+        return NapiThrowError(env, ret);
+    }
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
@@ -6662,12 +6698,9 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since window is not system window");
+
+    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -7740,6 +7773,10 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     if (argc > ARG_COUNT_ZERO) {
         return OnStartMoveWindowWithCoordinate(env, argc, argv);
     }
+    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
     NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
@@ -8272,6 +8309,47 @@ napi_value JsWindow::OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_cal
     return result;
 }
 
+napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowShadowEnabled(enabled));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, set enable: %{public}u",
+            where, window->GetWindowId(), enabled);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s set failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set window shadow failed."));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowShadowEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startMoving", moduleName, JsWindow::StartMoving);
@@ -8435,6 +8513,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "isWindowHighlighted", moduleName, JsWindow::IsWindowHighlighted);
     BindNativeFunction(env, object, "setFollowParentWindowLayoutEnabled", moduleName,
         JsWindow::SetFollowParentWindowLayoutEnabled);
+    BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS

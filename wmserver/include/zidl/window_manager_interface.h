@@ -94,6 +94,7 @@ public:
         TRANS_ID_GET_HOST_WINDOW_RECT,
         TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID,
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
+        TRANS_ID_SET_IMAGE_FOR_RECENT,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -119,6 +120,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
+    virtual WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
@@ -238,6 +243,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError GetFreeMultiWindowEnableState(bool& enable) { return WSError::WS_OK; }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {
@@ -266,6 +275,8 @@ public:
     virtual WMError IsPcWindow(bool& isPcWindow) { return WMError::WM_OK; }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
+        int persistentId) { return WMError::WM_OK; }
+    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
         int persistentId) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }

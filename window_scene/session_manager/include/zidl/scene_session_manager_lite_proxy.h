@@ -99,6 +99,7 @@ public:
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

@@ -219,7 +219,6 @@ WMError PictureInPictureControllerBase::StopPictureInPictureInner(StopPipType st
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
             DestroyPictureInPictureWindow();
         }
-
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PipConst::PIP_SUCCESS, "pip window stop success");
@@ -534,6 +533,13 @@ void PictureInPictureControllerBase::GetPipPossible(bool& pipPossible)
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
     pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
     return;
+}
+
+bool PictureInPictureControllerBase::GetPipEnabled()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    return multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
+        multiWindowUIType == "TabletSmartWindow";
 }
 } // namespace Rosen
 } // namespace OHOS

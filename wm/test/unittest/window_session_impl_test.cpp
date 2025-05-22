@@ -364,7 +364,7 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestS
     EXPECT_EQ(true, window->property_->IsDecorEnable());
     window->property_->SetDecorEnable(false);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(false, window->property_->IsDecorEnable());
@@ -719,23 +719,23 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    ASSERT_NE(nullptr, window->property_);
+    EXPECT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    EXPECT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
     float brightness = -0.5f; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
     brightness = 2.0f; // brightness > 1
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5f;
     window->hostSession_ = session;
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
@@ -754,19 +754,23 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    EXPECT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
-    ASSERT_NE(nullptr, window->property_);
+    EXPECT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     float brightness = 0.5f;
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    res = window->SetBrightness(brightness);
+    EXPECT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
 }
@@ -1408,8 +1412,8 @@ HWTEST_F(WindowSessionImplTest, SetAPPWindowIcon, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     Media::InitializationOptions opts;
-    opts.size.width = 200;  // 200： test width
-    opts.size.height = 300; // 300： test height
+    opts.size.width = 200;  // 200 test width
+    opts.size.height = 300; // 300 test height
     opts.pixelFormat = Media::PixelFormat::ARGB_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     std::unique_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMap::Create(opts);
@@ -1675,17 +1679,17 @@ HWTEST_F(WindowSessionImplTest, EnableDrag, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
     auto result = window->EnableDrag(true);
     ASSERT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     result = window->EnableDrag(true);
-    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     result = window->EnableDrag(true);
     ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
@@ -1977,6 +1981,8 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetExtensionConfig");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->crossAxisState_ = CrossAxisState::STATE_CROSS;
     AAFwk::WantParams want;
     window->GetExtensionConfig(want);
@@ -1990,6 +1996,50 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     window->crossAxisState_ = CrossAxisState::STATE_END;
     window->GetExtensionConfig(want);
     EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_END));
+
+    bool isHostWindowDelayRaiseEnabled = true;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0),
+        static_cast<int32_t>(isHostWindowDelayRaiseEnabled));
+    isHostWindowDelayRaiseEnabled = false;
+    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0),
+        static_cast<int32_t>(isHostWindowDelayRaiseEnabled));
+}
+
+/**
+ * @tc.name: OnExtensionMessage
+ * @tc.desc: OnExtensionMessage test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnExtensionMessage");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+    auto ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(nullptr, window->GetHostSession());
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_FALSE(window->GetPersistentId() == INVALID_SESSION_ID);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_FALSE(window->state_ == WindowState::STATE_DESTROYED);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(true, WindowHelper::IsAppWindow(window->GetType()));
+    ret = window->OnExtensionMessage(code, persistentId, want);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

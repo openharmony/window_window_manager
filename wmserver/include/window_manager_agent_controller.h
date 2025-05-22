@@ -36,10 +36,13 @@ public:
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
     void NotifyGestureNavigationEnabledResult(bool enable);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
 private:
     WindowManagerAgentController() {}

@@ -205,7 +205,7 @@ void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const 
             WLOGE("fail to add child. create rsDisplayNode fail!");
             return;
         }
-        rsDisplayNode->SetSkipCheckInMultiInstance(true);
+        RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
         rsDisplayNode_ = rsDisplayNode;
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
@@ -229,7 +229,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
         WLOGE("fail to add child. create rsDisplayNode fail!");
         return;
     }
-    rsDisplayNode->SetSkipCheckInMultiInstance(true);
+    RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
     rsDisplayNode_ = rsDisplayNode;
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());

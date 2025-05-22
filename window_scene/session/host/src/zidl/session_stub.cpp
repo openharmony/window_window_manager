@@ -268,6 +268,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
             return HandleUpdateKeyFrameCloneNode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED):
+            return HandleNotifyKeyboardWillShowRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED):
+            return HandleNotifyKeyboardWillHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
@@ -280,6 +284,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
             return HandleNotifyDisableDelegatorChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS):
+            return HandleSetWindowShadows(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
+            return HandleSetSubWindowSource(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1569,6 +1577,25 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetWindowShadows(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<ShadowsInfo> shadowsInfo = data.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read shadowsInfo error");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_ANIMATION, "shadow radius is %{public}f, color is %{public}s, "
+        "offsetX is %{public}f, offsetY is %{public}f", shadowsInfo->radius_, shadowsInfo->color_.c_str(),
+        shadowsInfo->offsetX_, shadowsInfo->offsetY_);
+    WSError errCode = SetWindowShadows(*shadowsInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGI(WmsLogTag::WMS_ANIMATION, "HandleSetWindowShadows end");
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply)
 {
     bool isFollow = false;
@@ -1762,6 +1789,30 @@ int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillShowRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillHideRegistered(registered);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
 {
     std::string flag;
@@ -1806,6 +1857,23 @@ int SessionStub::HandleNotifyDisableDelegatorChange(MessageParcel& data, Message
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WMError ret = NotifyDisableDelegatorChange();
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t sourceType = 0;
+    if (!data.ReadUint32(sourceType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read sourceType failed.");
+        return ERR_INVALID_DATA;
+    }
+    SubWindowSource source = static_cast<SubWindowSource>(sourceType);
+    TLOGD(WmsLogTag::WMS_SUB, "source: %{public}d", source);
+    WSError errCode = SetSubWindowSource(source);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

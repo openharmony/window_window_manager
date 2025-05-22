@@ -43,6 +43,8 @@ public:
     MOCK_METHOD0(AfterDestroyed, void(void));
     MOCK_METHOD0(AfterDidForeground, void(void));
     MOCK_METHOD0(AfterDidBackground, void(void));
+    MOCK_METHOD0(AfterInteractive, void(void));
+    MOCK_METHOD0(AfterNonInteractive, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -69,6 +71,16 @@ class MockIOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockIKeyboardWillShowListener : public IKeyboardWillShowListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillShow, void());
+};
+        
+class MockIKeyboardWillHideListener : public IKeyboardWillHideListener {
+public:
+    MOCK_METHOD0(OnKeyboardMockWillHide, void());
 };
 
 class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {

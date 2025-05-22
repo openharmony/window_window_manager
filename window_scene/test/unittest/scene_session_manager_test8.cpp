@@ -340,6 +340,17 @@ HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
     WSRect wsRect{ .posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100 };
     sceneSession->winRect_ = wsRect;
     EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
+
+    SessionInfo sessionInfo2;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    WSRect wsRect2 { .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
+    sceneSession2->winRect_ = wsRect2;
+    std::vector<Rect> hotAreas;
+    hotAreas.push_back(Rect::EMPTY_RECT);
+    hotAreas.push_back({.posX_ = 0, .posY_ = 0, .width_ = 10, .height_ = 10});
+    sceneSession2->GetSessionProperty()->SetTouchHotAreas(hotAreas);
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession2), true);
 }
 
 /**
@@ -750,6 +761,34 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: test function : GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->OnScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.bundleName_ = "GetHostGlobalScaledRect";
+    info.abilityName_ = "GetHostGlobalScaledRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    auto ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: NotifyStackEmpty
  * @tc.desc: test function : NotifyStackEmpty
  * @tc.type: FUNC
@@ -992,6 +1031,69 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
     property->SetIsLayoutFullScreen(false);
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestFlags_);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestFlags_ = 0;
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestFlags_);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestFlags_ = 0;
+}
+
+/**
+ * @tc.name: PackWindowPropertyChangeInfo01
+ * @tc.desc: test function : PackWindowPropertyChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
+{
+    ssm_->interestFlags_ = -1;
+    SessionInfo sessionInfo1;
+    sessionInfo1.isSystem_ = false;
+    sessionInfo1.bundleName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.abilityName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.appIndex_ = 10;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->GetSessionProperty()->SetDisplayId(0);
+
+    std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+    ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
+    ASSERT_EQ(windowPropertyChangeInfo.size(), 7);
 }
 } // namespace
 } // namespace Rosen

@@ -322,6 +322,43 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: NotifyDisplayIdChange
+ * @tc.desc: test NotifyDisplayIdChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyDisplayIdChange, TestSize.Level1)
+{
+    uint32_t windowId = 0;
+    DisplayId displayId = 0;
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        windowManagerAgentProxy->NotifyDisplayIdChange(windowId, displayId);
+        resultValue = 1;
+    };
+    func();
+    EXPECT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChange
+ * @tc.desc: test NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level1)
+{
+    uint32_t PropertyDirtyFlags = 0;
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        windowManagerAgentProxy->NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
+        resultValue = 1;
+    };
+    func();
+    EXPECT_EQ(resultValue, 1);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

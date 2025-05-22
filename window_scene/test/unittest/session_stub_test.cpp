@@ -415,6 +415,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
         reply,
         option);
     ASSERT_EQ(ERR_NONE, res);
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true , true };
+    ASSERT_EQ(data.WriteParcelable(&shadowsInfo), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -1063,6 +1068,40 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardWillShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetTargetOrientationConfigInfo
  * @tc.desc: sessionStub HandleGetTargetOrientationConfigInfo
  * @tc.type: FUNC
@@ -1408,6 +1447,23 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     data.WriteInt64(1);
     result = session_->HandleTransferAccessibilityEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSubWindowSource
+ * @tc.desc: test function : HandleSetSubWindowSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+    data.WriteUint32(1);
+    auto result = session_->HandleSetSubWindowSource(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

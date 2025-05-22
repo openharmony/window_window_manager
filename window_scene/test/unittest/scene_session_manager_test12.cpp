@@ -2423,6 +2423,43 @@ HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest
     ssm_->UpdateAbilityHookState(sceneSession, true);
     EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
 }
+
+/**
+ * @tc.name: UpdateRecentMainSessionInfos
+ * @tc.desc: test function : UpdateRecentMainSessionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateRecentMainSessionInfos, Function | SmallTest | Level2)
+{
+    const std::vector<int32_t> recentMainSessionIdList = { 101 };
+    SessionInfo info;
+    info.bundleName_ = "UpdateRecentMainSessionInfoList BundleName";
+    info.moduleName_ = "UpdateRecentMainSessionInfoList ModuleName";
+    info.abilityName_ = "UpdateRecentMainSessionInfoList AbilityName";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_[101] = sceneSession;
+    ssm_->recentMainSessionInfoList_.clear();
+    EXPECT_EQ(ssm_->recentMainSessionInfoList_.size(), 0);
+    ssm_->UpdateRecentMainSessionInfos(recentMainSessionIdList);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ssm_->recentMainSessionInfoList_.size(), 1);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList
+ * @tc.desc: test function : GetRecentMainSessionInfoList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList, Function | SmallTest | Level2)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

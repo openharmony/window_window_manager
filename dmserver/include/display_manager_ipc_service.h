@@ -78,7 +78,7 @@ public:
         uint64_t displayId,
         int32_t& errorCode,
         bool isUseDma,
-        bool isCaptureFullOfScreen,
+        bool isFullScreenCapture,
         std::shared_ptr<PixelMap>& pixelMap) override;
 
     ErrCode GetScreenSupportedColorGamuts(
@@ -260,6 +260,15 @@ public:
 
     ErrCode GetAllDisplayPhysicalResolution(
         std::vector<DisplayPhysicalResolution>& displayPhysicalResolutions) override;
+
+    ErrCode SetScreenBrightness(
+        uint64_t screenId,
+        uint32_t level,
+        bool& isSucc) override;
+
+    ErrCode GetScreenBrightness(
+        uint64_t screenId,
+        uint32_t& level) override;
 
 private:
     DisplayManagerIpcService();

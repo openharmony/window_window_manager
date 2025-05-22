@@ -232,6 +232,7 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
 
 private:
     const std::string& GetWindowName() const;
@@ -239,6 +240,8 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    void ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+        napi_env env, const napi_value* argv, size_t argc);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
@@ -437,6 +440,7 @@ private:
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

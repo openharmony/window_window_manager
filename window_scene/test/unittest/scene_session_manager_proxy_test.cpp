@@ -524,6 +524,25 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowManagerAgent01, TestSize.Le
 }
 
 /**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    ASSERT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_OK,
+        sceneSessionManagerProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
+}
+
+/**
  * @tc.name: UpdateModalExtensionRect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1111,6 +1130,19 @@ HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, TestSize.Level1)
     std::string key = "com.example.recposentryEntryAbility";
     int persistentId = 1;
     ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled, persistentId), WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: SetImageForRecent
+ * @tc.desc: SetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetImageForRecent, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sceneSessionManagerProxy->SetImageForRecent(1, ImageFit::FILL, 1), WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**

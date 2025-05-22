@@ -86,7 +86,7 @@ static int32_t checkControlsRules(uint32_t pipTemplateType, const std::vector<st
 static int32_t checkCreatePipParams(const PiPConfig& config)
 {
     if (config.mainWindowId == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be 0");
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be zero");
         return -1;
     }
     if (TEMPLATE_CONTROL_MAP.find(static_cast<PiPTemplateType>(config.pipTemplateType)) ==
@@ -95,7 +95,7 @@ static int32_t checkCreatePipParams(const PiPConfig& config)
         return -1;
     }
     if (config.width == 0 || config.height == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "width or height could not be 0");
+        TLOGE(WmsLogTag::WMS_PIP, "width or height could not be zero");
         return -1;
     }
     if (config.env == nullptr) {
@@ -105,33 +105,113 @@ static int32_t checkCreatePipParams(const PiPConfig& config)
     return checkControlsRules(config.pipTemplateType, config.controlGroup);
 }
 
-WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& config, uint32_t controllerId)
+WMError WebPictureInPictureControllerInterface::CreateWebPipController()
 {
-    int32_t ret = checkCreatePipParams(config);
+    int32_t ret = checkCreatePipParams(config_);
     if (ret == -1) {
-        TLOGE(WmsLogTag::WMS_PIP, "Invalid parameters when createPip, "
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid parameters when createPipController, "
             "please check if mainWindowId/width/height is zero, "
             "or env is nullptr, or controlGroup mismatch the corresponding pipTemplateType");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config);
-    sptrWebPipController_->SetControllerId(controllerId);
-    sptrWebPipController_->GetPipPossible(isPipPossible_);
-    if (!isPipPossible_) {
+    sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config_);
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::Create()
+{
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return WMError::WM_OK;
 }
 
-WMError WebPictureInPictureControllerInterface::StartPip()
+WMError WebPictureInPictureControllerInterface::SetMainWindowId(uint32_t mainWindowId)
 {
-    if (auto pipController = sptrWebPipController_) {
-        return pipController->StartPictureInPicture(StartPipType::NATIVE_START);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (mainWindowId == 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be zero");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    config_.mainWindowId = mainWindowId;
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType pipTemplateType)
+{
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto iter = TEMPLATE_CONTROL_MAP.find(pipTemplateType);
+    if (iter == TEMPLATE_CONTROL_MAP.end()) {
+        TLOGE(WmsLogTag::WMS_PIP, "createPip param error, pipTemplateType %{public}d not exists",
+            static_cast<int32_t>(pipTemplateType));
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    config_.pipTemplateType = static_cast<uint32_t>(pipTemplateType);
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::SetRect(uint32_t width, uint32_t height)
+{
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (width == 0 || height == 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "width or height could not be zero");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    config_.width = width;
+    config_.height = height;
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::SetControlGroup(const std::vector<uint32_t>& controlGroup)
+{
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (checkControlsRules(config_.pipTemplateType, controlGroup) != 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "controlGroup mismatch the corresponding pipTemplateType");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    config_.controlGroup = controlGroup;
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::SetNapiEnv(void* env)
+{
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    config_.env = reinterpret_cast<napi_env>(env);
+    return WMError::WM_OK;
+}
+
+WMError WebPictureInPictureControllerInterface::StartPip(uint32_t controllerId)
+{
+    WMError ret = WMError::WM_OK;
+    if (sptrWebPipController_ == nullptr) {
+        ret = CreateWebPipController();
+    }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sptrWebPipController_->SetControllerId(controllerId);
+    return sptrWebPipController_->StartPictureInPicture(StartPipType::NATIVE_START);
 }
 
 WMError WebPictureInPictureControllerInterface::StopPip()
@@ -178,7 +258,7 @@ void WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlType
 
 WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativePipStartPipCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -186,18 +266,21 @@ WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativeP
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return RegisterListenerWithType(ListenerType::PIP_START_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    WMError ret = WMError::WM_OK;
+    if (sptrWebPipController_ == nullptr) {
+        ret = CreateWebPipController();
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return RegisterListenerWithType(ListenerType::PIP_START_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterStartPipListener(NativePipStartPipCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -217,7 +300,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterStartPipListener(Nativ
 
 WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(NativePipLifeCycleCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -225,18 +308,21 @@ WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(Native
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return RegisterListenerWithType(ListenerType::STATE_CHANGE_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+     WMError ret = WMError::WM_OK;
+    if (sptrWebPipController_ == nullptr) {
+        ret = CreateWebPipController();
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return RegisterListenerWithType(ListenerType::STATE_CHANGE_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterLifeCycleListener(NativePipLifeCycleCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -255,7 +341,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterLifeCycleListener(Nati
 
 WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(NativePipControlEventCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -263,18 +349,21 @@ WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(Nat
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return RegisterListenerWithType(ListenerType::CONTROL_EVENT_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+     WMError ret = WMError::WM_OK;
+    if (sptrWebPipController_ == nullptr) {
+        ret = CreateWebPipController();
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return RegisterListenerWithType(ListenerType::CONTROL_EVENT_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterControlEventListener(NativePipControlEventCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -293,7 +382,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterControlEventListener(N
 
 WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePipResizeCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -301,18 +390,21 @@ WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePip
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (auto pipController = sptrWebPipController_) {
-        auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
-        return RegisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "sptrWebPipController_ is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    WMError ret = WMError::WM_OK;
+    if (sptrWebPipController_ == nullptr) {
+        ret = CreateWebPipController();
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
+    return RegisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
 }
 
 WMError WebPictureInPictureControllerInterface::UnregisterResizeListener(NativePipResizeCallback callback)
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -433,7 +525,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -448,7 +540,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPLifecycle()
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -463,7 +555,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPControlObserver(
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }
@@ -478,7 +570,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAllPiPWindowSize()
 
 WMError WebPictureInPictureControllerInterface::UnregisterAllPiPStart()
 {
-    if (!isPipPossible_) {
+    if (!isPipEnabled_) {
         TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
         }

@@ -1784,4 +1784,39 @@ WMError SceneSessionManagerLiteProxy::ListWindowInfo(const WindowInfoOption& win
     }
     return static_cast<WMError>(errCode);
 }
+
+WSError SceneSessionManagerLiteProxy::GetRecentMainSessionInfoList(
+    std::vector<RecentSessionInfo>& recentSessionInfoList)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    WSError error = static_cast<WSError>(GetParcelableInfos(reply, recentSessionInfoList));
+    if (error != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get info error");
+        return error;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read errcode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(errCode);
+}
 } // namespace OHOS::Rosen

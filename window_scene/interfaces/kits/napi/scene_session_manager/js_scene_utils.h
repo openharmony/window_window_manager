@@ -87,6 +87,7 @@ enum class JsSessionType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
+    TYPE_MUTISCREEN_COLLABORATION,
     TYPE_DYNAMIC = 41
 };
 
@@ -130,6 +131,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         JsSessionType::TYPE_FLOAT_NAVIGATION        },
+    { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, JsSessionType::TYPE_MUTISCREEN_COLLABORATION},
     { WindowType::WINDOW_TYPE_DYNAMIC,                  JsSessionType::TYPE_DYNAMIC                 },
 };
 
@@ -173,6 +175,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
     { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
+    { JsSessionType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION},
     { JsSessionType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                 },
 };
 
@@ -214,10 +217,12 @@ napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& 
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
+napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);
+napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo);
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
@@ -231,8 +236,8 @@ napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t per
 napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
-napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
-    const WindowAnimationOptions& animationConfig);
+napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
+    const WindowAnimationOption& animationConfig);
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
 bool NapiIsCallable(napi_env env, napi_value value);
