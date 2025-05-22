@@ -34,6 +34,7 @@ enum class RecordType : uint32_t {
     RECORD_TYPE_BEGIN = 0,
     SESSION_STATE_RECORD,
     VISIBLE_RECORD,
+    PRIVACY_MODE,
     ORIENTAION_RECORD,
     RECORD_TYPE_END,
 };

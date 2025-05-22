@@ -5596,7 +5596,7 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
             std::to_string(static_cast<uint32_t>(property->GetRequestedAnimation())),
         .logTag_ = WmsLogTag::WMS_ROTATION,
     };
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::ORIENTAION_RECORD, changeInfo);
     return WMError::WM_OK;
 }
 
@@ -5611,7 +5611,7 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
         .changeInfo_ = "Privacy mode change to " + std::to_string(isPrivacyMode),
         .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
     };
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::PRIVACY_MODE, changeInfo);
     return WMError::WM_OK;
 }
 
