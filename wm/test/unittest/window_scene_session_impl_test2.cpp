@@ -45,7 +45,7 @@ public:
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
-    void InitialWindowState();
+    sptr<WindowSceneSessionImpl> InitialWindowState();
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
@@ -1064,7 +1064,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync03, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     auto surfaceNode_mocker = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode_mocker);
-    windowSceneSessionImpl->surfaceNode_ = surfaceNode_mocker;
+    windowSceneSession->surfaceNode_ = surfaceNode_mocker;
     EXPECT_EQ(WMError::WM_ERROR_TIMEOUT, windowSceneSession->Snapshot(pixelMap));
 }
 
