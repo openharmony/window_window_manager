@@ -1278,6 +1278,11 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
     }
+    if (property->IsAdaptToEventMapping()) {
+        std::vector<Rect> touchHotAreas;
+        GetSessionProperty()->GetTouchHotAreas(touchHotAreas);
+        property->SetTouchHotAreas(touchHotAreas);
+    }
     property->SetIsAppSupportPhoneInPc(GetSessionProperty()->GetIsAppSupportPhoneInPc());
     std::optional<bool> clientDragEnable = GetClientDragEnable();
     if (clientDragEnable.has_value()) {
