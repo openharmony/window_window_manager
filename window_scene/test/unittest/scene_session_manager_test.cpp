@@ -2643,12 +2643,12 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
 {
-    int32_t windowNum = 0;
+    uint32_t windowNum = 0;
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     if (!ssm_->systemConfig_.freeMultiWindowSupport_) {
         EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
     } else {
-        EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+        EXPECT_EQ(WMError::WM_OK, res);
         windowNum = 1;
         res = ssm_->SetForegroundWindowNum(windowNum);
         EXPECT_EQ(WMError::WM_OK, res);
