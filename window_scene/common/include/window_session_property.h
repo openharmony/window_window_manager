@@ -182,6 +182,8 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingTransitionAnimationMap(Parcel& parcel) const;
+    static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingShadowsInfo(Parcel& parcel) const;
     static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
@@ -308,6 +310,11 @@ public:
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     mutable std::mutex windowMaskMutex_;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);

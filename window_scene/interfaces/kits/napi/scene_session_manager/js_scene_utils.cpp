@@ -1377,6 +1377,19 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
+
+    napi_value jsTransitionAnimationMapValue = nullptr;
+    napi_create_object(env, &jsTransitionAnimationMapValue);
+    if (jsTransitionAnimationMapValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to get jsObject");
+        return nullptr;
+    }
+    for (const auto& [transitionType, animation] : property->transitionAnimationConfig_) {
+        napi_set_property(env, jsTransitionAnimationMapValue, CreateJsValue(env, static_cast<uint32_t>(transitionType)),
+            ConvertTransitionAnimationToJsValue(env, animation));
+    }
+    napi_set_named_property(env, objValue, "transitionAnimationMap", jsTransitionAnimationMapValue);
+
     return objValue;
 }
 
