@@ -108,7 +108,7 @@ WSError SessionChangeRecorder::SetRecordSize(RecordType recordType, uint32_t rec
     return WSError::WS_OK;
 }
 
-void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params)
+void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string> params)
 {
     std::ostringstream oss;
     oss << "Record session change: " << std::endl;
