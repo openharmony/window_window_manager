@@ -75,12 +75,14 @@ public:
 
 class MockIKeyboardWillShowListener : public IKeyboardWillShowListener {
 public:
-    MOCK_METHOD0(OnKeyboardMockWillShow, void());
+    MOCK_METHOD2(OnKeyboardWillShow, void(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve));
 };
         
 class MockIKeyboardWillHideListener : public IKeyboardWillHideListener {
 public:
-    MOCK_METHOD0(OnKeyboardMockWillHide, void());
+    MOCK_METHOD2(OnKeyboardWillHide, void(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve));
 };
 
 class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {

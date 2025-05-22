@@ -4734,7 +4734,10 @@ napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeObj");
         return NapiGetUndefined(env);
     }
-    napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue);
+    if (napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeRawValue");
+        return NapiGetUndefined(env);
+    }
     funcType = static_cast<SupportFunctionType>(funcTypeRawValue);
     SceneSessionManager::GetInstance().ConfigSupportFunctionType(funcType);
     return NapiGetUndefined(env);
