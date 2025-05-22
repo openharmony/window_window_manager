@@ -5304,7 +5304,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     }
 }
 
-WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WMError WindowSessionImpl::InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (!pointerEvent) {
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Pointer event is nullptr");

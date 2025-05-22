@@ -1261,11 +1261,19 @@ HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     ret = window->InjectTouchEvent(pointerEvent);
-    ASSERT_EQ(ret, WMError::OK);
+    ASSERT_EQ(ret, WMError::WM_OK);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     ret = window->InjectTouchEvent(pointerEvent);
-    ASSERT_EQ(ret, WMError::OK);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    uiContent = nullptr;
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 }
 
 /**

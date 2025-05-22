@@ -575,7 +575,7 @@ int32_t OH_WindowManager_InjectTouchEvent(int32_t windowId, Input_TouchEvent* to
             return;
         }
         TLOGND(WmsLogTag::WMS_EVENT, "%{public}s, windowId:%{public}d", where, windowId);
-        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->InjectTouchEvent(isFocusable));
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->InjectTouchEvent(pointerEvent));
     }, __func__);
     return errCode;
 }
