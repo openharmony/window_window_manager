@@ -57,8 +57,8 @@ void MultiInstanceManager::SetCurrentUserId(int32_t userId)
     const char* const where = __func__;
     auto task = [this, where] {
         std::vector<AppExecFwk::ApplicationInfo> appInfos;
-        if (!bundleMgr_ || !bundleMgr_->GetApplicationInfos(
-            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfos)) {
+        auto flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+        if(!bundleMgr_ || bundleMgr_->GetApplicationInfosV9(flag, userId_, appInfos)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:get application infos fail", where);
             return;
         }
@@ -414,8 +414,13 @@ bool MultiInstanceManager::ConvertInstanceKeyToInstanceId(const std::string& ins
     return true;
 }
 
-std::unordered_map<std::string, AppExecFwk::ApplicationInfo> MultiInstanceManager::GetApplicationInfos()
+AppExecFwk::ApplicationInfo MultiInstanceManager::GetApplicationInfo(const std::string& bundleName)
 {
-    return appInfoMap_;
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    AppExecFwk::ApplicationInfo applicationInfo;
+    if (appInfoMap_.count(bundleName)) {
+        applicationInfo = appInfoMap_[bundleName];
+    }
+    return applicationInfo;
 }
 } // namespace OHOS::Rosen
