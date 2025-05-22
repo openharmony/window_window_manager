@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <chrono>
 
+#include "window_helper.h"
 #include "zlib.h"
 
 namespace OHOS::Rosen {
@@ -32,7 +33,7 @@ constexpr int32_t SCHEDULE_SECONDS = 5;
 std::string GetFormattedTime()
 {
     auto now = std::chrono::system_clock::now();
-    std::time_t = std::chrono::system_clock::to_time_t(now);
+    std::time_t t = std::chrono::system_clock::to_time_t(now);
     struct tm timeBuffer;
     std::tm* tmPtr = localtime_r(&t, &timeBuffer);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
@@ -51,17 +52,17 @@ void SessionChangeRecorder::Init()
     TLOGD(WmsLogTag::DEFAULT, "In");
     stopLogFlag.store(false);
     mThread = std::thread([this]() {
-        std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
+        std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
         while (!stopLogFlag.load()) {
             {
                 std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
-                if (!sceneSessionChangeNeedLogMap_) {
+                if (sceneSessionChangeNeedLogMap_.empty()) {
                     sceneSessionChangeNeedLogMapCopy = sceneSessionChangeNeedLogMap_;
                     sceneSessionChangeNeedLogMap_.clear();
                     currentLogSize_ = 0;
                 }
             }
-            if (!sceneSessionChangeNeedLogMapCopy) {
+            if (sceneSessionChangeNeedLogMapCopy.empty()) {
                 PrintLog(sceneSessionChangeNeedLogMapCopy);
             }
             std::this_thread::sleep_for(std::chrono::seconds(SCHEDULE_SECONDS));
@@ -73,7 +74,7 @@ SessionChangeRecorder::~SessionChangeRecorder()
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     stopLogFlag.store(true);
-    if (mThread.joinable) {
+    if (mThread.joinable()) {
         mThread.join();
     }
 }
@@ -130,7 +131,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
     }
     bool specifiedRecordTypeFlag = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ? true : false;
 
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
@@ -141,7 +142,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
         if (specifiedRecordTypeFlag && static_cast<uint32_t>(elem.first) != std::stoul(params[1])) {
             continue;
         }
-        std::queue<SceneSessionChangeInfo>> tempDumpQueue = elem.second;
+        std::queue<SceneSessionChangeInfo> tempDumpQueue = elem.second;
         while (!tempDumpQueue.empty()) {
             auto tempQueue = tempDumpQueue.front();
             if (specifiedWindowFlag && tempQueue.persistentId_ != std::stoi(params[0])) {
@@ -162,7 +163,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
     }
 }
 
-void SessionChangeRecorder::SimplifyDumpInfo(std::string& dumpInfo, std::string& preCompressInfo)
+void SessionChangeRecorder::SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo)
 {
     std::unique_ptr<std::ostringstream> compressOstream = std::make_unique<std::ostringstream>();
     std::string compressInfo;
@@ -266,14 +267,14 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
         } else {
             sceneSessionChangeNeedLogMap_[recordType].push(changeInfo);
         }
-        currentLogSize_ += changeInfo.size();
+        currentLogSize_ += changeInfo.changeInfo_.size();
     }
     uint32_t maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
         recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
     if (currentLogSize_ >= MAX_RECORD_LOG_SIZE ||
         sceneSessionChangeNeedLogMap_[recordType].size() > maxRecordTypeSize) {
         TLOGD(WmsLogTag::DEFAULT, "currentLogSize: %{public}d", currentLogSize_);
-        std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
+        std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
         {
             std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
             sceneSessionChangeNeedLogMapCopy = sceneSessionChangeNeedLogMap_;
@@ -285,11 +286,12 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
 }
 
 void SessionChangeRecorder::PrintLog(
-    std::unordered_map<RecordType recordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap)
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap)
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
-    for(const auto& [_, q] : sceneSessionChangeNeedLogMap) {
-        while (q.empty()) {
+    for(const auto& item : sceneSessionChangeNeedLogMap) {
+        std::queue<SceneSessionChangeInfo> q = item.second;
+        while (!q.empty()) {
             SceneSessionChangeInfo curChange = q.front();
             TLOGD(curChange.logTag_, "winId: %{public}d, changeInfo: %{public}s, time: %{public}s",
                 curChange.persistentId_, curChange.changeInfo_.c_str(), curChange.time_.c_str());

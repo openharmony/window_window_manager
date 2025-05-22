@@ -7892,7 +7892,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
     SceneSessionChangeInfo changeInfo {
         .persistentId_ = persistentId,
         .changeInfo_ = "Session state change to " + std::to_string(static_cast<uint32_t>(state)),
-        .logTag_ = WmsLogTag::WMS_LIFE;
+        .logTag_ = WmsLogTag::WMS_LIFE,
     };
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo);
     auto sceneSession = GetSceneSession(persistentId);
