@@ -7050,13 +7050,28 @@ float ScreenSessionManager::GetSuperRotation()
     return -1.f;
 }
 
+bool ScreenSessionManager::GetIsLandscapeLockStatus()
+{
+    return isLandscapeLockStatus_;
+}
+
+void ScreenSessionManager::SetIsLandscapeLockStatus(bool isLandscapeLockStatus)
+{
+    isLandscapeLockStatus_ = isLandscapeLockStatus;
+}
+
 void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     if (isLocked) {
-        SetIsExtendScreenConnected(true);
+        SetIsLandscapeLockStatus(true);
+        SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     } else {
-        SetIsExtendScreenConnected(false);
+        SetIsLandscapeLockStatus(false);
         SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
     }
 #endif
@@ -7129,7 +7144,7 @@ void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
     }
     SetIsFoldStatusLocked(isLocked);
     if (isLocked == true) {
-        SuperFoldSensorManager::GetInstance().HandleFoldStatusLocked();
+        SuperFoldSensorManager::GetInstance().HandleFoldStatusLockedToExpand();
     } else {
         SuperFoldSensorManager::GetInstance().HandleFoldStatusUnlocked();
     }

@@ -231,7 +231,8 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 {
     // trigger events
     if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected() ||
-        ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
+        ScreenSessionManager::GetInstance().GetIsFoldStatusLocked() ||
+        ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
         return;
     }
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -246,27 +247,39 @@ void SuperFoldSensorManager::HandleScreenConnectChange()
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
     if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
-        TLOGI(WmsLogTag::DMS, "Screen is disconnected, but fold status is locked");
+        TLOGI(WmsLogTag::DMS, "Fold status is still locked.");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "Screen disconnect to start statemachine.");
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        TLOGI(WmsLogTag::DMS, "Extend screen is still connected.");
+        return;
+    }
+    if (ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
+        TLOGI(WmsLogTag::DMS, "Landscape status is still locked.");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }
 
-void SuperFoldSensorManager::HandleFoldStatusLocked()
+void SuperFoldSensorManager::HandleFoldStatusLockedToExpand()
 {
-    TLOGI(WmsLogTag::DMS, "Fold status locked to stop statemachine.");
+    TLOGI(WmsLogTag::DMS, "Fold status locked to expand and stop statemachine.");
     SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
 }
 
 void SuperFoldSensorManager::HandleFoldStatusUnlocked()
 {
     if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
-        TLOGI(WmsLogTag::DMS, "Fold status is unlocked, but screen is connected.");
+        TLOGI(WmsLogTag::DMS, "Extend screen is still connected.");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "Fold status unlocked to start statemachine.");
+    if (ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
+        TLOGI(WmsLogTag::DMS, "Landscape status is still locked.");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }
