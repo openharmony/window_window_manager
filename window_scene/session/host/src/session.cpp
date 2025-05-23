@@ -3465,7 +3465,8 @@ void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                           const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (!sessionStage_) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");
@@ -3475,7 +3476,7 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
         info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Occupied area needs to be empty when in floating mode");
     }
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction, callingSessionRect, avoidAreas);
 }
 
 WindowMode Session::GetWindowMode() const

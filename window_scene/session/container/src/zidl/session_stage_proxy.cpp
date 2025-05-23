@@ -568,7 +568,8 @@ WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::Want
 }
 
 void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                                     const std::shared_ptr<RSTransaction>& rsTransaction)
+    const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -581,6 +582,26 @@ void SessionStageProxy::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     if (!data.WriteParcelable(info.GetRefPtr())) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "occupied info write failed.");
         return;
+    }
+
+    if (!(data.WriteInt32(callingSessionRect.posX_) && data.WriteInt32(callingSessionRect.posY_) &&
+        data.WriteUint32(callingSessionRect.width_) && data.WriteUint32(callingSessionRect.height_))) {
+        WLOGFE("Write callingSessionRect failed");
+        return;
+    }
+    if (!data.WriteUint32(avoidAreas.size())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write avoid area size failed");
+        return;
+    }
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Write avoid area type failed");
+            return;
+        }
+        if (!data.WriteParcelable(&avoidArea)) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Write avoid area failed");
+            return;
+        }
     }
 
     bool hasRSTransaction = rsTransaction != nullptr;

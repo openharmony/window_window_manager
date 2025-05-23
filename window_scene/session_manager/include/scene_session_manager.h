@@ -144,10 +144,10 @@ using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
-using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)>;
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
-using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
@@ -478,7 +478,6 @@ public:
      * Keyboard Window
      */
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
-    void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
@@ -1265,7 +1264,6 @@ private:
     void HandleKeyboardAvoidChange(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         SystemKeyboardAvoidChangeReason reason);
     void UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive);
-    NotifyRootSceneOccupiedAreaChangeFunc onNotifyOccupiedAreaChangeForRootFunc_;
 
     /*
      * Specific Window

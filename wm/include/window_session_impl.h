@@ -208,7 +208,8 @@ public:
         bool notifyInputMethod = true) override;
     void NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info);
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
@@ -699,6 +700,11 @@ protected:
      */
     int16_t rotationAnimationCount_ { 0 };
     void NotifyRotationAnimationEnd();
+
+    /*
+     * Keyboard
+     */
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
