@@ -11578,7 +11578,7 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     SessionManagerAgentController::GetInstance().NotifyDisplayIdChange(sceneSession->GetWindowId(),
         sceneSession->GetSessionProperty()->GetDisplayId());
     if (fromScreenId != screenId) {
-        sceneSession->AddPropertyDirtyFlags(static<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
+        sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
 
     // Find keyboard session.
