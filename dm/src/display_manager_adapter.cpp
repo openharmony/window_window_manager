@@ -84,19 +84,19 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId scree
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode, isUseDma,
-            isCaptureFullOfScreen);
+            isFullScreenCapture);
     }
 
     auto errorCodeOut = static_cast<int32_t>(DmErrorCode::DM_OK);
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode errCode = displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCodeOut, isUseDma,
-        isCaptureFullOfScreen, pixelMap);
+        isFullScreenCapture, pixelMap);
     if (errorCode != nullptr) {
         *errorCode = static_cast<DmErrorCode>(errorCodeOut);
     }

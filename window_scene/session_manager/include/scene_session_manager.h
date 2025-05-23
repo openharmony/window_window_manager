@@ -367,7 +367,8 @@ public:
         const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isNewWant, bool isFromClient = true);
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
@@ -502,6 +503,7 @@ public:
         uint32_t extWindowActions) override;
     void CheckSceneZOrder();
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
@@ -559,6 +561,7 @@ public:
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
     void ConfigSupportFollowParentWindowLayout();
+    void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
 
@@ -585,6 +588,7 @@ public:
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
+    void SetBehindWindowFilterEnabled(bool enabled);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
@@ -717,6 +721,12 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
 
+    /*
+     * Window Animation
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -844,9 +854,12 @@ private:
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
+    sptr<SceneSession> GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId);
+    sptr<SceneSession> GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId, int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
+    bool CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession);
     WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
@@ -887,7 +900,7 @@ private:
      * PC Window
      */
     WMError ShiftAppWindowPointerEventInner(
-        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId);
 
     /*
      * Sub Window

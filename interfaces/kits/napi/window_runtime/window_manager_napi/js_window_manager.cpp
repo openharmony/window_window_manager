@@ -44,6 +44,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindo
 const std::string PIP_WINDOW = "pip_window";
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
@@ -193,6 +194,12 @@ napi_value JsWindowManager::ShiftAppWindowPointerEvent(napi_env env, napi_callba
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnShiftAppWindowPointerEvent(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::ShiftAppWindowTouchEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnShiftAppWindowTouchEvent(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -1487,6 +1494,56 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     return result;
 }
 
+napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_THREE) {
+        TLOGE(WmsLogTag::WMS_PC, "parameter number is illegal");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t sourceWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t targetWindowId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t fingerId = static_cast<int32_t>(INVALID_FINGER_ID);
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], fingerId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to fingerId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [sourceWindowId, targetWindowId, fingerId, env, task = napiAsyncTask] {
+        if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+            targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+            (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
+            TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                         WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "shiftAppWindowTouchEvent failed"));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowTouchEvent failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1503,6 +1560,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));
+    napi_set_named_property(env, exportObj, "WindowAnchor", WindowAnchorInit(env));
     napi_set_named_property(env, exportObj, "WindowEventType", WindowEventTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowLayoutMode", WindowLayoutModeInit(env));
     napi_set_named_property(env, exportObj, "Orientation", OrientationInit(env));
@@ -1545,6 +1603,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::ShiftAppWindowPointerEvent);
     BindNativeFunction(env, exportObj, "setStartWindowBackgroundColor", moduleName,
         JsWindowManager::SetStartWindowBackgroundColor);
+    BindNativeFunction(env, exportObj, "shiftAppWindowTouchEvent", moduleName,
+        JsWindowManager::ShiftAppWindowTouchEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

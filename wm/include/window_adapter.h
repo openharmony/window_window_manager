@@ -131,6 +131,7 @@ public:
     virtual WMError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions);
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
+    virtual WMError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect);
     virtual WMError GetFreeMultiWindowEnableState(bool& enable);
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
@@ -166,7 +167,7 @@ public:
     virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId);
     virtual WMError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit);
 
     /*
@@ -191,6 +192,12 @@ public:
      * Window Pattern
      */
     virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
+
+    /*
+     * Window Animation
+     */
+    virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

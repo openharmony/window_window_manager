@@ -992,6 +992,15 @@ WMError WindowAdapter::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
     return static_cast<WMError>(wmsProxy->GetHostWindowRect(hostWindowId, rect));
 }
 
+WMError WindowAdapter::GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->GetHostGlobalScaledRect(hostWindowId, globalScaledRect));
+}
+
 WMError WindowAdapter::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
     const sptr<CompatibleModeProperty>& property)
 {
@@ -1118,12 +1127,12 @@ WMError WindowAdapter::SetImageForRecent(int imgResourceId, ImageFit imageFit, i
     return wmsProxy->SetImageForRecent(imgResourceId, imageFit, persistentId);
 }
 
-WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
+    return wmsProxy->ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId);
 }
 
 WMError WindowAdapter::SetStartWindowBackgroundColor(
@@ -1222,6 +1231,15 @@ WMError WindowAdapter::UseImplicitAnimation(int32_t hostWindowId, bool useImplic
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return static_cast<WMError>(wmsProxy->UseImplicitAnimation(hostWindowId, useImplicit));
+}
+
+WMError WindowAdapter::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->AnimateTo(windowId, animationProperty, animationOption);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -1146,9 +1146,10 @@ public:
      *
      * @param sourceWindowId Window id which the pointer event shift from
      * @param targetWindowId Window id which the pointer event shift to
+     * @param fingerId finger id of the event to be shift 
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
 
     /**
      * @brief Request focus.
@@ -1206,6 +1207,17 @@ public:
      * @return bool means the module finished ability hook or not.
      */
     bool IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName);
+
+    /**
+     * @brief set the animation property and parameter to the corresponding window.
+     *
+     * @param windowId target window id.
+     * @param animationProperty the property of animation.
+     * @param animationOption the option of animation.
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
 private:
     WindowManager();

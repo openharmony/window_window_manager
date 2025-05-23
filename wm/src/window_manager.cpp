@@ -1841,10 +1841,10 @@ WMError WindowManager::SetAppKeyFramePolicy(const std::string& bundleName, const
     return ret;
 }
 
-WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
-        sourceWindowId, targetWindowId);
+        sourceWindowId, targetWindowId, fingerId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
     }
@@ -2014,6 +2014,18 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
     if (PropertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
+}
+
+WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "In, windowId: %{public}d, targetScale: %{public}f, animationOption: %{public}s",
+        windowId, animationProperty.targetScale, animationOption.ToString().c_str());
+    WMError ret = SingletonContainer::Get<WindowAdapter>().AnimateTo(windowId, animationProperty, animationOption);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed, errorCode: %{public}d", static_cast<int32_t>(ret));
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

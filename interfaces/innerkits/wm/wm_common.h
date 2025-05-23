@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <any>
+#include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
@@ -152,7 +153,10 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_WALLET_SWIPE_CARD,
     WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_FLOAT_NAVIGATION,
+    WINDOW_TYPE_MUTISCREEN_COLLABORATION,
     WINDOW_TYPE_DYNAMIC,
+    WINDOW_TYPE_MAGNIFICATION,
+    WINDOW_TYPE_MAGNIFICATION_MENU,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -788,6 +792,7 @@ constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
 constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
 constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
 constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
+constexpr int32_t INVALID_FINGER_ID = -1;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -1160,6 +1165,61 @@ enum class WindowAnimation : uint32_t {
     DEFAULT,
     INPUTE,
     CUSTOM,
+};
+
+/**
+ * @brief Enumerates window anchor.
+ */
+enum class WindowAnchor : uint32_t {
+    TOP_START = 0,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+};
+
+/**
+ * @struct WindowAnchorInfo
+ *
+ * @brief Window anchor info
+ */
+struct WindowAnchorInfo : public Parcelable {
+    bool isAnchorEnabled_ = false;
+    WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
+    int32_t offsetX_ = 0;
+    int32_t offsetY_ = 0;
+
+    WindowAnchorInfo() {}
+    WindowAnchorInfo(bool isAnchorEnabled) : isAnchorEnabled_(isAnchorEnabled) {}
+    WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
+        offsetX_(offsetX), offsetY_(offsetY) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
+            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+    }
+
+    static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
+    {
+        uint32_t windowAnchorMode = 0;
+        WindowAnchorInfo* windowAnchorInfo = new(std::nothrow) WindowAnchorInfo();
+        if (windowAnchorInfo == nullptr) {
+            return nullptr;
+        }
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+            delete windowAnchorInfo;
+            return nullptr;
+        }
+        windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        return windowAnchorInfo;
+    }
 };
 
 /**
@@ -2399,10 +2459,32 @@ enum class WindowAnimationCurve : uint32_t {
 const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
 
+struct WindowAnimationProperty : public Parcelable {
+    float targetScale = 0.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteFloat(targetScale)) {
+            return false;
+        }
+        return true;
+    }
+
+    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
+        if (!parcel.ReadFloat(animationProperty->targetScale)) {
+            delete animationProperty;
+            return nullptr;
+        }
+        return animationProperty;
+    }
+};
+
 /*
  * @brief Window transition animation configuration.
  */
-struct WindowAnimationOptions : public Parcelable {
+struct WindowAnimationOption : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
     std::array<float, ANIMATION_PARAM_SIZE> param;
@@ -2423,9 +2505,9 @@ struct WindowAnimationOptions : public Parcelable {
         return true;
     }
 
-    static WindowAnimationOptions* Unmarshalling(Parcel& parcel)
+    static WindowAnimationOption* Unmarshalling(Parcel& parcel)
     {
-        WindowAnimationOptions* windowAnimationConfig = new WindowAnimationOptions();
+        WindowAnimationOption* windowAnimationConfig = new WindowAnimationOption();
         uint32_t curve = 0;
         if (!parcel.ReadUint32(curve)) {
             delete windowAnimationConfig;
@@ -2448,13 +2530,25 @@ struct WindowAnimationOptions : public Parcelable {
         }
         return windowAnimationConfig;
     }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
+            std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
+        for (auto p: param) {
+            oss << std::fixed << std::setprecision(2) << p << ", ";
+        }
+        oss << "]";
+        return oss.str();
+    }
 };
 
 /*
  * @brief Transition animation configuration.
  */
 struct TransitionAnimation : public Parcelable {
-    WindowAnimationOptions config;
+    WindowAnimationOption config;
     float opacity = 1.0f;
     
     bool Marshalling(Parcel& parcel) const override
@@ -2472,8 +2566,8 @@ struct TransitionAnimation : public Parcelable {
             delete transitionAnimation;
             return nullptr;
         }
-        std::shared_ptr<WindowAnimationOptions> animationConfig =
-            std::shared_ptr<WindowAnimationOptions>(parcel.ReadParcelable<WindowAnimationOptions>());
+        std::shared_ptr<WindowAnimationOption> animationConfig =
+            std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
         if (animationConfig == nullptr) {
             delete transitionAnimation;
             return nullptr;
@@ -2714,6 +2808,14 @@ struct RecentSessionInfo : public Parcelable {
     int32_t appIndex = 0;
     WindowType windowType = WindowType::APP_MAIN_WINDOW_BASE;
     RecentSessionState sessionState = RecentSessionState::DISCONNECT;
+};
+
+/**
+ * @brief Enumerates source of sub session.
+ */
+enum class SubWindowSource : uint32_t {
+    SUB_WINDOW_SOURCE_UNKNOWN = 0,
+    SUB_WINDOW_SOURCE_ARKUI = 1,
 };
 }
 }

@@ -321,7 +321,7 @@ ErrCode DisplayManagerLiteProxy::WakeUpBegin(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -360,7 +360,7 @@ ErrCode DisplayManagerLiteProxy::WakeUpEnd(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -405,7 +405,7 @@ ErrCode DisplayManagerLiteProxy::SuspendBegin(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -444,7 +444,7 @@ ErrCode DisplayManagerLiteProxy::SuspendEnd(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -499,7 +499,7 @@ ErrCode DisplayManagerLiteProxy::SetSpecifiedScreenPower(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -549,7 +549,7 @@ ErrCode DisplayManagerLiteProxy::SetScreenPowerForAll(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -594,7 +594,10 @@ ErrCode DisplayManagerLiteProxy::GetScreenPower(
         return errCode;
     }
 
-    screenPowerState = reply.ReadUint32();
+    if (!reply.ReadUint32(screenPowerState)) {
+        TLOGE(WmsLogTag::DMS, "Read [screenPowerState] failed!");
+        return ERR_INVALID_DATA;
+    }
     return ERR_OK;
 }
 
@@ -639,7 +642,7 @@ ErrCode DisplayManagerLiteProxy::SetDisplayState(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -684,7 +687,10 @@ ErrCode DisplayManagerLiteProxy::GetDisplayState(
         return errCode;
     }
 
-    displayState = reply.ReadUint32();
+    if (!reply.ReadUint32(displayState)) {
+        TLOGE(WmsLogTag::DMS, "Read [displayState] failed!");
+        return ERR_INVALID_DATA;
+    }
     return ERR_OK;
 }
 
@@ -723,7 +729,7 @@ ErrCode DisplayManagerLiteProxy::TryToCancelScreenOff(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1 ? true : false;
+    isSucc = reply.ReadInt32() == 1;
     return ERR_OK;
 }
 
@@ -886,6 +892,104 @@ ErrCode DisplayManagerLiteProxy::GetScreenInfoById(
     screenInfo = sptr<ScreenInfo>(reply.ReadParcelable<ScreenInfo>());
     if (!screenInfo) {
         TLOGE(WmsLogTag::DMS, "Read [ScreenInfo] failed!");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_OK;
+}
+
+ErrCode DisplayManagerLiteProxy::SetScreenBrightness(
+    uint64_t screenId,
+    uint32_t level,
+    bool& isSucc)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "Write interface token failed!");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Write [screenId] failed!");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteUint32(level)) {
+        TLOGE(WmsLogTag::DMS, "Write [level] failed!");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = remote->SendRequest(
+        static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SET_SCREEN_BRIGHTNESS), data, reply, option);
+    if (FAILED(result)) {
+        TLOGE(WmsLogTag::DMS, "Send request failed!");
+        return result;
+    }
+
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
+    if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
+            static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_SET_SCREEN_BRIGHTNESS));
+        return errCode;
+    }
+
+    isSucc = reply.ReadInt32() == 1;
+    return ERR_OK;
+}
+
+ErrCode DisplayManagerLiteProxy::GetScreenBrightness(
+    uint64_t screenId,
+    uint32_t& level)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "Write interface token failed!");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Write [screenId] failed!");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = remote->SendRequest(
+        static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_BRIGHTNESS), data, reply, option);
+    if (FAILED(result)) {
+        TLOGE(WmsLogTag::DMS, "Send request failed!");
+        return result;
+    }
+
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Read result failed!");
+        return ERR_INVALID_DATA;
+    }
+    if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
+            static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_BRIGHTNESS));
+        return errCode;
+    }
+
+    if (!reply.ReadUint32(level)) {
+        TLOGE(WmsLogTag::DMS, "Read [level] failed!");
         return ERR_INVALID_DATA;
     }
     return ERR_OK;

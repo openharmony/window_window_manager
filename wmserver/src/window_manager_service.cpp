@@ -1653,18 +1653,17 @@ void WindowManagerService::InitRSUIDirector()
         TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Failed to create RSUIDirector");
         return;
     }
-    if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
-        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
-                PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-            }, 0, true);
-        rsUiDirector_->Init(false, true);
+    int32_t instanceId = INSTANCE_ID_UNDEFINED;
+    bool useMultiInstance = false;
+    RunIfRSClientMultiInstanceEnabled([&] {
+        instanceId = 0;
+        useMultiInstance = true;
         WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
-    } else {
-        rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+    });
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
             PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-        });
-        rsUiDirector_->Init(false);
-    }
+        }, instanceId, useMultiInstance);
+    rsUiDirector_->Init(false, useMultiInstance);
     TLOGI(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSUIDirector: %{public}s",
           RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
 }

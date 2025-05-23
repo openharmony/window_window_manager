@@ -652,7 +652,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -678,7 +679,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -704,7 +706,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
