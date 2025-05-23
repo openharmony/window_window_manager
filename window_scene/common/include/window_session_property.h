@@ -398,7 +398,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
-    bool windowShadowEnabled_ { false };
+    bool windowShadowEnabled_ { true };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;

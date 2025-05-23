@@ -4475,6 +4475,7 @@ WMError WindowSceneSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixel
     if (state_ < WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
             GetPersistentId(), state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);

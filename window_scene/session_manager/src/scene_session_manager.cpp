@@ -3962,6 +3962,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
         CacheSpecificSessionForRecovering(sceneSession, property);
         NotifySessionUnfocusedToClient(persistentId);
+        sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
         AddClientDeathRecipient(sessionStage, sceneSession);
         session = sceneSession;
         return errCode;
