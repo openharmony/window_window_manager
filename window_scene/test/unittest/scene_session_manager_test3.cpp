@@ -1256,7 +1256,6 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness01, Function | SmallTest | Le
     info.isSystem_ = true;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, session));
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     auto  result01 = ssm_->UpdateBrightness(persistentId);
     EXPECT_EQ(result01, WSError::WS_OK);
 }

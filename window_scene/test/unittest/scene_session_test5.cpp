@@ -1216,7 +1216,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness01, Function | SmallT
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->SetSessionState(SessionState::STATE_CONNECT);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
-    auto res = session->HandleActionUpdateSetBrightness(property, action);
+    auto res = session->HandleActionUpdateSetBrightness(property, session, action);
     EXPECT_EQ(WMError::WM_OK, res);
 } 
 
