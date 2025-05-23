@@ -15420,11 +15420,8 @@ WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool use
 
 WSError SceneSessionManager::GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo)
 {
-    auto appInfoMap = MultiInstanceManager::GetInstance().GetApplicationInfos();
     AppExecFwk::ApplicationInfo applicationInfo;
-    if (!appInfoMap.count(bundleName)) {
-        applicationInfo = appInfoMap[bundleName];
-    }
+    applicationInfo = MultiInstanceManager::GetInstance().GetApplicationInfo(bundleName);
     scbApplicationInfo.startMode_ = applicationInfo.startMode;
     return WSError::WS_OK;
 }
