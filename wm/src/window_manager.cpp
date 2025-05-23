@@ -1958,7 +1958,7 @@ WMError WindowManager::RegisterWindowInfoChangeCallback(const std::unordered_set
             listener->AddInterestInfo(info);
         }
         if (!listener->GetInterestWindowIds().empty()) {
-            listener->AddInterestWindowIds(WindowInfoKey::WINDOW_ID);
+            listener->AddInterestInfo(WindowInfoKey::WINDOW_ID);
         }
         ret = ProcessRegisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
@@ -1986,7 +1986,7 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
             listener->AddInterestInfo(info);
         }
         if (!listener->GetInterestWindowIds.empty()) {
-            listener->AddInterestWindowIds(WindowInfoKey::WINDOW_ID);
+            listener->AddInterestInfo(WindowInfoKey::WINDOW_ID);
         }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
         if (ret != WMError::WM_OK) {
