@@ -2040,6 +2040,11 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsAppWindow(window->GetType()));
     ret = window->OnExtensionMessage(code, persistentId, want);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
 /**

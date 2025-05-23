@@ -51,6 +51,8 @@ public:
         const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) override;
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
+    WMError RegisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError UnregisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -164,6 +166,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data);
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
 
 protected:
@@ -202,6 +205,9 @@ private:
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -224,6 +230,8 @@ private:
     AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
     bool hostImmersiveModeEnabled_ { false };
+    std::mutex hostWindowRectChangeListenerMutex_;
+    std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
 
     /*
      * PC Fold Screen

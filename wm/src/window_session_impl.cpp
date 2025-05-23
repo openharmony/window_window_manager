@@ -4720,6 +4720,24 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
             }
         }
     }
+    // Notify UIExtension rect change listeners host window rect change
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
+    bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
+    std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+    if (!isUIExtensionWindow && !rectChangeUIExtListenerIds_.empty()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeUIExtListenerIds_ size: %{public}zu",
+            rectChangeUIExtListenerIds_.size());
+        AAFwk::Want rectWant;
+        rectWant.SetParam(Extension::RECT_X, rect.posX_);
+        rectWant.SetParam(Extension::RECT_Y, rect.posY_);
+        rectWant.SetParam(Extension::RECT_WIDTH, static_cast<int32_t>(rect.width_));
+        rectWant.SetParam(Extension::RECT_HEIGHT, static_cast<int32_t>(rect.height_));
+        rectWant.SetParam(Extension::RECT_CHANGE_REASON, static_cast<int32_t>(reason));
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), rectWant,
+            rectChangeUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
 }
 
 void WindowSessionImpl::NotifySubWindowClose(bool& terminateCloseProcess)
@@ -6601,6 +6619,24 @@ WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentI
                 return ret;
             }
             TLOGI(WmsLogTag::WMS_HIERARCHY, "Raise host window successfully, winId: %{public}u", GetWindowId());
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
+            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+            {
+                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+                rectChangeUIExtListenerIds_.emplace(persistentId);
+            }
+            TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change listener", persistentId);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
+            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+            {
+                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+                rectChangeUIExtListenerIds_.erase(persistentId);
+            }
+            TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
             break;
         }
         default: {
