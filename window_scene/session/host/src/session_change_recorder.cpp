@@ -39,8 +39,9 @@ std::string GetFormattedTime()
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     
     std::ostringstream oss;
+    const int formatThreeSpace = 3;
     oss << std::put_time(tmPtr, "%m-%d %H:%M:%S") << "."
-    << std::setw(3) << ms.count();
+    << std::setw(formatThreeSpace) << ms.count();
     return oss.str();
 }
 } // namespace
@@ -138,8 +139,23 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
         sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
     }
 
+    std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordTypeFlag,
+        specifiedWindowFlag, sceneSessionChangeNeedDumpMapCopy);
+    oss << dumpInfoJsonString;
+    const uint32_t eventDumpMaxSize = 512 * 1024;
+    if (simplifyFlag && oss.str().size() > eventDumpMaxSize) {
+        dumpInfo.append("wmsDumpSimplify\n");
+        SimplifyDumpInfo(dumpInfo, oss.str());
+    } else {
+        dumpInfo.append(oss.str());
+    }
+}
+
+std::string SessionChangeRecorder::FormatDumpInfoToJsonString (bool specifiedRecordTypeFlag, bool specifiedWindowFlag,
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& sceneSessionChangeNeedDumpMap)
+{
     nlohmann::json jsonArrayDump = nlohmann::json::array();
-    for (const auto& elem : sceneSessionChangeNeedDumpMapCopy) {
+    for (const auto& elem : sceneSessionChangeNeedDumpMap) {
         if (specifiedRecordTypeFlag && static_cast<uint32_t>(elem.first) != std::stoul(params[1])) {
             continue;
         }
@@ -155,13 +171,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
             tempDumpQueue.pop();
         }
     }
-    oss << jsonArrayDump.dump();
-    if (simplifyFlag && oss.str().size() > 1024 * 1024) {
-        dumpInfo.append("wmsDumpSimplify\n");
-        SimplifyDumpInfo(dumpInfo, oss.str());
-    } else {
-        dumpInfo.append(oss.str());
-    }
+    return jsonArrayDump.dump();
 }
 
 void SessionChangeRecorder::SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo)
@@ -238,7 +248,6 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
         } else {
             sceneSessionChangeNeedDumpMap_[recordType].push(changeInfo);
         }
-        
     }
 
     uint32_t maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
@@ -251,7 +260,6 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
                 sceneSessionChangeNeedDumpMap_[recordType].pop();
                 diff--;
             }
-            
         }
     }
 }
@@ -290,7 +298,7 @@ void SessionChangeRecorder::PrintLog(
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap)
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
-    for(const auto& item : sceneSessionChangeNeedLogMap) {
+    for (const auto& item : sceneSessionChangeNeedLogMap) {
         std::queue<SceneSessionChangeInfo> q = item.second;
         while (!q.empty()) {
             SceneSessionChangeInfo curChange = q.front();

@@ -26,7 +26,7 @@
 #include "ws_common.h"
 #include "wm_single_instance.h"
 
-namespace OHOS::Rosen{
+namespace OHOS::Rosen {
 /**
  * @brief Record type of session change
  */
@@ -56,12 +56,18 @@ public:
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
     void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params);
+    std::string SessionChangeRecorder::FormatDumpInfoToJsonString (bool specifiedRecordTypeFlag, bool specifiedWindowFlag,
+        std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& sceneSessionChangeNeedDumpMap);
     void SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo);
     int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
-    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap() {
-        return sceneSessionChangeNeedLogMap_; }
-    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedDumpMap() {
-        return sceneSessionChangeNeedDumpMap_; }
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap()
+    {
+        return sceneSessionChangeNeedLogMap_;
+    }
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedDumpMap()
+    {
+        return sceneSessionChangeNeedDumpMap_;
+    }
     uint32_t GetLogSize() { return currentLogSize_; }
     std::atomic<bool> stopLogFlag { false };
 
