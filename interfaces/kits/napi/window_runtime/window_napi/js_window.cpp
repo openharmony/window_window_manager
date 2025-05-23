@@ -8339,7 +8339,7 @@ napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info i
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool enabled = false;
+    bool enabled = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
