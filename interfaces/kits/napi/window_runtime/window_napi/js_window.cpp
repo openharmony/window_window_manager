@@ -2316,8 +2316,8 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), errCode, env, task = napiAsyncTask] {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             WLOGFE("window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
@@ -2328,7 +2328,7 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             return;
         }
         WindowPropertyInfo windowPropertyInfo;
-        WMError ret = weakWindow->GetWindowPropertyInfo(windowPropertyInfo);
+        WMError ret = window->GetWindowPropertyInfo(windowPropertyInfo);
         if (ret != WMError::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
@@ -2341,7 +2341,7 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
                 "Window get properties failed"));
         }
         WLOGFD("Window [%{public}u, %{public}s] get properties end",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+            window->GetWindowId(), window->GetWindowName().c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
