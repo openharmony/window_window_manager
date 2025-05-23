@@ -62,6 +62,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
@@ -1947,6 +1948,23 @@ WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
     return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
 }
 
+void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
+        return;
+    }
+    bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
+    if (isForceSplit && parallelType_ == 0) {
+        parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
+    }
+    bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
+    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, parallelType: %{public}d, "
+        "isRouter: %{public}u", GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
+    uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
+}
+
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
@@ -1985,8 +2003,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.isSupportSplitMode_ == true) {
-        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
-        SetForceSplitEnable(isForceSplit, config.homePage_);
+        SetForceSplitEnable(config);
     }
 
     uint32_t version = 0;
