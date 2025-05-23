@@ -260,6 +260,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO):
+            return HandleSetWindowAnchorInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
             return HandleSetWindowTransitionAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
@@ -288,6 +290,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDisableDelegatorChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS):
             return HandleSetWindowShadows(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
+            return HandleSetSubWindowSource(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1633,6 +1637,22 @@ int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "run");
+    sptr<WindowAnchorInfo> windowAnchorInfo = data.ReadParcelable<WindowAnchorInfo>();
+    if (windowAnchorInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowAnchorInfo is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowAnchorInfo(*windowAnchorInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
@@ -1873,6 +1893,23 @@ int SessionStub::HandleNotifyDisableDelegatorChange(MessageParcel& data, Message
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WMError ret = NotifyDisableDelegatorChange();
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t sourceType = 0;
+    if (!data.ReadUint32(sourceType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read sourceType failed.");
+        return ERR_INVALID_DATA;
+    }
+    SubWindowSource source = static_cast<SubWindowSource>(sourceType);
+    TLOGD(WmsLogTag::WMS_SUB, "source: %{public}d", source);
+    WSError errCode = SetSubWindowSource(source);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

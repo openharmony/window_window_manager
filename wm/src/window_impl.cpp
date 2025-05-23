@@ -183,9 +183,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
-    if (surfaceNode) {
-        surfaceNode->SetSkipCheckInMultiInstance(true);
-    }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
           "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());

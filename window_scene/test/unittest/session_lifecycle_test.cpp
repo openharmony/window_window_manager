@@ -334,8 +334,8 @@ HWTEST_F(WindowSessionLifecycleTest, Disconnect01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, TestSize.Level1)
 {
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
-
+    NotifyTerminateSessionFuncNew callback = 
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     bool needStartCaller = false;
     bool isFromBroker = false;
     sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -355,7 +355,8 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, TestSize.Level1)
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
-    session_->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {});
+    session_->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {});
     usleep(WAIT_SYNC_IN_NS);
     auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
     EXPECT_EQ(result, WSError::WS_OK);

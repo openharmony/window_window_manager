@@ -89,6 +89,9 @@ public:
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ProcessPointerEventWithHostWindowDelayRaise(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isHitTargetDraggable) const;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
@@ -113,6 +116,24 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
+    bool IsFocused() const override;
+
+    /*
+     * Gesture Back
+     */
+    WMError GetGestureBackEnabled(bool& enable) const override;
+    WMError SetGestureBackEnabled(bool enable) override;
+
+    /*
+     * Immersive
+     */
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetImmersiveModeEnabledState(bool enable) override;
+    bool GetImmersiveModeEnabledState() const override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation) override;
 
     /*
      * Free Multi Window
@@ -142,6 +163,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -176,6 +198,9 @@ private:
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -196,6 +221,8 @@ private:
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
+    bool hostGestureBackEnabled_ { true };
+    bool hostImmersiveModeEnabled_ { false };
 
     /*
      * PC Fold Screen

@@ -133,11 +133,14 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "DragResizeType", CreateJsSessionDragResizeType(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", CreateRotationChangeType(env));
     napi_set_named_property(env, exportObj, "RectType", CreateRectType(env));
+    napi_set_named_property(env, exportObj, "WindowAnchor", CreateWindowAnchorType(env));
     napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
     napi_set_named_property(env, exportObj, "SupportFunctionType", CreateSupportType(env));
 
     const char* moduleName = "JsSceneSessionManager";
+    BindNativeFunction(env, exportObj, "setBehindWindowFilterEnabled",
+        moduleName, JsSceneSessionManager::SetBehindWindowFilterEnabled);
     BindNativeFunction(env, exportObj, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
     BindNativeFunction(env, exportObj, "requestSceneSession", moduleName, JsSceneSessionManager::RequestSceneSession);
     BindNativeFunction(env, exportObj, "updateSceneSessionWant",
@@ -282,6 +285,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyRotationChange);
     BindNativeFunction(env, exportObj, "supportFollowParentWindowLayout", moduleName,
         JsSceneSessionManager::SupportFollowParentWindowLayout);
+    BindNativeFunction(env, exportObj, "supportFollowRelativePositionToParent", moduleName,
+        JsSceneSessionManager::SupportFollowRelativePositionToParent);
     BindNativeFunction(env, exportObj, "supportZLevel", moduleName,
         JsSceneSessionManager::SupportZLevel);
     BindNativeFunction(env, exportObj, "setSupportFunctionType", moduleName,
@@ -756,6 +761,13 @@ void JsSceneSessionManager::ProcessStartPiPFailedRegister()
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
         this->OnStartPiPFailed();
     });
+}
+
+napi_value JsSceneSessionManager::SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetBehindWindowFilterEnabled(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -1423,6 +1435,13 @@ napi_value JsSceneSessionManager::SupportFollowParentWindowLayout(napi_env env, 
     TLOGI(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSupportFollowParentWindowLayout(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SupportFollowRelativePositionToParent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportFollowRelativePositionToParent(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback_info info)
@@ -2310,6 +2329,29 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGD(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool behindWindowFilterEnabled = false;
+    if (!ConvertFromJsValue(env, argv[0], behindWindowFilterEnabled)) {
+        TLOGD(WmsLogTag::WMS_PC, "Faile to convert parameter to behindWindowFilterEnabled.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetBehindWindowFilterEnabled(behindWindowFilterEnabled);
     return NapiGetUndefined(env);
 }
 
@@ -4675,6 +4717,12 @@ void JsSceneSessionManager::OnSceneSessionDestruct(int32_t persistentId)
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ConfigSupportFollowParentWindowLayout();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSupportFollowRelativePositionToParent(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportFollowRelativePositionToParent();
     return NapiGetUndefined(env);
 }
 

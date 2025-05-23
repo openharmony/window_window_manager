@@ -144,7 +144,7 @@ public:
     static sptr<RootScene> staticRootScene_;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;

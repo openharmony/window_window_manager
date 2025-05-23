@@ -1794,6 +1794,89 @@ HWTEST_F(SceneSessionManagerTest5, SetDelayRemoveSnapshot, TestSize.Level1)
     auto res = ssm_->GetDelayRemoveSnapshot();
     ASSERT_EQ(true, res);
 }
+
+/**
+ * @tc.name: GetTopFloatingSession
+ * @tc.desc: GetTopFloatingSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetTopFloatingSession, TestSize.Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "GetTopFloatingSession";
+    info.bundleName_ = "GetTopFloatingSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->zOrder_ = 1;
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    ssm_->SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession1->persistentId_ = 2;
+    sceneSession1->zOrder_ = 2;
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession1->SetFocusable(true);
+    sceneSession1->isVisible_ = true;
+    sptr<SceneSession> result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
+    EXPECT_EQ(result, nullptr);
+    sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    result = ssm_->GetTopFloatingSession(DEFAULT_DISPLAY_ID, 1);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
+}
+
+/**
+ * @tc.name: GetNextFocusableSessionWhenFloatWindowExist
+ * @tc.desc: GetNextFocusableSessionWhenFloatWindowExist Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, GetNextFocusableSessionWhenFloatWindowExist, TestSize.Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "GetNextFocusableSessionWhenFloatWindowExist";
+    info.bundleName_ = "GetNextFocusableSessionWhenFloatWindowExist";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->zOrder_ = 1;
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    sptr<SceneSession> result =
+        ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    EXPECT_EQ(result, nullptr);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    EXPECT_EQ(result, nullptr);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(result, nullptr);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession1->persistentId_ = 2;
+    sceneSession1->zOrder_ = 2;
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession1->SetFocusable(true);
+    sceneSession1->isVisible_ = true;
+    sceneSession1->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_NEGATIVE_SCREEN);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession1->GetPersistentId(), sceneSession1));
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    EXPECT_EQ(result, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    result = ssm_->GetNextFocusableSessionWhenFloatWindowExist(DEFAULT_DISPLAY_ID, sceneSession->GetPersistentId());
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetPersistentId(), sceneSession1->GetPersistentId());
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

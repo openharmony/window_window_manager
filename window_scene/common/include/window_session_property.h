@@ -59,6 +59,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetViewKeepScreenOn(bool keepScreenOn);
+    void SetWindowShadowEnabled(bool isEnabled);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -127,6 +128,7 @@ public:
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool GetWindowShadowEnabled() const;
     bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
@@ -318,6 +320,7 @@ private:
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateWindowShadowEnabled(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -349,6 +352,7 @@ private:
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateWindowShadowEnabled(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -394,6 +398,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
+    bool windowShadowEnabled_ { false };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -701,6 +706,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t maxMidSceneNum_ = 4;
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
+    bool supportFollowRelativePositionToParent_ = false;
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
@@ -748,6 +754,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowRelativePositionToParent_)) {
             return false;
         }
         if (!parcel.WriteBool(supportZLevel_) ||
@@ -799,6 +808,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
+        config->supportFollowRelativePositionToParent_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();

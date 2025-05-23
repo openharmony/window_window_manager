@@ -883,14 +883,8 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
 void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        auto rsTransaction = RSTransactionProxy::GetInstance();
-        if (rsTransaction != nullptr) {
-            rsTransaction->Begin();
-        }
+        AutoRSTransaction trans(GetRSUIContext());
         HandleCrossScreenChild(true);
-        if (rsTransaction != nullptr) {
-            rsTransaction->Commit();
-        }
     } else if (reason == SizeChangeReason::DRAG_END) {
         HandleCrossScreenChild(false);
     }
@@ -903,22 +897,20 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
         GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
-    if (keyboardPanelSession_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
-        return;
-    }
-    auto surfaceNode = keyboardPanelSession_->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surfacenode is null");
-        return;
-    }
     {
-        AutoRSTransaction trans(surfaceNode, needFlush);
-        if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            surfaceNode->SetGlobalPositionEnabled(isGlobal);
-            surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-            surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        AutoRSTransaction trans(GetRSUIContext(), needFlush);
+        if (keyboardPanelSession_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
+            return;
         }
+        auto surfaceNode = keyboardPanelSession_->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surfacenode is null");
+            return;
+        }
+        surfaceNode->SetGlobalPositionEnabled(isGlobal);
+        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
 

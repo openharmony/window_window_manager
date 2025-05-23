@@ -1248,7 +1248,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
         InitSystemSessionDragEnable(property);
     } else {
-        property_->SetDragEnabled(false);
+        property->SetDragEnabled(false);
     }
     property->SetSessionPropertyChangeCallback(
         [weakThis = wptr(this)]() {
@@ -1846,7 +1846,7 @@ WSError Session::TerminateSessionNew(
             session->sessionInfo_.resultCode = abilitySessionInfo->resultCode;
         }
         if (session->terminateSessionFuncNew_) {
-            session->terminateSessionFuncNew_(info, needStartCaller, isFromBroker);
+            session->terminateSessionFuncNew_(info, needStartCaller, isFromBroker, false);
         }
         TLOGNI(WmsLogTag::WMS_LIFE,
             "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d, isFromBroker: %{public}d",
@@ -1943,10 +1943,11 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
     updateSessionIconFunc_ = func;
 }
 
-WSError Session::Clear(bool needStartCaller)
+WSError Session::Clear(bool needStartCaller, bool isForceClean)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u", GetPersistentId(), needStartCaller);
-    auto task = [weakThis = wptr(this), needStartCaller]() {
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u, isForceClean:%{public}u", 
+        GetPersistentId(), needStartCaller, isForceClean);
+    auto task = [weakThis = wptr(this), needStartCaller, isForceClean]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -1954,7 +1955,7 @@ WSError Session::Clear(bool needStartCaller)
         }
         session->isTerminating_ = true;
         if (session->terminateSessionFuncNew_) {
-            session->terminateSessionFuncNew_(session->GetSessionInfo(), needStartCaller, false);
+            session->terminateSessionFuncNew_(session->GetSessionInfo(), needStartCaller, false, isForceClean);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -3255,11 +3256,6 @@ WSRect Session::GetLayoutRect() const
     return layoutRect_;
 }
 
-void Session::SetOriginDisplayId(DisplayId displayId)
-{
-    originDisplayId_ = displayId;
-}
-
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     GetSessionProperty()->SetRequestRect(SessionHelper::TransferToRect(rect));
@@ -4259,6 +4255,11 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
     PostTask(task, eventName, THRESHOLD);
 }
 
+void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
+{
+    DisplayIdChangeFunc_ = func;
+}
+
 void Session::DeletePersistentImageFit()
 {
     auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
@@ -4288,9 +4289,5 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
     return rsUIContext_;
-}
-void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
-{
-    DisplayIdChangeFunc_ = func;
 }
 } // namespace OHOS::Rosen

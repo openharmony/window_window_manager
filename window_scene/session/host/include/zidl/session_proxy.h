@@ -78,6 +78,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
@@ -169,6 +170,7 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
