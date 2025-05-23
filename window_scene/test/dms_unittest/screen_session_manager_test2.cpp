@@ -281,6 +281,30 @@ HWTEST_F(ScreenSessionManagerTest, ScbStatusRecoveryWhenSwitchUser, Function | S
         }
     }
 }
+
+/**
+ * @tc.name: GetScreenAreaOfDisplayArea
+ * @tc.desc: GetScreenAreaOfDisplayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    DisplayId displayId = 0;
+    DMRect displayArea = { 0, 0, 1, 1 };
+    ScreenId screenId = 0;
+    DMRect screenArea = DMRect::NONE();
+    sptr<ScreenSession> screenSession = nullptr;
+    auto ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    ScreenProperty property = ScreenProperty();
+    screenSession = new (std::nothrow) ScreenSession(0, property, 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_.insert(std::make_pair(0, screenSession));
+    ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
 }
 }
 }

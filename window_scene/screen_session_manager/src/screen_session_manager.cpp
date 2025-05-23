@@ -9910,4 +9910,99 @@ bool ScreenSessionManager::GetKeyboardState()
 #endif
     return false;
 }
+
+DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    TLOGI(WmsLogTag::DMS, "displayId:%{public}" PRIu64 ",displayArea:%{public}d,%{public}d,%{public}d,%{public}d",
+        displayId, displayArea.posX_, displayArea.posY_, displayArea.width_, displayArea.height_);
+    auto displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get displayInfo");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    DMRect displayRegion =
+        { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(), displayInfo->GetWidth(), displayInfo->GetHeight() };
+    if (!displayArea.IsInsideOf(displayRegion)) {
+        TLOGE(WmsLogTag::DMS, "displayArea is outSide of displayRegion");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenId = displayInfo->GetScreenId();
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    RRect bounds = screenSession->GetScreenProperty().GetPhyBounds();
+    DMRect screenRegion =
+        { bounds.rect_.GetLeft(), bounds.rect_.GetTop(), bounds.rect_.GetWidth(), bounds.rect_.GetHeight() };
+    DMRect displayAreaFixed = displayArea;
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetFoldStatus() == FoldStatus::HALF_FOLD) {
+        if (displayId == DISPLAY_ID_FAKE) {
+            displayAreaFixed.posY_ += screenRegion.height_ - displayRegion.height_;
+        }
+        displayRegion.height_ = screenRegion.height_;
+    }
+    CalculateRotatedDisplay(displayInfo->GetRotation(), screenRegion, displayRegion, displayAreaFixed);
+    CalculateScreenArea(displayRegion, displayAreaFixed, screenRegion, screenArea);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ",screenArea:%{public}d,%{public}d,%{public}d,%{public}d",
+        screenId, screenArea.posX_, screenArea.posY_, screenArea.width_, screenArea.height_);
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion,
+    DMRect& displayRegion, DMRect& displayArea)
+{
+    DMRect displayRegionCopy = displayRegion;
+    DMRect displayAreaCopy = displayArea;
+    switch (rotation) {
+        case Rotation::ROTATION_90:
+            displayRegion.width_ = displayRegionCopy.height_;
+            displayRegion.height_ = displayRegionCopy.width_;
+            displayArea.width_ = displayAreaCopy.height_;
+            displayArea.height_ = displayAreaCopy.width_;
+            displayRegion.posX_ = displayRegionCopy.posY_;
+            displayRegion.posY_ = screenRegion.width_ - (displayRegionCopy.posX_ + displayRegionCopy.width_);
+            displayArea.posX_ = displayAreaCopy.posY_;
+            displayArea.posY_ = screenRegion.width_ - (displayAreaCopy.posX_ + displayAreaCopy.width_);
+            break;
+        case Rotation::ROTATION_180:
+            displayRegion.posX_ = screenRegion.width_ - (displayRegionCopy.posX_ + displayRegionCopy.width_);
+            displayRegion.posY_ = screenRegion.height_ - (displayRegionCopy.posY_ + displayRegionCopy.height_);
+            displayArea.posX_ = screenRegion.width_ - (displayAreaCopy.posX_ + displayAreaCopy.width_);
+            displayArea.posY_ = screenRegion.height_ - (displayAreaCopy.posY_ + displayAreaCopy.height_);
+            break;
+        case Rotation::ROTATION_270:
+            displayRegion.width_ = displayRegionCopy.height_;
+            displayRegion.height_ = displayRegionCopy.width_;
+            displayArea.width_ = displayAreaCopy.height_;
+            displayArea.height_ = displayAreaCopy.width_;
+            displayRegion.posX_ = screenRegion.height_ - (displayRegionCopy.posY_ + displayRegionCopy.height_);
+            displayRegion.posY_ = displayRegionCopy.posX_;
+            displayArea.posX_ = screenRegion.height_ - (displayAreaCopy.posY_ + displayAreaCopy.height_);
+            displayArea.posY_ = displayAreaCopy.posX_;
+            break;
+        default:
+            break;
+    }
+}
+
+void ScreenSessionManager::CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea,
+    const DMRect& screenRegion, DMRect& screenArea)
+{
+    if (displayRegion == screenRegion) {
+        screenArea = displayArea;
+        return;
+    }
+    float ratioX = static_cast<float>(displayArea.posX_ - displayRegion.posX_) /
+        static_cast<float>(displayRegion.width_);
+    float ratioY = static_cast<float>(displayArea.posY_ - displayRegion.posY_) /
+        static_cast<float>(displayRegion.height_);
+    float ratioWidth = static_cast<float>(displayArea.width_) / static_cast<float>(displayRegion.width_);
+    float ratioHeight = static_cast<float>(displayArea.height_) / static_cast<float>(displayRegion.height_);
+    screenArea.posX_ = screenRegion.posX_ + static_cast<int32_t>(ratioX * screenRegion.width_);
+    screenArea.posY_ = screenRegion.posY_ + static_cast<int32_t>(ratioY * screenRegion.height_);
+    screenArea.width_ = static_cast<int32_t>(ratioWidth * screenRegion.width_);
+    screenArea.height_ = static_cast<int32_t>(ratioHeight * screenRegion.height_);
+}
 } // namespace OHOS::Rosen

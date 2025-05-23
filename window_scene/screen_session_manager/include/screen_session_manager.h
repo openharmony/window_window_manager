@@ -48,7 +48,7 @@ struct ScaleProperty {
     float pivotX;
     float pivotY;
 
-    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY), 
+    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY),
                                                                             pivotX(pivotX), pivotY(pivotY) {}
 };
 
@@ -463,6 +463,8 @@ public:
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
     bool GetKeyboardState() override;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) override;
 
 protected:
     ScreenSessionManager();
@@ -566,13 +568,15 @@ private:
     void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
         sptr<ScreenSession> secondaryScreenSession = nullptr);
     void CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
-        
+
         sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
     void HandleSuperFoldStatusLocked(bool isLocked);
+    void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
+    void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -763,7 +767,7 @@ private:
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
-    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session, 
+    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session,
                                                         const ScaleProperty& scalep,
                                                         float& translateX, float& translateY);
     void RegisterApplicationStateObserver();
