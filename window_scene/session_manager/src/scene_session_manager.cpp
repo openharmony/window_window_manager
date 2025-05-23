@@ -781,7 +781,7 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::SetForegroundWindowNum(int32_t windowNum)
+WMError SceneSessionManager::SetForegroundWindowNum(uint32_t windowNum)
 {
     if (!SessionPermission::IsSystemServiceCalling()) {
         TLOGE(WmsLogTag::WMS_PC, "The caller is not system service.");
@@ -790,10 +790,6 @@ WMError SceneSessionManager::SetForegroundWindowNum(int32_t windowNum)
     if (!systemConfig_.freeMultiWindowSupport_) {
         TLOGE(WmsLogTag::WMS_PC, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (windowNum <= 0) {
-        TLOGE(WmsLogTag::WMS_PC, "windowNum is invaild.");
-        return WMError::WM_ERROR_INVALID_PARAM;
     }
     taskScheduler_->PostAsyncTask([this, windowNum]() {
         if (setForegroundWindowNumFunc_) {
@@ -15232,18 +15228,16 @@ WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& wind
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     taskScheduler_->PostAsyncTask([this, windowIds, where = __func__]() {
-        for (const auto& persistentId : windowIds) {
-            auto sceneSession = GetSceneSession(persistentId);
-            if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "could not find the window, persistentId:%{public}d", persistentId);
-                continue;
-            } else {
-                sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
-                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d", where, persistentId);
-            }
+        if (minimizeByWindowIdFunc_) {
+            TLOGNI(WmsLogTag::WMS_PC, "%{public}s", where);
+            minimizeByWindowIdFunc_(windowIds);
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func){
+    minimizeByWindowIdFunc_ = std::move(func);
 }
 
 const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()

@@ -46,6 +46,7 @@ enum class ListenerFunctionType : uint32_t {
     WATCH_GESTURE_CONSUME_RESULT_CB,
     WATCH_FOCUS_ACTIVE_CHANGE_CB,
     SET_FOREGROUND_WINDOW_NUM_CB,
+    MINIMIZE_BY_WINDOW_ID_CB,
     SCENE_SESSION_DESTRUCT_CB
 };
 
@@ -295,7 +296,9 @@ private:
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
     void RegisterSetForegroundWindowNumCallback();
-    void OnSetForegroundWindowNum(int32_t windowNum);
+    void OnSetForegroundWindowNum(uint32_t windowNum);
+    void RegisterMinimizeByWindowIdCallback();
+    void OnMinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
     /*
      * Window Recover

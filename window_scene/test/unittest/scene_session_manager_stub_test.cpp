@@ -2664,7 +2664,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t windowNum = 1;
+    uint32_t windowNum = 1;
     data.WriteInt32(windowNum);
     int res = stub_->HandleSetForegroundWindowNum(data, reply);
     EXPECT_EQ(res, ERR_NONE);
