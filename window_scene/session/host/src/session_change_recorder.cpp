@@ -110,29 +110,32 @@ WSError SessionChangeRecorder::SetRecordSize(RecordType recordType, uint32_t rec
     return WSError::WS_OK;
 }
 
-void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params)
+void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
+    const std::vector<std::string>& dumpParams, std::string& dumpInfo)
 {
     std::ostringstream oss;
     oss << "Record session change: " << std::endl;
 
     bool simplifyFlag = false;
+    std::vector<std::string> params = dumpParams;
     auto it = std::find(params.begin(), params.end(), "-simplify");
     if (it != params.end()) {
         simplifyFlag = true;
         params.erase(it);
     }
 
-    bool specifiedWindowFlag = false;
+    int32_t specifiedWindowId = INVALID_SESSION_ID;
     if (params.size() >= 1 && params[0] == "all") {
-        specifiedWindowFlag = false;
+        specifiedWindowId = INVALID_SESSION_ID;
     } else if (params.size() >= 1 && WindowHelper::IsNumber(params[0])) {
-        specifiedWindowFlag = true;
+        specifiedWindowId = std::stoi(params[0]);
     } else {
         oss << "Available args: '-v all/[specified window id]'" << std::endl;
         dumpInfo.append(oss.str());
         return;
     }
-    bool specifiedRecordTypeFlag = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ? true : false;
+    uint32_t specifiedRecordType = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ?
+        std::stoul(params[1]) : 0;
 
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
     {
@@ -140,8 +143,8 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
         sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
     }
 
-    std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordTypeFlag, specifiedWindowFlag,
-        params, sceneSessionChangeNeedDumpMapCopy);
+    std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordType, specifiedWindowId,
+        sceneSessionChangeNeedDumpMapCopy);
     oss << dumpInfoJsonString;
     if (simplifyFlag && oss.str().size() > MAX_EVENT_DUMP_SIZE) {
         dumpInfo.append("wmsDumpSimplify\n");
@@ -151,18 +154,18 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
     }
 }
 
-std::string SessionChangeRecorder::FormatDumpInfoToJsonString (bool specifiedRecordTypeFlag, bool specifiedWindowFlag,
-    std::vector<std::string>& params, std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& dumpMap)
+std::string SessionChangeRecorder::FormatDumpInfoToJsonString (uint32_t specifiedRecordType, int32_t specifiedWindowId,
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& dumpMap)
 {
     nlohmann::json jsonArrayDump = nlohmann::json::array();
     for (const auto& elem : dumpMap) {
-        if (specifiedRecordTypeFlag && static_cast<uint32_t>(elem.first) != std::stoul(params[1])) {
+        if (specifiedRecordType && static_cast<uint32_t>(elem.first) != specifiedRecordType) {
             continue;
         }
         std::queue<SceneSessionChangeInfo> tempDumpQueue = elem.second;
         while (!tempDumpQueue.empty()) {
             auto tempQueue = tempDumpQueue.front();
-            if (specifiedWindowFlag && tempQueue.persistentId_ != std::stoi(params[0])) {
+            if (specifiedWindowId && tempQueue.persistentId_ != specifiedWindowId) {
                 tempDumpQueue.pop();
                 continue;
             }

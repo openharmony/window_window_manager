@@ -103,7 +103,7 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
 
     std::vector<std::string> params;
     std::string dumpInfo;
-    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
+    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result1 = dumpInfo.find("Available args") != std::string::npos;
     EXPECT_TRUE(result1);
 
@@ -130,14 +130,14 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_END, changeInfo3);
 
     params.push_back("all");
-    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
+    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result2 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
         (dumpInfo.find("125") != std::string::npos);
     dumpInfo.clear();
     EXPECT_TRUE(result2);
 
     params.push_back("0");
-    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
+    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result3 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
         (dumpInfo.find("125") == std::string::npos);
     dumpInfo.clear();
@@ -145,7 +145,7 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
 
     params.pop_back();
     params[0] = "123";
-    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, params);
+    SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result4 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") == std::string::npos) &&
         (dumpInfo.find("125") == std::string::npos);
     dumpInfo.clear();

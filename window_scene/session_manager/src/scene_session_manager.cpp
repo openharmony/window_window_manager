@@ -6320,7 +6320,7 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     if (params.size() >= 2 && params[0] == ARG_DUMP_RECORD) {
         std::vector<std::string> resetParams;
         resetParams.assign(params.begin() + 1, params.end());
-        SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(dumpInfo, resetParams);
+        SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);
         return WSError::WS_OK; 
     }
     return WSError::WS_ERROR_INVALID_OPERATION;
