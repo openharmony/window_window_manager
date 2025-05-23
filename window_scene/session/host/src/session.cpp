@@ -3256,11 +3256,6 @@ WSRect Session::GetLayoutRect() const
     return layoutRect_;
 }
 
-void Session::SetOriginDisplayId(DisplayId displayId)
-{
-    originDisplayId_ = displayId;
-}
-
 void Session::SetSessionRequestRect(const WSRect& rect)
 {
     GetSessionProperty()->SetRequestRect(SessionHelper::TransferToRect(rect));
