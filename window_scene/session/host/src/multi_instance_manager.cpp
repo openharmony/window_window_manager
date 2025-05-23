@@ -414,12 +414,12 @@ bool MultiInstanceManager::ConvertInstanceKeyToInstanceId(const std::string& ins
     return true;
 }
 
-AppExecFwk::ApplicationInfo MultiInstanceManager::GetApplicationInfo(const std::string& bundleName)
+AppExecFwk::ApplicationInfo MultiInstanceManager::GetApplicationInfo(const std::string& bundleName) const
 {
     std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
     AppExecFwk::ApplicationInfo applicationInfo;
     if (appInfoMap_.count(bundleName)) {
-        applicationInfo = appInfoMap_[bundleName];
+        applicationInfo = appInfoMap_.at(bundleName);
     }
     return applicationInfo;
 }
