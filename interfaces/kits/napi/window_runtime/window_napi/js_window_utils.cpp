@@ -246,6 +246,33 @@ napi_value WindowStageEventTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowAnchorInit(napi_env env)
+{
+    WLOGFD("WindowAnchorInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "TOP_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_END)));
+    return objValue;
+}
+
 napi_value WindowEventTypeInit(napi_env env)
 {
     WLOGFD("WindowEventTypeInit");

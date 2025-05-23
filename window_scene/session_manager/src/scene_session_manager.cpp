@@ -1466,6 +1466,15 @@ void SceneSessionManager::ConfigSupportFollowParentWindowLayout()
     taskScheduler_->PostAsyncTask(task, "ConfigSupportFollowParentWindowLayout");
 }
 
+void SceneSessionManager::ConfigSupportFollowRelativePositionToParent()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "support");
+    auto task = [this] {
+        systemConfig_.supportFollowRelativePositionToParent_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportFollowRelativePositionToParent");
+}
+
 void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak)
 {
     rootSceneContextWeak_ = contextWeak;

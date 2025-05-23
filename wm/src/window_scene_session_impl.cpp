@@ -6054,6 +6054,36 @@ float WindowSceneSessionImpl::GetCustomDensity() const
     return customDensity_;
 }
 
+WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (property->GetSubWindowLevel() > 1) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (!windowSystemConfig_.supportFollowRelativePositionToParent_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    WSError ret = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
+    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     if (IsWindowSessionInvalid()) {

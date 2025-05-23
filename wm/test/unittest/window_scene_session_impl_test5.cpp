@@ -1249,6 +1249,47 @@ HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenSizeWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowAnchorInfo01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::BOTTOM_END, 0, 0 };
+    WMError ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+    window->state_ = WindowState::STATE_CREATED;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 100;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 1;
+    window->windowSystemConfig_.supportFollowRelativePositionToParent_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.supportFollowRelativePositionToParent_ = true;
+    session->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetFollowParentWindowLayoutEnabled
  * @tc.desc: SetFollowParentWindowLayoutEnabled
  * @tc.type: FUNC
