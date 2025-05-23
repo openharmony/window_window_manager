@@ -28,6 +28,7 @@ namespace {
 
 constexpr uint32_t MAX_RECORD_TYPE_SIZE = 10;
 constexpr uint32_t MAX_RECORD_LOG_SIZE = 102400;
+constexpr uint32_t MAX_EVENT_DUMP_SIZE = 512 * 1024;
 constexpr int32_t SCHEDULE_SECONDS = 5;
 
 std::string GetFormattedTime()
@@ -56,13 +57,13 @@ void SessionChangeRecorder::Init()
         while (!stopLogFlag.load()) {
             {
                 std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
-                if (sceneSessionChangeNeedLogMap_.empty()) {
+                if (!sceneSessionChangeNeedLogMap_.empty()) {
                     sceneSessionChangeNeedLogMapCopy = sceneSessionChangeNeedLogMap_;
                     sceneSessionChangeNeedLogMap_.clear();
                     currentLogSize_ = 0;
                 }
             }
-            if (sceneSessionChangeNeedLogMapCopy.empty()) {
+            if (!sceneSessionChangeNeedLogMapCopy.empty()) {
                 PrintLog(sceneSessionChangeNeedLogMapCopy);
             }
             std::this_thread::sleep_for(std::chrono::seconds(SCHEDULE_SECONDS));
@@ -141,8 +142,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
     std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordTypeFlag, specifiedWindowFlag,
         params, sceneSessionChangeNeedDumpMapCopy);
     oss << dumpInfoJsonString;
-    const uint32_t eventDumpMaxSize = 512 * 1024;
-    if (simplifyFlag && oss.str().size() > eventDumpMaxSize) {
+    if (simplifyFlag && oss.str().size() > MAX_EVENT_DUMP_SIZE) {
         dumpInfo.append("wmsDumpSimplify\n");
         SimplifyDumpInfo(dumpInfo, oss.str());
     } else {
@@ -252,13 +252,11 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
     uint32_t maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
         recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
     if (sceneSessionChangeNeedDumpMap_[recordType].size() > maxRecordTypeSize) {
-        {
-            std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
-            uint32_t diff = sceneSessionChangeNeedDumpMap_[recordType].size() - maxRecordTypeSize;
-            while (diff > 0) {
-                sceneSessionChangeNeedDumpMap_[recordType].pop();
-                diff--;
-            }
+        std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
+        uint32_t diff =  [recordType].size() - maxRecordTypeSize;
+        while (diff > 0) {
+            sceneSessionChangeNeedDumpMap_[recordType].pop();
+            diff--;
         }
     }
 }
@@ -298,12 +296,12 @@ void SessionChangeRecorder::PrintLog(
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     for (const auto& item : sceneSessionChangeNeedLogMap) {
-        std::queue<SceneSessionChangeInfo> q = item.second;
-        while (!q.empty()) {
-            SceneSessionChangeInfo curChange = q.front();
+        std::queue<SceneSessionChangeInfo> logInfoQueue = item.second;
+        while (!logInfoQueue.empty()) {
+            SceneSessionChangeInfo curChange = logInfoQueue.front();
             TLOGD(curChange.logTag_, "winId: %{public}d, changeInfo: %{public}s, time: %{public}s",
                 curChange.persistentId_, curChange.changeInfo_.c_str(), curChange.time_.c_str());
-            q.pop();
+            logInfoQueue.pop();
         }
     }
 }
