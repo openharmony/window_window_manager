@@ -2255,6 +2255,10 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
 WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameRect)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "set frame rect start, rect: %{public}s", frameRect.ToString().c_str());
+    if (GetType() != WindowType::WINDOW_TYPE_MAGNIFICATION) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "window type is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
