@@ -1778,6 +1778,15 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     sptr<IWindowRectChangeListener> listener1 = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(WindowHelper::IsUIExtensionWindow(window->GetType()));
+    sptr<IWindowRectChangeListener> listener2 = sptr<MockWindowRectChangeListener>::MakeSptr();
+    window->RegisterWindowRectChangeListener(listener2);
+    window->NotifySizeChange(rect, WindowSizeChangeReason::MOVE);
     window->Destroy(true);
 }
 
