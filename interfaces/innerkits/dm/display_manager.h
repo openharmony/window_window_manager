@@ -840,7 +840,7 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
-    
+
     /**
      * @brief Get CutoutInfo with rotation
      *
@@ -848,6 +848,18 @@ public:
      * @return CutoutInfo object of default screen.
      */
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+
+    /**
+     * @brief Get screenInfo of display area
+     *
+     * @param DisplayId displayId.
+     * @param DMRect displayArea.
+     * @param ScreenId screenId.
+     * @param DMRect screenArea.
+     * @return DM_OK means process get screenArea success.
+     */
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
 
 private:
     DisplayManager();
