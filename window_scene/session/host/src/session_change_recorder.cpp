@@ -65,6 +65,7 @@ void SessionChangeRecorder::Init()
             }
             if (!sceneSessionChangeNeedLogMapCopy.empty()) {
                 PrintLog(sceneSessionChangeNeedLogMapCopy);
+                sceneSessionChangeNeedLogMapCopy.clear();
             }
             std::this_thread::sleep_for(std::chrono::seconds(SCHEDULE_SECONDS));
         }
