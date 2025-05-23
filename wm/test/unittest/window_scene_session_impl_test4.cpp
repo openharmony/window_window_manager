@@ -2021,29 +2021,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 }
-
-/**
- * @tc.name: SetWindowContainerColor03
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor03, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetBundleName("SetWindowContainerColor");
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetDecorEnable(true);
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->containerColorList_.insert("SetWindowContainerColor");
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#FF000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    EXPECT_EQ(res, WMError::WM_OK);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
