@@ -378,13 +378,23 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
     return WMError::WM_OK;
 }
 
-void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+    AvoidArea area = {};
+    if (avoidArea != nullptr) {
+        area= *avoidArea;
+        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+    }
+    if (info != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, "
+            "Height_: %{public}f", info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
+    }
+    
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {
-            listener->OnAvoidAreaChanged(*avoidArea, type);
+            listener->OnAvoidAreaChanged(area, type, info);
         }
     }
 }
