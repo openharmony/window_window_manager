@@ -513,12 +513,12 @@ void ScreenSession::SetValidWidth(uint32_t validWidth)
     property_.SetValidWidth(validWidth);
 }
  
-int32_t ScreenSession::GetValidHeight() const
+uint32_t ScreenSession::GetValidHeight() const
 {
     return property_.GetValidHeight();
 }
  
-int32_t ScreenSession::GetValidWidth() const
+uint32_t ScreenSession::GetValidWidth() const
 {
     return property_.GetValidWidth();
 }

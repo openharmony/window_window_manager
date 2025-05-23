@@ -5663,8 +5663,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateValidArea, Function | SmallTest | Level
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
 
-    int32_t originValidWidth = screenSession->GetValidWidth();
-    int32_t originValidHeight = screenSession->GetValidHeight();
+    uint32_t originValidWidth = screenSession->GetValidWidth();
+    uint32_t originValidHeight = screenSession->GetValidHeight();
     ssm_->UpdateValidArea(screenId, 800, 1000);
     EXPECT_EQ(800, screenSession->GetValidWidth());
     EXPECT_EQ(1000, screenSession->GetValidHeight());
