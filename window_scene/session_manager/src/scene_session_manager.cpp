@@ -8209,7 +8209,7 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr
         TLOGD(WmsLogTag::WMS_FOCUS, "sub window is nullptr");
         return WSError::WS_DO_NOTHING;
     }
-    std::vector<sptr<Session>> subSessionVec = sceneSession->GetSubSession();
+    std::vector<sptr<SceneSession>> subSessionVec = sceneSession->GetSubSession();
     if (subSessionVec.empty()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "has no sub window");
         return WSError::WS_DO_NOTHING;
@@ -8229,7 +8229,10 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr
             TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
         }
-        if (RequestSessionFocusImmediately(session->GetPersistentId(), false, reason) == WSError::WS_OK) {
+        if (!IsSessionVisibleForeground(session)) {
+            continue;
+        }
+        if (RequestSessionFocus(session->GetPersistentId(), true, FocusChangeReason::ALT_TAB) == WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
