@@ -139,8 +139,8 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
         sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
     }
 
-    std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordTypeFlag,
-        specifiedWindowFlag, sceneSessionChangeNeedDumpMapCopy);
+    std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordTypeFlag, specifiedWindowFlag,
+        params, sceneSessionChangeNeedDumpMapCopy);
     oss << dumpInfoJsonString;
     const uint32_t eventDumpMaxSize = 512 * 1024;
     if (simplifyFlag && oss.str().size() > eventDumpMaxSize) {
@@ -152,10 +152,10 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(std::string& dumpInfo, s
 }
 
 std::string SessionChangeRecorder::FormatDumpInfoToJsonString (bool specifiedRecordTypeFlag, bool specifiedWindowFlag,
-    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& sceneSessionChangeNeedDumpMap)
+    std::vector<std::string>& params, std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& dumpMap)
 {
     nlohmann::json jsonArrayDump = nlohmann::json::array();
-    for (const auto& elem : sceneSessionChangeNeedDumpMap) {
+    for (const auto& elem : dumpMap) {
         if (specifiedRecordTypeFlag && static_cast<uint32_t>(elem.first) != std::stoul(params[1])) {
             continue;
         }
