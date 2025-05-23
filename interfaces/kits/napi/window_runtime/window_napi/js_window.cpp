@@ -2328,7 +2328,7 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             return;
         }
         WindowPropertyInfo windowPropertyInfo;
-        WMError ret = weakToken->GetWindowPropertyInfo(windowPropertyInfo);
+        WMError ret = weakWindow->GetWindowPropertyInfo(windowPropertyInfo);
         if (ret != WMError::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
