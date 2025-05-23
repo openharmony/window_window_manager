@@ -1985,7 +1985,7 @@ WMError WindowManager::UnregisterWindowInfoChangeCallback(const std::unordered_s
         if (listener->GetInterestInfo().find(info) == listener->GetInterestInfo().end()) {
             listener->AddInterestInfo(info);
         }
-        if (!listener->GetInterestWindowIds.empty()) {
+        if (!listener->GetInterestWindowIds().empty()) {
             listener->AddInterestInfo(WindowInfoKey::WINDOW_ID);
         }
         ret = ProcessUnregisterWindowInfoChangeCallback(info, listener);
