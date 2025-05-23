@@ -4717,8 +4717,9 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
     bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
+    std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
     if (!isUIExtensionWindow && !rectChangeUIExtListenerIds_.empty()) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeUIExtListenerIds_ size: %{public}lu",
+        TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeUIExtListenerIds_ size: %{public}zu",
             rectChangeUIExtListenerIds_.size());
         AAFwk::Want rectWant;
         rectWant.SetParam(Extension::RECT_X, rect.posX_);

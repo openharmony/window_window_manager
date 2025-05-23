@@ -451,10 +451,24 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
         std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
         ret = UnregisterListener(hostWindowRectChangeListener_, listener);
     }
-    if (!hostWindowRectChangeListener_.empty() || !rectChangeUIExtListenerIds_.empty()) {
+    bool isHostWindowRectChangeListenerEmpty = false;
+    bool isRectChangeUIExtListenerIdsEmpty = false;
+    size_t hostWindowRectChangeListenerSize = 0;
+    size_t rectChangeUIExtListenerIdsSize = 0;
+    {
+        std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
+        isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
+        hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
+    }
+    {
+        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+        isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
+        rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
+    }
+    if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
-            "hostWindowRectChangeListener_: %{public}lu, size of rectChangeUIExtListenerIds_: %{public}lu",
-            hostWindowRectChangeListener_.size(), rectChangeUIExtListenerIds_.size());
+            "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
+            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
         return ret;
     }
     AAFwk::Want dataToSend;
@@ -1790,10 +1804,24 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
                 std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
                 rectChangeUIExtListenerIds_.erase(persistentId);
             }
-            if (!hostWindowRectChangeListener_.empty() || !rectChangeUIExtListenerIds_.empty()) {
+            bool isHostWindowRectChangeListenerEmpty = false;
+            bool isRectChangeUIExtListenerIdsEmpty = false;
+            size_t hostWindowRectChangeListenerSize = 0;
+            size_t rectChangeUIExtListenerIdsSize = 0;
+            {
+                std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
+                isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
+                hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
+            }
+            {
+                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+                isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
+                rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
+            }
+            if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
                 TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
-                    "hostWindowRectChangeListener_: %{public}lu, size of rectChangeUIExtListenerIds_: %{public}lu",
-                    hostWindowRectChangeListener_.size(), rectChangeUIExtListenerIds_.size());
+                    "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
+                    hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
                 return WMError::WM_OK;
             }
             auto ret = SendExtensionMessageToHost(code, data);
@@ -1986,6 +2014,7 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
         }
     }
     auto uiContent = GetUIContentSharedPtr();
+    std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
     if (!rectChangeUIExtListenerIds_.empty() && uiContent != nullptr) {
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), data,
