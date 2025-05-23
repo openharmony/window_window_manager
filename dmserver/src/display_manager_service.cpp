@@ -690,7 +690,7 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
     }
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
         TLOGE(WmsLogTag::DMS, "create expand fail, input params is invalid. "
-            "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
+            "screenId vector size :%{public}u, startPoint vector size :%{public}u",
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
