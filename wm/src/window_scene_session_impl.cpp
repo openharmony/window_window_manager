@@ -1311,15 +1311,6 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
     newLimits = systemLimits;
-    // calculate new limit size
-    if (systemLimits.minWidth_ <= customizedLimits.maxWidth_ &&
-        customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
-        newLimits.maxWidth_ = customizedLimits.maxWidth_;
-    }
-    if (systemLimits.minHeight_ <= customizedLimits.maxHeight_ &&
-        customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
-        newLimits.maxHeight_ = customizedLimits.maxHeight_;
-    }
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
@@ -1329,6 +1320,15 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
+    }
+    // calculate new limit size
+    if (limitMinWidth <= customizedLimits.maxWidth_ &&
+        customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
+        newLimits.maxWidth_ = customizedLimits.maxWidth_;
+    }
+    if (limitMinHeight <= customizedLimits.maxHeight_ &&
+        customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
+        newLimits.maxHeight_ = customizedLimits.maxHeight_;
     }
     if (limitMinWidth <= customizedLimits.minWidth_ &&
         customizedLimits.minWidth_ <= newLimits.maxWidth_) {
@@ -1708,6 +1708,9 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_PANEL:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
         case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD:
+        case WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION:
+        case WindowType::WINDOW_TYPE_MAGNIFICATION:
+        case WindowType::WINDOW_TYPE_MAGNIFICATION_MENU:
         case WindowType::WINDOW_TYPE_DYNAMIC: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
@@ -2249,6 +2252,31 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
     return static_cast<WMError>(ret);
 }
 
+WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "set frame rect start, rect: %{public}s", frameRect.ToString().c_str());
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "display is null");
+        return WMError::WM_ERROR_INVALID_DISPLAY;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "display info is null");
+        return WMError::WM_ERROR_INVALID_DISPLAY;
+    }
+    Rect screenRect = {displayInfo->GetX(), displayInfo->GetY(), displayInfo->GetWidth(), displayInfo->GetHeight()};
+    if (!frameRect.IsInsideOf(screenRect)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s", screenRect.ToString().c_str());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
+    return WMError::WM_OK;
+}
 
 WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,
     const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
@@ -4061,24 +4089,6 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::GetMainWindowWithId(uint32_t mai
     return nullptr;
 }
 
-sptr<WindowSessionImpl> WindowSceneSessionImpl::GetWindowWithId(uint32_t winId)
-{
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    if (windowSessionMap_.empty()) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Please create mainWindow First!");
-        return nullptr;
-    }
-    for (const auto& winPair : windowSessionMap_) {
-        auto win = winPair.second.second;
-        if (win && winId == win->GetWindowId()) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "find window %{public}s, id %{public}d", win->GetWindowName().c_str(), winId);
-            return win;
-        }
-    }
-    TLOGE(WmsLogTag::WMS_SYSTEM, "Cannot find Window!");
-    return nullptr;
-}
-
 static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, int32_t windowId, int32_t& mainWindowId)
 {
     for (const auto& [_, pair] : sessionMap) {
@@ -4457,6 +4467,31 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
     return pixelMap;
 }
 
+WMError WindowSceneSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ < WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
+            GetPersistentId(), state_);
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to get pixelmap", GetPersistentId());
+        return WMError::WM_ERROR_TIMEOUT;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d snapshot end, WxH=%{public}dx%{public}d",
+        GetPersistentId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     if (IsWindowSessionInvalid()) {
@@ -4534,6 +4569,31 @@ WMError WindowSceneSessionImpl::SetViewKeepScreenOn(bool keepScreenOn)
 bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
 {
     return property_->IsViewKeepScreenOn();
+}
+
+WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, permission denied", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, type is not supported", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    property_->SetWindowShadowEnabled(isEnabled);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
+}
+
+bool WindowSceneSessionImpl::GetWindowShadowEnabled() const
+{
+    return property_->GetWindowShadowEnabled();
 }
 
 WMError WindowSceneSessionImpl::SetTransform(const Transform& trans)

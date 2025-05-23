@@ -114,7 +114,7 @@ public:
     MOCK_METHOD0(IsUIExtensionAbilityProcess, bool());
     MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent));
-    MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
+    MOCK_METHOD3(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage, bool isRouter));
     MOCK_METHOD1(SetContainerButtonStyle, void(const Rosen::DecorButtonStyle& decorButtonStyle));
 };
 } // namespace Ace

@@ -39,7 +39,7 @@ interface OHOS.Rosen.IDisplayManager {
     void SetVirtualScreenSurface([in] unsigned long screenId, [in] IBufferProducer surface, [out] int dmError);
     void SetOrientation([in] unsigned long screenId, [in] unsigned int orientation, [out] int dmError);
     void GetDisplaySnapshot([in] unsigned long displayId, [out] int errorCode, [in] boolean isUseDma,
-        [in] boolean isCaptureFullOfScreen, [out] sharedptr<PixelMap> pixelMap);
+        [in] boolean isFullScreenCapture, [out] sharedptr<PixelMap> pixelMap);
     void GetScreenSupportedColorGamuts([in] unsigned long screenId, [out] unsigned int[] colorGamuts,
         [out] int dmError);
     void GetScreenColorGamut([in] unsigned long screenId, [out] unsigned int colorGamut, [out] int dmError);
@@ -90,4 +90,6 @@ interface OHOS.Rosen.IDisplayManager {
     void SetScreenRotationLocked([in] boolean isLocked, [out] int dmError);
     void SetScreenRotationLockedFromJs([in] boolean isLocked, [out] int dmError);
     void GetAllDisplayPhysicalResolution([out] DisplayPhysicalResolution[] displayPhysicalResolutions);
+    void SetScreenBrightness([in] unsigned long screenId, [in] unsigned int level, [out] boolean isSucc);
+    void GetScreenBrightness([in] unsigned long screenId, [out] unsigned int level);
 }

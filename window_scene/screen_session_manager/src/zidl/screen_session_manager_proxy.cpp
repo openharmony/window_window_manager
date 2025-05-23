@@ -1751,7 +1751,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
 {
     WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1778,8 +1778,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         return nullptr;
     }
 
-    if (!data.WriteBool(isCaptureFullOfScreen)) {
-        WLOGFE("isCaptureFullOfScreen fail: data write failed");
+    if (!data.WriteBool(isFullScreenCapture)) {
+        WLOGFE("isFullScreenCapture fail: data write failed");
         return nullptr;
     }
 
@@ -4068,7 +4068,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isCaptureFullOfScreen)) {
+        !data.WriteBool(captureOption.isFullScreenCapture_)) {
         WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }

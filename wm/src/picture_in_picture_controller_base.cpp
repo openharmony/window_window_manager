@@ -219,7 +219,6 @@ WMError PictureInPictureControllerBase::StopPictureInPictureInner(StopPipType st
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
             DestroyPictureInPictureWindow();
         }
-
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PipConst::PIP_SUCCESS, "pip window stop success");

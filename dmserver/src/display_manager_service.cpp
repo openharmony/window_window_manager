@@ -213,6 +213,10 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenI
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd() &&
+        !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+        return ERROR_ID_NOT_SYSTEM_APP;
+    }
     if (displayManagerAgent == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
         return SCREEN_ID_INVALID;
@@ -295,7 +299,7 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64 ")", displayId);
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -686,7 +690,7 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
     }
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
         TLOGE(WmsLogTag::DMS, "create expand fail, input params is invalid. "
-            "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
+            "screenId vector size :%{public}u, startPoint vector size :%{public}u",
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
         return DMError::DM_ERROR_INVALID_PARAM;
     }

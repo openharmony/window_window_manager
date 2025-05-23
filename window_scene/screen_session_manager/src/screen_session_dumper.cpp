@@ -315,7 +315,7 @@ void ScreenSessionDumper::ShowHelpInfo()
             "eg. -rotationlock,0 \n")
         .append(" -motion                        ")
         .append("|set the sensor rotation angle clockwise, "\
-            "0 is 0°, 1 is 90°, 2 is 180°, 3 is 270°, eg. -motion,1\n");
+            "0 means 0 degree, 1 means 90 degree, 2 means 180 degree, 3 means 270 degree, eg. -motion,1\n");
     if (!system::GetBoolParameter("dms.hidumper.supportdebug", false)) {
         return;
     }

@@ -97,6 +97,31 @@ ohos_unittest("dmserver_display_manager_service_inner_test") {
   ]
 }
 
+ohos_unittest("dmserver_display_manager_ipc_service_test") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_ipc_service_test.cpp" ]
+
+  deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [
+    "cJSON:cjson_static",
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "hilog:libhilog",
+    "libxml2:libxml2",
+    "safwk:system_ability_fwk",
+    "selinux_adapter:librestorecon",
+  ]
+}
+
 ohos_unittest("dmserver_display_manager_service_test") {
   module_out_path = module_out_path
 

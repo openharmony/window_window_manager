@@ -1760,6 +1760,31 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated02, Te
     WSError res = window->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn
+ * @tc.desc: SetFrameRectForParticalZoomIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    ASSERT_NE(nullptr, window->surfaceNode_);
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, window->SetFrameRectForParticalZoomIn(frameRect));
+
+    ASSERT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
+    ASSERT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+
+    frameRect.posX_ = -1; // posX_ -1 is out of screen rect
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetFrameRectForParticalZoomIn(frameRect));
+
+    window->surfaceNode_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
