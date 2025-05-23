@@ -80,7 +80,7 @@ public:
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
-        bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
+        bool isUseDma = false, bool isFullScreenCapture = false) { return nullptr; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
         DmErrorCode* errorCode = nullptr)
     {

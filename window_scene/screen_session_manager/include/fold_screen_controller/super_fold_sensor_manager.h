@@ -58,7 +58,7 @@ public:
 
     void HandleScreenConnectChange();
     void HandleScreenDisconnectChange();
-    void HandleFoldStatusLocked();
+    void HandleFoldStatusLockedToExpand();
     void HandleFoldStatusUnlocked();
 
 private:

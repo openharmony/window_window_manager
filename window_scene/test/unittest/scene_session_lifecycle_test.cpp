@@ -979,7 +979,8 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, TestSize.Level0)
 
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
+    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller,
+        bool isFromBroker, bool isForceClean) {};
     session.isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 

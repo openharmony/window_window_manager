@@ -1232,5 +1232,14 @@ WMError WindowAdapter::UseImplicitAnimation(int32_t hostWindowId, bool useImplic
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
     return static_cast<WMError>(wmsProxy->UseImplicitAnimation(hostWindowId, useImplicit));
 }
+
+WMError WindowAdapter::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->AnimateTo(windowId, animationProperty, animationOption);
+}
 } // namespace Rosen
 } // namespace OHOS

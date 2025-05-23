@@ -2680,6 +2680,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
     abilitySessionInfo->requestId = sessionInfo.requestId;
     abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
+    abilitySessionInfo->specifiedFlag = sessionInfo.specifiedFlag_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = sessionInfo.GetWantSafely();
     } else {
@@ -3455,6 +3456,12 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    if (!isPhoneOrPad && property->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
+        TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+
     if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
         TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
         shouldBlock = false;
@@ -3820,6 +3827,14 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         } else {
             TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
         }
+    }
+    if (SessionHelper::IsMagnificationWindow(type)) {
+        if (SessionPermission::IsSACalling()) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check sa permission success, create with SA calling.");
+            return true;
+        }
+        TLOGE(WmsLogTag::WMS_SYSTEM, "check sa permission failed");
+        return false;
     }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
@@ -6791,9 +6806,11 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(const sptr<SceneSe
         uint32_t topNearestBlockingZOrder = 0;
         if  (topNearestBlockingFocusSession)  {
             topNearestBlockingZOrder = topNearestBlockingFocusSession->GetZOrder();
-            TLOGD(WmsLogTag::WMS_FOCUS,  "requestSessionZOrder: %{public}d, focusedSessionZOrder:  %{public}d\
-                topNearestBlockingZOrder:  %{public}d",  requestSessionZOrder,  focusedSessionZOrder,
-                topNearestBlockingZOrder);
+            TLOGI(WmsLogTag::WMS_FOCUS,
+                  "requestSessionZOrder: %{public}d, focusedSessionZOrder: %{public}d\
+                  topNearestBlockingZOrder:  %{public}d, topNearestBlockingId: %{public}d",
+                  requestSessionZOrder, focusedSessionZOrder,
+                  topNearestBlockingZOrder, topNearestBlockingFocusSession->GetPersistentId());
         }
         if  (focusedSessionZOrder >=  topNearestBlockingZOrder && requestSessionZOrder < topNearestBlockingZOrder)  {
             TLOGD(WmsLogTag::WMS_FOCUS,  "focus pass through, needs to be intercepted");
@@ -6934,9 +6951,9 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     bool previousFocusedSessionFound = false;
-    sptr<SceneSession> ret = nullptr;
     DisplayId displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
-    auto func = [this, persistentId, &previousFocusedSessionFound, &ret, displayGroupId](sptr<SceneSession> session) {
+    sptr<SceneSession> nextFocusableSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &nextFocusableSession, displayGroupId](sptr<SceneSession> session) {
         if (session == nullptr) {
             return false;
         }
@@ -6950,7 +6967,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
             session->IsVisible() && IsParentSessionVisible(session)) {
-            ret = session;
+            nextFocusableSession = session;
             return true;
         }
         if (session->GetPersistentId() == persistentId) {
@@ -6959,7 +6976,67 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
         return false;
     };
     TraverseSessionTree(func, true);
-    return ret;
+    sptr<SceneSession> topFloatingSession = GetNextFocusableSessionWhenFloatWindowExist(displayGroupId, persistentId);
+    if (topFloatingSession != nullptr && nextFocusableSession != nullptr && nextFocusableSession->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "topFloatingSessionId: %{public}d", topFloatingSession->GetPersistentId());
+        return topFloatingSession;
+    }
+    return nextFocusableSession;
+}
+
+sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId,
+                                                                                    int32_t persistentId)
+{
+    bool isPhoneOrPad =
+        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    if (!isPhoneOrPad) {
+        return nullptr;
+    }
+    auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (topFloatingSession != nullptr && SessionHelper::IsMainWindow(sceneSession->GetWindowType()) &&
+        sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        return topFloatingSession;
+    }
+    return nullptr;
+}
+
+sptr<SceneSession> SceneSessionManager::GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId)
+{
+    bool previousFocusedSessionFound = false;
+    sptr<SceneSession> topFloatingSession = nullptr;
+    auto func = [this, persistentId, &previousFocusedSessionFound, &topFloatingSession, displayGroupId](sptr<SceneSession> session) {
+        if (session == nullptr || topFloatingSession != nullptr || previousFocusedSessionFound) {
+            return false;
+        }
+        if (windowFocusController_->GetDisplayGroupId(session->GetSessionProperty()->GetDisplayId()) !=
+            displayGroupId) {
+            return false;
+        }
+        if (session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
+            return false;
+        }
+        // need to be floating window
+        if (session->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+            return false;
+        }
+        // need to be main window
+        if (!SessionHelper::IsMainWindow(session->GetWindowType())) {
+            return false;
+        }
+
+        if (session->CheckFocusable() && session->IsVisible()) {
+            topFloatingSession = session;
+            return true;
+        }
+        if (session->GetPersistentId() == persistentId) {
+            previousFocusedSessionFound = true;
+        }
+        return false;
+    };
+    TraverseSessionTree(func, true);
+    return topFloatingSession;
 }
 
 /**
@@ -6989,19 +7066,12 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
         }
         auto parentSession = GetSceneSession(session->GetParentPersistentId());
         if (SessionHelper::IsSubWindow(session->GetWindowType()) && parentSession != nullptr &&
-            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            parentSession->IsTopmost()) {
+            parentSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && parentSession->IsTopmost()) {
             TLOGND(WmsLogTag::WMS_FOCUS, "sub window of topmost do not block");
             return false;
         }
-        bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-        bool isPcOrPcMode = systemConfig_.IsPcWindow() ||
-            (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
-        bool isBlockingType = (includingAppSession && session->IsAppSession() &&
-                               !(isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT)) ||
-                              (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) ||
-                              (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION);
-        if (IsSessionVisibleForeground(session) && isBlockingType)  {
+
+        if (IsSessionVisibleForeground(session) && CheckBlockingFocus(session, includingAppSession)) {
             ret = session;
             return true;
         }
@@ -7009,6 +7079,38 @@ sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(Displa
     };
     TraverseSessionTree(func, false);
     return ret;
+}
+
+bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession)
+{
+    if (session->GetSessionInfo().isSystem_ && session->GetBlockingFocus()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "system window blocked");
+        return true;
+    }
+
+    bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    if (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION) {
+        return true;
+    }
+    if (includingAppSession && session->IsAppSession()) {
+        TLOGD(WmsLogTag::WMS_FOCUS,
+              "id: %{public}d, isFloatType: %{public}d, isFloatMode: %{public}d", session->GetPersistentId(),
+              session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT,
+              session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+        bool isPcOrPcMode =
+            systemConfig_.IsPcWindow() || (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
+
+        if (isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+            return false;
+        }
+        bool isPhoneAndPadWithoutPcMode =
+            systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+        if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 sptr<SceneSession> SceneSessionManager::GetTopFocusableNonAppSession()
@@ -8980,7 +9082,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         if (iter == abilityInfoMap.end()) {
             TLOGW(WmsLogTag::DEFAULT, "launcher ability not found, bundle:%{public}s", bundleInfo.name.c_str());
             auto hapModuleListIter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
-                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); }); 
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
             if (hapModuleListIter != hapModulesList.end()) {
                 abilityInfo = hapModuleListIter->abilityInfos[0];
             } else {
@@ -8998,7 +9100,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
         GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
         scbAbilityInfos.push_back(scbAbilityInfo);
-    } 
+    }
 }
 
 void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
@@ -11067,7 +11169,7 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
         TLOGE(WmsLogTag::WMS_LIFE, "session cannot be clear, Id %{public}d.", sceneSession->GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    const WSError errCode = sceneSession->Clear();
+    const WSError errCode = sceneSession->Clear(false, true);
     return errCode;
 }
 
@@ -13977,11 +14079,11 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
 
     AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
-    
+
     appForceLandscapeMap_[bundleName] = config;
     TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
         bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
-    
+
     if(preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE) {
         //Notify the client of the mode change
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -15039,7 +15141,7 @@ WMError SceneSessionManager::GetHostWindowCompatiblityInfo(const sptr<IRemoteObj
         }
         TLOGND(WmsLogTag::WMS_COMPAT, "%{public}s persistentId=%{public}d get compatibility info: %{public}s",
             where, persistentId, compatInfo->ToString().c_str());
-        property->CopyFrom(compatInfo); 
+        property->CopyFrom(compatInfo);
         return WMError::WM_OK;
     }, __func__);
 }
@@ -15305,7 +15407,7 @@ WSError SceneSessionManager::UseImplicitAnimation(int32_t hostWindowId, bool use
         }
         return sceneSession->UseImplicitAnimation(useImplicit);
     };
- 
+
     return taskScheduler_->PostSyncTask(task, "UseImplicitAnimation");
 }
 
@@ -15365,5 +15467,21 @@ void SceneSessionManager::UpdateRecentMainSessionInfos(const std::vector<int32_t
             }
         }
     }, __func__);
+}
+
+WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Permission denied, only for SA");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto session = GetSceneSession(windowId);
+    if (session == nullptr || SessionHelper::IsSystemWindow(session->GetWindowType())) {
+        TLOGNE(WmsLogTag::WMS_ANIMATION, "Can not find window or is system window");
+        return WMError::WM_DO_NOTHING;
+    }
+    session->AnimateTo(animationProperty, animationOption);
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

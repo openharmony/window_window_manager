@@ -144,8 +144,6 @@ HWTEST_F(DisplayManagerServiceTest, Config, TestSize.Level1)
 HWTEST_F(DisplayManagerServiceTest, DisplayChange, TestSize.Level1)
 {
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
-
     sptr<DisplayChangeListenerTest> displayChangeListener = new DisplayChangeListenerTest();
     ASSERT_NE(nullptr, displayChangeListener);
     dms_->RegisterDisplayChangeListener(displayChangeListener);
@@ -188,7 +186,7 @@ HWTEST_F(DisplayManagerServiceTest, GetScreenIdByDisplayId, TestSize.Level1)
     dms_->abstractDisplayController_->abstractDisplayMap_ = {
         {0, absDisplay}
     };
- 
+
     absDisplay->screenId_ = 0;
     EXPECT_EQ(SCREEN_ID_INVALID, dms_->GetScreenIdByDisplayId(1));
     EXPECT_EQ(0, dms_->GetScreenIdByDisplayId(0));
@@ -272,7 +270,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerServiceTest, VirtualScreen, TestSize.Level1)
 {
-    VirtualScreenOption option;
+    VirtualScreenOption option{};
     ASSERT_EQ(-1, dms_->CreateVirtualScreen(option, nullptr));
 
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, dms_->SetVirtualScreenSurface(-1, nullptr));
@@ -287,7 +285,7 @@ HWTEST_F(DisplayManagerServiceTest, VirtualScreen, TestSize.Level1)
 
 /**
  * @tc.name: OrientationAndRotation
- * @tc.desc: DMS set oritation and rotation
+ * @tc.desc: DMS set orientation and rotation
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerServiceTest, OrientationAndRotation, TestSize.Level1)
@@ -339,7 +337,7 @@ HWTEST_F(DisplayManagerServiceTest, ScreenColor, TestSize.Level1)
 
 /**
  * @tc.name: RegisterDisplayManagerAgent
- * @tc.desc: DMS rigister display manager agent
+ * @tc.desc: DMS register display manager agent
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerServiceTest, RegisterDisplayManagerAgent, TestSize.Level1)
@@ -442,12 +440,6 @@ HWTEST_F(DisplayManagerServiceTest, AddAndRemoveSurfaceNode, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     DMError result = dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, surfaceNode);
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
-
-    surfaceNode = std::make_shared<RSSurfaceNode>(RSSurfaceNodeConfig{}, true);
-    std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<MockRSDisplayNode>(RSDisplayNodeConfig{});
-    sptr<SupportedScreenModes> info = new SupportedScreenModes;
-    sptr<AbstractScreen> absScreen =
-        new AbstractScreen(nullptr, "", INVALID_SCREEN_ID, INVALID_SCREEN_ID);
 }
 
 /**
@@ -623,7 +615,6 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, TestSize.Level1)
 HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, TestSize.Level1)
 {
     DisplayId displayId = 1;
-    struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     bool onTop = true;
     auto ret = dms_->AddSurfaceNodeToDisplay(displayId, surfaceNode, onTop);
@@ -638,7 +629,7 @@ HWTEST_F(DisplayManagerServiceTest, AddSurfaceNodeToDisplay02, TestSize.Level1)
 HWTEST_F(DisplayManagerServiceTest, GetAllScreenInfos, TestSize.Level1)
 {
     std::vector<sptr<ScreenInfo>> screenInfos;
-    auto ret =dms_->GetAllScreenInfos(screenInfos);
+    auto ret = dms_->GetAllScreenInfos(screenInfos);
     ASSERT_EQ(DMError::DM_OK, ret);
 }
 

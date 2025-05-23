@@ -2416,6 +2416,15 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
 
     /**
+     * @brief window snapshot
+     *
+     * @param pixelMap pixel map
+     * @return the error code of this operation
+     */
+    virtual WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief window SnapshotIgnorePrivacy
      *
      * @param pixelMap pixel map
@@ -3838,6 +3847,21 @@ public:
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable window shadow.
+     *
+     * @param isEnabled Enable or disable window shadow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window shadow is enabled.
+     *
+     * @return True means window shadow is enabled.
+     */
+    virtual bool GetWindowShadowEnabled() const { return false; }
+
+    /**
      * @brief Set the transition animation.
      *
      * @param transitionType window transition type.
@@ -4023,6 +4047,17 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the frameRect in a partical zoom-in scene.
+     *
+     * @param frameRect The original rect of frameBuffer before partical zoom-in.
+     * @return WMError::WM_OK means set success, otherwise failed.
+     */
+    virtual WMError SetFrameRectForParticalZoomIn(const Rect& frameRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }
