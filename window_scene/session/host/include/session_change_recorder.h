@@ -55,11 +55,7 @@ public:
     void Init();
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
-    void GetSceneSessionNeedDumpInfo(std::string& dumpInfo, std::vector<std::string>& params);
-    std::string FormatDumpInfoToJsonString (bool specifiedRecordTypeFlag, bool specifiedWindowFlag,
-        std::vector<std::string>& params, std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& dumpMap);
-    void SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo);
-    int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
+    void GetSceneSessionNeedDumpInfo(const std::vector<std::string>& dumpParams, std::string& dumpInfo);
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap()
     {
         return sceneSessionChangeNeedLogMap_;
@@ -77,6 +73,10 @@ private:
     void RecordLog(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     void PrintLog(std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap);
     void RecordDump(RecordType recordType, SceneSessionChangeInfo& changeInfo);
+    std::string FormatDumpInfoToJsonString (uint32_t specifiedRecordType, int32_t specifiedWindowId,
+    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>>& dumpMap);
+    void SimplifyDumpInfo(std::string& dumpInfo, std::string preCompressInfo);
+    int CompressString(const char* in_str, size_t in_len, std::string& out_str, int level);
 
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMap_;
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMap_;
