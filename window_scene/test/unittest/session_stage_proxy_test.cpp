@@ -31,6 +31,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class SessionStageProxyTest : public testing::Test {
@@ -296,10 +305,13 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level
  */
 HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardAnimationInfo keyboardAnimationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
