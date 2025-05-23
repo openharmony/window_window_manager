@@ -907,17 +907,19 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->property_->SetPersistentId(1);
 
-    float brightness = -1.0; // brightness < 0
+    float brightness = -0.5f; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    brightness = 2.0; // brightness > 1
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    brightness = 2.0f; // brightness > 1
     res = window->SetBrightness(brightness);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
-    brightness = 0.5;
+    brightness = 0.5f;
+    window->hostSession_ = session;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
     res = window->SetBrightness(brightness);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }
 
@@ -944,14 +946,14 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, Function | SmallTest | Level2)
     WMError res = window->SetBrightness(brightness);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_TYPE);
 
-    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     res = window->SetBrightness(brightness);
-    EXPECT_NE(res, WMError::WM_ERROR_NULLPTR);
+    EXPECT_NE(res, WMError::WM_OK);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
     res = window->SetBrightness(brightness);
     EXPECT_EQ(res, WMError::WM_OK);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness02 end";
 }
 
