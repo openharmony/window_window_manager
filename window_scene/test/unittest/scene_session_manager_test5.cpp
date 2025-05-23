@@ -312,16 +312,16 @@ HWTEST_F(SceneSessionManagerTest5, IsNeedUpdateBrightness, TestSize.Level1)
     sceneSession1->state_ = SessionState::STATE_FOREGROUND;
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
 
-    bool isNeed = ssm_->IsNeedUpdateBrightness(sceneSession, -1);
+    bool isNeed = ssm_->IsNeedUpdateBrightness(1, -1);
     EXPECT_EQ(isNeed, false);
     ssm_->displayBrightness_ = -1;
-    isNeed = ssm_->IsNeedUpdateBrightness(sceneSession, -1);
+    isNeed = ssm_->IsNeedUpdateBrightness(1, -1);
     EXPECT_EQ(isNeed, false);
     ssm_->displayBrightness_ = 0;
     ssm_->brightnessSessionId_ = 1;
-    isNeed = ssm_->IsNeedUpdateBrightness(sceneSession, -1);
+    isNeed = ssm_->IsNeedUpdateBrightness(1, -1);
     EXPECT_EQ(isNeed, true);
-    isNeed = ssm_->IsNeedUpdateBrightness(sceneSession1, -1);
+    isNeed = ssm_->IsNeedUpdateBrightness(2, -1);
     EXPECT_EQ(isNeed, false);
     ssm_->sceneSessionMap_.clear();
 }
