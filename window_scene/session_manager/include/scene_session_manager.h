@@ -840,6 +840,7 @@ private:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
     bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
@@ -862,8 +863,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
-    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
