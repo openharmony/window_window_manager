@@ -291,8 +291,8 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
-        int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
