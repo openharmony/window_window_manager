@@ -3375,8 +3375,8 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         TLOGE(WmsLogTag::WMS_PATTERN, "Write color failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(uid)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Write color failed");
+    if (!data.WriteInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write uid failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -3385,7 +3385,7 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
