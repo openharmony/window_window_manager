@@ -26,6 +26,12 @@ constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiext
 constexpr const char* const GESTURE_BACK_ENABLED = "gestureBackEnabled";
 constexpr const char* const IMMERSIVE_MODE_ENABLED = "immersiveModeEnabled";
 constexpr const char* const HOST_WINDOW_DELAY_RAISE_STATE_FIELD = "hostWindowDelayRaiseState";
+constexpr const char* const ATOMICSERVICE_KEY_FUNCTION = "ohos.atomicService.window.function";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLE = "ohos.atomicService.window.param.enable";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_STATUS = "ohos.atomicService.window.param.status";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAVIGATION = "ohos.atomicService.window.param.navigation";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAME = "ohos.atomicService.window.param.name";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLEANIMATION = "ohos.atomicService.window.param.enableAnimation";
 
 enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
