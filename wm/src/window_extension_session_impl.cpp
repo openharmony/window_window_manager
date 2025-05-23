@@ -447,16 +447,13 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
     const sptr<IWindowRectChangeListener>& listener)
 {
     WMError ret = WMError::WM_OK;
-    {
-        std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
-        ret = UnregisterListener(hostWindowRectChangeListener_, listener);
-    }
     bool isHostWindowRectChangeListenerEmpty = false;
     bool isRectChangeUIExtListenerIdsEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
     size_t rectChangeUIExtListenerIdsSize = 0;
     {
         std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
+        ret = UnregisterListener(hostWindowRectChangeListener_, listener);
         isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
         hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
     }
@@ -1800,23 +1797,20 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
         }
         case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
             TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                rectChangeUIExtListenerIds_.erase(persistentId);
-            }
             bool isHostWindowRectChangeListenerEmpty = false;
             bool isRectChangeUIExtListenerIdsEmpty = false;
             size_t hostWindowRectChangeListenerSize = 0;
             size_t rectChangeUIExtListenerIdsSize = 0;
             {
+                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+                rectChangeUIExtListenerIds_.erase(persistentId);
+                isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
+                rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
+            }
+            {
                 std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
                 isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
                 hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
-            }
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
-                rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
             }
             if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
                 TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
