@@ -326,11 +326,40 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, TestSize.Level1)
 }
 
 /**
- * @tc.name: SplitStringByDelimiter
- * @tc.desc: SplitStringByDelimiter test
+ * @tc.name: SplitStringByDelimiter_TestInput
+ * @tc.desc: SplitStringByDelimiter test inputStr
  * @tc.type: FUNC
  */
-HWTEST_F(WindowHelperTest, SplitStringByDelimiter, TestSize.Level1)
+HWTEST_F(WindowHelperTest, SplitStringByDelimiter_TestInput, TestSize.Level1)
+{
+    std::string inputStr = "";
+    std::string delimiter = ",";
+    std::unordered_set<std::string> container;
+    WindowHelper::SplitStringByDelimiter(inputStr, delimiter, container);
+    EXPECT_EQ(0, container.size());
+}
+
+/**
+ * @tc.name: SplitStringByDelimiter_TestDelimiter
+ * @tc.desc: SplitStringByDelimiter test delimiter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, SplitStringByDelimiter_TestDelimiter, TestSize.Level1)
+{
+    std::string inputStr = "a,b,c,d";
+    std::string delimiter = "";
+    std::unordered_set<std::string> container;
+    WindowHelper::SplitStringByDelimiter(inputStr, delimiter, container);
+    EXPECT_EQ(1, container.count(inputStr));
+    EXPECT_EQ(1, container.size());
+}
+
+/**
+ * @tc.name: SplitStringByDelimiter_TestOther
+ * @tc.desc: SplitStringByDelimiter test other
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, SplitStringByDelimiter_TestOther, TestSize.Level1)
 {
     std::string inputStr = "a,b,c,d";
     std::string delimiter = ",";
