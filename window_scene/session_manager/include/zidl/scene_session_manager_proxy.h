@@ -164,7 +164,7 @@ public:
     WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
-    WMError SetForegroundWindowNum(int32_t windowNum) override;
+    WMError SetForegroundWindowNum(uint32_t windowNum) override;
     WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override;
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

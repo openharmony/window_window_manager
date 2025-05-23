@@ -81,6 +81,7 @@ const std::string NOTIFY_APP_USE_CONTROL_LIST_CB = "updateAppUseControl";
 const std::string WATCH_GESTURE_CONSUME_RESULT_CB = "watchGestureConsumeResult";
 const std::string WATCH_FOCUS_ACTIVE_CHANGE_CB = "watchFocusActiveChange";
 const std::string SET_FOREGROUND_WINDOW_NUM_CB = "setForegroundWindowNum";
+const std::string MINIMIZE_BY_WINDOW_ID_CB = "minimizeByWindowId";
 const std::string SCENE_SESSION_DESTRUCT_CB = "sceneSessionDestruct";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
@@ -101,6 +102,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {WATCH_GESTURE_CONSUME_RESULT_CB,          ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB},
     {WATCH_FOCUS_ACTIVE_CHANGE_CB,             ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
     {SET_FOREGROUND_WINDOW_NUM_CB,             ListenerFunctionType::SET_FOREGROUND_WINDOW_NUM_CB},
+    {MINIMIZE_BY_WINDOW_ID_CB,                 ListenerFunctionType::MINIMIZE_BY_WINDOW_ID_CB},
     {SCENE_SESSION_DESTRUCT_CB,    ListenerFunctionType::SCENE_SESSION_DESTRUCT_CB},
 };
 } // namespace
@@ -1540,6 +1542,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::SET_FOREGROUND_WINDOW_NUM_CB:
             RegisterSetForegroundWindowNumCallback();
+            break;
+        case ListenerFunctionType::MINIMIZE_BY_WINDOW_ID_CB:
+            RegisterMinimizeByWindowIdCallback();
             break;
         case ListenerFunctionType::SCENE_SESSION_DESTRUCT_CB:
             RegisterSceneSessionDestructCallback();
@@ -4559,13 +4564,13 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
 
 void JsSceneSessionManager::RegisterSetForegroundWindowNumCallback()
 {
-    SceneSessionManager::GetInstance().RegisterSetForegroundWindowNumCallback([this](int32_t windowNum) {
+    SceneSessionManager::GetInstance().RegisterSetForegroundWindowNumCallback([this](uint32_t windowNum) {
         TLOGND(WmsLogTag::WMS_PC, "RegisterSetForegroundWindowNumCallback called");
         this->OnSetForegroundWindowNum(windowNum);
     });
 }
 
-void JsSceneSessionManager::OnSetForegroundWindowNum(int32_t windowNum)
+void JsSceneSessionManager::OnSetForegroundWindowNum(uint32_t windowNum)
 {
     TLOGD(WmsLogTag::WMS_PC, "in");
     taskScheduler_->PostMainThreadTask([this, windowNum,
@@ -4576,6 +4581,45 @@ void JsSceneSessionManager::OnSetForegroundWindowNum(int32_t windowNum)
         }
         napi_value windowNumValue = CreateJsValue(env, windowNum);
         napi_value argv[] = { windowNumValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterMinimizeByWindowIdCallback()
+{
+    SceneSessionManager::GetInstance().RegisterMinimizeByWindowIdCallback(
+        [this](const std::vector<int32_t>& windowIds) {
+        TLOGND(WmsLogTag::WMS_PC, "RegisterMinimizeByWindowIdCallback called");
+        this->OnMinimizeByWindowId(windowIds);
+    });
+}
+
+static napi_value CreateWindowIds(napi_env env, const std::vector<int32_t>& windowIds)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, windowIds.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    auto index = 0;
+    for (const auto& windowId : windowIds) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(windowId)));
+    }
+    return arrayValue;
+}
+
+void JsSceneSessionManager::OnMinimizeByWindowId(const std::vector<int32_t>& windowIds)
+{
+    TLOGD(WmsLogTag::WMS_PC, "in");
+    taskScheduler_->PostMainThreadTask([this, windowIds,
+        jsCallBack = GetJSCallback(MINIMIZE_BY_WINDOW_ID_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PC, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value windowIdList = CreateWindowIds(env, windowIds);
+        napi_value argv[] = { windowIdList };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }

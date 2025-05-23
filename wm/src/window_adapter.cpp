@@ -1217,7 +1217,7 @@ WMError WindowAdapter::MinimizeByWindowId(const std::vector<int32_t>& windowIds)
     return wmsProxy->MinimizeByWindowId(windowIds);
 }
 
-WMError WindowAdapter::SetForegroundWindowNum(int32_t windowNum)
+WMError WindowAdapter::SetForegroundWindowNum(uint32_t windowNum)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();

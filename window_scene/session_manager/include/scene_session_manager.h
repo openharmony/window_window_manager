@@ -150,7 +150,8 @@ using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, 
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
-using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
+using SetForegroundWindowNumFunc = std::function<void(uint32_t windowNum)>;
+using MinimizeByWindowIdFunc = std::function<void(const std::vector<int32_t>& windowIds)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
@@ -524,7 +525,7 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
-    WMError SetForegroundWindowNum(int32_t windowNum) override;
+    WMError SetForegroundWindowNum(uint32_t windowNum) override;
     void RegisterSetForegroundWindowNumCallback(SetForegroundWindowNumFunc&& func);
 
     const SystemSessionConfig& GetSystemSessionConfig() const;
@@ -696,6 +697,7 @@ public:
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
+    void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
@@ -1106,6 +1108,7 @@ private:
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
     SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
+    MinimizeByWindowIdFunc minimizeByWindowIdFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 

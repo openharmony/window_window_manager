@@ -298,7 +298,7 @@ public:
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
-    virtual WMError SetForegroundWindowNum(int32_t windowNum) { return WMError::WM_OK; }
+    virtual WMError SetForegroundWindowNum(uint32_t windowNum) { return WMError::WM_OK; }
     virtual WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) { return WSError::WS_OK; }
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }

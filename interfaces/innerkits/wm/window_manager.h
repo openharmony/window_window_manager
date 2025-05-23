@@ -1177,7 +1177,7 @@ public:
      * @param windowNum foreground window number
      * @return WM_OK means set success, others means failed.
      */
-    WMError SetForegroundWindowNum(int32_t windowNum);
+    WMError SetForegroundWindowNum(uint32_t windowNum);
 
     /**
      * @brief Register window info change callback.
