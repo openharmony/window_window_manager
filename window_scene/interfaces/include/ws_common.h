@@ -310,6 +310,11 @@ enum class FocusChangeReason {
     SYSTEM_KEYBOARD,
 
     /**
+     * focus on alt + tab
+     */
+    ALT_TAB,
+
+    /**
      * focus change max.
      */
     MAX,

@@ -950,6 +950,38 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level
 }
 
 /**
+ * @tc.name: CheckRequestFocusSubWindowImmdediately
+ * @tc.desc: CheckRequestFocusSubWindowImmdediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmdediately";
+    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmdediately";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ASSERT_EQ(ret, false);
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->SetFocusedOnShow(true);
+    sceneSession->subSession_.push_back(subSession);
+
+    // ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    // ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+
+    ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
+    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ASSERT_EQ(ret, true);
+}
+
+/**
  * @tc.name: GetNextFocusableSession
  * @tc.desc: GetNextFocusableSession
  * @tc.type: FUNC
