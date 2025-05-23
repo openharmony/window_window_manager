@@ -940,6 +940,7 @@ HWTEST_F(WindowSessionImplTest, SetBrightness02, Function | SmallTest | Level2)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     float brightness = 0.5;
