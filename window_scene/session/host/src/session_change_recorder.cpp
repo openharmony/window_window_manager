@@ -40,8 +40,7 @@ std::string GetFormattedTime()
     
     std::ostringstream oss;
     const int formatThreeSpace = 3;
-    oss << std::put_time(tmPtr, "%m-%d %H:%M:%S") << "."
-    << std::setw(formatThreeSpace) << ms.count();
+    oss << std::put_time(tmPtr, "%m-%d %H:%M:%S") << "." << std::setw(formatThreeSpace) << ms.count();
     return oss.str();
 }
 } // namespace
