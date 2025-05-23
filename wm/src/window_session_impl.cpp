@@ -293,7 +293,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
     WindowHelper::SplitStringByDelimiter(
-        system::GetParameter("const.window.containerColorList", ""), ",", containerColorList_);
+        system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
