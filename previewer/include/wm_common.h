@@ -766,6 +766,61 @@ enum class WindowAnimation : uint32_t {
     CUSTOM
 };
 
+/**
+ * @brief Enumerates window anchor.
+ */
+enum class WindowAnchor : uint32_t {
+    TOP_START = 0,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+};
+
+/**
+ * @struct WindowAnchorInfo
+ *
+ * @brief Window anchor info
+ */
+struct WindowAnchorInfo : public Parcelable {
+    bool isAnchorEnabled_ = false;
+    WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
+    int32_t offsetX_ = 0;
+    int32_t offsetY_ = 0;
+
+    WindowAnchorInfo() {}
+    WindowAnchorInfo(bool isAnchorEnabled) : isAnchorEnabled_(isAnchorEnabled) {}
+    WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
+        offsetX_(offsetX), offsetY_(offsetY) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
+            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+    }
+
+    static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
+    {
+        uint32_t windowAnchorMode = 0;
+        WindowAnchorInfo* windowAnchorInfo = new(std::nothrow) WindowAnchorInfo();
+        if (windowAnchorInfo == nullptr) {
+            return nullptr;
+        }
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+            delete windowAnchorInfo;
+            return nullptr;
+        }
+        windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        return windowAnchorInfo;
+    }
+};
+
 struct DecorButtonStyle {
     int32_t  colorMode = DEFAULT_COLOR_MODE;
     uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;

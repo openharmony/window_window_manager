@@ -55,6 +55,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
