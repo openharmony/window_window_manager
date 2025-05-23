@@ -487,18 +487,19 @@ HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, TestSize.Level1)
     auto ret = ssm_->systemConfig_.IsPcWindow();
     ASSERT_EQ(ret, false);
 
-    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    int32_t fingerId = 0;
+    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
     sourcePersistentId = 1;
     ssm_->sceneSessionMap_.clear();
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
 }
 

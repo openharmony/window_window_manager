@@ -406,8 +406,8 @@ public:
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
     WMError SetAppKeyFramePolicy(const std::string& bundleName,
         const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
-        int32_t targetPersistentId) override { return WMError::WM_OK; }
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) override { return WMError::WM_OK; }
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

@@ -14811,7 +14811,8 @@ WMError SceneSessionManager::SetStartWindowBackgroundColor(
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+                                                        int32_t fingerId)
 {
     TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
         sourcePersistentId, targetPersistentId);
@@ -14854,13 +14855,13 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     return ShiftAppWindowPointerEventInner(sourcePersistentId, targetPersistentId,
-        targetSession->GetSessionProperty()->GetDisplayId());
+        targetSession->GetSessionProperty()->GetDisplayId(), fingerId);
 }
 
 WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
-    int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
+    int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId)
 {
-    return taskScheduler_->PostSyncTask([sourceWindowId, targetWindowId, targetDisplayId] {
+    return taskScheduler_->PostSyncTask([sourceWindowId, targetWindowId, targetDisplayId, fingerId] {
         auto display = DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
     	float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     	if (display) {
@@ -14872,6 +14873,12 @@ WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     	param.targetWindowId = targetWindowId;
     	param.x = -outside;
     	param.y = -outside;
+        if (fingerId == INVALID_FINGER_ID) {
+            param.sourceType = MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+        } else {
+            param.sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+            param.fingerId = fingerId;
+        }
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
         TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d vpr %{public}f ret %{public}d",
             param.sourceWindowId, param.targetWindowId, vpr, ret);
