@@ -93,6 +93,8 @@ public:
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
+        TRANS_ID_CREATE_NEW_INSTANCE_KEY,
+        TRANS_ID_REMOVE_INSTANCE_KEY,
     };
 
     /*
@@ -260,6 +262,35 @@ public:
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
      */
     virtual WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) = 0;
+
+    /**
+     * @brief Create a new instanceKey of a specific bundle
+     *
+     * This function is used to create a new instanceKey
+     * If the number of instanceKey reaches max limit, then return the last created instanceKey
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param bundleName the bundleName of the new instanceKey needs to be created
+     * @param instanceKey will be assigned the instanceKey just created
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) = 0;
+
+    /**
+     * @brief Remove a instanceKey of a specific bundle
+     *
+     * This function is used to remove a instanceKey of a specific bundle
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param bundleName the bundleName of the instanceKey to be removed
+     * @param instanceKey the instanceKey that needs to be removed
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
