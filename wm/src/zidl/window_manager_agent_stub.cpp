@@ -240,14 +240,14 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
 bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
     std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    uint32_t WindowInfoListLength = 0;
-    if (!data.ReadUint32(WindowInfoListLength)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowInfoLength failed");
+    uint32_t windowInfoListLength = 0;
+    if (!data.ReadUint32(windowInfoListLength)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoListLength failed");
         return false;
     }
-    size_t WindowInfoListSize = static_cast<size_t>(WindowInfoListLength);
+    size_t windowInfoListSize = static_cast<size_t>(windowInfoListLength);
 
-    for (size_t i = 0; i < WindowInfoListSize; i++) {
+    for (size_t i = 0; i < windowInfoListSize; i++) {
         uint32_t windowInfoLength = 0;
         if (!data.ReadUint32(windowInfoLength)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoLength failed");
@@ -269,13 +269,13 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
 bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
     std::unordered_map<WindowInfoKey, std::any>& windowInfo)
 {
-    int32_t WindowInfoKeyValue = 0;
-    if (!data.ReadInt32(WindowInfoKeyValue)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowInfoKeyValue failed");
+    int32_t windowInfoKeyValue = 0;
+    if (!data.ReadInt32(windowInfoKeyValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoKeyValue failed");
         return false;
     }
 
-    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(WindowInfoKeyValue);
+    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(windowInfoKeyValue);
     switch (windowInfoKey) {
         case WindowInfoKey::WINDOW_ID : {
             uint32_t value = 0;
@@ -323,8 +323,8 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
             windowInfo[windowInfoKey] = value;
             break;
         }
-        case WindowInfoKey::RECT : {
-            Rect rect;
+        case WindowInfoKey::WINDOW_RECT : {
+            Rect rect = Rect::EMPTY_RECT;
             if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
                 !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read Rect failed");

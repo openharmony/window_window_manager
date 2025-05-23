@@ -536,9 +536,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowPropertyChangeAgent01, Test
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         sceneSessionManagerProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         sceneSessionManagerProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
 }
 
