@@ -1096,7 +1096,7 @@ bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) co
             TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionType");
             return false;
         }
-        if (!parcel.WriteParcelable(&(*animation))) {
+        if (animation == nullptr || !parcel.WriteParcelable(animation.get())) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimation");
             return false;
         }
