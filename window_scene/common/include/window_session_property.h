@@ -43,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetTransitionAnimationConfig(WindowTransitionType transitionType, const TransitionAnimation& animation);
     void SetRequestRect(const struct Rect& rect);
     void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
@@ -113,6 +114,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> GetTransitionAnimationConfig() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -310,11 +312,6 @@ public:
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     mutable std::mutex windowMaskMutex_;
-
-    /**
-     * Window Transition Animation For PC
-     */
-    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -538,6 +535,11 @@ private:
     mutable std::mutex shadowsInfoMutex_;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
  
 class CompatibleModeProperty : public Parcelable {
