@@ -253,7 +253,7 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
     }
     if (!isToast && !parentSession->GetIsUIExtFirstSubWindow() &&
         parentSession->GetProperty()->GetSubWindowLevel() >= 1 &&
-        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        !parentSession->IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1547,9 +1547,9 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 
 void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrPadCapabilityEnabled(),
+    TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrFreeMultiWindowCapabilityEnabled(),
         isColdStart_);
-    if (IsPcOrPadCapabilityEnabled() && !isColdStart_) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
         NotifyAfterInteractive();
     }
@@ -3447,7 +3447,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrFreeMultiWindowCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -3472,7 +3472,7 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
             return true;
     }
 
-    if (IsPcOrPadCapabilityEnabled()) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled()) {
         return true;
     }
     return false;
@@ -3492,7 +3492,7 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowType()
 bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
 {
     WindowType windowType = GetType();
-    bool isPcOrFreeMultiWindowCanMove = IsPcOrPadCapabilityEnabled() && (WindowHelper::IsSystemWindow(windowType) ||
+    bool isPcOrFreeMultiWindowCanMove = IsPcOrFreeMultiWindowCapabilityEnabled() && (WindowHelper::IsSystemWindow(windowType) ||
         WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType));
     bool isPhoneWindowCanMove = (windowSystemConfig_.IsPhoneWindow() ||
         (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
@@ -3553,7 +3553,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4188,7 +4188,7 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4216,7 +4216,7 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
