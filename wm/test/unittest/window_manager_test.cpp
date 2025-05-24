@@ -1993,6 +1993,28 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowRectChangeListeners_ = oldListeners;
 }
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: check AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, AnimateTo01, Function | SmallTest | Level2)
+{
+    int32_t windowId = 1;
+    WindowAnimationProperty animationProperty;
+    WindowAnimationOption animationOption;
+    animationProperty.targetScale = 1.5f;
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    WMError ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
+    EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
