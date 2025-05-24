@@ -69,6 +69,10 @@ ohos_shared_library("pipwindowani_kit") {
     "graphic_surface:surface",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image",
+    "image_framework:image_native",
+    "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
   ]

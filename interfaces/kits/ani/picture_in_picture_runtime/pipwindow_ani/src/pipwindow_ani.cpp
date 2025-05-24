@@ -27,7 +27,7 @@ ani_status PiPWindowAni::Init(ani_env* env, ani_namespace nsp)
     TLOGI(WmsLogTag::WMS_PIP, "[ANI] Init");
     if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "[ANI] null env");
-        return nullptr;
+        return ANI_ERROR;
     }
     ani_function setObjFunc = nullptr;
     ani_status ret = env->Namespace_FindFunction(nsp, "setNativeObj", "J:V", &setObjFunc);
