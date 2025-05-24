@@ -4790,14 +4790,22 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
             }
         }
     }
-    // Notify UIExtension rect change listeners host window rect change
+    NofityUIExtHostWindowRectChangeListeners(rect, reason);
+}
+
+void WindowSessionImpl::NofityUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason)
+{
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
     bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
-    std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-    if (!isUIExtensionWindow && !rectChangeUIExtListenerIds_.empty()) {
+    std::unordered_set<int32_t> rectChangeUIExtListenerIdsCopy;
+    {
+        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+        rectChangeUIExtListenerIdsCopy = rectChangeUIExtListenerIds_;
+    }
+    if (!isUIExtensionWindow && !rectChangeUIExtListenerIdsCopy.empty()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeUIExtListenerIds_ size: %{public}zu",
-            rectChangeUIExtListenerIds_.size());
+            rectChangeUIExtListenerIdsCopy.size());
         AAFwk::Want rectWant;
         rectWant.SetParam(Extension::RECT_X, rect.posX_);
         rectWant.SetParam(Extension::RECT_Y, rect.posY_);
@@ -4806,7 +4814,7 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
         rectWant.SetParam(Extension::RECT_CHANGE_REASON, static_cast<int32_t>(reason));
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), rectWant,
-            rectChangeUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeUIExtListenerIdsCopy, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -6729,32 +6737,15 @@ WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentI
 {
     switch (code) {
         case static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            auto ret = RaiseToAppTopOnDrag();
-            if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_HIERARCHY, "Raise host window failed, winId: %{public}u, errCode: %{public}d",
-                    GetWindowId(), ret);
-                return ret;
-            }
-            TLOGI(WmsLogTag::WMS_HIERARCHY, "Raise host window successfully, winId: %{public}u", GetWindowId());
+            return HandleHostWindowRaise(code, persistentId, data);
             break;
         }
         case static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                rectChangeUIExtListenerIds_.emplace(persistentId);
-            }
-            TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change listener", persistentId);
+            return HandleRegisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
         case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                rectChangeUIExtListenerIds_.erase(persistentId);
-            }
-            TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
+            return HandleUnregisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
         default: {
@@ -6762,6 +6753,43 @@ WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentI
             break;
         }
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    auto ret = RaiseToAppTopOnDrag();
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Raise host window failed, winId: %{public}u, errCode: %{public}d",
+            GetWindowId(), ret);
+        return ret;
+    }
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Raise host window successfully, winId: %{public}u", GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    {
+        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+        rectChangeUIExtListenerIds_.emplace(persistentId);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change listener", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    {
+        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
+        rectChangeUIExtListenerIds_.erase(persistentId);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
     return WMError::WM_OK;
 }
 
