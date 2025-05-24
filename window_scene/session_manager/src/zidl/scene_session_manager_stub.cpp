@@ -105,6 +105,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleTerminateSessionNew(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER):
             return HandleUpdateSessionAvoidAreaListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SCREEN_SHOT_APP_EVENT_LISTENER):
+            return HandleUpdateSessionScreenshotAppEventListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_DUMP_INFO):
             return HandleGetSessionDump(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_SESSION_SNAPSHOT):
@@ -940,6 +942,21 @@ int SceneSessionManagerStub::HandleUpdateSessionAvoidAreaListener(MessageParcel&
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateSessionAvoidAreaListener(persistentId, haveAvoidAreaListener);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleUpdateSessionScreenshotAppEventListener(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        return ERR_INVALID_DATA;
+    }
+    bool haveAvoidAreaListener = false;
+    if (!data.ReadBool(haveAvoidAreaListener)) {
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = HandleUpdateSessionScreenshotAppEventListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

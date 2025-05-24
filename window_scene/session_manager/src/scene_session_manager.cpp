@@ -10563,6 +10563,31 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
+WSError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
+{
+    const auto callingPid = IPCSkeleton::GetCallingRealPid();
+    return taskScheduler_->PostSyncTask([this, persistentId, haveListener, callingPid, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d haveListener %{public}u",
+            where, persistentId, haveListener);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is nullptr", where);
+            return WSError::WS_DO_NOTHING;
+        }
+        if (callingPid != sceneSession->GetCallingPid()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s Permission denied, not called by the same process", where);
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
+        if (haveListener) {
+            screenshotAppEventListenerSessionSet_.insert(persistentId);
+            sceneSession->NotifyScreenshotAppEvent();
+        } else {
+            screenshotAppEventListenerSessionSet_.erase(persistentId);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+
 void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
 {
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?

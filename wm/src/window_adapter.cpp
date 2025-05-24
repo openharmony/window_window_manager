@@ -778,6 +778,15 @@ WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t persistentId, bool
     return static_cast<WMError>(wmsProxy->UpdateSessionAvoidAreaListener(persistentId, haveListener));
 }
 
+WMError WindowAdapter::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    return static_cast<WMError>(wmsProxy->UpdateSessionScreenshotAppEventListener(persistentId, haveListener));
+}
+
 WMError WindowAdapter::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
