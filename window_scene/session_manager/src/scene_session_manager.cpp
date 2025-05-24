@@ -14860,6 +14860,11 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         targetSession->GetSessionProperty()->GetDisplayId(), fingerId);
 }
 
+WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType screenshotEventType)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event:  %{public}u", screenshotEventType);
+}
+
 WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId)
 {

@@ -1862,6 +1862,15 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
+WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType screenshotEventType) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyScreenshotEvent(screenshotEventType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::SetStartWindowBackgroundColor(
     const std::string& moduleName, const std::string& abilityName, uint32_t color)
 {

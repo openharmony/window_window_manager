@@ -202,6 +202,12 @@ napi_value JsWindowManager::ShiftAppWindowTouchEvent(napi_env env, napi_callback
     return (me != nullptr) ? me->OnShiftAppWindowTouchEvent(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenshotEvent(env, info) : nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -1544,6 +1550,45 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     return result;
 }
 
+napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t screenshotEventTypeValue = 0;
+    if (!ConvertFromJsValue(env, argv[0], screenshotEventTypeValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to screenshotEventTypeValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(screenshotEventTypeValue);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [env, task = napiAsyncTask, screenshotEventType, where = __func__] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(screenshotEventType));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}u", where, screenshotEventType);
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "failed to send event"));
+    }
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1605,6 +1650,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetStartWindowBackgroundColor);
     BindNativeFunction(env, exportObj, "shiftAppWindowTouchEvent", moduleName,
         JsWindowManager::ShiftAppWindowTouchEvent);
+    BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName,
+        JsWindowManager::NotifyScreenshotEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
