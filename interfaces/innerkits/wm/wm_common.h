@@ -2810,6 +2810,36 @@ enum class SubWindowSource : uint32_t {
     SUB_WINDOW_SOURCE_UNKNOWN = 0,
     SUB_WINDOW_SOURCE_ARKUI = 1,
 };
+
+/**
+ * @brief Screenshot event type.
+ */
+enum class ScreenshotEventType : uint32_t {
+    /**
+     * System screenshot.
+     */
+    SYSTEM_SCREENSHOT = 0,
+
+    /**
+     * System screenshot abort.
+     */
+    SYSTEM_SCREENSHOT_ABORT,
+
+    /**
+     * Scroll shot start.
+     */
+    SCROLL_SHOT_START,
+
+    /**
+     * Scroll shot end.
+     */
+    SCROLL_SHOT_END,
+
+    /**
+     * Scroll shot abort.
+     */
+    SCROLL_SHOT_ABORT,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
