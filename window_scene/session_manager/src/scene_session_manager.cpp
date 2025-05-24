@@ -8231,7 +8231,7 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr
         return iter && iter->GetPersistentId() == focusedSessionId;
     };
     if (std::find_if(subSessionVec.begin(), subSessionVec.end(), std::move(conditionFunc)) != subSessionVec.end()) {
-        TLOGD(WmsLogTag::WMS_SUB, "subwindow id: %{public}d has been focused!", focusedSessionId);
+        TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d has been focused!", focusedSessionId);
         return WSError::WS_OK;
     }
     WSError ret = WSError::WS_DO_NOTHING;
