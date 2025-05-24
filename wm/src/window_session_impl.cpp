@@ -134,6 +134,7 @@ std::map<int32_t, std::vector<sptr<IKBWillHideListener>>> WindowSessionImpl::key
 std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> WindowSessionImpl::keyboardDidShowListeners_;
 std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> WindowSessionImpl::keyboardDidHideListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
+std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::screenshotAppEventListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
@@ -166,6 +167,7 @@ std::recursive_mutex WindowSessionImpl::keyboardWillHideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::keyboardDidShowListenerMutex_;
 std::recursive_mutex WindowSessionImpl::keyboardDidHideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
+std::recursive_mutex WindowSessionImpl::screenshotAppEventListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
@@ -3939,6 +3941,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(screenshotListeners_, persistentId);
     }
     {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        ClearUselessListeners(screenshotAppEventListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
         ClearUselessListeners(windowStatusChangeListeners_, persistentId);
     }
@@ -4604,6 +4610,20 @@ WMError WindowSessionImpl::UnregisterScreenshotListener(const sptr<IScreenshotLi
     return UnregisterListener(screenshotListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetPersistentId());
+    std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+    return RegisterListener(screenshotAppEventListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterScreenshotListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetPersistentId());
+    std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+    return UnregisterListener(screenshotAppEventListeners_[GetPersistentId()], listener);
+}
+
 template<typename T>
 EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::
     GetListeners()
@@ -4634,6 +4654,13 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
         screenshotListeners.push_back(listener);
     }
     return screenshotListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IScreenshotAppEventListener,
+    std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return screenshotAppEventListeners_[GetPersistentId()];
 }
 
 WSError WindowSessionImpl::NotifyDestroy()
@@ -4712,22 +4739,15 @@ void WindowSessionImpl::NotifyScreenshot()
     }
 }
 
-void WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+WSError WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
-    std::lock_guard<std::recursive_mutex> lockListener(screenshotListenerMutex_);
-    auto screenshotListeners = GetListeners<IScreenshotListener>();
-    for (auto& listener : screenshotListeners) {
-        if (listener != nullptr) {
-            listener->OnScreenshot();
-        }
-    }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, screenshotEvent: %{public}u",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, screenshotEvent: %{public}u",
         GetPersistentId(), type);
     std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
-    auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
-    for (auto& listener : screenshotListenerMutex_) {
+    auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
+    for (auto& listener : screenshotAppEventListeners) {
         if (listener != nullptr) {
-            listener->OnWindowVisibilityChangedCallback(isVisible);
+            listener->OnScreenshotAppEvent(type);
         }
     }
     return WSError::WS_OK;

@@ -445,6 +445,20 @@ public:
 };
 
 /**
+ * @class IScreenshotAppEventListener
+ *
+ * @brief IScreenshotAppEventListener is a Listener to observe event when screenshot happened.
+ */
+class IScreenshotAppEventListener : virtual public RefBase {
+public:
+    /**
+     * @brief Observe event when screenshot happened.
+     */
+    virtual void OnScreenshotAppEvent(ScreenshotEventType type) {}
+};
+using IScreenshotAppEventListenerSptr = sptr<ISystemDensityChangeListener>;
+
+/**
  * @class IDialogTargetTouchListener
  *
  * @brief IDialogTargetTouchListener is a Listener to observe event when touch dialog window.
@@ -1914,6 +1928,24 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) { return WMError::WM_OK; }
+
+    /**
+     * @brief Register screen shot app event listener.
+     *
+     * @param listener IScreenshotAppEventListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterScreenshotAppEventListener(
+        const IScreenshotAppEventListenerSptr& listener){ return WMError::WM_OK; }
+
+    /**
+     * @brief Unregister screen shot app event listener.
+     *
+     * @param listener IScreenshotAppEventListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterScreenshotAppEventListener(
+        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_OK; }
 
     /**
      * @brief Register dialog target touch listener.
