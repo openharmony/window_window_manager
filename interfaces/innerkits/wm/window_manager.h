@@ -1163,7 +1163,7 @@ public:
      * @param mode screen shot event type.
      * @return WM_OK means set success, others means set failed.
      */
-    WMError NotifyScreenshotEvent(ScreenshotEventType screenshotEventType);
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
     /**
      * @brief Request focus.

@@ -294,7 +294,7 @@ public:
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError NotifyScreenshotEvent(
-        ScreenshotEventType screenshotEventType) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        ScreenshotEventType type) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

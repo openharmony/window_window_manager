@@ -1862,9 +1862,9 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
-WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType screenshotEventType) const
+WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType type) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyScreenshotEvent(screenshotEventType);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyScreenshotEvent(type);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }

@@ -576,7 +576,7 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
-    WMError NotifyScreenshotEvent(ScreenshotEventType screenshotEventType);
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
     /*
      * Multi Window
@@ -1437,6 +1437,7 @@ private:
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    std::set<int32_t> screenshotAppEventListenerSessionSet_;
     void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifyWindowPropertyChange(ScreenId screenId);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,

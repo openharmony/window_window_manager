@@ -2048,6 +2048,15 @@ void Session::NotifyScreenshot()
     sessionStage_->NotifyScreenshot();
 }
 
+WSError Session::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, event:  %{public}u", GetPersistentId(), type);
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyScreenshotAppEvent(type);
+}
+
 WSError Session::NotifyCloseExistPipWindow()
 {
     if (!sessionStage_) {

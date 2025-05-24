@@ -1574,7 +1574,7 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [env, task = napiAsyncTask, screenshotEventType, where = __func__] {
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(screenshotEventType));
+            SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}u", where, screenshotEventType);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));

@@ -4712,6 +4712,27 @@ void WindowSessionImpl::NotifyScreenshot()
     }
 }
 
+void WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(screenshotListenerMutex_);
+    auto screenshotListeners = GetListeners<IScreenshotListener>();
+    for (auto& listener : screenshotListeners) {
+        if (listener != nullptr) {
+            listener->OnScreenshot();
+        }
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}d, screenshotEvent: %{public}u",
+        GetPersistentId(), type);
+    std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+    auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
+    for (auto& listener : screenshotListenerMutex_) {
+        if (listener != nullptr) {
+            listener->OnWindowVisibilityChangedCallback(isVisible);
+        }
+    }
+    return WSError::WS_OK;
+}
+
 /** @note @window.layout */
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {

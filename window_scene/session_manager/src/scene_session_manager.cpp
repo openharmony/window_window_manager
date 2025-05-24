@@ -11124,6 +11124,21 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
     }, "OnScreenshot:PID:" + std::to_string(displayId));
 }
 
+WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event:  %{public}u", type);
+    taskScheduler_->PostAsyncTask([this, type] {
+        for (auto persistentId : screenshotAppEventListenerSessionSet_) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
+                continue;
+            }
+            sceneSession->NotifyScreenshotAppEvent(type);
+        }
+    }, __func__);
+}
+
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", persistentId);
@@ -14858,11 +14873,6 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }
     return ShiftAppWindowPointerEventInner(sourcePersistentId, targetPersistentId,
         targetSession->GetSessionProperty()->GetDisplayId(), fingerId);
-}
-
-WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType screenshotEventType)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event:  %{public}u", screenshotEventType);
 }
 
 WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
