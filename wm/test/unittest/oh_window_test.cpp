@@ -139,6 +139,7 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     touchEvent.action = static_cast<Input_TouchEventAction>(10);
     touchEvent.displayX = 100;
     touchEvent.displayY = 200;
+    touchEvent.windowId = 1;
     ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
