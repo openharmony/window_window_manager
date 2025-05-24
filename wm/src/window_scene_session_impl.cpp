@@ -627,6 +627,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             TLOGI(WmsLogTag::WMS_LIFE, "create failed not system or sub type, type: %{public}d", type);
             return WMError::WM_ERROR_INVALID_CALLING;
         }
+        isEnableDefaultDensityWhenCreate_ = windowOption_->IsDefaultDensityEnabled();
         ret = CreateAndConnectSpecificSession();
     }
 
@@ -651,10 +652,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         RegisterWindowInspectorCallback();
     }
-    TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
-        "id:%{public}d], state:%{public}u, mode:%{public}u, displayId:%{public}" PRIu64,
-        property_->GetWindowName().c_str(), property_->GetPersistentId(),
-        state_, GetWindowMode(), property_->GetDisplayId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
+        "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
+        isEnableDefaultDensityWhenCreate_, property_->GetDisplayId());
     return ret;
 }
 
@@ -6028,6 +6029,9 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
 {
     if (WindowHelper::IsMainWindow(GetType())) {
         return GetDefaultDensityEnabled();
+    }
+    if (isEnableDefaultDensityWhenCreate_) {
+        return true;
     }
     if (auto mainWindow = FindMainWindowWithContext()) {
         CopyUniqueDensityParameter(mainWindow);

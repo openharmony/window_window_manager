@@ -423,6 +423,16 @@ bool WindowOption::GetIsDensityFollowHost() const
     return isDensityFollowHost_;
 }
 
+void WindowOption::SetDefaultDensityEnabled(bool defaultDensityEnabled)
+{
+    defaultDensityEnabled_ = defaultDensityEnabled;
+}
+
+bool WindowOption::IsDefaultDensityEnabled() const
+{
+    return defaultDensityEnabled_;
+}
+
 void WindowOption::SetConstrainedModal(bool isConstrainedModal)
 {
     isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
