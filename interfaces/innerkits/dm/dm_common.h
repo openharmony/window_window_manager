@@ -549,7 +549,7 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isCaptureFullOfScreen = false;
+    bool isFullScreenCapture_ = false;
 };
 
 struct ExpandOption {

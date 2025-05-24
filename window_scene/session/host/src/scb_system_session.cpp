@@ -43,9 +43,11 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
-        auto iter = surfaceWindowTypeMap.find(name);
-        if (iter != surfaceWindowTypeMap.end()) {
-            config.surfaceWindowType = iter->second;
+        for (const auto& iter : surfaceWindowTypeMap) {
+            if (name.find(iter.first) != std::string::npos) {
+                config.surfaceWindowType = iter.second;
+                break;
+            }
         }
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
@@ -89,18 +91,9 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             }
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-            session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
-            session->keyboardPanelRectUpdateCallback_();
-        }
         return ret;
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
-}
-
-void SCBSystemSession::SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func)
-{
-    keyboardPanelRectUpdateCallback_ = func;
 }
 
 void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
@@ -110,12 +103,6 @@ void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
         return;
     }
     keyboardSession_ = session;
-    KeyboardPanelRectUpdateCallback onKeyboardPanelRectUpdate = [this]() {
-        if (this->keyboardSession_ != nullptr) {
-            this->keyboardSession_->OnKeyboardPanelUpdated();
-        }
-    };
-    SetKeyboardPanelRectUpdateCallback(onKeyboardPanelRectUpdate);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
 }
 
@@ -251,10 +238,6 @@ bool SCBSystemSession::IsVisibleForeground() const
 void SCBSystemSession::NotifyClientToUpdateAvoidArea()
 {
     SceneSession::NotifyClientToUpdateAvoidArea();
-    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-        keyboardPanelRectUpdateCallback_ && isKeyboardPanelEnabled_) {
-        keyboardPanelRectUpdateCallback_();
-    }
 }
 
 void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)

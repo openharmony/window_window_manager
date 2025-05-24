@@ -261,8 +261,10 @@ public:
      *
      * @param avoidArea Area needed to be avoided.
      * @param type Type of avoid area.
+     * @param info Keyboard occupied area information.
      */
-    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) {}
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr) {}
 };
 
 /**
@@ -2416,6 +2418,15 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
 
     /**
+     * @brief window snapshot
+     *
+     * @param pixelMap pixel map
+     * @return the error code of this operation
+     */
+    virtual WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief window SnapshotIgnorePrivacy
      *
      * @param pixelMap pixel map
@@ -2796,6 +2807,18 @@ public:
      */
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
+
+    /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param name type of system bar
+     * @param enable is system bar enabled
+     * @param enableAnimation is animation enabled
+     */
+    virtual WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation)
+    {
+        return WMError::WM_OK;
+    }
 
     /*
      * @brief Set System Bar Property for page
@@ -3365,6 +3388,28 @@ public:
     }
 
     /**
+     * @brief UIExtension register host window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief UIExtension unregister host window rect change listener.
+     *
+     * @param listener IWindowRectChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Register window nonsecure limit change listener.
      *
      * @param listener IExtensionSecureLimitChangeListener.
@@ -3566,7 +3611,7 @@ public:
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
-    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+    virtual WMError GetGestureBackEnabled(bool& enable) const { return WMError::WM_OK; }
 
     /**
      * @brief this interface is invoked by the ACE to the native host.
@@ -3823,12 +3868,38 @@ public:
     virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window anchor info.
+     *
+     * @param windowAnchorInfo the windowAnchorInfo of subWindow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
      * @param isFollow true - follow, false - not follow.
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Enable or disable window shadow.
+     *
+     * @param isEnabled Enable or disable window shadow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window shadow is enabled.
+     *
+     * @return True means window shadow is enabled.
+     */
+    virtual bool GetWindowShadowEnabled() const { return false; }
 
     /**
      * @brief Set the transition animation.
@@ -4016,6 +4087,17 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the frameRect in a partical zoom-in scene.
+     *
+     * @param frameRect The original rect of frameBuffer before partical zoom-in.
+     * @return WMError::WM_OK means set success, otherwise failed.
+     */
+    virtual WMError SetFrameRectForParticalZoomIn(const Rect& frameRect)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 };
 }
 }

@@ -1751,7 +1751,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
 {
     WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1778,8 +1778,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         return nullptr;
     }
 
-    if (!data.WriteBool(isCaptureFullOfScreen)) {
-        WLOGFE("isCaptureFullOfScreen fail: data write failed");
+    if (!data.WriteBool(isFullScreenCapture)) {
+        WLOGFE("isFullScreenCapture fail: data write failed");
         return nullptr;
     }
 
@@ -3651,7 +3651,7 @@ void ScreenSessionManagerProxy::SetVirtualDisplayMuteFlag(ScreenId screenId, boo
         WLOGFE("Write muteFlag failed");
         return;
     }
-    
+
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
@@ -4068,7 +4068,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isCaptureFullOfScreen)) {
+        !data.WriteBool(captureOption.isFullScreenCapture_)) {
         WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
@@ -4260,5 +4260,44 @@ void ScreenSessionManagerProxy::NotifyScreenMaskAppear()
         WLOGFE("SendRequest failed");
         return;
     }
+}
+
+DMError ScreenSessionManagerProxy::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(displayId))) {
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(displayArea.posX_) || !data.WriteInt32(displayArea.posY_) ||
+        !data.WriteUint32(displayArea.width_) || !data.WriteUint32(displayArea.height_)) {
+        TLOGE(WmsLogTag::DMS, "Write displayArea failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_AREA_OF_DISPLAY_AREA),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    screenId = static_cast<ScreenId>(reply.ReadUint64());
+    int32_t posX = reply.ReadInt32();
+    int32_t posY = reply.ReadInt32();
+    uint32_t width = reply.ReadUint32();
+    uint32_t height = reply.ReadUint32();
+    screenArea = { posX, posY, width, height };
+    return ret;
 }
 } // namespace OHOS::Rosen

@@ -46,6 +46,7 @@ enum class ListenerFunctionType : uint32_t {
     WATCH_GESTURE_CONSUME_RESULT_CB,
     WATCH_FOCUS_ACTIVE_CHANGE_CB,
     SET_FOREGROUND_WINDOW_NUM_CB,
+    MINIMIZE_BY_WINDOW_ID_CB,
     SCENE_SESSION_DESTRUCT_CB
 };
 
@@ -120,6 +121,7 @@ public:
     static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationChange(napi_env env, napi_callback_info info);
     static napi_value SupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    static napi_value SupportFollowRelativePositionToParent(napi_env env, napi_callback_info info);
     static napi_value SupportZLevel(napi_env env, napi_callback_info info);
     static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
@@ -226,6 +228,7 @@ private:
     napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
     napi_value OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info);
+    napi_value OnSupportFollowRelativePositionToParent(napi_env env, napi_callback_info info);
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
     napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
@@ -293,7 +296,9 @@ private:
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
     void RegisterSetForegroundWindowNumCallback();
-    void OnSetForegroundWindowNum(int32_t windowNum);
+    void OnSetForegroundWindowNum(uint32_t windowNum);
+    void RegisterMinimizeByWindowIdCallback();
+    void OnMinimizeByWindowId(const std::vector<int32_t>& windowIds);
 
     /*
      * Window Recover

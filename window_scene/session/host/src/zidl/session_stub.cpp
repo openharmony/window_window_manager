@@ -262,6 +262,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO):
+            return HandleSetWindowAnchorInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
             return HandleSetWindowTransitionAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
@@ -1641,6 +1643,22 @@ int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, Message
     WSError errCode = SetWindowTransitionAnimation(static_cast<WindowTransitionType>(type), *animation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "run");
+    sptr<WindowAnchorInfo> windowAnchorInfo = data.ReadParcelable<WindowAnchorInfo>();
+    if (windowAnchorInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowAnchorInfo is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowAnchorInfo(*windowAnchorInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

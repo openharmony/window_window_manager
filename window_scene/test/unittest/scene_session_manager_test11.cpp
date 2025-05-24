@@ -228,35 +228,6 @@ HWTEST_F(SceneSessionManagerTest11, GetLastInstanceKey, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateOccupiedAreaIfNeed
- * @tc.desc: SceneSesionManager update occupiedArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, TestSize.Level1)
-{
-    int ret = 0;
-    int32_t persistentId = 0;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.moduleName_ = "test3";
-    info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    persistentId = 1;
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    ssm_->sceneSessionMap_.erase(1);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetAbilityInfo
  * @tc.desc: SceneSesionManager test GetAbilityInfo
  * @tc.type: FUNC
@@ -487,18 +458,19 @@ HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, TestSize.Level1)
     auto ret = ssm_->systemConfig_.IsPcWindow();
     ASSERT_EQ(ret, false);
 
-    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    int32_t fingerId = 0;
+    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
     sourcePersistentId = 1;
     ssm_->sceneSessionMap_.clear();
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
 }
 
@@ -973,6 +945,53 @@ HWTEST_F(SceneSessionManagerTest11, GetHostWindowCompatiblityInfo, TestSize.Leve
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     res = ssm_->GetHostWindowCompatiblityInfo(token, property);
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, AnimateTo01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "AnimateToTest";
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    float targetScale = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    sceneSession->RegisterAnimateToCallback([&targetScale, &curve](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        targetScale = animationProperty.targetScale;
+        curve = animationOption.curve;
+    });
+
+    auto persistenId = sceneSession->GetPersistentId();
+    ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
+    WindowAnimationProperty animationProperty;
+    animationProperty.targetScale = 10.5f;
+    WindowAnimationOption animationOption;
+    animationOption.curve = WindowAnimationCurve::INTERPOLATION_SPRING;
+    animationOption.duration = 1000;
+
+    ssm_->AnimateTo(0, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
+    ASSERT_EQ(targetScale, animationProperty.targetScale);
+
 }
 } // namespace
 } // namespace Rosen

@@ -76,6 +76,7 @@ enum class ListenerFuncType : uint32_t {
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
+    WINDOW_SHADOW_ENABLE_CHANGE_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     PRIVACY_MODE_CHANGE_CB,
     RESTORE_MAIN_WINDOW_CB,
@@ -100,8 +101,10 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_PIP_TEMPLATE_INFO_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
     USE_IMPLICIT_ANIMATION_CB,
+    WINDOW_ANCHOR_INFO_CHANGE_CB,
     SET_WINDOW_SHADOWS_CB,
     SET_SUB_WINDOW_SOURCE_CB,
+    ANIMATE_TO_CB,
 };
 
 class SceneSession;
@@ -139,7 +142,8 @@ private:
     void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller,
+        bool isFromBroker, bool isForceClean = false);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
@@ -366,6 +370,7 @@ private:
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
+    void ProcessWindowShadowEnableChangeRegister();
     void ProcessTitleAndDockHoverShowChangeRegister();
     void ProcessRestoreMainWindowRegister();
     void ProcessFrameLayoutFinishRegister();
@@ -377,11 +382,13 @@ private:
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
+    void ProcessWindowAnchorInfoChangeRegister();
     void ProcessFollowParentRectRegister();
     void ProcessGetTargetOrientationConfigInfoRegister();
     void ProcessUpdatePiPTemplateInfoRegister();
     void ProcessUseImplicitAnimationChangeRegister();
     void ProcessSetSubWindowSourceRegister();
+    void ProcessAnimateToTargetPropertyRegister();
 
     /*
      * Window Property
@@ -445,6 +452,7 @@ private:
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
+    void OnWindowShadowEnableChange(bool isEnabled);
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void RestoreMainWindow();
     void NotifyFrameLayoutFinish();
@@ -457,6 +465,7 @@ private:
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
     void NotifyHighlightChange(bool isHighlight);
+    void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
     void NotifyFollowParentRect(bool isFollow);
     void OnGetTargetOrientationConfigInfo(uint32_t targetOrientation);
     void OnRotationChange(int32_t persistentId, bool isRegister);
@@ -464,6 +473,8 @@ private:
     void OnUpdateFollowScreenChange(bool isFollowScreenChange);
     void OnUseImplicitAnimationChange(bool useImplicit);
     void NotifySetSubWindowSource(SubWindowSource source);
+    void OnAnimateToTargetProperty(const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
     /*
      * Window Property

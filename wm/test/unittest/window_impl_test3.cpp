@@ -64,7 +64,8 @@ public:
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    MOCK_METHOD2(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type));
+    MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info));
 };
 
 class MockDisplayMoveListener : public IDisplayMoveListener {
@@ -251,7 +252,7 @@ HWTEST_F(WindowImplTest3, NotifyAvoidAreaChange, TestSize.Level1)
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
     listener = sptr<MockAvoidAreaChangedListener>::MakeSptr();
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
-    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _));
+    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _, _));
     sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     window->NotifyAvoidAreaChange(avoidArea, AvoidAreaType::TYPE_CUTOUT);
     window->avoidAreaChangeListeners_[window->GetWindowId()].clear();
