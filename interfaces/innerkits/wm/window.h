@@ -3440,6 +3440,11 @@ public:
     virtual void FlushLayoutSize(int32_t width, int32_t height) {}
 
     /**
+     * @brief Notify window manager to update snapshot.
+     */
+    virtual WMError NotifySnapshotUpdate() { return WMError::WM_OK; }
+
+    /**
      * @brief get callingWindow windowStatus.
      * @param windowStatus
      * @return WM_OK means set success, others means set Failed.
