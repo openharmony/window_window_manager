@@ -3353,7 +3353,7 @@ WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersi
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType screenshotEventType)
+WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3362,7 +3362,7 @@ WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType scre
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(screenshotEventType))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

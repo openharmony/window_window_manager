@@ -437,6 +437,7 @@ public:
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
 
     /*
      * Window Input Event

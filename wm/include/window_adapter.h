@@ -202,7 +202,7 @@ public:
     /*
      * Window Property
      */
-    virtual WMError NotifyScreenshotEvent(ScreenshotEventType screenshotEventType);
+    virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
