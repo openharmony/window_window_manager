@@ -53,12 +53,6 @@ public:
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
 
-    /*
-     * Compatible Mode
-     */
-    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) override;
-
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

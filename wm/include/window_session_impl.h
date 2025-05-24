@@ -148,6 +148,11 @@ public:
      * Compatible Mode
      */
     bool IsAdaptToSimulationScale() const;
+    bool IsAdaptToProportionalScale() const;
+    bool IsInCompatScaleMode() const;
+    bool IsInCompatScaleStatus() const;
+    WMError UpdateCompatScaleInfo(const Transform& transform);
+    void SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const;
     bool IsAdaptToSubWindow() const;
     static void RegisterWindowScaleCallback();
     static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
@@ -619,6 +624,12 @@ protected:
      */
     static std::recursive_mutex subWindowSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+
+    /*
+     * Compatible Mode
+     */
+    float compatScaleX_ = 1.0f;
+    float compatScaleY_ = 1.0f;
 
     /*
      * DFX

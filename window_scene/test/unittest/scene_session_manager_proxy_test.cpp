@@ -1530,29 +1530,6 @@ HWTEST_F(sceneSessionManagerProxyTest, SetParentWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHostWindowCompatiblityInfo
- * @tc.desc: GetHostWindowCompatiblityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-
-    sptr<CompatibleModeProperty> property = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    WMError res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-    property = sptr<CompatibleModeProperty>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-    token = sptr<IRemoteObjectMocker>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-}
-
-/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: MinimizeByWindowId
  * @tc.type: FUNC
