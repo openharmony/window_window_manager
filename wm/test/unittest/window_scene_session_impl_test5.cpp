@@ -377,6 +377,8 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(false, window->GetDefaultDensityEnabled());
+    window->isEnableDefaultDensityWhenCreate_ = true;
+    EXPECT_EQ(window->GetDefaultDensityEnabled(), true);
 }
 
 
