@@ -540,6 +540,11 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         option.SetDialogTitle(dialogTitle);
     }
 
+    bool defaultDensityEnabled = false;
+    if (ParseJsValue(jsObject, env, "defaultDensityEnabled", defaultDensityEnabled)) {
+        option.SetDefaultDensityEnabled(defaultDensityEnabled);
+    }
+
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (ParseJsValue(jsObject, env, "displayId", displayId)) {
         if (displayId < 0 ||
@@ -556,10 +561,6 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         option.SetParentId(parentId);
     }
 
-    bool defaultDensityEnabled = false;
-    if (ParseJsValue(jsObject, env, "defaultDensityEnabled", defaultDensityEnabled)) {
-        option.SetDefaultDensityEnabled(defaultDensityEnabled);
-    }
     return true;
 }
 
