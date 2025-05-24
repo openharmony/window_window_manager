@@ -65,6 +65,7 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "session/host/include/session_change_recorder.h"
 #include "session/host/include/session_utils.h"
 #include "session/host/include/sub_session.h"
 #include "session_helper.h"
@@ -128,6 +129,7 @@ const std::string ARG_DUMP_DISPLAY = "-d";
 const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
 const std::string ARG_DUMP_DETAIL = "-c";
+const std::string ARG_DUMP_RECORD = "-v";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
@@ -364,6 +366,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
+    SessionChangeRecorder::GetInstance().stopLogFlag.store(true);
 }
 
 void SceneSessionManager::Init()
@@ -411,6 +414,9 @@ void SceneSessionManager::Init()
     // Input init.
     SceneInputManager::GetInstance().Init();
     RegisterFlushWindowInfoCallback();
+
+    // DFX
+    SessionChangeRecorder::GetInstance().Init();
 
     // MMI window state error check
     int32_t retCode = MMI::InputManager::GetInstance()->
@@ -6326,6 +6332,12 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     if (params.size() >= 1 && params[0] == ARG_DUMP_PIPLINE) { // 1: params num
         return GetTotalUITreeInfo(dumpInfo);
     }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_RECORD) { // 2: params num
+        std::vector<std::string> resetParams;
+        resetParams.assign(params.begin() + 1, params.end());
+        SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);
+        return WSError::WS_OK; 
+    }
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
@@ -7979,6 +7991,12 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnSessionStateChange%d", persistentId);
     TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, state:%{public}u", persistentId, state);
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = persistentId,
+        .changeInfo_ = "Session state change to " + std::to_string(static_cast<uint32_t>(state)),
+        .logTag_ = WmsLogTag::WMS_LIFE,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGD(WmsLogTag::DEFAULT, "session is nullptr");
