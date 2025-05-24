@@ -111,6 +111,7 @@ private:
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetHostGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
@@ -136,6 +137,7 @@ private:
     int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply);
+    int HandleAnimateTo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);

@@ -74,6 +74,7 @@ public:
 
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
+    static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windowId);
 
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession,
@@ -112,6 +113,7 @@ public:
     bool IsMainWindowTopmost() const override;
     void SetSubWindowZLevelToProperty();
     int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
+    WMError RaiseToAppTopOnDrag();
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
@@ -147,6 +149,9 @@ public:
      */
     bool IsAdaptToSimulationScale() const;
     bool IsAdaptToSubWindow() const;
+    static void RegisterWindowScaleCallback();
+    static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
+    static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -178,6 +183,7 @@ public:
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
+    void SetForceSplitEnable(AppForceLandscapeConfig& config);
 
     /*
      * inherits from session stage
@@ -203,7 +209,8 @@ public:
         bool notifyInputMethod = true) override;
     void NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info);
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
@@ -257,6 +264,7 @@ public:
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
     void GetExtensionConfig(AAFwk::WantParams& want) const override;
+    WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
@@ -549,6 +557,12 @@ protected:
     WMError ClearTouchEventFilter() override;
 
     /*
+     * UIExtension
+     */
+    std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
+    std::mutex rectChangeUIExtListenerIdsMutex_;
+
+    /*
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
@@ -674,6 +688,11 @@ protected:
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 
     /*
+     * Window Pattern
+     */
+    WMError NotifySnapshotUpdate() override;
+
+    /*
      * Window Property
      */
     std::unordered_set<std::string> containerColorList_;
@@ -695,9 +714,9 @@ protected:
     void NotifyRotationAnimationEnd();
 
     /*
-     * Window Pattern
+     * Keyboard
      */
-    WMError NotifySnapshotUpdate() override;
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
 private:
     //Trans between colorGamut and colorSpace
@@ -807,8 +826,7 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
-    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage = "") {}
+    virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
@@ -981,6 +999,11 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /**
+     * Parallel Type For PAD
+     */
+    int32_t parallelType_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

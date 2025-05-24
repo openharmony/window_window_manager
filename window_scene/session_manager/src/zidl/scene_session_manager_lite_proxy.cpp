@@ -1819,4 +1819,78 @@ WSError SceneSessionManagerLiteProxy::GetRecentMainSessionInfoList(
     }
     return static_cast<WSError>(errCode);
 }
+
+WMError SceneSessionManagerLiteProxy::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write bundleName failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CREATE_NEW_INSTANCE_KEY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadString(instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read instanceKey failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
+WMError SceneSessionManagerLiteProxy::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write bundleName failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write instanceKey failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REMOVE_INSTANCE_KEY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

@@ -127,7 +127,8 @@ void CjWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
 }
 
-void CjWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void CjWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {

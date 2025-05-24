@@ -44,7 +44,6 @@ WindowFocusController::WindowFocusController() noexcept
 
 DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DEFAULT_DISPLAY_ID || virtualScreenDisplayIdSet_.size() == 0) {
         return DEFAULT_DISPLAY_ID;
     }
@@ -86,8 +85,6 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
 sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
 {
     DisplayId displayGroupId = GetDisplayGroupId(displayId);
-    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", displayGroupId: %{public}" PRIu64,
-          displayId, displayGroupId);
     if (displayGroupId == DEFAULT_DISPLAY_ID) {
         return focusGroupMap_[DEFAULT_DISPLAY_ID];
     }
@@ -101,7 +98,6 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
 
 int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return INVALID_SESSION_ID;
@@ -116,7 +112,6 @@ int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 
 sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return nullptr;

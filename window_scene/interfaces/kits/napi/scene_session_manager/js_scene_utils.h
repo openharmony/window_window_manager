@@ -87,7 +87,10 @@ enum class JsSessionType : uint32_t {
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
-    TYPE_DYNAMIC = 41
+    TYPE_MUTISCREEN_COLLABORATION,
+    TYPE_DYNAMIC = 41,
+    TYPE_MAGNIFICATION = 42,
+    TYPE_MAGNIFICATION_MENU = 43
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -130,7 +133,10 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         JsSessionType::TYPE_FLOAT_NAVIGATION        },
+    { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, JsSessionType::TYPE_MUTISCREEN_COLLABORATION},
     { WindowType::WINDOW_TYPE_DYNAMIC,                  JsSessionType::TYPE_DYNAMIC                 },
+    { WindowType::WINDOW_TYPE_MAGNIFICATION,            JsSessionType::TYPE_MAGNIFICATION           },
+    { WindowType::WINDOW_TYPE_MAGNIFICATION_MENU,       JsSessionType::TYPE_MAGNIFICATION_MENU      },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -173,7 +179,10 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
     { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
+    { JsSessionType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION},
     { JsSessionType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                 },
+    { JsSessionType::TYPE_MAGNIFICATION,            WindowType::WINDOW_TYPE_MAGNIFICATION           },
+    { JsSessionType::TYPE_MAGNIFICATION_MENU,       WindowType::WINDOW_TYPE_MAGNIFICATION_MENU      },
 };
 
 enum class ThrowSlipMode;
@@ -214,6 +223,8 @@ napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& 
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
+napi_value CreateWindowAnchorType(napi_env env);
+napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo);
 napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
@@ -237,6 +248,8 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig);
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
+    const WindowAnimationProperty& animationProperty);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);

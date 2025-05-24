@@ -67,7 +67,7 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void(bool requestFocus, bool isClick)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
-    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
@@ -103,7 +103,6 @@ using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
-
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -318,8 +317,6 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
-    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
-    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -354,7 +351,8 @@ public:
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
-    WSError Clear(bool needStartCaller = false);
+    // Just terminate, not clear session
+    WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
@@ -413,7 +411,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const Rect& callingSessionRect = {}, const std::map<AvoidAreaType, AvoidArea>& = {});
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
@@ -674,7 +673,7 @@ public:
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
     uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
-    void AddPropertyDirtyFlag(uint32_t dirtyFlag) { propertyDirtyFlags_ |= dirtyFlag; }
+    void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
 
     /*
      * Window Pattern
@@ -1036,7 +1035,6 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
-    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
     NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;
