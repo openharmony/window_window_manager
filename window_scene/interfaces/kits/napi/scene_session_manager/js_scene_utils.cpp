@@ -1384,7 +1384,7 @@ napi_value CreateJsSessionRecoverInfo(
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to get jsObject");
         return nullptr;
     }
-    for (const auto& [transitionType, animation] : property->transitionAnimationConfig_) {
+    for (const auto& [transitionType, animation] : property->GetTransitionAnimationConfig()) {
         napi_set_property(env, jsTransitionAnimationMapValue, CreateJsValue(env, static_cast<uint32_t>(transitionType)),
             ConvertTransitionAnimationToJsValue(env, animation));
     }

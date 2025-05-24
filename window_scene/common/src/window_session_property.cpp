@@ -189,6 +189,12 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
     sessionInfo_ = info;
 }
 
+void WindowSessionProperty::SetTransitionAnimationConfig(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    transitionAnimationConfig_[transitionType] = std::make_shared<TransitionAnimation>(animation);
+}
+
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
     std::lock_guard<std::mutex> lock(windowRectMutex_);
@@ -311,6 +317,12 @@ const std::string& WindowSessionProperty::GetWindowName() const
 const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 {
     return sessionInfo_;
+}
+
+std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>
+    WindowSessionProperty::GetTransitionAnimationConfig() const
+{
+    return transitionAnimationConfig_;
 }
 
 SessionInfo& WindowSessionProperty::EditSessionInfo()
@@ -1087,7 +1099,8 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
 
 bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
 {
-    if (!parcel.WriteUint32(transitionAnimationConfig_.size())) {
+    uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
+    if (transitionAnimationMapSize > 100 || !parcel.WriteUint32(transitionAnimationMapSize)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
         return false;
     }
