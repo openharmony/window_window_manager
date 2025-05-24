@@ -688,6 +688,11 @@ protected:
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 
     /*
+     * Window Pattern
+     */
+    WMError NotifySnapshotUpdate() override;
+
+    /*
      * Window Property
      */
     std::unordered_set<std::string> containerColorList_;

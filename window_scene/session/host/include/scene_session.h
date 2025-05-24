@@ -795,6 +795,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    WMError NotifySnapshotUpdate() override;
 
     /*
      * Window LifeCycle
