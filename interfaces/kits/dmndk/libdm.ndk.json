@@ -102,5 +102,45 @@
     {
         "first_instroduced":"14",
         "name":"OH_NativeDisplayManager_CaptureScreenPixelmap"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_RegisterAvailableAreaChangeListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_UnregisterAvailableAreaChangeListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_CreateAvailableArea"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_DestroyAvailableArea"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_RegisterDisplayAddListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_UnregisterDisplayAddListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_RegisterDisplayRemoveListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_UnregisterDisplayRemoveListener"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_GetDisplaySourceMode"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_NativeDisplayManager_GetDisplayPosition"
     }
 ]
