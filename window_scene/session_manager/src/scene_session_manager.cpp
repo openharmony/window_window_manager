@@ -6694,7 +6694,8 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
 WSError SceneSessionManager::RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession,
     const sptr<FocusGroup>& focusGroup, int32_t persistentId, bool byForeground, FocusChangeReason reason)
 {
-    if (reason == FocusChangeReason::ALT_TAB && CheckRequestFocusSubWindowImmdediately(sceneSession)) {
+    if (reason == FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW &&
+        CheckRequestFocusSubWindowImmdediately(sceneSession)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "sub window focused");
         return WSError::WS_DO_NOTHING;
     }
@@ -8241,7 +8242,8 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr
         if (!IsSessionVisibleForeground(session)) {
             continue;
         }
-        if (RequestSessionFocus(session->GetPersistentId(), true, FocusChangeReason::ALT_TAB) == WSError::WS_OK) {
+        if (RequestSessionFocus(session->GetPersistentId(), true, FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW) ==
+            WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
