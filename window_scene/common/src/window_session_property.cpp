@@ -1120,7 +1120,7 @@ bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) co
 bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property)
 {
     uint32_t transitionAnimationMapSize = 0;
-    if (!parcel.ReadUint32(transitionAnimationMapSize)) {
+    if (!parcel.ReadUint32(transitionAnimationMapSize) || transitionAnimationMapSize > 100) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
         return false;
     }
