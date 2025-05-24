@@ -25,6 +25,16 @@
 #include "window_scene.h"
 #include "window_session_impl.h"
 
+struct Input_TouchEvent {
+    int32_t action;
+    int32_t id;
+    int32_t displayX;
+    int32_t displayY;
+    int64_t actionTime {-1};
+    int32_t windowId {-1};
+    int32_t displayId {-1};
+}
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -142,6 +152,8 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     touchEvent.windowId = 1;
     ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("InjectTouchEvent");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     string winName = "test";
     WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
