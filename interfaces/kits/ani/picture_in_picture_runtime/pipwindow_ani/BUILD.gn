@@ -11,14 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
-group("ani_packages") {
-  deps = [
-    "display_runtime:display_ani",
-    "embeddable_window_stage:embeddable_window_stage_ani",
-    "picture_in_picture_runtime:pipwindow_ani_pack",
-    "screen_runtime:screen_ani",
-    "window_runtime:window_stage_ani_pack",
-  ]
+# abc generate
+generate_static_abc("pipwindow_ani") {
+  base_url = "./ets"
+  files = [ "./ets/@ohos.PiPWindow.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/pipwindow_ani.abc"
+}
+
+ohos_prebuilt_etc("pipwindow_etc") {
+  source = "$target_out_dir/pipwindow_ani.abc"
+  deps = [ ":pipwindow_ani" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+  module_install_dir = "framework"
 }
