@@ -30,10 +30,10 @@ struct Input_TouchEvent {
     int32_t id;
     int32_t displayX;
     int32_t displayY;
-    int64_t actionTime {-1};
-    int32_t windowId {-1};
-    int32_t displayId {-1};
-}
+    int64_t actionTime { -1 };
+    int32_t windowId { -1 };
+    int32_t displayId { -1 };
+};
 
 using namespace testing;
 using namespace testing::ext;
