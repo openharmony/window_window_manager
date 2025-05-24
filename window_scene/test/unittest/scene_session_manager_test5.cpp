@@ -968,7 +968,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately01, Tes
     ASSERT_EQ(ret, false);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
     ASSERT_EQ(ret, false);
 
     SessionInfo subSessionInfo;
@@ -1049,7 +1049,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately03, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(2, dialogSceneSession));
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
-    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
     ASSERT_EQ(ret, true);
     ssm_->sceneSessionMap_.clear();
 }
