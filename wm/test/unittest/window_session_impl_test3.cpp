@@ -1277,6 +1277,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InjectTouchEvent
+ * @tc.desc: InjectTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("InjectTouchEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+ 
+    pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->uiContent_ = nullptr;
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetAvoidAreaOption01
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
