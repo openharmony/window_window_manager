@@ -732,6 +732,8 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path)
     AniWindowUtils::GetStdString(env, path, contentPath);
     TLOGI(WmsLogTag::DEFAULT, "[ANI] contentPath:%{public}s", contentPath.c_str());
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, nullptr));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
@@ -760,8 +762,9 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
     }
     std::string contentPath;
     AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, (napi_env)env,
-        (napi_value)storage));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, storage));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), ret);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
