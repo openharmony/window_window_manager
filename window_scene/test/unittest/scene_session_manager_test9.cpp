@@ -854,7 +854,6 @@ HWTEST_F(SceneSessionManagerTest9, ProcessDialogRequestFocusImmdediately02, Test
     ASSERT_NE(ret, WSError::WS_OK);
 }
 
-
 /**
  * @tc.name: ProcessSubWindowRequestFocusImmdediately
  * @tc.desc: ProcessSubWindowRequestFocusImmdediately
@@ -874,7 +873,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, Tes
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
-    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
 
     SessionInfo subSessionInfo;
@@ -889,11 +888,11 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
-    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     ASSERT_NE(ret, WSError::WS_OK);
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
-    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     ASSERT_NE(ret, WSError::WS_OK);
     ssm_->sceneSessionMap_.clear();
 }
