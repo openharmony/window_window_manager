@@ -1308,6 +1308,11 @@ private:
      * Window Transition Animation For PC
      */
     UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
+
+    /**
+     * Window pattern
+     */
+    void NotifyAddOrRemoveSnapshotWindow(bool interactive);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

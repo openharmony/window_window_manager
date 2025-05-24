@@ -289,7 +289,7 @@ public:
     /*
      * Window Pattern
      */
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit) override;
     /**
      * Window Transition Animation For PC
      */
