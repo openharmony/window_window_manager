@@ -4068,7 +4068,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isFullScreenCapture_)) {
+        !data.WriteBool(captureOption.isFullScreenCapture_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
         WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
