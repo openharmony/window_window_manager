@@ -237,8 +237,9 @@ int SessionChangeRecorder::CompressString (const char* inStr, size_t inLen, std:
             break;
         }
     } while (flush != Z_FINISH);
-    if (ret != Z_STREAM_END)
+    if (ret != Z_STREAM_END) {
         return Z_STREAM_ERROR;
+    }
     return Z_OK;
 }
 
