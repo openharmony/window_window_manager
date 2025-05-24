@@ -1011,7 +1011,7 @@ HWTEST_F(SessionProxyTest, NotifySnapshotUpdate, TestSize.Level1)
     WMError res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_OK);
     sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    res = sProxy->NotifySnapshotUpdate(notifyListener, rect);
+    res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySnapshotUpdate end";
 }
