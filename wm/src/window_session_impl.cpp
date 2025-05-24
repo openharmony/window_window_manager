@@ -306,9 +306,11 @@ bool WindowSessionImpl::IsPadWindow() const
     return windowSystemConfig_.IsPadWindow();
 }
 
-bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
+bool WindowSessionImpl::IsPcOrFreeMultiWindowCapabilityEnabled() const
 {
-    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode()
+        || property_->GetIsPcAppInPad()
+        || IsDeviceFeatureCapableForFreeMultiWindow();
 }
 
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
@@ -350,7 +352,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
     TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
     bool isNormalCompatSubWindow = IsAdaptToSubWindow() &&
         !property_->GetIsUIExtensionAbilityProcess();
-    if (IsPcOrPadCapabilityEnabled() && !isNormalCompatSubWindow && windowOption_ != nullptr) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isNormalCompatSubWindow && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_PC, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -1708,7 +1710,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         uiContent->HideWindowTitleButton(true, !windowOption_->GetSubWindowMaximizeSupported(), true, false);
         return;
     }
@@ -2964,7 +2966,7 @@ WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3482,7 +3484,7 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
         TLOGE(WmsLogTag::WMS_PC, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3500,7 +3502,7 @@ WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWi
         TLOGE(WmsLogTag::WMS_PC, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3528,7 +3530,7 @@ WMError WindowSessionImpl::RegisterWindowWillCloseListeners(const sptr<IWindowWi
         TLOGE(WmsLogTag::WMS_DECOR, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3549,7 +3551,7 @@ WMError WindowSessionImpl::UnRegisterWindowWillCloseListeners(const sptr<IWindow
         TLOGE(WmsLogTag::WMS_DECOR, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4041,7 +4043,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
@@ -6515,6 +6517,23 @@ uint32_t WindowSessionImpl::GetTargetAPIVersionByApplicationInfo() const
     return (context_ != nullptr && context_->GetApplicationInfo() != nullptr) ?
         static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD :
         INVALID_TARGET_API_VERSION;
+}
+
+bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) const
+{
+    if (context_ == nullptr || context_->GetHapModuleInfo() == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window [%{public}d] context is nullptr", GetPersistentId());
+        return false;
+    }
+    std::vector<std::string> deviceFeatures = context_->GetHapModuleInfo()->deviceFeatures;
+    return std::find(deviceFeatures.begin(), deviceFeatures.end(), feature) != deviceFeatures.end();
+}
+
+bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const
+{
+    static const std::string DEVICE_FEATURE_FREE_MULTI_WINDOW = "free_multi_window";
+    return IsDeviceFeatureCapableFor(DEVICE_FEATURE_FREE_MULTI_WINDOW)
+        && system::GetParameter("const.window.device_feature_support_type", "0") == "1";
 }
 
 void WindowSessionImpl::SetLayoutTransform(const Transform& transform)

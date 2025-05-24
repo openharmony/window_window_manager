@@ -1767,15 +1767,15 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor04, TestSize.Level1
 }
 
 /**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled test
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPcOrPadCapabilityEnabled");
+    option->SetWindowName("IsPcOrFreeMultiWindowCapabilityEnabled");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
@@ -1787,15 +1787,15 @@ HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
     window->hostSession_ = session;
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->property_->SetIsPcAppInPad(true);
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled end";
 }
 
 /**
