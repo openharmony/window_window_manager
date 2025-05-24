@@ -78,6 +78,7 @@ private:
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionDump(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionAvoidAreaListener(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionScreenshotAppEventListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshot(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionSnapshotById(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);

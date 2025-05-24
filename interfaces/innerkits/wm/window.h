@@ -1936,7 +1936,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterScreenshotAppEventListener(
-        const IScreenshotAppEventListenerSptr& listener){ return WMError::WM_OK; }
+        const IScreenshotAppEventListenerSptr& listener){ return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister screen shot app event listener.
@@ -1945,7 +1945,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterScreenshotAppEventListener(
-        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_OK; }
+        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register dialog target touch listener.
