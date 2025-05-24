@@ -5879,7 +5879,7 @@ bool ScreenSessionManager::IsFakeDisplayExist()
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma,
-    bool isFullScreenCapture)
+    bool isFullScreenCapture, const std::vector<NodeId>& blackList)
 {
     DisplayId realDisplayId = displayId;
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && displayId == DISPLAY_ID_FAKE) {
@@ -5907,6 +5907,10 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         config.mainScreenRect = SuperFoldPolicy::GetInstance().GetSnapshotRect(displayId, isFullScreenCapture);
     }
 #endif
+    config.blackList = blackList;
+    if (blackList.size() > 0) {
+        TLOGI(WmsLogTag::DMS, "Snapshot filtering blackList surfaceNodes, size:%{public}ud", static_cast<uint32_t>(blackList.size()));
+    }
     bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
@@ -5967,8 +5971,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
     DmErrorCode* errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter!");
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
+        !SessionPermission::IsSACalling()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
         return nullptr;
     }
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
@@ -5983,7 +5990,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         SessionPermission::IsShellCall()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
-        auto res = GetScreenSnapshot(option.displayId_, true, option.isFullScreenCapture_);
+        auto res = GetScreenSnapshot(option.displayId_, true, option.isFullScreenCapture_, option.blackList_);
         if (res != nullptr) {
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
