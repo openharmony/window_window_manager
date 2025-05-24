@@ -833,6 +833,8 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
+    WSError RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession, const sptr<FocusGroup>& focusGroup,
+        int32_t persistentId, bool byForeground, FocusChangeReason reason);
     WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);
     bool CheckLastFocusedAppSessionFocus(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& nextSession);
