@@ -19,6 +19,7 @@
 
 #include "ability_context_impl.h"
 #include "color_parser.h"
+#include "extension/extension_business_info.h"
 #include "mock_session.h"
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
@@ -734,12 +735,17 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(subWindow->GetWindowId(), subWindow)));
+    res = subWindow->GetWindowScaleCoordinate(x, y, subWindow->GetPersistentId());
+    EXPECT_EQ(res, WMError::WM_OK);
     mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     subWindow->context_ = mainWindow->context_;
     subWindow->property_->SetIsUIExtensionAbilityProcess(true);
     res = mainWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
     subWindow->property_->SetIsUIExtensionAbilityProcess(false);
+    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+    mainWindow->compatScaleX_ = 0.5;
     res = mainWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
     WindowSessionImpl::windowSessionMap_.clear();
@@ -774,7 +780,150 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     extensionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
     res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
+    extensionWindow->compatScaleX_ = 0.5;
+    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
     WindowSessionImpl::windowExtensionSessionSet_.clear();
+}
+
+/**
+ * @tc.name: SetCurrentTransform
+ * @tc.desc: SetCurrentTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetCurrentTransform, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCurrentTransform");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    Transform transform;
+    transform.scaleX_ = 0.5f;
+    transform.scaleY_ = 0.6f;
+    window->SetCurrentTransform(transform);
+    EXPECT_NEAR(window->currentTransform_.scaleX_, transform.scaleX_, 0.00001f);
+    EXPECT_NEAR(window->currentTransform_.scaleY_, transform.scaleY_, 0.00001f);
+    auto res = window->GetCurrentTransform();
+    EXPECT_TRUE(res == transform);
+}
+
+/**
+ * @tc.name: UpdateCompatScaleInfo
+ * @tc.desc: UpdateCompatScaleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateCompatScaleInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateCompatScaleInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    Transform transform;
+    transform.scaleX_ = 0.5f;
+    transform.scaleY_ = 0.6f;
+    EXPECT_EQ(window->UpdateCompatScaleInfo(transform), WMError::WM_DO_NOTHING);
+    EXPECT_NEAR(window->compatScaleX_, 1.0f, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, 1.0f, 0.00001f);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(window->UpdateCompatScaleInfo(transform), WMError::WM_DO_NOTHING);
+    EXPECT_NEAR(window->compatScaleX_, 1.0f, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, 1.0f, 0.00001f);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_NEAR(window->compatScaleX_, 1.0f, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, 1.0f, 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(window->UpdateCompatScaleInfo(transform), WMError::WM_OK);
+    EXPECT_NEAR(window->compatScaleX_, transform.scaleX_, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, transform.scaleY_, 0.00001f);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(window->UpdateCompatScaleInfo(transform), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetCompatInfoInExtensionConfig
+ * @tc.desc: SetCompatInfoInExtensionConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetCompatInfoInExtensionConfig, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCompatInfoInExtensionConfig");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    AAFwk::WantParams want;
+    window->SetCompatInfoInExtensionConfig(want);
+    bool isAdaptToSimulationScale =
+        static_cast<bool>(want.GetIntParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, 0));
+    EXPECT_FALSE(isAdaptToSimulationScale);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->SetCompatInfoInExtensionConfig(want);
+    isAdaptToSimulationScale =
+        static_cast<bool>(want.GetIntParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, 0));
+    EXPECT_TRUE(isAdaptToSimulationScale);
+}
+
+/**
+ * @tc.name: IsAdaptToProportionalScale
+ * @tc.desc: IsAdaptToProportionalScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsAdaptToProportionalScale, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAdaptToProportionalScale");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_FALSE(window->IsAdaptToProportionalScale());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(window->IsAdaptToProportionalScale());
+}
+
+/**
+ * @tc.name: IsInCompatScaleMode
+ * @tc.desc: IsInCompatScaleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsInCompatScaleMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsInCompatScaleMode");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_FALSE(window->IsInCompatScaleMode());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(window->IsInCompatScaleMode());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(window->IsInCompatScaleMode());
+}
+
+/**
+ * @tc.name: IsInCompatScaleStatus
+ * @tc.desc: IsInCompatScaleStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsInCompatScaleStatus, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsInCompatScaleStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_FALSE(window->IsInCompatScaleStatus());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_FALSE(window->IsInCompatScaleStatus());
+    window->compatScaleX_ = 0.5f;
+    EXPECT_TRUE(window->IsInCompatScaleStatus());
+    window->compatScaleX_ = 1.0f;
+    window->compatScaleX_ = 1.5f;
+    EXPECT_TRUE(window->IsInCompatScaleStatus());
 }
 
 /**
@@ -873,7 +1022,7 @@ HWTEST_F(WindowSessionImplTest5, IsAdaptToSubWindow, Function | SmallTest | Leve
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
- {
+{
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetIntentParam");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -884,7 +1033,7 @@ HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
     window->SetIntentParam(intentParam, testCallback, isColdStart);
     EXPECT_EQ(window->isColdStart_, true);
     EXPECT_EQ(window->intentParam_, intentParam);
- }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

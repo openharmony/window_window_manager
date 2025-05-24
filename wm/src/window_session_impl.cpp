@@ -19,6 +19,7 @@
 
 #include <common/rs_common_def.h>
 #include <filesystem>
+#include <float_wrapper.h>
 #include <fstream>
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
@@ -339,6 +340,23 @@ bool WindowSessionImpl::IsAdaptToSimulationScale() const
     return property->IsAdaptToSimulationScale();
 }
 
+bool WindowSessionImpl::IsAdaptToProportionalScale() const
+{
+    auto property = GetPropertyByContext();
+    return property->IsAdaptToProportionalScale();
+}
+
+bool WindowSessionImpl::IsInCompatScaleMode() const
+{
+    auto property = GetPropertyByContext();
+    return property->IsAdaptToSimulationScale() || property->IsAdaptToProportionalScale();
+}
+
+bool WindowSessionImpl::IsInCompatScaleStatus() const
+{
+    return IsInCompatScaleMode() && (!NearEqual(compatScaleX_, 1.0f) || !NearEqual(compatScaleY_, 1.0f));
+}
+
 bool WindowSessionImpl::IsAdaptToSubWindow() const
 {
     auto property = GetPropertyByContext();
@@ -605,7 +623,6 @@ WMError WindowSessionImpl::Connect()
     windowEventChannel->SetIsUIExtension(property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowEventChannel->SetUIExtensionUsage(property_->GetUIExtensionUsage());
     sptr<IWindowEventChannel> iWindowEventChannel(windowEventChannel);
-    RegisterWindowScaleCallback();
     auto context = GetContext();
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     if (token) {
@@ -616,6 +633,9 @@ WMError WindowSessionImpl::Connect()
         token, identityToken_);
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
+    if (IsInCompatScaleMode() || WindowHelper::IsUIExtensionWindow(GetType())) {
+        RegisterWindowScaleCallback();
+    }
     return static_cast<WMError>(ret);
 }
 
@@ -682,14 +702,16 @@ WMError WindowSessionImpl::GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint
         }
         window = window->FindMainWindowWithContext();
     }
-    if (!window->IsAdaptToSimulationScale()) {
+    if (!window || !window->IsInCompatScaleStatus()) {
         TLOGD(WmsLogTag::WMS_COMPAT, "window id:%{public}d not scale", windowId);
         return WMError::WM_OK;
     }
     Rect windowRect = window->GetRect();
-    Transform transform = window->GetCurrentTransform();
-    float scaleX = transform.scaleX_;
-    float scaleY = transform.scaleY_;
+    if (WindowHelper::IsUIExtensionWindow(windowType)) {
+        windowRect = window->GetHostWindowRect(windowId);
+    }
+    float scaleX = window->compatScaleX_;
+    float scaleY = window->compatScaleY_;
     int32_t cursorX = x - windowRect.posX_;
     int32_t cursorY = y - windowRect.posY_;
     // 2: x scale computational formula
@@ -6560,10 +6582,40 @@ Transform WindowSessionImpl::GetLayoutTransform() const
     return layoutTransform_;
 }
 
+WMError WindowSessionImpl::UpdateCompatScaleInfo(const Transform& transform)
+{
+    if (!WindowHelper::IsMainWindow(GetType()) || !IsInCompatScaleMode()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d not scale mode", GetPersistentId());
+        return WMError::WM_DO_NOTHING;
+    }
+    compatScaleX_ = transform.scaleX_;
+    compatScaleY_ = transform.scaleY_;
+    AAFwk::Want want;
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, IsAdaptToSimulationScale());
+    want.SetParam(Extension::COMPAT_IS_PROPORTION_SCALE_FIELD, IsAdaptToProportionalScale());
+    want.SetParam(Extension::COMPAT_SCALE_X_FIELD, compatScaleX_);
+    want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, compatScaleY_);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_COMPAT_INFO),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::SetCurrentTransform(const Transform& transform)
 {
-    std::lock_guard<std::mutex> lock(currentTransformMutex_);
-    currentTransform_ = transform;
+    {
+        std::lock_guard<std::mutex> lock(currentTransformMutex_);
+        currentTransform_ = transform;
+    }
+    handler_->PostTask([weakThis = wptr(this), transform, where = __func__] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
+            return;
+        }
+        window->UpdateCompatScaleInfo(transform);
+    }, __func__);
 }
 
 Transform WindowSessionImpl::GetCurrentTransform() const
@@ -6587,6 +6639,20 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
+void WindowSessionImpl::SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const
+{
+    if (!IsInCompatScaleMode()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d not scale mode", GetPersistentId());
+        return;
+    }
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(IsAdaptToSimulationScale())));
+    want.SetParam(Extension::COMPAT_IS_PROPORTION_SCALE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(IsAdaptToProportionalScale())));
+    want.SetParam(Extension::COMPAT_SCALE_X_FIELD, AAFwk::Float::Box(compatScaleX_));
+    want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, AAFwk::Float::Box(compatScaleY_));
+}
+
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
@@ -6605,6 +6671,7 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool isHostWindowDelayRaiseEnabled = IsWindowDelayRaiseEnabled();
     want.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD,
         AAFwk::Integer::Box(static_cast<int32_t>(isHostWindowDelayRaiseEnabled)));
+    SetCompatInfoInExtensionConfig(want);
 }
 
 WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)

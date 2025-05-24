@@ -212,7 +212,8 @@ private:
     /*
      * Compatible Mode
      */
-    WMError GetHostWindowCompatiblityInfo();
+    WMError OnHostWindowCompatInfoChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError SetCompatInfo(const AAFwk::WantParams& configParam);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
