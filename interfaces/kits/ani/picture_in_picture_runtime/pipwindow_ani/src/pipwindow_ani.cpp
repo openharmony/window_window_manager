@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <hitrace_meter.h>
-
-#include "ani.h"
 #include "pipwindow_ani.h"
+#include <hitrace_meter.h>
+#include "ani.h"
 #include "window_manager_hilog.h"
 #include "picture_in_picture_manager.h"
 #include "picture_in_picture_controller.h"
@@ -26,6 +25,10 @@ namespace Rosen {
 ani_status PiPWindowAni::Init(ani_env* env, ani_namespace nsp)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[ANI] Init");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "[ANI] null env");
+        return nullptr;
+    }
     ani_function setObjFunc = nullptr;
     ani_status ret = env->Namespace_FindFunction(nsp, "setNativeObj", "J:V", &setObjFunc);
     if (ret != ANI_OK) {
@@ -105,7 +108,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
-    ani_env *env;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "[ANI] null env");
         return ANI_NOT_FOUND;
@@ -123,7 +126,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array funcs = {
-        ani_native_function {"isPiPEnabled", ":Z", reinterpret_cast<void *>(PiPWindowAni::IsPiPEnabledAni)},
+        ani_native_function {"isPiPEnabled", ":Z", reinterpret_cast<void*>(PiPWindowAni::IsPiPEnabledAni)},
     };
 
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
@@ -132,13 +135,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array methods = {
-        ani_native_function {"startPiPNative", "J:V", reinterpret_cast<void *>(PiPWindowAni::StartPiPAni)},
-        ani_native_function {"stopPiPNative", "J:V", reinterpret_cast<void *>(PiPWindowAni::StopPiPAni)},
+        ani_native_function {"startPiPNative", "J:V", reinterpret_cast<void*>(PiPWindowAni::StartPiPAni)},
+        ani_native_function {"stopPiPNative", "J:V", reinterpret_cast<void*>(PiPWindowAni::StopPiPAni)},
     };
 
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "[ANI] bind pip method fail %{public}u", ret);
-    return ANI_NOT_FOUND;
+        return ANI_NOT_FOUND;
     }
     PiPWindowAni::Init(env, nsp);
     *result = ANI_VERSION_1;
