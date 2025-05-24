@@ -6726,7 +6726,8 @@ WSError SceneSessionManager::RequestSessionFocusCheck(const sptr<SceneSession>& 
             return WSError::WS_DO_NOTHING;
     }
     // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(displayId, sceneSession, byForeground, reason);
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession->GetSessionProperty()->GetDisplayId(),
+        sceneSession, byForeground, reason);
     if (specificCheckRet != WSError::WS_OK) {
         return specificCheckRet;
     }
