@@ -863,11 +863,18 @@ HWTEST_F(SceneSessionManagerTest9, ProcessDialogRequestFocusImmdediately02, Test
 HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
+    sptr<SceneSession> sceneSession = nullptr;
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
 
     SessionInfo subSessionInfo;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
