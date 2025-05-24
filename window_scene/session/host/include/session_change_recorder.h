@@ -23,8 +23,8 @@
 #include <unordered_map>
 
 #include "window_manager_hilog.h"
-#include "ws_common.h"
 #include "wm_single_instance.h"
+#include "ws_common.h"
 
 namespace OHOS::Rosen {
 /**
@@ -56,15 +56,6 @@ public:
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
     void GetSceneSessionNeedDumpInfo(const std::vector<std::string>& dumpParams, std::string& dumpInfo);
-    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedLogMap()
-    {
-        return sceneSessionChangeNeedLogMap_;
-    }
-    std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> const GetNeedDumpMap()
-    {
-        return sceneSessionChangeNeedDumpMap_;
-    }
-    uint32_t GetLogSize() { return currentLogSize_; }
     std::atomic<bool> stopLogFlag { false };
 
 private:

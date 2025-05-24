@@ -6317,7 +6317,7 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     if (params.size() >= 1 && params[0] == ARG_DUMP_PIPLINE) { // 1: params num
         return GetTotalUITreeInfo(dumpInfo);
     }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_RECORD) {
+    if (params.size() >= 2 && params[0] == ARG_DUMP_RECORD) { // 2: params num
         std::vector<std::string> resetParams;
         resetParams.assign(params.begin() + 1, params.end());
         SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);

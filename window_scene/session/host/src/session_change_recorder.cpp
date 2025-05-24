@@ -37,6 +37,7 @@ std::string GetFormattedTime()
     std::time_t t = std::chrono::system_clock::to_time_t(now);
     struct tm timeBuffer;
     std::tm* tmPtr = localtime_r(&t, &timeBuffer);
+    // 1000：million record
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     
     std::ostringstream oss;
@@ -191,12 +192,14 @@ void SessionChangeRecorder::SimplifyDumpInfo(std::string& dumpInfo, std::string 
 
     dumpInfo.append(compressOstream->str());
 }
-int SessionChangeRecorder::CompressString(const char* in_str, size_t in_len, std::string& out_str, int level)
+int SessionChangeRecorder::CompressString (const char* inStr, size_t inLen, std::string& outStr, int level)
 {
-    if (!in_str)
+    if (!inStr) {
         return Z_DATA_ERROR;
+    }
 
-    int ret, flush;
+    int ret;
+    int flush;
     unsigned have;
     z_stream strm;
 
@@ -211,16 +214,16 @@ int SessionChangeRecorder::CompressString(const char* in_str, size_t in_len, std
         return ret;
 
     std::shared_ptr<z_stream> sp_strm(&strm, [](z_stream* strm) { (void)deflateEnd(strm); });
-    const char* end = in_str + in_len;
+    const char* end = inStr + inLen;
 
     size_t distance = 0;
     /* compress until end of file */
     do {
-        distance = end - in_str;
+        distance = end - inStr;
         strm.avail_in = (distance >= CHUNK) ? CHUNK : distance;
-        strm.next_in = (Bytef*)in_str;
-        in_str += strm.avail_in;
-        flush = (in_str == end) ? Z_FINISH : Z_NO_FLUSH;
+        strm.next_in = (Bytef*)inStr;
+        inStr += strm.avail_in;
+        flush = (inStr == end) ? Z_FINISH : Z_NO_FLUSH;
         do {
             strm.avail_out = CHUNK;
             strm.next_out = out;
@@ -228,7 +231,7 @@ int SessionChangeRecorder::CompressString(const char* in_str, size_t in_len, std
             if (ret == Z_STREAM_ERROR)
                 break;
             have = CHUNK - strm.avail_out;
-            out_str.append((const char*)out, have);
+            outStr.append((const char*)out, have);
         } while (strm.avail_out == 0);
         if (strm.avail_in != 0) {
             break;
