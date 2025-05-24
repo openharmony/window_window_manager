@@ -195,6 +195,7 @@ private:
     bool modalUIExtensionSelfLoadContent_ { false };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
+    uint64_t lastDisplayId_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
 
     /*
