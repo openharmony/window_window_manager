@@ -1175,11 +1175,12 @@ void SceneSession::RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEn
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
         auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+        if (!session || !callback) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session or callback is null", where);
             return;
         }
         session->onWindowShadowEnableChangeFunc_ = std::move(callback);
+        session->onWindowShadowEnableChangeFunc_(session->GetSessionProperty()->GetWindowShadowEnabled());
     }, __func__);
 }
 

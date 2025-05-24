@@ -3894,7 +3894,7 @@ public:
      *
      * @return True means window shadow is enabled.
      */
-    virtual bool GetWindowShadowEnabled() const { return false; }
+    virtual bool GetWindowShadowEnabled() const { return true; }
 
     /**
      * @brief Set the transition animation.
