@@ -2486,11 +2486,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int imgResourceId = 1;
+    uint32_t imgResourceId = 1;
     ImageFit imageFit = ImageFit::FILL;
-    int persistentId = 1;
-    data.WriteInt32(imgResourceId);
-    data.WriteInt32(static_cast<uint32_t>(imageFit));
+    int32_t persistentId = 1;
+    data.WriteUint32(imgResourceId);
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
     data.WriteInt32(persistentId);
     int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);

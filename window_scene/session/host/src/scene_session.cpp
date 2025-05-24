@@ -7169,34 +7169,28 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (needSaveSnapshot && !GetShowRecent()) { // persistent imageFit exist, add snapshot when interactive is false.
-        if (interactive) {
-            TLOGND(WmsLogTag::WMS_PATTERN, "Remove static image from window");
-            PostTask([weakThis = wptr(this), where = __func__] {
-                auto session = weakThis.promote();
-                if (session == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
-                    return;
-                }
-                session->NotifyRemoveSnapshot();
-            }, __func__);
-        } else {
-            TLOGND(WmsLogTag::WMS_PATTERN, "Add static image for window");
-            PostTask([weakThis = wptr(this), where = __func__] {
-                auto session = weakThis.promote();
-                if (session == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
-                    return;
-                }
-                session->NotifyAddSnapshot(false, false, false);
-            }, __func__);
-        }
-    }
+    NotifyAddOrRemoveSnapshotWindow(interactive);
     SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);
     return true;
+}
+
+void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
+{
+    auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
+        ScenePersistentStorageType::MAXIMIZE_STATE);
+    // persistent imageFit exist, add snapshot when interactive is false.
+    if (needSaveSnapshot && !GetShowRecent()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "Add or remove static image from window, interactive:%{public}d", interactive);
+        PostTask([weakThis = wptr(this), interactive, where = __func__] {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is null", where);
+                return;
+            }
+            interactive ? session->NotifyRemoveSnapshot() : session->NotifyAddSnapshot(false, false, false);
+        }, __func__);
+    }
 }
 
 void SceneSession::UpdateNonInteractiveInner()
