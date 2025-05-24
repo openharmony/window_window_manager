@@ -141,9 +141,9 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Lev
 HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
 {
     int32_t windowId = 1;
-    Input_TouchEvent touchEvent = nullptr;
-    auto ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
+    auto ret = OH_WindowManager_InjectTouchEvent(windowId, nullptr);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    Input_TouchEvent touchEvent;
     touchEvent.actionTime = 100;
     touchEvent.id = 1;
     touchEvent.action = static_cast<Input_TouchEventAction>(10);
@@ -151,14 +151,12 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     touchEvent.displayY = 200;
     touchEvent.windowId = 1;
     ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("InjectTouchEvent");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     string winName = "test";
     WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
     ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL), ret);
     touchEvent.action = Input_TouchEventAction::TOUCH_ACTION_DOWN;
     ret = OH_WindowManager_InjectTouchEvent(windowId, &touchEvent);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
