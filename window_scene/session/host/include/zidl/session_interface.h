@@ -488,17 +488,6 @@ public:
     {
         return WSError::WS_OK;
     }
-
-    /**
-     * @brief Get the transition animation.
-     *
-     * @param transitionType window transition type.
-     * @return nullptr means get failed.
-     */
-    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
-    {
-        return nullptr;
-    }
    
     /**
     * @brief Set sub window source
