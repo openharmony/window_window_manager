@@ -99,6 +99,7 @@ test_external_deps = [
   "hilog:libhilog_base",
   "image_framework:image_native",
   "input:libmmi-client",
+  "input:oh_input_manager",
   "ipc:ipc_core",
   "ipc:ipc_single",
   "napi:ace_napi",
