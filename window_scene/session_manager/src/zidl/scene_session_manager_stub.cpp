@@ -953,7 +953,7 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenshotAppEventListener(Messa
     if (!data.ReadBool(haveListener)) {
         return ERR_INVALID_DATA;
     }
-    WSError errCode = HandleUpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    WSError errCode = UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
