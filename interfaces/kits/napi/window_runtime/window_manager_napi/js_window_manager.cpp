@@ -1564,12 +1564,14 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int32_t screenshotEventTypeValue = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
-    if (!ConvertFromJsValue(env, argv[0], screenshotEventTypeValue)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to screenshotEventTypeValue");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    int32_t type = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
+    if (!ConvertFromJsValue(env, argv[0], type) ||
+        type < static_cast<uint32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT) ||
+        type > static_cast<uint32_t>(ScreenshotEventType::SCROLL_SHOT_ABORT)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
-    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(screenshotEventTypeValue);
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(type);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [env, task = napiAsyncTask, screenshotEventType, where = __func__] {
@@ -1584,7 +1586,7 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "send event failed"));
     }
     return result;
 }
