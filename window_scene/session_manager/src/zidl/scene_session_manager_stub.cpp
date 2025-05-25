@@ -226,7 +226,7 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_ENENT):
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT):
             return HandleNotifyScreenshotEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR):
             return HandleSetStartWindowBackgroundColor(data, reply);
@@ -694,7 +694,6 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
     return ERR_NONE;
 }
 
-
 int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
@@ -834,7 +833,6 @@ int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, M
     return ERR_NONE;
 }
 
-
 int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFI("run HandleCheckWindowId!");
@@ -879,7 +877,6 @@ int SceneSessionManagerStub::HandleGetAccessibilityWindowInfo(MessageParcel& dat
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
-
 
 int SceneSessionManagerStub::HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
@@ -952,11 +949,11 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenshotAppEventListener(Messa
     if (!data.ReadInt32(persistentId)) {
         return ERR_INVALID_DATA;
     }
-    bool haveAvoidAreaListener = false;
-    if (!data.ReadBool(haveAvoidAreaListener)) {
+    bool haveListener = false;
+    if (!data.ReadBool(haveListener)) {
         return ERR_INVALID_DATA;
     }
-    WSError errCode = HandleUpdateSessionScreenshotAppEventListener(persistentId, haveAvoidAreaListener);
+    WSError errCode = HandleUpdateSessionScreenshotAppEventListener(persistentId, haveListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
