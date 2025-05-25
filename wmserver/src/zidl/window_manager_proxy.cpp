@@ -520,6 +520,33 @@ WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
     return static_cast<WMError>(ret);
 }
 
+WMError WindowManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        WLOGFE("Write screen shot event type failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_SCREEN_SHOT_EVENT_TYPE),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask)
 {

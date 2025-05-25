@@ -59,6 +59,7 @@ public:
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_ALPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
+        TRANS_ID_UPDATE_SCREEN_SHOT_EVENT_TYPE,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
         TRANS_ID_LIST_WINDOW_INFO,
@@ -113,6 +114,7 @@ public:
     virtual WMError MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
+    virtual WMError NotifyScreenshotEvent(ScreenshotEventType type) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) = 0;
     virtual WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent) = 0;
@@ -293,8 +295,6 @@ public:
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError NotifyScreenshotEvent(
-        ScreenshotEventType type) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

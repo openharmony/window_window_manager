@@ -1432,6 +1432,19 @@ WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
     return res;
 }
 
+WMError WindowController::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowRoot_->GetForegroundNodes(windowNodes);
+    for (auto& windowNode : windowNodes) {
+        auto windowToken = windowNode->GetWindowToken();
+        if (windowToken != nullptr) {
+            windowToken->NotifyScreenshotAppEvent();
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action)
 {
     if (property == nullptr) {

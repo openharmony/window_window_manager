@@ -255,6 +255,8 @@ public:
         const sptr<IAnimationTransitionController>& listener) override;
     virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
+    virtual WMError UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
     virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
@@ -289,6 +291,7 @@ public:
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
     void NotifyScreenshot();
+    void NotifyScreenshotAppEvent(ScreenshotEventType type);
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();

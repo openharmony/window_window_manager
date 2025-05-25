@@ -89,6 +89,7 @@ std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appDialogWindowMap_;
 std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> WindowImpl::screenshotListeners_;
+std::map<uint32_t, std::vector<sptr<IScreenshotAppEventListener>>> WindowImpl::screenshotAppEventListeners_;
 std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::touchOutsideListeners_;
 std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowImpl::dialogTargetTouchListeners_;
 std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> WindowImpl::lifecycleListeners_;
@@ -2610,6 +2611,20 @@ WMError WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>
     return UnregisterListener(screenshotListeners_[GetWindowId()], listener);
 }
 
+WMError WindowImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start register", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
+WMError WindowImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start unregister", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
 WMError WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
     WLOGFD("Start register");
@@ -3852,6 +3867,16 @@ void WindowImpl::NotifyScreenshot()
     for (auto& screenshotListener : screenshotListeners) {
         if (screenshotListener != nullptr) {
             screenshotListener->OnScreenshot();
+        }
+    }
+}
+
+void WindowImpl::NotifyScreenshotAppEvent()
+{
+    auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
+    for (auto& screenshotAppEventListener : screenshotAppEventListeners) {
+        if (screenshotAppEventListener != nullptr) {
+            screenshotAppEventListener->OnScreenshotAppEvent();
         }
     }
 }
