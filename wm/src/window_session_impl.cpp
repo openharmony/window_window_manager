@@ -4788,7 +4788,7 @@ void WindowSessionImpl::NotifyScreenshot()
 
 WSError WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, screenshotEvent: %{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, screenshotEvent: %{public}d",
         GetPersistentId(), type);
     std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
     auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
