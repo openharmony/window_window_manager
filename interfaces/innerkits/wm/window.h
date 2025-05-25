@@ -456,7 +456,7 @@ public:
      */
     virtual void OnScreenshotAppEvent(ScreenshotEventType type) {}
 };
-using IScreenshotAppEventListenerSptr = sptr<ISystemDensityChangeListener>;
+using IScreenshotAppEventListenerSptr = sptr<IScreenshotAppEventListener>;
 
 /**
  * @class IDialogTargetTouchListener
