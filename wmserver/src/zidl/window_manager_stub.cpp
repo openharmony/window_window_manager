@@ -225,7 +225,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_UPDATE_SCREEN_SHOT_EVENT_TYPE: {
+        case WindowManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT: {
             int32_t screenshotEventType = 0;
             if (!data.ReadInt32(screenshotEventType)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read screenshotEventType failed");

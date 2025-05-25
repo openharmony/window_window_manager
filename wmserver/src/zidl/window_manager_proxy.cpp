@@ -538,7 +538,7 @@ WMError WindowManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
         WLOGFE("remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_SCREEN_SHOT_EVENT_TYPE),
+    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }

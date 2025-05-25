@@ -3404,7 +3404,7 @@ WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_ENENT), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

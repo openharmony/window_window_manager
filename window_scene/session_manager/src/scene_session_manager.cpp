@@ -11157,7 +11157,7 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event:  %{public}u", type);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
     screenshotEventType_ = type;
     taskScheduler_->PostAsyncTask([this, type] {
         for (auto persistentId : screenshotAppEventListenerSessionSet_) {
