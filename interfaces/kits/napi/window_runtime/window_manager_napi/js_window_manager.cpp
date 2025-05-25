@@ -1564,7 +1564,7 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t screenshotEventTypeValue = 0;
+    int32_t screenshotEventTypeValue = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
     if (!ConvertFromJsValue(env, argv[0], screenshotEventTypeValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to screenshotEventTypeValue");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -1575,11 +1575,11 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
     auto asyncTask = [env, task = napiAsyncTask, screenshotEventType, where = __func__] {
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}u", where, screenshotEventType);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d", where, screenshotEventType);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "NotifyScreenshotEvent failed"));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {

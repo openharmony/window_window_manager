@@ -484,8 +484,8 @@ int SessionStageStub::HandleNotifyScreenshot(MessageParcel& data, MessageParcel&
 int SessionStageStub::HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called");
-    uint32_t screenshotEventType = 0;
-    if (!data.ReadUint32(type)) {
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
+    if (!data.ReadInt32(screenshotEventType)) {
         return ERR_INVALID_VALUE;
     }
     NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
