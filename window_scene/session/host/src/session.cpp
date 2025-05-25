@@ -2050,8 +2050,9 @@ void Session::NotifyScreenshot()
 
 WSError Session::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, event:  %{public}u", GetPersistentId(), type);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, event: %{public}u", GetPersistentId(), type);
     if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyScreenshotAppEvent(type);

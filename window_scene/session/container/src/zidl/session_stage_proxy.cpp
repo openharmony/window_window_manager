@@ -718,8 +718,8 @@ WSError SessionStageProxy::NotifyScreenshotAppEvent(ScreenshotEventType type)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write window islimit failed");
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write screenshot event type failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

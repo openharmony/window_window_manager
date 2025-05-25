@@ -2083,7 +2083,7 @@ int SceneSessionManagerStub::HandleNotifyScreenshotEvent(MessageParcel& data, Me
 {
     int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
     if (!data.ReadInt32(screenshotEventType)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read screenshotEventType");
         return ERR_INVALID_DATA;
     }
     WMError errCode = NotifyScreenshotEvent(static_cast<ScreenshotEventType>(screenshotEventType));
