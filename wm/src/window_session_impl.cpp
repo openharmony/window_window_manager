@@ -4644,7 +4644,7 @@ WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotA
     return ret;
 }
 
-WMError WindowSessionImpl::UnregisterScreenshotListener(const IScreenshotAppEventListenerSptr& listener)
+WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_IMMS, "winId %{public}d", persistentId);
