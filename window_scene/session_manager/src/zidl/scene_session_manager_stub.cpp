@@ -2081,8 +2081,8 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
 
 int SceneSessionManagerStub::HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t screenshotEventType = 0;
-    if (!data.ReadUint32(screenshotEventType)) {
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
+    if (!data.ReadInt32(screenshotEventType)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }

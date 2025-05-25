@@ -3394,8 +3394,8 @@ WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write screenshot event type failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

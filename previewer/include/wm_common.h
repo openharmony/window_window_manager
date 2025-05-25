@@ -1688,7 +1688,12 @@ enum class SubWindowSource : uint32_t {
 /**
  * @brief Screenshot event type.
  */
-enum class ScreenshotEventType : uint32_t {
+enum class ScreenshotEventType : int32_t {
+    /**
+     * screenshot event type undefined.
+     */
+    EVENT_TYPE_UNDEFINED= -1,
+
     /**
      * System screenshot.
      */

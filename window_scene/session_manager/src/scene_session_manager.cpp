@@ -10580,7 +10580,13 @@ WSError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t per
         }
         if (haveListener) {
             screenshotAppEventListenerSessionSet_.insert(persistentId);
-            sceneSession->NotifyScreenshotAppEvent();
+            auto state = sceneSession->GetSessionState();
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d, state: %{public}u, event: %{public}d",
+                where, persistentId, state, screenshotEventType_);
+            if ((state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) &&
+                screenshotEventType_ != ScreenshotEventType::EVENT_TYPE_UNDEFINED) {
+                sceneSession->NotifyScreenshotAppEvent(screenshotEventType_);
+            }
         } else {
             screenshotAppEventListenerSessionSet_.erase(persistentId);
         }
@@ -11152,6 +11158,7 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event:  %{public}u", type);
+    screenshotEventType_ = type;
     taskScheduler_->PostAsyncTask([this, type] {
         for (auto persistentId : screenshotAppEventListenerSessionSet_) {
             auto sceneSession = GetSceneSession(persistentId);
@@ -11159,9 +11166,13 @@ WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
                 continue;
             }
-            sceneSession->NotifyScreenshotAppEvent(type);
+            auto state = sceneSession->GetSessionState();
+            if (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) {
+                sceneSession->NotifyScreenshotAppEvent(type);
+            }
         }
     }, __func__);
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::ClearSession(int32_t persistentId)
