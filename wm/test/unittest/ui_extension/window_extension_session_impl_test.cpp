@@ -2465,6 +2465,28 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity, TestSize.Level1
 }
 
 /**
+ * @tc.name: GetDefaultDensity
+ * @tc.desc: GetDefaultDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetDefaultDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDefaultDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    sptr<DisplayInfo> displayInfo = nullptr;
+    EXPECT_NEAR(1.0f, window->GetDefaultDensity(displayInfo), 0.00001f);
+    auto systemDensity = 2.0;
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(systemDensity);
+    EXPECT_NEAR(systemDensity, window->GetDefaultDensity(displayInfo), 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_NEAR(COMPACT_SIMULATION_SCALE_DPI, window->GetDefaultDensity(displayInfo), 0.00001f);
+}
+
+/**
  * @tc.name: NotifyExtensionDataConsumer01
  * @tc.desc: Test NotifyExtensionDataConsumer with valid window mode data
  * @tc.type: FUNC
