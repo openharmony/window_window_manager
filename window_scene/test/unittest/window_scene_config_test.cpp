@@ -148,7 +148,7 @@ void WindowSceneConfigTest::TearDown() {}
 ConfigItem WindowSceneConfigTest::ReadConfig(const std::string& xmlStr)
 {
     ConfigItem cfgItem;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return cfgItem;
     }
