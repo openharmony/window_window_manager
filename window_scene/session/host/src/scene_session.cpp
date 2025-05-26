@@ -2430,7 +2430,8 @@ bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, Avoi
     if (GetSessionProperty()->IsAdaptToImmersive()) {
         return true;
     }
-    if (winMode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING &&
+        (type != AvoidAreaType::TYPE_SYSTEM || (systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()))) {
         return false;
     }
     if (winMode != WindowMode::WINDOW_MODE_FLOATING || systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) {
