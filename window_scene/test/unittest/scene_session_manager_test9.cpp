@@ -492,7 +492,7 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_11, TestSize.Level1)
     sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**

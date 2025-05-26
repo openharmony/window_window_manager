@@ -965,11 +965,11 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately01, Tes
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
+    EXPECT_EQ(ret, false);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
+    EXPECT_EQ(ret, false);
 
     SessionInfo subSessionInfo;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
@@ -983,7 +983,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately01, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
     ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -1002,7 +1002,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately02, Tes
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
+    EXPECT_EQ(ret, false);
 
     SessionInfo subSessionInfo;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
@@ -1016,7 +1016,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately02, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
     ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
     ssm_->sceneSessionMap_.clear();
 }
 
