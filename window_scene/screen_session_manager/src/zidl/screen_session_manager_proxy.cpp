@@ -1775,8 +1775,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         return nullptr;
     }
 
-    if (!data.WriteBool(isCaptureFullOfScreen)) {
-        TLOGE(WmsLogTag::DMS, "isCaptureFullOfScreen fail: data write failed");
+    if (!data.WriteBool(isFullScreenCapture)) {
+        TLOGE(WmsLogTag::DMS, "isFullScreenCapture fail: data write failed");
         return nullptr;
     }
 
@@ -4065,7 +4065,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isCaptureFullOfScreen)) {
+        !data.WriteBool(captureOption.isFullScreenCapture_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
