@@ -464,10 +464,6 @@ void JsWindowListener::OnScreenshotAppEvent(ScreenshotEventType type)
             return;
         }
         HandleScope handleScope(env);
-        napi_value ScreenshotEventTypeValue = ConvertScreenshotEventTypeToJsValue(env, type);
-        if (ScreenshotEventTypeValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s jsValue is null", where);
-        }
         napi_value argv[] = { CreateJsValue(env, static_cast<uint32_t>(type)) };
         thisListener->CallJsMethod(SCREENSHOT_APP_EVENT_CB.c_str(), argv, ArraySize(argv));
     };
