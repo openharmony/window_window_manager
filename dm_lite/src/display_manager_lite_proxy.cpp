@@ -830,7 +830,9 @@ bool DisplayManagerLiteProxy::SetScreenBrightness(uint64_t screenId, uint32_t le
     }
     return reply.ReadBool();
 #else
-    return false;
+    bool isSucc = false;
+    SetScreenBrightness(screenId, level, isSucc);
+    return isSucc;
 #endif
 }
 
@@ -860,7 +862,14 @@ uint32_t DisplayManagerLiteProxy::GetScreenBrightness(uint64_t screenId)
     }
     return reply.ReadUint32();
 #else
-    return 0;
+    uint32_t level;
+    ErrCode errCode = GetScreenBrightness(screenId, level);
+    if (FAILED(errCode)) {
+        TLOGE(WmsLogTag::DMS, "GetScreenBrightness failed, screenId: %{public}" PRIu64 ", errCode: %{public}d",
+            screenId, errCode);
+        return 0;
+    }
+    return level;
 #endif
 }
 

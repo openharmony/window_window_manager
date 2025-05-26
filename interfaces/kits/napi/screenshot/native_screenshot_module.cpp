@@ -44,7 +44,7 @@ struct Option {
     DisplayId displayId = 0;
     bool isNeedNotify = true;
     bool isNeedPointer = true;
-    bool isCaptureFullOfScreen = false;
+    bool isFullScreenCapture = false;
 };
 
 struct Param {
@@ -193,7 +193,7 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
     }
 }
 
-static void IsCaptureFullOfScreen(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+static void IsFullScreenCapture(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     TLOGI(WmsLogTag::DMS, "Get Screenshot Option: isCaptureFullOfScreen");
     napi_value isCaptureFullOfScreen;
@@ -219,7 +219,7 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     GetImageSize(env, param, argv);
     IsNeedNotify(env, param, argv);
     IsNeedPointer(env, param, argv);
-    IsCaptureFullOfScreen(env, param, argv);
+    IsFullScreenCapture(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -232,7 +232,7 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         return;
     }
     CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
-        param->option.isCaptureFullOfScreen};
+        param->option.isFullScreenCapture};
     if (!param->isPick && (!option.isNeedNotify_ || !option.isNeedPointer_)) {
         if (param->useInputOption) {
             param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
@@ -248,7 +248,7 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
             snapConfig.imageRect_ = param->option.rect;
             snapConfig.imageSize_ = param->option.size;
             snapConfig.rotation_ = param->option.rotation;
-            snapConfig.isCaptureFullOfScreen = param->option.isCaptureFullOfScreen;
+            snapConfig.isFullScreenCapture_ = param->option.isFullScreenCapture;
             param->image = DisplayManager::GetInstance().GetScreenshotwithConfig(snapConfig, &param->wret, true);
         } else if (param->isPick) {
             TLOGI(WmsLogTag::DMS, "Get Screenshot by picker");
@@ -256,7 +256,7 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         } else {
             TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
             param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true,
-                param->option.isCaptureFullOfScreen);
+                param->option.isFullScreenCapture);
         }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {

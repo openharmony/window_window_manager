@@ -38,7 +38,7 @@ struct SnapShotConfig {
     Media::Size imageSize_;
     Media::Rect imageRect_;
     int rotation_;
-    bool isCaptureFullOfScreen = false;
+    bool isFullScreenCapture_ = false;
 };
 
 class DisplayManager {
@@ -258,11 +258,11 @@ public:
      * @param displayId Display id.
      * @param errorCode error code.
      * @param isUseDma Whether to use DMA, not used by default.
-     * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
+     * @param isFullScreenCapture Whether to take screenshots of all displays on this screen.
      * @return PixelMap object of screenshot.
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isFullScreenCapture = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -840,7 +840,7 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
-    
+
     /**
      * @brief Get CutoutInfo with rotation
      *
@@ -848,6 +848,18 @@ public:
      * @return CutoutInfo object of default screen.
      */
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+
+    /**
+     * @brief Get screenInfo of display area
+     *
+     * @param DisplayId displayId.
+     * @param DMRect displayArea.
+     * @param ScreenId screenId.
+     * @param DMRect screenArea.
+     * @return DM_OK means process get screenArea success.
+     */
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
 
 private:
     DisplayManager();

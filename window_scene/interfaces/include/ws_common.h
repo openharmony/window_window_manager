@@ -513,6 +513,7 @@ enum class SizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
+    OCCUPIED_AREA_CHANGE = 34,
     END,
 };
 
@@ -878,7 +879,7 @@ enum class SessionPropertyFlag {
     APP_INDEX = 1 << 3,
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
-    RECT = 1 << 6,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**

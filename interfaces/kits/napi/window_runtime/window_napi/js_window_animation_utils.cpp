@@ -38,7 +38,7 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
         return objValue;
     }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_value configJsValue = ConvertWindowAnimationOptionsToJsValue(env, transitionAnimation->config);
+    napi_value configJsValue = ConvertWindowAnimationOptionToJsValue(env, transitionAnimation->config);
     if (!configJsValue) {
         return nullptr;
     }
@@ -48,8 +48,8 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     return objValue;
 }
 
-napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
-    const WindowAnimationOptions& animationConfig)
+napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
+    const WindowAnimationOption& animationConfig)
 {
     napi_value configJsValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
@@ -81,8 +81,8 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
 {
     napi_value jsAnimationConfig = nullptr;
     napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
-    if (!ConvertWindowAnimationOptionsFromJsValue(env, jsAnimationConfig, transitionAnimation.config, result) ||
-        !CheckWindowAnimationOptions(env, transitionAnimation.config, result)) {
+    if (!ConvertWindowAnimationOptionFromJsValue(env, jsAnimationConfig, transitionAnimation.config, result) ||
+        !CheckWindowAnimationOption(env, transitionAnimation.config, result)) {
         return false;
     }
     double opacity = 1.0f;
@@ -103,7 +103,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     return true;
 }
 
-bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animationConfig, WmErrorCode& result)
+bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationConfig, WmErrorCode& result)
 {
     switch (animationConfig.curve) {
         case WindowAnimationCurve::LINEAR: {
@@ -131,8 +131,8 @@ bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animation
     return true;
 }
 
-bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value jsAnimationConfig,
-    WindowAnimationOptions& animationConfig, WmErrorCode& result)
+bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimationConfig,
+    WindowAnimationOption& animationConfig, WmErrorCode& result)
 {
     if (jsAnimationConfig == nullptr) {
         result = WmErrorCode::WM_ERROR_INVALID_PARAM;

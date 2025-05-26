@@ -243,6 +243,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError GetFreeMultiWindowEnableState(bool& enable) { return WSError::WS_OK; }
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus)
     {
@@ -287,15 +291,17 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
-        int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) { return WMError::WM_OK; }
-    virtual WMError SetForegroundWindowNum(int32_t windowNum) { return WMError::WM_OK; }
+    virtual WMError SetForegroundWindowNum(uint32_t windowNum) { return WMError::WM_OK; }
     virtual WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) { return WSError::WS_OK; }
+    virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /*
      * Sub Window

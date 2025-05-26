@@ -101,7 +101,9 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
-    
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
+
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
@@ -758,7 +760,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -766,7 +768,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode,
-            isUseDma, isCaptureFullOfScreen);
+            isUseDma, isFullScreenCapture);
     if (screenShot == nullptr) {
         TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
@@ -813,7 +815,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const S
     DmErrorCode* errorCode, bool isUseDma)
 {
     std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma,
-        snapShotConfig.isCaptureFullOfScreen);
+        snapShotConfig.isFullScreenCapture_);
     if (screenShot == nullptr) {
         TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
@@ -2488,5 +2490,17 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
 }
 
+DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return pImpl_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenAreaOfDisplayArea(
+        displayId, displayArea, screenId, screenArea);
+}
 } // namespace OHOS::Rosen
 

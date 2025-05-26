@@ -91,7 +91,7 @@ public:
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;

@@ -89,6 +89,7 @@ enum class SessionInterfaceCode {
     TRANS_ID_UPDATE_FLAG,
     TRANS_ID_GET_IS_HIGHLIGHTED,
     TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE,
+    TRANS_ID_SET_WINDOW_ANCHOR_INFO,
     TRANS_ID_SET_WINDOW_SHADOWS,
 
     // keyboard
@@ -130,7 +131,11 @@ enum class SessionInterfaceCode {
     TRANS_ID_SET_AUTOSTART_PIP,
 
     // Window Pattern
+    TRANS_ID_NOTIFY_SNAPSHOT_UPDATE,
     TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED,
+
+    // Window source
+    TRANS_ID_SET_SUBWINDOW_SOURCE,
 };
 } // namespace Rosen
 } // namespace OHOS

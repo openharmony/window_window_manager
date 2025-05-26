@@ -672,29 +672,29 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window->windowSessionMap_.insert(
         { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), nullptr) });
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
     window->windowSessionMap_.clear();
 
     window->windowSessionMap_.insert(
         { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), window) });
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->handler_ = nullptr;
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
     window->Destroy();
 }
 
@@ -1698,11 +1698,11 @@ HWTEST_F(WindowSessionImplTest2, GetListeners02, TestSize.Level1)
     ASSERT_NE(window_, nullptr);
     window_->occupiedAreaChangeListeners_.clear();
     sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr);
+    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr, {}, {});
     ASSERT_TRUE(window_->occupiedAreaChangeListeners_[window_->GetPersistentId()].empty());
     sptr<IOccupiedAreaChangeListener> listener = sptr<MockIOccupiedAreaChangeListener>::MakeSptr();
     window_->RegisterOccupiedAreaChangeListener(listener);
-    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr);
+    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr, {}, {});
     ASSERT_FALSE(window_->occupiedAreaChangeListeners_[window_->GetPersistentId()].empty());
     window_->Destroy();
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners02 end";
@@ -1778,6 +1778,15 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     sptr<IWindowRectChangeListener> listener1 = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(WindowHelper::IsUIExtensionWindow(window->GetType()));
+    sptr<IWindowRectChangeListener> listener2 = sptr<MockWindowRectChangeListener>::MakeSptr();
+    window->RegisterWindowRectChangeListener(listener2);
+    window->NotifySizeChange(rect, WindowSizeChangeReason::MOVE);
     window->Destroy(true);
 }
 

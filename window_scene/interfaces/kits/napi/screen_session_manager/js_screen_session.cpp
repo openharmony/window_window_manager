@@ -547,6 +547,10 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
+    if (reason == ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE) {
+        TLOGW(WmsLogTag::DMS, "relative position change, no need call callback");
+        return;
+    }
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason, env = env_]() {

@@ -348,12 +348,12 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyDisplayIdChange, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level1)
 {
-    uint32_t PropertyDirtyFlags = 0;
+    uint32_t propertyDirtyFlags = 0;
     std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
+        windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
         resultValue = 1;
     };
     func();
