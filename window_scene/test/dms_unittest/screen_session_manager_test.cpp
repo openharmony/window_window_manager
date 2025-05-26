@@ -5648,23 +5648,6 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, TestSize.L
 }
 
 /**
- * @tc.name: MultiScreenChangeOuter
- * @tc.desc: MultiScreenChangeOuter
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    EXPECT_EQ(ssm_->clientProxy_, nullptr);
-    std::string outerFlag = "2";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "0";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "1";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-}
-
-/**
  * @tc.name: UpdateValidArea
  * @tc.desc: UpdateValidArea
  * @tc.type: FUNC
@@ -5680,8 +5663,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateValidArea, Function | SmallTest | Level
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
 
-    int32_t originValidWidth = screenSession->GetValidWidth();
-    int32_t originValidHeight = screenSession->GetValidHeight();
+    uint32_t originValidWidth = screenSession->GetValidWidth();
+    uint32_t originValidHeight = screenSession->GetValidHeight();
     ssm_->UpdateValidArea(screenId, 800, 1000);
     EXPECT_EQ(800, screenSession->GetValidWidth());
     EXPECT_EQ(1000, screenSession->GetValidHeight());
@@ -6718,6 +6701,42 @@ HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap04, TestSize.Level1)
     std::map<std::string, MultiScreenInfo> nonEmptyMap;
     nonEmptyMap["serial123"] = MultiScreenInfo();
     EXPECT_TRUE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: AdaptSuperHorizonalBoot
+ * @tc.desc: AdaptSuperHorizonalBoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenSessionConfig config;
+    sptr<ScreenSession> session = new ScreenSession(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ScreenId id = 0;
+    
+    ssm_->AdaptSuperHorizonalBoot(session, id);
+    EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
 }
 }
 } // namespace Rosen

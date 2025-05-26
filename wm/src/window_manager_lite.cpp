@@ -1239,5 +1239,11 @@ WMError WindowManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOpti
     }
     return ret;
 }
+
+WMError WindowManagerLite::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    TLOGE(WmsLogTag::WMS_ATTRIBUTE, "NotifyDisplayIdChange is not supported");
+    return WMError::WM_OK; 
+}
 } // namespace Rosen
 } // namespace OHOS

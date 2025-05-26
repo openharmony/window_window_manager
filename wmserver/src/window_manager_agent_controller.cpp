@@ -83,6 +83,14 @@ void WindowManagerAgentController::UpdateWindowVisibilityInfo(
     }
 }
 
+void WindowManagerAgentController::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
+{
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID)) {
+        agent->NotifyDisplayIdChange(windowId, displayId);
+    }
+}
+
 void WindowManagerAgentController::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     for (auto& agent : wmAgentContainer_.GetAgentsByType(

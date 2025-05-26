@@ -444,6 +444,24 @@ HWTEST_F(SessionProxyTest, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowTransitionAnimation
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, SetWindowTransitionAnimation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetWindowTransitionAnimation: SetWindowTransitionAnimation start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    TransitionAnimation animation;
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation));
+    GTEST_LOG_(INFO) << "SetWindowTransitionAnimation: SetWindowTransitionAnimation end";
+}
+
+/**
  * @tc.name: GetGlobalScaledRect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -980,6 +998,25 @@ HWTEST_F(SessionProxyTest, NotifyFrameLayoutFinishFromApp, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifySnapshotUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySnapshotUpdate start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    WMError res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySnapshotUpdate end";
+}
+
+/**
  * @tc.name: RaiseAppMainWindowToTop
  * @tc.desc: RaiseAppMainWindowToTop test
  * @tc.type: FUNC
@@ -1364,6 +1401,7 @@ HWTEST_F(SessionProxyTest, NotifyFollowParentMultiScreenPolicy, TestSize.Level1)
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFollowParentMultiScreenPolicy end";
 }
 
+
 /**
  * @tc.name: UpdateRotationChangeRegistered
  * @tc.desc: UpdateRotationChangeRegistered test
@@ -1444,6 +1482,50 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
     ASSERT_NE(sProxy, nullptr);
     bool isHighlighted = false;
     ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_ERROR_IPC_FAILED);
+}
+/**
+ * @tc.name: NotifyKeyboardWillShowRegistered
+ * @tc.desc: NotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool registered = true;
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+}
+
+/**
+ * @tc.name: NotifyKeyboardWillHideRegistered
+ * @tc.desc: NotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool registered = true;
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
+}
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
+    EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

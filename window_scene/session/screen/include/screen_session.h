@@ -23,6 +23,7 @@
 #include <screen_manager/screen_types.h>
 #include <shared_mutex>
 #include <ui/rs_display_node.h>
+#include <ui/rs_ui_director.h>
 
 #include "screen_property.h"
 #include "dm_common.h"
@@ -117,6 +118,8 @@ public:
     void SetScreenCombination(ScreenCombination combination);
     ScreenCombination GetScreenCombination() const;
 
+    void SetBounds(RRect screenBounds);
+    void SetHorizontalRotation();
     Orientation GetOrientation() const;
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;
@@ -240,8 +243,8 @@ public:
     ScreenShape GetScreenShape() const;
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
-    int32_t GetValidHeight() const;
-    int32_t GetValidWidth() const;
+    uint32_t GetValidHeight() const;
+    uint32_t GetValidWidth() const;
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
@@ -325,6 +328,7 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
     void SetScreenAvailableStatus(bool isScreenAvailable);
@@ -333,13 +337,21 @@ public:
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
 
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
 private:
     ScreenProperty property_;
+    mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
+    mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;  // is fakeScreenSession can be used
@@ -370,6 +382,11 @@ private:
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

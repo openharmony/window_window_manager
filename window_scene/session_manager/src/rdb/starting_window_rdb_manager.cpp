@@ -215,8 +215,8 @@ bool StartingWindowRdbManager::QueryData(const StartingWindowRdbItemKey& key, St
         !CheckRdbResult(absSharedResultSet->GetString(DB_BACKGROUND_IMAGE_FIT_INDEX, value.backgroundImageFit_))) {
         return false;
     }
-    value.backgroundColorEarlyVersion_ = backgroundColorEarlyVersion;
-    value.backgroundColor_ = backgroundColor;
+    value.backgroundColorEarlyVersion_ = static_cast<uint32_t>(backgroundColorEarlyVersion);
+    value.backgroundColor_ = static_cast<uint32_t>(backgroundColor);
     value.configFileEnabled_ = configFileEnabled;
     return true;
 }

@@ -518,20 +518,20 @@ HWTEST_F(SuperFoldSensorManagerTest, GetCurAngle, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: HandleFoldStatusLocked
- * @tc.desc: HandleFoldStatusLocked
+ * @tc.name: HandleFoldStatusLockedToExpand
+ * @tc.desc: HandleFoldStatusLockedToExpand
  * @tc.type: FUNC
  */
-HWTEST_F(SuperFoldSensorManagerTest, HandleFoldStatusLocked, TestSize.Level1)
+HWTEST_F(SuperFoldSensorManagerTest, HandleFoldStatusLockedToExpand, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         GTEST_SKIP();
     }
     SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    mgr.HandleFoldStatusLocked();
+    mgr.HandleFoldStatusLockedToExpand();
     EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
 
-    mgr.HandleFoldStatusUnlocked();
+    mgr.HandleFoldStatusLockedToExpand();
     EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
 }
 }

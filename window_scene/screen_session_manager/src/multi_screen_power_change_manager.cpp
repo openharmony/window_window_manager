@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "window_manager_hilog.h"
 #include <power_mgr_client.h>
 
@@ -200,7 +201,7 @@ void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>&
         }
         displayNode = nullptr;
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(screenScreen->GetRSUIContext());
 }
 
 void MultiScreenPowerChangeManager::ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient,
@@ -605,7 +606,10 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMirrorExternalMainChan
     /* step2: set screen combination */
     MultiScreenChangeUtils::ScreenCombinationChange(externalScreen, innerScreen, ScreenCombination::SCREEN_MIRROR);
 
-    /* step3: inner screen power on */
+    /* step3: set inner screen unavailable */
+    MultiScreenChangeUtils::SetScreenAvailableStatus(innerScreen, true);
+
+    /* step4: inner screen power on */
     CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     TLOGW(WmsLogTag::DMS, "recovery external main to inner mirror and external main end.");
 

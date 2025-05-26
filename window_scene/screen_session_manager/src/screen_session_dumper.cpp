@@ -175,10 +175,6 @@ void ScreenSessionDumper::ExecuteInjectCmd()
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
         return;
     }
-    if (params_[0] == ARG_CHANGE_OUTER_CMD && params_.size() == DUMPER_PARAM_INDEX_TWO) {
-        ScreenSessionManager::GetInstance().MultiScreenChangeOuter(params_[1]);
-        return;
-    }
     if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
         TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
             params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
@@ -319,7 +315,7 @@ void ScreenSessionDumper::ShowHelpInfo()
             "eg. -rotationlock,0 \n")
         .append(" -motion                        ")
         .append("|set the sensor rotation angle clockwise, "\
-            "0 is 0°, 1 is 90°, 2 is 180°, 3 is 270°, eg. -motion,1\n");
+            "0 means 0 degree, 1 means 90 degree, 2 means 180 degree, 3 means 270 degree, eg. -motion,1\n");
     if (!system::GetBoolParameter("dms.hidumper.supportdebug", false)) {
         return;
     }

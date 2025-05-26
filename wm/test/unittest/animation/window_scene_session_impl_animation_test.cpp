@@ -496,6 +496,29 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetTransform02, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
     ASSERT_EQ(trans_, window->GetTransform());
 }
+
+/**
+ * @tc.name: SyncShadowsToComponent
+ * @tc.desc: SyncShadowsToComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplAnimationTest, SyncShadowsToComponent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SyncShadowsToComponent");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SyncShadowsToComponent(shadowsInfo));
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    auto ret = window->SyncShadowsToComponent(shadowsInfo);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

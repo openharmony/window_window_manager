@@ -292,6 +292,61 @@ HWTEST_F(CompatibleModePropertyTest, CopyFrom, TestSize.Level1)
     property->CopyFrom(copyProperty);
     EXPECT_EQ(property->IsAdaptToSimulationScale(), true);
 }
+
+
+/**
+ * @tc.name: SetIsSupportRotateFullScreen
+ * @tc.desc: SetIsSupportRotateFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, SetIsSupportRotateFullScreen, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->SetIsSupportRotateFullScreen(true);
+    EXPECT_EQ(property->isSupportRotateFullScreen_, true);
+    property->SetIsSupportRotateFullScreen(false);
+    EXPECT_EQ(property->isSupportRotateFullScreen_, false);
+}
+
+/**
+ * @tc.name: IsSupportRotateFullScreen
+ * @tc.desc: IsSupportRotateFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, IsSupportRotateFullScreen, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(property->IsSupportRotateFullScreen(), false);
+    property->isSupportRotateFullScreen_ = true;
+    EXPECT_EQ(property->IsSupportRotateFullScreen(), true);
+}
+
+/**
+ * @tc.name: SetIsAdaptToSubWindow
+ * @tc.desc: SetIsAdaptToSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, SetIsAdaptToSubWindow, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->SetIsAdaptToSubWindow(true);
+    EXPECT_EQ(property->isAdaptToSubWindow_, true);
+    property->SetIsAdaptToSubWindow(false);
+    EXPECT_EQ(property->isAdaptToSubWindow_, false);
+}
+
+/**
+ * @tc.name: IsAdaptToSubWindow
+ * @tc.desc: IsAdaptToSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, IsAdaptToSubWindow, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(property->IsAdaptToSubWindow(), false);
+    property->isAdaptToSubWindow_ = true;
+    EXPECT_EQ(property->IsAdaptToSubWindow(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

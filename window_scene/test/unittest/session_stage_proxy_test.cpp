@@ -14,8 +14,12 @@
  */
 
 #include "session/container/include/zidl/session_stage_proxy.h"
-#include "iremote_object_mocker.h"
+
 #include <gtest/gtest.h>
+#include <transaction/rs_transaction.h>
+
+#include "iremote_object_mocker.h"
+#include "mock_message_parcel.h"
 #include "proto.h"
 #include "string_wrapper.h"
 #include "util.h"
@@ -270,7 +274,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**
@@ -283,6 +287,19 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardPanelInfo keyboardPanelInfo;
     sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: test function : NotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardAnimationInfo keyboardAnimationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
 }
 
 /**
@@ -361,6 +378,36 @@ HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, TestSize.Level1)
     sessionStage_->NotifySessionFullScreen(fullScreen);
     fullScreen = false;
     sessionStage_->NotifySessionFullScreen(fullScreen);
+}
+
+/**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isLimit = false;
+    res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyExtensionSecureLimitChange02
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**
@@ -776,6 +823,18 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->CloseSpecificScene();
+    EXPECT_NE(nullptr, sessionStage_);
 }
 } // namespace
 } // namespace Rosen

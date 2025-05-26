@@ -22,6 +22,7 @@
 
 #include "display_group_info.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -153,19 +154,30 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
-    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    auto rsUIContext = node->GetRSUIContext();
+    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
     if (node->leashWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->leashWinSurfaceNode_, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->startingWinSurfaceNode_, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
         "Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!",
         node->GetWindowId());
@@ -237,13 +249,14 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
             weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         weakNode->startingWinSurfaceNode_ = nullptr;
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(weakNode->leashWinSurfaceNode_);
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
             "StartingWindowAnimate(%u)", weakNode->GetWindowId());
     };
-    RSNode::Animate(animationConfig_.startWinAnimationConfig_.timingProtocol_,
-        animationConfig_.startWinAnimationConfig_.timingCurve_, execute, finish);
-    RSTransaction::FlushImplicitTransaction();
+    auto rsUIContext = weakNode->startingWinSurfaceNode_->GetRSUIContext();
+    RSNode::Animate(rsUIContext, animationConfig_.startWinAnimationConfig_.timingProtocol_,
+                    animationConfig_.startWinAnimationConfig_.timingCurve_, execute, finish);
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
     FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     return WMError::WM_OK;
 }
@@ -286,7 +299,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
             } else {
                 weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
                 weakNode->startingWinSurfaceNode_ = nullptr;
-                RSTransaction::FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(weakNode->leashWinSurfaceNode_);
                 TLOGNI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
                     weakNode->GetWindowId());
             }
@@ -296,7 +309,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         WindowManagerService::GetInstance().PostAsyncTask(task, "firstFrameCompleteCallback");
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
 }
 
 void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
@@ -310,6 +323,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->closeWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
+    RSTransactionAdapter::FlushImplicitTransaction(node->leashWinSurfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
     node->closeWinSurfaceNode_ = nullptr;
@@ -317,7 +331,6 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
         "[leashWinSurface]: use_count: %{public}ld, [startWinSurface]: use_count: %{public}ld ",
         node->GetWindowId(), node->leashWinSurfaceNode_.use_count(),
         node->startingWinSurfaceNode_.use_count());
-    RSTransaction::FlushImplicitTransaction();
 }
 
 bool StartingWindow::IsWindowFollowParent(WindowType type)
@@ -347,12 +360,16 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
             weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
             weak->leashWinSurfaceNode_->SetAnimationFinished();
         }
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(weak->leashWinSurfaceNode_);
     };
     if (!RemoteAnimation::CheckAnimationController()) {
-        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
-            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,
-            updateRSTreeFunc, finishCallBack);
+        std::shared_ptr<RSUIContext> rsUIContext;
+        if (node->leashWinSurfaceNode_) {
+            rsUIContext = node->leashWinSurfaceNode_->GetRSUIContext();
+        }
+        RSNode::Animate(rsUIContext, animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+                        animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,
+                        updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
         updateRSTreeFunc();
