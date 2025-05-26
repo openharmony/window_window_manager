@@ -1437,9 +1437,12 @@ WMError WindowController::NotifyScreenshotEvent(ScreenshotEventType type)
     std::vector<sptr<WindowNode>> windowNodes;
     windowRoot_->GetForegroundNodes(windowNodes);
     for (auto& windowNode : windowNodes) {
+        if (windowNode == nullptr) {
+            continue;
+        }
         auto windowToken = windowNode->GetWindowToken();
         if (windowToken != nullptr) {
-            windowToken->NotifyScreenshotAppEvent();
+            windowToken->NotifyScreenshotAppEvent(type);
         }
     }
     return WMError::WM_OK;
