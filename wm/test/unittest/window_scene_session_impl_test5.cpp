@@ -1440,7 +1440,8 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
-    window->transitionAnimationConfig_[type] = std::make_shared<TransitionAnimation>();
+    TransitionAnimation animation;
+    property->SetTransitionAnimationConfig(type, animation);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_NE(ret, nullptr);
 }
@@ -1690,31 +1691,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Lev
     subWindowOption->SetSubWindowMaximizeSupported(true);
     ret = window->IsDecorEnable();
     EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitEnable, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-
-    isForceSplit = true;
-    window->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
 }
 
 /**

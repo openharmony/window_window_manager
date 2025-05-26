@@ -84,7 +84,8 @@
           "selinux_adapter",
           "cJSON",
           "bounds_checking_function",
-          "device_status"
+          "device_status",
+          "zlib"
         ],
         "third_party": [
         ]

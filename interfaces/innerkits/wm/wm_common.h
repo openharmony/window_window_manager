@@ -587,6 +587,14 @@ struct KeyFramePolicy : public Parcelable {
         keyFramePolicy->dragResizeType_ = static_cast<DragResizeType>(dragResizeType);
         return keyFramePolicy;
     }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << static_cast<uint32_t>(dragResizeType_) << " " << interval_ << " " << distance_;
+        oss << " " << animationDuration_ << " " << animationDelay_ << "]";
+        return oss.str();
+    }
 };
 
 /**
@@ -2390,7 +2398,7 @@ enum class WindowInfoKey : int32_t {
     APP_INDEX = 1 << 3,
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
-    RECT = 1 << 6,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**

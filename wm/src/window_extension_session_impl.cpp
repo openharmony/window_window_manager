@@ -930,6 +930,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
         if (ret == WSError::WS_OK) {
             window->lastDensity_ = viewportConfig.density_;
             window->lastOrientation_ = viewportConfig.orientation_;
+            window->lastDisplayId_ = viewportConfig.displayId_;
         }
     };
     handler_->PostTask(task, "UpdateSessionViewportConfig");
@@ -976,7 +977,8 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
 
 WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const SessionViewportConfig& config)
 {
-    if (NearEqual(lastDensity_, config.density_) && lastOrientation_ == config.orientation_) {
+    if (NearEqual(lastDensity_, config.density_) && lastOrientation_ == config.orientation_ &&
+        lastDisplayId_ == config.displayId_) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No parameters have changed, no need to update");
         return WSError::WS_DO_NOTHING;
     }

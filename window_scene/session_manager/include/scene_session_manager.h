@@ -697,6 +697,8 @@ public:
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
 
     /*
      * Window Pattern
@@ -836,6 +838,8 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
+    WSError RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession, const sptr<FocusGroup>& focusGroup,
+        int32_t persistentId, bool byForeground, FocusChangeReason reason);
     WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);
     bool CheckLastFocusedAppSessionFocus(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& nextSession);
@@ -843,6 +847,7 @@ private:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
     bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
@@ -868,8 +873,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
-    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -1425,11 +1431,11 @@ private:
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
+    uint32_t observedFlags_ = 0;
+    uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
     void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifyWindowPropertyChange(ScreenId screenId);
-    uint32_t observedFlags_ = 0;
-    uint32_t interestFlags_ = 0;
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,

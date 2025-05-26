@@ -310,6 +310,11 @@ enum class FocusChangeReason {
     SYSTEM_KEYBOARD,
 
     /**
+     * focus change when pressing alt+tab or dock click
+     */
+    REQUEST_WITH_CHECK_SUB_WINDOW,
+
+    /**
      * focus change max.
      */
     MAX,
@@ -879,7 +884,7 @@ enum class SessionPropertyFlag {
     APP_INDEX = 1 << 3,
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
-    RECT = 1 << 6,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**
