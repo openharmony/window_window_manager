@@ -2451,13 +2451,13 @@ bool SceneSession::CheckGetSystemWindowAvoidAreaAvailable()
 bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
 {
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
-        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d keyboard, return 1", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type 3, return 1", GetPersistentId());
         return true;
     }
     WindowMode winMode = GetWindowMode();
     WindowType winType = GetWindowType();
-    if (winType == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d pad free multi window mode, return 0", GetPersistentId());
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
         return false;
     }
     bool isAvailable = false;
@@ -2469,10 +2469,10 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
         isAvailable = CheckGetSystemWindowAvoidAreaAvailable();
     }
     TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u avoidAreaType %{public}u "
-        "windowMode %{public}u avoidAreaOption %{public}u return %{public}d",
+        "windowMode %{public}u avoidAreaOption %{public}u, return %{public}d",
         GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type),
         static_cast<uint32_t>(winMode), GetSessionProperty()->GetAvoidAreaOption(), isAvailable);
-    return ret;
+    return isAvailable;
 }
 
 void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
