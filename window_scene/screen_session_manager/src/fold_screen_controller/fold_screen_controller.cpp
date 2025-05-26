@@ -92,7 +92,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
             break;
         }
         default: {
-            TLOGE(WmsLogTag::DMS, "GetFoldScreenPolicy DisplayDeviceType is invalid");
+            TLOGE(WmsLogTag::DMS, "DisplayDeviceType is invalid");
             break;
         }
     }
@@ -103,7 +103,7 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
 void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "SetDisplayMode: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return;
     }
     foldScreenPolicy_->ChangeScreenDisplayMode(displayMode);
@@ -134,7 +134,7 @@ void FoldScreenController::RecoverDisplayMode()
 void FoldScreenController::LockDisplayStatus(bool locked)
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "LockDisplayStatus: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return;
     }
     foldScreenPolicy_->LockDisplayStatus(locked);
@@ -143,7 +143,7 @@ void FoldScreenController::LockDisplayStatus(bool locked)
 FoldDisplayMode FoldScreenController::GetDisplayMode()
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetDisplayMode: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return FoldDisplayMode::UNKNOWN;
     }
     return foldScreenPolicy_->GetScreenDisplayMode();
@@ -157,7 +157,7 @@ bool FoldScreenController::IsFoldable()
 FoldStatus FoldScreenController::GetFoldStatus()
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetFoldStatus: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return FoldStatus::UNKNOWN;
     }
     return foldScreenPolicy_->GetFoldStatus();
@@ -166,7 +166,7 @@ FoldStatus FoldScreenController::GetFoldStatus()
 void FoldScreenController::SetFoldStatus(FoldStatus foldStatus)
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "SetFoldStatus: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return;
     }
     foldScreenPolicy_->SetFoldStatus(foldStatus);
@@ -184,7 +184,7 @@ FoldDisplayMode FoldScreenController::GetModeMatchStatus()
 bool FoldScreenController::GetTentMode()
 {
     if (sensorFoldStateManager_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetTentMode: sensorFoldStateManager_ is null");
+        TLOGW(WmsLogTag::DMS, "sensorFoldStateManager_ is null");
         return false;
     }
     return sensorFoldStateManager_->IsTentMode();
@@ -193,7 +193,7 @@ bool FoldScreenController::GetTentMode()
 void FoldScreenController::OnTentModeChanged(int tentType, int32_t hall)
 {
     if (sensorFoldStateManager_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "OnTentModeChanged: sensorFoldStateManager_ is null");
+        TLOGW(WmsLogTag::DMS, "sensorFoldStateManager_ is null");
         return;
     }
     return sensorFoldStateManager_->HandleTentChange(tentType, foldScreenPolicy_, hall);
@@ -202,7 +202,7 @@ void FoldScreenController::OnTentModeChanged(int tentType, int32_t hall)
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetFoldStatus: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return nullptr;
     }
     return foldScreenPolicy_->GetCurrentFoldCreaseRegion();
@@ -211,7 +211,7 @@ sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
 ScreenId FoldScreenController::GetCurrentScreenId()
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetCurrentScreenId: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return 0;
     }
     return foldScreenPolicy_->GetCurrentScreenId();
@@ -230,7 +230,7 @@ void FoldScreenController::BootAnimationFinishPowerInit()
 void FoldScreenController::SetOnBootAnimation(bool onBootAnimation)
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "SetOnBootAnimation: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return;
     }
     foldScreenPolicy_->SetOnBootAnimation(onBootAnimation);
@@ -239,7 +239,7 @@ void FoldScreenController::SetOnBootAnimation(bool onBootAnimation)
 void FoldScreenController::UpdateForPhyScreenPropertyChange()
 {
     if (foldScreenPolicy_ == nullptr) {
-        TLOGW(WmsLogTag::DMS, "UpdateForPhyScreenPropertyChange: foldScreenPolicy_ is null");
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
         return;
     }
     foldScreenPolicy_->UpdateForPhyScreenPropertyChange();
