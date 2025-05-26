@@ -19,7 +19,7 @@
 #include "rs_adapter.h"
 #include "window_agent.h"
 #include "window_stub.h"
-  
+
 using namespace testing;
 using namespace testing::ext;
 
