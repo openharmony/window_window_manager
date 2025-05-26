@@ -121,6 +121,7 @@ public:
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void OnAppRemoveStartingWindow() {}
+    virtual void OnUpdateSnapshotWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -209,6 +210,7 @@ public:
     void NotifyRemoveBlank();
     void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
+    void NotifyUpdateSnapshotWindow();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -248,7 +250,7 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
-        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr);
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -701,7 +703,6 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
@@ -1009,6 +1010,7 @@ private:
      * Window Lifecycle
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
+    bool SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask);
 
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };

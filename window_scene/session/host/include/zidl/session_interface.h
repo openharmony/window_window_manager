@@ -221,11 +221,13 @@ public:
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
     virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+    virtual WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
 
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
         return WSError::WS_OK;
     }
+    virtual WMError NotifySnapshotUpdate() { return WMError::WM_OK; }
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
@@ -486,17 +488,6 @@ public:
         const TransitionAnimation& animation)
     {
         return WSError::WS_OK;
-    }
-
-    /**
-     * @brief Get the transition animation.
-     *
-     * @param transitionType window transition type.
-     * @return nullptr means get failed.
-     */
-    virtual std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType)
-    {
-        return nullptr;
     }
    
     /**

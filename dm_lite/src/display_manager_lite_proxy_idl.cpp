@@ -321,7 +321,12 @@ ErrCode DisplayManagerLiteProxy::WakeUpBegin(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -360,7 +365,12 @@ ErrCode DisplayManagerLiteProxy::WakeUpEnd(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -405,7 +415,12 @@ ErrCode DisplayManagerLiteProxy::SuspendBegin(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -444,7 +459,12 @@ ErrCode DisplayManagerLiteProxy::SuspendEnd(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -499,7 +519,12 @@ ErrCode DisplayManagerLiteProxy::SetSpecifiedScreenPower(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -549,7 +574,12 @@ ErrCode DisplayManagerLiteProxy::SetScreenPowerForAll(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -642,7 +672,12 @@ ErrCode DisplayManagerLiteProxy::SetDisplayState(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -729,7 +764,12 @@ ErrCode DisplayManagerLiteProxy::TryToCancelScreenOff(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
@@ -943,7 +983,12 @@ ErrCode DisplayManagerLiteProxy::SetScreenBrightness(
         return errCode;
     }
 
-    isSucc = reply.ReadInt32() == 1;
+    int32_t isSuccInt = 0;
+    if (!reply.ReadInt32(isSuccInt)) {
+        TLOGE(WmsLogTag::DMS, "Read [isSucc] failed!");
+        return ERR_INVALID_DATA;
+    }
+    isSucc = isSuccInt == 1;
     return ERR_OK;
 }
 
