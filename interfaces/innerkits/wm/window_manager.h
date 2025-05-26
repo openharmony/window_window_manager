@@ -245,9 +245,15 @@ public:
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
     void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+    void SetInterestWindowIds(const std::unordered_set<int32_t>& interestWindowIds)
+        { interestWindowIds_ = interestWindowIds; }
+    const std::unordered_set<int32_t>& GetInterestWindowIds() const { return interestWindowIds_; }
+    void AddInterestWindowId(int32_t interestWindowId) { interestWindowIds_.insert(interestWindowId); }
+    void RemoveInterestWindowId(int32_t interestWindowId) { interestWindowIds_.erase(interestWindowId); }
 
 private:
     std::unordered_set<WindowInfoKey> interestInfo_;
+    std::unordered_set<int32_t> interestWindowIds_;
 };
 
 /**
@@ -797,7 +803,7 @@ public:
      * @param windowInfoList the changed window info list.
      * @return WM_OK means notify success, others means notify failed.
      */
-    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     /**

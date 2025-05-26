@@ -157,7 +157,6 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
 
     /*
@@ -497,7 +496,6 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
-    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -20,6 +20,7 @@
 #include "ability_context_impl.h"
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
+#include "mock_ability_context_impl.h"
 #include "mock_session.h"
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
@@ -324,6 +325,47 @@ HWTEST_F(WindowSessionImplTest5, CheckMultiWindowRect, Function | SmallTest | Le
     windowSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ret = windowSessionImpl->CheckMultiWindowRect(width, height);
     EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: IsDeviceFeatureCapableFor
+ * @tc.desc: IsDeviceFeatureCapableFor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableFor, Function | SmallTest | Level2)
+{
+    const std::string feature = "free_multi_window";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsDeviceFeatureCapableFor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), true);
+}
+
+/**
+ * @tc.name: IsDeviceFeatureCapableForFreeMultiWindow
+ * @tc.desc: IsDeviceFeatureCapableForFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Function | SmallTest | Level2)
+{
+    const std::string feature = "free_multi_window";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsDeviceFeatureCapableForFreeMultiWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
+    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
+        system::GetParameter("const.window.device_feature_support_type", "0") == "1");
 }
 
 /**

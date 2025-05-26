@@ -20,11 +20,11 @@ using namespace testing::ext;
 
 namespace OHOS::Rosen {
 /**
- * @tc.name: Marshalling01
- * @tc.desc: Marshalling test
+ * @tc.name: Marshalling
+ * @tc.desc: Marshalling test with an empty surfaceNode
  * @tc.type: FUNC
  */
-HWTEST(DmRsSurfaceNodeTest, Marshalling01, TestSize.Level1)
+HWTEST(DmRsSurfaceNodeTest, Marshalling, TestSize.Level1)
 {
     DmRsSurfaceNode DmRsSurfaceNode;
     Parcel parcel;
@@ -33,11 +33,11 @@ HWTEST(DmRsSurfaceNodeTest, Marshalling01, TestSize.Level1)
 }
 
 /**
- * @tc.name: MarshallingUnmarshalling02
- * @tc.desc: MarshallingUnmarshalling test
+ * @tc.name: MarshallingUnmarshalling_CustomValues
+ * @tc.desc: Marshalling and unmarshalling test with custom values
  * @tc.type: FUNC
  */
-HWTEST(DmRsSurfaceNodeTest, MarshallingUnmarshalling02, TestSize.Level1)
+HWTEST(DmRsSurfaceNodeTest, MarshallingUnmarshalling_CustomValues, TestSize.Level1)
 {
     RSSurfaceNodeConfig rsSurfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 10);

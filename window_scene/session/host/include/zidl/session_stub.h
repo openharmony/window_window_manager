@@ -117,6 +117,7 @@ private:
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleSnapshotUpdate(MessageParcel& data, MessageParcel& reply);
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
@@ -145,6 +146,7 @@ private:
     // KeyFrame
     int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 

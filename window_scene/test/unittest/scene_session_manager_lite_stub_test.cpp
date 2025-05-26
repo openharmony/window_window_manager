@@ -251,6 +251,15 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override
+    {
+        return WMError::WM_OK;
+    }
+
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -1056,7 +1065,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, TestSi
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
-
 
 /**
  * @tc.name: HandleGetRecentMainSessionInfoList

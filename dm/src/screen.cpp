@@ -26,9 +26,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Screen"};
-}
 class Screen::Impl : public RefBase {
 public:
     explicit Impl(sptr<ScreenInfo> info)
@@ -122,7 +119,7 @@ bool Screen::IsReal() const
 
 DMError Screen::SetOrientation(Orientation orientation) const
 {
-    WLOGFD("Orientation %{public}u", orientation);
+    TLOGD(WmsLogTag::DMS, "Orientation %{public}u", orientation);
     return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
 }
 
@@ -231,7 +228,7 @@ DMError Screen::SetScreenActiveMode(uint32_t modeId)
 void Screen::UpdateScreenInfo(sptr<ScreenInfo> info) const
 {
     if (info == nullptr) {
-        WLOGFE("ScreenInfo is invalid");
+        TLOGE(WmsLogTag::DMS, "ScreenInfo is invalid");
         return;
     }
     pImpl_->SetScreenInfo(info);
@@ -246,7 +243,7 @@ void Screen::UpdateScreenInfo() const
 DMError Screen::SetDensityDpi(uint32_t dpi) const
 {
     if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
-        WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+        TLOGE(WmsLogTag::DMS, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
             DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -258,7 +255,7 @@ DMError Screen::SetDensityDpi(uint32_t dpi) const
 DMError Screen::SetDensityDpiSystem(uint32_t dpi) const
 {
     if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
-        WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+        TLOGE(WmsLogTag::DMS, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
             DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -269,7 +266,7 @@ DMError Screen::SetDensityDpiSystem(uint32_t dpi) const
 DMError Screen::SetDefaultDensityDpi(uint32_t dpi) const
 {
     if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
-        WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+        TLOGE(WmsLogTag::DMS, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
             DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -280,7 +277,7 @@ DMError Screen::SetDefaultDensityDpi(uint32_t dpi) const
 DMError Screen::SetResolution(uint32_t width, uint32_t height, uint32_t dpi) const
 {
     if (width <= 0 || height <= 0 || dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
-        WLOGFE("Invalid param, w:%{public}u h:%{public}u dpi:%{public}u", width, height, dpi);
+        TLOGE(WmsLogTag::DMS, "Invalid param, w:%{public}u h:%{public}u dpi:%{public}u", width, height, dpi);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     // Calculate display density, Density = Dpi / 160.

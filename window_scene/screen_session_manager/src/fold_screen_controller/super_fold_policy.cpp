@@ -83,8 +83,6 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         return recordRect;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
-    auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
@@ -98,7 +96,7 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
             recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
-            recordRect = {0, 0, screenWidth, screenHeight};
+            recordRect = {0, 0, 0, 0};
         }
     }
     std::ostringstream oss;
