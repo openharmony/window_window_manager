@@ -287,13 +287,6 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, TestSize.Level1)
         return;
     };
     callback->onUpdateAvoidArea_ = callbackFun;
-
-    callback->onUpdateOccupiedAreaIfNeed_ = nullptr;
-    UpdateOccupiedAreaIfNeedCallback updateCallbackFun = [&sceneSession](int32_t persistentId) {
-        sceneSession->RemoveToastSession(persistentId);
-        return;
-    };
-    callback->onUpdateOccupiedAreaIfNeed_ = updateCallbackFun;
     sceneSession->NotifyClientToUpdateAvoidArea();
     EXPECT_EQ(6, sceneSession->GetPersistentId());
 }

@@ -36,7 +36,7 @@ class ScreenManager::Impl : public RefBase {
 public:
     Impl() = default;
     ~Impl();
-    
+
     static inline SingletonDelegator<ScreenManager> delegator;
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     sptr<Screen> GetScreen(ScreenId screenId);

@@ -993,6 +993,16 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect, TestSize.Level1)
     ASSERT_EQ(res, 1);
     moveDragController->CalcFirstMoveTargetRect(windowRect, true);
     ASSERT_EQ(res, 1);
+
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
+    ASSERT_EQ(0, moveDragController->moveDragProperty_.targetRect_.posX_);
+    ASSERT_EQ(0, moveDragController->moveDragProperty_.targetRect_.posY_);
+
+    moveDragController->SetParentRect({10, 10, 10, 10});
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
+    ASSERT_EQ(-10, moveDragController->moveDragProperty_.targetRect_.posX_);
+    ASSERT_EQ(-10, moveDragController->moveDragProperty_.targetRect_.posY_);
+
     moveDragController->isStartMove_ = preIsStartMove;
     moveDragController->moveTempProperty_ = preMoveTempProperty;
 }

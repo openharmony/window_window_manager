@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -61,6 +61,7 @@ group("unittest") {
     ":ws_scene_session_manager_test9",
     ":ws_scene_session_test",
     ":ws_scene_system_ability_listener_test",
+    ":ws_session_change_recorder_test",
     ":ws_session_lifecycle_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
@@ -97,6 +98,7 @@ group("unittest") {
     ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+    ":ws_compatible_mode_property_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_window_session_property_animation_test",
@@ -105,7 +107,6 @@ group("unittest") {
     "event_distribution:ws_scene_session_dirty_manager_test",
     "event_distribution:ws_scene_session_dirty_manager_test2",
     "layout:ws_layout_test",
-    "multi_user:unittest",
     "rotation:ws_scene_session_manager_rotation_test",
     "rotation:ws_scene_session_rotation_test",
     "rotation:ws_session_stage_proxy_rotation_test",
@@ -124,6 +125,7 @@ group("unittest") {
       ":ws_mock_session_manager_service_test",
       ":ws_session_manager_lite_test",
       ":ws_session_manager_test",
+      "multi_user:unittest",
     ]
   } else {
     deps += [
@@ -140,6 +142,7 @@ test_external_deps = [
   "ability_runtime:session_handler",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
+  "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
   "googletest:gmock",
@@ -155,6 +158,7 @@ test_external_deps = [
   "ipc:ipc_single",
   "libxml2:libxml2",
   "napi:ace_napi",
+  "safwk:system_ability_fwk",
 ]
 
 ohos_unittest("ws_ability_info_manager_test") {
@@ -170,6 +174,7 @@ ohos_unittest("ws_ability_info_manager_test") {
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "hilog:libhilog",
   ]
 }
@@ -301,7 +306,10 @@ ohos_unittest("ws_session_listener_controller_test") {
 
   sources = [ "session_listener_controller_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = test_external_deps
 }
@@ -1029,6 +1037,16 @@ ohos_unittest("ws_window_session_property_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("ws_compatible_mode_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "compatible_mode_property_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
 ohos_unittest("ws_window_event_channel_test") {
   module_out_path = module_out_path
 
@@ -1487,6 +1505,8 @@ config("ws_unittest_common_public_config") {
 
     # for window_manager_hilog
     "${window_base_path}/utils/include",
+
+    "${dmserver_gen_path}",
   ]
 }
 
@@ -1509,6 +1529,7 @@ ohos_static_library("ws_unittest_common") {
     ":ws_unittest_common_public_config",
     "${window_base_path}/resources/config/build:coverage_flags",
     "${window_base_path}/resources/config/build:testcase_flags",
+    "${window_base_path}/wmserver:libidl_config",
   ]
 
   deps = [
@@ -1526,6 +1547,7 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wm:libwm_lite",
+    "${window_base_path}/wmserver:mock_session_manager_service_proxy",
   ]
 
   public_deps = [
@@ -1567,5 +1589,25 @@ ohos_unittest("ws_scene_system_ability_listener_test") {
     external_deps += [ "resource_schedule_service:ressched_client" ]
     defines = [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
   }
+}
+
+ohos_unittest("ws_session_change_recorder_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_change_recorder_test.cpp" ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
+  ]
 }
 ## Build ws_unittest_common.a }}}

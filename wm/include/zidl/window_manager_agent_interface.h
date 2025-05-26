@@ -38,6 +38,8 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
     WINDOW_MANAGER_AGENT_TYPE_PIP,
     WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID,
+    WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
     WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
@@ -61,6 +63,8 @@ public:
         TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY,
         TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED,
         TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE,
+        TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID,
+        TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -69,6 +73,7 @@ public:
     virtual void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) = 0;
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
+    virtual void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId) = 0;
     virtual void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
@@ -80,6 +85,8 @@ public:
     virtual void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) = 0;
     virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
+    virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

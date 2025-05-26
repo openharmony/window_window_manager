@@ -652,7 +652,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -678,7 +679,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -704,7 +706,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -2381,6 +2384,20 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetImageForRecent
+ * @tc.desc: SetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetImageForRecent, TestSize.Level1)
+{
+    int imgResourceId = 1;
+    ImageFit imageFit = ImageFit::FILL;
+    int persistentId = 1;
+    auto result = ssm_->SetImageForRecent(imgResourceId, imageFit, persistentId);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: SetIsWindowRectAutoSave
  * @tc.desc: SetIsWindowRectAutoSave
  * @tc.type: FUNC
@@ -2626,12 +2643,12 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
 {
-    int32_t windowNum = 0;
+    uint32_t windowNum = 0;
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     if (!ssm_->systemConfig_.freeMultiWindowSupport_) {
         EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
     } else {
-        EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+        EXPECT_EQ(WMError::WM_OK, res);
         windowNum = 1;
         res = ssm_->SetForegroundWindowNum(windowNum);
         EXPECT_EQ(WMError::WM_OK, res);
@@ -2650,6 +2667,18 @@ HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
     bool needOffScreen = true;
     WSError res = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
+/**
+ * @tc.name: ConfigSupportFunctionType
+ * @tc.desc: test function : ConfigSupportFunctionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
+{
+    ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
+    EXPECT_EQ(true,
+        (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
 }
 } // namespace
 } // namespace Rosen

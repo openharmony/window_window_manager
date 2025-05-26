@@ -1452,5 +1452,16 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
     windowManager.pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowVisibilityStateListeners_ = oldListeners;
 }
+
+/**
+ * @tc.name: NotifyDisplayIdChange01
+ * @tc.desc: check NotifyDisplayIdChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyDisplayIdChange01, Function | SmallTest | Level2)
+{
+    auto ret = WindowManagerLite::GetInstance().NotifyDisplayIdChange(1, 0);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
 } // namespace
 } // namespace OHOS::Rosen
