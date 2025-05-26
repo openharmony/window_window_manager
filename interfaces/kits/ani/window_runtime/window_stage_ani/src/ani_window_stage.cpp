@@ -282,38 +282,7 @@ void AniWindowStage::OnUnregisterWindowCallback(ani_env* env, ani_string type, a
 
 void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
-    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (aniWindowStage != nullptr) {
-        aniWindowStage->OnLoadContent(env, path);
-    } else {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
-    }
-}
-
-void AniWindowStage::OnLoadContent(ani_env* env, ani_string path)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
-    auto windowScene = GetWindowScene().lock();
-    if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI]windowScene is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    auto mainWindow = windowScene->GetMainWindow();
-    if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] mainWindow is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contentPath;
-    AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, nullptr));
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
-        mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);
-    if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
-    }
+    AniWindowStage::LoadContentWithStorage(env, obj, nativeObj, path, nullptr);
 }
 
 void AniWindowStage::LoadContentWithStorage(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,

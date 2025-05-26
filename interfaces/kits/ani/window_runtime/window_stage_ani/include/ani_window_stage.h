@@ -51,7 +51,6 @@ private:
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
-    void OnLoadContent(ani_env* env, ani_string path);
     void OnLoadContentWithStorage(ani_env* env, ani_string path, ani_object storage);
     std::weak_ptr<WindowScene> windowScene_;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
