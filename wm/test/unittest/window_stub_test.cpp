@@ -605,7 +605,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest26, TestSize.Level1)
  * @tc.desc: test TRANS_ID_NOTIFY_SCREEN_SHOT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowStubTest, OnRemoteRequest26, TestSize.Level1)
+HWTEST_F(WindowStubTest, OnRemoteRequest_TRANS_ID_NOTIFY_SCREEN_SHOT, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
