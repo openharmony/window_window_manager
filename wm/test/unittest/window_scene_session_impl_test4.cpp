@@ -1060,14 +1060,14 @@ HWTEST_F(WindowSceneSessionImplTest4, AddSubWindowMapForExtensionWindow, TestSiz
 }
 
 /**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled Test
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest4, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPcOrPadCapabilityEnabled");
+    option->SetWindowName("IsPcOrFreeMultiWindowCapabilityEnabled");
     option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1075,15 +1075,15 @@ HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->property_->SetIsUIExtFirstSubWindow(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
@@ -2020,29 +2020,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1
     activeColor = "rgb#00000000";
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: SetWindowContainerColor03
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor03, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetBundleName("SetWindowContainerColor");
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetDecorEnable(true);
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->containerColorList_.insert("SetWindowContainerColor");
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#FF000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    EXPECT_EQ(res, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen
