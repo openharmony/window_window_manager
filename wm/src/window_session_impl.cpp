@@ -308,9 +308,9 @@ bool WindowSessionImpl::IsPadWindow() const
 
 bool WindowSessionImpl::IsPcOrFreeMultiWindowCapabilityEnabled() const
 {
-    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode()
-        || property_->GetIsPcAppInPad()
-        || IsDeviceFeatureCapableForFreeMultiWindow();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() ||
+        property_->GetIsPcAppInPad() ||
+        IsDeviceFeatureCapableForFreeMultiWindow();
 }
 
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
