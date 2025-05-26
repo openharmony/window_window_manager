@@ -4255,9 +4255,9 @@ WMError WindowSceneSessionImpl::SyncShadowsToComponent(const ShadowsInfo& shadow
 
     property_->SetWindowShadows(shadowsInfo);
     auto hostSession = GetHostSession();
-    if (hostSession) {
-        hostSession->SetWindowShadows(shadowsInfo);
-    }
+
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->SetWindowShadows(shadowsInfo);
     return WMError::WM_OK;
 }
 

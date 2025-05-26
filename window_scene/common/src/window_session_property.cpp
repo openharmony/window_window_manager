@@ -2268,6 +2268,7 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
 {
     sptr<ShadowsInfo> shadowsInfo = parcel.ReadParcelable<ShadowsInfo>();
     if (shadowsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "shadowsInfo is null");
         return;
     }
     property->SetWindowShadows(*shadowsInfo);
