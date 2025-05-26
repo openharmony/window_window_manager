@@ -4906,12 +4906,6 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         UpdateTitleButtonVisibility();
         UpdateDecorEnable(true);
     } else if (state_ == WindowState::STATE_SHOWN) {
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("update filed! id: %{public}u, mode: %{public}u.", GetWindowId(),
-                static_cast<uint32_t>(mode));
-            return ret;
-        }
         // set client window mode if success.
         property_->SetWindowMode(mode);
         UpdateTitleButtonVisibility();
