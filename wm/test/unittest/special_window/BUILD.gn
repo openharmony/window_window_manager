@@ -21,5 +21,8 @@ ohos_unittest("window_scene_session_impl_special_window_test") {
   module_out_path = module_out_path
   sources = [ "window_scene_session_impl_special_window_test.cpp" ]
   deps = [ wm_unittest_common ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+  ]
 }

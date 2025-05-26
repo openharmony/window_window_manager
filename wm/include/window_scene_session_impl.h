@@ -41,7 +41,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
-    void Resume() override;
     WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
 
     /*
@@ -56,7 +55,10 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
 
     /*
      * Window Hierarchy
@@ -82,7 +84,6 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
-    static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windId);
     // only main window, sub window, dialog window can use
     static int32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -99,10 +100,12 @@ public:
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
     virtual WMError SetViewKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetWindowShadowEnabled(bool isEnabled) override;
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
@@ -114,6 +117,7 @@ public:
     virtual bool IsTurnScreenOn() const override;
     virtual bool IsKeepScreenOn() const override;
     virtual bool IsViewKeepScreenOn() const override;
+    virtual bool GetWindowShadowEnabled() const override;
     virtual bool IsPrivacyMode() const override;
     virtual bool IsLayoutFullScreen() const override;
     virtual bool IsFullScreen() const override;
@@ -152,6 +156,8 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
+    WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
 
     /*
      * Sub Window
@@ -215,7 +221,7 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
-    WMError GetGestureBackEnabled(bool& enable) override;
+    WMError GetGestureBackEnabled(bool& enable) const override;
 
     /*
      * PC Fold Screen
@@ -231,6 +237,7 @@ public:
     WMError SetWindowCornerRadius(float cornerRadius) override;
     WMError GetWindowCornerRadius(float& cornerRadius) override;
     WMError SetShadowRadius(float radius) override;
+    WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) override;
     WMError SetShadowColor(std::string color) override;
     WMError SetShadowOffsetX(float offsetX) override;
     WMError SetShadowOffsetY(float offsetY) override;
@@ -279,6 +286,24 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    /*
+     * Window Pattern
+     */
+    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit) override;
+    /**
+     * Window Transition Animation For PC
+     */
+    WMError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
+    std::shared_ptr<TransitionAnimation> GetWindowTransitionAnimation(WindowTransitionType transitionType) override;
+
+    /*
+     * Window LifeCycle
+     */
+    void Interactive() override;
+
+    WSError CloseSpecificScene() override;
+    WMError SetSubWindowSource(SubWindowSource source) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -430,6 +455,7 @@ private:
      */
     bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
+    bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
 
     /*
@@ -462,10 +488,14 @@ private:
     /*
      * Window Lifecycle
      */
-    bool isColdStart_ = true;
-    void NotifyFreeMultiWindowModeResume();
+    void NotifyFreeMultiWindowModeInteractive();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::mutex transitionAnimationConfigMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

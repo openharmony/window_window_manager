@@ -19,6 +19,7 @@
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
 #include "dm_common.h"
+#include "rs_adapter.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -33,6 +34,7 @@ AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, 
     if (name != "") {
         name_ = name;
     }
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
 }
 
 AbstractScreen::~AbstractScreen()
@@ -81,6 +83,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
         surfaceNode->GetName().c_str(), surfaceNode->GetId());
 
     if (isAdd) {
+        RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
         surfaceNode->SetVisible(true);
         rsDisplayNode_->AddChild(surfaceNode, -1);
     } else {
@@ -109,6 +112,7 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
         WLOGFE("node is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     surfaceNode->SetVisible(true);
     if (onTop) {
         rsDisplayNode_->AddChild(surfaceNode, -1);
@@ -120,10 +124,7 @@ DMError AbstractScreen::AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNo
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         nativeSurfaceNodes_.push_back(surfaceNode);
     }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     return DMError::DM_OK;
 }
 
@@ -144,15 +145,12 @@ DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfac
     }
     rsDisplayNode_->RemoveChild(*iter);
     nativeSurfaceNodes_.erase(iter);
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     return DMError::DM_OK;
 }
 
-void AbstractScreen::UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId,
-    bool isAdd)
+void AbstractScreen::UpdateDisplayGroupRSTree(
+    std::shared_ptr<RSSurfaceNode>& surfaceNode, std::shared_ptr<RSDisplayNode>& parentNode, bool isAdd)
 {
     if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
         WLOGFE("node is nullptr");
@@ -162,10 +160,11 @@ void AbstractScreen::UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& su
         surfaceNode->GetName().c_str(), surfaceNode->GetId());
 
     if (isAdd) {
+        RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
         surfaceNode->SetVisible(true);
         rsDisplayNode_->AddCrossParentChild(surfaceNode, -1);
     } else {
-        rsDisplayNode_->RemoveCrossParentChild(surfaceNode, parentNodeId);
+        rsDisplayNode_->RemoveCrossParentChild(surfaceNode, parentNode);
     }
 }
 
@@ -201,20 +200,20 @@ void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const 
         WLOGFD("RSDisplayNode is not null");
     } else {
         WLOGFD("Create rsDisplayNode");
-        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+        std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, GetRSUIContext());
         if (rsDisplayNode == nullptr) {
             WLOGE("fail to add child. create rsDisplayNode fail!");
             return;
         }
+        RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
         rsDisplayNode_ = rsDisplayNode;
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+              "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     }
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
 
     // flush transaction
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     WLOGFD("InitRSDisplayNode success");
 }
 
@@ -225,12 +224,15 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     }
 
     WLOGFD("Create defaultRSDisplayNode");
-    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config, GetRSUIContext());
     if (rsDisplayNode == nullptr) {
         WLOGE("fail to add child. create rsDisplayNode fail!");
         return;
     }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
     rsDisplayNode_ = rsDisplayNode;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+          "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -243,10 +245,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     }
 
     // flush transaction
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     WLOGFD("InitRSDefaultDisplayNode success");
 }
 
@@ -489,6 +488,14 @@ uint32_t AbstractScreen::GetPhyHeight() const
     return phyHeight_;
 }
 
+std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    return rsUIContext;
+}
+
 AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, ScreenId dmsId, ScreenId rsId,
     std::string name, ScreenCombination combination) : AbstractScreen(screenController, name, dmsId, rsId),
     combination_(combination)
@@ -622,10 +629,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     if (dmsScreen->rsDisplayNode_ != nullptr) {
         dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
         dmsScreen->rsDisplayNode_->RemoveFromTree();
-        auto transactionProxy = RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
+        RSTransactionAdapter::FlushImplicitTransaction(dmsScreen->GetRSUIContext());
         dmsScreen->rsDisplayNode_ = nullptr;
     }
     WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
@@ -644,10 +648,7 @@ bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScr
     if (dmsScreen->rsDisplayNode_ != nullptr) {
         dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
         dmsScreen->rsDisplayNode_->RemoveFromTree();
-        auto transactionProxy = RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
+        RSTransactionAdapter::FlushImplicitTransaction(dmsScreen->GetRSUIContext());
     }
     defaultScreenId_ = screenId;
     WLOGFD("groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",

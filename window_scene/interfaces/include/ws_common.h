@@ -409,6 +409,14 @@ struct SessionInfo {
     bool isAbilityHook_ = false;
 
     /*
+     * Keyboard
+     */
+    bool isKeyboardWillShowRegistered_ { false };
+    bool isKeyboardWillHideRegistered_ { false };
+    bool isKeyboardDidShowRegistered_ { false };
+    bool isKeyboardDidHideRegistered_ { false };
+
+    /*
      * App Use Control
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
@@ -505,6 +513,7 @@ enum class SizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
+    OCCUPIED_AREA_CHANGE = 34,
     END,
 };
 
@@ -570,6 +579,11 @@ inline bool NearEqual(const int32_t& left, const int32_t& right)
     return left == right;
 }
 
+inline bool NearEqual(const int32_t& left, const int32_t& right, const int32_t threshold)
+{
+    return std::abs(left - right) <= threshold;
+}
+
 inline bool NearZero(const double left)
 {
     constexpr double epsilon = 0.001f;
@@ -592,6 +606,12 @@ struct WSRectT {
     bool operator!=(const WSRectT<T>& a) const
     {
         return !this->operator==(a);
+    }
+
+    inline bool isNearEqual(const WSRectT<T>& rect, const T threshold) const
+    {
+        return (NearEqual(posX_, rect.posX_, threshold) && NearEqual(posY_, rect.posY_, threshold) &&
+                NearEqual(width_, rect.width_, threshold) && NearEqual(height_, rect.height_, threshold));
     }
 
     bool IsEmpty() const
@@ -641,6 +661,13 @@ inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
+struct WindowAnimationInfo {
+    WSRect beginRect { 0, 0, 0, 0 };
+    WSRect endRect { 0, 0, 0, 0 };
+    bool animated { false };
+    uint32_t callingId { 0 };
+};
+
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
@@ -650,12 +677,12 @@ struct WindowShadowConfig {
 };
 
 struct KeyboardSceneAnimationConfig {
-    std::string curveType_ = "default";
-    float ctrlX1_ = 0.2f;
+    std::string curveType_;
+    float ctrlX1_ = 0.0f;
     float ctrlY1_ = 0.0f;
-    float ctrlX2_ = 0.2f;
-    float ctrlY2_ = 1.0f;
-    uint32_t duration_ = 150;
+    float ctrlX2_ = 0.0f;
+    float ctrlY2_ = 0.0f;
+    uint32_t duration_ = 0;
 };
 
 struct WindowAnimationConfig {
@@ -842,6 +869,17 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
+};
+
+enum class SessionPropertyFlag {
+    NONE = 0,
+    WINDOW_ID = 1,
+    BUNDLE_NAME = 1 << 1,
+    ABILITY_NAME = 1 << 2,
+    APP_INDEX = 1 << 3,
+    VISIBILITY_STATE = 1 << 4,
+    DISPLAY_ID = 1 << 5,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**

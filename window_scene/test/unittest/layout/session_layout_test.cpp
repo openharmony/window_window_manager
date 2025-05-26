@@ -256,21 +256,6 @@ HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
     session->SetDragStart(false);
     ASSERT_EQ(false, session->IsDragStart());
 }
-
-/**
- * @tc.name: SetOriginDisplayId
- * @tc.desc: SetOriginDisplayId
- * @tc.type: FUNC
- */
-HWTEST_F(SessionLayoutTest, SetOriginDisplayId, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetOriginDisplayId";
-    info.bundleName_ = "SetOriginDisplayId";
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    session->SetOriginDisplayId(999);
-    ASSERT_EQ(999, session->GetOriginDisplayId());
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

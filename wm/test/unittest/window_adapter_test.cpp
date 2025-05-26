@@ -652,6 +652,20 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: WindowAdapter/GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+}
+
+/**
  * @tc.name: GetWindowStyleType
  * @tc.desc: WindowAdapter/GetWindowStyleType
  * @tc.type: FUNC
@@ -861,6 +875,20 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostWindowCompatiblityInfo
+ * @tc.desc: WindowAdapter/GetHostWindowCompatiblityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto err = windowAdapter.GetHostWindowCompatiblityInfo(token, property);
+    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: WindowAdapter/MinimizeByWindowId
  * @tc.type: FUNC
@@ -886,6 +914,42 @@ HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     auto err = windowAdapter.ListWindowInfo(windowInfoOption, infos);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);

@@ -19,6 +19,7 @@
 
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +28,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+constexpr uint32_t M_STATUS_WIDTH = 1008;
+constexpr uint32_t F_STATUS_WIDTH = 2048;
+constexpr uint32_t G_STATUS_WIDTH = 3184;
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -249,6 +253,57 @@ HWTEST_F(ScreenSessionManagerTest, OnBeforeScreenPropertyChange, Function | Smal
     ASSERT_NE(ssm_, nullptr);
     ssm_->OnBeforeScreenPropertyChange(FoldStatus::UNKNOWN);
     ASSERT_EQ(ssm_->clientProxy_, nullptr);
+}
+
+/**
+ * @tc.name: ScbStatusRecoveryWhenSwitchUser
+ * @tc.desc: ScbStatusRecoveryWhenSwitchUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ScbStatusRecoveryWhenSwitchUser, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        ScreenId id = ssm_->GetDefaultScreenId();
+        sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(id);
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
+        uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
+        std::vector<int32_t> oldScbPids_ = { 100 };
+        int32_t newScbPid = 101;
+        ssm_->ScbStatusRecoveryWhenSwitchUser(oldScbPids_, newScbPid);
+        FoldDisplayMode mode = ssm_->GetFoldDisplayMode();
+        if (mode == FoldDisplayMode::MAIN) {
+            EXPECT_EQ(currentWidth, M_STATUS_WIDTH);
+        } else if (mode == FoldDisplayMode::FULL) {
+            EXPECT_EQ(currentWidth, F_STATUS_WIDTH);
+        } else {
+            EXPECT_EQ(currentWidth, G_STATUS_WIDTH);
+        }
+    }
+}
+
+/**
+ * @tc.name: GetScreenAreaOfDisplayArea
+ * @tc.desc: GetScreenAreaOfDisplayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    DisplayId displayId = 0;
+    DMRect displayArea = { 0, 0, 1, 1 };
+    ScreenId screenId = 0;
+    DMRect screenArea = DMRect::NONE();
+    sptr<ScreenSession> screenSession = nullptr;
+    auto ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    ScreenProperty property = ScreenProperty();
+    screenSession = new (std::nothrow) ScreenSession(0, property, 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_.insert(std::make_pair(0, screenSession));
+    ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 }
 }

@@ -43,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetTransitionAnimationConfig(WindowTransitionType transitionType, const TransitionAnimation& animation);
     void SetRequestRect(const struct Rect& rect);
     void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
@@ -59,6 +60,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetViewKeepScreenOn(bool keepScreenOn);
+    void SetWindowShadowEnabled(bool isEnabled);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
@@ -112,6 +114,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> GetTransitionAnimationConfig() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -127,6 +130,7 @@ public:
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool GetWindowShadowEnabled() const;
     bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
@@ -180,6 +184,10 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingTransitionAnimationMap(Parcel& parcel) const;
+    static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingShadowsInfo(Parcel& parcel) const;
+    static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -216,18 +224,24 @@ public:
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    bool IsSubWindowOutlineEnabled() const;
 
     /*
      * Window Hierarchy
      */
     void SetSubWindowZLevel(int32_t zLevel);
     int32_t GetSubWindowZLevel() const;
+    void SetZIndex(int32_t zIndex);
+    int32_t GetZIndex() const;
 
     /*
      * Window Property
      */
     void SetWindowCornerRadius(float cornerRadius);
     float GetWindowCornerRadius() const;
+    void SetWindowShadows(const ShadowsInfo& shadowsInfo);
+    ShadowsInfo GetWindowShadows() const;
 
     /*
      * UIExtension
@@ -278,6 +292,9 @@ public:
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsSupportRotateFullScreen() const;
+    bool IsAdaptToSubWindow() const;
+    bool IsAdaptToSimulationScale() const;
 
     /*
      * Keyboard
@@ -307,6 +324,7 @@ private:
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateWindowShadowEnabled(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -338,6 +356,7 @@ private:
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateWindowShadowEnabled(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -383,6 +402,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
+    bool windowShadowEnabled_ { true };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -455,11 +475,13 @@ private:
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
+    bool subWindowOutlineEnabled_ = false;
 
     /*
      * Window Hierarchy
      */
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     /*
      * UIExtension
@@ -509,8 +531,15 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+    ShadowsInfo shadowsInfo_;
+    mutable std::mutex shadowsInfoMutex_;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
  
 class CompatibleModeProperty : public Parcelable {
@@ -539,8 +568,19 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
+    bool IsSupportRotateFullScreen() const;
+
+    void SetIsAdaptToSubWindow(bool isAdaptToSubWindow);
+    bool IsAdaptToSubWindow() const;
+
+    void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
+    bool IsAdaptToSimulationScale() const;
+
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
+
+    void CopyFrom(const sptr<CompatibleModeProperty>& property);
 
     std::string ToString() const
     {
@@ -553,6 +593,9 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
+        ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
+        ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
         return ss.str();
     }
 
@@ -565,6 +608,9 @@ private:
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
     bool disableWindowLimit_ { false };
+    bool isSupportRotateFullScreen_ { false };
+    bool isAdaptToSubWindow_ { false };
+    bool isAdaptToSimulationScale_ { false };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -669,7 +715,10 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t maxMidSceneNum_ = 4;
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
+    bool supportFollowRelativePositionToParent_ = false;
     bool supportZLevel_ = false;
+    bool skipRedundantWindowStatusNotifications_ = false;
+    uint32_t supportFunctionType_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -716,7 +765,11 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
             return false;
         }
-        if (!parcel.WriteBool(supportZLevel_)) {
+        if (!parcel.WriteBool(supportFollowRelativePositionToParent_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportZLevel_) ||
+            !parcel.WriteBool(skipRedundantWindowStatusNotifications_) || !parcel.WriteUint32(supportFunctionType_)) {
             return false;
         }
         return true;
@@ -764,7 +817,10 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
+        config->supportFollowRelativePositionToParent_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
+        config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
+        config->supportFunctionType_ = parcel.ReadUint32();
         return config;
     }
 

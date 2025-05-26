@@ -82,7 +82,7 @@ public:
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
 
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
-    
+
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 
@@ -114,7 +114,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
+        DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
@@ -162,6 +162,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
@@ -225,6 +226,8 @@ public:
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
     void NotifyScreenMaskAppear() override;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
