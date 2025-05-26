@@ -407,12 +407,14 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
-        if (session->specificCallback_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->MarkAvoidAreaAsDirty();
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(persistentId);
+        session->MarkAvoidAreaAsDirty();
+        auto subSessions = session->GetSubSession();
+        for (const auto& subSession : subSession) {
+            if (subSession) {
+                subSession->MarkAvoidAreaAsDirty();
             }
+        }
+        if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
