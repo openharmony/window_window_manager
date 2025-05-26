@@ -2818,7 +2818,7 @@ enum class ScreenshotEventType : int32_t {
     /**
      * screenshot event type undefined.
      */
-    EVENT_TYPE_UNDEFINED= -1,
+    EVENT_TYPE_UNDEFINED = -1,
 
     /**
      * System screenshot.
