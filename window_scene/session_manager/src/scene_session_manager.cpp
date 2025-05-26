@@ -65,6 +65,7 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "session/host/include/session_change_recorder.h"
 #include "session/host/include/session_utils.h"
 #include "session/host/include/sub_session.h"
 #include "session_helper.h"
@@ -128,6 +129,7 @@ const std::string ARG_DUMP_DISPLAY = "-d";
 const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
 const std::string ARG_DUMP_DETAIL = "-c";
+const std::string ARG_DUMP_RECORD = "-v";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
@@ -364,6 +366,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
+    SessionChangeRecorder::GetInstance().stopLogFlag.store(true);
 }
 
 void SceneSessionManager::Init()
@@ -411,6 +414,9 @@ void SceneSessionManager::Init()
     // Input init.
     SceneInputManager::GetInstance().Init();
     RegisterFlushWindowInfoCallback();
+
+    // DFX
+    SessionChangeRecorder::GetInstance().Init();
 
     // MMI window state error check
     int32_t retCode = MMI::InputManager::GetInstance()->
@@ -4107,6 +4113,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         sceneSession->SetRecovered(true);
         recoverSceneSessionFunc_(sceneSession, sessionInfo);
         NotifySessionUnfocusedToClient(persistentId);
+        sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
         session = sceneSession;
         return WSError::WS_OK;
     };
@@ -5058,9 +5065,9 @@ bool SceneSessionManager::GetStartingWindowInfoFromCache(
         return false;
     }
     startingWindowInfo = infoMapIter->second;
-    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
-        startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
-                                                startingWindowInfo.backgroundColorEarlyVersion_);
+    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s",
+        startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
+        startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str());
     return true;
 }
 
@@ -5080,9 +5087,9 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
     };
     bool res = startingWindowRdbMgr_->QueryData(itemKey, startingWindowInfo);
     if (res) {
-        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
-            startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
-                                                    startingWindowInfo.backgroundColorEarlyVersion_);
+        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s",
+            startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
+            startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str());
     }
     return res;
 }
@@ -6326,6 +6333,12 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     if (params.size() >= 1 && params[0] == ARG_DUMP_PIPLINE) { // 1: params num
         return GetTotalUITreeInfo(dumpInfo);
     }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_RECORD) { // 2: params num
+        std::vector<std::string> resetParams;
+        resetParams.assign(params.begin() + 1, params.end());
+        SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);
+        return WSError::WS_OK; 
+    }
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
@@ -6624,37 +6637,9 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_NULLPTR;
     }
-    WSError basicCheckRet = RequestFocusBasicCheck(persistentId, focusGroup);
-    if (basicCheckRet != WSError::WS_OK) {
-        return basicCheckRet;
-    }
-    if (!sceneSession->CheckFocusable() || !IsSessionVisibleForeground(sceneSession)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable or not visible!");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!sceneSession->IsFocusedOnShow()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focused on show!");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!sceneSession->IsFocusableOnShow() &&
-        (reason == FocusChangeReason::FOREGROUND || reason == FocusChangeReason::APP_FOREGROUND)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable on show!");
-        return WSError::WS_DO_NOTHING;
-    }
-
-    // subwindow/dialog state block
-    if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
-        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
-        GetSceneSession(sceneSession->GetParentPersistentId()) &&
-        !IsSessionVisibleForeground(GetSceneSession(sceneSession->GetParentPersistentId()))) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "parent session id: %{public}d is not visible!",
-                sceneSession->GetParentPersistentId());
-            return WSError::WS_DO_NOTHING;
-    }
-    // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(displayId, sceneSession, byForeground, reason);
-    if (specificCheckRet != WSError::WS_OK) {
-        return specificCheckRet;
+    WSError checkRet = RequestSessionFocusCheck(sceneSession, focusGroup, persistentId, byForeground, reason);
+    if (checkRet != WSError::WS_OK) {
+        return checkRet;
     }
     focusGroup->SetNeedBlockNotifyUnfocusStatus(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground());
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
@@ -6732,6 +6717,49 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
     focusGroup->SetNeedBlockNotifyUnfocusStatus(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground());
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
     return ShiftFocus(DEFAULT_DISPLAY_ID, nextSession, true, FocusChangeReason::WIND);
+}
+
+WSError SceneSessionManager::RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession,
+    const sptr<FocusGroup>& focusGroup, int32_t persistentId, bool byForeground, FocusChangeReason reason)
+{
+    if (reason == FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW &&
+        CheckRequestFocusSubWindowImmdediately(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "sub window focused");
+        return WSError::WS_DO_NOTHING;
+    }
+    WSError basicCheckRet = RequestFocusBasicCheck(persistentId, focusGroup);
+    if (basicCheckRet != WSError::WS_OK) {
+        return basicCheckRet;
+    }
+    if (!sceneSession->CheckFocusable() || !IsSessionVisibleForeground(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable or not visible!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!sceneSession->IsFocusedOnShow()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focused on show!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!sceneSession->IsFocusableOnShow() &&
+        (reason == FocusChangeReason::FOREGROUND || reason == FocusChangeReason::APP_FOREGROUND)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable on show!");
+        return WSError::WS_DO_NOTHING;
+    }
+    // subwindow/dialog state block
+    if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+        GetSceneSession(sceneSession->GetParentPersistentId()) &&
+        !IsSessionVisibleForeground(GetSceneSession(sceneSession->GetParentPersistentId()))) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "parent session id: %{public}d is not visible!",
+                sceneSession->GetParentPersistentId());
+            return WSError::WS_DO_NOTHING;
+    }
+    // specific block
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession->GetSessionProperty()->GetDisplayId(),
+        sceneSession, byForeground, reason);
+    if (specificCheckRet != WSError::WS_OK) {
+        return specificCheckRet;
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup)
@@ -6850,6 +6878,18 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(const sptr<SceneSession>
         (ProcessModalTopmostRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
          ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "dialog or modal subwindow get focused");
+        return true;
+    }
+    return false;
+}
+
+bool SceneSessionManager::CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession)
+{
+    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+         SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
+        (ProcessSubWindowRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
+         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "dialog or sub window get focused");
         return true;
     }
     return false;
@@ -7979,6 +8019,12 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:OnSessionStateChange%d", persistentId);
     TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, state:%{public}u", persistentId, state);
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = persistentId,
+        .changeInfo_ = "Session state change to " + std::to_string(static_cast<uint32_t>(state)),
+        .logTag_ = WmsLogTag::WMS_LIFE,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGD(WmsLogTag::DEFAULT, "session is nullptr");
@@ -8288,6 +8334,43 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
         }
         // no need to consider order, since rule of zOrder
         if (RequestSessionFocusImmediately(topmostSession->GetPersistentId(), false) == WSError::WS_OK) {
+            ret = WSError::WS_OK;
+        }
+    }
+    return ret;
+}
+
+WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "sub window is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+    std::vector<sptr<SceneSession>> subSessionVec = sceneSession->GetSubSession();
+    if (subSessionVec.empty()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "has no sub window");
+        return WSError::WS_DO_NOTHING;
+    }
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
+    auto conditionFunc =  [this, focusedSessionId](const sptr<SceneSession>& iter) {
+        return iter && iter->GetPersistentId() == focusedSessionId;
+    };
+    if (std::find_if(subSessionVec.begin(), subSessionVec.end(), std::move(conditionFunc)) != subSessionVec.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d has been focused!", focusedSessionId);
+        return WSError::WS_OK;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    for (auto session : subSessionVec) {
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
+            continue;
+        }
+        if (!IsSessionVisibleForeground(session)) {
+            continue;
+        }
+        if (RequestSessionFocus(session->GetPersistentId(), true, FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW) ==
+            WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
@@ -11094,7 +11177,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    if (screenType == ScreenType::VIRTUAL && name == "CeliaView") {
+    if (screenType == ScreenType::VIRTUAL && (name == "CeliaView" || name == "DevEcoViewer")) {
         return true;
     }
     return false;

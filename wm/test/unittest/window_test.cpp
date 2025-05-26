@@ -2704,15 +2704,15 @@ HWTEST_F(WindowTest, IsAdaptToCompatibleImmersive, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, TestSize.Level1)
+HWTEST_F(WindowTest, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
-    auto ret = window->IsPcOrPadCapabilityEnabled();
+    auto ret = window->IsPcOrFreeMultiWindowCapabilityEnabled();
     EXPECT_EQ(false, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }

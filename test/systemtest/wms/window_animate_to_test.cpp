@@ -27,6 +27,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t MAX_WINDOW_ID = -1;
+}
 
 using Utils = WindowTestUtils;
 
@@ -52,28 +55,28 @@ void WindowAnimateToTest::TearDown() {}
 namespace {
 /**
  * @tc.name: AnimateTo
- * @tc.desc: Register AnimationController and hide with custom animation
+ * @tc.desc: 测试WindowManager::AnimateTo接口的完整通路.
  * @tc.type: FUNC
  * @tc.require: issueI5NDLK
  */
-HWTEST_F(WindowAnimateToTest, AnimateTo, TestSize.Level1)
+HWTEST_F(WindowAnimateToTest, AnimateTo01, TestSize.Level1)
 {
     WindowAnimationOption animationOption;
     WindowAnimationProperty animationProperty;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT,
             WindowManager::GetInstance().AnimateTo(0, animationProperty, animationOption));
-        return;
+        GTEST_SKIP() << "AnimateTo01 not support if IsSceneBoardEnabled() return false";
     }
 
-    int32_t windowId = 0;
     FocusChangeInfo focusInfo;
     WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
     sleep(1);
     if (focusInfo.windowId_ == 0 || focusInfo.windowId_ == INVALID_WINDOW_ID) {
-        // 功能特有测试，依赖存在前台获焦窗口，所以当没有获焦窗口ID时默认通过;
-        ASSERT_EQ(windowId, 0);
-        return;
+        // 功能特有测试，依赖存在前台获焦窗口，所以当没有获焦窗口ID时返回DO_NOTHING;
+        ASSERT_EQ(WMError::WM_DO_NOTHING,
+            WindowManager::GetInstance().AnimateTo(focusInfo.windowId_, animationProperty, animationOption));
+        GTEST_SKIP() << "If windowId is 0 or INVALID_WINDOW_ID, break out";
     }
     animationOption.curve = WindowAnimationCurve::LINEAR;
     animationOption.duration = 100; // 100ms
@@ -85,6 +88,27 @@ HWTEST_F(WindowAnimateToTest, AnimateTo, TestSize.Level1)
         ASSERT_EQ(WMError::WM_OK,
             WindowManager::GetInstance().AnimateTo(focusInfo.windowId_, animationProperty, animationOption));
     }
+}
+
+/**
+ * @tc.name: AnimateTo
+ * @tc.desc: test founction WindowManager::AnimateTo with windowId 0.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
+ */
+HWTEST_F(WindowAnimateToTest, AnimateTo02, TestSize.Level1)
+{
+    WindowAnimationOption animationOption;
+    WindowAnimationProperty animationProperty;
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "AnimateTo02 not support if IsSceneBoardEnabled() return false";
+    }
+
+    animationOption.curve = WindowAnimationCurve::LINEAR;
+    animationOption.duration = 100; // 100ms
+    animationProperty.targetScale = 0.5f;
+    ASSERT_EQ(WMError::WM_DO_NOTHING,
+        WindowManager::GetInstance().AnimateTo(MAX_WINDOW_ID, animationProperty, animationOption));
 }
 } // namespace
 } // namespace Rosen

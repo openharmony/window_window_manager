@@ -998,6 +998,25 @@ HWTEST_F(SessionProxyTest, NotifyFrameLayoutFinishFromApp, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifySnapshotUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySnapshotUpdate start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    WMError res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySnapshotUpdate end";
+}
+
+/**
  * @tc.name: RaiseAppMainWindowToTop
  * @tc.desc: RaiseAppMainWindowToTop test
  * @tc.type: FUNC
