@@ -3793,6 +3793,17 @@ void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
     keyFramePolicy_.stopping_ = stopping;
 }
 
+WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    bool running = keyFramePolicy_.running_;
+    bool stopping = keyFramePolicy_.stopping_;
+    keyFramePolicy_ = keyFramePolicy;
+    keyFramePolicy_.running_ = running;
+    keyFramePolicy_.stopping_ = stopping;
+    return WSError::WS_OK;
+}
+
 void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d rect: %{public}s reason: %{public}d",
