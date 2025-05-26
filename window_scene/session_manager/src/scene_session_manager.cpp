@@ -14722,6 +14722,10 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
         return WMError::WM_ERROR_NULLPTR;
     }
 
+    if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
@@ -14741,6 +14745,10 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return WMError::WM_ERROR_NULLPTR;
     }
+    // Decoupling from LRU
+    sceneSession->SetSaveSnapshotCallback([]() {
+        // do nothing
+    });
     sceneSession->SaveSnapshot(true, true, pixelMap);
     scenePersistence->SetHasSnapshot(true);
     ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
