@@ -3492,8 +3492,10 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowType()
 bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
 {
     WindowType windowType = GetType();
-    bool isPcOrFreeMultiWindowCanMove = IsPcOrFreeMultiWindowCapabilityEnabled() && (WindowHelper::IsSystemWindow(windowType) ||
-        WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType));
+    bool isPcOrFreeMultiWindowCanMove = IsPcOrFreeMultiWindowCapabilityEnabled() &&
+        (WindowHelper::IsSystemWindow(windowType) ||
+         WindowHelper::IsMainWindow(windowType) ||
+         WindowHelper::IsSubWindow(windowType));
     bool isPhoneWindowCanMove = (windowSystemConfig_.IsPhoneWindow() ||
         (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
         (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType));
