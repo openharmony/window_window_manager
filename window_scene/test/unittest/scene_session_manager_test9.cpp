@@ -489,7 +489,7 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_11, TestSize.Level1)
     sessionInfo.abilityName_ = "TestRequestSessionFocus_11";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetDisplayId(-1);
-    sceneSession->persistentId = 1;
+    sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
     ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
@@ -911,6 +911,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, Tes
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
     ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(ret, WSError::WS_OK);
+
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
     ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
