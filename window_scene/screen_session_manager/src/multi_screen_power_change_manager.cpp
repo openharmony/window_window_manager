@@ -606,7 +606,10 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMirrorExternalMainChan
     /* step2: set screen combination */
     MultiScreenChangeUtils::ScreenCombinationChange(externalScreen, innerScreen, ScreenCombination::SCREEN_MIRROR);
 
-    /* step3: inner screen power on */
+    /* step3: set inner screen unavailable */
+    MultiScreenChangeUtils::SetScreenAvailableStatus(innerScreen, true);
+
+    /* step4: inner screen power on */
     CallRsSetScreenPowerStatusSyncToOn(SCREEN_ID_FULL);
     TLOGW(WmsLogTag::DMS, "recovery external main to inner mirror and external main end.");
 

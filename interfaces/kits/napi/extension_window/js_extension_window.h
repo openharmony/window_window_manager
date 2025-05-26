@@ -61,7 +61,20 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value HidePrivacyContentForHost(napi_env env, napi_callback_info info);
     static napi_value OccupyEvents(napi_env env, napi_callback_info info);
-    
+    static napi_value AtomicServiceCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+    static napi_value SetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value GetWindowColorSpace(napi_env env, napi_callback_info info);
+    static napi_value SetWindowColorSpace(napi_env env, napi_callback_info info);
+    static napi_value SetWindowPrivacyMode(napi_env env, napi_callback_info info);
+    static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value IsFocused(napi_env env, napi_callback_info info);
+    static napi_value IsWindowSupportWideGamut(napi_env env, napi_callback_info info);
+    static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
@@ -89,6 +102,19 @@ private:
 
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnOccupyEvents(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowColorSpace(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowColorSpace(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowPrivacyMode(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
+    napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnIsFocused(napi_env env, napi_callback_info info);
+    napi_value OnIsWindowSupportWideGamut(napi_env env, napi_callback_info info);
+    napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
+    napi_value OnUnsupportAsyncCall(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 

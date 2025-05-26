@@ -245,9 +245,15 @@ public:
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
     void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+    void SetInterestWindowIds(const std::unordered_set<int32_t>& interestWindowIds)
+        { interestWindowIds_ = interestWindowIds; }
+    const std::unordered_set<int32_t>& GetInterestWindowIds() const { return interestWindowIds_; }
+    void AddInterestWindowId(int32_t interestWindowId) { interestWindowIds_.insert(interestWindowId); }
+    void RemoveInterestWindowId(int32_t interestWindowId) { interestWindowIds_.erase(interestWindowId); }
 
 private:
     std::unordered_set<WindowInfoKey> interestInfo_;
+    std::unordered_set<int32_t> interestWindowIds_;
 };
 
 /**
@@ -797,7 +803,7 @@ public:
      * @param windowInfoList the changed window info list.
      * @return WM_OK means notify success, others means notify failed.
      */
-    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     /**
@@ -1146,9 +1152,10 @@ public:
      *
      * @param sourceWindowId Window id which the pointer event shift from
      * @param targetWindowId Window id which the pointer event shift to
+     * @param fingerId finger id of the event to be shift 
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
 
     /**
      * @brief Request focus.
@@ -1176,7 +1183,7 @@ public:
      * @param windowNum foreground window number
      * @return WM_OK means set success, others means failed.
      */
-    WMError SetForegroundWindowNum(int32_t windowNum);
+    WMError SetForegroundWindowNum(uint32_t windowNum);
 
     /**
      * @brief Register window info change callback.
@@ -1206,6 +1213,17 @@ public:
      * @return bool means the module finished ability hook or not.
      */
     bool IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName);
+
+    /**
+     * @brief set the animation property and parameter to the corresponding window.
+     *
+     * @param windowId target window id.
+     * @param animationProperty the property of animation.
+     * @param animationOption the option of animation.
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
 private:
     WindowManager();

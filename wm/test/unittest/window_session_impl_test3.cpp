@@ -150,6 +150,38 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
+ * @tc.name: SetForceSplitEnable
+ * @tc.desc: SetForceSplitEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    ASSERT_NE(window_, nullptr);
+
+    int32_t FORCE_SPLIT_MODE = 5;
+    int32_t NAV_FORCE_SPLIT_MODE = 6;
+    int32_t res = 0;
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -674,6 +706,37 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, TestSize.Level1)
     parentWindow = nullptr;
     window_->CopyUniqueDensityParameter(parentWindow);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter end";
+}
+
+/**
+ * @tc.name: RaiseToAppTopOnDrag
+ * @tc.desc: RaiseToAppTopOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RaiseToAppTopOnDrag, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RaiseToAppTop");
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    windowSessionImpl->property_->SetPersistentId(1);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSessionImpl->hostSession_ = session;
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag end";
 }
 
 /**
@@ -1214,6 +1277,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InjectTouchEvent
+ * @tc.desc: InjectTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("InjectTouchEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+ 
+    pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->uiContent_ = nullptr;
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetAvoidAreaOption01
  * @tc.desc: SetAvoidAreaOption
  * @tc.type: FUNC
@@ -1271,6 +1367,10 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->uiContent_ = nullptr;
+    ret = window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ret = window->SetWindowDelayRaiseEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
 }

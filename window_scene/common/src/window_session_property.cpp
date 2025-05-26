@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -95,6 +96,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::WriteActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::WriteActionUpdateWindowShadowEnabled),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -168,6 +171,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE),
         &WindowSessionProperty::ReadActionUpdateFollowScreenChange),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED),
+        &WindowSessionProperty::ReadActionUpdateWindowShadowEnabled),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -183,6 +188,12 @@ void WindowSessionProperty::SetWindowName(const std::string& name)
 void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
 {
     sessionInfo_ = info;
+}
+
+void WindowSessionProperty::SetTransitionAnimationConfig(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    transitionAnimationConfig_[transitionType] = std::make_shared<TransitionAnimation>(animation);
 }
 
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
@@ -307,6 +318,12 @@ const std::string& WindowSessionProperty::GetWindowName() const
 const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 {
     return sessionInfo_;
+}
+
+std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>
+    WindowSessionProperty::GetTransitionAnimationConfig() const
+{
+    return transitionAnimationConfig_;
 }
 
 SessionInfo& WindowSessionProperty::EditSessionInfo()
@@ -540,6 +557,16 @@ void WindowSessionProperty::SetViewKeepScreenOn(bool keepScreenOn)
 bool WindowSessionProperty::IsViewKeepScreenOn() const
 {
     return viewKeepScreenOn_;
+}
+
+void WindowSessionProperty::SetWindowShadowEnabled(bool isEnabled)
+{
+    windowShadowEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::GetWindowShadowEnabled() const
+{
+    return windowShadowEnabled_;
 }
 
 void WindowSessionProperty::SetAccessTokenId(uint32_t accessTokenId)
@@ -1071,6 +1098,52 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
     return true;
 }
 
+bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
+{
+    uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
+    if (transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM ||
+        !parcel.WriteUint32(transitionAnimationMapSize)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
+        return false;
+    }
+    for (const auto& [transitionType, animation] : transitionAnimationConfig_) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(transitionType))) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionType");
+            return false;
+        }
+        if (animation == nullptr || !parcel.WriteParcelable(animation.get())) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimation");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property)
+{
+    uint32_t transitionAnimationMapSize = 0;
+    if (!parcel.ReadUint32(transitionAnimationMapSize) ||
+        transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
+        return false;
+    }
+    uint32_t transitionType = 0;
+    std::shared_ptr<TransitionAnimation> animation = nullptr;
+    for (uint32_t i = 0; i < transitionAnimationMapSize; ++i) {
+        if (!parcel.ReadUint32(transitionType)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionType");
+            return false;
+        }
+        animation = std::shared_ptr<TransitionAnimation>(parcel.ReadParcelable<TransitionAnimation>());
+        if (animation == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimation");
+            return false;
+        }
+        property->transitionAnimationConfig_[static_cast<WindowTransitionType>(transitionType)] = animation;
+    }
+    return true;
+}
+
 void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
 {
     isAppSupportPhoneInPc_ = isSupportPhone;
@@ -1158,9 +1231,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
-        parcel.WriteBool(isSnapshotSkip_) &&
+        parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
+        MarshallingTransitionAnimationMap(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -1225,9 +1299,14 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetSystemPrivacyMode(parcel.ReadBool());
     property->SetSnapshotSkip(parcel.ReadBool());
+    property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
+        delete property;
+        return nullptr;
+    }
+    if (!UnmarshallingTransitionAnimationMap(parcel, property)) {
         delete property;
         return nullptr;
     }
@@ -1312,6 +1391,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     viewKeepScreenOn_ = property->viewKeepScreenOn_;
+    windowShadowEnabled_ = property->windowShadowEnabled_;
     topmost_ = property->topmost_;
     mainWindowTopmost_ = property->mainWindowTopmost_;
     zLevel_ = property->zLevel_;
@@ -1559,6 +1639,11 @@ bool WindowSessionProperty::WriteActionUpdateFollowScreenChange(Parcel& parcel)
     return parcel.WriteBool(isFollowScreenChange_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    return parcel.WriteBool(windowShadowEnabled_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint64_t>(action));
@@ -1728,6 +1813,11 @@ void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parce
 void WindowSessionProperty::ReadActionUpdateFollowScreenChange(Parcel& parcel)
 {
     SetFollowScreenChange(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateWindowShadowEnabled(Parcel& parcel)
+{
+    SetWindowShadowEnabled(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

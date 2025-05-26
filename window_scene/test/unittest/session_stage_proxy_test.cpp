@@ -274,7 +274,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**
@@ -823,6 +823,18 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->CloseSpecificScene();
+    EXPECT_NE(nullptr, sessionStage_);
 }
 } // namespace
 } // namespace Rosen

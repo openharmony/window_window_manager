@@ -44,6 +44,7 @@
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
+#include "session/host/include/session_change_recorder.h"
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
 #include "session_helper.h"
@@ -512,6 +513,22 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
+}
+
+WMError SceneSession::NotifySnapshotUpdate()
+{
+    PostTask([weakThis = wptr(this), where = __func__] {
+        auto session = weakThis.promote();
+        TLOGNI(WmsLogTag::WMS_PATTERN, "id: %{public}d", session->GetPersistentId());
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
+            return;
+        }
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            session->SaveSnapshot(true, true, nullptr, true);
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 
 void SceneSession::ClearSpecificSessionCbMap()
@@ -1171,6 +1188,19 @@ void SceneSession::RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEna
     }, __func__);
 }
 
+void SceneSession::RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !callback) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session or callback is null", where);
+            return;
+        }
+        session->onWindowShadowEnableChangeFunc_ = std::move(callback);
+        session->onWindowShadowEnableChangeFunc_(session->GetSessionProperty()->GetWindowShadowEnabled());
+    }, __func__);
+}
+
 void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -1373,7 +1403,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        session->AddPropertyDirtyFlag(static_cast<uint32_t>(SessionPropertyFlag::RECT));
+        session->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s, "
             "rect:%{public}s, clientRect:%{public}s",
             where, session->GetPersistentId(), session->reason_, updateReason.c_str(),
@@ -1447,9 +1477,6 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         if (ret != WSError::WS_OK) {
             return ret;
-        }
-        if (session->specificCallback_ && session->specificCallback_->onUpdateOccupiedAreaIfNeed_) {
-            session->specificCallback_->onUpdateOccupiedAreaIfNeed_(session->GetPersistentId());
         }
         return ret;
     }, __func__);
@@ -4026,6 +4053,7 @@ void SceneSession::HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrM
             NotifySessionRectChange(lastRect, SizeChangeReason::UNDEFINED, moveConfiguration.displayId);
             SetRequestRectWhenFollowParent({0, 0, 0, 0});
             SetRequestMoveConfiguration({DISPLAY_ID_INVALID});
+            cloneNodeCount_ = 0;
         }
     }
 }
@@ -4234,6 +4262,28 @@ bool SceneSession::IsViewKeepScreenOn() const
     return GetSessionProperty()->IsViewKeepScreenOn();
 }
 
+WSError SceneSession::SetWindowShadowEnabled(bool isEnabled)
+{
+    GetSessionProperty()->SetWindowShadowEnabled(isEnabled);
+    PostTask([weakThis = wptr(this), isEnabled, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s isEnabled: %{public}u", where, isEnabled);
+        if (session->onWindowShadowEnableChangeFunc_) {
+            session->onWindowShadowEnableChangeFunc_(isEnabled);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+bool SceneSession::GetWindowShadowEnabled() const
+{
+    return GetSessionProperty()->GetWindowShadowEnabled();
+}
+
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
@@ -4262,6 +4312,12 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         int32_t persistentId = session->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_SCB, "%{public}s name: %{public}s, id: %{public}u, visible: %{public}u",
             where, session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+        SceneSessionChangeInfo changeInfo {
+            .persistentId_ = persistentId,
+            .changeInfo_ = "Visibility change to " + std::to_string(visible),
+            .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
+        };
+        SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
         bool oldVisibleState = session->isVisible_;
         session->isVisible_ = visible;
         if (session->visibilityChangedDetectFunc_) {
@@ -5443,6 +5499,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateExclusivelyHighlighted(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE):
             return HandleActionUpdateFollowScreenChange(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED):
+            return HandleActionUpdateWindowShadowEnabled(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -5494,6 +5552,15 @@ WMError SceneSession::HandleActionUpdateViewKeepScreenOn(const sptr<WindowSessio
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
+        GetPersistentId(), property->GetWindowShadowEnabled());
+    SetWindowShadowEnabled(property->GetWindowShadowEnabled());
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateFocusable(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
@@ -5537,6 +5604,14 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
     WSPropertyChangeAction action)
 {
     SetRequestedOrientation(property->GetRequestedOrientation(), property->GetRequestedAnimation());
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = property->GetPersistentId(),
+        .changeInfo_ = "Orientation change to " +
+            std::to_string(static_cast<uint32_t>(property->GetRequestedOrientation())) + ", animation change to "+
+            std::to_string(static_cast<uint32_t>(property->GetRequestedAnimation())),
+        .logTag_ = WmsLogTag::WMS_ROTATION,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::ORIENTAION_RECORD, changeInfo);
     return WMError::WM_OK;
 }
 
@@ -5546,6 +5621,12 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
     bool isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     SetPrivacyMode(isPrivacyMode);
     NotifySessionChangeByActionNotifyManager(property, action);
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = property->GetPersistentId(),
+        .changeInfo_ = "Privacy mode change to " + std::to_string(isPrivacyMode),
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::PRIVACY_MODE, changeInfo);
     return WMError::WM_OK;
 }
 
@@ -6679,8 +6760,12 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
-            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
-            session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
+            if (WindowHelper::IsPipWindow(session->GetWindowType())) {
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is pip", where);
+                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            } else {
+                session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
+            }
         }
         return;
     }, __func__);
@@ -6918,6 +7003,63 @@ sptr<SceneSession> SceneSession::GetSceneSessionById(int32_t sessionId) const
     return specificCallback_->onGetSceneSessionByIdCallback_(sessionId);
 }
 
+void SceneSession::SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_SUB, "func is null");
+        return;
+    }
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->windowAnchorInfo_);
+        session->onWindowAnchorInfoChangeFunc_ = std::move(func);
+    });
+}
+
+WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    auto property = GetSessionProperty();
+    if (!property || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (GetIsFollowParentLayout()) {
+        TLOGE(WmsLogTag::WMS_SUB, "current sub window follow parent layout");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (windowAnchorInfo.windowAnchor_ > WindowAnchor::BOTTOM_END ||
+        windowAnchorInfo.windowAnchor_ < WindowAnchor::TOP_START) {
+        TLOGE(WmsLogTag::WMS_SUB, "Unknown window anchor");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (!systemConfig_.supportFollowRelativePositionToParent_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    PostTask([weakThis = wptr(this), windowAnchorInfo, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        session->windowAnchorInfo_ = windowAnchorInfo;
+        if (session->onWindowAnchorInfoChangeFunc_) {
+            session->onWindowAnchorInfoChangeFunc_(windowAnchorInfo);
+        } else {
+            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+        }
+    });
+    return WSError::WS_OK;
+}
+
 void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
 {
     if (!func) {
@@ -6945,6 +7087,10 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    if (GetWindowAnchorInfo().isAnchorEnabled_) {
+        TLOGE(WmsLogTag::WMS_SUB, "current sub window follow parent anchor");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     if (!systemConfig_.supportFollowParentWindowLayout_) {
@@ -7112,6 +7258,12 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     if (notifyVisibleChangeFunc_ != nullptr) {
         notifyVisibleChangeFunc_(GetPersistentId());
     }
+    SceneSessionChangeInfo changeInfo {
+        .persistentId_ = GetPersistentId(),
+        .changeInfo_ = "Visibility change to " + std::to_string(visibility),
+        .logTag_ = WmsLogTag::WMS_ATTRIBUTE,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::VISIBLE_RECORD, changeInfo);
     return true;
 }
 
@@ -7120,7 +7272,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
+    auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
     if (needSaveSnapshot && !GetShowRecent()) { // persistent imageFit exist, add snapshot when interactive is false.
         if (interactive) {
@@ -7248,9 +7400,6 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     // flush avoid areas on (avoid area dirty && (normal session rect NOT dirty || avoid session))
     if ((IsImmersiveType() || !IsDirtyWindow()) && specificCallback_->onUpdateAvoidArea_) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    }
-    if (specificCallback_->onUpdateOccupiedAreaIfNeed_) {
-        specificCallback_->onUpdateOccupiedAreaIfNeed_(GetPersistentId());
     }
 }
 
@@ -8439,5 +8588,90 @@ WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transiti
         updateTransitionAnimationFunc_(transitionType, animation);
     }
     return WSError::WS_OK;
+}
+
+void SceneSession::SetSubWindowSourceFunc(NotifySetSubWindowSourceFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_SUB, "func is null");
+        return;
+    }
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->subWindowSource_);
+        session->subWindowSourceFunc_ = std::move(func);
+    }, __func__);
+}
+
+WSError SceneSession::SetSubWindowSource(SubWindowSource source)
+{
+    auto property = GetSessionProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    PostTask([weakThis = wptr(this), source = source, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_SUB, "SetSubWindowSource source: %{public}d", source);
+        session->subWindowSource_ = source;
+        if (session->subWindowSourceFunc_) {
+            session->subWindowSourceFunc_(source);
+        } else {
+            TLOGNE(WmsLogTag::WMS_SUB, "func is null");
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::CloseSpecificScene()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "close specific scene");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->CloseSpecificScene();
+}
+
+void SceneSession::RegisterAnimateToCallback(NotifyAnimateToFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: Session is null", where);
+            return;
+        }
+        session->onAnimateTo_ = std::move(callback);
+    }, __func__);
+}
+
+WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    PostTask([weakThis = wptr(this), where = __func__, animationProperty, animationOption] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: Session is null", where);
+            return;
+        }
+        if (session->onAnimateTo_) {
+            session->onAnimateTo_(animationProperty, animationOption);
+            return;
+        }
+        TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: onAnimateTo_ is nullptr", where);
+    }, __func__);
+    TLOGI(WmsLogTag::WMS_ANIMATION, "Post AnimateTo task success. windowId: %{public}d, targetScale: %{public}f, \
+        animationOption: %{public}s", GetWindowId(), animationProperty.targetScale, \
+        animationOption.ToString().c_str());
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

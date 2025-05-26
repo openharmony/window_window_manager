@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
+using NodeId = uint64_t;
 
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
@@ -549,7 +550,8 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isCaptureFullOfScreen = false;
+    bool isFullScreenCapture_ = false;
+    std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 
 struct ExpandOption {

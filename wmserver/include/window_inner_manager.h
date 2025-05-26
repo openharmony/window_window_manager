@@ -70,7 +70,7 @@ public:
     void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     void SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector);
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
@@ -94,7 +94,7 @@ private:
     bool isReportTaskStart_ = false;
 
     /*
-     * RS Multi Instance
+     * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
