@@ -1853,10 +1853,10 @@ void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> first
     }
     ScreenProperty firstScreenProperty = firstScreenSession->GetScreenProperty();
     ScreenProperty secondaryScreenProperty = secondaryScreenSession->GetScreenProperty();
-    uint32_t firstStartX = firstScreenProperty.GetStartX();
-    uint32_t firstStartY = firstScreenProperty.GetStartY();
-    uint32_t secondaryStartX = secondaryScreenProperty.GetStartX();
-    uint32_t secondaryStartY = secondaryScreenProperty.GetStartY();
+    int32_t firstStartX = static_cast<int32_t>(firstScreenProperty.GetStartX());
+    int32_t firstStartY = static_cast<int32_t>(firstScreenProperty.GetStartY());
+    int32_t secondaryStartX = static_cast<int32_t>(secondaryScreenProperty.GetStartX());
+    int32_t secondaryStartY = static_cast<int32_t>(secondaryScreenProperty.GetStartY());
     int32_t secondaryX = -firstStartX + secondaryStartX;
     int32_t secondaryY = -firstStartY + secondaryStartY;
     secondaryScreenSession->SetXYPosition(secondaryX, secondaryY);
