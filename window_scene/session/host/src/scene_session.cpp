@@ -501,12 +501,8 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
+        session->MarkAvoidAreaAsDirty();
         if (session->specificCallback_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->MarkAvoidAreaAsDirty();
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            }
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
@@ -4187,12 +4183,8 @@ void SceneSession::SetFloatingScale(float floatingScale)
         Session::SetFloatingScale(floatingScale);
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            if (Session::IsScbCoreEnabled()) {
-                MarkAvoidAreaAsDirty();
-            } else {
-                specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-            }
         }
+        MarkAvoidAreaAsDirty();
     }
 }
 
