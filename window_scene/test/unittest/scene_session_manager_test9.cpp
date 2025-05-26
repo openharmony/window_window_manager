@@ -476,6 +476,26 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestRequestSessionFocus_11
+ * @tc.desc: Test RequestSessionFocus with focusGroup is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_11, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "TestRequestSessionFocus_11";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetDisplayId(-1);
+    sceneSession->persistentId = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: RequestSessionUnfocus02
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
@@ -872,6 +892,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, Tes
     sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately";
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
 
     ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
@@ -889,11 +910,11 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately, Tes
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
     ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
-    ASSERT_NE(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WSError::WS_OK);
 
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
     ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
-    ASSERT_NE(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
     ssm_->sceneSessionMap_.clear();
 }
 
