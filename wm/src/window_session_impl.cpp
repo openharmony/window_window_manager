@@ -134,7 +134,8 @@ std::map<int32_t, std::vector<sptr<IKBWillHideListener>>> WindowSessionImpl::key
 std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> WindowSessionImpl::keyboardDidShowListeners_;
 std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> WindowSessionImpl::keyboardDidHideListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
-std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::screenshotAppEventListeners_;
+std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>>
+    WindowSessionImpl::screenshotAppEventListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
