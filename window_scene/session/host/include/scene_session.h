@@ -428,6 +428,9 @@ public:
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    bool CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type);
+    bool CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type);
+    bool CheckGetSystemWindowAvoidAreaAvailable();
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
