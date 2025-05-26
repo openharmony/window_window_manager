@@ -2560,11 +2560,11 @@ public:
     virtual bool IsPadWindow() const { return false; }
 
     /**
-     * @brief Is pc window of app type or not.
+     * @brief Is pc window or free multi window capility enabled or not.
      *
-     * @return True means pc window of app type, false means the opposite.
+     * @return True means pc window or free multi window capility enabled, false means the opposite.
      */
-    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+    virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
 
     /**
      * @brief Is pc window or pad free multi-window.
@@ -3704,6 +3704,21 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Check whether current window has specified device feature.
+     *
+     * @param feature specified device feature
+     * @return true means current window has specified device feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableFor(const std::string& feature) const { return false; }
+
+    /**
+     * @brief Check whether current window has free-multi-window device feature.
+     *
+     * @return true means current window has free-multi-window feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableForFreeMultiWindow() const { return false; }
 
     /**
      * @brief Set whether to enable exclusively highlight.

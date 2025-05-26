@@ -389,7 +389,7 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcWindow() const { return false; }
     virtual bool IsPadWindow() const { return false; }
-    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+    virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
     virtual bool GetCompatibleModeInPc() const { return false; }
@@ -575,6 +575,21 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Check whether current window has specified device feature.
+     *
+     * @param feature specified device feature
+     * @return true means current window has specified device feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableFor(const std::string& feature) const { return false; }
+
+    /**
+     * @brief Check whether current window has free-multi-window device feature.
+     *
+     * @return true means current window has free-multi-window feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableForFreeMultiWindow() const { return false; }
 
     /**
      * @brief Get highlight property of window.
