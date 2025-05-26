@@ -342,8 +342,10 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
         TLOGI(WmsLogTag::DMS, "Resolve Screenshot by picker");
         return CreateJsPickerObject(env, param);
     }
-    TLOGI(WmsLogTag::DMS, "Screenshot image Width %{public}d, Height %{public}d",
-        param->image->GetWidth(), param->image->GetHeight());
+    if (param->image != nullptr) {
+        TLOGI(WmsLogTag::DMS, "Screenshot image Width %{public}d, Height %{public}d",
+            param->image->GetWidth(), param->image->GetHeight());
+    }
     napi_value jsImage = OHOS::Media::PixelMapNapi::CreatePixelMap(env, param->image);
     return jsImage;
 }
