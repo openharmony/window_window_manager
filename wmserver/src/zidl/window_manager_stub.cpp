@@ -231,7 +231,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read screenshotEventType failed");
                 return ERR_INVALID_DATA;
             }
-            WMError errCode = NotifyScreenshotEvent(static_cast<screenshotEventType>(screenshotEventType));
+            WMError errCode = NotifyScreenshotEvent(static_cast<ScreenshotEventType>(screenshotEventType));
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
