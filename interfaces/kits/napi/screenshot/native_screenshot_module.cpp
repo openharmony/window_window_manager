@@ -195,15 +195,15 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
 
 static void IsFullScreenCapture(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
-    TLOGI(WmsLogTag::DMS, "Get Screenshot Option: isCaptureFullOfScreen");
-    napi_value isCaptureFullOfScreen;
-    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isCaptureFullOfScreen", &isCaptureFullOfScreen));
-    if (isCaptureFullOfScreen != nullptr && GetType(env, isCaptureFullOfScreen) == napi_boolean) {
-        NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isCaptureFullOfScreen,
-            &param->option.isCaptureFullOfScreen));
-        TLOGI(WmsLogTag::DMS, "isCaptureFullOfScreen: %{public}d", param->option.isCaptureFullOfScreen);
+    TLOGI(WmsLogTag::DMS, "Get Screenshot Option: isFullScreenCapture");
+    napi_value isFullScreenCapture;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isFullScreenCapture", &isFullScreenCapture));
+    if (isFullScreenCapture != nullptr && GetType(env, isFullScreenCapture) == napi_boolean) {
+        NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isFullScreenCapture,
+            &param->option.isFullScreenCapture));
+        TLOGI(WmsLogTag::DMS, "isFullScreenCapture: %{public}d", param->option.isFullScreenCapture);
     } else {
-        TLOGI(WmsLogTag::DMS, "isCaptureFullOfScreen failed, invalid param, use default true.");
+        TLOGI(WmsLogTag::DMS, "isFullScreenCapture failed, invalid param, use default false.");
     }
 }
 
