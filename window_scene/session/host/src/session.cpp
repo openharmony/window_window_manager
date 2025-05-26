@@ -1817,8 +1817,7 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
 
 bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
     if (lifeCycleTask == nullptr || lifeCycleTask->running) {
-        TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask %{public}s is running or null. PersistentId: %{public}d",
-            lifeCycleTask->name.c_str(), persistentId_);
+        TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
         return false;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
