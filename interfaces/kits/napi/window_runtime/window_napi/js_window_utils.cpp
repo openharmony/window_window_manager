@@ -158,6 +158,26 @@ napi_value WindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value ScreenshotEventTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "SYSTEM_SCREENSHOT", CreateJsValue(env,
+        static_cast<int32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT)));
+    napi_set_named_property(env, objValue, "SYSTEM_SCREENSHOT_ABORT", CreateJsValue(env,
+        static_cast<int32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT_ABORT)));
+    napi_set_named_property(env, objValue, "SCROLL_SHOT_START", CreateJsValue(env,
+        static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_START)));
+    napi_set_named_property(env, objValue, "SCROLL_SHOT_END", CreateJsValue(env,
+        static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_END)));
+    napi_set_named_property(env, objValue, "SCROLL_SHOT_ABORT", CreateJsValue(env,
+        static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_ABORT)));
+    return objValue;
+}
+
 napi_value ColorSpaceInit(napi_env env)
 {
     WLOGFD("ColorSpaceInit");
