@@ -863,12 +863,7 @@ WMError WindowExtensionSessionImpl::GetSystemViewportConfig(SessionViewportConfi
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (IsAdaptToSimulationScale()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d scale mode", GetPersistentId());
-        config.density_ = COMPACT_SIMULATION_SCALE_DPI;
-    } else {
-        config.density_ = displayInfo->GetVirtualPixelRatio();
-    }
+    config.density_ = GetDefaultDensity(displayInfo);
     auto rotation = ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     config.transform_ = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -950,11 +945,6 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
         hostDensityValue_ = config.density_;
         return;
     }
-    if (IsAdaptToSimulationScale()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d scale mode", GetPersistentId());
-        config.density_ = COMPACT_SIMULATION_SCALE_DPI;
-        return;
-    }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "display is null!");
@@ -965,7 +955,7 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is null");
         return;
     }
-    config.density_ = displayInfo->GetVirtualPixelRatio();
+    config.density_ = GetDefaultDensity(displayInfo);
 }
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
@@ -1160,6 +1150,11 @@ float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& 
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         return hostDensityValue_->load();
     }
+    return GetDefaultDensity(displayInfo);
+}
+
+float WindowExtensionSessionImpl::GetDefaultDensity(const sptr<DisplayInfo>& displayInfo)
+{
     if (IsAdaptToSimulationScale()) {
         TLOGD(WmsLogTag::WMS_COMPAT, "id:%{public}d scale mode", GetPersistentId());
         return COMPACT_SIMULATION_SCALE_DPI;
