@@ -1511,7 +1511,6 @@ HWTEST_F(WindowSessionImplTest4, NotifyExtensionSecureLimitChange01, TestSize.Le
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->NotifyExtensionSecureLimitChange(false);
     sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
     window->RegisterExtensionSecureLimitChangeListener(listener);
     WSError res = window->NotifyExtensionSecureLimitChange(false);
@@ -1578,7 +1577,9 @@ HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener01,
     window->hostSession_ = session;
 
     sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
-    WMError res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->UnregisterExtensionSecureLimitChangeListener(listener);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
