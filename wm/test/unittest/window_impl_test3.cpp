@@ -180,6 +180,25 @@ HWTEST_F(WindowImplTest3, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    listener = sptr<MockScreenshotListener>::MakeSptr();
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    auto ret = window->window->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(WMError::WM_OK, NotifyScreenshotAppEvent);
+    window->screenshotListeners_[window->GetWindowId()].clear();
+}
+
+/**
  * @tc.name: NotifyTouchDialogTarget
  * @tc.desc: NotifyTouchDialogTarget test
  * @tc.type: FUNC

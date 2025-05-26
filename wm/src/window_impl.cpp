@@ -3884,7 +3884,7 @@ void WindowImpl::NotifyScreenshot()
     }
 }
 
-void WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+WMError WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
     auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
     for (auto& screenshotAppEventListener : screenshotAppEventListeners) {
@@ -3892,6 +3892,7 @@ void WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
             screenshotAppEventListener->OnScreenshotAppEvent(type);
         }
     }
+    return WMError::WM_OK;
 }
 
 void WindowImpl::NotifyTouchOutside()
