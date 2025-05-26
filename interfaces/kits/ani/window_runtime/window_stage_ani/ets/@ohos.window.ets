@@ -1502,12 +1502,33 @@ export class WindowStageInternal implements WindowStage {
         this.nativeObj = nativeObj;
     }
 
+    public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native loadContent(nativeObj:long, path: String): int;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
+
+    public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentSync(this.nativeObj, path, storage);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
+    }
+
+    public loadContent(path: string, storage?: LocalStorage): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.loadContentSync(this.nativeObj, path, storage);
+          resolve(undefined);
+        } catch (err: Error) {
+          reject(err as BusinessError);
+        }
+      });
+    }
 
     public loadContent(path: string, callback: AsyncCallback<void>): void {
         // uicontent not support taskpool, must use ui thread
@@ -1573,6 +1594,8 @@ export class WindowStageInternal implements WindowStage {
 }
 
 export interface WindowStage {
+    loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
+    loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
     loadContentByName(name: string, callback: AsyncCallbackVoid): void;
     getMainWindowSync(): Window;
