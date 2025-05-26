@@ -1438,7 +1438,6 @@ private:
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    ScreenshotEventType screenshotEventType_ = ScreenshotEventType::EVENT_TYPE_UNDEFINED;
     std::set<int32_t> screenshotAppEventListenerSessionSet_;
     void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifyWindowPropertyChange(ScreenId screenId);

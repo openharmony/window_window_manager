@@ -3300,6 +3300,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             isForceClean, isUserRequestedExit);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         avoidAreaListenerSessionSet_.erase(persistentId);
+        screenshotAppEventListenerSessionSet_.erase(persistentId);
         DestroyDialogWithMainWindow(sceneSession);
         DestroyToastSession(sceneSession);
         DestroySubSession(sceneSession); // destroy sub session by destruction
@@ -10580,13 +10581,6 @@ WSError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t per
         }
         if (haveListener) {
             screenshotAppEventListenerSessionSet_.insert(persistentId);
-            auto state = sceneSession->GetSessionState();
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d, state: %{public}u, event: %{public}d",
-                where, persistentId, state, screenshotEventType_);
-            if ((state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) &&
-                screenshotEventType_ != ScreenshotEventType::EVENT_TYPE_UNDEFINED) {
-                sceneSession->NotifyScreenshotAppEvent(screenshotEventType_);
-            }
         } else {
             screenshotAppEventListenerSessionSet_.erase(persistentId);
         }
@@ -11158,12 +11152,11 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
-    screenshotEventType_ = type;
-    taskScheduler_->PostAsyncTask([this, type] {
+    taskScheduler_->PostAsyncTask([this, type, where = __func__] {
         for (auto persistentId : screenshotAppEventListenerSessionSet_) {
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
                 continue;
             }
             auto state = sceneSession->GetSessionState();
