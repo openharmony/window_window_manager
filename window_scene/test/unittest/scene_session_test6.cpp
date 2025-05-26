@@ -36,6 +36,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr uint32_t SLEEP_TIME = 100000; // 100ms
 std::string g_errlog;
 void ScreenSessionLogCallback(const LogType type,
                               const LogLevel level,
@@ -682,6 +683,40 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     EXPECT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+}
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: test AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WindowAnimationProperty animationProperty;
+    animationProperty.targetScale = 1.5f;
+    WindowAnimationOption animationOption;
+    animationOption.curve = WindowAnimationCurve::INTERPOLATION_SPRING;
+    animationOption.duration = 500;
+
+    float resultScale = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    auto callback = [&resultScale, &curve](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        resultScale = animationProperty.targetScale;
+        curve = animationOption.curve;
+    };
+    sceneSession->AnimateTo(animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(resultScale, 0);
+
+    sceneSession->RegisterAnimateToCallback(callback);
+    usleep(SLEEP_TIME);
+    sceneSession->AnimateTo(animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(resultScale, animationProperty.targetScale);
+    ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
 }
 } // namespace
 } // namespace Rosen

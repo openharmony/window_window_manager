@@ -1113,7 +1113,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterAvailableAreaChan
 {
     if (availableAreaChangeCallback == nullptr || listenerIndex == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input params null.");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<AvailableAreaChangeListener> availableAreaChangeListener =
         sptr<AvailableAreaChangeListener>::MakeSptr(availableAreaChangeCallback);
@@ -1142,7 +1142,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterAvailableAreaCh
     auto iter = availableAreaChangeListenerMap.find(listenerIndex);
     if (iter == availableAreaChangeListenerMap.end()) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] unregister listener fail(not find register info).");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     DMError ret = DMError::DM_OK;
     if (iter->second != nullptr) {
@@ -1159,7 +1159,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayAddListene
 {
     if (displayAddCallback == nullptr || listenerIndex == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] register fail(input params null).");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<DisplayAddListener> displayAddListener =
         sptr<DisplayAddListener>::MakeSptr(displayAddCallback);
@@ -1188,7 +1188,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayAddListe
     auto iter = displayAddListenerMap.find(listenerIndex);
     if (iter == displayAddListenerMap.end()) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] unregister fail(not find register info).");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     DMError ret = DMError::DM_OK;
     if (iter->second != nullptr) {
@@ -1205,7 +1205,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayRemoveList
 {
     if (displayRemoveCallback == nullptr || listenerIndex == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] register fail(input params null).");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<DisplayRemoveListener> displayRemoveListener =
         sptr<DisplayRemoveListener>::MakeSptr(displayRemoveCallback);
@@ -1234,7 +1234,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
     auto iter = displayRemoveListenerMap.find(listenerIndex);
     if (iter == displayRemoveListenerMap.end()) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] unregister fail(not find register info).");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     DMError ret = DMError::DM_OK;
     if (iter->second != nullptr) {
@@ -1246,11 +1246,11 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
         NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
 }
 
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetAvailableArea(
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
     uint64_t displayId, NativeDisplayManager_Rect** availableArea)
 {
     DMError ret = DMError::DM_OK;
-    if (availableArea == nullptr || *availableArea == nullptr) {
+    if (availableArea == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
@@ -1259,13 +1259,42 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetAvailableArea(
         TLOGE(WmsLogTag::DMS, "[DMNDK] display is  null, id %{public}" PRIu64" ", displayId);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
+    NativeDisplayManager_Rect* availableAreaInfo = 
+        static_cast<NativeDisplayManager_Rect*>(malloc(sizeof(NativeDisplayManager_Rect)));
+    if (availableAreaInfo == NULL) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] memory failed.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+
+    auto retMemset = memset_s(availableAreaInfo, sizeof(NativeDisplayManager_Rect), 0,
+        sizeof(NativeDisplayManager_Rect));
+    if (retMemset != EOK) {
+        free(availableAreaInfo);
+        availableAreaInfo = nullptr;
+        TLOGE(WmsLogTag::DMS, "[DMNDK] memset failed.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+
     DMRect displayAvailableArea = DMRect::NONE();
     display->GetAvailableArea(displayAvailableArea);
-    TLOGI(WmsLogTag::DMS, "[DMNDK] posX_ = %{public}d posY_ = %{public}d width_ = %{public}d  height_ = %{public}d",
+    TLOGI(WmsLogTag::DMS, "[DMNDK] posX_=%{public}d posY_=%{public}d width_=%{public}d height_=%{public}d",
         displayAvailableArea.posX_, displayAvailableArea.posY_, displayAvailableArea.width_, displayAvailableArea.height_);
-    OH_SetDisplayRect(displayAvailableArea, *availableArea);
+    OH_SetDisplayRect(displayAvailableArea, availableAreaInfo);
+    *availableArea = availableAreaInfo;
     return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
         NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(NativeDisplayManager_Rect* availableArea)
+{
+    if (availableArea == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    free(availableArea);
+    availableArea = nullptr;
+    TLOGI(WmsLogTag::DMS, "[DMNDK] destroy availableArea end");
+    return  NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
 }
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(

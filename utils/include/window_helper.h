@@ -652,6 +652,10 @@ public:
         if (inputStr.empty()) {
             return;
         }
+        if (delimiter.empty()) {
+            container.insert(inputStr);
+            return;
+        }
         std::string::size_type start = 0;
         std::string::size_type end = 0;
         while ((end = inputStr.find(delimiter, start)) != std::string::npos) {

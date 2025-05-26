@@ -704,6 +704,7 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
 
     /*
@@ -795,6 +796,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    WMError NotifySnapshotUpdate() override;
 
     /*
      * Window LifeCycle

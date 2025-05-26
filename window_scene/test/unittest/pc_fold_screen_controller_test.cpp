@@ -729,7 +729,7 @@ HWTEST_F(PcFoldScreenManagerTest, GetVirtualDisplayPosY, Function | SmallTest | 
 {
     manager_.SetDisplayRects(DISPLAY_RECT, ZERO_RECT, ZERO_RECT);
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = manager_.GetDisplayRects();
-    EXPECT_EQ(defaultDisplayRect.posY_ + foldCreaseRect.posY_, manager_.GetVirtualDisplayPosY());
+    EXPECT_EQ(defaultDisplayRect.height_ + foldCreaseRect.height_, manager_.GetVirtualDisplayPosY());
 }
 
 /**

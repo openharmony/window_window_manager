@@ -126,7 +126,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPadWindow() const override;
-    bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
@@ -402,6 +402,7 @@ public:
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
     WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
@@ -440,12 +441,15 @@ public:
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
+    bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
+    bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
 
     /*
      * Window Input Event
      */
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     WMError NotifyWatchFocusActiveChange(bool isActive);
+    WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void RegisterWatchFocusActiveChangeCallback();
     void NotifyConsumeResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
 
@@ -689,6 +693,11 @@ protected:
     std::atomic_bool isValidWaterfallMode_ { false };
     void NotifyWaterfallModeChange(bool isWaterfallMode);
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
+
+    /*
+     * Window Pattern
+     */
+    WMError NotifySnapshotUpdate() override;
 
     /*
      * Window Property
