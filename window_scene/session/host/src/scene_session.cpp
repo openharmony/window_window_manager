@@ -409,7 +409,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         }
         session->MarkAvoidAreaAsDirty();
         auto subSessions = session->GetSubSession();
-        for (const auto& subSession : subSession) {
+        for (const auto& subSession : subSessions) {
             if (subSession) {
                 subSession->MarkAvoidAreaAsDirty();
             }
