@@ -5064,9 +5064,9 @@ bool SceneSessionManager::GetStartingWindowInfoFromCache(
         return false;
     }
     startingWindowInfo = infoMapIter->second;
-    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
-        startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
-                                                startingWindowInfo.backgroundColorEarlyVersion_);
+    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s",
+        startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
+        startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str());
     return true;
 }
 
@@ -5086,9 +5086,9 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
     };
     bool res = startingWindowRdbMgr_->QueryData(itemKey, startingWindowInfo);
     if (res) {
-        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}x", startingWindowInfo.configFileEnabled_,
-            startingWindowInfo.configFileEnabled_ ? startingWindowInfo.backgroundColor_ :
-                                                    startingWindowInfo.backgroundColorEarlyVersion_);
+        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s",
+            startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
+            startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str());
     }
     return res;
 }
