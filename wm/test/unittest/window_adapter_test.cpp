@@ -710,6 +710,22 @@ HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionScreenshotAppEventListener
+ * @tc.desc: UpdateSessionScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UpdateSessionScreenshotAppEventListener, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.windowManagerServiceProxy_ = nullptr;
+    int32_t persistentId = 0;
+    bool haveListener = true;
+    auto ret = windowAdapter.UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+}
+
+/**
  * @tc.name: UpdateScreenLockStatusForApp
  * @tc.desc: WindowAdapter/UpdateScreenLockStatusForApp
  * @tc.type: FUNC
