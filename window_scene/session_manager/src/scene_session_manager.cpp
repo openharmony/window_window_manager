@@ -11172,7 +11172,7 @@ WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
             }
         }
     }, __func__);
-    return WSError::WS_OK;
+    return WMError::WM_OK;
 }
 
 WSError SceneSessionManager::ClearSession(int32_t persistentId)

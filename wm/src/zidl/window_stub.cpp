@@ -232,7 +232,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
         case WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT: {
             int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
             if (!data.ReadInt32(screenshotEventType)) {
-                TLOGE(WmsLogTag::WMS_KEYBOARD, "screenshot event type read failed.");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "screenshot event type read failed.");
                 return ERR_INVALID_DATA;
             }
             NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));

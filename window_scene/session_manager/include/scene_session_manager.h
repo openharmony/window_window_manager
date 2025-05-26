@@ -576,7 +576,7 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
-    WMError NotifyScreenshotEvent(ScreenshotEventType type);
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WSError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener) override;
 
     /*
