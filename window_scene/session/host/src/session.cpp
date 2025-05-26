@@ -1788,13 +1788,16 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
             return;
         }
         frontLifeCycleTask = lifeCycleTaskQueue_.front();
+        if (!SetLifeCycleTaskRunning(frontLifeCycleTask)) {
+            return;
+        }
     }
-    StartLifeCycleTask(frontLifeCycleTask);
+    PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
-    sptr<SessionLifeCycleTask> frontlifeCycleTask = nullptr;
+    sptr<SessionLifeCycleTask> frontLifeCycleTask = nullptr;
     {
         std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
         if (!lifeCycleTaskQueue_.empty()) {
@@ -1820,21 +1823,24 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         lifeCycleTaskQueue_.push_back(lifeCycleTask);
         TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
             name.c_str(), persistentId_);
-        frontlifeCycleTask = lifeCycleTaskQueue_.front();
+        frontLifeCycleTask = lifeCycleTaskQueue_.front();
+        if (!SetLifeCycleTaskRunning(frontLifeCycleTask)) {
+            return;
+        }
     }
-    StartLifeCycleTask(frontlifeCycleTask);
+    PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
-void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
-{
-    if (lifeCycleTask->running) {
-        return;
+bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
+    if (lifeCycleTask == nullptr || lifeCycleTask->running) {
+        TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
+        return false;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Execute LifeCycleTask %{public}s. PersistentId: %{public}d",
         lifeCycleTask->name.c_str(), persistentId_);
     lifeCycleTask->running = true;
     lifeCycleTask->startTime = std::chrono::steady_clock::now();
-    PostTask(std::move(lifeCycleTask->task), lifeCycleTask->name);
+    return true;
 }
 
 WSError Session::TerminateSessionNew(
