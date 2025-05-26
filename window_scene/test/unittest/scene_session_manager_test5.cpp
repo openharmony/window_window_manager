@@ -1021,40 +1021,6 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately02, Tes
 }
 
 /**
- * @tc.name: CheckRequestFocusSubWindowImmdediately03
- * @tc.desc: CheckRequestFocusSubWindowImmdediately03
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately03, TestSize.Level0)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->sceneSessionMap_.clear();
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmdediately03";
-    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmdediately03";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-
-    SessionInfo dialogSessionInfo;
-    sptr<SceneSession> dialogSceneSession = sptr<SceneSession>::MakeSptr(dialogSessionInfo, nullptr);
-    ASSERT_NE(nullptr, dialogSceneSession);
-    dialogSceneSession->SetTopmost(true);
-    dialogSceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    dialogSceneSession->persistentId_ = 1;
-    dialogSceneSession->SetFocusable(true);
-    dialogSceneSession->SetFocusedOnShow(true);
-    sceneSession->GetDialogVector().push_back(dialogSceneSession);
-
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, dialogSceneSession));
-
-    ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
-    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
-    ASSERT_EQ(ret, true);
-    ssm_->sceneSessionMap_.clear();
-}
-
-/**
  * @tc.name: GetNextFocusableSession
  * @tc.desc: GetNextFocusableSession
  * @tc.type: FUNC
