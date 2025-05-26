@@ -1178,6 +1178,15 @@ napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityIn
     return objValue;
 }
 
+napi_value ConvertScreenshotEventTypeToJsValue(napi_env env, ScreenshotEventType type)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "ScreenshotEventType", CreateJsValue(env, static_cast<int32_t>(type)));
+    return objValue;
+}
+
 bool CheckCallingPermission(std::string permission)
 {
     WLOGD("Permission: %{public}s", permission.c_str());
