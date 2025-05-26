@@ -469,6 +469,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, TestSize.Level1)
     uint32_t result = 150;
     KeyboardSceneAnimationConfig animationIn;
     KeyboardSceneAnimationConfig animationOut;
+    systemConfig_.animationIn_.curveType_ = "";
     ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
     ASSERT_EQ(animationIn.duration_, result);
 }
