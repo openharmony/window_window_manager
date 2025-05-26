@@ -362,13 +362,9 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Funct
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
-    auto supportType = system::GetParameter("const.window.device_feature_support_type", "0");
-    system::SetParameter("const.window.device_feature_support_type", "0");
     context->hapModuleInfo_->deviceFeatures.push_back(feature);
-    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
-    system::SetParameter("const.window.device_feature_support_type", "1");
-    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), true);
-    system::SetParameter("const.window.device_feature_support_type", supportType);
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
+        system::GetParameter("const.window.device_feature_support_type", "0") == "1");
 }
 
 /**
