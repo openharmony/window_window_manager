@@ -2752,6 +2752,19 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
 }
 
 template <typename T>
+EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> WindowImpl::GetListeners()
+{
+    std::vector<IScreenshotAppEventListenerSptr> screenshotAppEventListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : screenshotAppEventListeners_[GetWindowId()]) {
+            screenshotAppEventListeners.push_back(listener);
+        }
+    }
+    return screenshotAppEventListeners;
+}
+
+template <typename T>
 EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::GetListeners()
 {
     std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
@@ -3871,12 +3884,12 @@ void WindowImpl::NotifyScreenshot()
     }
 }
 
-void WindowImpl::NotifyScreenshotAppEvent()
+void WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
     auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
     for (auto& screenshotAppEventListener : screenshotAppEventListeners) {
         if (screenshotAppEventListener != nullptr) {
-            screenshotAppEventListener->OnScreenshotAppEvent();
+            screenshotAppEventListener->OnScreenshotAppEvent(type);
         }
     }
 }
