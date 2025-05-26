@@ -48,9 +48,9 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    TLOGD(WmsLogTag::DMS, "DisplayManagerLiteProxy::RegisterDisplayManagerAgent");
+    TLOGD(WmsLogTag::DMS, "enter!");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "RegisterDisplayManagerAgent WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (displayManagerAgent == nullptr) {
@@ -91,9 +91,9 @@ DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    TLOGD(WmsLogTag::DMS, "DisplayManagerLiteProxy::UnregisterDisplayManagerAgent");
+    TLOGD(WmsLogTag::DMS, "enter!");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "UnregisterDisplayManagerAgent WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (displayManagerAgent == nullptr) {
@@ -267,28 +267,28 @@ sptr<DisplayInfo> DisplayManagerLiteProxy::GetDisplayInfoById(DisplayId displayI
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetDisplayInfoById: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "GetDisplayInfoById: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        TLOGW(WmsLogTag::DMS, "GetDisplayInfoById: WriteUint64 displayId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
         data, reply, option) != ERR_NONE) {
-        TLOGW(WmsLogTag::DMS, "GetDisplayInfoById: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        TLOGW(WmsLogTag::DMS, "DisplayManagerProxy::GetDisplayInfoById SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     return info;
@@ -309,23 +309,23 @@ sptr<CutoutInfo> DisplayManagerLiteProxy::GetCutoutInfo(DisplayId displayId)
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGW(WmsLogTag::DMS, "get cutout info : remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "get cutout info : failed");
+        TLOGE(WmsLogTag::DMS, "failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        TLOGE(WmsLogTag::DMS, "get cutout info: write displayId failed");
+        TLOGE(WmsLogTag::DMS, "write displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
         data, reply, option) != ERR_NONE) {
-        TLOGW(WmsLogTag::DMS, "GetCutoutInfo: GetCutoutInfo failed");
+        TLOGW(WmsLogTag::DMS, "GetCutoutInfo failed");
         return nullptr;
     }
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
@@ -645,7 +645,7 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower(ScreenId dmsScreenId)
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetScreenPower remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
     MessageParcel data;
@@ -682,7 +682,7 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower()
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetScreenPower remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
     MessageParcel data;
@@ -740,7 +740,7 @@ DisplayState DisplayManagerLiteProxy::GetDisplayState(DisplayId displayId)
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetDisplayState remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return DisplayState::UNKNOWN;
     }
     MessageParcel data;
@@ -805,7 +805,7 @@ bool DisplayManagerLiteProxy::SetScreenBrightness(uint64_t screenId, uint32_t le
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "SetScreenBrightness remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return false;
     }
     MessageParcel data;
@@ -841,7 +841,7 @@ uint32_t DisplayManagerLiteProxy::GetScreenBrightness(uint64_t screenId)
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetScreenBrightness remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return 0;
     }
     MessageParcel data;
@@ -878,7 +878,7 @@ std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]GetAllDisplayIds remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]remote is nullptr");
         return {};
     }
     std::vector<DisplayId> allDisplayIds;
@@ -908,19 +908,19 @@ DMError DisplayManagerLiteProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGW(WmsLogTag::DMS, "GetAllScreenInfos: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "GetAllScreenInfos: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
         data, reply, option) != ERR_NONE) {
-        TLOGW(WmsLogTag::DMS, "GetAllScreenInfos: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1016,7 +1016,7 @@ bool DisplayManagerLiteProxy::GetKeyboardState()
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetKeyboardState: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return false;
     }
 

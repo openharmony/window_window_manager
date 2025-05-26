@@ -901,7 +901,7 @@ void ScreenSessionManager::NotifyScreenModeChange(ScreenId disconnectedScreenId)
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
         if (agents.empty()) {
-            TLOGE(WmsLogTag::DMS, "NotifyScreenModeChange agent is null");
+            TLOGNE(WmsLogTag::DMS, "NotifyScreenModeChange agent is null");
             return;
         }
         std::vector<sptr<ScreenInfo>> screenInfos;
@@ -910,7 +910,7 @@ void ScreenSessionManager::NotifyScreenModeChange(ScreenId disconnectedScreenId)
             if (disconnectedScreenId == screenId) {
                 continue;
             }
-            TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64, screenId);
+            TLOGNI(WmsLogTag::DMS, "screenId:%{public}" PRIu64, screenId);
             auto screenSession = GetScreenSession(screenId);
             screenInfos.emplace_back(screenSession->ConvertToScreenInfo());
         }
@@ -7754,7 +7754,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
     auto task = [=] {
         auto clientProxy = GetClientProxy();
         if (!clientProxy) {
-            TLOGE(WmsLogTag::DMS, "ScbStatusRecoveryWhenSwitchUser clientProxy_ is null");
+            TLOGNE(WmsLogTag::DMS, "ScbStatusRecoveryWhenSwitchUser clientProxy_ is null");
             return;
         }
         clientProxy->SwitchUserCallback(oldScbPids, newScbPid);
