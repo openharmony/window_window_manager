@@ -39,7 +39,6 @@ enum class ImageFit {
         BOTTONM_LEFT,
         BOTTOM,
         BOTTOM_RIGHT,
-        COVER_TOP_LEFT,
         MATRIX,
 };
 using namespace AbilityRuntime;
