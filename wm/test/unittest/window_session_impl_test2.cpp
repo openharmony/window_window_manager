@@ -1877,11 +1877,11 @@ HWTEST_F(WindowSessionImplTest2, unregisterScreenshotAppEventListener01, TestSiz
 }
 
 /**
- * @tc.name: GetListenersAndNotifyScreenshotAppEvent
- * @tc.desc: GetListenersAndNotifyScreenshotAppEvent IScreenshotAppEventListener
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent IScreenshotAppEventListener
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetListenersAndNotifyScreenshotAppEvent, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshotAppEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("unregisterScreenshotAppEventListener");
