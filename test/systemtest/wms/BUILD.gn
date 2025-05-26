@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,7 @@ group("systemtest") {
     ":wms_window_touch_outside_test",
     ":wms_window_visibility_info_test",
     ":wms_window_water_mark_test",
+    ":wms_window_animate_to_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [
@@ -93,6 +94,27 @@ test_external_deps = [
   "resource_management:global_resmgr",
   "selinux_adapter:librestorecon",
 ]
+
+ohos_systemtest("wms_window_animate_to_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_animate_to_test.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/window_scene/interfaces/include",
+  ]
+
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session:scene_session",
+  ]
+
+  external_deps = test_external_deps
+}
 
 ohos_systemtest("wms_window_layout_test") {
   module_out_path = module_out_path
@@ -554,6 +576,7 @@ config("wms_systemtest_common_public_config") {
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
     "${window_base_path}/test/common/utils/include",
+    "${dmserver_gen_path}",
   ]
 }
 

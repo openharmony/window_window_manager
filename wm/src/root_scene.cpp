@@ -27,9 +27,12 @@
 
 #include "ability_context.h"
 #include "app_mgr_client.h"
+#include "display_manager.h"
 #include "extension/extension_business_info.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
+#include "rs_adapter.h"
+#include "screen_session_manager_client.h"
 #include "singleton.h"
 #include "singleton_container.h"
 
@@ -375,13 +378,23 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
     return WMError::WM_OK;
 }
 
-void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+    AvoidArea area = {};
+    if (avoidArea != nullptr) {
+        area= *avoidArea;
+        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
+    }
+    if (info != nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, "
+            "Height_: %{public}f", info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
+    }
+    
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {
-            listener->OnAvoidAreaChanged(*avoidArea, type);
+            listener->OnAvoidAreaChanged(area, type, info);
         }
     }
 }
@@ -510,6 +523,37 @@ void RootScene::RemoveRootScene(DisplayId displayId)
         return;
     }
     rootSceneMap_.erase(displayId);
+}
+
+std::shared_ptr<RSUIDirector> RootScene::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    sptr<Display> display;
+    if (displayId_ == DISPLAY_ID_INVALID) {
+        display = DisplayManager::GetInstance().GetDefaultDisplay();
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "displayId is invalid, use default display");
+    } else {
+        display = DisplayManager::GetInstance().GetDisplayById(displayId_);
+    }
+    if (!display) {
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "display is null, displayId: %{public}" PRIu64, displayId_);
+        return nullptr;
+    }
+    auto screenId = display->GetScreenId();
+    auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, GetWindowId());
+    return rsUIDirector;
+}
+
+std::shared_ptr<RSUIContext> RootScene::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIDirector = GetRSUIDirector();
+    auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}d",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

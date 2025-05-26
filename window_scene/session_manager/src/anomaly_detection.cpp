@@ -37,7 +37,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         // check zorder = 0
         if (session->GetZOrder() == 0) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, zorder 0");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, zorder 0");
             ReportZOrderException("check zorder 0", session);
         }
         // repetitive zorder
@@ -47,37 +47,71 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         curZOrder = session->GetZOrder();
         // callingSession check for input method
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            uint32_t callingWindowId = session->GetCallingSessionId();
-            const auto& callingSession =
-                SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
-            if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
-                TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
-                    callingSession->GetZOrder(), session->GetZOrder());
-                ReportZOrderException("check callingSession check for input", session);
-            }
-        }
+        CheckCallingSession(session);
         // subWindow/dialogWindow
-        if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
-            session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-            auto mainSession = session->GetParentSession();
-            if ((mainSession != nullptr) && (session->GetZOrder() < mainSession->GetZOrder())) {
-                TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
-                    session->GetZOrder(), mainSession->GetZOrder());
-                ReportZOrderException("check subWindow and dialogWindow", session);
-            }
-        }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-            keyGuardFlag = true;
-            return false;
-        }
-        if (keyGuardFlag && (!session->IsShowWhenLocked()) && (session->IsAppSession())) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
-            ReportZOrderException("check isShowWhenLocked", session);
-        }
+        CheckSubWindow(session);
+        // check app session showWhenLocked
+        CheckShowWhenLocked(session, keyGuardFlag);
+        // wallpaper zOrder check
+        CheckWallpaper(session);
         return false;
     };
     SceneSessionManager::GetInstance().TraverseSessionTree(func, false);
+}
+
+void AnomalyDetection::CheckCallingSession(sptr<SceneSession>& session)
+{
+    if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        uint32_t callingWindowId = session->GetCallingSessionId();
+        const auto& callingSession =
+            SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
+        if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY,
+                  "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
+                  callingSession->GetZOrder(),
+                  session->GetZOrder());
+            ReportZOrderException("check callingSession check for input", session);
+        }
+    }
+}
+
+void AnomalyDetection::CheckSubWindow(sptr<SceneSession>& session)
+{
+    if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
+        session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        auto mainSession = session->GetParentSession();
+        if ((mainSession != nullptr) && (session->GetZOrder() < mainSession->GetZOrder())) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY,
+                  "ZOrderCheck err, subSession %{public}d mainSession %{public}d",
+                  session->GetZOrder(),
+                  mainSession->GetZOrder());
+            ReportZOrderException("check subWindow and dialogWindow", session);
+        }
+    }
+}
+
+void AnomalyDetection::CheckShowWhenLocked(sptr<SceneSession>& session, bool& keyGuardFlag)
+{
+    if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        keyGuardFlag = true;
+        return;
+    }
+    if (keyGuardFlag && (!session->IsShowWhenLocked()) && (session->IsAppSession())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
+        ReportZOrderException("check isShowWhenLocked", session);
+    }
+}
+
+void AnomalyDetection::CheckWallpaper(sptr<SceneSession>& session)
+{
+    if (session->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        constexpr uint32_t defaultWallpaperZOrder = 1;
+        if (!SceneSessionManager::GetInstance().IsScreenLocked() && session->GetZOrder() != defaultWallpaperZOrder) {
+            TLOGE(
+                WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err %{public}d wallpaper zOrder abnormal", session->GetZOrder());
+            ReportZOrderException("check wallpaperWhenLocked", session);
+        }
+    }
 }
 
 void AnomalyDetection::FocusCheckProcess(int32_t focusedId, int32_t nextId)

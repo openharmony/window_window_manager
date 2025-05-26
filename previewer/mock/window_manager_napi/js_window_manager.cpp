@@ -110,6 +110,12 @@ napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_i
     return nullptr;
 }
 
+napi_value JsWindowManager::GetGlobalWindowMode(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mock");
+    return nullptr;
+}
+
 napi_value JsWindowManager::SetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
     WLOGI("mock: SetWindowLayoutMode");
@@ -228,6 +234,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));
+    napi_set_named_property(env, exportObj, "WindowAnchor", WindowAnchorInit(env));
     napi_set_named_property(env, exportObj, "WindowEventType", WindowEventTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowLayoutMode", WindowLayoutModeInit(env));
     napi_set_named_property(env, exportObj, "Orientation", OrientationInit(env));
@@ -249,6 +256,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
+    BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
     BindNativeFunction(env, exportObj, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);
     BindNativeFunction(env, exportObj, "setGestureNavigationEnabled", moduleName,
         JsWindowManager::SetGestureNavigationEnabled);

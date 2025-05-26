@@ -33,6 +33,9 @@ enum class InnerWMRunningState {
 };
 namespace OHOS {
 namespace Rosen {
+class RSUIContext;
+class RSUIDirector;
+
 using InnerTask = std::function<void()>;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -66,6 +69,13 @@ public:
     void StartWindowInfoReportLoop();
     void SetWindowRoot(const sptr<WindowRoot>& windowRoot);
 
+    /*
+     * RS Client Multi Instance
+     */
+    void SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector);
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
 protected:
     WindowInnerManager();
     ~WindowInnerManager();
@@ -82,6 +92,11 @@ private:
     InnerWMRunningState state_;
     const std::string INNER_WM_THREAD_NAME = "InnerWindowManager";
     bool isReportTaskStart_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

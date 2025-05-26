@@ -31,6 +31,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSCanvasNode;
 class RSTransaction;
+enum class ImageFit;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -225,6 +226,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError NotifySnapshotUpdate() { return WMError::WM_OK; }
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
@@ -316,8 +318,10 @@ public:
         return WSError::WS_OK;
     }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
-    virtual void NotifyKeyboardDidShowRegistered(bool registered) { };
-    virtual void NotifyKeyboardDidHideRegistered(bool registered) { };
+    virtual void NotifyKeyboardWillShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardWillHideRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidHideRegistered(bool registered) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
@@ -367,12 +371,29 @@ public:
     virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for set Image for recent.
+     *
+     * @param imgResourceId resourceId of static image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent(int imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+    
+    /**
      * @brief Callback for setting to radius of window.
      *
      * @param cornerRadius corner radius of window.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting to shadows of window.
+     *
+     * @param shadowsInfo shadows of window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back
@@ -430,6 +451,7 @@ public:
      */
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
+    virtual WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
@@ -453,6 +475,27 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UseImplicitAnimation(bool useImplicit) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set success.
+     */
+    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WSError::WS_OK;
+    }
+   
+    /**
+    * @brief Set sub window source
+    *
+    * @param source source
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

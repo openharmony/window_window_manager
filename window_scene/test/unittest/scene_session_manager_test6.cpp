@@ -141,6 +141,19 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBehindWindowFilterEnabled
+ * @tc.desc: SetBehindWindowFilterEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetBehindWindowFilterEnabled, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->SetBehindWindowFilterEnabled(true);
+    ssm_->SetBehindWindowFilterEnabled(false);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: GetWindowLayerChangeInfo
  * @tc.desc: Simulate window Layer change
  * @tc.type: FUNC
@@ -2132,6 +2145,20 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, TestSize.Level
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
     ASSERT_FALSE(sceneSession->GetRSVisible());
+}
+
+/**
+ * @tc.name: GetApplicationInfo
+ * @tc.desc: GetApplicationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetApplicationInfo, TestSize.Level1)
+{
+    std::string bundleName = "com.ohos.sceneboard";
+    SCBApplicationInfo applicationInfo;
+    ASSERT_NE(nullptr, ssm_);
+    WSError ret = ssm_->GetApplicationInfo(bundleName, applicationInfo);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 } // namespace
 } // namespace Rosen

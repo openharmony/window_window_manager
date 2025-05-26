@@ -800,9 +800,10 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, TestSize.Leve
     ssm_->sceneSessionMap_.insert({ targetSceneSession->GetPersistentId(), targetSceneSession });
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId());
+    int32_t fingerId = 0;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId(), fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
-    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID);
+    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
@@ -828,9 +829,10 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_02, TestSize.Leve
     int mainWindowPersistentId = mainWindowSession->GetPersistentId();
     int systemWindowPersistentId = systemWindowSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(mainWindowPersistentId, systemWindowPersistentId);
+    int32_t fingerId = 0;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(mainWindowPersistentId, systemWindowPersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
-    result = ssm_->ShiftAppWindowPointerEvent(systemWindowPersistentId, mainWindowPersistentId);
+    result = ssm_->ShiftAppWindowPointerEvent(systemWindowPersistentId, mainWindowPersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(systemWindowSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(mainWindowSession->GetPersistentId());
@@ -850,11 +852,12 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_03, TestSize.Leve
 
     int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
+    int32_t fingerId = 0;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
+    result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
 }
@@ -887,9 +890,10 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_04, TestSize.Leve
     int32_t otherSourcePersistentId = otherSourceSession->GetPersistentId();
     int32_t otherTargetPersistentId = otherTargetSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, otherTargetPersistentId);
+    int32_t fingerId = 0;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, otherTargetPersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
-    result = ssm_->ShiftAppWindowPointerEvent(otherSourcePersistentId, otherTargetPersistentId);
+    result = ssm_->ShiftAppWindowPointerEvent(otherSourcePersistentId, otherTargetPersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(otherSourceSession->GetPersistentId());
@@ -914,8 +918,9 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEventInner01, TestSize.
     ssm_->sceneSessionMap_.insert({ targetSceneSession->GetPersistentId(), targetSceneSession });
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    int32_t fingerId = 0;
     WMError result = ssm_->ShiftAppWindowPointerEventInner(
-        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), DISPLAY_ID_INVALID);
+        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), DISPLAY_ID_INVALID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
@@ -939,8 +944,9 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEventInner02, TestSize.
     ssm_->sceneSessionMap_.insert({ targetSceneSession->GetPersistentId(), targetSceneSession });
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    int32_t fingerId = 0;
     WMError result = ssm_->ShiftAppWindowPointerEventInner(
-        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), 0);
+        sourceSceneSession->GetPersistentId(), targetSceneSession->GetPersistentId(), 0, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
@@ -1342,6 +1348,144 @@ HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded03, TestSize.Leve
 }
 
 /**
+ * @tc.name: GetGlobalWindowMode01
+ * @tc.desc: test window of type fullscreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode01, TestSize.Level0)
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetRSVisible(true);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    WSRect rect1 = { 0, 100, 1200, 1000 };
+    sceneSession1->SetSessionRect(rect1);
+    sceneSession1->SetSessionGlobalRect(rect1);
+    sceneSession1->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sceneSession2->SetRSVisible(true);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    WSRect rect2 = { 0, 2100, 200, 100 };
+    sceneSession2->SetSessionRect(rect2);
+    sceneSession2->SetSessionGlobalRect(rect2);
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+
+    SessionInfo sessionInfo3;
+    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    sceneSession3->GetSessionProperty()->SetDisplayId(100);
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
+
+    SessionInfo sessionInfo4;
+    sessionInfo4.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(sessionInfo4, nullptr);
+    sceneSession4->SetSessionState(SessionState::STATE_BACKGROUND);
+    sceneSession4->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
+
+    GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    ssm_->sceneSessionMap_.insert({ -1, nullptr });
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 1);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetGlobalWindowMode02
+ * @tc.desc: test all window modes except for fullscreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetRSVisible(true);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    WSRect rect1 = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect1);
+    sceneSession1->SetSessionGlobalRect(rect1);
+    sceneSession1->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+    GlobalWindowMode globalWinMode1 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode1);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode1), 2);
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sceneSession2->SetRSVisible(true);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    WSRect rect2 = { 100, 0, 100, 100 };
+    sceneSession2->SetSessionRect(rect2);
+    sceneSession2->SetSessionGlobalRect(rect2);
+    sceneSession2->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+    GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode2);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 6);
+
+    SessionInfo sessionInfo3;
+    sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    sceneSession3->SetRSVisible(true);
+    sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
+    WSRect rect3 = { 0, 200, 1200, 1000 };
+    sceneSession3->SetSessionRect(rect3);
+    sceneSession3->SetSessionGlobalRect(rect3);
+    sceneSession3->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
+    GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 14);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: IsSessionInSpecificDisplay01
+ * @tc.desc: test IsSessionInSpecificDisplay01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsSessionInSpecificDisplay01, TestSize.Level0)
+{
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1648, 2472, 0 });
+    bool ret = ssm_->IsSessionInSpecificDisplay(nullptr, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(ret, false);
+
+    SessionInfo sessionInfo1;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    WSRect rect1 = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect1);
+    sceneSession1->SetSessionGlobalRect(rect1);
+    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+    bool ret1 = ssm_->IsSessionInSpecificDisplay(sceneSession1, VIRTUAL_DISPLAY_ID);
+    EXPECT_EQ(ret1, false);
+
+    SessionInfo sessionInfo2;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    WSRect rect2 = { 0, 1700, 100, 100 };
+    sceneSession2->SetSessionRect(rect2);
+    sceneSession2->SetSessionGlobalRect(rect2);
+    bool ret2 = ssm_->IsSessionInSpecificDisplay(sceneSession2, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(ret2, false);
+
+    SessionInfo sessionInfo3;
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    WSRect rect3 = { 0, 200, 1200, 1000 };
+    sceneSession3->SetSessionRect(rect3);
+    sceneSession3->SetSessionGlobalRect(rect3);
+    bool ret3 = ssm_->IsSessionInSpecificDisplay(sceneSession3, DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(ret3, true);
+}
+
+/**
  * @tc.name: HasFloatingWindowForeground01
  * @tc.desc: test HasFloatingWindowForeground with null abilityToken
  * @tc.type: FUNC
@@ -1352,6 +1496,19 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground01, TestSize.Leve
     WMError result = ssm_->HasFloatingWindowForeground(nullptr, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: ConfigSupportFollowRelativePositionToParent
+ * @tc.desc: test ConfigSupportFollowRelativePositionToParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ConfigSupportFollowRelativePositionToParent01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    bool ret = true;
+    ssm_->ConfigSupportFollowRelativePositionToParent();
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -2284,6 +2441,43 @@ HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest
 
     ssm_->UpdateAbilityHookState(sceneSession, true);
     EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
+}
+
+/**
+ * @tc.name: UpdateRecentMainSessionInfos
+ * @tc.desc: test function : UpdateRecentMainSessionInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateRecentMainSessionInfos, Function | SmallTest | Level2)
+{
+    const std::vector<int32_t> recentMainSessionIdList = { 101 };
+    SessionInfo info;
+    info.bundleName_ = "UpdateRecentMainSessionInfoList BundleName";
+    info.moduleName_ = "UpdateRecentMainSessionInfoList ModuleName";
+    info.abilityName_ = "UpdateRecentMainSessionInfoList AbilityName";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_[101] = sceneSession;
+    ssm_->recentMainSessionInfoList_.clear();
+    EXPECT_EQ(ssm_->recentMainSessionInfoList_.size(), 0);
+    ssm_->UpdateRecentMainSessionInfos(recentMainSessionIdList);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(ssm_->recentMainSessionInfoList_.size(), 1);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList
+ * @tc.desc: test function : GetRecentMainSessionInfoList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList, Function | SmallTest | Level2)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 } // namespace
 } // namespace Rosen

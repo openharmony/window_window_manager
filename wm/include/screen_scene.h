@@ -89,6 +89,13 @@ public:
     void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+
 private:
     mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;

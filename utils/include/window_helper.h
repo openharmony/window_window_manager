@@ -198,6 +198,11 @@ public:
         return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     }
 
+    static inline bool IsPipWindowMode(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_PIP;
+    }
+
     static inline bool IsAppFullOrSplitWindow(WindowType type, WindowMode mode)
     {
         if (!IsAppWindow(type)) {
@@ -639,6 +644,25 @@ public:
                decorButtonStyle.buttonIconSize <= MAX_BUTTON_ICON_SIZE &&
                decorButtonStyle.buttonBackgroundCornerRadius >= MIN_BUTTON_BACKGROUND_CORNER_RADIUS &&
                decorButtonStyle.buttonBackgroundCornerRadius <= MAX_BUTTON_BACKGROUND_CORNER_RADIUS;
+    }
+
+    static void SplitStringByDelimiter(
+        const std::string& inputStr, const std::string& delimiter, std::unordered_set<std::string>& container)
+    {
+        if (inputStr.empty()) {
+            return;
+        }
+        if (delimiter.empty()) {
+            container.insert(inputStr);
+            return;
+        }
+        std::string::size_type start = 0;
+        std::string::size_type end = 0;
+        while ((end = inputStr.find(delimiter, start)) != std::string::npos) {
+            container.insert(inputStr.substr(start, end - start));
+            start = end + delimiter.length();
+        }
+        container.insert(inputStr.substr(start));
     }
 
 private:

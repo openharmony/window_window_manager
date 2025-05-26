@@ -1956,6 +1956,71 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowPropertyInfo02, TestSize.Level1)
     EXPECT_EQ(true, windowPropertyInfo.isTouchable);
     EXPECT_EQ(999, windowPropertyInfo.displayId);
 }
+
+/**
+ * @tc.name: SetWindowContainerColor01
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetBundleName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    window->containerColorList_.insert("SetWindowContainerColor");
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor02
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetBundleName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->containerColorList_.insert("SetWindowContainerColor");
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#FF000000";
+    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    inactiveColor = "rgb#FF000000";
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    activeColor = "rgb#00000000";
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
