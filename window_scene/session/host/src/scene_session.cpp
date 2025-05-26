@@ -2408,51 +2408,71 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
     }
 }
 
+bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
+{
+    if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
+        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
+        return parentSession->CheckGetAvoidAreaAvailable(type);
+    } else if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
+    }
+    return false;
+}
+
+bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type)
+{
+    // compatibleMode app in pc,need use avoid Area
+    if (GetSessionProperty()->IsAdaptToImmersive()) {
+        return true;
+    }
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
+        return false;
+    }
+    if (winMode != WindowMode::WINDOW_MODE_FLOATING || systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) {
+        return true;
+    }
+    return false;
+}
+
+bool SceneSession::CheckGetSystemWindowAvoidAreaAvailable()
+{
+    if (GetSessionProperty()->GetAvoidAreaOption() &
+        static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW)) {
+        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+    }
+    return false;
+}
+
 bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
 {
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d keyboard, return 1", GetPersistentId());
         return true;
     }
-    WindowMode mode = GetWindowMode();
+    WindowMode winMode = GetWindowMode();
     WindowType winType = GetWindowType();
+    if (winType == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d pad free multi window mode, return 0", GetPersistentId());
+        return false;
+    }
+    bool isAvailable = false;
     if (WindowHelper::IsSubWindow(winType)) {
-        if (GetSessionProperty()->GetAvoidAreaOption() &
-            static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d option %{public}d",
-                GetPersistentId(), GetSessionProperty()->GetAvoidAreaOption());
-            return true;
-        }
-        auto parentSession = GetParentSession();
-        if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
-            return parentSession->CheckGetAvoidAreaAvailable(type);
-        } else if (parentSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
-        }
-        TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
+        isAvailable = CheckGetSubWindowAvoidAreaAvailable(type);
+    } else if (WindowHelper::IsMainWindow(winType)) {
+        isAvailable = CheckGetMainWindowAvoidAreaAvailable(winMode, type);
+    } else if (WindowHelper::IsSystemWindow(winType)) {
+        isAvailable = CheckGetSystemWindowAvoidAreaAvailable();
     }
-    if (WindowHelper::IsMainWindow(winType)) {
-        // compatibleMode app in pc,need use avoid Area
-        if (GetSessionProperty()->IsAdaptToImmersive()) {
-            return true;
-        }
-
-        if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
-            return false;
-        }
-
-        if (mode != WindowMode::WINDOW_MODE_FLOATING || systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) {
-            return true;
-        }
-    }
-    if (WindowHelper::IsSystemWindow(winType) &&
-        (GetSessionProperty()->GetAvoidAreaOption() &
-         static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
-        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-    }
-    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u "
-        "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
-        GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
-    return false;
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u avoidAreaType %{public}u "
+        "windowMode %{public}u avoidAreaOption %{public}u return %{public}d",
+        GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type),
+        static_cast<uint32_t>(winMode), GetSessionProperty()->GetAvoidAreaOption(), isAvailable);
+    return ret;
 }
 
 void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
