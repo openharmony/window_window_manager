@@ -13771,8 +13771,8 @@ void SceneSessionManager::ChangeWindowRectYInVirtualDisplay(DisplayId& displayId
             screenHightByDisplayId = screenDisplay->GetDisplayInfo()->GetHeight();
         }
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "defaultScreenPhyHight %{public}d screenHightByDisplayId %{public}d",
-        defaultScreenPhyHight, screenHightByDisplayId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "defaultScreenPhysicalHeight %{public}d screenHightByDisplayId %{public}d",
+        defaultScreenPhysicalHeight, screenHightByDisplayId);
     if (displayId == VIRTUAL_DISPLAY_ID) {
         displayId = DEFAULT_DISPLAY_ID;
         y = y + defaultScreenPhysicalHeight - screenHightByDisplayId;

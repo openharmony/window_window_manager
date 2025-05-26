@@ -57,7 +57,7 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
-constexpr float POS_ZERO = 0.001f;
+constexpr double POS_ZERO = 0.001f;
 }
 
 /**

@@ -6871,7 +6871,7 @@ void JsSceneSession::OnSetWindowShadows(const ShadowsInfo& shadowsInfo)
         TLOGND(WmsLogTag::WMS_ANIMATION, "%{public}s: shadow radius is %{public}f, color is %{public}s, "
             "offsetX is %{public}f, offsetY is %{public}f ", where, shadowsInfo.radius_, shadowsInfo.color_.c_str(),
             shadowsInfo.offsetX_, shadowsInfo.offsetY_);
-        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_CORNER_RADIUS_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_SHADOWS_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s: jsCallBack is nullptr", where);
             return;
