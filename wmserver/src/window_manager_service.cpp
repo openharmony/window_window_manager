@@ -1340,11 +1340,11 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 WMError WindowManagerService::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     if (!Permission::IsSystemCalling()) {
-        WLOGFE("notify screen shot event type permission denied!");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify screen shot event type permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, type]() {
-        WLOGI("screenshot event type: %{public}u", mode);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "screenshot event type: %{public}d", type);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:NotifyScreenshotEvent");
         return windowController_->NotifyScreenshotEvent(type);
     };
