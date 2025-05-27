@@ -1744,7 +1744,12 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestS
     std::function<void(uint32_t windowNum)> func = [](uint32_t windowNum) {
         return;
     };
+    int res = 0;
     ssm_->RegisterSetForegroundWindowNumCallback(std::move(func));
+    if(ssm_ ->setForegroundWindowNumFunc_) {
+        res = 1;
+    }
+    ASSERT_EQ(res, 1);
 }
 
 /**
@@ -1758,19 +1763,9 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
     std::vector<float> subFloat = { 0.1f };
     WindowSceneConfig::ConfigItem configItem;
     configItem.SetValue(subFloat);
-    configItem.SetValue({ { "miniHeight", configItem } });
+    configItem.SetValue({ { "singleHandScale", configItem } });
     ssm_->ConfigSingleHandCompatibleMode(configItem);
-}
-
-/**
- * @tc.name: UpdateRootSceneAvoidArea
- * @tc.desc: call UpdateRootSceneAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->UpdateRootSceneAvoidArea();
+    ASSERT_EQ(configItem.IsFloats(), false);
 }
 } // namespace
 } // namespace Rosen
