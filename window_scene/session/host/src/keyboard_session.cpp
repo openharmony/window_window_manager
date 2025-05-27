@@ -679,26 +679,16 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         }
 
         // The callingId may change in WindowManager. Use scb's callingId to properly handle callingWindow raise/restore.
-        bool isLayoutFinished = true;
         sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
         if (callingSession != nullptr) {
             callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
                 animationInfo.endRect, animationInfo.animated, rsTransaction);
         }
         if (isKeyboardShow) {
-            // If vsync acquisition fails or the vsync period terminates, immediately notify all registered listeners.
-            if (session->keyboardCallback_ != nullptr &&
-                session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
-                    isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
-            }
-            if (isLayoutFinished) {
-                session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
-            }
+            session->MarkOccupiedAreaAsDirty();
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
-        }
-        if (isLayoutFinished) {
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;

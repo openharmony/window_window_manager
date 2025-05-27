@@ -37,7 +37,6 @@ using OnCallingSessionIdChangeCallback = std::function<void(uint32_t callingSess
 using OnSystemKeyboardAvoidChangeCallback = std::function<void(DisplayId displayId,
     SystemKeyboardAvoidChangeReason reason)>;
 using NotifyOccupiedAreaChangeCallback = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
-using IsLastFrameLayoutFinishedCallback = std::function<bool()>;
 
 const std::string KEYBOARD_ANIM_SYNC_EVENT_NAME { "KeyboardAnimationSyncException" };
 
@@ -50,7 +49,6 @@ public:
         OnCallingSessionIdChangeCallback onCallingSessionIdChange;
         OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange;
         NotifyOccupiedAreaChangeCallback onNotifyOccupiedAreaChange;
-        IsLastFrameLayoutFinishedCallback isLastFrameLayoutFinished;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
         const sptr<KeyboardSessionCallback>& keyboardCallback);
