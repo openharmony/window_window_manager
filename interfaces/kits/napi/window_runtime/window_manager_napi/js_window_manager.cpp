@@ -595,7 +595,7 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     auto asyncTask = [option, contextPtr, env, task = napiAsyncTask, where = __func__] {
         sptr<WindowOption> windowOption = new WindowOption(option);
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s type=%{public}u, name=%{public}s, defaultDensity=%{public}d",
+        TLOGND(WmsLogTag::WMS_LIFE, "%{public}s type=%{public}u, name=%{public}s, defaultDensity=%{public}d",
             where, static_cast<uint32_t>(option.GetWindowType()), option.GetWindowName().c_str(),
             option.IsDefaultDensityEnabled());
         if (WindowHelper::IsSystemWindow(option.GetWindowType())) {
