@@ -718,6 +718,16 @@ HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
     ASSERT_EQ(resultScale, animationProperty.targetScale);
     ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
 }
+
+/**
+ * @tc.name: GetAllAppUseControlMap
+ * @tc.desc: GetAllAppUseControlMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level3)
+{
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

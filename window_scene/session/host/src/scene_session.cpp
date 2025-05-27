@@ -98,6 +98,7 @@ std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
+AllAppUseControlMapType SceneSession::allAppUseControlMap_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -1144,6 +1145,16 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
         session->onUpdateAppUseControlFunc_ = std::move(callback);
         for (const auto& [type, info] : session->appUseControlMap_) {
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
+        }
+        std::string key =
+            session->GetSessionInfo().bundleName_ + "#" + std::to_string(session->GetSessionInfo().appIndex_);
+        if (allAppUseControlMap_.find(key) == allAppUseControlMap_.end()) {
+            return;
+        }
+        for (const auto& [type, info] : allAppUseControlMap_[key]) {
+            if (session->appUseControlMap_.find(type) == session->appUseControlMap_.end()) {
+                session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
+            }
         }
     }, __func__);
 }
@@ -8685,5 +8696,10 @@ WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty
         animationOption: %{public}s", GetWindowId(), animationProperty.targetScale, \
         animationOption.ToString().c_str());
     return WMError::WM_OK;
+}
+
+AllAppUseControlMapType& SceneSession::GetAllAppUseControlMap()
+{
+    return allAppUseControlMap_;
 }
 } // namespace OHOS::Rosen

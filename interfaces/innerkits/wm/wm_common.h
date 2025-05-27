@@ -402,6 +402,14 @@ enum class ControlAppType : uint8_t {
 };
 
 /**
+ * @brief Control info of App lock.
+ */
+struct ControlInfo {
+    bool isNeedControl;
+    bool isControlRecentOnly;
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {

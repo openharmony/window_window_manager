@@ -137,6 +137,8 @@ using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowE
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
 using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& animationProperty,
     const WindowAnimationOption& animationOption)>;
+using AllAppUseControlMapType =
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -180,11 +182,6 @@ public:
     // func for change window scene pattern property
     struct SetWindowScenePatternFunc : public RefBase {
         SetWindowPatternOpacityFunc setOpacityFunc_;
-    };
-
-    struct ControlInfo {
-        bool isNeedControl;
-        bool isControlRecentOnly;
     };
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -583,6 +580,7 @@ public:
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
     void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);
     void SetIsUserRequestedExit(bool isUserRequestedExit);
+    static std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& GetAllAppUseControlMap();
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -930,6 +928,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
+    static AllAppUseControlMapType allAppUseControlMap_;
 
     /*
      * PC Fold Screen
