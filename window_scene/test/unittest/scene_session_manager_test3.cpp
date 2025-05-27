@@ -1767,6 +1767,25 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
     ssm_->ConfigSingleHandCompatibleMode(configItem);
     ASSERT_EQ(configItem.IsFloats(), false);
 }
+
+/**
+ * @tc.name: UpdateRootSceneAvoidArea
+ * @tc.desc: call UpdateRootSceneAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testbundleName";
+    sessionInfo.abilityName_ = "testabilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->rootSceneSession_->specificCallback_ = nullptr;
+    ssm_->UpdateRootSceneAvoidArea();
+    auto res = ssm_->rootSceneSession_->GetPersistentId();
+    ASSERT_NE(res, 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
