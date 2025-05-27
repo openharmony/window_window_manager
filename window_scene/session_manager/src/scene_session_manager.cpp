@@ -7150,7 +7150,8 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
         }
         bool isPhoneAndPadWithoutPcMode =
             systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
-        if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+            SessionHelper::IsMainWindow(session->GetWindowType())) {
             return false;
         }
         return true;
