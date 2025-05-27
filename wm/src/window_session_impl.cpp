@@ -5742,8 +5742,8 @@ WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}u, %{public}s], value=%{public}u",
-        GetWindowId(), GetWindowName().c_str(), color);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "window: %{public}s, value:%{public}u", GetWindowName().c_str(), color);
+
     // 0xff000000: ARGB style, means Opaque color.
     const bool isAlphaZero = !(color & 0xff000000);
     std::string bundleName;
@@ -5767,13 +5767,13 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA);
         return WMError::WM_OK;
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, win=[%{public}u, %{public}s], value=%{public}u",
-            GetWindowId(), GetWindowName().c_str(), color);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, win=%{public}u, value=%{public}u",
+            GetWindowId(), color);
     }
 
     if (aceAbilityHandler_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "set ability background color, win=[%{public}u, %{public}s], value=%{public}u",
-            GetWindowId(), GetWindowName().c_str(), color);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "set ability background color, win=%{public}u, value=%{public}u",
+            GetWindowId(), color);
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
