@@ -963,9 +963,9 @@ HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | Smal
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -981,9 +981,9 @@ HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | Sm
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen

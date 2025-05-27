@@ -173,34 +173,35 @@ HWTEST_F(WindowSessionImplRotationTest, SetRequestedOrientation01, TestSize.Leve
 
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
 
     Orientation ori = Orientation::VERTICAL;
     window->SetRequestedOrientation(ori);
-    Orientation ret = window->GetRequestedOrientation();
+    Orientation ret = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret, ori);
 
     window->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
-    Orientation ret1 = window->GetRequestedOrientation();
+    Orientation ret1 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
 
     window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-    Orientation ret2 = window->GetRequestedOrientation();
+    Orientation ret2 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
 
     window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
-    Orientation ret3 = window->GetRequestedOrientation();
+    Orientation ret3 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
 
     window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
-    Orientation ret4 = window->GetRequestedOrientation();
+    Orientation ret4 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
 
     window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
-    Orientation ret5 = window->GetRequestedOrientation();
+    Orientation ret5 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 
     window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
-    Orientation ret6 = window->GetRequestedOrientation();
+    Orientation ret6 = window->property_->GetRequestedOrientation();
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetRequestedOrientation01 end";
@@ -243,7 +244,7 @@ HWTEST_F(WindowSessionImplRotationTest, SetRequestedOrientation03, TestSize.Leve
     window_->SetRequestedOrientation(orientation);
     orientation = Orientation::USER_ROTATION_PORTRAIT;
     window_->SetRequestedOrientation(orientation);
-    auto ret = window_->GetRequestedOrientation();
+    auto ret = window_->property_->GetRequestedOrientation();
     ASSERT_EQ(ret, orientation);
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetRequestedOrientation03 end";
 }
@@ -270,33 +271,34 @@ HWTEST_F(WindowSessionImplRotationTest, GetRequestedOrientation, TestSize.Level1
 
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
 
     Orientation ori = Orientation::HORIZONTAL;
-    window->SetRequestedOrientation(ori);
+    window->SetUserRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
     ASSERT_EQ(ret, ori);
 
-    window->SetRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
+    window->SetUserRequestedOrientation(Orientation::AUTO_ROTATION_UNSPECIFIED);
     Orientation ret1 = window->GetRequestedOrientation();
     ASSERT_EQ(ret1, Orientation::AUTO_ROTATION_UNSPECIFIED);
 
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    window->SetUserRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
     Orientation ret2 = window->GetRequestedOrientation();
     ASSERT_EQ(ret2, Orientation::USER_ROTATION_PORTRAIT);
 
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
+    window->SetUserRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE);
     Orientation ret3 = window->GetRequestedOrientation();
     ASSERT_EQ(ret3, Orientation::USER_ROTATION_LANDSCAPE);
 
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
+    window->SetUserRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED);
     Orientation ret4 = window->GetRequestedOrientation();
     ASSERT_EQ(ret4, Orientation::USER_ROTATION_PORTRAIT_INVERTED);
 
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
+    window->SetUserRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
     Orientation ret5 = window->GetRequestedOrientation();
     ASSERT_EQ(ret5, Orientation::USER_ROTATION_LANDSCAPE_INVERTED);
 
-    window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    window->SetUserRequestedOrientation(Orientation::FOLLOW_DESKTOP);
     Orientation ret6 = window->GetRequestedOrientation();
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 
