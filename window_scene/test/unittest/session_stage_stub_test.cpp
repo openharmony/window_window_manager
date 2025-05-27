@@ -302,6 +302,56 @@ HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleNotifyOccupiedAreaChange02
+ * @tc.desc: test function : HandleNotifyOccupiedAreaChange02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyOccupiedAreaChange02, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    MessageParcel data;
+    MessageParcel reply;
+    WSRect safeRect;
+    double textFieldPositionY = 0.0;
+    double textFieldHeight = 0.0;
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT,
+    SessionHelper::TransferToRect(safeRect), safeRect.height_, textFieldPositionY, textFieldHeight);
+    data.WriteParcelable(info.GetRefPtr());
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleNotifyOccupiedAreaChange(data, reply));
+
+    MessageParcel data2;
+    data2.WriteParcelable(info.GetRefPtr());
+    data2.WriteInt32(safeRect.posX_);
+    data2.WriteInt32(safeRect.posY_);
+    data2.WriteInt32(safeRect.width_);
+    data2.WriteInt32(safeRect.height_);
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleNotifyOccupiedAreaChange(data2, reply));
+
+    MessageParcel data3;
+    data3.WriteParcelable(info.GetRefPtr());
+    data3.WriteInt32(safeRect.posX_);
+    data3.WriteInt32(safeRect.posY_);
+    data3.WriteInt32(safeRect.width_);
+    data3.WriteInt32(safeRect.height_);
+    std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
+    data3.WriteUint32(avoidAreas.size());
+    bool hasRSTransaction = false;
+    data3.WriteBool(hasRSTransaction);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleNotifyOccupiedAreaChange(data3, reply));
+
+    MessageParcel data4;
+    data4.WriteParcelable(info.GetRefPtr());
+    data4.WriteInt32(safeRect.posX_);
+    data4.WriteInt32(safeRect.posY_);
+    data4.WriteInt32(safeRect.width_);
+    data4.WriteInt32(safeRect.height_);
+    data4.WriteUint32(avoidAreas.size());
+    hasRSTransaction = true;
+    data4.WriteBool(hasRSTransaction);
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleNotifyOccupiedAreaChange(data4, reply));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardAnimationCompleted
  * @tc.desc: test function : HandleNotifyKeyboardAnimationCompleted
  * @tc.type: FUNC
