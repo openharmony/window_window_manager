@@ -342,6 +342,34 @@ HWTEST_F(SessionStageProxyTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: test function : NotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(sessionStage_, nullptr);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    auto ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ret = sessionStage->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyTouchOutside
  * @tc.desc: test function : NotifyTouchOutside
  * @tc.type: FUNC

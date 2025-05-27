@@ -781,6 +781,34 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, TestSize.
 }
 
 /**
+ * @tc.name: UpdateSessionScreenshotAppEventListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionScreenshotAppEventListener, TestSize.Level1)
+{
+    int32_t persistendId = 0;
+    bool haveListener = true;
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    EXPECT_EQ(WSError::WS_OK, ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener));
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    EXPECT_EQ(WSError::WS_OK, ssmProxy->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START));
+}
+
+/**
  * @tc.name: SetSessionLabel
  * @tc.desc: normal function
  * @tc.type: FUNC

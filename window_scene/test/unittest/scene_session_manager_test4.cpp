@@ -708,6 +708,61 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
 }
 
 /**
+ * @tc.name: UpdateSessionScreenshotAppEventListener01
+ * @tc.desc: test WS_DO_NOTHING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
+{
+    int32_t persistentId = 10086;
+    bool haveListener = true;
+    WSError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+
+}
+
+/**
+ * @tc.name: UpdateSessionScreenshotAppEventListener02
+ * @tc.desc: test WS_ERROR_INVALID_PERMISSION and WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionScreenshotAppEventListener";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    int32_t persistentId = 1;
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    sceneSession->SetCallingPid(pid + 1);
+    auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    sceneSession->SetCallingPid(pid);
+    auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: test WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionScreenshotAppEventListener";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: UpdateDarkColorModeToRS
  * @tc.desc: UpdateDarkColorModeToRS
  * @tc.type: FUNC
