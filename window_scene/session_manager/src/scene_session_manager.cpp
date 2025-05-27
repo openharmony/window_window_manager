@@ -10272,7 +10272,8 @@ WSError SceneSessionManager::NotifyAppUseControlList(
                 .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
             };
             std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
-            AllAppUseControlMapType &allAppUseControlMap = SceneSession::GetAllAppUseControlMap();
+            std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& allAppUseControlMap
+                = SceneSession::GetAllAppUseControlMap();
             allAppUseControlMap[key][type] = controlInfo;
             GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
             if (mainSessions.empty()) {

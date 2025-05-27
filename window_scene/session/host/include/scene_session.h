@@ -137,8 +137,6 @@ using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowE
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
 using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& animationProperty,
     const WindowAnimationOption& animationOption)>;
-using AllAppUseControlMapType =
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -928,7 +926,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
-    static AllAppUseControlMapType allAppUseControlMap_;
+    static std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseControlMap_;
 
     /*
      * PC Fold Screen

@@ -1656,6 +1656,18 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
+
+/**
+ * @tc.name: CheckNotifyAppUseControlList
+ * @tc.desc: CheckNotifyAppUseControlList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, CheckNotifyAppUseControlList, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
+              ssm_->CheckNotifyAppUseControlList(ControlAppType::APP_LOCK, -1));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
