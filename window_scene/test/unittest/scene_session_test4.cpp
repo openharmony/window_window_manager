@@ -1535,11 +1535,11 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     SystemSessionConfig parentSystemConfig;
-    parentSystemConfig.windowUIType_ = windowUIType::PHONE_WINDOW;
+    parentSystemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     parentSession->SetSystemConfig(parentSystemConfig);
     sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
     parentProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    parentProperty->SetWIndowMode(WindowMode::WINDOW_MODE_FLOATING);
+    parentProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     parentSession->SetSessionProperty(parentProperty);
     session->SetParentSession(parentSession);
     EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
