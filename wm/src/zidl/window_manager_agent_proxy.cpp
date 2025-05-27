@@ -186,34 +186,6 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     }
 }
 
-void WindowManagerAgentProxy::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return;
-    }
-    if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
-        return;
-    }
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("remote is null");
-        return;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-    }
-}
-
 void WindowManagerAgentProxy::UpdateWindowDrawingContentInfo(
     const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
 {
