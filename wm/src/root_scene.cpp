@@ -144,6 +144,10 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root map size: %{public}lu", rootSceneMap_.size());
     for (const auto& sceneMap : rootSceneMap_) {
+        if (sceneMap.second == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root window is null, display=%{public}" PRIu64, sceneMap.first);
+            continue;
+        }
         auto window = sceneMap.second.promote();
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root win is null, display=%{public}" PRIu64, sceneMap.first);
@@ -222,6 +226,10 @@ void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Config
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root map size: %{public}lu", rootSceneMap_.size());
     for (const auto& sceneMap : rootSceneMap_) {
+        if (sceneMap.second == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root window is null, display=%{public}" PRIu64, sceneMap.first);
+            continue;
+        }
         auto window = sceneMap.second.promote();
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root win is null, display=%{public}" PRIu64, sceneMap.first);
