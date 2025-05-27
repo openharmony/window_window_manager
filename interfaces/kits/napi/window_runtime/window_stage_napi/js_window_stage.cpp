@@ -36,7 +36,7 @@ enum class ImageFit {
         LEFT,
         CENTER,
         RIGHT,
-        BOTTONM_LEFT,
+        BOTTOM_LEFT,
         BOTTOM,
         BOTTOM_RIGHT,
         MATRIX,
