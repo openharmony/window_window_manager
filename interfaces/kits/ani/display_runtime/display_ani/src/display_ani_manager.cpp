@@ -20,6 +20,7 @@
 
 #include "ani.h"
 #include "ani_err_utils.h"
+#include <ani_signature_builder.h>
 #include "display.h"
 #include "display_ani.h"
 #include "display_ani_listener.h"
@@ -33,6 +34,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 
 DisplayManagerAni::DisplayManagerAni()
 {
@@ -182,11 +184,13 @@ void DisplayManagerAni::OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] DisplayManager GetCurrentFoldCreaseRegion success %{public}d", (int)displayId);
-    if (ANI_OK != env->Object_SetFieldByName_Long(obj, "<property>displayId", (ani_long)displayId)) {
+    if (ANI_OK != env->Object_SetFieldByName_Long(obj, Builder::BuildPropertyName("displayId").c_str(),
+        (ani_long)displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
     }
     ani_ref creaseRectsObj{};
-    if (ANI_OK != env->Object_GetFieldByName_Ref(obj, "<property>creaseRects", &creaseRectsObj)) {
+    if (ANI_OK != env->Object_GetFieldByName_Ref(obj, Builder::BuildPropertyName("creaseRects").c_str(),
+        &creaseRectsObj)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
     ani_int length;
@@ -791,7 +795,7 @@ void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
     ani_long displayId;
-    if (ANI_OK != env->Object_GetFieldByName_Long(displayObj, "<property>id", &displayId)) {
+    if (ANI_OK != env->Object_GetFieldByName_Long(displayObj, Builder::BuildPropertyName("id").c_str(), &displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative get displayId failed");
         return;
     }

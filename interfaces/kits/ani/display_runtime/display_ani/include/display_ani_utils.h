@@ -44,6 +44,8 @@ static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, an
 
 static ani_status CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);
 
+static void CvtDisplayHelper(sptr<Display> display, ani_env* env, ani_object obj, sptr<DisplayInfo> info);
+
 static ani_status GetStdString(ani_env *env, ani_string ani_str, std::string &result);
 
 static ani_status GetAniArrayInt(ani_env *env, ani_object arrayObj, std::vector<int32_t>& arrayNative);
