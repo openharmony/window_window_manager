@@ -1567,18 +1567,9 @@ void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(
     bool needNotifyHostWindowToRaise = isPointerUp || !isHitTargetDraggable;
     if (needNotifyHostWindowToRaise) {
         // Send message to host window to raise hierarchy
-        auto dataHandler = GetExtensionDataHandler();
-        if (dataHandler == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is nullptr!");
-            return;
-        }
         auto businessCode = Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE;
         AAFwk::Want dataToSend;
-        auto sendResult = dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(businessCode),
-            dataToSend);
-        if (sendResult != DataHandlerErr::OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, errCode: "
-                "%{public}u", businessCode, sendResult);
+        if (SendExtensionMessageToHost(static_cast<uint32_t>(businessCode), dataToSend) != WMError::WM_OK) {
             return;
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "Notify host window to raise, id: %{public}d, isHitTargetDraggable: %{public}d, "
@@ -1770,7 +1761,7 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
         state, isFullScreenWaterfallMode_.load(), rootHostWindowType, isHostWindowDelayRaiseEnabled, GetWindowId());
 }
 
-WMError WindowExtensionSessionImpl::SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data)
+WMError WindowExtensionSessionImpl::SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const
 {
     auto dataHandler = GetExtensionDataHandler();
     if (dataHandler == nullptr) {
