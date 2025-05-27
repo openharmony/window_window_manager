@@ -480,9 +480,12 @@ public:
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
     WMError CheckMultiWindowRect(uint32_t& width, uint32_t& height);
     WSError SetCurrentRotation(int32_t currentRotation) override;
-    void SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion);
-    DisplayOrientation GetDisplayOrientationForRotation() const;
-    void SetPreferredRequestedOrientation(Orientation orientation) override;
+    void UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation);
+    DisplayOrientation GetCurrentWindowOrientation() const;
+    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation);
+    void SetUserRequestedOrientation(Orientation orientation) override;
+    bool IsUserOrientation(Orientation orientation) const;
+    bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
     /*
@@ -840,7 +843,6 @@ private:
         const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
-    bool IsUserOrientation(Orientation orientation) const;
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     void SetFrameLayoutCallbackEnable(bool enable);
@@ -1008,7 +1010,6 @@ private:
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
     void NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo);
     DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
-    Orientation preferredRequestedOrientation_ = Orientation::UNSPECIFIED;
 
     /*
      * RS Client Multi Instance

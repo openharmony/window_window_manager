@@ -1350,11 +1350,6 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
     return WMError::WM_OK;
 }
 
-WMError WindowManager::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    return WMError::WM_OK;
-}
-
 void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo, displayId);
