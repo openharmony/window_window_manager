@@ -1732,6 +1732,46 @@ HWTEST_F(SceneSessionManagerTest3, ConfigDialogWindowSizeLimits01, TestSize.Leve
     mainFloat02.SetValue({ { "miniHeight", mainFloat02 } });
     ssm_->ConfigDialogWindowSizeLimits(mainFloat02);
 }
+
+/**
+ * @tc.name: RegisterSetForegroundWindowNumCallback
+ * @tc.desc: call RegisterSetForegroundWindowNumCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::function<void(uint32_t windowNum)> func = [](uint32_t windowNum) {
+        return;
+    };
+    ssm_->RegisterSetForegroundWindowNumCallback(std::move(func));
+}
+
+/**
+ * @tc.name: ConfigSingleHandCompatibleMode
+ * @tc.desc: call ConfigSingleHandCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<float> subFloat = { 0.1f };
+    WindowSceneConfig::ConfigItem configItem;
+    configItem.SetValue(subFloat);
+    configItem.SetValue({ { "miniHeight", configItem } });
+    ssm_->ConfigSingleHandCompatibleMode(configItem);
+}
+
+/**
+ * @tc.name: UpdateRootSceneAvoidArea
+ * @tc.desc: call UpdateRootSceneAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateRootSceneAvoidArea();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
