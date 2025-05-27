@@ -418,7 +418,7 @@ HWTEST_F(KeyboardSessionTest3, IsNeedRaiseSubWindow02, Function | SmallTest | Le
  * @tc.desc: check func CalculateOccupiedArea_MIDSCENE
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallTest | Level0)
+HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallTest | Level1)
 {
     auto keyboardSession = GetKeyboardSession("CalculateOccupiedArea_MIDSCENE",
         "CalculateOccupiedArea_MIDSCENE");
@@ -429,7 +429,7 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallT
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     callingSession->SetLastSafeRect(lastSafeRect);
     auto lastSafeRectRet = callingSession->GetLastSafeRect();
-    auto rectEqual = (lastSAfeRect == lastSafeRectRet) ? true : false;
+    auto rectEqual = (lastSafeRect == lastSafeRectRet) ? true : false;
     EXPECT_EQ(rectEqual, true);
     callingSession->SetIsMidScene(false);
     usleep(SLEEP_TIME_US);
