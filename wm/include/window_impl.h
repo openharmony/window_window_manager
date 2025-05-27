@@ -361,7 +361,7 @@ public:
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
 
     /*
      * RS Client Multi Instance

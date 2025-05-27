@@ -301,8 +301,8 @@ public:
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
-    void SetKeyboardViewMode(KeyboardViewMode mode);
-    KeyboardViewMode GetKeyboardViewMode() const;
+    void SetKeyboardEffectOption(const KeyboardEffectOption& effectOption);
+    KeyboardEffectOption GetKeyboardEffectOption() const;
 
     /*
      * Window focus
@@ -512,7 +512,7 @@ private:
      * Keyboard
      */
     bool isSystemKeyboard_ = false;
-    KeyboardViewMode keyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    KeyboardEffectOption keyboardEffectOption_;
 
     /*
      * Window Immersive
