@@ -1143,18 +1143,13 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        for (const auto& [type, info] : session->appUseControlMap_) {
-            session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
-        }
         std::string key =
             session->GetSessionInfo().bundleName_ + "#" + std::to_string(session->GetSessionInfo().appIndex_);
         if (allAppUseControlMap_.find(key) == allAppUseControlMap_.end()) {
             return;
         }
         for (const auto& [type, info] : allAppUseControlMap_[key]) {
-            if (session->appUseControlMap_.find(type) == session->appUseControlMap_.end()) {
-                session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
-            }
+            session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
         }
     }, __func__);
 }
