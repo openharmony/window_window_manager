@@ -2306,7 +2306,11 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     }
     WSError ret;
     if (targetOrientation == Orientation::INVALID) {
-        ret = hostSession->GetTargetOrientationConfigInfo(GetRequestedOrientation(), pageProperties);
+        Orientation requestedOrientation = GetRequestedOrientation();
+        if (IsUserOrientation(requestedOrientation)) {
+            requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
+        }
+        ret = hostSession->GetTargetOrientationConfigInfo(requestedOrientation, pageProperties);
     } else {
         ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
     }
@@ -2333,11 +2337,15 @@ Ace::ViewportConfig WindowSceneSessionImpl::FillTargetOrientationConfig(
 {
     Ace::ViewportConfig config;
     Rect targetRect = info.rect;
-    int32_t targetRotation = info.rotation;
+    uint32_t targetRotation = info.rotation;
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "displayInfo is null!");
+        return config;
+    }
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (targetRotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
-    int32_t orientation = targetRotation / ONE_FOURTH_FULL_CIRCLE_DEGREE;
+    int32_t orientation = static_cast<int32_t>(targetRotation) / ONE_FOURTH_FULL_CIRCLE_DEGREE;
     virtualPixelRatio_ = density;
     config.SetSize(targetRect.width_, targetRect.height_);
     config.SetPosition(targetRect.posX_, targetRect.posY_);
@@ -4262,9 +4270,9 @@ WMError WindowSceneSessionImpl::SyncShadowsToComponent(const ShadowsInfo& shadow
 
     property_->SetWindowShadows(shadowsInfo);
     auto hostSession = GetHostSession();
-    if (hostSession) {
-        hostSession->SetWindowShadows(shadowsInfo);
-    }
+
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->SetWindowShadows(shadowsInfo);
     return WMError::WM_OK;
 }
 
@@ -4939,12 +4947,6 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         UpdateTitleButtonVisibility();
         UpdateDecorEnable(true);
     } else if (state_ == WindowState::STATE_SHOWN) {
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("update filed! id: %{public}u, mode: %{public}u.", GetWindowId(),
-                static_cast<uint32_t>(mode));
-            return ret;
-        }
         // set client window mode if success.
         property_->SetWindowMode(mode);
         UpdateTitleButtonVisibility();
