@@ -145,7 +145,7 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
-    virtual WMError SetForegroundWindowNum(int32_t windowNum);
+    virtual WMError SetForegroundWindowNum(uint32_t windowNum);
     virtual WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid);
 
@@ -167,7 +167,7 @@ public:
     virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId);
     virtual WMError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit);
 
     /*
@@ -192,6 +192,12 @@ public:
      * Window Pattern
      */
     virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
+
+    /*
+     * Window Animation
+     */
+    virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

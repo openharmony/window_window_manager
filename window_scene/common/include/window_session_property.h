@@ -43,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetTransitionAnimationConfig(WindowTransitionType transitionType, const TransitionAnimation& animation);
     void SetRequestRect(const struct Rect& rect);
     void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
@@ -113,6 +114,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> GetTransitionAnimationConfig() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -182,6 +184,8 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingTransitionAnimationMap(Parcel& parcel) const;
+    static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingShadowsInfo(Parcel& parcel) const;
     static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
@@ -398,7 +402,7 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
-    bool windowShadowEnabled_ { false };
+    bool windowShadowEnabled_ { true };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
@@ -531,6 +535,11 @@ private:
     mutable std::mutex shadowsInfoMutex_;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 };
  
 class CompatibleModeProperty : public Parcelable {
@@ -706,6 +715,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t maxMidSceneNum_ = 4;
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
+    bool supportFollowRelativePositionToParent_ = false;
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
@@ -753,6 +763,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowRelativePositionToParent_)) {
             return false;
         }
         if (!parcel.WriteBool(supportZLevel_) ||
@@ -804,6 +817,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
+        config->supportFollowRelativePositionToParent_ = parcel.ReadBool();
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();

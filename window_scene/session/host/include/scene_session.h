@@ -123,6 +123,7 @@ using GetKeyboardOccupiedAreaWithRotationCallback =
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
+using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
@@ -134,6 +135,8 @@ using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowEnabled)>;
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
+using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -207,8 +210,6 @@ public:
     virtual void BindKeyboardSession(sptr<SceneSession> session) {};
     virtual sptr<SceneSession> GetKeyboardSession() const { return nullptr; };
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
-    virtual void OnKeyboardPanelUpdated() {};
-    virtual void OnCallingSessionUpdated() {};
     virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
@@ -546,6 +547,9 @@ public:
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
+    void RegisterAnimateToCallback(NotifyAnimateToFunc&& callback);
+    WMError AnimateTo(const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
 
     /*
      * Window Visibility
@@ -700,6 +704,7 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WSError KeyFrameAnimateEnd() override;
 
     /*
@@ -718,6 +723,9 @@ public:
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
     sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
+    void SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func);
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
+    WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
     void SetTempRect(WSRect rect)
     {
         tempRect_ = rect;
@@ -761,6 +769,8 @@ public:
     void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
+    virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
+        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) {}
 
     /*
      * Window Focus
@@ -786,6 +796,7 @@ public:
      * Window Pattern
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    WMError NotifySnapshotUpdate() override;
 
     /*
      * Window LifeCycle
@@ -889,6 +900,8 @@ protected:
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
     bool isFollowParentLayout_ = false;
+    NotifyWindowAnchorInfoChangeFunc onWindowAnchorInfoChangeFunc_ = nullptr;
+    WindowAnchorInfo windowAnchorInfo_;
     int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySessionRectChange(const WSRect& rect,
@@ -1244,6 +1257,7 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+    NotifyAnimateToFunc onAnimateTo_;
 
     /*
      * Window Layout

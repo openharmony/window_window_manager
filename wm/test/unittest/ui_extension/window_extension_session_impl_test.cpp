@@ -25,13 +25,13 @@
 #include "display_info.h"
 #include "extension/extension_business_info.h"
 #include "extension_data_handler.h"
+#include "extension_data_handler_mock.h"
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
-#include "ui_extension/provider_data_handler.h"
 #include "window_extension_session_impl.h"
 #include "wm_common.h"
 
@@ -170,6 +170,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level0)
     window_->hostSession_ = session;
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
 }
 
@@ -524,6 +525,60 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
     window_->property_->SetPersistentId(1);
     NotifyTransferComponentDataForResultFunc func;
     window_->RegisterTransferComponentDataForResultListener(func);
+}
+
+/**
+ * @tc.name: RegisterHostWindowRectChangeListener
+ * @tc.desc: RegisterHostWindowRectChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterHostWindowRectChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterHostWindowRectChangeListener");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->dataHandler_ = nullptr;
+    sptr<IWindowRectChangeListener> listener = nullptr;
+
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->RegisterHostWindowRectChangeListener(listener));
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterHostWindowRectChangeListener(listener));
+    listener = sptr<MockWindowRectChangeListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_OK, window->RegisterHostWindowRectChangeListener(listener));
+    // Test listener alreday registered
+    EXPECT_EQ(WMError::WM_OK, window->RegisterHostWindowRectChangeListener(listener));
+}
+
+/**
+ * @tc.name: UnregisterHostWindowRectChangeListener
+ * @tc.desc: UnregisterHostWindowRectChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterHostWindowRectChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterHostWindowRectChangeListener");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->dataHandler_ = nullptr;
+    sptr<IWindowRectChangeListener> listener = nullptr;
+
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterHostWindowRectChangeListener(listener));
+    listener = sptr<MockWindowRectChangeListener>::MakeSptr();
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
+    window->rectChangeUIExtListenerIds_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UnregisterHostWindowRectChangeListener(listener));
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
 }
 
 /**
@@ -1310,7 +1365,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo01, TestSiz
 {
     sptr<OccupiedAreaChangeInfo> info = new(std::nothrow) OccupiedAreaChangeInfo();
     ASSERT_NE(nullptr, info);
-    window_->NotifyOccupiedAreaChangeInfo(info);
+    window_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**
@@ -1325,7 +1380,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, TestSiz
     window_->RegisterOccupiedAreaChangeListener(iOccupiedAreaChangeListener);
     sptr<OccupiedAreaChangeInfo> info = new(std::nothrow) OccupiedAreaChangeInfo();
     ASSERT_NE(nullptr, info);
-    window_->NotifyOccupiedAreaChangeInfo(info);
+    window_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**
@@ -1498,7 +1553,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, TestSize.Lev
     preRect.height_ = 200;
     preRect.width_ = 200;
     window_->property_->SetWindowRect(preRect);
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _, _));
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
@@ -1532,7 +1587,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, TestSize.Lev
     preRect.height_ = 100;
     preRect.width_ = 100;
     window_->property_->SetWindowRect(preRect);
-    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _));
+    EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _, _));
 
     window_->isDensityFollowHost_ = true;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -1555,7 +1610,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, TestSize.Lev
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _, _)).Times(0);
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
@@ -1596,7 +1651,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, TestSize.Lev
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
-    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(3);
+    EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _, _)).Times(3);
 
     window_->hostDensityValue_ = densityValue;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -2032,7 +2087,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
@@ -2365,6 +2420,30 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowDelayRaiseStateChange, Test
 }
 
 /**
+ * @tc.name: OnHostWindowRectChange
+ * @tc.desc: OnHostWindowRectChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowRectChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnHostWindowRectChange");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+
+    EXPECT_EQ(WMError::WM_OK, window->OnHostWindowRectChange(std::move(want), reply));
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(WMError::WM_OK, window->OnHostWindowRectChange(std::move(want), reply));
+}
+
+/**
  * @tc.name: OnResyncExtensionConfig
  * @tc.desc: OnResyncExtensionConfig Test
  * @tc.type: FUNC
@@ -2389,6 +2468,35 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfig, Function | Sma
 }
 
 /**
+ * @tc.name: SendExtensionMessageToHost
+ * @tc.desc: SendExtensionMessageToHost Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SendExtensionMessageToHost, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendExtensionMessageToHost");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->dataHandler_ = nullptr;
+    uint32_t code = 111;
+    AAFwk::Want data;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SendExtensionMessageToHost(code, data));
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
+    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
+    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
+}
+
+/**
  * @tc.name: OnExtensionMessage
  * @tc.desc: OnExtensionMessage test
  * @tc.type: FUNC
@@ -2408,12 +2516,19 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
-    ret = window->OnExtensionMessage(code, persistentId, want);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
 
-    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
-    ret = window->OnExtensionMessage(code, persistentId, want);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
 /**

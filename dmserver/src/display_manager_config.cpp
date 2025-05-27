@@ -30,9 +30,6 @@
 
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerConfig"};
-}
 
 std::map<std::string, bool> DisplayManagerConfig::enableConfig_;
 std::map<std::string, std::vector<int>> DisplayManagerConfig::intNumbersConfig_;
@@ -70,7 +67,7 @@ std::string DisplayManagerConfig::GetConfigPath(const std::string& configFileNam
     char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
     char tmpPath[PATH_MAX + 1] = { 0 };
     if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
-        WLOGFI("[DmConfig] can not get customization config file");
+        TLOGI(WmsLogTag::DMS, "[DmConfig] can not get customization config file");
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
@@ -84,23 +81,23 @@ bool DisplayManagerConfig::LoadConfigXml()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     }
-    WLOGFI("[DmConfig] filePath: %{public}s", configFilePath.c_str());
+    TLOGI(WmsLogTag::DMS, "[DmConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
-        WLOGFE("[DmConfig] load xml error!");
+        TLOGE(WmsLogTag::DMS, "[DmConfig] load xml error!");
         return false;
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        WLOGFE("[DmConfig] get root element failed!");
+        TLOGE(WmsLogTag::DMS, "[DmConfig] get root element failed!");
         xmlFreeDoc(docPtr);
         return false;
     }
 
     for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
         if (!IsValidNode(*curNodePtr)) {
-            WLOGFE("DmConfig]: invalid node!");
+            TLOGE(WmsLogTag::DMS, "DmConfig]: invalid node!");
             continue;
         }
 
@@ -140,7 +137,7 @@ void DisplayManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -153,7 +150,7 @@ void DisplayManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!IsNumber(num)) {
-            WLOGFE("[DmConfig] read number error: nodeName:(%{public}s)", currNode->name);
+            TLOGE(WmsLogTag::DMS, "[DmConfig] read number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
@@ -169,7 +166,7 @@ void DisplayManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (enable == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -186,7 +183,7 @@ void DisplayManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        TLOGE(WmsLogTag::DMS, "[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
 
@@ -214,16 +211,17 @@ const std::map<std::string, std::string>& DisplayManagerConfig::GetStringConfig(
 void DisplayManagerConfig::DumpConfig()
 {
     for (auto& enable : enableConfig_) {
-        WLOGFI("[DmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
+        TLOGI(WmsLogTag::DMS, "[DmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
     }
     for (auto& numbers : intNumbersConfig_) {
-        WLOGFI("[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
+        TLOGI(WmsLogTag::DMS, "[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(),
+            numbers.second.size());
         for (auto& num : numbers.second) {
-            WLOGFI("[DmConfig] Num: %{public}d", num);
+            TLOGI(WmsLogTag::DMS, "[DmConfig] Num: %{public}d", num);
         }
     }
     for (auto& string : stringConfig_) {
-        WLOGFI("[DmConfig] String: %{public}s", string.first.c_str());
+        TLOGI(WmsLogTag::DMS, "[DmConfig] String: %{public}s", string.first.c_str());
     }
 }
 } // namespace OHOS::Rosen

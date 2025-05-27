@@ -137,6 +137,14 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     return objValue;
 }
 
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env, const WindowAnimationProperty& animationProperty)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "targetScale", CreateJsValue(env, animationProperty.targetScale));
+    return objValue;
+}
+
 napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig)
 {
@@ -1377,6 +1385,19 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
+
+    napi_value jsTransitionAnimationMapValue = nullptr;
+    napi_create_object(env, &jsTransitionAnimationMapValue);
+    if (jsTransitionAnimationMapValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to get jsObject");
+        return nullptr;
+    }
+    for (const auto& [transitionType, animation] : property->GetTransitionAnimationConfig()) {
+        napi_set_property(env, jsTransitionAnimationMapValue, CreateJsValue(env, static_cast<uint32_t>(transitionType)),
+            ConvertTransitionAnimationToJsValue(env, animation));
+    }
+    napi_set_named_property(env, objValue, "transitionAnimationMap", jsTransitionAnimationMapValue);
+
     return objValue;
 }
 
@@ -2173,6 +2194,8 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     SetTypeProperty(objValue, env, "TYPE_MUTISCREEN_COLLABORATION", JsSessionType::TYPE_MUTISCREEN_COLLABORATION);
     SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     return objValue;
 }
 
@@ -2248,6 +2271,54 @@ napi_value CreateSupportType(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION)));
     napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION",
         CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION)));
+    return objValue;
+}
+
+napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "isAnchorEnabled",
+        CreateJsValue(env, windowAnchorInfo.isAnchorEnabled_));
+    napi_set_named_property(env, objValue, "windowAnchor",
+        CreateJsValue(env, static_cast<uint32_t>(windowAnchorInfo.windowAnchor_)));
+    napi_set_named_property(env, objValue, "offsetX",
+        CreateJsValue(env, windowAnchorInfo.offsetX_));
+    napi_set_named_property(env, objValue, "offsetY",
+        CreateJsValue(env, windowAnchorInfo.offsetY_));
+    return objValue;
+}
+
+napi_value CreateWindowAnchorType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "TOP_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_END)));
     return objValue;
 }
 

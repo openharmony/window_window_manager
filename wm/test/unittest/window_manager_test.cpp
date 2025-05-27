@@ -1635,8 +1635,10 @@ HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, TestSize.Level1)
 {
     int32_t sourceWindowId = 1;
     int32_t targetWindowId = 1;
-    auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
-    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId), ret);
+    int32_t fingerId = 0;
+    auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
+        sourceWindowId, targetWindowId, fingerId), ret);
 }
 
 /**
@@ -1900,7 +1902,7 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
 
     sptr<TestWindowDisplayIdChangeListener> listener1 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
     sptr<TestWindowDisplayIdChangeListener> listener2 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterDisplayIdChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterDisplayIdChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -1990,6 +1992,28 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
 
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowRectChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: check AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, AnimateTo01, Function | SmallTest | Level2)
+{
+    int32_t windowId = 1;
+    WindowAnimationProperty animationProperty;
+    WindowAnimationOption animationOption;
+    animationProperty.targetScale = 1.5f;
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    WMError ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
+    EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
 }
 } // namespace
 } // namespace Rosen

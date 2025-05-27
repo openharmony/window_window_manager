@@ -204,7 +204,7 @@ void ScreenProperty::SetValidHeight(uint32_t validHeight)
     validHeight_ = validHeight;
 }
  
-int32_t ScreenProperty::GetValidHeight() const
+uint32_t ScreenProperty::GetValidHeight() const
 {
     return validHeight_;
 }
@@ -214,7 +214,7 @@ void ScreenProperty::SetValidWidth(uint32_t validWidth)
     validWidth_ = validWidth;
 }
  
-int32_t ScreenProperty::GetValidWidth() const
+uint32_t ScreenProperty::GetValidWidth() const
 {
     return validWidth_;
 }

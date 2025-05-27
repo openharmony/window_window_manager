@@ -334,4 +334,14 @@ WSError SceneSessionManagerLite::GetRecentMainSessionInfoList(std::vector<Recent
 {
     return SceneSessionManager::GetInstance().GetRecentMainSessionInfoList(recentSessionInfoList);
 }
+
+WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
+{
+    return SceneSessionManager::GetInstance().CreateNewInstanceKey(bundleName, instanceKey);
+}
+
+WMError SceneSessionManagerLite::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
+{
+    return SceneSessionManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+}
 } // namespace OHOS::Rosen
