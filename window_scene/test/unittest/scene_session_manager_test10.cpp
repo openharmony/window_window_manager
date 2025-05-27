@@ -1658,15 +1658,22 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
 }
 
 /**
- * @tc.name: CheckNotifyAppUseControlList
- * @tc.desc: CheckNotifyAppUseControlList
+ * @tc.name: refreshAllAppUseControlMap
+ * @tc.desc: refreshAllAppUseControlMap
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, CheckNotifyAppUseControlList, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
-              ssm_->CheckNotifyAppUseControlList(ControlAppType::APP_LOCK, -1));
+    AppUseControlInfo appUseControlInfo;
+    appUseControlInfo.bundleName_ = "app_bundle_name";
+    appUseControlInfo.isNeedControl_ = true;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo);
+    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
+
+    appUseControlInfo.isNeedControl_ = false;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo);
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
 }
 } // namespace
 } // namespace Rosen

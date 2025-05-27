@@ -1151,7 +1151,7 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
         for (const auto& [type, info] : allAppUseControlMap_[key]) {
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
-                key, info.isNeedControl, info.isControlRecentOnly);
+                key.c_str(), info.isNeedControl, info.isControlRecentOnly);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
         }
     }, __func__);
