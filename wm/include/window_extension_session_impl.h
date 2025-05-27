@@ -166,7 +166,7 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
-    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data);
+    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
     WMError HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
     WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
