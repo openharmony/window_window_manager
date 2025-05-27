@@ -74,7 +74,7 @@ napi_value JsWindowManager::Create(napi_env env, napi_callback_info info)
 
 napi_value JsWindowManager::CreateWindow(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnCreateWindow(env, info) : nullptr;
 }
