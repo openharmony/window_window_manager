@@ -1442,6 +1442,7 @@ WMError WindowController::NotifyScreenshotEvent(ScreenshotEventType type)
         }
         auto windowToken = windowNode->GetWindowToken();
         if (windowToken != nullptr) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, event: %{public}d", windowNode->GetWindowId(), type);
             windowToken->NotifyScreenshotAppEvent(type);
         }
     }

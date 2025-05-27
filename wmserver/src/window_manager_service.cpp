@@ -1343,8 +1343,8 @@ WMError WindowManagerService::NotifyScreenshotEvent(ScreenshotEventType type)
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify screen shot event type permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event : %{public}d", type);
     auto task = [this, type]() {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "screenshot event type: %{public}d", type);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:NotifyScreenshotEvent");
         return windowController_->NotifyScreenshotEvent(type);
     };
