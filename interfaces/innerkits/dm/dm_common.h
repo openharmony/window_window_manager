@@ -550,7 +550,7 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isFullScreenCapture_ = false;
+    bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 
