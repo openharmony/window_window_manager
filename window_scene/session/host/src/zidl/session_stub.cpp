@@ -1011,8 +1011,8 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
     Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
     uint32_t size = data.ReadUint32();
-    constexpr uint32_t WINDOW_TYPE_MAX_SIZE = 100;
-    if (size > WINDOW_TYPE_MAX_SIZE) {
+    constexpr uint32_t maxMapSize = 100;
+    if (size > maxMapSize) {
         TLOGE(WmsLogTag::WMS_ROTATION, "size is invalid");
         return ERR_INVALID_DATA;
     }
