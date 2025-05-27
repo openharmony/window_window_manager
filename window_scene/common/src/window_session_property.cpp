@@ -275,6 +275,11 @@ void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientati
     defaultRequestedOrientation_ = orientation;
 }
 
+void WindowSessionProperty::SetUserRequestedOrientation(Orientation orientation)
+{
+    userRequestedOrientation_ = orientation;
+}
+
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 {
     isPrivacyMode_ = isPrivate;
@@ -412,6 +417,11 @@ bool WindowSessionProperty::GetRequestedAnimation() const
 Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
 {
     return defaultRequestedOrientation_;
+}
+
+Orientation WindowSessionProperty::GetUserRequestedOrientation() const
+{
+    return userRequestedOrientation_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -1239,6 +1249,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(needRotateAnimation_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(userRequestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
@@ -1314,6 +1325,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
+    property->SetUserRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
@@ -1398,6 +1410,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     zIndex_ = property->zIndex_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
+    userRequestedOrientation_ = property->userRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
