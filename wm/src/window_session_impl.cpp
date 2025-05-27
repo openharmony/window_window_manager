@@ -2597,6 +2597,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
         property_->SetIsLayoutFullScreen(true);
     }
+    // the orientation of the invalid type is only applied to pageRotation.
     if (orientation == Orientation::INVALID) {
         Orientation requestedOrientation = GetRequestedOrientation();
         if (IsUserOrientation(requestedOrientation)) {
