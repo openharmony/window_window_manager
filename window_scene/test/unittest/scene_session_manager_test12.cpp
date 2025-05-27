@@ -1745,6 +1745,38 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus01, TestSize.Level1)
  * @tc.desc: SetHighlightSessionIds
  * @tc.type: FUNC
  */
+HWTEST_F(SceneSessionManagerTest12, FlushUIParams, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest12";
+    sessionInfo.abilityName_ = "FlushUIParams";
+    sessionInfo.screenId = 2;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParam.clear();
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> keyboardCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(sessionInfo, specificCb, keyboardCb);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->CreateKeyboardPanelSession(keyboardSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(keyboardSession->GetPersistentId(), keyboardSession));
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+
+    std::unordered_map<int32_t, SessionUIParam> uiParams2;
+    uiParams2.clear();
+    SessionUIParam sessionUIParam;
+    uiParam2.insert(std::make_pair(keyboardSession->GetPersistentId(), sessionUIParam));
+    ssm_->FlushUIParams(screenId, std::move(uiParam2));
+}
+
+
+/**
+ * @tc.name: SetHighlightSessionIds
+ * @tc.desc: SetHighlightSessionIds
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
