@@ -377,14 +377,16 @@ ohos_unittest("wm_window_impl_listener_test") {
   external_deps = test_external_deps
 }
 
-ohos_unittest("wm_window_proxy_test") {
-  module_out_path = module_out_path
+if (!window_manager_use_sceneboard) {
+    ohos_unittest("wm_window_proxy_test") {
+    module_out_path = module_out_path
 
-  sources = [ "window_proxy_test.cpp" ]
+    sources = [ "window_proxy_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+    deps = [ ":wm_unittest_common" ]
 
-  external_deps = test_external_deps
+    external_deps = test_external_deps
+  }
 }
 
 ohos_unittest("wm_window_stub_test") {
