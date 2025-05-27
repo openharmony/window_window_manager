@@ -10256,40 +10256,6 @@ WSError SceneSessionManager::NotifyAppUseControlList(
     TLOGI(WmsLogTag::WMS_LIFE,
         "controlApptype: %{public}d userId: %{public}d controlList size: %{public}zu",
         static_cast<int>(type), userId, controlList.size());
-    WSError checkResult = CheckNotifyAppUseControlList(type, userId);
-    if (checkResult != WSError::WS_OK) {
-        return checkResult;
-    }
-    taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
-        if (notifyAppUseControlListFunc_ != nullptr) {
-            notifyAppUseControlListFunc_(type, userId, controlList);
-        }
-
-        std::vector<sptr<SceneSession>> mainSessions;
-        for (const auto& appUseControlInfo : controlList) {
-            ControlInfo controlInfo = {
-                .isNeedControl = appUseControlInfo.isNeedControl_,
-                .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
-            };
-            std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
-            std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& allAppUseControlMap
-                = SceneSession::GetAllAppUseControlMap();
-            allAppUseControlMap[key][type] = controlInfo;
-            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
-            if (mainSessions.empty()) {
-                continue;
-            }
-            for (const auto& session : mainSessions) {
-                session->NotifyUpdateAppUseControl(type, controlInfo);
-            }
-            mainSessions.clear();
-        }
-    }, __func__);
-    return WSError::WS_OK;
-}
-
-WSError SceneSessionManager::CheckNotifyAppUseControlList(ControlAppType type, int32_t userId)
-{
     if (!SessionPermission::IsSACalling()) {
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -10313,7 +10279,50 @@ WSError SceneSessionManager::CheckNotifyAppUseControlList(ControlAppType type, i
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
     }
+    taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
+        if (notifyAppUseControlListFunc_ != nullptr) {
+            notifyAppUseControlListFunc_(type, userId, controlList);
+        }
+
+        std::vector<sptr<SceneSession>> mainSessions;
+        for (const auto& appUseControlInfo : controlList) {
+            refreshAllAppUseControlMap(appUseControlInfo);
+            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
+            if (mainSessions.empty()) {
+                continue;
+            }
+            SceneSession::ControlInfo controlInfo = {
+                .isNeedControl = appUseControlInfo.isNeedControl_,
+                .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
+            };
+            for (const auto& session : mainSessions) {
+                session->NotifyUpdateAppUseControl(type, controlInfo);
+            }
+            mainSessions.clear();
+        }
+    }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::refreshAllAppUseControlMap(AppUseControlInfo& appUseControlInfo)
+{
+    SceneSession::ControlInfo controlInfo = {
+        .isNeedControl = appUseControlInfo.isNeedControl_,
+        .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
+    };
+    std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& allAppUseControlMap =
+        SceneSession::GetAllAppUseControlMap();
+    if (!controlInfo.isNeedControl && !controlInfo.isControlRecentOnly) {
+        if (allAppUseControlMap.find(key) != allAppUserControlMap.end()) {
+            allAppUseControlMap[key].erase(type);
+            if (allAppUseControlMap[key].empty()){
+                allAppUseControlMap.erase(key);
+            }
+        }
+    } else {
+        allAppUseControlMap[key][type] = controlInfo;
+    }
 }
 
 void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)

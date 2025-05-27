@@ -705,7 +705,7 @@ public:
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
-    WSError CheckNotifyAppUseControlList(ControlAppType type, int32_t userId);
+    void refreshAllAppUseControlMap(AppUseControlInfo& appUseControlInfo);
 
     /*
      * Window Pattern
