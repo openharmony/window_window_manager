@@ -274,7 +274,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**

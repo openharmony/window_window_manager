@@ -3318,7 +3318,8 @@ WMError SceneSessionManagerProxy::SetAppKeyFramePolicy(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+                                                             int32_t fingerId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3333,6 +3334,10 @@ WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersi
     }
     if (!data.WriteInt32(targetPersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "Write targetPersistentId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(fingerId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Write fingerId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -3370,8 +3375,8 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         TLOGE(WmsLogTag::WMS_PATTERN, "Write color failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(uid)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "Write color failed");
+    if (!data.WriteInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Write uid failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -3380,7 +3385,7 @@ WMError SceneSessionManagerProxy::SetStartWindowBackgroundColor(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR), data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_PATTERN, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -3417,7 +3422,7 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
+WMError SceneSessionManagerProxy::SetForegroundWindowNum(uint32_t windowNum)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3426,7 +3431,7 @@ WMError SceneSessionManagerProxy::SetForegroundWindowNum(int32_t windowNum)
         TLOGE(WmsLogTag::WMS_PC, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(windowNum)) {
+    if (!data.WriteUint32(windowNum)) {
         TLOGE(WmsLogTag::WMS_PC, "Write windowNum failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -3476,5 +3481,40 @@ WSError SceneSessionManagerProxy::UseImplicitAnimation(int32_t hostWindowId, boo
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
+}
+
+WMError SceneSessionManagerProxy::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+    const WindowAnimationOption& animationOption)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&animationProperty)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write animationProperty failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&animationOption)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write animationOption failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

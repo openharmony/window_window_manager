@@ -368,6 +368,7 @@ public:
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowAnchorInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);
@@ -400,6 +401,8 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy);
+    napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
     bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
     bool CheckZIndex(int32_t zIndex);
@@ -420,6 +423,26 @@ public:
         }
         return true;
     }
+
+    template<class T>
+    bool ParseJsValueOrGetDefault(napi_value jsObject, napi_env env,
+        const std::string& name, T& data, const T& defaultVal)
+    {
+        napi_value value = nullptr;
+        napi_get_named_property(env, jsObject, name.c_str(), &value);
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env, value, &type);
+        if (type != napi_undefined) {
+            if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
+                return false;
+            }
+        } else {
+            data = defaultVal;
+            return true;
+        }
+        return true;
+    }
+
     template<class T>
     inline bool ConvertNativeValueToVector(napi_env env, napi_value nativeArray, std::vector<T>& out)
     {

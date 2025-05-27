@@ -150,6 +150,38 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
+ * @tc.name: SetForceSplitEnable
+ * @tc.desc: SetForceSplitEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    ASSERT_NE(window_, nullptr);
+
+    int32_t FORCE_SPLIT_MODE = 5;
+    int32_t NAV_FORCE_SPLIT_MODE = 6;
+    int32_t res = 0;
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    ASSERT_EQ(res, 0);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -1242,6 +1274,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 
     window->inputEventConsumer_ = nullptr;
     window->NotifyPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: InjectTouchEvent
+ * @tc.desc: InjectTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("InjectTouchEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+ 
+    pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->uiContent_ = nullptr;
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**

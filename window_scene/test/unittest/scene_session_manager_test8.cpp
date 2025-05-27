@@ -1045,10 +1045,10 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
-    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ssm_->observedFlags_ = 0;
-    ssm_->interestFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
 }
 
 /**
@@ -1064,10 +1064,10 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
-    EXPECT_EQ(0, ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ssm_->observedFlags_ = 0;
-    ssm_->interestFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
 }
 
 /**
@@ -1077,7 +1077,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
  */
 HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
 {
-    ssm_->interestFlags_ = -1;
+    ssm_->interestedFlags_ = -1;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = false;
     sessionInfo1.bundleName_ = "PackWindowPropertyChangeInfo";
@@ -1093,7 +1093,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
 
     std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    ASSERT_EQ(windowPropertyChangeInfo.size(), 7);
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
 }
 } // namespace
 } // namespace Rosen

@@ -36,6 +36,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr uint32_t SLEEP_TIME = 100000; // 100ms
 std::string g_errlog;
 void ScreenSessionLogCallback(const LogType type,
                               const LogLevel level,
@@ -160,6 +161,97 @@ HWTEST_F(SceneSessionTest6, GetSceneSessionById01, TestSize.Level1)
     callBack->onGetSceneSessionByIdCallback_ = task;
     ret = sceneSession->GetSceneSessionById(findSession->GetPersistentId());
     ASSERT_EQ(findSession->GetPersistentId(), ret->GetPersistentId());
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfoChangeFunc
+ * @tc.desc: SetWindowAnchorInfoChangeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowAnchorInfoChangeFunc01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->SetWindowAnchorInfoChangeFunc(nullptr);
+    EXPECT_EQ(nullptr, sceneSession->onWindowAnchorInfoChangeFunc_);
+
+    NotifyWindowAnchorInfoChangeFunc func = [](const WindowAnchorInfo& windowAnchorInfo) {};
+    sceneSession->SetWindowAnchorInfoChangeFunc(std::move(func));
+    EXPECT_NE(nullptr, sceneSession->onWindowAnchorInfoChangeFunc_);
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo01, check the param
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    sceneSession->property_ = property;
+    property->subWindowLevel_ = 100;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    sceneSession->isFollowParentLayout_ = true;
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
+    sceneSession->isFollowParentLayout_ = false;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    // test set isAnchorEnabled_
+    sceneSession->windowAnchorInfo_.isAnchorEnabled_ = false;
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_TRUE(sceneSession->windowAnchorInfo_.isAnchorEnabled_);
+
+    //test after set flag, call func
+    std::shared_ptr<bool> isCall = std::make_shared<bool>(false);
+    NotifyWindowAnchorInfoChangeFunc callback = [isCall](const WindowAnchorInfo& windowAnchorInfo) {
+        *isCall = true;
+    };
+    sceneSession->SetWindowAnchorInfoChangeFunc(std::move(callback));
+    EXPECT_NE(nullptr, sceneSession->onWindowAnchorInfoChangeFunc_);
+    sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_TRUE(*isCall);
 }
 
 /**
@@ -603,6 +695,40 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     sceneSession->subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     EXPECT_TRUE(sceneSession->subWindowSource_ == SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+}
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: test AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WindowAnimationProperty animationProperty;
+    animationProperty.targetScale = 1.5f;
+    WindowAnimationOption animationOption;
+    animationOption.curve = WindowAnimationCurve::INTERPOLATION_SPRING;
+    animationOption.duration = 500;
+
+    float resultScale = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    auto callback = [&resultScale, &curve](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        resultScale = animationProperty.targetScale;
+        curve = animationOption.curve;
+    };
+    sceneSession->AnimateTo(animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(resultScale, 0);
+
+    sceneSession->RegisterAnimateToCallback(callback);
+    usleep(SLEEP_TIME);
+    sceneSession->AnimateTo(animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(resultScale, animationProperty.targetScale);
+    ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
 }
 } // namespace
 } // namespace Rosen

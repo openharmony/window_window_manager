@@ -66,6 +66,8 @@ public:
     MOCK_METHOD3(IsWindowRectAutoSave, WMError(const std::string& key, bool& enabled, int persistentId));
     MOCK_METHOD2(GetHostWindowCompatiblityInfo, WMError(const sptr<IRemoteObject>& token,
         const sptr<CompatibleModeProperty>& property));
+    MOCK_METHOD3(AnimateTo, WMError(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption));
 };
 }
 } // namespace OHOS

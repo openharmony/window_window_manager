@@ -224,8 +224,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINODW_BACKGROUND_COLOR):
-            return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR):
+            return HandleSetStartWindowBackgroundColor(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
             return HandleMinimizeByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
@@ -238,6 +238,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetHostWindowCompatiblityInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
             return HandleSetImageForRecent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
+            return HandleAnimateTo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2045,7 +2047,12 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
         TLOGE(WmsLogTag::WMS_PC, "read targetPersistentId failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    int32_t fingerId = INVALID_FINGER_ID;
+    if (!data.ReadInt32(fingerId)) {
+        TLOGE(WmsLogTag::WMS_PC, "read fingerId failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -2097,8 +2104,8 @@ int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, Messa
 
 int SceneSessionManagerStub::HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t windowNum = 0;
-    if (!data.ReadInt32(windowNum)) {
+    uint32_t windowNum = 0;
+    if (!data.ReadUint32(windowNum)) {
         TLOGE(WmsLogTag::WMS_PC, "read windowNum failed");
         return ERR_INVALID_DATA;
     }
@@ -2126,6 +2133,31 @@ int SceneSessionManagerStub::HandleUseImplicitAnimation(MessageParcel& data, Mes
     WSError errCode = UseImplicitAnimation(hostWindowId, useImplicit);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleAnimateTo(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowId = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read windowId failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<WindowAnimationProperty> animationProperty = data.ReadStrongParcelable<WindowAnimationProperty>();
+    if (animationProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animationProperty failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<WindowAnimationOption> animationOption = data.ReadStrongParcelable<WindowAnimationOption>();
+    if (animationOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animationOption failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = AnimateTo(windowId, *animationProperty, *animationOption);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

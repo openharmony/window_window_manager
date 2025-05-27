@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <any>
+#include <iomanip>
 #include <map>
 #include <sstream>
 #include <string>
@@ -154,6 +155,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_FLOAT_NAVIGATION,
     WINDOW_TYPE_MUTISCREEN_COLLABORATION,
     WINDOW_TYPE_DYNAMIC,
+    WINDOW_TYPE_MAGNIFICATION,
+    WINDOW_TYPE_MAGNIFICATION_MENU,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -499,6 +502,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
+    OCCUPIED_AREA_CHANGE = 34,
     END,
 };
 
@@ -582,6 +586,14 @@ struct KeyFramePolicy : public Parcelable {
         }
         keyFramePolicy->dragResizeType_ = static_cast<DragResizeType>(dragResizeType);
         return keyFramePolicy;
+    }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << static_cast<uint32_t>(dragResizeType_) << " " << interval_ << " " << distance_;
+        oss << " " << animationDuration_ << " " << animationDelay_ << "]";
+        return oss.str();
     }
 };
 
@@ -781,6 +793,7 @@ constexpr int32_t TEXT_MENU_SUB_WINDOW_Z_LEVEL = 13500;
 constexpr int32_t TOAST_SUB_WINDOW_Z_LEVEL = 14000;
 constexpr int32_t APPLICATION_MODALITY_SUB_WINDOW_Z_LEVEL = 20000;
 constexpr int32_t TOPMOST_SUB_WINDOW_Z_LEVEL = 2000;
+constexpr int32_t INVALID_FINGER_ID = -1;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -1153,6 +1166,61 @@ enum class WindowAnimation : uint32_t {
     DEFAULT,
     INPUTE,
     CUSTOM,
+};
+
+/**
+ * @brief Enumerates window anchor.
+ */
+enum class WindowAnchor : uint32_t {
+    TOP_START = 0,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+};
+
+/**
+ * @struct WindowAnchorInfo
+ *
+ * @brief Window anchor info
+ */
+struct WindowAnchorInfo : public Parcelable {
+    bool isAnchorEnabled_ = false;
+    WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
+    int32_t offsetX_ = 0;
+    int32_t offsetY_ = 0;
+
+    WindowAnchorInfo() {}
+    WindowAnchorInfo(bool isAnchorEnabled) : isAnchorEnabled_(isAnchorEnabled) {}
+    WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
+        offsetX_(offsetX), offsetY_(offsetY) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
+            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+    }
+
+    static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
+    {
+        uint32_t windowAnchorMode = 0;
+        WindowAnchorInfo* windowAnchorInfo = new(std::nothrow) WindowAnchorInfo();
+        if (windowAnchorInfo == nullptr) {
+            return nullptr;
+        }
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+            delete windowAnchorInfo;
+            return nullptr;
+        }
+        windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        return windowAnchorInfo;
+    }
 };
 
 /**
@@ -2330,7 +2398,7 @@ enum class WindowInfoKey : int32_t {
     APP_INDEX = 1 << 3,
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
-    RECT = 1 << 6,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**
@@ -2392,6 +2460,28 @@ enum class WindowAnimationCurve : uint32_t {
 const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
 
+struct WindowAnimationProperty : public Parcelable {
+    float targetScale = 0.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteFloat(targetScale)) {
+            return false;
+        }
+        return true;
+    }
+
+    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
+    {
+        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
+        if (!parcel.ReadFloat(animationProperty->targetScale)) {
+            delete animationProperty;
+            return nullptr;
+        }
+        return animationProperty;
+    }
+};
+
 /*
  * @brief Window transition animation configuration.
  */
@@ -2440,6 +2530,18 @@ struct WindowAnimationOption : public Parcelable {
             }
         }
         return windowAnimationConfig;
+    }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
+            std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
+        for (auto p: param) {
+            oss << std::fixed << std::setprecision(2) << p << ", ";
+        }
+        oss << "]";
+        return oss.str();
     }
 };
 

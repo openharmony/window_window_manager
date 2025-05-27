@@ -246,6 +246,33 @@ napi_value WindowStageEventTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowAnchorInit(napi_env env)
+{
+    WLOGFD("WindowAnchorInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "TOP_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_END)));
+    return objValue;
+}
+
 napi_value WindowEventTypeInit(napi_env env)
 {
     WLOGFD("WindowEventTypeInit");
@@ -1577,6 +1604,70 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
     return ParseZLevelParam(env, jsObject, windowOption);
+}
+
+bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsObject is null");
+        return false;
+    }
+    bool enable = false;
+    if (ParseJsValue(jsObject, env, "enable", enable)) {
+        keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
+            DragResizeType::RESIZE_TYPE_UNDEFINED;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to enable");
+        return false;
+    }
+    int32_t data = 0;
+    if (ParseJsValueOrGetDefault(jsObject, env, "interval", data,
+        static_cast<int32_t>(keyFramePolicy.interval_)) && data > 0) {
+        keyFramePolicy.interval_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to interval");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "distance", data,
+        static_cast<int32_t>(keyFramePolicy.distance_)) && data >= 0) {
+        keyFramePolicy.distance_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to distance");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "animationDuration", data,
+        static_cast<int32_t>(keyFramePolicy.animationDuration_)) && data >= 0) {
+        keyFramePolicy.animationDuration_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDuration");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "animationDelay", data,
+        static_cast<int32_t>(keyFramePolicy.animationDelay_)) && data >= 0) {
+        keyFramePolicy.animationDelay_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDelay");
+        return false;
+    }
+    return true;
+}
+
+napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(
+        env, objValue, "enable", CreateJsValue(env, keyFramePolicy.enabled()));
+    napi_set_named_property(
+        env, objValue, "interval", CreateJsValue(env, keyFramePolicy.interval_));
+    napi_set_named_property(
+        env, objValue, "distance", CreateJsValue(env, keyFramePolicy.distance_));
+    napi_set_named_property(
+        env, objValue, "animationDuration", CreateJsValue(env, keyFramePolicy.animationDuration_));
+    napi_set_named_property(
+        env, objValue, "animationDelay", CreateJsValue(env, keyFramePolicy.animationDelay_));
+    return objValue;
 }
 
 bool CheckPromise(napi_env env, napi_value promiseObj)

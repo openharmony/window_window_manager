@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
+constexpr uint32_t TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -189,6 +190,12 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
     sessionInfo_ = info;
 }
 
+void WindowSessionProperty::SetTransitionAnimationConfig(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    transitionAnimationConfig_[transitionType] = std::make_shared<TransitionAnimation>(animation);
+}
+
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
     std::lock_guard<std::mutex> lock(windowRectMutex_);
@@ -311,6 +318,12 @@ const std::string& WindowSessionProperty::GetWindowName() const
 const SessionInfo& WindowSessionProperty::GetSessionInfo() const
 {
     return sessionInfo_;
+}
+
+std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>
+    WindowSessionProperty::GetTransitionAnimationConfig() const
+{
+    return transitionAnimationConfig_;
 }
 
 SessionInfo& WindowSessionProperty::EditSessionInfo()
@@ -1085,6 +1098,52 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
     return true;
 }
 
+bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
+{
+    uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
+    if (transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM ||
+        !parcel.WriteUint32(transitionAnimationMapSize)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
+        return false;
+    }
+    for (const auto& [transitionType, animation] : transitionAnimationConfig_) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(transitionType))) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionType");
+            return false;
+        }
+        if (animation == nullptr || !parcel.WriteParcelable(animation.get())) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimation");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property)
+{
+    uint32_t transitionAnimationMapSize = 0;
+    if (!parcel.ReadUint32(transitionAnimationMapSize) ||
+        transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
+        return false;
+    }
+    uint32_t transitionType = 0;
+    std::shared_ptr<TransitionAnimation> animation = nullptr;
+    for (uint32_t i = 0; i < transitionAnimationMapSize; ++i) {
+        if (!parcel.ReadUint32(transitionType)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionType");
+            return false;
+        }
+        animation = std::shared_ptr<TransitionAnimation>(parcel.ReadParcelable<TransitionAnimation>());
+        if (animation == nullptr) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimation");
+            return false;
+        }
+        property->transitionAnimationConfig_[static_cast<WindowTransitionType>(transitionType)] = animation;
+    }
+    return true;
+}
+
 void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
 {
     isAppSupportPhoneInPc_ = isSupportPhone;
@@ -1175,6 +1234,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
+        MarshallingTransitionAnimationMap(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
@@ -1243,6 +1303,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetDisplayId(parcel.ReadUint64());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
+        delete property;
+        return nullptr;
+    }
+    if (!UnmarshallingTransitionAnimationMap(parcel, property)) {
         delete property;
         return nullptr;
     }

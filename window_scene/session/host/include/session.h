@@ -103,7 +103,6 @@ using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
-
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -122,6 +121,7 @@ public:
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void OnAppRemoveStartingWindow() {}
+    virtual void OnUpdateSnapshotWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -210,6 +210,7 @@ public:
     void NotifyRemoveBlank();
     void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
+    void NotifyUpdateSnapshotWindow();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -249,7 +250,7 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
-        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr);
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -316,8 +317,6 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
-    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
-    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -412,7 +411,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const Rect& callingSessionRect = {}, const std::map<AvoidAreaType, AvoidArea>& = {});
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
@@ -673,7 +673,7 @@ public:
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
     uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
-    void AddPropertyDirtyFlag(uint32_t dirtyFlag) { propertyDirtyFlags_ |= dirtyFlag; }
+    void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
 
     /*
      * Window Pattern
@@ -702,7 +702,6 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
@@ -1010,6 +1009,7 @@ private:
      * Window Lifecycle
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
+    bool SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask);
 
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
@@ -1035,7 +1035,6 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
-    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
     NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;

@@ -2664,9 +2664,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t windowNum = 1;
+    uint32_t windowNum = 1;
     data.WriteInt32(windowNum);
     int res = stub_->HandleSetForegroundWindowNum(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleAnimateTo
+ * @tc.desc: test HandleAnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAnimateTo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t windowId = 1;
+    data.WriteInt32(windowId);
+
+    WindowAnimationProperty animationProperty;
+    data.WriteParcelable(&animationProperty);
+
+    WindowAnimationOption animationOption;
+    data.WriteParcelable(&animationOption);
+
+    int res = stub_->HandleAnimateTo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace

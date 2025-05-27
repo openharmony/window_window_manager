@@ -138,7 +138,6 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
-constexpr int32_t FORCE_SPLIT_MODE = 5;
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -253,7 +252,7 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
     }
     if (!isToast && !parentSession->GetIsUIExtFirstSubWindow() &&
         parentSession->GetProperty()->GetSubWindowLevel() >= 1 &&
-        !parentSession->IsPcOrPadCapabilityEnabled()) {
+        !parentSession->IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -1547,9 +1546,9 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 
 void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrPadCapabilityEnabled(),
+    TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrFreeMultiWindowCapabilityEnabled(),
         isColdStart_);
-    if (IsPcOrPadCapabilityEnabled() && !isColdStart_) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
         NotifyAfterInteractive();
     }
@@ -1709,6 +1708,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
         case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD:
         case WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION:
+        case WindowType::WINDOW_TYPE_MAGNIFICATION:
+        case WindowType::WINDOW_TYPE_MAGNIFICATION_MENU:
         case WindowType::WINDOW_TYPE_DYNAMIC: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
@@ -2253,6 +2254,10 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
 WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameRect)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "set frame rect start, rect: %{public}s", frameRect.ToString().c_str());
+    if (GetType() != WindowType::WINDOW_TYPE_MAGNIFICATION) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "window type is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3441,7 +3446,7 @@ void WindowSceneSessionImpl::StartMove()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isDecorDialog = isDialogWindow && property_->IsDecorEnable();
-    bool isValidWindow = isMainWindow || (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDecorDialog));
+    bool isValidWindow = isMainWindow || (IsPcOrFreeMultiWindowCapabilityEnabled() && (isSubWindow || isDecorDialog));
     auto hostSession = GetHostSession();
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
@@ -3466,7 +3471,7 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
             return true;
     }
 
-    if (IsPcOrPadCapabilityEnabled()) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled()) {
         return true;
     }
     return false;
@@ -3486,8 +3491,10 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowType()
 bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
 {
     WindowType windowType = GetType();
-    bool isPcOrFreeMultiWindowCanMove = IsPcOrPadCapabilityEnabled() && (WindowHelper::IsSystemWindow(windowType) ||
-        WindowHelper::IsMainWindow(windowType) || WindowHelper::IsSubWindow(windowType));
+    bool isPcOrFreeMultiWindowCanMove = IsPcOrFreeMultiWindowCapabilityEnabled() &&
+        (WindowHelper::IsSystemWindow(windowType) ||
+         WindowHelper::IsMainWindow(windowType) ||
+         WindowHelper::IsSubWindow(windowType));
     bool isPhoneWindowCanMove = (windowSystemConfig_.IsPhoneWindow() ||
         (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
         (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType));
@@ -3547,7 +3554,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4182,7 +4189,7 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4210,7 +4217,7 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadCapabilityEnabled()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4463,6 +4470,32 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
     return pixelMap;
+}
+
+WMError WindowSceneSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ < WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
+            GetPersistentId(), state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to get pixelmap", GetPersistentId());
+        return WMError::WM_ERROR_TIMEOUT;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d snapshot end, WxH=%{public}dx%{public}d",
+        GetPersistentId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -4906,12 +4939,6 @@ WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
         UpdateTitleButtonVisibility();
         UpdateDecorEnable(true);
     } else if (state_ == WindowState::STATE_SHOWN) {
-        WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("update filed! id: %{public}u, mode: %{public}u.", GetWindowId(),
-                static_cast<uint32_t>(mode));
-            return ret;
-        }
         // set client window mode if success.
         property_->SetWindowMode(mode);
         UpdateTitleButtonVisibility();
@@ -6023,6 +6050,36 @@ float WindowSceneSessionImpl::GetCustomDensity() const
     return customDensity_;
 }
 
+WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (property->GetSubWindowLevel() > 1) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (!windowSystemConfig_.supportFollowRelativePositionToParent_) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    WSError ret = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
+    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
 {
     if (IsWindowSessionInvalid()) {
@@ -6074,10 +6131,8 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
     if (ret == WSError::WS_OK) {
         std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
-        std::shared_ptr<TransitionAnimation> config = std::make_shared<TransitionAnimation>(animation);
-        transitionAnimationConfig_[transitionType] = config;
+        property_->SetTransitionAnimationConfig(transitionType, animation);
     }
-
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
@@ -6094,8 +6149,9 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
         return nullptr;
     }
     std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
-    if (transitionAnimationConfig_.find(transitionType) != transitionAnimationConfig_.end()) {
-        return transitionAnimationConfig_[transitionType];
+    auto transitionAnimationConfig = property_->GetTransitionAnimationConfig();
+    if (transitionAnimationConfig.find(transitionType) != transitionAnimationConfig.end()) {
+        return transitionAnimationConfig[transitionType];
     } else {
         return nullptr;
     }
@@ -6232,18 +6288,6 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-void WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
-        return;
-    }
-    TLOGI(WmsLogTag::DEFAULT, "isForceSplit: %{public}u, homePage: %{public}s",
-        isForceSplit, homePage.c_str());
-    uiContent->SetForceSplitEnable(isForceSplit, homePage);
-}
-
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
@@ -6251,10 +6295,7 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.isSupportSplitMode_ == true) {
-        bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE);
-        TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
-            isForceSplit, config.homePage_.c_str());
-        SetForceSplitEnable(isForceSplit, config.homePage_);
+        SetForceSplitEnable(config);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;

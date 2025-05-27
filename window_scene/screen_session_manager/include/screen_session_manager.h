@@ -48,7 +48,7 @@ struct ScaleProperty {
     float pivotX;
     float pivotY;
 
-    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY), 
+    ScaleProperty(float scaleX, float scaleY, float pivotX, float pivotY) : scaleX(scaleX), scaleY(scaleY),
                                                                             pivotX(pivotX), pivotY(pivotY) {}
 };
 
@@ -174,7 +174,7 @@ public:
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, bool isUseDma = false,
-        bool isFullScreenCapture = false);
+        bool isFullScreenCapture = false, const std::vector<NodeId>& blackList = {});
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
@@ -289,6 +289,8 @@ public:
     void HandleExtendScreenDisconnect(ScreenId screenId);
     bool GetIsFoldStatusLocked();
     void SetIsFoldStatusLocked(bool isFoldStatusLocked);
+    bool GetIsLandscapeLockStatus();
+    void SetIsLandscapeLockStatus(bool isLandscapeLockStatus);
     bool GetIsOuterOnlyMode();
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
@@ -461,6 +463,8 @@ public:
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
     bool GetKeyboardState() override;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) override;
 
 protected:
     ScreenSessionManager();
@@ -516,9 +520,11 @@ private:
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
-    void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool& phyMirrorEnable);
+    void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool phyMirrorEnable);
     void HandleMapWhenScreenDisconnect(ScreenId screenId);
-    void HandlePCScreenDisconnect(sptr<ScreenSession> screenSession);
+    void HandlePCScreenDisconnect(sptr<ScreenSession>& screenSession);
+    void HandleMainScreenDisconnect(sptr<ScreenSession>& screenSession);
+    void ResetInternalScreenSession(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
@@ -562,13 +568,15 @@ private:
     void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
         sptr<ScreenSession> secondaryScreenSession = nullptr);
     void CalculateSecondryXYPosition(sptr<ScreenSession> firstScreenSession,
-        
+
         sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
     void HandleSuperFoldStatusLocked(bool isLocked);
+    void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
+    void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -688,6 +696,7 @@ private:
     bool isOuterOnlyMode_ = false;
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
+    std::atomic<bool> isLandscapeLockStatus_ = false;
 
     /**
      * On/Off screen
@@ -758,7 +767,7 @@ private:
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
-    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session, 
+    void CalcDisplayNodeTranslateOnVerticalScanRotation(const sptr<ScreenSession>& session,
                                                         const ScaleProperty& scalep,
                                                         float& translateX, float& translateY);
     void RegisterApplicationStateObserver();

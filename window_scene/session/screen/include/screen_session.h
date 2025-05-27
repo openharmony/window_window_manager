@@ -243,8 +243,8 @@ public:
     ScreenShape GetScreenShape() const;
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
-    int32_t GetValidHeight() const;
-    int32_t GetValidWidth() const;
+    uint32_t GetValidHeight() const;
+    uint32_t GetValidWidth() const;
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
