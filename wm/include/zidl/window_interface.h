@@ -72,7 +72,8 @@ public:
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
     virtual WMError NotifyTouchOutside() = 0;
     virtual WMError NotifyScreenshot() = 0;
-    virtual WMError NotifyScreenshotAppEvent(ScreenshotEventType type) = 0;
+    virtual WMError NotifyScreenshotAppEvent(ScreenshotEventType type) { 
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
     virtual WMError DumpInfo(const std::vector<std::string>& params) = 0;
     virtual WMError NotifyDestroy(void) = 0;
     virtual WMError NotifyForeground(void) = 0;
