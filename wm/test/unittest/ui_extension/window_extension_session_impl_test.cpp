@@ -2054,6 +2054,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     window->NotifyPointerEvent(pointerEvent);
     EXPECT_TRUE(logMsg.find("PointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
@@ -2093,6 +2094,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
     bool isHitTargetDraggable = false;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
@@ -2103,14 +2105,17 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("No need to notify") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("dataHandler_ is nullptr") != std::string::npos);
+    logMsg.clear();
     window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("Send raise message to host window failed") != std::string::npos);
+    logMsg.clear();
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("Notify host window to raise") != std::string::npos);
