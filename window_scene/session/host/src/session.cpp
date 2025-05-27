@@ -1283,10 +1283,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
+    property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
-        " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+        " defaultRequestedOrientation: %{public}u,"
+        " userRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
-        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
+        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()),
+        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()));
     property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());

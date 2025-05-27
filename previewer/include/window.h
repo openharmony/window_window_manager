@@ -314,7 +314,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
-    virtual void SetPreferredRequestedOrientation(Orientation orientation) = 0;
+    virtual void SetUserRequestedOrientation(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
