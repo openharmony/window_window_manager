@@ -4188,7 +4188,7 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.pid = GetCallingPid();
     windowMetaInfo.windowType = GetWindowType();
     if (auto parentSession = GetParentSession()) {
-        windowMetaInfo.parentWindowId = parentSession->GetWindowId();
+        windowMetaInfo.parentWindowId = static_cast<uint32_t>(parentSession->GetWindowId());
     }
     if (auto surfaceNode = GetSurfaceNode()) {
         windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(surfaceNode->GetId());
