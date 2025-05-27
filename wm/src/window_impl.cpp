@@ -292,7 +292,7 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}lu", windowMap_.size());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
@@ -300,12 +300,12 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
             continue;
         }
         if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
         } else {
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
         }
     }
 }
@@ -3523,15 +3523,15 @@ bool WindowImpl::IsFocused() const
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration);
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}lu, display=%{public}" PRIu64,
-        GetWindowId(), subWindowMap_.size(), GetDisplayId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
@@ -3540,8 +3540,8 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            subWindow->GetWindowId(), subWindow->GetWindowName().c_str(), subWindow->GetDisplayId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfiguration(configuration);
     }
 }
@@ -3550,15 +3550,15 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration, resourceManager);
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}lu, display=%{public}" PRIu64,
-        GetWindowId(), subWindowMap_.size(), GetDisplayId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
@@ -3567,8 +3567,8 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            subWindow->GetWindowId(), subWindow->GetWindowName().c_str(), subWindow->GetDisplayId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
@@ -3576,15 +3576,15 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
 void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfigurationSyncForAll(configuration);
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}lu, display=%{public}" PRIu64,
-        GetWindowId(), subWindowMap_.size(), GetDisplayId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
@@ -3593,8 +3593,8 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-            subWindow->GetWindowId(), subWindow->GetWindowName().c_str(), subWindow->GetDisplayId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationSync(configuration);
     }
 }
@@ -3602,11 +3602,11 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}lu", windowMap_.size());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=[%{public}u, %{public}s], display=%{public}" PRIu64,
-                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfigurationSync(configuration);
         }
     }

@@ -3817,9 +3817,8 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto retErr = windowToken_->SetBackgroundColor(color);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}u, %{public}s], color=%{public}s, retErr=%{public}d",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), color.c_str(),
-        static_cast<int32_t>(retErr));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, color=%{public}s, retErr=%{public}d",
+        windowToken_->GetWindowId(), color.c_str(), static_cast<int32_t>(retErr));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retErr);
     if (ret == WmErrorCode::WM_OK) {
         return NapiGetUndefined(env);
