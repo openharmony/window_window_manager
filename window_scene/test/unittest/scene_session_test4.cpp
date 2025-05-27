@@ -1497,6 +1497,18 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
     session->SetSessionProperty(property);
     EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FULLSCREEN,
         AvoidAreaType::TYPE_SYSTEM));
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+    
+    // pad
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW
+    session->SetSystemConfig(systemConfig);
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
 
     // PC
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1504,6 +1516,13 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
     systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+    
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    property->SetCompatibleModeProperty(CompatibleModeProperty);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
         AvoidAreaType::TYPE_SYSTEM));
 }
 
@@ -1542,6 +1561,12 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     parentProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     parentSession->SetSessionProperty(parentProperty);
     session->SetParentSession(parentSession);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    WSRect sessionRect({0, 0, 10, 10});
+    WSRect parentSessionRect({0, 0, 100, 100});
+    session->SetSessionRect(sessionRect);
+    parentSession->SetSessionRect(parentSessionRect);
     EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 }
 
