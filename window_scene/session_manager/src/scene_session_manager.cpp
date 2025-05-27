@@ -14746,9 +14746,7 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
         return WMError::WM_ERROR_NULLPTR;
     }
     // Decoupling from LRU
-    sceneSession->SetSaveSnapshotCallback([]() {
-        // do nothing
-    });
+    sceneSession->SetSaveSnapshotCallback([](){});
     sceneSession->SaveSnapshot(true, true, pixelMap);
     scenePersistence->SetHasSnapshot(true);
     ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
