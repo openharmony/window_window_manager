@@ -5922,7 +5922,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;
         window->UpdateViewportConfig(callingWindowRect, WindowSizeChangeReason::OCCUPIED_AREA_CHANGE,
-            rsTransaction, nullptr, avoidAreas);
+            nullptr, nullptr, avoidAreas);
         if (rsTransaction) {
             rsTransaction->Commit();
         }
