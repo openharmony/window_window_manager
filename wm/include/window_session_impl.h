@@ -126,7 +126,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPadWindow() const override;
-    bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
@@ -400,6 +400,7 @@ public:
     void RegisterKeyFrameCallback();
     WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
     WSError SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
@@ -437,6 +438,8 @@ public:
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
+    bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
+    bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
 
     /*
      * Window Input Event

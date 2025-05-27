@@ -3793,6 +3793,17 @@ void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
     keyFramePolicy_.stopping_ = stopping;
 }
 
+WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    bool running = keyFramePolicy_.running_;
+    bool stopping = keyFramePolicy_.stopping_;
+    keyFramePolicy_ = keyFramePolicy;
+    keyFramePolicy_.running_ = running;
+    keyFramePolicy_.stopping_ = stopping;
+    return WSError::WS_OK;
+}
+
 void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d rect: %{public}s reason: %{public}d",
@@ -6536,9 +6547,13 @@ void SceneSession::CalculateCombinedExtWindowFlags()
     {
         // Only correct when each flag is true when active, and once a uiextension is active, the host is active
         std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
+        ExtensionWindowFlags combinedExtWindowOldFlag = combinedExtWindowFlags_;
         combinedExtWindowFlags_.bitData = 0;
         for (const auto& iter: extWindowFlagsMap_) {
             combinedExtWindowFlags_.bitData |= iter.second.bitData;
+        }
+        if (combinedExtWindowOldFlag.hideNonSecureWindowsFlag != combinedExtWindowFlags_.hideNonSecureWindowsFlag) {
+            NotifyExtensionSecureLimitChange(static_cast<bool>(combinedExtWindowFlags_.hideNonSecureWindowsFlag));
         }
     }
     NotifyPrivacyModeChange();
@@ -6558,9 +6573,6 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const Extension
         extWindowFlagsMap_[extPersistentId] = newFlags;
     }
     CalculateCombinedExtWindowFlags();
-    if (oldFlags.hideNonSecureWindowsFlag != newFlags.hideNonSecureWindowsFlag) {
-        NotifyExtensionSecureLimitChange(static_cast<bool>(newFlags.hideNonSecureWindowsFlag));
-    }
 }
 
 ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags()

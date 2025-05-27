@@ -2665,6 +2665,37 @@ WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&keyFramePolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write keyFramePolicy failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DRAG_KEY_FRAME_POLICY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
     int32_t pointerPosX, int32_t pointerPosY)
 {
