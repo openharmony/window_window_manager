@@ -1473,6 +1473,7 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
     info.abilityName_ = "CheckGetMainWindowAvoidAreaAvailable";
     info.bundleName_ = "CheckGetMainWindowAvoidAreaAvailable";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
 
     SystemSessionConfig systemConfig;
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1503,7 +1504,7 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
         AvoidAreaType::TYPE_SYSTEM));
     
     // pad
-    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
     session->SetSystemConfig(systemConfig);
     session->SetSystemConfig(systemConfig);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
