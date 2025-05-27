@@ -1022,9 +1022,6 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     if (displayId != clientDisplayId_) {
         AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
-    if (DisplayIdChangeFunc_ && clientDisplayId_ != displayId) {
-        DisplayIdChangeFunc_(GetWindowId(), displayId);
-    }
     clientDisplayId_ = displayId;
     return WSError::WS_OK;
 }
@@ -4289,11 +4286,6 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
-}
-
-void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
-{
-    DisplayIdChangeFunc_ = func;
 }
 
 void Session::DeletePersistentImageFit()
