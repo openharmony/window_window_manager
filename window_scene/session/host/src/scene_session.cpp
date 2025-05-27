@@ -7785,8 +7785,8 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
             TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
                 where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
-            session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
         }
+        session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
     }, __func__);
     return WSError::WS_OK;
 }
@@ -7826,8 +7826,8 @@ WSError SceneSession::SetWindowShadows(const ShadowsInfo& shadowsInfo)
                 "color: %{public}s, offsetX: %{public}f, offsetY: %{public}f", where, session->GetPersistentId(),
                 shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_, shadowsInfo.offsetY_);
             session->onSetWindowShadowsFunc_(shadowsInfo);
-            session->GetSessionProperty()->SetWindowShadows(shadowsInfo);
         }
+        session->GetSessionProperty()->SetWindowShadows(shadowsInfo);
     }, __func__);
     return WSError::WS_OK;
 }
