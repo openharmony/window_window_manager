@@ -57,7 +57,7 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
-constexpr float POS_ZERO = 0.001f;
+constexpr double POS_ZERO = 0.001f;
 }
 
 /**
@@ -403,11 +403,11 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     SPLIT_DRAG_START,
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
-    PAGE_ROTATION,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     END

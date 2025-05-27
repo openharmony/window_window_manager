@@ -323,25 +323,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize
 }
 
 /**
- * @tc.name: NotifyDisplayIdChange
- * @tc.desc: test NotifyDisplayIdChange
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyDisplayIdChange, TestSize.Level1)
-{
-    uint32_t windowId = 0;
-    DisplayId displayId = 0;
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyDisplayIdChange(windowId, displayId);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: NotifyWindowPropertyChange
  * @tc.desc: test NotifyWindowPropertyChange
  * @tc.type: FUNC

@@ -63,6 +63,7 @@ public:
     void SetWindowShadowEnabled(bool isEnabled);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
+    void SetUserRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetSnapshotSkip(bool isSkip);
@@ -135,6 +136,7 @@ public:
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
+    Orientation GetUserRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     bool GetSnapshotSkip() const;
@@ -408,6 +410,7 @@ private:
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool needRotateAnimation_ = true;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
+    Orientation userRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
