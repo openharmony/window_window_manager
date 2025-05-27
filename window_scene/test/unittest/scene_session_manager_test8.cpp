@@ -1046,7 +1046,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestedFlags_);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestedFlags_ = 0;
 }
@@ -1065,7 +1065,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
     EXPECT_EQ(0, ssm_->interestedFlags_);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestedFlags_ = 0;
 }

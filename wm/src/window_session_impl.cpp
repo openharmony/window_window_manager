@@ -1039,19 +1039,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
     }
 
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get display failed displayId: %{public}" PRIu64, property_->GetDisplayId());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get display info failed displayId: %{public}" PRIu64,
-            property_->GetDisplayId());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    DisplayOrientation displayOrientaion = displayInfo->GetDisplayOrientation();
-    SetDisplayOrientationForRotation(displayOrientaion);
     return WSError::WS_OK;
 }
 
@@ -1125,10 +1112,8 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    DisplayOrientation windowOrientation = GetDisplayOrientationForRotation();
-    TLOGE(WmsLogTag::WMS_ROTATION, "windowOrientation: %{public}d", static_cast<int32_t>(windowOrientation));
     handler_->PostImmediateTask(
-        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas, windowOrientation]() mutable {
+        [weak = wptr(this), wmReason, wmRect, preRect, config, avoidAreas]() mutable {
             HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForPageRotation");
             auto window = weak.promote();
             if (!window) {
@@ -1139,7 +1124,7 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
                 TLOGE(WmsLogTag::WMS_ROTATION, "display is null!");
                 return;
             }
-            sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+            sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
             if (displayInfo == nullptr) {
                 TLOGE(WmsLogTag::WMS_ROTATION, "displayInfo is null!");
                 return;
@@ -1155,12 +1140,14 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
                 window->lastSizeChangeReason_ = wmReason;
             }
             window->NotifyClientOrientationChange();
-            DisplayOrientation displayOrientaion = displayInfo->GetDisplayOrientation();
-            TLOGE(WmsLogTag::WMS_ROTATION, "targetdisplayOrientation: %{public}d",
-                static_cast<int32_t>(displayOrientaion));
-            TLOGE(WmsLogTag::WMS_ROTATION, "windowRect: %{public}s, preRect: %{public}s",
-                wmRect.ToString().c_str(), preRect.ToString().c_str());
-            if (wmRect != preRect || windowOrientation != displayOrientaion) {
+            DisplayOrientation windowOrientation = window->GetCurrentWindowOrientation();
+            DisplayOrientation displayOrientation = displayInfo->GetDisplayOrientation();
+            TLOGI(WmsLogTag::WMS_ROTATION,
+                "windowOrientation: %{public}d, targetdisplayOrientation: %{public}d, "
+                "windowRect: %{public}s, preRect: %{public}s, id: %{public}d",
+                static_cast<int32_t>(windowOrientation), static_cast<int32_t>(displayOrientation),
+                wmRect.ToString().c_str(), preRect.ToString().c_str(), window->GetPersistentId());
+            if (wmRect != preRect || windowOrientation != displayOrientation) {
                 window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo, avoidAreas);
             }
             if (rsTransaction) {
@@ -1173,12 +1160,12 @@ void WindowSessionImpl::UpdateRectForPageRotation(const Rect& wmRect, const Rect
         "WMS_WindowSessionImpl_UpdateRectForPageRotation");
 }
 
-void WindowSessionImpl::SetDisplayOrientationForRotation(DisplayOrientation displayOrientaion)
+void WindowSessionImpl::UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation)
 {
-    windowOrientation_ = displayOrientaion;
+    windowOrientation_ = displayOrientation;
 }
 
-DisplayOrientation WindowSessionImpl::GetDisplayOrientationForRotation() const
+DisplayOrientation WindowSessionImpl::GetCurrentWindowOrientation() const
 {
     return windowOrientation_;
 }
@@ -1682,6 +1669,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
+    UpdateCurrentWindowOrientation(displayInfo->GetDisplayOrientation());
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
     auto config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
@@ -2635,19 +2623,28 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     }
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    bool isUserOrientation = IsUserOrientation(orientation);
-    if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
+    if (!isNeededForciblySetOrientation(orientation)) { 
         return;
     }
-    if (orientation == Orientation::INVALID) {
-        orientation = GetRequestedOrientation();
+    if (needAnimation) {
+        NotifyPreferredOrientationChange(orientation);
+        SetUserRequestedOrientation(orientation);
     }
     // when compatible mode disable fullscreen and request orientation, will enter into immersive mode
     if (property_->IsFullScreenDisabled() && IsHorizontalOrientation(orientation)) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
         property_->SetIsLayoutFullScreen(true);
     }
-    property_->SetRequestedOrientation(orientation, needAnimation);
+    // the orientation of the invalid type is only applied to pageRotation.
+    if (orientation == Orientation::INVALID) {
+        Orientation requestedOrientation = GetRequestedOrientation();
+        if (IsUserOrientation(requestedOrientation)) {
+            requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
+        }
+        property_->SetRequestedOrientation(requestedOrientation, needAnimation);
+    } else {
+        property_->SetRequestedOrientation(orientation, needAnimation);
+    }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
 
@@ -2657,19 +2654,46 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
         return Orientation::UNSPECIFIED;
     }
-    return preferredRequestedOrientation_;
+    TLOGI(WmsLogTag::WMS_ROTATION, "userRequestedOrientation:%{public}u", property_->GetUserRequestedOrientation());
+    return property_->GetUserRequestedOrientation();
 }
 
-void WindowSessionImpl::SetPreferredRequestedOrientation(Orientation orientation)
+Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation)
+{
+    switch (Orientation) {
+        case Orientation::USER_ROTATION_LANDSCAPE:
+            return Orientation::USER_PAGE_ROTATION_LANDSCAPE;
+        case Orientation::USER_ROTATION_LANDSCAPE_INVERTED:
+            return Orientation::USER_PAGE_ROTATION_LANDSCAPE_INVERTED;
+        case Orientation::USER_ROTATION_PORTRAIT:
+            return Orientation::USER_PAGE_ROTATION_PORTRAIT;
+        case Orientation::USER_ROTATION_PORTRAIT_INVERTED:
+            return Orientation::USER_PAGE_ROTATION_PORTRAIT_INVERTED;
+        default:
+            break;
+    }
+    return Orientation::UNSPECIFIED;
+}
+
+void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
         return;
     }
     TLOGI(WmsLogTag::WMS_ROTATION,
-        "id:%{public}u preferredRequestedOrientation:%{public}u state:%{public}u",
+        "id:%{public}u userRequestedOrientation:%{public}u state:%{public}u",
         GetPersistentId(), orientation, state_);
-    preferredRequestedOrientation_ = orientation;
+    property_->SetUserRequestedOrientation(orientation);
+}
+
+bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
+{
+    bool isUserOrientation = IsUserOrientation(orientation);
+    if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
+        return false;
+    }
+    return true;
 }
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
