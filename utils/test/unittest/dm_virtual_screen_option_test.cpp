@@ -20,11 +20,11 @@ using namespace testing::ext;
 
 namespace OHOS::Rosen {
 /**
- * @tc.name: MarshallingUnmarshalling01
- * @tc.desc: MarshallingUnmarshalling test
+ * @tc.name: MarshallingUnmarshalling_DefaultValues
+ * @tc.desc: Marshalling and unmarshalling test with default values
  * @tc.type: FUNC
  */
-HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling01, TestSize.Level1)
+HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling_DefaultValues, TestSize.Level1)
 {
     DmVirtualScreenOption dmVirtualScreenOption;
     Parcel parcel;
@@ -39,11 +39,11 @@ HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling01, TestSize.Level1)
 }
 
 /**
- * @tc.name: MarshallingUnmarshalling02
- * @tc.desc: MarshallingUnmarshalling test
+ * @tc.name: MarshallingUnmarshalling_CustomValues
+ * @tc.desc: Marshalling and unmarshalling test with custom values
  * @tc.type: FUNC
  */
-HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling02, TestSize.Level1)
+HWTEST(DmVirtualScreenOptionTest, MarshallingUnmarshalling_CustomValues, TestSize.Level1)
 {
     VirtualScreenOption virtualOption{};
     virtualOption.name_ = "testVirtualOption";

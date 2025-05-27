@@ -37,7 +37,6 @@ namespace OHOS::Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::ApplicationState;
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SingleDisplaySensorPocketFoldStateManager"};
 const std::string CAMERA_NAME = "camera";
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ALTA_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
@@ -168,13 +167,13 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(int tentType,
     sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
 {
     if (tentType == tentModeType_) {
-        WLOGI("Repeat reporting tent mode:%{public}d, no processing", tentModeType_);
+        TLOGI(WmsLogTag::DMS, "Repeat reporting tent mode:%{public}d, no processing", tentModeType_);
         return;
     }
 
     SetTentMode(tentType);
     if (foldScreenPolicy == nullptr) {
-        WLOGE("foldScreenPolicy is nullptr");
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is nullptr");
         return;
     }
     if (tentType != TENT_MODE_OFF) {
@@ -214,13 +213,13 @@ bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL);
-        WLOGI("Exit tent mode due to hall sensor report folded");
+        TLOGI(WmsLogTag::DMS, "Exit tent mode due to hall sensor report folded");
         return true;
     }
 
     if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE);
-        WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
+        TLOGI(WmsLogTag::DMS, "Exit tent mode due to angle sensor report angle:%{public}f", angle);
         return true;
     }
 
