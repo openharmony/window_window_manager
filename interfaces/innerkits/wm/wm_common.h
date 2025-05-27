@@ -60,7 +60,7 @@ constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
-constexpr float POS_ZERO = 0.001f;
+constexpr double POS_ZERO = 0.001f;
 /*
  * PC Window Sidebar Blur
  */
@@ -2407,7 +2407,7 @@ enum class WindowInfoKey : int32_t {
  * @brief orientation info
  */
 struct OrientationInfo {
-    int32_t rotation = 0;
+    uint32_t rotation = 0;
     Rect rect = {0, 0, 0, 0};
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };

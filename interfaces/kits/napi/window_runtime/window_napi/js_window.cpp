@@ -3631,9 +3631,12 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
                     "OnSetPreferredOrientation failed"));
             return;
         }
+        if (requestedOrientation == Orientation::INVALID) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                    "Invalid param"));
+            return;
+        }
         weakWindow->SetRequestedOrientation(requestedOrientation);
-        weakWindow->NotifyPreferredOrientationChange(requestedOrientation);
-        weakWindow->SetPreferredRequestedOrientation(requestedOrientation);
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
@@ -6131,10 +6134,19 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
+    shadowsInfo->radius_ = result;
+    shadowsInfo->hasRadiusValue_ = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
         return NapiThrowError(env, ret);
+    }
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+        return NapiThrowError(env, syncShadowsRet);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);

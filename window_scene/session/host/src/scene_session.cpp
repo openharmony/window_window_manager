@@ -80,7 +80,7 @@ constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
-constexpr int32_t ROTATION_DEGREE = 90;
+constexpr uint32_t ROTATION_DEGREE = 90;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -4800,6 +4800,7 @@ WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
         auto property = session->GetSessionProperty();
         property->SetRequestedOrientation(orientation);
         property->SetDefaultRequestedOrientation(orientation);
+        property->SetUserRequestedOrientation(orientation);
         return WSError::WS_OK;
     }, __func__);
 }
@@ -7784,8 +7785,8 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
             TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
                 where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
-            session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
         }
+        session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
     }, __func__);
     return WSError::WS_OK;
 }
@@ -7825,8 +7826,8 @@ WSError SceneSession::SetWindowShadows(const ShadowsInfo& shadowsInfo)
                 "color: %{public}s, offsetX: %{public}f, offsetY: %{public}f", where, session->GetPersistentId(),
                 shadowsInfo.radius_, shadowsInfo.color_.c_str(), shadowsInfo.offsetX_, shadowsInfo.offsetY_);
             session->onSetWindowShadowsFunc_(shadowsInfo);
-            session->GetSessionProperty()->SetWindowShadows(shadowsInfo);
         }
+        session->GetSessionProperty()->SetWindowShadows(shadowsInfo);
     }, __func__);
     return WSError::WS_OK;
 }
@@ -7934,7 +7935,7 @@ WSError SceneSession::GetTargetOrientationConfigInfo(Orientation targetOrientati
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifyRotationProperty(int32_t rotation, uint32_t width, uint32_t height)
+WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height)
 {
     PostTask(
         [weakThis = wptr(this), rotation, width, height, where = __func__] {

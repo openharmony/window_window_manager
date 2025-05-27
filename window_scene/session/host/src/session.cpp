@@ -1022,9 +1022,6 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     if (displayId != clientDisplayId_) {
         AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
-    if (DisplayIdChangeFunc_ && clientDisplayId_ != displayId) {
-        DisplayIdChangeFunc_(GetWindowId(), displayId);
-    }
     clientDisplayId_ = displayId;
     return WSError::WS_OK;
 }
@@ -1283,10 +1280,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
+    property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
-        " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+        " defaultRequestedOrientation: %{public}u,"
+        " userRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
-        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
+        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()),
+        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()));
     property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
@@ -4296,11 +4296,6 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
-}
-
-void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
-{
-    DisplayIdChangeFunc_ = func;
 }
 
 void Session::DeletePersistentImageFit()
