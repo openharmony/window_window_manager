@@ -7414,6 +7414,22 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     if ((IsImmersiveType() || !IsDirtyWindow()) && specificCallback_->onUpdateAvoidArea_) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
+
+    // Recalculate keyboard occupied area info when calling session rect is dirty
+    if (specificCallback_->onGetSceneSessionVectorByType_) {
+        const auto& keyboardSessionVec = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+        for (const auto& keyboardSession : keyboardSessionVec) {
+            if (!keyboardSession) {
+                continue;
+            }
+            if (!keyboardSession->IsSystemKeyboard() &&
+                static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == GetPersistentId()) {
+                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, true);
+                break;
+            }
+        }
+    }
 }
 
 bool SceneSession::IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY)
@@ -7687,6 +7703,21 @@ bool SceneSession::IsKeyboardAvoidAreaActive() const
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
+void SceneSession::MarkOccupiedAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::OCCUPIED_AREA);
+}
+
+void SceneSession::ResetOccupiedAreaDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::OCCUPIED_AREA);
+}
+
+uint32_t SceneSession::GetOccupiedAreaDirtyFlags()
+{
+    return dirtyFlags_;
 }
 
 void SceneSession::SetMousePointerDownEventStatus(bool mousePointerDownEventStatus)

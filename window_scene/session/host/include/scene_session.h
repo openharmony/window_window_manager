@@ -771,6 +771,9 @@ public:
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
         bool needRecalculateAvoidAreas, bool needCheckRSTransaction) {}
+    void MarkOccupiedAreaAsDirty();
+    void ResetOccupiedAreaDirtyFlags();
+    uint32_t GetOccupiedAreaDirtyFlags();
 
     /*
      * Window Focus
