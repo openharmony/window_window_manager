@@ -192,8 +192,12 @@ void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB(bool isConstr
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
 }
 
@@ -202,10 +206,12 @@ void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration, resourceManager);
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
 }
 
@@ -213,22 +219,22 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify scene ace update config");
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}lu", windowExtensionSessionSet_.size());
     for (const auto& window : windowExtensionSessionSet_) {
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
             continue;
         }
-        auto context = window->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
-            continue;
-        }
-        if (ignoreWindowCtxSet.count(context) == 0) {
+        if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
         }
     }
 }
@@ -237,10 +243,12 @@ void WindowExtensionSessionImpl::UpdateConfigurationSync(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfigurationSyncForAll(configuration);
     } else {
-        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, ext win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
 }
 
@@ -248,7 +256,14 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}lu", windowExtensionSessionSet_.size());
     for (const auto& window : windowExtensionSessionSet_) {
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
         window->UpdateConfigurationSync(configuration);
     }
 }

@@ -142,14 +142,25 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root map size: %{public}lu", rootSceneMap_.size());
     for (const auto& sceneMap : rootSceneMap_) {
-        auto uiContent = sceneMap.second->GetUIContent();
-        if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
-            return;
+        auto window = sceneMap.second.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root win is null, display=%{public}" PRIu64, sceneMap.first);
+            continue;
         }
+        auto uiContent = window->GetUIContent();
+        if (uiContent == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, root win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
         uiContent->UpdateConfiguration(configuration);
         if (configuration == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "config is null, root win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             return;
         }
         std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
@@ -165,14 +176,18 @@ void RootScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         return;
     }
     uiContent_->UpdateConfiguration(configuration, resourceManager);
     if (configuration == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "config is null, winId: %{public}u", GetWindowId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "config is null, root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         return;
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+        GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
     if (!RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark)) {
@@ -184,40 +199,55 @@ void RootScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk
 void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (staticRootScene_) {
-        auto context = staticRootScene_->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", staticRootScene_->GetWindowId());
-            return;
-        }
-        if (std::count(ignoreWindowContexts.begin(), ignoreWindowContexts.end(), context) == 0) {
+        if (std::count(ignoreWindowContexts.begin(), ignoreWindowContexts.end(), staticRootScene_->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                staticRootScene_->GetWindowId(), staticRootScene_->GetWindowName().c_str(),
+                staticRootScene_->GetDisplayId());
             staticRootScene_->UpdateConfiguration(configuration);
             if (configurationUpdatedCallback_) {
                 configurationUpdatedCallback_(configuration);
             }
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                staticRootScene_->GetWindowId(), staticRootScene_->GetWindowName().c_str(),
+                staticRootScene_->GetDisplayId());
         }
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root is null");
     }
 }
 
 void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root map size: %{public}lu", rootSceneMap_.size());
     for (const auto& sceneMap : rootSceneMap_) {
-        auto uiContent = sceneMap.second->GetUIContent();
+        auto window = sceneMap.second.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root win is null, display=%{public}" PRIu64, sceneMap.first);
+            continue;
+        }
+        auto uiContent = window->GetUIContent();
         if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, root win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             return;
         }
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
         uiContent->UpdateConfigurationSyncForAll(configuration);
     }
 }
 
 void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (staticRootScene_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            staticRootScene_->GetWindowId(), staticRootScene_->GetWindowName().c_str(),
+            staticRootScene_->GetDisplayId());
         staticRootScene_->UpdateConfigurationSync(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root is null");
     }
 }
 
