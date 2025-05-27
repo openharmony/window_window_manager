@@ -235,6 +235,7 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "config: %{public}s", configuration->GetName().c_str());
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         WindowSceneSessionImpl::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
         RootScene::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
@@ -246,6 +247,7 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
 
 void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "config: %{public}s", configuration->GetName().c_str());
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         WindowSceneSessionImpl::UpdateConfigurationSyncForAll(configuration);
         RootScene::UpdateConfigurationSyncForAll(configuration);

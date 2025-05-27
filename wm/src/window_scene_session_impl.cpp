@@ -3918,14 +3918,21 @@ uint32_t WindowSceneSessionImpl::GetWindowFlags() const
 void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGD(WmsLogTag::DEFAULT, "notify ace winId:%{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
     UpdateDefaultStatusBarColor();
     std::vector<sptr<WindowSessionImpl>> subWindows;
     GetSubWindows(GetPersistentId(), subWindows);
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene subWin=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                subWindowSession->GetWindowId(), subWindowSession->GetWindowName().c_str(),
+                subWindowSession->GetDisplayId());
             subWindowSession->UpdateConfiguration(configuration);
         }
     }
@@ -3936,21 +3943,32 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ace winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
     if (configuration != nullptr) {
         specifiedColorMode_ = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "scene win=[%{public}u, %{public}s], colorMode=%{public}s, "
+            "display=%{public}" PRIu64, GetWindowId(), GetWindowName().c_str(), specifiedColorMode_.c_str(),
+            GetDisplayId());
     }
     UpdateDefaultStatusBarColor();
     std::vector<sptr<WindowSessionImpl>> subWindows;
     GetSubWindows(GetPersistentId(), subWindows);
     if (subWindows.empty()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         return;
     }
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene subWin=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                subWindowSession->GetWindowId(), subWindowSession->GetWindowName().c_str(),
+                subWindowSession->GetDisplayId());
             subWindowSession->UpdateConfigurationForSpecified(configuration, resourceManager);
         }
     }
@@ -3959,23 +3977,23 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
 void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene map size: %{public}lu", windowSessionMap_.size());
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "scene window is null");
             continue;
         }
-        auto context = window->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
-            continue;
-        }
-        if (ignoreWindowCtxSet.count(context) == 0) {
+        if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
         }
     }
 }
@@ -3983,17 +4001,25 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
 void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         uiContent->UpdateConfigurationSyncForAll(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
     }
     std::vector<sptr<WindowSessionImpl>> subWindows;
     GetSubWindows(GetPersistentId(), subWindows);
     if (subWindows.empty()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subSession, winId: %{public}u", GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "no subSession, scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+            GetWindowId(), GetWindowName().c_str(), GetDisplayId());
         return;
     }
     for (auto& subWindowSession : subWindows) {
         if (subWindowSession != nullptr) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene subWin=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                subWindowSession->GetWindowId(), subWindowSession->GetWindowName().c_str(),
+                subWindowSession->GetDisplayId());
             subWindowSession->UpdateConfigurationSync(configuration);
         }
     }
@@ -4003,8 +4029,11 @@ void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene map size: %{public}lu", windowSessionMap_.size());
     for (const auto& winPair : windowSessionMap_) {
         if (auto window = winPair.second.second) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "scene win=[%{public}u, %{public}s], display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetWindowName().c_str(), window->GetDisplayId());
             window->UpdateConfigurationSync(configuration);
         }
     }
