@@ -732,7 +732,12 @@ WSError SessionStageProxy::NotifyScreenshotAppEvent(ScreenshotEventType type)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return WSError::WS_OK;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read int32 failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 
 WSError SessionStageProxy::NotifyTouchOutside()

@@ -189,10 +189,10 @@ WMError WindowAgent::NotifyScreenshot()
 WMError WindowAgent::NotifyScreenshotAppEvent(ScreenshotEventType type)
 {
     if (window_ == nullptr) {
-        WLOGFE("notify screenshot app event failed: window is null.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFD("called");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, event: %{public}d", window_->GetWindowId(), type);
     window_->NotifyScreenshotAppEvent(type);
     return WMError::WM_OK;
 }

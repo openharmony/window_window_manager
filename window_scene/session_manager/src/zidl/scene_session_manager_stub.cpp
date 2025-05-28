@@ -947,14 +947,16 @@ int SceneSessionManagerStub::HandleUpdateSessionScreenshotAppEventListener(Messa
 {
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read persistentId fail");
         return ERR_INVALID_DATA;
     }
     bool haveListener = false;
     if (!data.ReadBool(haveListener)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read haveListener fail");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteUint32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
