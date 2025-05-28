@@ -1744,12 +1744,8 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestS
     std::function<void(uint32_t windowNum)> func = [](uint32_t windowNum) {
         return;
     };
-    int res = 0;
     ssm_->RegisterSetForegroundWindowNumCallback(std::move(func));
-    if(ssm_ ->setForegroundWindowNumFunc_) {
-        res = 1;
-    }
-    ASSERT_EQ(res, 1);
+    ASSERT_NE(ssm_->setForegroundWindowNumFunc_, nullptr);
 }
 
 /**
@@ -1760,12 +1756,11 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestS
 HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::vector<float> subFloat = { 0.1f };
     WindowSceneConfig::ConfigItem configItem;
-    configItem.SetValue(subFloat);
-    configItem.SetValue({ { "singleHandScale", configItem } });
+    configItem.SetValue(true);
+    configItem.SetValue({ { "test", configItem } });
     ssm_->ConfigSingleHandCompatibleMode(configItem);
-    ASSERT_EQ(configItem.IsFloats(), false);
+    ASSERT_EQ(ssm_->singleHandCompatibleModeConfig_.enabled, configItem.boolValue_);
 }
 
 /**
