@@ -718,7 +718,6 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener01, Te
     bool haveListener = true;
     WSError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
-
 }
 
 /**

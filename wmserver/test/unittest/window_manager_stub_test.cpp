@@ -594,9 +594,9 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest25 TestSize.Level1)
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
-    data.WriteUint32(static_cast<uint32_t>(ScreenshotEventType::SCROLL_SHOT_START));
+    data.WriteInt32(static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_START));
 
-    int32_t code = static_cast<int32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE);
+    int32_t code = static_cast<int32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_NONE));
