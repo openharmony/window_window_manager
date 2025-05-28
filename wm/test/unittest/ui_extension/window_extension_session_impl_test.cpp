@@ -1144,6 +1144,28 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, TestSize.
 }
 
 /**
+ * @tc.name: UpdateSessionViewportConfig4
+ * @tc.desc: displayId is changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig4, TestSize.Level1)
+{  
+    window_->property_->SetDisplayId(0);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+
+    SessionViewportConfig config;
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    config.displayId_ = 999;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(999, window_GetDisplayId());  
+}
+
+/**
  * @tc.name: UpdateSystemViewportConfig1
  * @tc.desc: handler_ is null
  * @tc.type: FUNC
