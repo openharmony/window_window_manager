@@ -392,8 +392,8 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
-        int persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

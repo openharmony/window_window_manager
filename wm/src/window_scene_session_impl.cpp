@@ -3434,11 +3434,10 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetImageForRecent(int imgResourceId, ImageFit imageFit)
+WMError WindowSceneSessionImpl::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit)
 {
-    int persistentId = GetPersistentId();
-    auto ret = SingletonContainer::Get<WindowAdapter>().SetImageForRecent(imgResourceId, imageFit, persistentId);
-    return ret;
+    int32_t persistentId = GetPersistentId();
+    return SingletonContainer::Get<WindowAdapter>().SetImageForRecent(imgResourceId, imageFit, persistentId);
 }
 
 /** @note @window.drag */

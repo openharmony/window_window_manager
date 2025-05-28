@@ -1295,6 +1295,11 @@ private:
     bool isDefaultDensityEnabled_ = false;
     WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
+    /**
+     * Window pattern
+     */
+    void NotifyAddOrRemoveSnapshotWindow(bool interactive);
+
     /*
      * Window Property
      */

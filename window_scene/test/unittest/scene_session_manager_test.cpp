@@ -2420,9 +2420,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetImageForRecent, TestSize.Level1)
 {
-    int imgResourceId = 1;
+    uint32_t imgResourceId = 1;
     ImageFit imageFit = ImageFit::FILL;
-    int persistentId = 1;
+    int32_t persistentId = 1;
     auto result = ssm_->SetImageForRecent(imgResourceId, imageFit, persistentId);
     ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }

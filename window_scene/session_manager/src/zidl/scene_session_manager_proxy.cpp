@@ -3057,7 +3057,7 @@ WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, b
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId)
+WMError SceneSessionManagerProxy::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3066,7 +3066,7 @@ WMError SceneSessionManagerProxy::SetImageForRecent(int imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(imgResourceId)) {
+    if (!data.WriteUint32(imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write imgResourceId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
