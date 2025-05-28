@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
+    ":wm_oh_window_pip_test",
     ":wm_pattern_detach_callback_proxy_test",
     ":wm_pattern_detach_callback_test",
     ":wm_picture_in_picture_controller_test",
@@ -579,6 +580,27 @@ ohos_unittest("wm_web_picture_in_picture_controller_test") {
   sources = [ "web_picture_in_picture_controller_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_oh_window_pip_test") {
+  module_out_path = module_out_path
+
+  include_dirs =
+    [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
+
+  sources = [ "oh_window_pip_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/wm:libpip_ndk",
+   ]
 
   external_deps = [
     "ability_runtime:runtime",

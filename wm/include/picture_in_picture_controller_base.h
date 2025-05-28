@@ -153,7 +153,7 @@ protected:
     napi_env env_ = nullptr;
     bool isStoppedFromClient_ = false;
     int32_t handleId_ = -1;
-    uint64_t surfaceId_;
+    uint64_t surfaceId_ = 0;
 
     // diffrent between normal and web
     virtual WMError CreatePictureInPictureWindow(StartPipType startType) = 0;

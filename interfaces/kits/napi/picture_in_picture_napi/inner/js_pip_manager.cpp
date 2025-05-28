@@ -51,6 +51,34 @@ napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "")
     return NapiGetUndefined(env);
 }
 
+napi_value GetSurfaceIdFromJs(napi_env env, napi_value surfaceIdNapiValue,
+    sptr<PictureInPictureControllerBase> pipController)
+{
+    if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface. Invalidate params");
+        return NapiGetUndefined(env);
+    }
+    char buffer[PATH_MAX];
+    size_t length = 0;
+    uint64_t surfaceId = 0;
+    if (napi_get_value_string_utf8(env, surfaceIdNapiValue, buffer, PATH_MAX, &length) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface");
+        return NapiGetUndefined(env);
+    }
+    std::istringstream inputStream(buffer);
+    inputStream >> surfaceId;
+    pipController->SetSurfaceId(surfaceId);
+    TLOGI(WmsLogTag::WMS_PIP, "surfaceId: %{public}" PRIu64"", surfaceId);
+    for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "one start listener is nullptr");
+            continue;
+        }
+        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), surfaceId);
+    }
+    return NapiGetUndefined(env);
+}
+
 JsPipManager::JsPipManager()
 {
     listenerCodeMap_ = {
@@ -144,28 +172,7 @@ napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callba
         return NapiGetUndefined(env);
     }
     napi_value surfaceIdNapiValue = argv[1];
-    if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
-        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface. Invalidate params");
-        return NapiGetUndefined(env);
-    }
-    char buffer[PATH_MAX];
-    size_t length = 0;
-    uint64_t surfaceId = 0;
-    if (napi_get_value_string_utf8(env, surfaceIdNapiValue, buffer, PATH_MAX, &length) != napi_ok) {
-        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface");
-        return NapiGetUndefined(env);;
-    }
-    std::istringstream inputStream(buffer);
-    inputStream >> surfaceId;
-    pipController->SetSurfaceId(surfaceId);
-    for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
-        if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one start listener is nullptr");
-            continue;
-        }
-        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), surfaceId);
-    }
-    return NapiGetUndefined(env);
+    return GetSurfaceIdFromJs(env, surfaceIdNapiValue, pipController);
 }
 
 napi_value JsPipManager::GetCustomUIController(napi_env env, napi_callback_info info)
@@ -184,7 +191,8 @@ napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_inf
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
-    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController =
+        PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);

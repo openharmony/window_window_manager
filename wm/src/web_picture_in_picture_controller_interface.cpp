@@ -25,6 +25,7 @@ using namespace Ace;
 
 namespace {
     constexpr uint32_t MAX_CONTROL_GROUP_NUM = 3;
+    std::shared_mutex cbSetMutex_;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
@@ -104,125 +105,47 @@ static int32_t checkCreatePipParams(const PiPConfig& config)
     return checkControlsRules(config.pipTemplateType, config.controlGroup);
 }
 
-WMError WebPictureInPictureControllerInterface::CreateWebPipController()
+WMError WebPictureInPictureControllerInterface::Create(const PiPConfig& pipConfig)
 {
-    int32_t ret = checkCreatePipParams(config_);
+    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
+    if (!isPipEnabled_) {
+        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    int32_t ret = checkCreatePipParams(pipConfig);
     if (ret == -1) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid parameters when createPipController, "
             "please check if mainWindowId/width/height is zero, "
             "or env is nullptr, or controlGroup mismatch the corresponding pipTemplateType");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(config_);
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::Create()
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::SetMainWindowId(uint32_t mainWindowId)
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (mainWindowId == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "mainWindowId could not be zero");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    config_.mainWindowId = mainWindowId;
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::SetTemplateType(PiPTemplateType pipTemplateType)
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    auto iter = TEMPLATE_CONTROL_MAP.find(pipTemplateType);
-    if (iter == TEMPLATE_CONTROL_MAP.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "createPip param error, pipTemplateType %{public}d not exists",
-            static_cast<int32_t>(pipTemplateType));
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    config_.pipTemplateType = static_cast<uint32_t>(pipTemplateType);
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::SetRect(uint32_t width, uint32_t height)
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (width == 0 || height == 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "width or height could not be zero");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    config_.width = width;
-    config_.height = height;
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::SetControlGroup(const std::vector<uint32_t>& controlGroup)
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (checkControlsRules(config_.pipTemplateType, controlGroup) != 0) {
-        TLOGE(WmsLogTag::WMS_PIP, "controlGroup mismatch the corresponding pipTemplateType");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    config_.controlGroup = controlGroup;
-    return WMError::WM_OK;
-}
-
-WMError WebPictureInPictureControllerInterface::SetNapiEnv(void* env)
-{
-    isPipEnabled_ = PictureInPictureControllerBase::GetPipEnabled();
-    if (!isPipEnabled_) {
-        TLOGE(WmsLogTag::WMS_PIP, "The device is not supported");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    config_.env = reinterpret_cast<napi_env>(env);
+    sptrWebPipController_ = sptr<WebPictureInPictureController>::MakeSptr(pipConfig);
     return WMError::WM_OK;
 }
 
 WMError WebPictureInPictureControllerInterface::StartPip(uint32_t controllerId)
 {
-    WMError ret = WMError::WM_OK;
-    if (sptrWebPipController_ == nullptr) {
-        ret = CreateWebPipController();
+    if (auto pipController = sptrWebPipController_) {
+        sptrWebPipController_->SetControllerId(controllerId);
+        auto res = sptrWebPipController_->StartPictureInPicture(StartPipType::NATIVE_START);
+        if (res == WMError::WM_OK) {
+            isStarted_ = true;
+        }
+        return res;
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    sptrWebPipController_->SetControllerId(controllerId);
-    return sptrWebPipController_->StartPictureInPicture(StartPipType::NATIVE_START);
 }
 
 WMError WebPictureInPictureControllerInterface::StopPip()
 {
     if (auto pipController = sptrWebPipController_) {
-        return pipController->StopPictureInPictureFromClient();
+        auto res = pipController->StopPictureInPictureFromClient();
+        if (res == WMError::WM_OK) {
+            isStarted_ = false;
+        }
+        return res;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -231,6 +154,10 @@ WMError WebPictureInPictureControllerInterface::StopPip()
 
 WMError WebPictureInPictureControllerInterface::UpdateContentSize(int32_t width, int32_t height)
 {
+    if (width < 1 || height < 1) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid width or height");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     if (auto pipController = sptrWebPipController_) {
         pipController->UpdateContentSize(width, height);
         return WMError::WM_OK;
@@ -240,24 +167,27 @@ WMError WebPictureInPictureControllerInterface::UpdateContentSize(int32_t width,
     }
 }
 
-void WebPictureInPictureControllerInterface::UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status)
+WMError WebPictureInPictureControllerInterface::UpdatePiPControlStatus(PiPControlType controlType,
+    PiPControlStatus status)
 {
     if (auto pipController = sptrWebPipController_) {
         pipController->UpdatePiPControlStatus(controlType, status);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
-        return;
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
 }
 
-void WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlType controlType, bool enabled)
+WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlType controlType, bool enabled)
 {
     if (auto pipController = sptrWebPipController_) {
         pipController->UpdatePiPControlStatus(controlType,
             enabled ? PiPControlStatus::ENABLED : PiPControlStatus::DISABLED);
+        return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
-        return;
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
 }
 
@@ -269,14 +199,6 @@ WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativeP
     }
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    WMError ret = WMError::WM_OK;
-    if (sptrWebPipController_ == nullptr) {
-        ret = CreateWebPipController();
-    }
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
@@ -308,14 +230,6 @@ WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(Native
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-     WMError ret = WMError::WM_OK;
-    if (sptrWebPipController_ == nullptr) {
-        ret = CreateWebPipController();
-    }
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
     return RegisterListenerWithType(ListenerType::STATE_CHANGE_CB, listener);
 }
@@ -342,14 +256,6 @@ WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(Nat
     }
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-     WMError ret = WMError::WM_OK;
-    if (sptrWebPipController_ == nullptr) {
-        ret = CreateWebPipController();
-    }
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
@@ -380,14 +286,6 @@ WMError WebPictureInPictureControllerInterface::RegisterResizeListener(NativePip
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    WMError ret = WMError::WM_OK;
-    if (sptrWebPipController_ == nullptr) {
-        ret = CreateWebPipController();
-    }
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "create controller failed");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     auto listener = sptr<NativePiPWindowListener>::MakeSptr(callback);
     return RegisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
 }
@@ -410,7 +308,7 @@ WMError WebPictureInPictureControllerInterface::CheckRegisterParam(ListenerType 
     const sptr<NativePiPWindowListener>& listener)
 {
     if (sptrWebPipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "WebPipController is nullptr");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     if (listener == nullptr) {
@@ -429,28 +327,31 @@ WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(Listene
     }
     if (IsRegistered(type, listener)) {
         TLOGE(WmsLogTag::WMS_PIP, "Listener already registered");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     int32_t cbMapSize = -1;
-    switch (type) {
-        case ListenerType::STATE_CHANGE_CB:
-            ret = ProcessStateChangeRegister(listener);
-            cbMapSize = lifeCycleCallbackSet_.size();
-            break;
-        case ListenerType::CONTROL_EVENT_CB:
-            ret = ProcessControlEventRegister(listener);
-            cbMapSize = controlEventCallbackSet_.size();
-            break;
-        case ListenerType::SIZE_CHANGE_CB:
-            ret = ProcessSizeChangeRegister(listener);
-            cbMapSize = resizeCallbackSet_.size();
-            break;
-        case ListenerType::PIP_START_CB:
-            ret = ProcessPipStartRegister(listener);
-            cbMapSize = startPipCallbackSet_.size();
-            break;
-        default:
-            break;
+    {
+        std::unique_lock<std::shared_mutex> lock(cbSetMutex_);
+        switch (type) {
+            case ListenerType::STATE_CHANGE_CB:
+                ret = ProcessStateChangeRegister(listener);
+                cbMapSize = lifeCycleCallbackSet_.size();
+                break;
+            case ListenerType::CONTROL_EVENT_CB:
+                ret = ProcessControlEventRegister(listener);
+                cbMapSize = controlEventCallbackSet_.size();
+                break;
+            case ListenerType::SIZE_CHANGE_CB:
+                ret = ProcessSizeChangeRegister(listener);
+                cbMapSize = resizeCallbackSet_.size();
+                break;
+            case ListenerType::PIP_START_CB:
+                ret = ProcessPipStartRegister(listener);
+                cbMapSize = startPipCallbackSet_.size();
+                break;
+            default:
+                break;
+        }
     }
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Register type %{public}u failed", type);
@@ -469,28 +370,31 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
     }
     if (!IsRegistered(type, listener)) {
         TLOGE(WmsLogTag::WMS_PIP, "Listener not registered");
-        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     int32_t cbMapSize = -1;
-    switch (type) {
-        case ListenerType::STATE_CHANGE_CB:
-            ret = ProcessStateChangeUnregister(listener);
-            cbMapSize = lifeCycleCallbackSet_.size();
-            break;
-        case ListenerType::CONTROL_EVENT_CB:
-            ret = ProcessControlEventUnregister(listener);
-            cbMapSize = controlEventCallbackSet_.size();
-            break;
-        case ListenerType::SIZE_CHANGE_CB:
-            ret = ProcessSizeChangeUnregister(listener);
-            cbMapSize = resizeCallbackSet_.size();
-            break;
-        case ListenerType::PIP_START_CB:
-            ret = ProcessPipStartUnregister(listener);
-            cbMapSize = startPipCallbackSet_.size();
-            break;
-        default:
-            break;
+    {
+        std::unique_lock<std::shared_mutex> lock(cbSetMutex_);
+        switch (type) {
+            case ListenerType::STATE_CHANGE_CB:
+                ret = ProcessStateChangeUnregister(listener);
+                cbMapSize = lifeCycleCallbackSet_.size();
+                break;
+            case ListenerType::CONTROL_EVENT_CB:
+                ret = ProcessControlEventUnregister(listener);
+                cbMapSize = controlEventCallbackSet_.size();
+                break;
+            case ListenerType::SIZE_CHANGE_CB:
+                ret = ProcessSizeChangeUnregister(listener);
+                cbMapSize = resizeCallbackSet_.size();
+                break;
+            case ListenerType::PIP_START_CB:
+                ret = ProcessPipStartUnregister(listener);
+                cbMapSize = startPipCallbackSet_.size();
+                break;
+            default:
+                break;
+        }
     }
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}u failed", type);
@@ -527,6 +431,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (auto pipController = sptrWebPipController_) {
+        std::unique_lock<std::shared_mutex> lock(cbSetMutex_);
         switch (type) {
             case ListenerType::STATE_CHANGE_CB:
                 lifeCycleCallbackSet_.clear();
@@ -557,9 +462,13 @@ WMError WebPictureInPictureControllerInterface::UnregisterAll(ListenerType type)
 bool WebPictureInPictureControllerInterface::IsRegistered(ListenerType type,
     const sptr<NativePiPWindowListener>& listener)
 {
+    std::shared_lock<std::shared_mutex> lock(cbSetMutex_);
     switch (type) {
         case ListenerType::STATE_CHANGE_CB:
             for (const auto& it : lifeCycleCallbackSet_) {
+                if (it == nullptr) {
+                    continue;
+                }
                 if (it->GetLifeCycleCallbackRef() == listener->GetLifeCycleCallbackRef()) {
                     return true;
                 }
@@ -567,6 +476,9 @@ bool WebPictureInPictureControllerInterface::IsRegistered(ListenerType type,
             break;
         case ListenerType::CONTROL_EVENT_CB:
             for (const auto& it : controlEventCallbackSet_) {
+                if (it == nullptr) {
+                    continue;
+                }
                 if (it->GetControlEventCallbackRef() == listener->GetControlEventCallbackRef()) {
                     return true;
                 }
@@ -574,6 +486,9 @@ bool WebPictureInPictureControllerInterface::IsRegistered(ListenerType type,
             break;
         case ListenerType::SIZE_CHANGE_CB:
             for (const auto& it : resizeCallbackSet_) {
+                if (it == nullptr) {
+                    continue;
+                }
                 if (it->GetResizeCallbackRef() == listener->GetResizeCallbackRef()) {
                     return true;
                 }
@@ -581,6 +496,9 @@ bool WebPictureInPictureControllerInterface::IsRegistered(ListenerType type,
             break;
         case ListenerType::PIP_START_CB:
             for (const auto& it : startPipCallbackSet_) {
+                if (it == nullptr) {
+                    continue;
+                }
                 if (it->GetStartPipCallbackRef() == listener->GetStartPipCallbackRef()) {
                     return true;
                 }

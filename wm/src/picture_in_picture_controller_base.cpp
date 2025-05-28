@@ -53,6 +53,21 @@ PictureInPictureControllerBase::~PictureInPictureControllerBase()
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
 }
 
+void PictureInPictureControllerBase::NotifyOpretationError(WMError errCode, StartPipType startType)
+{
+    TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
+    for (auto& listener : pipLifeCycleListeners_) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
+            continue;
+        }
+        listener->OnPictureInPictureOperationError(static_cast<int32_t>(errCode));
+        listener->OnPictureInPictureOperationError(controllerId_, static_cast<int32_t>(errCode));
+    }
+    SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+        pipOption_->GetPipTemplate(), PipConst::FAILED, "window show failed");
+}
+
 void PictureInPictureControllerBase::SetControllerId(uint32_t controllerId)
 {
     controllerId_ = controllerId;
@@ -78,7 +93,7 @@ WMError PictureInPictureControllerBase::ShowPictureInPictureWindow(StartPipType 
     }
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
         listener->OnPreparePictureInPictureStart();
@@ -87,17 +102,7 @@ WMError PictureInPictureControllerBase::ShowPictureInPictureWindow(StartPipType 
     SetUIContent();
     WMError errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
-        for (auto& listener : pipLifeCycleListeners_) {
-            if (listener == nullptr) {
-                TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
-                continue;
-            }
-            listener->OnPictureInPictureOperationError(static_cast<int32_t>(errCode));
-            listener->OnPictureInPictureOperationError(controllerId_, static_cast<int32_t>(errCode));
-        }
-        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
-            pipOption_->GetPipTemplate(), PipConst::FAILED, "window show failed");
+        NotifyOpretationError(errCode, startType);
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
     uint32_t requestWidth = 0;
@@ -193,7 +198,7 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
     curState_ = PiPWindowState::STATE_STOPPING;
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
         listener->OnPreparePictureInPictureStop();
@@ -204,7 +209,7 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
         curState_ = PiPWindowState::STATE_STOPPED;
         for (auto& listener : pipLifeCycleListeners_) {
             if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
             listener->OnPictureInPictureStop();
@@ -236,7 +241,6 @@ WMError PictureInPictureControllerBase::StopPictureInPictureInner(StopPipType st
             TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
             DestroyPictureInPictureWindow();
         }
-
     }
     SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(stopType),
         templateType, PipConst::PIP_SUCCESS, "pip window stop success");
@@ -256,7 +260,7 @@ WMError PictureInPictureControllerBase::DestroyPictureInPictureWindow()
         TLOGE(WmsLogTag::WMS_PIP, "window destroy failed, err:%{public}u", ret);
         for (auto& listener : pipLifeCycleListeners_) {
             if (listener == nullptr) {
-                TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
+                TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
                 continue;
             }
             listener->OnPictureInPictureOperationError(static_cast<int32_t>(ret));
@@ -267,7 +271,7 @@ WMError PictureInPictureControllerBase::DestroyPictureInPictureWindow()
 
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one lifeCycle Listener is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
         listener->OnPictureInPictureStop();
@@ -381,7 +385,7 @@ void PictureInPictureControllerBase::PreRestorePictureInPicture()
     curState_ = PiPWindowState::STATE_RESTORING;
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one action observer is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
         listener->OnRestoreUserInterface();
@@ -432,7 +436,7 @@ void PictureInPictureControllerBase::OnPictureInPictureStart()
 {
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one action observer is nullptr");
+            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
         listener->OnPictureInPictureStart();
