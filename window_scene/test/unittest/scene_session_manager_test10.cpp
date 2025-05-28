@@ -1668,11 +1668,11 @@ HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "app_bundle_name";
     appUseControlInfo.isNeedControl_ = true;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo);
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
     EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
 
     appUseControlInfo.isNeedControl_ = false;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo);
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
     EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
 }
 } // namespace

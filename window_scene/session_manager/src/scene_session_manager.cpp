@@ -10286,7 +10286,7 @@ WSError SceneSessionManager::NotifyAppUseControlList(
 
         std::vector<sptr<SceneSession>> mainSessions;
         for (const auto& appUseControlInfo : controlList) {
-            refreshAllAppUseControlMap(appUseControlInfo);
+            refreshAllAppUseControlMap(appUseControlInfo, type);
             GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
             if (mainSessions.empty()) {
                 continue;
@@ -10304,17 +10304,17 @@ WSError SceneSessionManager::NotifyAppUseControlList(
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::refreshAllAppUseControlMap(AppUseControlInfo& appUseControlInfo)
+void SceneSessionManager::refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
 {
     SceneSession::ControlInfo controlInfo = {
         .isNeedControl = appUseControlInfo.isNeedControl_,
         .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
     };
     std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& allAppUseControlMap =
-        SceneSession::GetAllAppUseControlMap();
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
+        allAppUseControlMap = SceneSession::GetAllAppUseControlMap();
     if (!controlInfo.isNeedControl && !controlInfo.isControlRecentOnly) {
-        if (allAppUseControlMap.find(key) != allAppUserControlMap.end()) {
+        if (allAppUseControlMap.find(key) != allAppUseControlMap.end()) {
             allAppUseControlMap[key].erase(type);
             if (allAppUseControlMap[key].empty()){
                 allAppUseControlMap.erase(key);
