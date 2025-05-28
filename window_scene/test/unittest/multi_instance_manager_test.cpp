@@ -370,6 +370,18 @@ HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, TestSize.Level1)
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession3);
 }
+
+/**
+ * @tc.name: GetApplicationInfo
+ * @tc.desc: test function : GetApplicationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiInstanceManagerTest, GetApplicationInfo, TestSize.Level1)
+{
+    std::string bundleName = "com.ohos.sceneboard";
+    AppExecFwk::ApplicationInfo applicationInfo = MultiInstanceManager::GetInstance().GetApplicationInfo(bundleName);
+    EXPECT_EQ(applicationInfo.startMode, AppExecFwk::StartMode::MAIN_TASK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

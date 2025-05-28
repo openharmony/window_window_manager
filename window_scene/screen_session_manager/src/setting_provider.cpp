@@ -43,7 +43,6 @@ const std::string SETTING_MULTI_USER_TABLE = "USER_SETTINGSDATA_";
 const std::string SETTING_WALL_MULTI_USER_TABLE = "USER_SETTINGSDATA_SECURE_";
 const std::string SETTING_MULTI_USER_PROXY = "?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "SettingProvider" };
 constexpr int32_t PARAM_NUM_TEN = 10;
 } // namespace
 
@@ -132,7 +131,7 @@ sptr<SettingObserver> SettingProvider::CreateObserver(const std::string& key, Se
 void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
 {
     if (observer == nullptr) {
-        WLOGFE("observer is nullptr");
+        TLOGE(WmsLogTag::DMS, "observer is nullptr");
         return;
     }
     observer->OnChange();
@@ -156,7 +155,7 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
     execCb.detach();
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
-    WLOGFD("succeed to register observer of uri=%{public}s", uri.ToString().c_str());
+    TLOGD(WmsLogTag::DMS, "succeed to register observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
 
@@ -175,7 +174,7 @@ ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observe
     helper->UnregisterObserver(uri, observer);
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
-    WLOGFD("succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
+    TLOGD(WmsLogTag::DMS, "succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
 
@@ -183,12 +182,12 @@ void SettingProvider::Initialize(int32_t systemAbilityId)
 {
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
-        WLOGFE("GetSystemAbilityManager return nullptr");
+        TLOGE(WmsLogTag::DMS, "GetSystemAbilityManager return nullptr");
         return;
     }
     auto remoteObj = sam->GetSystemAbility(systemAbilityId);
     if (remoteObj == nullptr) {
-        WLOGFE("GetSystemAbility return nullptr, systemAbilityId=%{public}d", systemAbilityId);
+        TLOGE(WmsLogTag::DMS, "GetSystemAbility return nullptr, systemAbilityId=%{public}d", systemAbilityId);
         return;
     }
     remoteObj_ = remoteObj;
@@ -209,14 +208,14 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
-        WLOGFE("helper->Query return nullptr");
+        TLOGE(WmsLogTag::DMS, "helper->Query return nullptr");
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     int32_t count;
     resultSet->GetRowCount(count);
     if (count == 0) {
-        WLOGFW("not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        TLOGW(WmsLogTag::DMS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_NAME_NOT_FOUND;
@@ -225,7 +224,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     resultSet->GoToRow(INDEX);
     int32_t ret = resultSet->GetString(INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        WLOGFW("resultSet->GetString return not ok, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "resultSet->GetString return not ok, ret=%{public}d", ret);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_INVALID_VALUE;
@@ -250,14 +249,14 @@ ErrCode SettingProvider::GetStringValueMultiUser(const std::string& key, std::st
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
-        WLOGFE("helper->Query return nullptr");
+        TLOGE(WmsLogTag::DMS, "helper->Query return nullptr");
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     int32_t count;
     resultSet->GetRowCount(count);
     if (count == 0) {
-        WLOGFW("not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        TLOGW(WmsLogTag::DMS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_NAME_NOT_FOUND;
@@ -266,7 +265,7 @@ ErrCode SettingProvider::GetStringValueMultiUser(const std::string& key, std::st
     resultSet->GoToRow(INDEX);
     int32_t ret = resultSet->GetString(INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        WLOGFW("resultSet->GetString return not ok, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "resultSet->GetString return not ok, ret=%{public}d", ret);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_INVALID_VALUE;
@@ -293,7 +292,7 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
     Uri uri(AssembleUri(key));
     if (helper->Update(uri, predicates, bucket) <= 0) {
-        WLOGFD("no data exist, insert one row");
+        TLOGD(WmsLogTag::DMS, "no data exist, insert one row");
         helper->Insert(uri, bucket);
     }
     if (needNotify) {
@@ -308,7 +307,7 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
 {
     auto helper = DataShare::DataShareHelper::Creator(remoteObj_, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        WLOGFW("helper is nullptr, uri=%{public}s", SETTING_URI_PROXY.c_str());
+        TLOGW(WmsLogTag::DMS, "helper is nullptr, uri=%{public}s", SETTING_URI_PROXY.c_str());
         return nullptr;
     }
     return helper;
@@ -319,17 +318,17 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
     std::string uriString = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFI("current userId: %{public}d", userId);
+        TLOGI(WmsLogTag::DMS, "current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY;
     } else {
-        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        TLOGE(WmsLogTag::DMS, "invalid userId: %{public}d, use default uri", userId);
         uriString = SETTING_URI_PROXY;
     }
     auto helper = DataShare::DataShareHelper::Creator(remoteObj_, uriString, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        WLOGFW("helper is nullptr, uri=%{public}s", uriString.c_str());
+        TLOGW(WmsLogTag::DMS, "helper is nullptr, uri=%{public}s", uriString.c_str());
         return nullptr;
     }
     return helper;
@@ -338,7 +337,7 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
 bool SettingProvider::ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper)
 {
     if (!helper->Release()) {
-        WLOGFW("release helper fail");
+        TLOGW(WmsLogTag::DMS, "release helper fail");
         return false;
     }
     return true;
@@ -355,7 +354,7 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
     std::string uriString = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFI("current userId: %{public}d", userId);
+        TLOGI(WmsLogTag::DMS, "current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;
@@ -364,7 +363,7 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
                 userIdString + SETTING_MULTI_USER_PROXY + "&key=" + key;
         }
     } else {
-        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        TLOGE(WmsLogTag::DMS, "invalid userId: %{public}d, use default uri", userId);
         uriString = SETTING_URI_PROXY + "&key=" + key;
         if (key == WALL_KEY) {
             uriString = SETTING_WALL_URI + "&key=" + key;
@@ -392,7 +391,7 @@ ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& ob
     execCb.detach();
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
-    WLOGFD("succeed to register observer of uri=%{public}s", uri.ToString().c_str());
+    TLOGD(WmsLogTag::DMS, "succeed to register observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
 
@@ -411,7 +410,7 @@ ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& 
     helper->UnregisterObserver(uri, observer);
     ReleaseDataShareHelper(helper);
     IPCSkeleton::SetCallingIdentity(callingIdentity);
-    WLOGFD("succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
+    TLOGD(WmsLogTag::DMS, "succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
     return ERR_OK;
 }
 
@@ -453,14 +452,14 @@ ErrCode SettingProvider::GetStringValueMultiUserByTable(const std::string& key,
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
-        WLOGFE("helper->Query return nullptr");
+        TLOGE(WmsLogTag::DMS, "helper->Query return nullptr");
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         return ERR_INVALID_OPERATION;
     }
     int32_t count;
     resultSet->GetRowCount(count);
     if (count == 0) {
-        WLOGFW("not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        TLOGW(WmsLogTag::DMS, "not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_NAME_NOT_FOUND;
@@ -469,7 +468,7 @@ ErrCode SettingProvider::GetStringValueMultiUserByTable(const std::string& key,
     resultSet->GoToRow(INDEX);
     int32_t ret = resultSet->GetString(INDEX, value);
     if (ret != NativeRdb::E_OK) {
-        WLOGFW("resultSet->GetString return not ok, ret=%{public}d", ret);
+        TLOGW(WmsLogTag::DMS, "resultSet->GetString return not ok, ret=%{public}d", ret);
         IPCSkeleton::SetCallingIdentity(callingIdentity);
         resultSet->Close();
         return ERR_INVALID_VALUE;
@@ -485,17 +484,17 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
     std::string address = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFD("current userId: %{public}d", userId);
+        TLOGD(WmsLogTag::DMS, "current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         address = SETTING_MULTI_USER_URI + tableName + userIdString +
             SETTING_MULTI_USER_PROXY;
     } else {
-        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        TLOGE(WmsLogTag::DMS, "invalid userId: %{public}d, use default uri", userId);
         address = SETTING_URI_PROXY;
     }
     auto helper = DataShare::DataShareHelper::Creator(remoteObj_, address, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        WLOGFW("helper is nullptr, uri=%{public}s", address.c_str());
+        TLOGW(WmsLogTag::DMS, "helper is nullptr, uri=%{public}s", address.c_str());
         return nullptr;
     }
     return helper;
@@ -506,12 +505,12 @@ Uri SettingProvider::AssembleUriMultiUserByTable(const std::string& key, std::st
     std::string address = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFD("current userId: %{public}d", userId);
+        TLOGD(WmsLogTag::DMS, "current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         address = SETTING_MULTI_USER_URI + tableName + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;
     } else {
-        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        TLOGE(WmsLogTag::DMS, "invalid userId: %{public}d, use default uri", userId);
         address = SETTING_URI_PROXY + "&key=" + key;
     }
     Uri uri(address);

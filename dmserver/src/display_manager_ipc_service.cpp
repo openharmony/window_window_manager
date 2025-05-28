@@ -425,4 +425,16 @@ ErrCode DisplayManagerIpcService::GetAllDisplayPhysicalResolution(
     displayPhysicalResolutions = displayManagerService_.GetAllDisplayPhysicalResolution();
     return ERR_OK;
 }
+
+ErrCode DisplayManagerIpcService::SetScreenBrightness(uint64_t screenId, uint32_t level, bool& isSucc)
+{
+    isSucc = displayManagerService_.SetScreenBrightness(screenId, level);
+    return ERR_OK;
+}
+
+ErrCode DisplayManagerIpcService::GetScreenBrightness(uint64_t screenId, uint32_t& level)
+{
+    level = displayManagerService_.GetScreenBrightness(screenId);
+    return ERR_OK;
+}
 } // namespace OHOS::Rosen

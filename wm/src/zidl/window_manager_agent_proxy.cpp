@@ -186,34 +186,6 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     }
 }
 
-void WindowManagerAgentProxy::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return;
-    }
-    if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
-        return;
-    }
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("remote is null");
-        return;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-    }
-}
-
 void WindowManagerAgentProxy::UpdateWindowDrawingContentInfo(
     const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos)
 {
@@ -493,7 +465,7 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
     }
 }
 
-void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
     MessageParcel data;
@@ -503,8 +475,8 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t PropertyDirtyF
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint32(PropertyDirtyFlags)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write PropertyDirtyFlags failed");
+    if (!data.WriteUint32(propertyDirtyFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write propertyDirtyFlags failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(windowInfoList.size()))) {
@@ -580,7 +552,7 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             }
             break;
         }
-        case WindowInfoKey::RECT : {
+        case WindowInfoKey::WINDOW_RECT : {
             Rect rect = std::any_cast<Rect>(windowInfoPair.second);
             if (!data.WriteInt32(rect.posX_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
@@ -601,7 +573,8 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             break;
         }
         default : {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Unknown WindowInfoKey: %{public}d",
+                static_cast<int32_t>(windowInfoPair.first));
             return false;
         }
     }

@@ -62,7 +62,8 @@ public:
 class TestAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
     AvoidArea avoidArea_;
-    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info) override;
 };
 
 class WindowImmersiveTest : public testing::Test {
@@ -197,7 +198,8 @@ void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId
     }
 }
 
-void TestAvoidAreaChangedListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void TestAvoidAreaChangedListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     avoidArea_ = avoidArea;
 }

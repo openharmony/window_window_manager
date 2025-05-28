@@ -148,14 +148,6 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
     }
 }
 
-void SessionManagerAgentController::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    for (auto& agent : smAgentContainer_.GetAgentsByType(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID)) {
-        agent->NotifyDisplayIdChange(windowId, displayId);
-    }
-}
-
 void SessionManagerAgentController::UpdateVisibleWindowNum(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
@@ -274,13 +266,13 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
     }
 }
 
-void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
-    for (auto& agent : smAgentContainer_.GetAgentsByType(
+    for (const auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {
         if (agent != nullptr) {
-            agent->NotifyWindowPropertyChange(PropertyDirtyFlags, windowInfoList);
+            agent->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
         }
     }
 }

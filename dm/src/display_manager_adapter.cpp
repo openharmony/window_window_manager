@@ -219,7 +219,7 @@ DMError ScreenManagerAdapter::GetPixelFormat(ScreenId screenId, GraphicPixelForm
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetPixelFormat");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetPixelFormat(screenId, pixelFormat);
     }
@@ -231,7 +231,7 @@ DMError ScreenManagerAdapter::SetPixelFormat(ScreenId screenId, GraphicPixelForm
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::SetPixelFormat");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetPixelFormat(screenId, pixelFormat);
     }
@@ -244,7 +244,7 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetSupportedHDRFormats");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetSupportedHDRFormats(screenId, hdrFormats);
     }
@@ -256,7 +256,7 @@ DMError ScreenManagerAdapter::GetScreenHDRFormat(ScreenId screenId, ScreenHDRFor
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetScreenHDRFormat");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetScreenHDRFormat(screenId, hdrFormat);
     }
@@ -268,7 +268,7 @@ DMError ScreenManagerAdapter::SetScreenHDRFormat(ScreenId screenId, int32_t mode
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::SetScreenHDRFormat");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetScreenHDRFormat(screenId, modeIdx);
     }
@@ -281,7 +281,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetSupportedColorSpaces");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetSupportedColorSpaces(screenId, colorSpaces);
     }
@@ -294,7 +294,7 @@ DMError ScreenManagerAdapter::GetScreenColorSpace(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetScreenColorSpace");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetScreenColorSpace(screenId, colorSpace);
     }
@@ -307,7 +307,7 @@ DMError ScreenManagerAdapter::SetScreenColorSpace(ScreenId screenId,
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::SetScreenColorSpace");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetScreenColorSpace(screenId, colorSpace);
     }
@@ -324,7 +324,7 @@ DMError ScreenManagerAdapter::GetSupportedHDRFormats(ScreenId screenId, std::vec
     for (auto value : hdrFormatsVec) {
         hdrFormats.push_back(static_cast<uint32_t>(value));
     }
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetSupportedHDRFormats ret %{public}d", static_cast<int32_t>(ret));
+    TLOGI(WmsLogTag::DMS, "ret: %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -337,7 +337,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId, std::ve
     for (auto value : colorSpacesVec) {
         colorSpaces.push_back(static_cast<uint32_t>(value));
     }
-    TLOGI(WmsLogTag::DMS, "ScreenManagerAdapter::GetSupportedColorSpaces ret %{public}d", static_cast<int32_t>(ret));
+    TLOGI(WmsLogTag::DMS, "ret: %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -351,7 +351,7 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
 
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::CreateVirtualScreen");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject());
     }
@@ -377,7 +377,7 @@ DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::DestroyVirtualScreen");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->DestroyVirtualScreen(screenId);
     }
@@ -395,7 +395,7 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
         TLOGE(WmsLogTag::DMS, "Surface is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetVirtualScreenSurface");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface->GetProducer());
     }
@@ -430,7 +430,7 @@ DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetScreenPrivacyMaskImage");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
     }
@@ -441,7 +441,7 @@ DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,
 DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetVirtualMirrorScreenCanvasRotation");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetVirtualMirrorScreenCanvasRotation(screenId, canvasRotation);
     }
@@ -452,7 +452,7 @@ DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId scre
 DMError ScreenManagerAdapter::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetVirtualMirrorScreenScaleMode");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetVirtualMirrorScreenScaleMode(screenId, scaleMode);
     }
@@ -463,7 +463,7 @@ DMError ScreenManagerAdapter::SetVirtualMirrorScreenScaleMode(ScreenId screenId,
 DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetScreenRotationLocked");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetScreenRotationLocked(isLocked);
     }
@@ -476,7 +476,7 @@ DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 DMError ScreenManagerAdapter::SetScreenRotationLockedFromJs(bool isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::SetScreenRotationLockedFromJs");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetScreenRotationLockedFromJs(isLocked);
     }
@@ -489,7 +489,7 @@ DMError ScreenManagerAdapter::SetScreenRotationLockedFromJs(bool isLocked)
 DMError ScreenManagerAdapter::IsScreenRotationLocked(bool& isLocked)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    TLOGI(WmsLogTag::DMS, "DisplayManagerAdapter::IsScreenRotationLocked");
+    TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->IsScreenRotationLocked(isLocked);
     }
@@ -1625,6 +1625,17 @@ DMError ScreenManagerAdapter::SetScreenSkipProtectedWindow(const std::vector<Scr
         return screenSessionManagerServiceProxy_->SetScreenSkipProtectedWindow(screenIds, isEnable);
     }
 
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerAdapter::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetScreenAreaOfDisplayArea(
+            displayId, displayArea, screenId, screenArea);
+    }
     return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

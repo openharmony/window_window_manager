@@ -22,7 +22,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
 constexpr int32_t PAD_SCREEN_WIDTH = 2560;
 constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
 constexpr float INCH_2_MM = 25.4f;
@@ -32,7 +31,7 @@ AbstractDisplay::AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info,
     : id_(id)
 {
     if (info == nullptr || absScreen == nullptr) {
-        WLOGFE("info or absScreen is nullptr");
+        TLOGE(WmsLogTag::DMS, "info or absScreen is nullptr");
         return;
     }
     screenId_ = absScreen->dmsId_;
@@ -192,9 +191,10 @@ void AbstractDisplay::SetDisplayOrientation(DisplayOrientation displayOrientatio
 
 bool AbstractDisplay::RequestRotation(Rotation rotation)
 {
-    WLOGD("request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_, rotation, id_);
+    TLOGD(WmsLogTag::DMS, "request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_,
+        rotation, id_);
     if (rotation_ == rotation) {
-        WLOGFE("rotation not change %{public}u", rotation);
+        TLOGE(WmsLogTag::DMS, "rotation not change %{public}u", rotation);
         return false;
     }
     if (IsVertical(rotation) != IsVertical(rotation_)) {
@@ -232,14 +232,14 @@ FreezeFlag AbstractDisplay::GetFreezeFlag() const
 bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
 {
     if (abstractScreen == nullptr) {
-        WLOGE("display bind screen error, cannot get screen. display:%{public}" PRIu64"", id_);
+        TLOGE(WmsLogTag::DMS, "display bind screen error, cannot get screen. display:%{public}" PRIu64"", id_);
         return false;
     }
     ScreenId dmsScreenId = abstractScreen->dmsId_;
     sptr<SupportedScreenModes> info = abstractScreen->GetActiveScreenMode();
     if (info == nullptr) {
-        WLOGE("display bind screen error, cannot get info. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
-            id_, dmsScreenId);
+        TLOGE(WmsLogTag::DMS, "display bind screen error, cannot get info. display:%{public}" PRIu64", "
+            "screen:%{public}" PRIu64"", id_, dmsScreenId);
         return false;
     }
 
@@ -250,7 +250,8 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
     height_ = static_cast<int32_t>(info->height_);
     refreshRate_ = info->refreshRate_;
     screenId_ = dmsScreenId;
-    WLOGD("display bind to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
+    TLOGD(WmsLogTag::DMS, "display bind to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_,
+        dmsScreenId);
     return true;
 }
 

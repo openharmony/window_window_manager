@@ -1062,6 +1062,19 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
 }
+
+/**
+ * @tc.name: HandleCloseSpecificScene
+ * @tc.desc: test function : HandleCloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleCloseSpecificScene(data, reply));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

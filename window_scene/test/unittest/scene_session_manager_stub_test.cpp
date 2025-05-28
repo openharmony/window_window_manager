@@ -2224,6 +2224,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleGetHostGlobalScaledRect
+ * @tc.desc: test HandleGetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetHostGlobalScaledRect, TestSize.Level1)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t hostWindowId = 65535;
+    data.WriteInt32(hostWindowId);
+    int res = stub_->HandleGetHostGlobalScaledRect(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetCallingWindowWindowStatus
  * @tc.desc: test HandleGetCallingWindowWindowStatus
  * @tc.type: FUNC
@@ -2468,11 +2486,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int imgResourceId = 1;
+    uint32_t imgResourceId = 1;
     ImageFit imageFit = ImageFit::FILL;
-    int persistentId = 1;
-    data.WriteInt32(imgResourceId);
-    data.WriteInt32(static_cast<uint32_t>(imageFit));
+    int32_t persistentId = 1;
+    data.WriteUint32(imgResourceId);
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
     data.WriteInt32(persistentId);
     int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -2646,9 +2664,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetForegroundWindowNum, TestSize.Lev
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t windowNum = 1;
+    uint32_t windowNum = 1;
     data.WriteInt32(windowNum);
     int res = stub_->HandleSetForegroundWindowNum(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleAnimateTo
+ * @tc.desc: test HandleAnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAnimateTo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t windowId = 1;
+    data.WriteInt32(windowId);
+
+    WindowAnimationProperty animationProperty;
+    data.WriteParcelable(&animationProperty);
+
+    WindowAnimationOption animationOption;
+    data.WriteParcelable(&animationOption);
+
+    int res = stub_->HandleAnimateTo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace

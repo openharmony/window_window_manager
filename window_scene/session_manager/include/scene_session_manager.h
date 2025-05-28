@@ -144,13 +144,14 @@ using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
-using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)>;
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
-using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
-using SetForegroundWindowNumFunc = std::function<void(int32_t windowNum)>;
+using SetForegroundWindowNumFunc = std::function<void(uint32_t windowNum)>;
+using MinimizeByWindowIdFunc = std::function<void(const std::vector<int32_t>& windowIds)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
 using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
@@ -367,7 +368,8 @@ public:
         const std::string& abilityKey, bool isSaveBySpecifiedFlag);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isNewWant, bool isFromClient = true);
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
@@ -477,7 +479,6 @@ public:
      * Keyboard Window
      */
     void RequestInputMethodCloseKeyboard(int32_t persistentId);
-    void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
     void GetKeyboardOccupiedAreaWithRotation(
         int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas);
     void ReportKeyboardCreateException(sptr<SceneSession>& keyboardSession);
@@ -502,6 +503,7 @@ public:
         uint32_t extWindowActions) override;
     void CheckSceneZOrder();
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override;
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override;
     WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus) override;
     WMError GetCallingWindowRect(int32_t persistentId, Rect& rect) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
@@ -523,7 +525,7 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
-    WMError SetForegroundWindowNum(int32_t windowNum) override;
+    WMError SetForegroundWindowNum(uint32_t windowNum) override;
     void RegisterSetForegroundWindowNumCallback(SetForegroundWindowNumFunc&& func);
 
     const SystemSessionConfig& GetSystemSessionConfig() const;
@@ -559,6 +561,7 @@ public:
     void RegisterSingleHandContainerNode(const std::string& stringId);
     const SingleHandCompatibleModeConfig& GetSingleHandCompatibleModeConfig() const;
     void ConfigSupportFollowParentWindowLayout();
+    void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
 
@@ -585,6 +588,7 @@ public:
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
+    void SetBehindWindowFilterEnabled(bool enabled);
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
@@ -693,11 +697,15 @@ public:
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
+    void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
+    void refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
 
     /*
      * Window Pattern
@@ -711,11 +719,17 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
-    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t resourceId,
+    std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resourceId,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
+    bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+
+    /*
+     * Window Animation
+     */
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) override;
 
 protected:
     SceneSessionManager();
@@ -831,6 +845,8 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
+    WSError RequestSessionFocusCheck(const sptr<SceneSession>& sceneSession, const sptr<FocusGroup>& focusGroup,
+        int32_t persistentId, bool byForeground, FocusChangeReason reason);
     WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);
     bool CheckLastFocusedAppSessionFocus(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& nextSession);
@@ -838,15 +854,19 @@ private:
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
     bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
+    sptr<SceneSession> GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId);
+    sptr<SceneSession> GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId, int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
+    bool CheckBlockingFocus(const sptr<SceneSession>& session, bool includingAppSession);
     WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
@@ -860,8 +880,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
-    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
     WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -887,7 +908,7 @@ private:
      * PC Window
      */
     WMError ShiftAppWindowPointerEventInner(
-        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId);
 
     /*
      * Sub Window
@@ -970,7 +991,7 @@ private:
     void SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip);
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     void CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession);
-    bool IsNeedUpdateBrightness(float brightness);
+    bool IsNeedUpdateBrightness(int32_t persistentId, float brightness);
 
     /*
      * Window Rotate Animation
@@ -1094,6 +1115,7 @@ private:
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
     SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
+    MinimizeByWindowIdFunc minimizeByWindowIdFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 
@@ -1252,7 +1274,6 @@ private:
     void HandleKeyboardAvoidChange(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         SystemKeyboardAvoidChangeReason reason);
     void UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive);
-    NotifyRootSceneOccupiedAreaChangeFunc onNotifyOccupiedAreaChangeForRootFunc_;
 
     /*
      * Specific Window
@@ -1417,11 +1438,10 @@ private:
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-    std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
-    void NotifyWindowPropertyChange(ScreenId screenId);
     uint32_t observedFlags_ = 0;
-    uint32_t interestFlags_ = 0;
+    uint32_t interestedFlags_ = 0;
+    std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    void NotifyWindowPropertyChange(ScreenId screenId);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
@@ -1489,7 +1509,7 @@ private:
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
 };
 } // namespace OHOS::Rosen
 
