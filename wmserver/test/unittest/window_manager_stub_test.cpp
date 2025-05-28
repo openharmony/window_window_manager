@@ -587,7 +587,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest24, TestSize.Level1)
  * @tc.desc: test TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT success
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerStubTest, OnRemoteRequest25 TestSize.Level1)
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest25, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
