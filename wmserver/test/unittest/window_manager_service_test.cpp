@@ -784,7 +784,6 @@ HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, res);
 }
 
-
 /**
  * @tc.name: NotifyScreenshotEvent
  * @tc.desc: NotifyScreenshotEvent test
