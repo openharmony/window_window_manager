@@ -305,7 +305,18 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, TestSize.Level
     property->subWindowLevel_ = 1;
     ret = sceneSession->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = sceneSession->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->systemConfig_.supportFollowParentWindowLayout_ = false;
+    ret = sceneSession->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 }
+
 
 /**
  * @tc.name: SetFollowParentWindowLayoutEnabled
