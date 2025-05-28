@@ -1431,7 +1431,21 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, TestSize.Level1)
     systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+}
 
+/**
+ * @tc.name: CheckGetAvoidAreaAvailable02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable02, TestSize.Level1)
+    SessionInfo info;
+    info.abilityName_ = "CheckGetAvoidAreaAvailable02";
+    info.bundleName_ = "CheckGetAvoidAreaAvailable02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SystemSessionConfig systemConfig;
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
     // system window
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
