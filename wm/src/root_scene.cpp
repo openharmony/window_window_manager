@@ -140,14 +140,18 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     for (const auto& sceneMap : rootSceneMap_) {
+        if (sceneMap.second == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "screenScene is null, displayId: %{public}" PRIu64, sceneMap.first);
+            continue;
+        }
         auto uiContent = sceneMap.second->GetUIContent();
         if (uiContent == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
-            return;
+            continue;
         }
         uiContent->UpdateConfiguration(configuration);
         if (configuration == nullptr) {
-            return;
+            continue;
         }
         std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
@@ -200,10 +204,14 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     for (const auto& sceneMap : rootSceneMap_) {
+        if (sceneMap.second == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "screenScene is null, displayId: %{public}" PRIu64, sceneMap.first);
+            continue;
+        }
         auto uiContent = sceneMap.second->GetUIContent();
         if (uiContent == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
-            return;
+            continue;
         }
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
         uiContent->UpdateConfigurationSyncForAll(configuration);
@@ -456,13 +464,14 @@ void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(rootHostWindowType));
 }
 
-Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId)
+Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId, bool& isFound)
 {
     auto iter = rootSceneMap_.find(displayId);
     if (iter == rootSceneMap_.end()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
         return GetUIContent();
     }
+    isFound = true;
     if (iter->second != nullptr) {
         auto window = iter->second.promote();
         if (window != nullptr) {
