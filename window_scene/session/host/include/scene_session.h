@@ -182,6 +182,11 @@ public:
         SetWindowPatternOpacityFunc setOpacityFunc_;
     };
 
+    struct ControlInfo {
+        bool isNeedControl;
+        bool isControlRecentOnly;
+    };
+
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     virtual ~SceneSession();
 

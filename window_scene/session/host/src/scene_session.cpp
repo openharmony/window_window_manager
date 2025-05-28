@@ -98,7 +98,8 @@ std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
-std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> SceneSession::allAppUseControlMap_;
+std::unordered_map<std::string,
+    std::unordered_map<ControlAppType, SceneSession::ControlInfo>> SceneSession::allAppUseControlMap_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -8696,7 +8697,8 @@ WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty
     return WMError::WM_OK;
 }
 
-std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& SceneSession::GetAllAppUseControlMap()
+std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
+    SceneSession::GetAllAppUseControlMap()
 {
     return allAppUseControlMap_;
 }

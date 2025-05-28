@@ -728,6 +728,29 @@ HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level
 {
     EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
 }
+
+/**
+ * @tc.name: RegisterUpdateAppUseControlCallback
+ * @tc.desc: RegisterUpdateAppUseControlCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
+{
+    SceneSession::ControlInfo controlInfo = {
+        .isNeedControl = true,
+        .isControlRecentOnly = true
+    };
+    SessionInfo info;
+    info.bundleName_ = "app";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
+        allAppUseMap = sceneSession->GetAllAppUseControlMap();
+    std::string key = "app#0";
+    allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
