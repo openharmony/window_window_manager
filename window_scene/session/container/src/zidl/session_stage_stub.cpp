@@ -486,9 +486,11 @@ int SessionStageStub::HandleNotifyScreenshotAppEvent(MessageParcel& data, Messag
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called");
     int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
     if (!data.ReadInt32(screenshotEventType)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenshotEventType failed");
         return ERR_INVALID_VALUE;
     }
-    NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
+    WSError errCode = NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

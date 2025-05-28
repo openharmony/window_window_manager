@@ -11244,6 +11244,8 @@ WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
                 continue;
             }
             auto state = sceneSession->GetSessionState();
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, state: %{public}u, event: %{public}d",
+                where, sceneSession->GetPersistentId(), state, type);
             if (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) {
                 sceneSession->NotifyScreenshotAppEvent(type);
             }
