@@ -102,6 +102,10 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, TestSize.Level1)
 HWTEST_F(RootSceneTest, UpdateConfiguration, TestSize.Level1)
 {
     RootScene rootScene;
+    sptr<RootScene> staticRootScene = sptr<RootScene>::MakeSptr();
+    wptr<Window> weakWindow(staticRootScene);
+    rootScene.AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
+    rootScene.AddRootScene(100, nullptr);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateConfiguration(configuration);
@@ -423,9 +427,15 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, TestSize.Level1)
 HWTEST_F(RootSceneTest, UpdateConfigurationSync, TestSize.Level1)
 {
     RootScene rootScene;
+    sptr<RootScene> staticRootScene = sptr<RootScene>::MakeSptr();
+    wptr<Window> weakWindow(staticRootScene);
+    rootScene.AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
+    rootScene.AddRootScene(100, nullptr);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     rootScene.uiContent_ = nullptr;
+    rootScene.UpdateConfigurationSync(configuration);
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene.UpdateConfigurationSync(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
