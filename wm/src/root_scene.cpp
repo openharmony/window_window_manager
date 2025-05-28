@@ -140,14 +140,10 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     for (const auto& sceneMap : rootSceneMap_) {
-        if (sceneMap.second == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "screenScene is null, displayId: %{public}" PRIu64, sceneMap.first);
-            continue;
-        }
         auto uiContent = sceneMap.second->GetUIContent();
         if (uiContent == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
-            continue;
+            return;
         }
         uiContent->UpdateConfiguration(configuration);
         if (configuration == nullptr) {
@@ -204,10 +200,6 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     for (const auto& sceneMap : rootSceneMap_) {
-        if (sceneMap.second == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "screenScene is null, displayId: %{public}" PRIu64, sceneMap.first);
-            continue;
-        }
         auto uiContent = sceneMap.second->GetUIContent();
         if (uiContent == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
