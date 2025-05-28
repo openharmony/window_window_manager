@@ -7750,6 +7750,10 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
                 extensionInfo.windowRect = extensionInfo.uiExtRect;
                 extensionInfo.windowRect.posX_ += parentTransX;
                 extensionInfo.windowRect.posY_ += parentTransY;
+                WSRect transRect = { extensionInfo.windowRect.posX_, extensionInfo.windowRect.posY_,
+                    extensionInfo.windowRect.width_, extensionInfo.windowRect.height_ };
+                session->TransformRelativeRectToGlobalRect(transRect);
+                extensionInfo.windowRect.posY_ = transRect.posY_;
             }
         }
         session->NotifySessionInfoChange();
