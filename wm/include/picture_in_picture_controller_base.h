@@ -126,6 +126,7 @@ protected:
         void AfterDestroyed() override;
     };
 
+    void NotifyOpretationError(WMError errCode, StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
