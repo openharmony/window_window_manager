@@ -1279,6 +1279,11 @@ private:
     bool isDefaultDensityEnabled_ = false;
     WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
+    /**
+     * Window pattern
+     */
+    void NotifyAddOrRemoveSnapshotWindow(bool interactive);
+
     /*
      * Window Property
      */
@@ -1308,11 +1313,6 @@ private:
      * Window Transition Animation For PC
      */
     UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
-
-    /**
-     * Window pattern
-     */
-    void NotifyAddOrRemoveSnapshotWindow(bool interactive);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
