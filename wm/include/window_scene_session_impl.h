@@ -425,6 +425,7 @@ private:
     bool IsDefaultDensityEnabled();
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
+    bool isEnableDefaultDensityWhenCreate_ = false;
     std::string specifiedColorMode_;
 
     /*

@@ -604,6 +604,20 @@ public:
     bool GetIsDensityFollowHost() const;
 
     /**
+     * @brief Set default density for subwindow or system window.
+     *
+     * @param defaultDensityEnabled Whether default density enabled.
+     */
+    void SetDefaultDensityEnabled(bool defaultDensityEnabled);
+
+    /**
+     * @brief Check whether default density enabled.
+     *
+     * @return true - default density is enabled.
+     */
+    bool IsDefaultDensityEnabled() const;
+
+    /**
      * @brief Set whether this modal UIExt is a constrained modal UIExtension.
      *
      * @param isConstrainedModal true - is a constrained modal UIExtension,
@@ -655,6 +669,7 @@ private:
     int32_t zLevel_ = 0;
     int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
     bool isSystemKeyboard_ = false;
+    bool defaultDensityEnabled_ = false;
 
     /*
      * UIExtension
