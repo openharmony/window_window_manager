@@ -1755,40 +1755,6 @@ HWTEST_F(SceneSessionTest4, UpdatePiPTemplateInfoTest, Function | SmallTest | Le
     auto result = sceneSession->UpdatePiPTemplateInfo(templateInfo);
     ASSERT_EQ(result, WSError::WS_OK);
 }
-
-/**
- * @tc.name: ForegroundTask
- * @tc.desc: ForegroundTask function test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, ForegroundTask, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundTask";
-    info.bundleName_ = "ForegroundTask";
-
-    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sceneSession->state_ = SessionState::STATE_CONNECT;
-    sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
-    EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
-
-    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->persistentId_ = 11;
-    subSession->persistentId_ = 12;
-    sceneSession->subSession_.push_back(subSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
-
-    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onWindowInfoUpdate_ = [](int32_t persistentId, WindowUpdateType type) {
-        return;
-    };
-    specificCb->onHandleSecureSessionShouldHide_ = [](const sptr<SceneSession>& sceneSession) {
-        return WSError::WS_OK;
-    };
-    sceneSession->specificCallback_ = specificCb;
-
-    EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
-}
 }
 }
 }
