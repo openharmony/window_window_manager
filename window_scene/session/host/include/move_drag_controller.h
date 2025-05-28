@@ -136,7 +136,7 @@ public:
      * PC Window Layout
      */
     void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+        int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect);
     void StopMoving();
     int32_t GetLastMovePointerPosX() const;
     void SetLastMovePointerPosX(int32_t lastMovePointerPosX);

@@ -1414,7 +1414,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
 }
 
 void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect)
+    int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect)
 {
     moveTempProperty_.lastDownPointerPosX_ = pointerPosX;
     moveTempProperty_.lastDownPointerPosY_ = pointerPosY;
@@ -1423,7 +1423,30 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
     moveTempProperty_.lastDownPointerWindowX_ = offsetX;
     moveTempProperty_.lastDownPointerWindowY_ = offsetY;
 
-    moveDragProperty_.targetRect_ = winRect;
+    int32_t displayOffsetX = 0;
+    int32_t displayOffsetY = 0;
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(static_cast<uint64_t>(dispalyId));
+    if (screenSession) {
+        ScreenProperty screenProperty = screenSession.GetScreenProperty();
+        displayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+        displayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "displayOffsetX %{public}d, displayOffsetY %{public}d, displayId %{public}d",
+        displayOffsetX, displayOffsetY, displayId);
+    int32_t originalPointerPosX = pointerPosX + displayOffsetX - originalDisplayOffsetX_;
+    int32_t originalPointerPosY = pointerPosY + displayOffsetY - originalDisplayOffsetY_;
+    WSRect targetRect = {
+        originalPointerPosX - offsetX,
+        originalPointerPosY - offsetY,
+        winRect.width_,
+        winRect.height_,
+    };
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "targetRect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
+        targetRect.posY_, targetRect.width_, targetRect.height_);
+    moveDragProperty_.originalRect_ = winRect;
+    moveDragProperty_.targetRect_ = targetRect;
+    moveDragEndDisplayId_ = static_cast<uint64_t>(displayId);
     ProcessSessionRectChange(SizeChangeReason::DRAG_END);
 }
 
