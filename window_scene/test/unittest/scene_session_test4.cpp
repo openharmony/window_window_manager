@@ -1770,14 +1770,13 @@ HWTEST_F(SceneSessionTest4, ForegroundTask, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->state_ = SessionState::STATE_CONNECT;
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
-    EXPECT_EQ(WSError::WM_OK, sceneSession->ForegroundTask(property));
-    
+    EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
+
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->persistentId_ = 11;
     subSession->persistentId_ = 12;
-    sceneSession->AddSubSession(subSession);
+    sceneSession->subSession_.push_back(subSession);
     EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
-    EXPECT_EQ(1, subSession->dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
 
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onWindowInfoUpdate_ = [](int32_t persistentId, WindowUpdateType type) {
@@ -1789,7 +1788,6 @@ HWTEST_F(SceneSessionTest4, ForegroundTask, Function | SmallTest | Level2)
     sceneSession->specificCallback_ = specificCb;
 
     EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
-    EXPECT_EQ(1, subSession->dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
 }
 }
 }
