@@ -39,7 +39,7 @@ interface OHOS.Rosen.IDisplayManager {
     void SetVirtualScreenSurface([in] unsigned long screenId, [in] IBufferProducer surface, [out] int dmError);
     void SetOrientation([in] unsigned long screenId, [in] unsigned int orientation, [out] int dmError);
     void GetDisplaySnapshot([in] unsigned long displayId, [out] int errorCode, [in] boolean isUseDma,
-        [in] boolean isFullScreenCapture, [out] sharedptr<PixelMap> pixelMap);
+        [in] boolean isCaptureFullOfScreen, [out] sharedptr<PixelMap> pixelMap);
     void GetScreenSupportedColorGamuts([in] unsigned long screenId, [out] unsigned int[] colorGamuts,
         [out] int dmError);
     void GetScreenColorGamut([in] unsigned long screenId, [out] unsigned int colorGamut, [out] int dmError);
