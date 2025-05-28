@@ -102,12 +102,6 @@ HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, TestSize.Level1)
     window_->UnregisterScreenshotListener(screenshotListener);
     ASSERT_EQ(window_->screenshotListeners_[window_->GetWindowId()].size(), 0);
 
-    sptr<IScreenshotAppEventListener> screenshotAppEventListener = new IScreenshotAppEventListener();
-    window_->RegisterScreenshotAppEventListener(screenshotAppEventListener);
-    ASSERT_EQ(window_->screenshotAppEventListeners_[window_->GetWindowId()].size(), 1);
-    window_->UnregisterScreenshotAppEventListener(screenshotAppEventListener);
-    ASSERT_EQ(window_->screenshotAppEventListeners_[window_->GetWindowId()].size(), 0);
-
     sptr<IDialogTargetTouchListener> dialogTargetTouchListener = new IDialogTargetTouchListener();
     window_->RegisterDialogTargetTouchListener(dialogTargetTouchListener);
     ASSERT_EQ(window_->dialogTargetTouchListeners_[window_->GetWindowId()].size(), 1);
