@@ -1013,7 +1013,7 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
         session->InitializeCrossMoveDrag();
         session->moveDragController_->InitMoveDragProperty();
         session->moveDragController_->HandleStartMovingWithCoordinate(offsetX,
-            offsetY, pointerPosX, pointerY, session->winRect_);
+            offsetY, pointerPosX, pointerY, displayId, session->winRect_);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
     }, __func__);

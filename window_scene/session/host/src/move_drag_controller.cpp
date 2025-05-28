@@ -1426,9 +1426,9 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
     int32_t displayOffsetX = 0;
     int32_t displayOffsetY = 0;
     sptr<ScreenSession> screenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(static_cast<uint64_t>(dispalyId));
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(static_cast<uint64_t>(displayId));
     if (screenSession) {
-        ScreenProperty screenProperty = screenSession.GetScreenProperty();
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
         displayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
         displayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
     }
@@ -1440,7 +1440,7 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
         originalPointerPosX - offsetX,
         originalPointerPosY - offsetY,
         winRect.width_,
-        winRect.height_,
+        winRect.height_
     };
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "targetRect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
