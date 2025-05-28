@@ -1753,10 +1753,10 @@ HWTEST_F(SceneSessionManagerTest12, FlushUIParams, TestSize.Level1)
     sessionInfo.screenId_ = 2;
     ScreenId screenId = 2;
     std::unordered_map<int32_t, SessionUIParam> uiParams;
-    uiParam.clear();
+    uiParams.clear();
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<KeyboardSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession::KeyboardSessionCallback> keyboardCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(sessionInfo, specificCb, keyboardCb);
     ASSERT_NE(nullptr, ssm_);

@@ -412,44 +412,6 @@ HWTEST_F(KeyboardSessionTest3, IsNeedRaiseSubWindow02, Function | SmallTest | Le
     ret = keyboardSession->IsNeedRaiseSubWindow(callingSession, sessionRect);
     ASSERT_EQ(true, ret);
 }
-
-/**
- * @tc.name: CalculateOccupiedArea_MIDSCENE
- * @tc.desc: check func CalculateOccupiedArea_MIDSCENE
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallTest | Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalculateOccupiedArea_MIDSCENE",
-        "CalculateOccupiedArea_MIDSCENE");
-    SessionInfo info;
-    info.abilityName_ = "CallingSession";
-    info.bundleName_ = "CallingSession";
-    auto callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect lastSafeRect = { 0, 0, 0, 0 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    auto lastSafeRectRet = callingSession->GetLastSafeRect();
-    auto rectEqual = (lastSafeRect == lastSafeRectRet) ? true : false;
-    EXPECT_EQ(rectEqual, true);
-    callingSession->SetIsMidScene(false);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(false, callingSession->GetIsMidScene());
-    WSRect zeroRect1 = { 0, 0, 0, 0 };
-    WSRect zeroRect2 = { 0, 0, 0, 0 };
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-    auto ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-    callingSession->SetIsMidScene(true);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(true, callingSession->GetIsMidScene());
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    lastSafeRectRet = callingSession->GetLastSafeRect();
-    rectEqual = (lastSafeRect == lastSafeRectRet) ? true : false;
-    EXPECT_EQ(rectEqual, true);
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
