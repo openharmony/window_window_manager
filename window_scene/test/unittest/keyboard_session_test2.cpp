@@ -553,7 +553,6 @@ HWTEST_F(KeyboardSessionTest2, FlushUIParams05, TestSize.Level1)
     keyboardSession->SetSessionRect(rect2);
     WSRect lastSafeRect = { 1, 1, 1, 1 };
     panelSession->SetLastSafeRect(lastSafeRect);
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
     keyboardSession->SetSessionState(SessionState::STATE_FOREGROUND);
     auto ret = keyboardSession->RaiseCallingSession(callingSession, occupiedAreaInfo, false);
     EXPECT_EQ(ret, true);
@@ -607,7 +606,6 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, TestSize.Level1)
     params.landscapeAvoidHeight_ = -10;
     keyboardSession->property_->SetKeyboardLayoutParams(params);
     callingSession->SetOriPosYBeforeRaisedByKeyboard(10);
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
     WSRect lastSafeRect = { 1, 50, 100, 100 };
     callingSession->SetLastSafeRect(lastSafeRect);
     WSRect rect1 = { 1, 1, 100, 100 };
