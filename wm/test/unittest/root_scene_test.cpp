@@ -20,6 +20,7 @@
 #include "mock_uicontent.h"
 #include <viewport_config.h>
 #include "root_scene.h"
+#include "screen_scene.h"
 
 #include "app_mgr_client.h"
 #include "mock_uicontent.h"
@@ -558,6 +559,49 @@ HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest001, TestSize.Level1)
 
     auto res = rootScene->GetRSNodeByStringID(stringId);
     ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: AddRootScene
+ * @tc.desc: For AddRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, AddRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    sptr<ScreenScene> screenScene = sptr<ScreenScene>::MakeSptr("AddRootScene");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    wptr<Window> weakWindow1(screenScene);
+    rootScene->AddRootScene(1, weakWindow);
+    rootScene->AddRootScene(12, weakWindow1);
+    bool findScreenScene = false;
+
+    auto res = rootScene->GetUIContentByDisplayId(1, findScreenScene);
+    ASSERT_NE(res, nullptr);
+    ASSERT_EQ(findScreenScene, true);
+    res = rootScene->GetUIContentByDisplayId(12, findScreenScene);
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: RemoveRootScene
+ * @tc.desc: For RemoveRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RemoveRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    rootScene->AddRootScene(0, weakWindow);
+    bool findScreenScene = false;
+
+    auto res = rootScene->GetUIContentByDisplayId(0, findScreenScene);
+    ASSERT_EQ(findScreenScene, true);
+    rootScene->RemoveRootScene(0);
+    res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(findScreenScene, false);
 }
 
 } // namespace
