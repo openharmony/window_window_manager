@@ -3588,8 +3588,8 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         int32_t lastDisplayX = pointerItem.GetDisplayX();
         int32_t lastDisplayY = pointerItem.GetDisplayY();
         int32_t lastDisplayId = lastPointerEvent_->GetTargetDisplayId();
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
-            " lastDisplayY:%{public}d lastDisplayId:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY, lastDisplayId);
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offset:[%{public}d,%{public}d] lastEvent:[%{public}d,%{public}d]"
+            " lastDisplayId:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY, lastDisplayId);
         errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY, lastDisplayId);
     } else {
         errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
