@@ -29,6 +29,7 @@ ohos_unittest("wm_extension_window_impl_test") {
 
 ohos_unittest("wm_window_extension_session_impl_test") {
   module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/window_scene/test/unittest/ui_extension/data_handler" ]
   sources = [
     "provider_data_handler_test.cpp",
     "window_extension_session_impl_test.cpp",

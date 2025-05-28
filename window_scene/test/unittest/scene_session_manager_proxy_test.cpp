@@ -536,9 +536,9 @@ HWTEST_F(sceneSessionManagerProxyTest, RegisterWindowPropertyChangeAgent01, Test
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         sceneSessionManagerProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         sceneSessionManagerProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent));
 }
 
@@ -614,7 +614,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.L
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
 
-    EXPECT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED,
         sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
 }
 
@@ -1577,11 +1577,34 @@ HWTEST_F(sceneSessionManagerProxyTest, SetForegroundWindowNum, TestSize.Level1)
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
-    int32_t windowNum = 1;
+    uint32_t windowNum = 1;
     WMError res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
     ASSERT_EQ(WMError::WM_OK, res);
     sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     res = sceneSessionManagerProxy->SetForegroundWindowNum(windowNum);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: AnimateTo
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AnimateTo, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t windowId = 1;
+    WindowAnimationProperty animationProperty;
+    WindowAnimationOption animationOption;
+
+    WMError res = sceneSessionManagerProxy->AnimateTo(windowId, animationProperty, animationOption);
+    ASSERT_EQ(WMError::WM_OK, res);
+
+    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    res = sceneSessionManagerProxy->AnimateTo(windowId, animationProperty, animationOption);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 } // namespace

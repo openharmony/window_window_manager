@@ -151,10 +151,10 @@ public:
     uint32_t GetStartY() const;
 
     void SetValidHeight(uint32_t validHeight);
-    int32_t GetValidHeight() const;
+    uint32_t GetValidHeight() const;
  
     void SetValidWidth(uint32_t validWidth);
-    int32_t GetValidWidth() const;
+    uint32_t GetValidWidth() const;
 
     void SetStartPosition(uint32_t startX, uint32_t startY);
 

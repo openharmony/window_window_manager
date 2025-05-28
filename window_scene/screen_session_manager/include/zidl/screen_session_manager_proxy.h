@@ -82,7 +82,7 @@ public:
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
 
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
-    
+
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 
@@ -226,6 +226,8 @@ public:
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
     void NotifyScreenMaskAppear() override;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

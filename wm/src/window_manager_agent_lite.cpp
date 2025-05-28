@@ -67,10 +67,5 @@ void WindowManagerAgentLite::NotifyAccessibilityWindowInfo(const std::vector<spt
 {
     SingletonContainer::Get<WindowManagerLite>().NotifyAccessibilityWindowInfo(infos, type);
 }
-
-void WindowManagerAgentLite::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    SingletonContainer::Get<WindowManagerLite>().NotifyDisplayIdChange(windowId, displayId);
-}
 } // namespace Rosen
 } // namespace OHOS

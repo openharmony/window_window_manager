@@ -652,7 +652,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -678,7 +679,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -704,7 +706,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -1910,6 +1913,36 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo07
+ * @tc.desc: system touchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo07, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.windowType_ = 2122;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(true);
+    sceneSession->SetSystemTouchable(false);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->sceneSessionMap_.insert({ 0, nullptr });
+
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    sceneSession->SetRSVisible(false);
+    result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    EXPECT_EQ(0, infos.size());
+}
+
+/**
  * @tc.name: SkipSnapshotForAppProcess
  * @tc.desc: add or cancel snapshot skip for app process
  * @tc.type: FUNC
@@ -2387,9 +2420,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetImageForRecent, TestSize.Level1)
 {
-    int imgResourceId = 1;
+    uint32_t imgResourceId = 1;
     ImageFit imageFit = ImageFit::FILL;
-    int persistentId = 1;
+    int32_t persistentId = 1;
     auto result = ssm_->SetImageForRecent(imgResourceId, imageFit, persistentId);
     ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }
@@ -2640,12 +2673,12 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
 {
-    int32_t windowNum = 0;
+    uint32_t windowNum = 0;
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     if (!ssm_->systemConfig_.freeMultiWindowSupport_) {
         EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
     } else {
-        EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+        EXPECT_EQ(WMError::WM_OK, res);
         windowNum = 1;
         res = ssm_->SetForegroundWindowNum(windowNum);
         EXPECT_EQ(WMError::WM_OK, res);

@@ -532,30 +532,29 @@ HWTEST_F(OHDisplayManagerTest, DisplayRemoveListener, TestSize.Level1)
 }
 
 /**
- * @tc.name: OH_NativeDisplayManager_GetAvailableArea
+ * @tc.name: OH_NativeDisplayManager_CreateAvailableArea
+
  * @tc.desc: availableArea
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetAvailableArea01, TestSize.Level1)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea01, TestSize.Level1)
 {
     uint64_t testId = 0;
-    NativeDisplayManager_Rect *availableArea =
-        static_cast<NativeDisplayManager_Rect*>(malloc(sizeof(NativeDisplayManager_Rect)));
-    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetAvailableArea(testId, &availableArea);
+    NativeDisplayManager_Rect *availableArea = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAvailableArea(testId, &availableArea);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
 }
 
 /**
- * @tc.name: OH_NativeDisplayManager_GetAvailableArea
+ * @tc.name: OH_NativeDisplayManager_DestroyAvailableArea
  * @tc.desc: availableArea = nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetAvailableArea02, TestSize.Level1)
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_DestroyAvailableArea, TestSize.Level1)
 {
-    uint64_t testId = 0;
     NativeDisplayManager_Rect *availableArea = nullptr;
-    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetAvailableArea(testId, &availableArea);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_DestroyAvailableArea(availableArea);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
 }
 
 /**

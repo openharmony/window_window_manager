@@ -31,7 +31,6 @@ public:
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) override;
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
-    void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId) override;
     void UpdateWindowModeTypeInfo(WindowModeType type) override;
     void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) override;
@@ -44,7 +43,7 @@ public:
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override {};
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override;
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override {}
-    void NotifyWindowPropertyChange(uint32_t PropertyDirtyFlags,
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override;
 };
 } // namespace Rosen

@@ -58,7 +58,7 @@ FoldStatus FoldScreenPolicy::GetFoldStatus()
 
 void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
 {
-    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    TLOGI(WmsLogTag::DMS, "FoldStatus: %{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
     lastFoldStatus_ = foldStatus;
 }

@@ -590,6 +590,32 @@ HWTEST_F(WindowPatternSnapshotTest, SetEnableAddSnapshot, TestSize.Level1)
     bool res = session_->GetEnableAddSnapshot();
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.name: NotifyUpdateSnapshotWindow
+ * @tc.desc: NotifyUpdateSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, NotifyUpdateSnapshotWindow, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyUpdateSnapshotWindow();
+    ASSERT_EQ(session_->GetSnapshot(), nullptr);
+}
+
+/**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, NotifySnapshotUpdate, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WMError ret = sceneSession->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -1656,6 +1656,25 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
 }
+
+/**
+ * @tc.name: refreshAllAppUseControlMap
+ * @tc.desc: refreshAllAppUseControlMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppUseControlInfo appUseControlInfo;
+    appUseControlInfo.bundleName_ = "app_bundle_name";
+    appUseControlInfo.isNeedControl_ = true;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
+
+    appUseControlInfo.isNeedControl_ = false;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -761,6 +761,34 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: test function : GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->OnScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.bundleName_ = "GetHostGlobalScaledRect";
+    info.abilityName_ = "GetHostGlobalScaledRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    auto ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: NotifyStackEmpty
  * @tc.desc: test function : NotifyStackEmpty
  * @tc.type: FUNC
@@ -1017,10 +1045,10 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
-    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
-    ssm_->interestFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
 }
 
 /**
@@ -1036,10 +1064,10 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
-    EXPECT_EQ(0, ssm_->interestFlags_);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
-    ssm_->interestFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
 }
 
 /**
@@ -1049,7 +1077,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
  */
 HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
 {
-    ssm_->interestFlags_ = -1;
+    ssm_->interestedFlags_ = -1;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = false;
     sessionInfo1.bundleName_ = "PackWindowPropertyChangeInfo";
@@ -1065,7 +1093,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
 
     std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    ASSERT_EQ(windowPropertyChangeInfo.size(), 7);
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
 }
 } // namespace
 } // namespace Rosen
