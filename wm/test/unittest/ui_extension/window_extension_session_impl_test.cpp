@@ -32,6 +32,7 @@
 #include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "ui_extension/provider_data_handler.h"
 #include "window_extension_session_impl.h"
 #include "wm_common.h"
 
@@ -39,6 +40,16 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Accessibility;
 using namespace std;
+
+namespace {
+    std::string logMsg;
+    void WindowExtensionSessionImplLogCallback(const LogType type, const LogLevel level, const unsigned int domain,
+        const char* tag, const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
@@ -544,7 +555,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterHostWindowRectChangeListener, T
     window->dataHandler_ = nullptr;
     sptr<IWindowRectChangeListener> listener = nullptr;
 
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->RegisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->RegisterHostWindowRectChangeListener(listener));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterHostWindowRectChangeListener(listener));
     listener = sptr<MockWindowRectChangeListener>::MakeSptr();
@@ -570,13 +581,13 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterHostWindowRectChangeListener,
     window->dataHandler_ = nullptr;
     sptr<IWindowRectChangeListener> listener = nullptr;
 
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->UnregisterHostWindowRectChangeListener(listener));
     listener = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->rectChangeUIExtListenerIds_.emplace(111);
     ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
     EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
     window->rectChangeUIExtListenerIds_.clear();
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UnregisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->UnregisterHostWindowRectChangeListener(listener));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
 }
@@ -2030,23 +2041,25 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level0)
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(WindowExtensionSessionImplLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo;
+    window->uiContent_ = nullptr;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
     ASSERT_NE(0, window->GetPersistentId());
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("PointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     EXPECT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    window->NotifyPointerEvent(pointerEvent);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->NotifyPointerEvent(pointerEvent);
 
     bool isHostWindowDelayRaiseEnabled = true;
@@ -2055,11 +2068,10 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
     window->NotifyPointerEvent(pointerEvent);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->NotifyPointerEvent(pointerEvent);
-    isHostWindowDelayRaiseEnabled = false;
-    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->NotifyPointerEvent(pointerEvent);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    EXPECT_TRUE(logMsg.find("uiContent is null") != std::string::npos);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->NotifyPointerEvent(pointerEvent);
 
     window->inputEventConsumer_ = nullptr;
@@ -2073,36 +2085,40 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
  */
 HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayRaise, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(WindowExtensionSessionImplLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ProcessPointerEventWithHostWindowDelayRaise");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     bool isHitTargetDraggable = false;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
 
+    isHitTargetDraggable = true;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("No need to notify") != std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("dataHandler_ is nullptr") != std::string::npos);
+    logMsg.clear();
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("Send raise message to host window failed") != std::string::npos);
+    logMsg.clear();
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    isHitTargetDraggable = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("Notify host window to raise") != std::string::npos);
 }
 
 /**
@@ -2486,6 +2502,8 @@ HWTEST_F(WindowExtensionSessionImplTest, SendExtensionMessageToHost, TestSize.Le
     AAFwk::Want data;
 
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SendExtensionMessageToHost(code, data));
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SendExtensionMessageToHost(code, data));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
     code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);

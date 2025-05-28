@@ -2341,6 +2341,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, TestSize.Level1
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(false));
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
