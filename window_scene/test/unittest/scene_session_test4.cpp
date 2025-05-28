@@ -1781,10 +1781,10 @@ HWTEST_F(SceneSessionTest4, ForegroundTask, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onWindowInfoUpdate_ = [](int32_t persistentId, WindowUpdateType type) {
         return;
-    }
+    };
     specificCb->onHandleSecureSessionShouldHide_ = [](const sptr<SceneSession>& sceneSession) {
         return WSError::WS_OK;
-    }
+    };
     sceneSession->specificCallback_ = specificCb;
 
     EXPECT_EQ(WSError::WS_OK, sceneSession->ForegroundTask(property));
