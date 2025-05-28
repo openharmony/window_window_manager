@@ -1771,7 +1771,6 @@ HWTEST_F(SceneSessionManagerTest12, FlushUIParams, TestSize.Level1)
     ssm_->FlushUIParams(screenId, std::move(uiParams2));
 }
 
-
 /**
  * @tc.name: SetHighlightSessionIds
  * @tc.desc: SetHighlightSessionIds
