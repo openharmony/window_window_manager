@@ -19,6 +19,7 @@
 
 #include "ability_context_impl.h"
 #include "color_parser.h"
+#include "mock_ability_context_impl.h"
 #include "mock_session.h"
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
@@ -326,6 +327,47 @@ HWTEST_F(WindowSessionImplTest5, CheckMultiWindowRect, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: IsDeviceFeatureCapableFor
+ * @tc.desc: IsDeviceFeatureCapableFor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableFor, Function | SmallTest | Level2)
+{
+    const std::string feature = "free_multi_window";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsDeviceFeatureCapableFor");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), true);
+}
+
+/**
+ * @tc.name: IsDeviceFeatureCapableForFreeMultiWindow
+ * @tc.desc: IsDeviceFeatureCapableForFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Function | SmallTest | Level2)
+{
+    const std::string feature = "free_multi_window";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsDeviceFeatureCapableForFreeMultiWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
+    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
+        system::GetParameter("const.window.device_feature_support_type", "0") == "1");
+}
+
+/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: NotifyRotationChange
  * @tc.type: FUNC
@@ -564,29 +606,29 @@ HWTEST_F(WindowSessionImplTest5, NotifyClientOrientationChange, Function | Small
 }
 
 /**
- * @tc.name: GetDisplayOrientationForRotation
- * @tc.desc: GetDisplayOrientationForRotation
+ * @tc.name: GetCurrentWindowOrientation
+ * @tc.desc: GetCurrentWindowOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, GetDisplayOrientationForRotation, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest5, GetCurrentWindowOrientation, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetDisplayOrientationForRotation start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetCurrentWindowOrientation start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetDisplayId(0);
-    option->SetWindowName("GetDisplayOrientationForRotation");
+    option->SetWindowName("GetCurrentWindowOrientation");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    window->SetDisplayOrientationForRotation(DisplayOrientation::PORTRAIT);
-    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::PORTRAIT);
-    window->SetDisplayOrientationForRotation(DisplayOrientation::UNKNOWN);
-    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::UNKNOWN);
-    window->SetDisplayOrientationForRotation(DisplayOrientation::LANDSCAPE);
-    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::LANDSCAPE);
-    window->SetDisplayOrientationForRotation(DisplayOrientation::PORTRAIT_INVERTED);
-    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::PORTRAIT_INVERTED);
-    window->SetDisplayOrientationForRotation(DisplayOrientation::LANDSCAPE_INVERTED);
-    EXPECT_EQ(window->GetDisplayOrientationForRotation(), DisplayOrientation::LANDSCAPE_INVERTED);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetDisplayOrientationForRotation end";
+    window->UpdateCurrentWindowOrientation(DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(window->GetCurrentWindowOrientation(), DisplayOrientation::PORTRAIT);
+    window->UpdateCurrentWindowOrientation(DisplayOrientation::UNKNOWN);
+    EXPECT_EQ(window->GetCurrentWindowOrientation(), DisplayOrientation::UNKNOWN);
+    window->UpdateCurrentWindowOrientation(DisplayOrientation::LANDSCAPE);
+    EXPECT_EQ(window->GetCurrentWindowOrientation(), DisplayOrientation::LANDSCAPE);
+    window->UpdateCurrentWindowOrientation(DisplayOrientation::PORTRAIT_INVERTED);
+    EXPECT_EQ(window->GetCurrentWindowOrientation(), DisplayOrientation::PORTRAIT_INVERTED);
+    window->UpdateCurrentWindowOrientation(DisplayOrientation::LANDSCAPE_INVERTED);
+    EXPECT_EQ(window->GetCurrentWindowOrientation(), DisplayOrientation::LANDSCAPE_INVERTED);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetCurrentWindowOrientation end";
 }
 
 /**
@@ -607,17 +649,45 @@ HWTEST_F(WindowSessionImplTest5, GetRequestedOrientation, Function | SmallTest |
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_CREATED;
 
-    window->SetPreferredRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    window->SetUserRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::USER_ROTATION_PORTRAIT);
-    window->SetPreferredRequestedOrientation(Orientation::VERTICAL);
+    window->SetUserRequestedOrientation(Orientation::VERTICAL);
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::VERTICAL);
-    window->SetPreferredRequestedOrientation(Orientation::HORIZONTAL);
+    window->SetUserRequestedOrientation(Orientation::HORIZONTAL);
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::HORIZONTAL);
-    window->SetPreferredRequestedOrientation(Orientation::SENSOR);
+    window->SetUserRequestedOrientation(Orientation::SENSOR);
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::SENSOR);
-    window->SetPreferredRequestedOrientation(Orientation::FOLLOW_DESKTOP);
+    window->SetUserRequestedOrientation(Orientation::FOLLOW_DESKTOP);
     EXPECT_EQ(window->GetRequestedOrientation(), Orientation::FOLLOW_DESKTOP);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: GetRequestedOrientation end";
+}
+
+/**
+ * @tc.name: isNeededForciblySetOrientation
+ * @tc.desc: isNeededForciblySetOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, isNeededForciblySetOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: isNeededForciblySetOrientation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("isNeededForciblySetOrientation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+ 
+    Orientation ori = Orientation::VERTICAL;
+    window->SetRequestedOrientation(ori);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::USER_ROTATION_PORTRAIT), true);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::VERTICAL), false);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::HORIZONTAL), true);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::SENSOR), true);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::FOLLOW_DESKTOP), true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: isNeededForciblySetOrientation end";
 }
 
 /**
@@ -647,6 +717,134 @@ HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | L
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetScaleWindow
+ * @tc.desc: GetScaleWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetScaleWindow_window1");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    int32_t id = 1;
+    mainWindow->property_->SetPersistentId(id);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
+    auto res = mainWindow->GetScaleWindow(id);
+    EXPECT_NE(res, nullptr);
+
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("GetScaleWindow_extensionWindow");
+    sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option2);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    extensionWindow->property_->SetPersistentId(2);
+    extensionWindow->isUIExtensionAbilityProcess_ = true;
+    int32_t testId = 3;
+    res = mainWindow->GetScaleWindow(testId);
+    EXPECT_EQ(res, nullptr);
+    extensionWindow->property_->SetParentPersistentId(testId);
+    extensionWindow->property_->SetParentId(testId);
+    res = mainWindow->GetScaleWindow(testId);
+    EXPECT_NE(res, nullptr);
+    mainWindow->isFocused_ = true;
+    extensionWindow->isUIExtensionAbilityProcess_ = false;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    mainWindow->hostSession_ = session;
+    res = mainWindow->GetScaleWindow(testId);
+    EXPECT_NE(res, nullptr);
+    mainWindow->isFocused_ = false;
+    res = mainWindow->GetScaleWindow(testId);
+    EXPECT_EQ(res, nullptr);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
+}
+
+/**
+ * @tc.name: GetWindowScaleCoordinate01
+ * @tc.desc: GetWindowScaleCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowScaleCoordinate01_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    int32_t id = 1;
+    mainWindow->property_->SetPersistentId(id);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    int32_t x = 100;
+    int32_t y = 100;
+    auto res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
+    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    mainWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("GetWindowScaleCoordinate01_subWindow");
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentPersistentId(id);
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(subWindow->GetWindowId(), subWindow)));
+    mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    subWindow->context_ = mainWindow->context_;
+    subWindow->property_->SetIsUIExtensionAbilityProcess(true);
+    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+    subWindow->property_->SetIsUIExtensionAbilityProcess(false);
+    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+    WindowSessionImpl::windowSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetWindowScaleCoordinate02
+ * @tc.desc: GetWindowScaleCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowScaleCoordinate02_extensionWindow");
+    sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    extensionWindow->property_->SetPersistentId(2);
+    extensionWindow->isUIExtensionAbilityProcess_ = true;
+    extensionWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    int32_t id = 1;
+    int32_t x = 100;
+    int32_t y = 100;
+    auto res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    extensionWindow->property_->SetParentPersistentId(id);
+    extensionWindow->property_->SetParentId(id);
+    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    extensionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    EXPECT_EQ(res, WMError::WM_OK);
+    WindowSessionImpl::windowExtensionSessionSet_.clear();
 }
 
 /**

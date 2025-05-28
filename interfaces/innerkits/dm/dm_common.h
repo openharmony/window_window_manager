@@ -24,6 +24,7 @@
 namespace OHOS::Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
+using NodeId = uint64_t;
 
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
@@ -332,8 +333,12 @@ enum class Orientation : uint32_t {
     USER_ROTATION_PORTRAIT_INVERTED = 16,
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
-    INVALID = 19,
-    END = INVALID,
+    END = FOLLOW_DESKTOP,
+    USER_PAGE_ROTATION_PORTRAIT = 3000,
+    USER_PAGE_ROTATION_LANDSCAPE = 3001,
+    USER_PAGE_ROTATION_PORTRAIT_INVERTED = 3002,
+    USER_PAGE_ROTATION_LANDSCAPE_INVERTED = 3003,
+    INVALID = 3004,
 };
 
 /**
@@ -549,7 +554,8 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isCaptureFullOfScreen = false;
+    bool isCaptureFullOfScreen_ = false;
+    std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 
 struct ExpandOption {

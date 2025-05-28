@@ -130,11 +130,11 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeInner(FoldDisplayMode displ
             break;
         }
         case FoldDisplayMode::UNKNOWN: {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
+            TLOGI(WmsLogTag::DMS, "displayMode is unknown");
             break;
         }
         default: {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
+            TLOGI(WmsLogTag::DMS, "displayMode is invalid");
             break;
         }
     }
@@ -165,10 +165,10 @@ void SingleDisplayFoldPolicy::LockDisplayStatus(bool locked)
 
 void SingleDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
-    TLOGI(WmsLogTag::DMS, "SetOnBootAnimation onBootAnimation: %{public}d", onBootAnimation);
+    TLOGI(WmsLogTag::DMS, "onBootAnimation: %{public}d", onBootAnimation);
     onBootAnimation_ = onBootAnimation;
     if (!onBootAnimation_) {
-        TLOGI(WmsLogTag::DMS, "SetOnBootAnimation when boot animation finished, change display mode");
+        TLOGI(WmsLogTag::DMS, "when boot animation finished, change display mode");
         RecoverWhenBootAnimationExit();
     }
 }
@@ -217,20 +217,20 @@ FoldDisplayMode SingleDisplayFoldPolicy::GetModeMatchStatus()
 void SingleDisplayFoldPolicy::ReportFoldDisplayModeChange(FoldDisplayMode displayMode)
 {
     int32_t mode = static_cast<int32_t>(displayMode);
-    TLOGI(WmsLogTag::DMS, "ReportFoldDisplayModeChange displayMode: %{public}d", mode);
+    TLOGI(WmsLogTag::DMS, "displayMode: %{public}d", mode);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "DISPLAY_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_DISPLAY_MODE", mode);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "ReportFoldDisplayModeChange Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
 void SingleDisplayFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
 {
-    TLOGI(WmsLogTag::DMS, "ReportFoldStatusChangeBegin offScreen: %{public}d, onScreen: %{public}d",
+    TLOGI(WmsLogTag::DMS, "offScreen: %{public}d, onScreen: %{public}d",
         offScreen, onScreen);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -239,7 +239,7 @@ void SingleDisplayFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int
         "POWER_OFF_SCREEN", offScreen,
         "POWER_ON_SCREEN", onScreen);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "ReportFoldStatusChangeBegin Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -404,7 +404,7 @@ void SingleDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> scree
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMainOnBootAnimation");
+    TLOGI(WmsLogTag::DMS, "enter!");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -417,7 +417,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation(sptr<
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
+    TLOGI(WmsLogTag::DMS, "enter!");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),

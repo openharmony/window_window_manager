@@ -1753,5 +1753,29 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusExpandAndLocked, Function |
     screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
     EXPECT_EQ(ScreenSessionManager::GetInstance().GetIsFoldStatusLocked(), false);
 }
+
+/**
+ * @tc.name: GetScreenAreaOfDisplayArea
+ * @tc.desc: GetScreenAreaOfDisplayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+    DisplayId displayId = 0;
+    DMRect displayArea = DMRect::NONE();
+    ScreenId screenId = 0;
+    DMRect screenArea = DMRect::NONE();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
+    } else {
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
+    }
+}
 }
 }

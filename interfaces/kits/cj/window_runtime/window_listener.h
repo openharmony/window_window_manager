@@ -76,7 +76,8 @@ public:
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnModeChange(WindowMode mode, bool hasDeco) override;
-    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;

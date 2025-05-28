@@ -18,9 +18,6 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAgentController"};
-}
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAgentController)
 
 DMError DisplayManagerAgentController::RegisterDisplayManagerAgent(
@@ -43,7 +40,7 @@ bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent ev
     if (agents.empty()) {
         return false;
     }
-    WLOGFI("NotifyDisplayPowerEvent");
+    TLOGI(WmsLogTag::DMS, "NotifyDisplayPowerEvent");
     for (auto& agent : agents) {
         agent->NotifyDisplayPowerEvent(event, status);
     }
@@ -56,7 +53,7 @@ bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayId id, Disp
     if (agents.empty()) {
         return false;
     }
-    WLOGFI("NotifyDisplayStateChanged");
+    TLOGI(WmsLogTag::DMS, "NotifyDisplayStateChanged");
     for (auto& agent : agents) {
         agent->NotifyDisplayStateChanged(id, state);
     }
@@ -72,7 +69,7 @@ void DisplayManagerAgentController::OnScreenConnect(sptr<ScreenInfo> screenInfo)
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnScreenConnect");
+    TLOGI(WmsLogTag::DMS, "OnScreenConnect");
     for (auto& agent : agents) {
         agent->OnScreenConnect(screenInfo);
     }
@@ -84,7 +81,7 @@ void DisplayManagerAgentController::OnScreenDisconnect(ScreenId screenId)
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnScreenDisconnect");
+    TLOGI(WmsLogTag::DMS, "OnScreenDisconnect");
     for (auto& agent : agents) {
         agent->OnScreenDisconnect(screenId);
     }
@@ -99,7 +96,7 @@ void DisplayManagerAgentController::OnScreenChange(sptr<ScreenInfo> screenInfo, 
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnScreenChange");
+    TLOGI(WmsLogTag::DMS, "OnScreenChange");
     for (auto& agent : agents) {
         agent->OnScreenChange(screenInfo, screenChangeEvent);
     }
@@ -143,7 +140,7 @@ void DisplayManagerAgentController::OnDisplayCreate(sptr<DisplayInfo> displayInf
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnDisplayCreate");
+    TLOGI(WmsLogTag::DMS, "OnDisplayCreate");
     for (auto& agent : agents) {
         agent->OnDisplayCreate(displayInfo);
     }
@@ -155,7 +152,7 @@ void DisplayManagerAgentController::OnDisplayDestroy(DisplayId displayId)
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnDisplayDestroy");
+    TLOGI(WmsLogTag::DMS, "OnDisplayDestroy");
     for (auto& agent : agents) {
         agent->OnDisplayDestroy(displayId);
     }
@@ -171,7 +168,7 @@ void DisplayManagerAgentController::OnDisplayChange(
     if (agents.empty()) {
         return;
     }
-    WLOGFI("OnDisplayChange");
+    TLOGI(WmsLogTag::DMS, "OnDisplayChange");
     for (auto& agent : agents) {
         agent->OnDisplayChange(displayInfo, displayChangeEvent);
     }
@@ -186,7 +183,7 @@ void DisplayManagerAgentController::OnScreenshot(sptr<ScreenshotInfo> info)
     if (agents.empty()) {
         return;
     }
-    WLOGFI("onScreenshot");
+    TLOGI(WmsLogTag::DMS, "onScreenshot");
     for (auto& agent : agents) {
         agent->OnScreenshot(info);
     }
@@ -198,7 +195,7 @@ void DisplayManagerAgentController::NotifyPrivateWindowStateChanged(bool hasPriv
     if (agents.empty()) {
         return;
     }
-    WLOGI("PrivateWindow status : %{public}u", hasPrivate);
+    TLOGI(WmsLogTag::DMS, "PrivateWindow status : %{public}u", hasPrivate);
     for (auto& agent : agents) {
         agent->NotifyPrivateWindowStateChanged(hasPrivate);
     }
@@ -210,7 +207,7 @@ void DisplayManagerAgentController::NotifyFoldStatusChanged(FoldStatus foldStatu
     if (agents.empty()) {
         return;
     }
-    WLOGI("FoldStatus is : %{public}u", foldStatus);
+    TLOGI(WmsLogTag::DMS, "FoldStatus is : %{public}u", foldStatus);
     for (auto& agent : agents) {
         agent->NotifyFoldStatusChanged(foldStatus);
     }
@@ -233,7 +230,7 @@ void DisplayManagerAgentController::NotifyDisplayModeChanged(FoldDisplayMode dis
     if (agents.empty()) {
         return;
     }
-    WLOGI("FoldDisplayMode is : %{public}u", displayMode);
+    TLOGI(WmsLogTag::DMS, "FoldDisplayMode is : %{public}u", displayMode);
     for (auto& agent : agents) {
         agent->NotifyDisplayModeChanged(displayMode);
     }

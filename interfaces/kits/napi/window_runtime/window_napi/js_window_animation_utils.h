@@ -65,13 +65,13 @@ namespace Rosen {
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
-napi_value ConvertWindowAnimationOptionsToJsValue(napi_env env,
-    const WindowAnimationOptions& animationConfig);
+napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
+    const WindowAnimationOption& animationConfig);
 bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject,
     TransitionAnimation& transitionAnimation, WmErrorCode& result);
-bool ConvertWindowAnimationOptionsFromJsValue(napi_env env, napi_value config,
-    WindowAnimationOptions& animationConfig, WmErrorCode& result);
-bool CheckWindowAnimationOptions(napi_env env, WindowAnimationOptions& animationConfig, WmErrorCode& result);
+bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value config,
+    WindowAnimationOption& animationConfig, WmErrorCode& result);
+bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationConfig, WmErrorCode& result);
 }
 }
 #endif

@@ -314,7 +314,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual void NotifyPreferredOrientationChange(Orientation orientation) = 0;
-    virtual void SetPreferredRequestedOrientation(Orientation orientation) = 0;
+    virtual void SetUserRequestedOrientation(Orientation orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
     virtual uint32_t GetRequestWindowModeSupportType() const = 0;
@@ -334,7 +334,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual WMError SetImageForRecent(int imgResourceId, OHOS::Rosen::ImageFit ImageFit)
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, OHOS::Rosen::ImageFit ImageFit)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -351,6 +351,8 @@ public:
     virtual ColorSpace GetColorSpace() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
+    virtual WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
     virtual WMError NotifyMemoryLevel(int32_t level) = 0;
     virtual bool IsAllowHaveSystemSubWindow() = 0;
@@ -368,6 +370,8 @@ public:
     virtual bool GetDefaultDensityEnabled() { return false; }
     virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+    virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual bool GetWindowShadowEnabled() const { return true; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetVirtualPixelRatio() { return 1.0f; }
@@ -385,7 +389,7 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcWindow() const { return false; }
     virtual bool IsPadWindow() const { return false; }
-    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+    virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
     virtual bool GetCompatibleModeInPc() const { return false; }
@@ -525,7 +529,7 @@ public:
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
-    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+    virtual WMError GetGestureBackEnabled(bool& enable) const { return WMError::WM_OK; }
 
     /**
      * @brief Flush layout size.
@@ -534,6 +538,11 @@ public:
      * @param height The height after layout
      */
     virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
+     * @brief Notify window manager to update snapshot.
+     */
+    virtual WMError NotifySnapshotUpdate() { return WMError::WM_OK; }
 
     /**
      * @brief notify window remove starting window.
@@ -566,6 +575,21 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Check whether current window has specified device feature.
+     *
+     * @param feature specified device feature
+     * @return true means current window has specified device feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableFor(const std::string& feature) const { return false; }
+
+    /**
+     * @brief Check whether current window has free-multi-window device feature.
+     *
+     * @return true means current window has free-multi-window feature, false means not.
+     */
+    virtual bool IsDeviceFeatureCapableForFreeMultiWindow() const { return false; }
 
     /**
      * @brief Get highlight property of window.
@@ -636,6 +660,17 @@ public:
     virtual WMError GetParentWindow(sptr<Window>& parentWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set window anchor info.
+     *
+     * @param windowAnchorInfo the windowAnchorInfo of subWindow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
      * @param isFollow true - follow, false - not follow.
@@ -675,6 +710,21 @@ public:
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
     /**
+     * @brief Set drag key frame policy.
+     * effective order:
+     *  1. resize when drag
+     *  2. key frame
+     *  3. default value
+     *
+     * @param keyFramePolicy param of key frame
+     * @return WM_OK means get success, others means failed.
+     */
+    virtual WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get the window property of current window.
      *
      * @param windowPropertyInfo the window property struct.
@@ -693,6 +743,14 @@ public:
      * @return true comptbleMode adapt to immersive, others means not.
      */
     virtual bool IsAdaptToCompatibleImmersive() const { return false; }
+
+    /**
+     * @brief Set the source of subwindow.
+     *
+     * @param source 0 - defalut, 1 - arkui.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

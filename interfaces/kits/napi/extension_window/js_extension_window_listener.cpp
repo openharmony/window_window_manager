@@ -155,7 +155,8 @@ void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
     TLOGI(WmsLogTag::WMS_UIEXT, "%{public}u", mode);
 }
 
-void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     // js callback should run in js thread

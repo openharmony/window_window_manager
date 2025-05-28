@@ -25,9 +25,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenGroup"};
-}
 class ScreenGroup::Impl : public RefBase {
 public:
     explicit Impl(sptr<ScreenGroupInfo> info)
@@ -47,7 +44,7 @@ ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
 void ScreenGroup::UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info) const
 {
     if (info == nullptr) {
-        WLOGFE("ScreenGroupInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "ScreenGroupInfo is nullptr.");
         return;
     }
     Screen::UpdateScreenInfo(info);
