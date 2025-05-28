@@ -102,9 +102,9 @@ void KeyboardSessionTest2::ConstructKeyboardCallingWindowTestData(sptr<SceneSess
     info2.bundleName_ = "GetStatusBarHeight";
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
+    ASSERT_NE(specificCallback_, nullptr);
     statusBarSession = sptr<SceneSession>::MakeSptr(info2, specificCallback_);
-    EXPECT_NE(statusBarSession, nullptr);
+    ASSERT_NE(statusBarSession, nullptr);
     WSRect rect({ 0, 0, 0, 10 });
     statusBarSession->winRect_ = rect;
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,

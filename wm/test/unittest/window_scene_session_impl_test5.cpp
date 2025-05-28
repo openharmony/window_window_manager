@@ -1333,7 +1333,6 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 
-
 /**
  * @tc.name: GetTargetOrientationConfigInfo
  * @tc.desc: GetTargetOrientationConfigInfo
