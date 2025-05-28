@@ -1894,17 +1894,17 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply)
 {
-    int imgResourceId = 0;
-    if (!data.ReadInt32(imgResourceId)) {
+    uint32_t imgResourceId = 0;
+    if (!data.ReadUint32(imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imgResourceId failed.");
         return ERR_INVALID_DATA;
     }
-    uint32_t imageFit;
+    uint32_t imageFit = 0;
     if (!data.ReadUint32(imageFit)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
         return ERR_INVALID_DATA;
     }
-    int persistentId = 0;
+    int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
         return ERR_INVALID_DATA;

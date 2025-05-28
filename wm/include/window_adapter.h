@@ -191,7 +191,7 @@ public:
     /*
      * Window Pattern
      */
-    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
 
     /*
      * Window Animation

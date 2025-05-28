@@ -334,7 +334,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual WMError SetImageForRecent(int imgResourceId, OHOS::Rosen::ImageFit ImageFit)
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, OHOS::Rosen::ImageFit ImageFit)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

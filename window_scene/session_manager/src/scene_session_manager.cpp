@@ -14736,7 +14736,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
 
 }
 
-WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId)
+WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
@@ -14775,7 +14775,7 @@ WMError SceneSessionManager::SetImageForRecent(int imgResourceId, ImageFit image
     return WMError::WM_OK;
 }
 
-bool SceneSessionManager::GetPersistentImageFit(int persistentId, int32_t& imageFit)
+bool SceneSessionManager::GetPersistentImageFit(int32_t persistentId, int32_t& imageFit)
 {
     auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
         ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -14787,7 +14787,7 @@ bool SceneSessionManager::GetPersistentImageFit(int persistentId, int32_t& image
     return false;
 }
 
-std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(const uint32_t resourceId,
+std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resourceId,
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
     auto resourceMgr = GetResourceManager(*abilityInfo.get());
