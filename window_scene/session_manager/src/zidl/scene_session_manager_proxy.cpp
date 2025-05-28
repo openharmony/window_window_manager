@@ -551,8 +551,8 @@ WSError SceneSessionManagerProxy::UpdateSessionScreenshotAppEventListener(int32_
     MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-       TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
-       return WSError::WS_ERROR_IPC_FAILED;
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write persistentId failed");
