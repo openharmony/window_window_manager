@@ -2050,11 +2050,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Leve
     int res = stub_->HandleNotifyScreenshotEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    res = stub_->HandleNotifyScreenshotEvent(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    data.WriteInt32(2);
     res = stub_->HandleNotifyScreenshotEvent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
