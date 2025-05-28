@@ -720,7 +720,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession04, TestSize.Level1)
     ConstructKeyboardCallingWindowTestData(callingSession, keyboardSession, statusBarSession);
     sptr<SceneSession> panelSession = keyboardSession->GetKeyboardPanelSession();
 
-    int32_t statusHeight = callingSession->GetStatusBarHeight();
+    int32_t statusHeight = statusBarSession->GetStatusBarHeight();
     ASSERT_EQ(statusHeight, 10);
     keyboardSession->SetSessionState(SessionState::STATE_FOREGROUND);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
