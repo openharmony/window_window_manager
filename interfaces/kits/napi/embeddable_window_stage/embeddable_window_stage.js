@@ -49,6 +49,14 @@ class EmbeddableWindowStage {
   getSubWindow(asyncCallback) {
     return this.__embeddable_window_stage__.getSubWindow(asyncCallback);
   }
+
+  createSubWindowWithOptions(windowName, option, asyncCallback) {
+    return this.__embeddable_window_stage__.createSubWindowWithOptions(windowName, option, asyncCallback);
+  }
+
+  setUIContent(context, url, storage) {
+    return this.__embeddable_window_stage__.setUIContent(context, url, storage);
+  }
 }
 
 export default EmbeddableWindowStage;

@@ -218,6 +218,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
             return HandleNotifyNonInteractiveStatus(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
+            return HandleCloseSpecificScene(data, reply); 
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -401,7 +403,44 @@ int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Occupied info is nullptr");
         return ERR_INVALID_VALUE;
     }
-
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!(data.ReadInt32(posX) && data.ReadInt32(posY) && data.ReadUint32(width) && data.ReadUint32(height))) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingSessionRect failed");
+        return ERR_INVALID_VALUE;
+    }
+    Rect callingSessionRect = { posX, posY, width, height };
+    std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area size failed");
+        return ERR_INVALID_VALUE;
+    }
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Avoid area size: %{public}d is invalid", size);
+        return ERR_INVALID_VALUE;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = static_cast<uint32_t>(AvoidAreaType::TYPE_START);
+        if (!data.ReadUint32(type)) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area size failed");
+            return ERR_INVALID_VALUE;
+        }
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid avoid area type: %{public}d", type);
+            return ERR_INVALID_VALUE;
+        }
+        sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area failed");
+            return ERR_INVALID_VALUE;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
     bool hasRSTransaction = data.ReadBool();
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
@@ -409,9 +448,9 @@ int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, Messag
             TLOGE(WmsLogTag::WMS_KEYBOARD, "transaction unMarsh failed");
             return ERR_INVALID_VALUE;
         }
-        NotifyOccupiedAreaChangeInfo(info, transaction);
+        NotifyOccupiedAreaChangeInfo(info, transaction, callingSessionRect, avoidAreas);
     } else {
-        NotifyOccupiedAreaChangeInfo(info);
+        NotifyOccupiedAreaChangeInfo(info, nullptr, callingSessionRect, avoidAreas);
     }
 
     return ERR_NONE;
@@ -914,8 +953,8 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    int32_t rotation = 0;
-    if (!data.ReadInt32(rotation)) {
+    uint32_t rotation = 0;
+    if (!data.ReadUint32(rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
         return ERR_INVALID_VALUE;
     }
@@ -1034,6 +1073,13 @@ int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data
 
     std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
     NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    CloseSpecificScene();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
