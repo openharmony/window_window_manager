@@ -315,7 +315,6 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled01, TestSize.Level
     sceneSession->systemConfig_.supportFollowParentWindowLayout_ = false;
     ret = sceneSession->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
-
 }
 
 
