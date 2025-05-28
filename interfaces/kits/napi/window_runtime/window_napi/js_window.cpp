@@ -3819,10 +3819,11 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
+    auto retErr = windowToken_->SetBackgroundColor(color);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, color=%{public}s, retErr=%{public}d",
+        windowToken_->GetWindowId(), color.c_str(), static_cast<int32_t>(retErr));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retErr);
     if (ret == WmErrorCode::WM_OK) {
-        WLOGFI("Window [%{public}u, %{public}s] end",
-               windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         return NapiGetUndefined(env);
     } else {
         return NapiThrowError(env, ret);

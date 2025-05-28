@@ -5792,13 +5792,18 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         property_->SetBackgroundAlpha(alpha);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA);
         return WMError::WM_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, win=%{public}u, value=%{public}u",
+            GetWindowId(), color);
     }
 
     if (aceAbilityHandler_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "set ability background color, win=%{public}u, value=%{public}u",
+            GetWindowId(), color);
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "FA mode could not set bg color: %{public}u", GetWindowId());
+    TLOGW(WmsLogTag::WMS_ATTRIBUTE, "FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
