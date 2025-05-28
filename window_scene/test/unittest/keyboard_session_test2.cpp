@@ -50,7 +50,7 @@ public:
     void TearDown() override;
     void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
     void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
-    void ConstructKeyboardCallingWindowTestData(sptr<SceneSession>& callingSession, 
+    void ConstructKeyboardCallingWindowTestData(sptr<SceneSession>& callingSession,
                                                 sptr<KeyboardSession>& keyboardSession,
                                                 sptr<SceneSession>& statusBarSession);
 
@@ -72,7 +72,7 @@ void KeyboardSessionTest2::OnScreenConnected(const sptr<ScreenSession>& screenSe
 
 void KeyboardSessionTest2::OnScreenDisconnected(const sptr<ScreenSession>& screenSession) {}
 
-void KeyboardSessionTest2::ConstructKeyboardCallingWindowTestData(sptr<SceneSession>& callingSession, 
+void KeyboardSessionTest2::ConstructKeyboardCallingWindowTestData(sptr<SceneSession>& callingSession,
                                                                   sptr<KeyboardSession>& keyboardSession,
                                                                   sptr<SceneSession>& statusBarSession)
 {
@@ -108,8 +108,7 @@ void KeyboardSessionTest2::ConstructKeyboardCallingWindowTestData(sptr<SceneSess
     WSRect rect({ 0, 0, 0, 10 });
     statusBarSession->winRect_ = rect;
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
-        uint64_t displayId) -> std::vector<sptr<SceneSession>>
-    {
+        uint64_t displayId) -> std::vector<sptr<SceneSession>>{
         std::vector<sptr<SceneSession>> vec;
         vec.push_back(statusBarSession);
         return vec;
