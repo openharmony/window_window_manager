@@ -64,10 +64,10 @@ void SceneSessionTest4::SetUp()
     property = sptr<WindowSessionProperty>::MakeSptr();
     action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     if (!handler_) {
-        auto runner = AppExecFwk::EventRunner::Create("WindowExtensionSessionImplTest");
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner, nullptr);
+        auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    sceneSession->SetEventHandler(handler_);
+    sceneSession->SetEventHandler(handler_, nullptr);
 }
 
 void SceneSessionTest4::TearDown()
