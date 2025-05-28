@@ -4757,7 +4757,7 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
     return screenshotListeners;
 }
 
-template<typename T>
+template <typename T>
 EnableIfSame<T, IScreenshotAppEventListener,
     std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::GetListeners()
 {
