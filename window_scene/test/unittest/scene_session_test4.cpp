@@ -1502,12 +1502,30 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level
     session->SetSessionProperty(property);
     EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
         AvoidAreaType::TYPE_SYSTEM));
-    
+}
+
+
+/**
+ * @tc.name: CheckGetMainWindowAvoidAreaAvailable02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+
+    SystemSessionConfig systemConfig;
     // pad
     systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
-    session->SetSystemConfig(systemConfig);
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
     session->SetSystemConfig(systemConfig);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
     EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
         AvoidAreaType::TYPE_SYSTEM));
 
