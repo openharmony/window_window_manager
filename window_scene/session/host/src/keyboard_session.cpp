@@ -302,7 +302,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
         if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
-            session->NotifyClientToUpdateAvoidArea();
+            session->OnKeyboardPanelUpdated();
         }
         // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
