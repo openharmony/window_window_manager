@@ -156,7 +156,7 @@ public:
      * PC Window
      */
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY) override;
+        int32_t pointerPosX, int32_t pointerPosY, int32_t displayId) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;

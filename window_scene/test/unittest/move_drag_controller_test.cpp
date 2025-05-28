@@ -1413,13 +1413,17 @@ HWTEST_F(MoveDragControllerTest, StopMoving, TestSize.Level1)
 HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, TestSize.Level1)
 {
     WSRect winRect = { 200, 200, 1000, 1000 };
-    moveDragController->HandleStartMovingWithCoordinate(100, 50, 300, 500, winRect);
+    moveDragController->HandleStartMovingWithCoordinate(100, 50, 300, 500, 0, winRect);
     ASSERT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
     ASSERT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
     ASSERT_EQ(300, moveDragController->moveTempProperty_.lastMovePointerPosX_);
     ASSERT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
     ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
     ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
+    ASSERT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posX_);
+    ASSERT_EQ(450, moveDragController->moveDragProperty_.targetRect_.posY_);
+    ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.width_);
+    ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.height_);
 }
 
 /**
