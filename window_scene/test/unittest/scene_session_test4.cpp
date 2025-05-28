@@ -1439,6 +1439,7 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable02, TestSize.Level1)
+{
     SessionInfo info;
     info.abilityName_ = "CheckGetAvoidAreaAvailable02";
     info.bundleName_ = "CheckGetAvoidAreaAvailable02";
