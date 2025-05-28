@@ -1778,7 +1778,7 @@ HWTEST_F(SceneSessionTest4, ForegroundTask, Function | SmallTest | Level2)
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
     EXPECT_EQ(1, subSession->dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
 
-    sptr<SpecificSessionCallback> specificCb = sptr<SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onWindowInfoUpdate_ = [](int32_t persistentId, WindowUpdateType type) {
         return;
     }
