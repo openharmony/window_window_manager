@@ -712,7 +712,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
  * @tc.desc: test WS_DO_NOTHING
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
 {
     int32_t persistentId = 10086;
     bool haveListener = true;
@@ -726,7 +726,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateSessionScreenshotAppEventListener01, Tes
  * @tc.desc: test WS_ERROR_INVALID_PERMISSION and WS_OK
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -741,7 +741,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 
     sceneSession->SetCallingPid(pid);
-    auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
+    ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 
@@ -750,11 +750,11 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
  * @tc.desc: test WS_OK
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
-    info.abilityName_ = "UpdateSessionScreenshotAppEventListener";
+    info.abilityName_ = "NotifyScreenshotEvent";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));

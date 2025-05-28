@@ -805,7 +805,7 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(nullptr, ssmProxy);
-    EXPECT_EQ(WSError::WS_OK, ssmProxy->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START));
+    EXPECT_EQ(WMError::WM_OK, ssmProxy->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START));
 }
 
 /**
