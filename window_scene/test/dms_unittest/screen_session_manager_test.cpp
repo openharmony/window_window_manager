@@ -6891,6 +6891,32 @@ HWTEST_F(ScreenSessionManagerTest, ResetInternalScreenSession02, TestSize.Level1
     ssm_->screenSessionMap_.erase(extendId);
 #endif
 }
+
+/**
+ * @tc.name: NotifyCreatedScreen
+ * @tc.desc: NotifyCreatedScreen test
+ * @tc.type: session null
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->NotifyCreatedScreen(screenSession);
+}
+
+/**
+ * @tc.name: NotifyCreatedScreen
+ * @tc.desc: NotifyCreatedScreen test
+ * @tc.type: session not null
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId id = 1001;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    EXPECT_NE(nullptr, screenSession);
+    ssm_->NotifyCreatedScreen(screenSession);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
