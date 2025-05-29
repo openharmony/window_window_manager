@@ -578,7 +578,7 @@ HWTEST_F(RootSceneTest, AddRootScene, TestSize.Level1)
 
     auto res = rootScene->GetUIContentByDisplayId(1);
     ASSERT_EQ(res.second, true);
-    res = rootScene->GetUIContentByDisplayId(12, findScreenScene);
+    res = rootScene->GetUIContentByDisplayId(12);
 }
 
 /**

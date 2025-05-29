@@ -632,7 +632,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
             prevDisplayId, currDisplayId);
         const auto& prevUIContentPair = rootScene_->GetUIContentByDisplayId(prevDisplayId);
         const auto& prevUIContent = prevUIContentPair.first;
-        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
+        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId).first;
         if (prevUIContentPair.second && prevUIContent == currUIContent) {
             TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
             return;
