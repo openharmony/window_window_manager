@@ -3443,11 +3443,13 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         SetRSScreenPowerStatus(screenId, status);
         return;
     }
+    static bool isNeedScreenOffDevice =
+        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice());
     if ((lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED ||
         lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
-        screenId == SCREEN_ID_MAIN && lastScreenId_.load() == SCREEN_ID_MAIN &&
-        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsDualDisplayFoldDevice())) {
+        screenId == SCREEN_ID_MAIN && lastScreenId_.load() == SCREEN_ID_MAIN && isNeedScreenOffDevice) {
         if (!IsInAod()) {
             TLOGW(WmsLogTag::DMS, "preStatus:%{public}d, screenId:%{public}" PRIu64"",
                 lastPowerForAllStatus_.load(), screenId);
