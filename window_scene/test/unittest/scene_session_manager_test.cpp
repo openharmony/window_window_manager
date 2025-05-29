@@ -2092,6 +2092,69 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAppForceLandscapeConfig01
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldReturnNullptrError_WhenBundleNameIsEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig01, TestSize.Level1)
+{
+    std::string bundleName = "";
+    AppForceLandscapeConfig config;
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig02
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
+{
+    int32_t FORCE_SPLIT_MODE = 5;
+
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig config;
+    config.mode_ = FORCE_SPLIT_MODE;
+    config.homePage_ = "homePage";
+    config.isSupportSplitMode_ = true;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, FORCE_SPLIT_MODE);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "homePage");
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig03
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
+{
+    int32_t FORCE_SPLIT_MODE = 5;
+
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig preConfig;
+    preConfig.mode_ = 0;
+    preConfig.homePage_ = "homePage";
+    preConfig.isSupportSplitMode_ = false;
+    ssm_->appForceLandscapeMap_[bundleName] = preConfig;
+
+    AppForceLandscapeConfig config;
+    config.mode_ = FORCE_SPLIT_MODE;
+    config.homePage_ = "newHomePage";
+    config.isSupportSplitMode_ = true;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, FORCE_SPLIT_MODE);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
  * @tc.type: FUNC

@@ -1064,6 +1064,23 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
 }
 
 /**
+ * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated01
+ * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleCloseSpecificScene
  * @tc.desc: test function : HandleCloseSpecificScene
  * @tc.type: FUNC

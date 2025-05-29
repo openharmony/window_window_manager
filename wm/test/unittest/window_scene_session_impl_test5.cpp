@@ -28,6 +28,7 @@
 #include "wm_common_inner.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
+#include "session_manager/include/scene_session_manager.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -1775,6 +1776,80 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated02, Te
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated03
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated_ShouldReturnDoNothing_WhenMainWindowAndConfigInvalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated03, TestSize.Level1)
+{
+    int32_t FORCE_SPLIT_MODE = 5;
+
+    sptr<SceneSessionManager> ssm = &SceneSessionManager::GetInstance();
+    std::string bundleName = "CreateTestBundle";
+
+    AppForceLandscapeConfig config;
+    config.mode_ = FORCE_SPLIT_MODE;
+    config.homePage_ = "homePage";
+    config.isSupportSplitMode_ = false;
+
+    WSError result = ssm->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated04
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated_ShouldReturnDoNothing_WhenMainWindowAndConfigValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated04, TestSize.Level1)
+{
+    int32_t FORCE_SPLIT_MODE = 5;
+
+    sptr<SceneSessionManager> ssm = &SceneSessionManager::GetInstance();
+    std::string bundleName = "CreateTestBundle";
+
+    AppForceLandscapeConfig config;
+    config.mode_ = FORCE_SPLIT_MODE;
+    config.homePage_ = "homePage";
+    config.isSupportSplitMode_ = true;
+
+    WSError result = ssm->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->state_ = WindowState::STATE_CREATED;
+    AppForceLandscapeConfig config1 = {};
+    auto res1 = window->GetAppForceLandscapeConfig(config1);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res1, WMError::WM_OK);
+        EXPECT_EQ(config1.mode_, FORCE_SPLIT_MODE);
+        EXPECT_EQ(config1.homePage_, "homePage");
+        EXPECT_EQ(config1.isSupportSplitMode_, true);
+    }
 
     WSError res = window->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
