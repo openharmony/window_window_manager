@@ -897,7 +897,7 @@ HWTEST_F(SessionStubTest, HandleSnapshotUpdate, TestSize.Level1)
     MessageParcel reply;
 
     auto result = session_->HandleSnapshotUpdate(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
