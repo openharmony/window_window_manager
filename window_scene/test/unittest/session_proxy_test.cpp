@@ -1010,6 +1010,12 @@ HWTEST_F(SessionProxyTest, NotifySnapshotUpdate, TestSize.Level1)
 
     WMError res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
     sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
