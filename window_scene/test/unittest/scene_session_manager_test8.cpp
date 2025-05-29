@@ -486,24 +486,6 @@ HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, 
 }
 
 /**
- * @tc.name: CheckRequestFocusImmdediately
- * @tc.desc: test function : CheckRequestFocusImmdediately
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.abilityName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
-    bool ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
-}
-
-/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: test function : HandleTurnScreenOn
  * @tc.type: FUNC

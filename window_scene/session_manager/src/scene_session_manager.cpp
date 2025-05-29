@@ -6721,7 +6721,7 @@ WSError SceneSessionManager::RequestSessionFocusCheck(const sptr<SceneSession>& 
     const sptr<FocusGroup>& focusGroup, int32_t persistentId, bool byForeground, FocusChangeReason reason)
 {
     if (reason == FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW &&
-        CheckRequestFocusSubWindowImmdediately(sceneSession)) {
+        CheckRequestFocusSubWindowImmediately(sceneSession)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "sub window focused");
         return WSError::WS_DO_NOTHING;
     }
@@ -6869,24 +6869,24 @@ bool SceneSessionManager::CheckTopmostWindowFocus(const sptr<SceneSession>& focu
     return false;
 }
 
-bool SceneSessionManager::CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::CheckRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
          (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsModal())) &&
-        (ProcessModalTopmostRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
-         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
+        (ProcessModalTopmostRequestFocusImmediately(sceneSession) == WSError::WS_OK ||
+         ProcessDialogRequestFocusImmediately(sceneSession) == WSError::WS_OK)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "dialog or modal subwindow get focused");
         return true;
     }
     return false;
 }
 
-bool SceneSessionManager::CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::CheckRequestFocusSubWindowImmediately(const sptr<SceneSession>& sceneSession)
 {
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
          SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
-        (ProcessSubWindowRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
-         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
+        (ProcessSubWindowRequestFocusImmediately(sceneSession) == WSError::WS_OK ||
+         ProcessDialogRequestFocusImmediately(sceneSession) == WSError::WS_OK)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "dialog or sub window get focused");
         return true;
     }
@@ -6916,7 +6916,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, cons
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     // dialog get focus
-    if (CheckRequestFocusImmdediately(sceneSession)) {
+    if (CheckRequestFocusImmediately(sceneSession)) {
         return WSError::WS_DO_NOTHING;
     }
     // blocking-type session will block lower zOrder request focus
@@ -8297,7 +8297,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
     }
 }
 
-WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub winodw request focus
     sptr<SceneSession> mainSession = nullptr;
@@ -8339,10 +8339,10 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
     return ret;
 }
 
-WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::ProcessSubWindowRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "sub window is nullptr");
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
         return WSError::WS_DO_NOTHING;
     }
     std::vector<sptr<SceneSession>> subSessionVec = sceneSession->GetSubSession();
@@ -8376,7 +8376,7 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(const sptr
     return ret;
 }
 
-WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     // focus must on dialog when APP_MAIN_WINDOW or sub winodw request focus
     sptr<SceneSession> mainSession = nullptr;
