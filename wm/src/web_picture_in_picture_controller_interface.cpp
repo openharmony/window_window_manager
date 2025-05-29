@@ -329,7 +329,7 @@ WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(Listene
         TLOGE(WmsLogTag::WMS_PIP, "Listener already registered");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    int32_t cbMapSize = -1;
+    uint32_t cbMapSize = 0;
     {
         std::unique_lock<std::shared_mutex> lock(cbSetMutex_);
         switch (type) {
@@ -372,7 +372,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
         TLOGE(WmsLogTag::WMS_PIP, "Listener not registered");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    int32_t cbMapSize = -1;
+    uint32_t cbMapSize = 0;
     {
         std::unique_lock<std::shared_mutex> lock(cbSetMutex_);
         switch (type) {
