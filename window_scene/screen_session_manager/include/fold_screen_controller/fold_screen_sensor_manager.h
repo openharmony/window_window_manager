@@ -81,6 +81,10 @@ public:
         float postureAbAnti = 0.0F;
     } PostureDataSecondary;
 
+    float GetGlobalAngle() const;
+    void SetGlobalAngle(float angle);
+    uint16_t GetGlobalHall() const;
+
 protected:
     FoldStatus GetCurrentState();
 
