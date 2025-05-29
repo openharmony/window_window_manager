@@ -456,22 +456,20 @@ void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(rootHostWindowType));
 }
 
-Ace::UIContent* RootScene::GetUIContentByDisplayId(DisplayId displayId, bool& isFound)
+std::pair<Ace::UIContent*, bool> GetUIContentByDisplayId(DisplayId displayId)
 {
     auto iter = rootSceneMap_.find(displayId);
     if (iter == rootSceneMap_.end()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
-        isFound = false;
-        return GetUIContent();
+        return std::make_pair(GetUIContent(), false);
     }
-    isFound = true;
     if (iter->second != nullptr) {
         auto window = iter->second.promote();
         if (window != nullptr) {
-            return window->GetUIContent();
+            return std::make_pair(window->GetUIContent(), true);
         }
     }
-    return nullptr;
+    return std::make_pair(nullptr, true);
 }
 
 void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
