@@ -1740,7 +1740,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigDialogWindowSizeLimits01, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestSize.Level1)
 {
-    ASSERT_NE(ssm_, nullptr);
+    EXPECT_NE(ssm_, nullptr);
     std::function<void(uint32_t windowNum)> func = [](uint32_t windowNum) {
         return;
     };
@@ -1755,7 +1755,7 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestS
  */
 HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Level1)
 {
-    ASSERT_NE(ssm_, nullptr);
+    EXPECT_NE(ssm_, nullptr);
     WindowSceneConfig::ConfigItem configItem;
     configItem.SetValue(true);
     configItem.SetValue({ { "test", configItem } });
@@ -1770,7 +1770,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
 {
-    ASSERT_NE(ssm_, nullptr);
+    EXPECT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "testbundleName";
     sessionInfo.abilityName_ = "testabilityName";
