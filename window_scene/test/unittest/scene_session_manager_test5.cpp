@@ -935,11 +935,11 @@ HWTEST_F(SceneSessionManagerTest5, CheckTopmostWindowFocus, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckRequestFocusImmdediately
- * @tc.desc: CheckRequestFocusImmdediately
+ * @tc.name: CheckRequestFocusImmediately01
+ * @tc.desc: CheckRequestFocusImmediately01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level0)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmediately01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -948,37 +948,55 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmdediately, TestSize.Level
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    bool ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
+    bool ret = ssm_->CheckRequestFocusImmediately(sceneSession);
     ASSERT_EQ(ret, false);
 
     sptr<Session> session = sptr<Session>::MakeSptr(info);
     session->persistentId_ = 1;
     sceneSession->dialogVec_.push_back(session);
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
-    ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
+    ret = ssm_->CheckRequestFocusImmediately(sceneSession);
     ASSERT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckRequestFocusSubWindowImmdediately01
- * @tc.desc: CheckRequestFocusSubWindowImmdediately01
+ * @tc.name: CheckRequestFocusImmediately02
+ * @tc.desc: CheckRequestFocusImmediately02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately01, TestSize.Level0)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmediately02, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CheckRequestFocusImmediately02";
+    sessionInfo.abilityName_ = "CheckRequestFocusImmediately02";
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
+    bool ret = ssm_->CheckRequestFocusImmediately(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckRequestFocusSubWindowImmediately01
+ * @tc.desc: CheckRequestFocusSubWindowImmediately01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmediately01, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmdediately01";
-    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmdediately01";
+    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmediately01";
+    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmediately01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    bool ret = ssm_->CheckRequestFocusSubWindowImmediately(sceneSession);
     EXPECT_EQ(ret, false);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ret = ssm_->CheckRequestFocusSubWindowImmediately(sceneSession);
     EXPECT_EQ(ret, false);
 
     SessionInfo subSessionInfo;
@@ -992,26 +1010,26 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately01, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
-    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ret = ssm_->CheckRequestFocusSubWindowImmediately(sceneSession);
     EXPECT_EQ(ret, true);
     ssm_->sceneSessionMap_.clear();
 }
 
 /**
- * @tc.name: CheckRequestFocusSubWindowImmdediately02
- * @tc.desc: CheckRequestFocusSubWindowImmdediately02
+ * @tc.name: CheckRequestFocusSubWindowImmediately02
+ * @tc.desc: CheckRequestFocusSubWindowImmediately02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately02, TestSize.Level0)
+HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmediately02, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmdediately02";
-    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmdediately02";
+    sessionInfo.bundleName_ = "CheckRequestFocusSubWindowImmediately02";
+    sessionInfo.abilityName_ = "CheckRequestFocusSubWindowImmediately02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    bool ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    bool ret = ssm_->CheckRequestFocusSubWindowImmediately(sceneSession);
     EXPECT_EQ(ret, false);
 
     SessionInfo subSessionInfo;
@@ -1025,7 +1043,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusSubWindowImmdediately02, Tes
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
     ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
-    ret = ssm_->CheckRequestFocusSubWindowImmdediately(sceneSession);
+    ret = ssm_->CheckRequestFocusSubWindowImmediately(sceneSession);
     EXPECT_EQ(ret, true);
     ssm_->sceneSessionMap_.clear();
 }
@@ -1401,11 +1419,11 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId02, TestSize.L
 }
 
 /**
- * @tc.name: ProcessDialogRequestFocusImmdediately
- * @tc.desc: ProcessDialogRequestFocusImmdediately
+ * @tc.name: ProcessDialogRequestFocusImmediately
+ * @tc.desc: ProcessDialogRequestFocusImmediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmediately02, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
@@ -1417,7 +1435,7 @@ HWTEST_F(SceneSessionManagerTest5, ProcessDialogRequestFocusImmdediately02, Test
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    auto ret = ssm_->ProcessDialogRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     usleep(WAIT_SYNC_IN_NS);
 }
