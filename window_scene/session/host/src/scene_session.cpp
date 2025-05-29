@@ -7365,10 +7365,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         return false;
     }
     auto globalRect = GetSessionGlobalRect();
+    SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
     }
-    SetSessionGlobalRect(uiParam.rect_);
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
             "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,
@@ -7750,6 +7750,10 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
                 extensionInfo.windowRect = extensionInfo.uiExtRect;
                 extensionInfo.windowRect.posX_ += parentTransX;
                 extensionInfo.windowRect.posY_ += parentTransY;
+                WSRect transRect = { extensionInfo.windowRect.posX_, extensionInfo.windowRect.posY_,
+                    extensionInfo.windowRect.width_, extensionInfo.windowRect.height_ };
+                session->TransformRelativeRectToGlobalRect(transRect);
+                extensionInfo.windowRect.posY_ = transRect.posY_;
             }
         }
         session->NotifySessionInfoChange();
