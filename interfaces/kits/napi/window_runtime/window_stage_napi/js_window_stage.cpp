@@ -275,6 +275,7 @@ napi_value JsWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "Get main window failed."));
+            TLOGNE(WmsLogTag::WMS_LIFE, "Get main window failed.");
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
