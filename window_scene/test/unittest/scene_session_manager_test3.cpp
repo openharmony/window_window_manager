@@ -1745,7 +1745,7 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestS
         return;
     };
     ssm_->RegisterSetForegroundWindowNumCallback(std::move(func));
-    ASSERT_NE(ssm_->setForegroundWindowNumFunc_, nullptr);
+    EXPECT_NE(ssm_->setForegroundWindowNumFunc_, nullptr);
 }
 
 /**
@@ -1760,7 +1760,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
     configItem.SetValue(true);
     configItem.SetValue({ { "test", configItem } });
     ssm_->ConfigSingleHandCompatibleMode(configItem);
-    ASSERT_EQ(ssm_->singleHandCompatibleModeConfig_.enabled, configItem.boolValue_);
+    EXPECT_EQ(ssm_->singleHandCompatibleModeConfig_.enabled, configItem.boolValue_);
 }
 
 /**
@@ -1779,7 +1779,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
     ssm_->rootSceneSession_->specificCallback_ = nullptr;
     ssm_->UpdateRootSceneAvoidArea();
     auto res = ssm_->rootSceneSession_->GetPersistentId();
-    ASSERT_NE(res, 0);
+    EXPECT_NE(res, 0);
 }
 } // namespace
 } // namespace Rosen
