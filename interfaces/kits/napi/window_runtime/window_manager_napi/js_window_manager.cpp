@@ -1337,14 +1337,19 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     if (argc == ARGC_ONE) {
         int64_t inputDisplayId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], inputDisplayId)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
-        }
-        if (inputDisplayId < 0) {
+            napi_valuetype paramType = napi_undefined;
+            napi_typeof(env, argv[INDEX_ZERO], &paramType);
+            if (paramType != napi_undefined && paramType != napi_null) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to convert parameter to displayId");
+                return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            }
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "query all displays by default");
+        } else if (inputDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64, inputDisplayId);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        } else {
+            displayId = static_cast<DisplayId>(inputDisplayId);
         }
-        displayId = static_cast<DisplayId>(inputDisplayId);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
