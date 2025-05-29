@@ -610,7 +610,8 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this](DisplayId displayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, displayId: %{public}" PRIu64, displayId);
-        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId, false);
+        bool isScreenSceneExit = false;
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId, isScreenSceneExit);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
@@ -619,7 +620,8 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this](DisplayId displayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, displayId: %{public}" PRIu64, displayId);
-        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId, false);
+        bool isScreenSceneExit = false;
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId, isScreenSceneExit);
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
@@ -630,10 +632,10 @@ void JsSceneSessionManager::ProcessShiftFocus()
         DisplayId prevDisplayId, DisplayId currDisplayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 " currId: %{public}" PRIu64,
             prevDisplayId, currDisplayId);
-        bool isPrevFound = false;
-        const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId, isPrevFound);
-        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId, false);
-        if (isPrevFound && prevUIContent == currUIContent) {
+        bool isPrevScreenSceneExit = false, isCurrScreenSceneExit = false;
+        const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId, isPrevScreenSceneExit);
+        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId, isCurrScreenSceneExit);
+        if (isPrevScreenSceneExit && prevUIContent == currUIContent) {
             TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
             return;
         }
