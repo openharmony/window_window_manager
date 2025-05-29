@@ -684,11 +684,23 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
                 animationInfo.endRect, animationInfo.animated, rsTransaction);
         }
+        bool isLayoutFinished = true;
         if (isKeyboardShow) {
+            // If the vsync period terminates, immediately notify all registered listeners.
+            if (session->keyboardCallback_ != nullptr &&
+                session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
+                    isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
+            }
+            if (isLayoutFinished) {
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
+                session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
+            }
             session->MarkOccupiedAreaAsDirty();
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+        }
+        if (isLayoutFinished) {
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;

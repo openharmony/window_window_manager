@@ -7416,7 +7416,9 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     }
 
     // Recalculate keyboard occupied area info when calling session rect is dirty
-    if (specificCallback_->onGetSceneSessionVectorByType_) {
+    if (specificCallback_->onGetSceneSessionVectorByType_ &&
+        (reason_ < SizeChangeReason::DRAG || reason_ > SizeChangeReason::DRAG_END) &&
+        reason_ != SizeChangeReason::DRAG_MOVE) {
         const auto& keyboardSessionVec = specificCallback_->onGetSceneSessionVectorByType_(
             WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
         for (const auto& keyboardSession : keyboardSessionVec) {
@@ -7425,10 +7427,13 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
             }
             if (!keyboardSession->IsSystemKeyboard() &&
                 static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == GetPersistentId()) {
-                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, true);
+                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, false);
                 break;
             }
         }
+    } else {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Session rect dirty, id: %{public}d, reason: %{public}d",
+            GetPersistentId(), reason_);
     }
 }
 
@@ -7707,12 +7712,12 @@ void SceneSession::MarkAvoidAreaAsDirty()
 
 void SceneSession::MarkOccupiedAreaAsDirty()
 {
-    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::OCCUPIED_AREA);
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
 }
 
 void SceneSession::ResetOccupiedAreaDirtyFlags()
 {
-    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::OCCUPIED_AREA);
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
 }
 
 uint32_t SceneSession::GetOccupiedAreaDirtyFlags()
