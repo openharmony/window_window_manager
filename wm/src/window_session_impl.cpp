@@ -1323,6 +1323,7 @@ WMError WindowSessionImpl::NotifySnapshotUpdate()
         ret = session->NotifySnapshotUpdate();
     } else {
         TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
+        ret = WMError::WM_ERROR_INVALID_SESSION;
     }
     return ret;
 }
