@@ -21,13 +21,12 @@
 
 using namespace OHOS::Rosen;
 
-std::shared_mutex idMapMutex_;
-
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t MAX_CONTROL_TYPE_NUM = 8;
     constexpr uint32_t MAX_CONTROL_STATUS_NUM = 1;
+    std::shared_mutex idMapMutex_;
     std::map<uint32_t, sptr<WebPictureInPictureControllerInterface>> g_ControllerIds;
 }
 
