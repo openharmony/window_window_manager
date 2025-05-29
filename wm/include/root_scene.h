@@ -117,7 +117,7 @@ public:
 
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
 
-    Ace::UIContent* GetUIContentByDisplayId(DisplayId displayId, bool& isFound)
+    std::pair<Ace::UIContent*, bool> GetUIContentByDisplayId(DisplayId displayId);
 
     void AddRootScene(DisplayId displayId, wptr<Window> window);
 

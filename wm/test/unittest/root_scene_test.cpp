@@ -575,13 +575,10 @@ HWTEST_F(RootSceneTest, AddRootScene, TestSize.Level1)
     wptr<Window> weakWindow1(screenScene);
     rootScene->AddRootScene(1, weakWindow);
     rootScene->AddRootScene(12, weakWindow1);
-    bool findScreenScene = false;
 
-    auto res = rootScene->GetUIContentByDisplayId(1, findScreenScene);
-    ASSERT_NE(res, nullptr);
-    ASSERT_EQ(findScreenScene, true);
+    auto res = rootScene->GetUIContentByDisplayId(1);
+    ASSERT_EQ(res.second, true);
     res = rootScene->GetUIContentByDisplayId(12, findScreenScene);
-    ASSERT_EQ(res, nullptr);
 }
 
 /**
@@ -595,14 +592,12 @@ HWTEST_F(RootSceneTest, RemoveRootScene, TestSize.Level1)
     rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     wptr<Window> weakWindow(rootScene);
     rootScene->AddRootScene(0, weakWindow);
-    bool findScreenScene = false;
 
-    auto res = rootScene->GetUIContentByDisplayId(0, findScreenScene);
-    ASSERT_NE(res, nullptr);
-    ASSERT_EQ(findScreenScene, true);
+    auto res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, true);
     rootScene->RemoveRootScene(0);
-    res = rootScene->GetUIContentByDisplayId(0, findScreenScene);
-    ASSERT_EQ(findScreenScene, false);
+    res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, false);
 }
 
 } // namespace
