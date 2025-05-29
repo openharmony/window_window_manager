@@ -598,9 +598,10 @@ HWTEST_F(RootSceneTest, RemoveRootScene, TestSize.Level1)
     bool findScreenScene = false;
 
     auto res = rootScene->GetUIContentByDisplayId(0, findScreenScene);
+    ASSERT_NE(res, nullptr);
     ASSERT_EQ(findScreenScene, true);
     rootScene->RemoveRootScene(0);
-    res = rootScene->GetUIContentByDisplayId(0);
+    res = rootScene->GetUIContentByDisplayId(0, findScreenScene);
     ASSERT_EQ(findScreenScene, false);
 }
 
