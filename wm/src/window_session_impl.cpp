@@ -4798,14 +4798,9 @@ void WindowSessionImpl::NofityUIExtHostWindowRectChangeListeners(const Rect rect
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
     bool isUIExtensionWindow = WindowHelper::IsUIExtensionWindow(GetType());
-    std::unordered_set<int32_t> rectChangeUIExtListenerIdsCopy;
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIdsCopy = rectChangeUIExtListenerIds_;
-    }
-    if (!isUIExtensionWindow && !rectChangeUIExtListenerIdsCopy.empty()) {
+    if (!isUIExtensionWindow && !rectChangeUIExtListenerIds_.empty()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "rectChangeUIExtListenerIds_ size: %{public}zu",
-            rectChangeUIExtListenerIdsCopy.size());
+            rectChangeUIExtListenerIds_.size());
         AAFwk::Want rectWant;
         rectWant.SetParam(Extension::RECT_X, rect.posX_);
         rectWant.SetParam(Extension::RECT_Y, rect.posY_);
@@ -4814,7 +4809,7 @@ void WindowSessionImpl::NofityUIExtHostWindowRectChangeListeners(const Rect rect
         rectWant.SetParam(Extension::RECT_CHANGE_REASON, static_cast<int32_t>(reason));
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), rectWant,
-            rectChangeUIExtListenerIdsCopy, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -6773,10 +6768,7 @@ WMError WindowSessionImpl::HandleRegisterHostWindowRectChangeListener(uint32_t c
     const AAFwk::Want& data)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIds_.emplace(persistentId);
-    }
+    rectChangeUIExtListenerIds_.emplace(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d register rect change listener", persistentId);
     return WMError::WM_OK;
 }
@@ -6785,10 +6777,7 @@ WMError WindowSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t
     const AAFwk::Want& data)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIds_.erase(persistentId);
-    }
+    rectChangeUIExtListenerIds_.erase(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
     return WMError::WM_OK;
 }

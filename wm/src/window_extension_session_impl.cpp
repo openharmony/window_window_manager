@@ -465,9 +465,7 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
 {
     WMError ret = WMError::WM_OK;
     bool isHostWindowRectChangeListenerEmpty = false;
-    bool isRectChangeUIExtListenerIdsEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
-    size_t rectChangeUIExtListenerIdsSize = 0;
     {
         std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
         ret = UnregisterListener(hostWindowRectChangeListener_, listener);
@@ -477,15 +475,10 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
         isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
         hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
     }
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
-        rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
-    }
-    if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
+    if (!isHostWindowRectChangeListenerEmpty || !rectChangeUIExtListenerIds_.empty()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
             "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
+            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIds_.size());
         return ret;
     }
     AAFwk::Want dataToSend;
@@ -1521,7 +1514,7 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
 void WindowExtensionSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr, windowId: %{public}d", GetWindowId());
         return;
     }
     WindowSessionImpl::NotifyPointerEvent(pointerEvent);
@@ -1814,10 +1807,7 @@ WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(u
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIds_.emplace(persistentId);
-    }
+    rectChangeUIExtListenerIds_.emplace(persistentId);
     return WMError::WM_OK;
 }
 
@@ -1826,24 +1816,17 @@ WMError WindowExtensionSessionImpl::HandleUnregisterHostWindowRectChangeListener
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     bool isHostWindowRectChangeListenerEmpty = false;
-    bool isRectChangeUIExtListenerIdsEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
-    size_t rectChangeUIExtListenerIdsSize = 0;
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIds_.erase(persistentId);
-        isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
-        rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
-    }
+    rectChangeUIExtListenerIds_.erase(persistentId);
     {
         std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
         isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
         hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
     }
-    if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
+    if (!isHostWindowRectChangeListenerEmpty || !rectChangeUIExtListenerIds_.empty()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
             "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
+            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIds_.size());
         return WMError::WM_OK;
     }
     return SendExtensionMessageToHost(code, data);
@@ -1996,15 +1979,10 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
         }
     }
     auto uiContent = GetUIContentSharedPtr();
-    std::unordered_set<int32_t> rectChangeUIExtListenerIdsCopy;
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        rectChangeUIExtListenerIdsCopy = rectChangeUIExtListenerIds_;
-    }
-    if (!rectChangeUIExtListenerIdsCopy.empty() && uiContent != nullptr) {
+    if (!rectChangeUIExtListenerIds_.empty() && uiContent != nullptr) {
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), data,
-            rectChangeUIExtListenerIdsCopy, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+            rectChangeUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     return WMError::WM_OK;
 }

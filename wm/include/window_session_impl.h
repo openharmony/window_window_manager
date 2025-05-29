@@ -575,7 +575,6 @@ protected:
      * UIExtension
      */
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
-    std::mutex rectChangeUIExtListenerIdsMutex_;
 
     /*
      * Sub Window
