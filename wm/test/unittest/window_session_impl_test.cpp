@@ -363,14 +363,23 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestS
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(true, window->property_->IsDecorEnable());
     window->property_->SetDecorEnable(false);
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToSubWindow(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->MakeSubOrDialogWindowDragableAndMoveble();
-    EXPECT_EQ(false, window->property_->IsDecorEnable());
-    window->property_->SetIsUIExtensionAbilityProcess(true);
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble05_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    mainWindow->property_->SetPersistentId(1);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(true, window->property_->IsDecorEnable());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
+    mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = mainWindow->context_;
+    window->property_->SetDecorEnable(false);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 end";
 }
 
