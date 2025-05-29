@@ -1909,6 +1909,13 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
     keyboardCb->onNotifyOccupiedAreaChange = [this](const sptr<OccupiedAreaChangeInfo>& info) {
         this->onNotifyAvoidAreaChangeForRootFunc_(nullptr, AvoidAreaType::TYPE_KEYBOARD, info);
     };
+    keyboardCb->isLastFrameLayoutFinished = [this]() {
+        if (isRootSceneLastFrameLayoutFinishedFunc_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "isRootSceneLastFrameLayoutFinishedFunc_ is nullptr");
+            return false;
+        }
+        return isRootSceneLastFrameLayoutFinishedFunc_();
+    };
     return keyboardCb;
 }
 
@@ -11933,7 +11940,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         std::vector<uint32_t> startingAppZOrderList;
         processingFlushUIParams_.store(true);
         auto keyboardSession = GetKeyboardSession(screenId, false);
-        uint32_t callingId = 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -11950,15 +11956,18 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                         startingAppZOrderList.push_back(iter->second.zOrder_);
                         sceneSession->SetStartingBeforeVisible(false);
                     }
-                    if (keyboardSession != nullptr &&
-                        keyboardSession->GetPersistentId() == sceneSession->GetPersistentId()) {
-                        callingId = keyboardSession->GetCallingSessionId();
-                    }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
                 } else {
                     sessionMapDirty_ |= sceneSession->UpdateUIParam();
                 }
             }
+        }
+        if (keyboardSession != nullptr && 
+            (keyboardSession->GetOccupiedAreaDirtyFlags() &
+            static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA)) !=
+            static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
+            keyboardSession->ProcessKeyboardOccupiedAreaInfo(keyboardSession->GetCallingSessionId(), false, false, true);
+            keyboardSession->ResetOccupiedAreaDirtyFlags();
         }
         processingFlushUIParams_.store(false);
 
@@ -11980,12 +11989,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             AnomalyDetection::SceneZOrderCheckProcess();
         } else if (sessionMapDirty_ == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
             PostProcessProperty(sessionMapDirty_);
-        }
-        if (keyboardSession != nullptr &&
-            (keyboardSession->GetOccupiedAreaDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::OCCUPIED_AREA)) !=
-            static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
-            keyboardSession->ProcessKeyboardOccupiedAreaInfo(callingId, false, false, true);
-            keyboardSession->ResetOccupiedAreaDirtyFlags();
         }
         FlushWindowInfoToMMI();
         NotifyWindowPropertyChange(screenId);
