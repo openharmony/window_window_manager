@@ -1529,6 +1529,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetWindowMode());
+    NotifyWindowStatusDidChange(GetWindowMode());
     NotifyDisplayInfoChange(displayInfo);
     return ret;
 }
@@ -1635,6 +1636,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     }
     NotifyWindowStatusChange(GetWindowMode());
+    NotifyWindowStatusDidChange(GetWindowMode());
     escKeyEventTriggered_ = false;
     TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
         property_->GetPersistentId(), type);
