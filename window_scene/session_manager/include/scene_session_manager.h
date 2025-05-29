@@ -752,7 +752,7 @@ private:
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     void CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession);
-    bool IsNeedUpdateBrightness(float brightness);
+    bool IsNeedUpdateBrightness(int32_t persistentId, float brightness);
 
     /**
      * UIExtension
