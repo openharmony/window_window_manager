@@ -144,7 +144,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, 
 
 /**
  * @tc.name: HandleAngleOrHallChange05
- * @tc.desc: test curHallPrimary && curHallSecondary
+ * @tc.desc: test curHallAB && curHallBC
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange05, TestSize.Level1)
@@ -160,16 +160,16 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange05, 
         screenPowerTaskScheduler);
     EXPECT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
-    manager.curHallPrimary = 0;
-    manager.curHallSecondary = 0;
+    manager.curHallAB = 0;
+    manager.curHallBC = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
-    manager.curHallPrimary = 0;
-    manager.curHallSecondary = 1;
+    manager.curHallAB = 0;
+    manager.curHallBC = 1;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
-    manager.curHallPrimary = 1;
-    manager.curHallSecondary = 0;
+    manager.curHallAB = 1;
+    manager.curHallBC = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
