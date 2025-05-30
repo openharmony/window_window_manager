@@ -45,9 +45,6 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr int32_t HALF_FOLD_VALUE = 3;
 constexpr int32_t REFLEXION_VALUE = 2;
-uint16_t curHallPrimary = -1;
-uint16_t curHallSecondary = -1;
-std::mutex secondaryFoldStatusMutex;
 } // namespace
 
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
@@ -56,6 +53,10 @@ SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager(
 void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    if (halls.size() != HALLS_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
+        return;
+    }
     bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     {
         std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex);
