@@ -943,6 +943,11 @@ protected:
     std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
 
     /*
+     * Compatible Mode
+     */
+    void HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect);
+
+    /*
      * UIExtension
      */
     static GetConstrainedModalExtWindowInfoFunc onGetConstrainedModalExtWindowInfoFunc_;
@@ -1003,7 +1008,6 @@ private:
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     void WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY);
-    void HookStartMoveRect(WSRect& newRect, const WSRect& sessionRect);
     bool IsCompatibilityModeScale(float scaleX, float scaleY);
     void CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isScale);
     void ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect);
