@@ -369,9 +369,15 @@ bool WindowSessionImpl::IsAdaptToSubWindow() const
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
-    bool isNormalCompatSubWindow = IsAdaptToSubWindow() &&
-        !property_->GetIsUIExtensionAbilityProcess();
-    if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isNormalCompatSubWindow && windowOption_ != nullptr) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && windowOption_ != nullptr) {
+        // The context of the UEC child window is not the context of the main window
+        auto mainWindow = FindMainWindowWithContext();
+        // The child Windows created by compatible applications are mounted within the parent window,
+        // with the same specifications as the mobile phone. No child Windows with title bars are created
+        if (mainWindow && mainWindow->IsAdaptToSubWindow()) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "compat sub window not has title");
+            return;
+        }
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_PC, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
