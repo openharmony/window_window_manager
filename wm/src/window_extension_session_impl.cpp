@@ -1383,8 +1383,8 @@ WMError WindowExtensionSessionImpl::GetGestureBackEnabled(bool& enable) const
 WMError WindowExtensionSessionImpl::SetGestureBackEnabled(bool enable)
 {
     AAFwk::WantParams want;
-    want.SetParam("ohos.atomicService.window.function", AAFwk::String::Box("setGestureBackEnabled"));
-    want.SetParam("ohos.atomicService.window.param.enable", AAFwk::Boolean::Box(enable));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setGestureBackEnabled"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1416,10 +1416,10 @@ WMError WindowExtensionSessionImpl::UpdateSystemBarProperties(
     const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
     AAFwk::WantParams want;
-    want.SetParam("ohos.atomicService.window.function", AAFwk::String::Box("setWindowSystemBarEnable"));
-    want.SetParam("ohos.atomicService.window.param.status",
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowSystemBarEnable"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_STATUS,
         AAFwk::Boolean::Box(systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR).enable_));
-    want.SetParam("ohos.atomicService.window.param.navigation",
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_NAVIGATION,
         AAFwk::Boolean::Box(systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR).enable_));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
@@ -1432,10 +1432,10 @@ WMError WindowExtensionSessionImpl::UpdateHostSpecificSystemBarEnabled(const std
     bool enableAnimation)
 {
     AAFwk::WantParams want;
-    want.SetParam("ohos.atomicService.window.function", AAFwk::String::Box("setSpecificSystemBarEnabled"));
-    want.SetParam("ohos.atomicService.window.param.name", AAFwk::String::Box(name));
-    want.SetParam("ohos.atomicService.window.param.enable", AAFwk::Boolean::Box(enable));
-    want.SetParam("ohos.atomicService.window.param.enableAnimation", AAFwk::Boolean::Box(enableAnimation));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setSpecificSystemBarEnabled"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_NAME, AAFwk::String::Box(name));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLEANIMATION, AAFwk::Boolean::Box(enableAnimation));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1451,8 +1451,8 @@ bool WindowExtensionSessionImpl::GetImmersiveModeEnabledState() const
 WMError WindowExtensionSessionImpl::SetImmersiveModeEnabledState(bool enable)
 {
     AAFwk::WantParams want;
-    want.SetParam("ohos.atomicService.window.function", AAFwk::String::Box("setImmersiveModeEnabledState"));
-    want.SetParam("ohos.atomicService.window.param.enable", AAFwk::Boolean::Box(enable));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setImmersiveModeEnabledState"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
