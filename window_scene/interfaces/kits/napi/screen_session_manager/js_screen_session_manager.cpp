@@ -367,7 +367,7 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip, "OnScreenConnected");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnScreenConnected: Failed to SendEvent.");
         }
@@ -412,7 +412,7 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenDisconnected");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnScreenDisconnected: Failed to SendEvent.");
         }
@@ -439,7 +439,7 @@ bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& in
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnTakeOverShutdown");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnTakeOverShutdown: Failed to SendEvent.");
         }

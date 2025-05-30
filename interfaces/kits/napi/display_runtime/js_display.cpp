@@ -445,7 +445,7 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetCutoutInfo")) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -498,7 +498,7 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetAvailableArea")) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -551,7 +551,7 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnHasImmersiveWindow")) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -620,7 +620,7 @@ napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetSupportedColorSpaces")) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -689,7 +689,7 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetSupportedHDRFormats")) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
