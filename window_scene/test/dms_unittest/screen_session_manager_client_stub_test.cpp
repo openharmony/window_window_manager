@@ -483,6 +483,27 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest19, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest20
+ * @tc.desc: TRANS_ID_ON_SCREEN_MODE_CHANGED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest20, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
+    data.WriteInt32(static_cast<uint32_t>(screenModeChangeEvent));
+
+    uint32_t code = static_cast<uint32_t>(
+        IScreenSessionManagerClient::ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_MODE_CHANGED);
+    int res = screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: HandleOnScreenConnectionChanged
  * @tc.desc: HandleOnScreenConnectionChanged test
  * @tc.type: FUNC
@@ -891,15 +912,33 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnDumperClientScreenSessions,
 }
 
 /**
- * @tc.name: HandleOnBeforeScreenPropertyChange
- * @tc.desc: HandleOnBeforeScreenPropertyChange test
+ * @tc.name: HandleOnBeforeScreenPropertyChange01
+ * @tc.desc: HandleOnBeforeScreenPropertyChange test err
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
+    uint32_t errFoldStatus = 123;
+    data.WriteUint32(errFoldStatus);
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnBeforeScreenPropertyChange(data, reply);
+    EXPECT_EQ(ret, 22);
+}
 
+/**
+ * @tc.name: HandleOnBeforeScreenPropertyChange02
+ * @tc.desc: HandleOnBeforeScreenPropertyChange test normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnBeforeScreenPropertyChange02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    FoldStatus foldStatus = FoldStatus::FOLDED;
+    data.WriteUint32(static_cast<uint32_t>(foldStatus));
     data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
     ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
     auto ret = screenSessionManagerClientStub_->HandleOnBeforeScreenPropertyChange(data, reply);
@@ -926,6 +965,25 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleSyncScreenCombination, TestSi
     data.WriteUint32(static_cast<u_int32_t>(extendCombination));
     ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
     auto ret = screenSessionManagerClientStub_->HandleSyncScreenCombination(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnScreenModeChanged
+ * @tc.desc: HandleOnScreenModeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenModeChanged, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
+    data.WriteUint32(static_cast<u_int32_t>(screenModeChangeEvent));
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnScreenModeChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
 } // namespace Rosen

@@ -32,6 +32,11 @@ public:
                 (override));
     MOCK_METHOD(bool, WriteInterfaceToken, (MessageParcel & data), (override));
 
+    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
+    {
+        return DataHandlerErr::OK;
+    }
+
     // Helper methods to expose protected methods for testing
     using DataHandler::NotifyDataConsumer;
 };

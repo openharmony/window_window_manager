@@ -45,6 +45,9 @@ public:
     sptr<WindowSessionProperty> property;
     SessionInfo info;
     WSPropertyChangeAction action;
+private:
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void SceneSessionTest4::SetUpTestCase()
@@ -60,6 +63,11 @@ void SceneSessionTest4::SetUp()
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     property = sptr<WindowSessionProperty>::MakeSptr();
     action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    if (!handler_) {
+        auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    sceneSession->SetEventHandler(handler_, nullptr);
 }
 
 void SceneSessionTest4::TearDown()
@@ -889,9 +897,14 @@ HWTEST_F(SceneSessionTest4, SetSystemWindowEnableDrag01, TestSize.Level1)
     info.bundleName_ = "SetSystemWindowEnableDrag01";
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto ret = session->SetSystemWindowEnableDrag(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = session->SetSystemWindowEnableDrag(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1266,27 +1279,22 @@ HWTEST_F(SceneSessionTest4, IsLayoutFullScreen, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, TestSize.Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "UpdateAllModalUIExtensions";
-    info.bundleName_ = "UpdateAllModalUIExtensions";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
     WSRect globalRect = { 100, 100, 100, 100 };
-    session->SetSessionGlobalRect(globalRect);
+    sceneSession->SetSessionGlobalRect(globalRect);
+
+    WSRect newGlobalRect = { 150, 150, 100, 100 };
+    sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
 
     Rect windowRect = { 100, 100, 100, 100 };
     Rect uiExtRect = { 0, 0, 100, 100 };
     ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
     ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
-    session->modalUIExtensionInfoList_.push_back(extensionInfo);
-    session->modalUIExtensionInfoList_.push_back(extensionInfo2);
-
-    WSRect newGlobalRect = { 150, 150, 100, 100 };
-    session->UpdateAllModalUIExtensions(newGlobalRect);
+    sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo);
+    sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo2);
+    sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(sceneSession->modalUIExtensionInfoList_[1].windowRect.posX_, 150);
+    EXPECT_EQ(sceneSession->modalUIExtensionInfoList_[1].windowRect.posY_, 150);
 }
 
 /**

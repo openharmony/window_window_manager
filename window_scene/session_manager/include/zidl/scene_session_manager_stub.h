@@ -42,6 +42,8 @@ private:
     int HandleDestroyAndDisconnectSpcificSession(MessageParcel& data, MessageParcel& reply);
     int HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
@@ -95,6 +97,7 @@ private:
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
@@ -103,6 +106,7 @@ private:
     int HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply);
     int HandleGetHostWindowRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetHostGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetFreeMultiWindowEnableState(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowWindowStatus(MessageParcel& data, MessageParcel& reply);
     int HandleGetCallingWindowRect(MessageParcel& data, MessageParcel& reply);
@@ -119,6 +123,7 @@ private:
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
+    int HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
@@ -126,10 +131,13 @@ private:
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply);
+    int HandleAnimateTo(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
+    int HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

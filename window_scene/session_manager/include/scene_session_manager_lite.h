@@ -90,6 +90,9 @@ public:
         const std::vector<std::string>& bundleNameList) override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override;
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
 };
 } // namespace OHOS::Rosen
 

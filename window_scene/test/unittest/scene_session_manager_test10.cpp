@@ -593,6 +593,23 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeWindowRectYInVirtualDisplay
+ * @tc.desc: ChangeWindowRectYInVirtualDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ChangeWindowRectYInVirtualDisplay, TestSize.Level1)
+{
+    DisplayId defaultDisplayId = 0;
+    DisplayId displayId = 0;
+    int32_t y = 100;
+    ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
+    EXPECT_EQ(displayId, 0);
+    EXPECT_EQ(y, 100);
+    displayId = 999;
+    ssm_->ChangeWindowRectYInVirtualDisplay(displayId, y);
+    EXPECT_EQ(displayId, defaultDisplayId);
+}
+/**
  * @tc.name: ProcessFocusZOrderChange
  * @tc.desc: ProcessFocusZOrderChange
  * @tc.type: FUNC
@@ -1638,6 +1655,25 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: refreshAllAppUseControlMap
+ * @tc.desc: refreshAllAppUseControlMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppUseControlInfo appUseControlInfo;
+    appUseControlInfo.bundleName_ = "app_bundle_name";
+    appUseControlInfo.isNeedControl_ = true;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
+
+    appUseControlInfo.isNeedControl_ = false;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
 }
 } // namespace
 } // namespace Rosen

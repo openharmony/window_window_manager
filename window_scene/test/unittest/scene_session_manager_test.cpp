@@ -652,7 +652,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -678,7 +679,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -704,7 +706,8 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
     });
     usleep(WAIT_SYNC_IN_NS);
@@ -1910,6 +1913,36 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo07
+ * @tc.desc: system touchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo07, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.windowType_ = 2122;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(true);
+    sceneSession->SetSystemTouchable(false);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->sceneSessionMap_.insert({ 0, nullptr });
+
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    sceneSession->SetRSVisible(false);
+    result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    EXPECT_EQ(0, infos.size());
+}
+
+/**
  * @tc.name: SkipSnapshotForAppProcess
  * @tc.desc: add or cancel snapshot skip for app process
  * @tc.type: FUNC
@@ -2053,7 +2086,7 @@ HWTEST_F(SceneSessionManagerTest, TestReportIncompleteScreenFoldStatusChangeEven
 HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, "MainPage" };
+    AppForceLandscapeConfig config = { 0, "MainPage", false };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -2067,8 +2100,9 @@ HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "GetAppForceLandscapeConfig";
     AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
-    ASSERT_EQ(config.mode_, 0);
-    ASSERT_EQ(config.homePage_, "");
+    EXPECT_EQ(config.mode_, 0);
+    EXPECT_EQ(config.homePage_, "");
+    EXPECT_EQ(config.isSupportSplitMode_, false);
 }
 
 /**
@@ -2380,6 +2414,20 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetImageForRecent
+ * @tc.desc: SetImageForRecent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetImageForRecent, TestSize.Level1)
+{
+    uint32_t imgResourceId = 1;
+    ImageFit imageFit = ImageFit::FILL;
+    int32_t persistentId = 1;
+    auto result = ssm_->SetImageForRecent(imgResourceId, imageFit, persistentId);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: SetIsWindowRectAutoSave
  * @tc.desc: SetIsWindowRectAutoSave
  * @tc.type: FUNC
@@ -2625,12 +2673,12 @@ HWTEST_F(SceneSessionManagerTest, MinimizeByWindowId, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetForegroundWindowNum, TestSize.Level1)
 {
-    int32_t windowNum = 0;
+    uint32_t windowNum = 0;
     WMError res = ssm_->SetForegroundWindowNum(windowNum);
     if (!ssm_->systemConfig_.freeMultiWindowSupport_) {
         EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
     } else {
-        EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+        EXPECT_EQ(WMError::WM_OK, res);
         windowNum = 1;
         res = ssm_->SetForegroundWindowNum(windowNum);
         EXPECT_EQ(WMError::WM_OK, res);
@@ -2649,6 +2697,18 @@ HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
     bool needOffScreen = true;
     WSError res = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
+/**
+ * @tc.name: ConfigSupportFunctionType
+ * @tc.desc: test function : ConfigSupportFunctionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
+{
+    ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
+    EXPECT_EQ(true,
+        (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
 }
 } // namespace
 } // namespace Rosen

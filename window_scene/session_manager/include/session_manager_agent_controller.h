@@ -50,6 +50,8 @@ public:
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
 private:
     SessionManagerAgentController()

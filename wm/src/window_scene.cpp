@@ -174,7 +174,20 @@ WMError WindowScene::GoResume()
         TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow->Resume();
+    TLOGI(WmsLogTag::WMS_MAIN, "begin call Interactive");
+    mainWindow->Interactive();
+    return WMError::WM_OK;
+}
+
+WMError WindowScene::GoInteractive()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "go interactive in");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow->Interactive();
     return WMError::WM_OK;
 }
 

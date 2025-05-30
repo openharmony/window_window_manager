@@ -181,17 +181,14 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeEnableInPad
- * @tc.desc: SetCompatibleModeEnableInPad test
+ * @tc.name: SetCompatibleModeProperty
+ * @tc.desc: SetCompatibleModeProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, TestSize.Level1)
+HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    property->SetCompatibleModeEnableInPad(enable);
-    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
 }
 
 /**
@@ -1448,23 +1445,6 @@ HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeInPc
- * @tc.desc: SetCompatibleModeInPc test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    bool isSupportDragInPcCompatibleMode = true;
-    property->SetCompatibleModeInPc(enable);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
-    ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
-}
-
-/**
  * @tc.name: UpdateMaximizeMode
  * @tc.desc: UpdateMaximizeMode test
  * @tc.type: FUNC
@@ -1528,6 +1508,25 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, TestSize.Level1)
     ret = session_->SwitchFreeMultiWindow(sessionConfig);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 }
+
+/**
+ * @tc.name: InitSessionPropertyWhenConnect
+ * @tc.desc: InitSessionPropertyWhenConnect test
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionTest, InitSessionPropertyWhenConnect, TestSize.Level1)
+ {
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->isSystemCalling_ = false;
+    session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session_->InitSessionPropertyWhenConnect(property);
+    ASSERT_EQ(true, property->dragEnabled_);
+
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session_->InitSessionPropertyWhenConnect(property);
+    ASSERT_EQ(false, property->dragEnabled_);
+ }
 
 /**
  * @tc.name: SetTouchHotAreas

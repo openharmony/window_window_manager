@@ -44,7 +44,7 @@ using ConfigItem = WindowSceneConfig::ConfigItem;
 ConfigItem ReadConfig(const std::string& xmlStr)
 {
     ConfigItem config;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return config;
     }
@@ -469,6 +469,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, TestSize.Level1)
     uint32_t result = 150;
     KeyboardSceneAnimationConfig animationIn;
     KeyboardSceneAnimationConfig animationOut;
+    ssm_->systemConfig_.animationIn_.curveType_ = "";
     ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
     ASSERT_EQ(animationIn.duration_, result);
 }

@@ -2280,7 +2280,7 @@ HWTEST_F(ScreenSessionManagerTest, HasPrivateWindow, TestSize.Level1)
  * @tc.desc: GetAvailableArea test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetAvailableArea, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetAvailableArea01, TestSize.Level1)
 {
     DMRect area;
     EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetAvailableArea(SCREEN_ID_INVALID, area));
@@ -2289,6 +2289,42 @@ HWTEST_F(ScreenSessionManagerTest, GetAvailableArea, TestSize.Level1)
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
     EXPECT_EQ(DMError::DM_OK, ssm_->GetAvailableArea(id, area));
+}
+
+/**
+ * @tc.name: GetAvailableArea
+ * @tc.desc: GetAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAvailableArea02, TestSize.Level1)
+{
+    DMRect area;
+    DisplayId id = 999;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetAvailableArea(id, area));
+    ssm_->screenSessionMap_.clear();
+}
+
+
+/**
+ * @tc.name: GetExpandAvailableArea
+ * @tc.desc: GetExpandAvailableArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetExpandAvailableArea02, TestSize.Level1)
+{
+    DMRect area;
+    DisplayId id = 0;
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->GetExpandAvailableArea(id, area));
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    EXPECT_EQ(DMError::DM_OK, ssm_->GetExpandAvailableArea(id, area));
+    ssm_->screenSessionMap_.clear();
 }
 
 /**
@@ -2551,7 +2587,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualDisplayMuteFlag02, Function | Small
  * @tc.desc: GetAllDisplayPhysicalResolution test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution01, TestSize.Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize {};
     if (ssm_ != nullptr) {
@@ -2560,6 +2596,54 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution, TestSize.Lev
     } else {
         ASSERT_TRUE(allSize.empty());
     }
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution02, TestSize.Level1)
+{
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    std::vector<DisplayPhysicalResolution> result = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_TRUE(!result.empty());
+    ssm_->allDisplayPhysicalResolution_.clear();
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution03, TestSize.Level1)
+{
+    DisplayPhysicalResolution resolution;
+    resolution.physicalWidth_ = 1920;
+    resolution.physicalHeight_ = 1080;
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.push_back(resolution);
+    std::vector<DisplayPhysicalResolution> result = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].physicalWidth_, 1920);
+    EXPECT_EQ(result[0].physicalHeight_, 1080);
+    ssm_->allDisplayPhysicalResolution_.clear();
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalResolution
+ * @tc.desc: GetAllDisplayPhysicalResolution test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution04, TestSize.Level1)
+{
+    ssm_->allDisplayPhysicalResolution_.clear();
+    ssm_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    ssm_->allDisplayPhysicalResolution_.back().foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    std::vector<DisplayPhysicalResolution> resolutions = ssm_->GetAllDisplayPhysicalResolution();
+    EXPECT_EQ(resolutions.back().foldDisplayMode_, FoldDisplayMode::FULL);
+    ssm_->allDisplayPhysicalResolution_.clear();
 }
 
 /**
@@ -5564,23 +5648,6 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, TestSize.L
 }
 
 /**
- * @tc.name: MultiScreenChangeOuter
- * @tc.desc: MultiScreenChangeOuter
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    EXPECT_EQ(ssm_->clientProxy_, nullptr);
-    std::string outerFlag = "2";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "0";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-    outerFlag = "1";
-    ssm_->MultiScreenChangeOuter(outerFlag);
-}
-
-/**
  * @tc.name: UpdateValidArea
  * @tc.desc: UpdateValidArea
  * @tc.type: FUNC
@@ -5596,8 +5663,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateValidArea, Function | SmallTest | Level
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
 
-    int32_t originValidWidth = screenSession->GetValidWidth();
-    int32_t originValidHeight = screenSession->GetValidHeight();
+    uint32_t originValidWidth = screenSession->GetValidWidth();
+    uint32_t originValidHeight = screenSession->GetValidHeight();
     ssm_->UpdateValidArea(screenId, 800, 1000);
     EXPECT_EQ(800, screenSession->GetValidWidth());
     EXPECT_EQ(1000, screenSession->GetValidHeight());
@@ -5638,7 +5705,7 @@ HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardStatus01, Function | SmallTe
     auto ret = ssm_->SetSystemKeyboardStatus(true);
     ASSERT_NE(ret, DMError::DM_ERROR_UNKNOWN);
 }
- 
+
 /**
  * @tc.name: SetSystemKeyboardStatus
  * @tc.desc: SetSystemKeyboardStatus with false as parameter
@@ -6005,7 +6072,7 @@ HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap, Function | SmallTest
 HWTEST_F(ScreenSessionManagerTest, SetMultiScreenFrameControl, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    
+
     sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     screenSession1->SetScreenType(ScreenType::REAL);
@@ -6046,7 +6113,7 @@ HWTEST_F(ScreenSessionManagerTest, GetInternalScreenSession, Function | SmallTes
     sptr<ScreenSession> screenSession1 = nullptr;
     ASSERT_EQ(nullptr, screenSession1);
     ssm_->screenSessionMap_[50] = screenSession1;
-    
+
     sptr<ScreenSession> screenSession2 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession2);
     screenSession2->SetScreenType(ScreenType::REAL);
@@ -6092,7 +6159,7 @@ HWTEST_F(ScreenSessionManagerTest, GetInternalAndExternalSession, Function | Sma
     sptr<ScreenSession> screenSession1 = nullptr;
     ASSERT_EQ(nullptr, screenSession1);
     ssm_->screenSessionMap_[50] = screenSession1;
-    
+
     sptr<ScreenSession> screenSession2 = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession2);
     screenSession2->SetIsCurrentInUse(false);
@@ -6279,7 +6346,6 @@ HWTEST_F(ScreenSessionManagerTest, ShouldReturnOkWhenMultiScreenNotEnabled, Test
 HWTEST_F(ScreenSessionManagerTest, ShouldReturnNullPtrWhenDefaultScreenIsNull, TestSize.Level1)
 {
 #ifndef WM_MULTI_SCREEN_ENABLE
-#define WM_MULTI_SCREEN_ENABLE
     ScreenSessionManager ssm;
     ssm = ScreenSessionManager::GetInstance();
 
@@ -6297,7 +6363,6 @@ HWTEST_F(ScreenSessionManagerTest, ShouldReturnNullPtrWhenDefaultScreenIsNull, T
 HWTEST_F(ScreenSessionManagerTest, ShouldHandleExistingGroupSmsId, TestSize.Level1)
 {
 #ifndef WM_MULTI_SCREEN_ENABLE
-#define WM_MULTI_SCREEN_ENABLE
     ScreenSessionManager ssm;
     ssm = ScreenSessionManager::GetInstance();
 
@@ -6320,7 +6385,6 @@ HWTEST_F(ScreenSessionManagerTest, ShouldHandleExistingGroupSmsId, TestSize.Leve
 HWTEST_F(ScreenSessionManagerTest, ShouldHandleNonExistingGroupSmsId, TestSize.Level1)
 {
 #ifndef WM_MULTI_SCREEN_ENABLE
-#define WM_MULTI_SCREEN_ENABLE
     ScreenSessionManager ssm;
     ssm = ScreenSessionManager::GetInstance();
 
@@ -6489,17 +6553,35 @@ HWTEST_F(ScreenSessionManagerTest, GetOrCreatePhysicalScreenSession, TestSize.Le
 }
 
 /**
- * @tc.name: GetScreenSessionByRsId
- * @tc.desc: GetScreenSessionByRsId
+ * @tc.name: GetScreenSessionByRsId01
+ * @tc.desc: GetScreenSessionByRsId01
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId01, TestSize.Level1)
 {
+    ssm_->screenSessionMap_.erase(123);
+    ScreenId rsScreenId = 123;
+    sptr<ScreenSession> newSession = new ScreenSession();
+    newSession->SetRSScreenId(rsScreenId);
+    ssm_->screenSessionMap_[rsScreenId] = newSession;
+
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
+    EXPECT_NE(result, nullptr);
+    ssm_->screenSessionMap_.erase(123);
+}
+
+/**
+ * @tc.name: GetScreenSessionByRsId02
+ * @tc.desc: GetScreenSessionByRsId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenSessionByRsId02, TestSize.Level1)
+{
+    ssm_->screenSessionMap_.clear();
     ScreenId rsScreenId = 123;
     ssm_->screenSessionMap_[rsScreenId] = nullptr;
-    sptr<ScreenSession> newSession = new ScreenSession();
 
-    sptr<ScreenSession> result = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(rsScreenId);
+    sptr<ScreenSession> result = ssm_->GetScreenSessionByRsId(rsScreenId);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -6524,6 +6606,290 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession002, TestSize.Level1)
     ssm_->screenAgentMap_.clear();
     ScreenId screenId = 123;
     EXPECT_EQ(ssm_->GetPhysicalScreenSession(screenId), nullptr);
+}
+
+/**
+ * @tc.name: OnScreenModeChange
+ * @tc.desc: OnScreenModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenModeChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ScreenModeChangeEvent screenModeChangeEvent = ScreenModeChangeEvent::UNKNOWN;
+    ssm_->OnScreenModeChange(screenModeChangeEvent);
+}
+
+/**
+ * @tc.name: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.desc: GetIsFoldStatusLocked/SetIsFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetIsFoldStatusLocked, Function | SmallTest | Level3)
+{
+    ssm_->SetIsFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetIsFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: SetFoldStatusExpandAndLocked
+ * @tc.desc: SetFoldStatusExpandAndLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->SetFoldStatusExpandAndLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->SetFoldStatusExpandAndLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap01
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the map is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap01, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> emptyMap;
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(emptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap02
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap02, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, ""));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap03
+ * @tc.desc: Test CheckMultiScreenInfoMap function when the serial number is not found in the map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap03, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial456"));
+}
+
+/**
+ * @tc.name: CheckMultiScreenInfoMap04
+ * @tc.desc: Test CHeckMultiScreenInfoMap function when all checks pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckMultiScreenInfoMap04, TestSize.Level1)
+{
+    std::map<std::string, MultiScreenInfo> nonEmptyMap;
+    nonEmptyMap["serial123"] = MultiScreenInfo();
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().CheckMultiScreenInfoMap(nonEmptyMap, "serial123"));
+}
+
+/**
+ * @tc.name: AdaptSuperHorizonalBoot
+ * @tc.desc: AdaptSuperHorizonalBoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AdaptSuperHorizonalBoot, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ScreenSessionConfig config;
+    sptr<ScreenSession> session = new ScreenSession(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ScreenId id = 0;
+    
+    ssm_->AdaptSuperHorizonalBoot(session, id);
+    EXPECT_EQ(session->GetRotation(), Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: HandleSuperFoldStatusLocked
+ * @tc.desc: HandleSuperFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleSuperFoldStatusLocked, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    ssm_->HandleSuperFoldStatusLocked(true);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+
+    ssm_->HandleSuperFoldStatusLocked(false);
+    EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), false);
+}
+
+/**
+ * @tc.name: HandleMainScreenDisconnect
+ * @tc.desc: HandleMainScreenDisconnect test
+ * @tc.type: not main screen
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleMainScreenDisconnect01, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+    ASSERT_NE(ssm_, nullptr);
+
+    ScreenId id = 1001;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+
+    ssm_->HandleMainScreenDisconnect(screenSession);
+    EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+#endif
+}
+
+/**
+ * @tc.name: HandleMainScreenDisconnect
+ * @tc.desc: HandleMainScreenDisconnect test
+ * @tc.type: main screen
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleMainScreenDisconnect02, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+    ASSERT_NE(ssm_, nullptr);
+
+    ScreenId id = 1001;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+
+    ssm_->HandleMainScreenDisconnect(screenSession);
+    if (!g_isPcDevice) {
+        EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MAIN);
+    } else {
+        EXPECT_EQ(ssm_->GetIsOuterOnlyMode(), false);
+    }
+#endif
+}
+
+/**
+ * @tc.name: HandleMainScreenDisconnect
+ * @tc.desc: HandleMainScreenDisconnect test
+ * @tc.type: main screen
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleMainScreenDisconnect03, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+    ASSERT_NE(ssm_, nullptr);
+
+    ScreenId innerId = 1000;
+    ScreenId extendId = 1001;
+    ScreenSessionConfig innerConfig = {
+        .screenId = innerId,
+        .rsId = extendId,
+        .defaultScreenId = innerId,
+    };
+    sptr<ScreenSession> innerSession = new ScreenSession(innerConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ASSERT_NE(nullptr, innerSession);
+    innerSession->SetIsInternal(true);
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    innerSession->SetIsCurrentInUse(true);
+    ssm_->screenSessionMap_.insert(std::make_pair(innerId, innerSession));
+
+    ScreenSessionConfig extendConfig = {
+        .screenId = extendId,
+        .rsId = innerId,
+        .defaultScreenId = innerId,
+    };
+    sptr<ScreenSession> extendSession = new ScreenSession(extendConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ASSERT_NE(nullptr, extendSession);
+    extendSession->SetIsInternal(false);
+    extendSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    extendSession->SetIsCurrentInUse(true);
+    ssm_->screenSessionMap_.insert(std::make_pair(extendId, extendSession));
+
+    ssm_->HandleMainScreenDisconnect(extendSession);
+    if (!g_isPcDevice) {
+        EXPECT_EQ(extendSession->GetScreenCombination(), ScreenCombination::SCREEN_MAIN);
+    } else {
+        EXPECT_EQ(extendSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    }
+    ssm_->screenSessionMap_.erase(innerId);
+    ssm_->screenSessionMap_.erase(extendId);
+#endif
+}
+
+/**
+ * @tc.name: ResetInternalScreenSession
+ * @tc.desc: ResetInternalScreenSession test
+ * @tc.type: session null
+ */
+HWTEST_F(ScreenSessionManagerTest, ResetInternalScreenSession01, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> innerSession = nullptr;
+    sptr<ScreenSession> extendSession = nullptr;
+
+    ssm_->ResetInternalScreenSession(innerSession, extendSession);
+    EXPECT_EQ(nullptr, innerSession);
+    EXPECT_EQ(nullptr, extendSession);
+#endif
+}
+
+/**
+ * @tc.name: ResetInternalScreenSession
+ * @tc.desc: ResetInternalScreenSession test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ResetInternalScreenSession02, TestSize.Level1)
+{
+#ifndef WM_MULTI_SCREEN_ENABLE
+    ASSERT_NE(ssm_, nullptr);
+
+    ScreenId innerId = 1000;
+    ScreenId extendId = 1001;
+    ScreenSessionConfig innerConfig = {
+        .screenId = innerId,
+        .rsId = extendId,
+        .defaultScreenId = innerId,
+    };
+    sptr<ScreenSession> innerSession = new ScreenSession(innerConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ASSERT_NE(nullptr, innerSession);
+    innerSession->SetIsInternal(true);
+    innerSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ssm_->screenSessionMap_.insert(std::make_pair(innerId, innerSession));
+
+    ScreenSessionConfig extendConfig = {
+        .screenId = extendId,
+        .rsId = innerId,
+        .defaultScreenId = innerId,
+    };
+    sptr<ScreenSession> extendSession = new ScreenSession(extendConfig,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ASSERT_NE(nullptr, extendSession);
+    extendSession->SetIsInternal(false);
+    extendSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ssm_->screenSessionMap_.insert(std::make_pair(extendId, extendSession));
+
+    ssm_->ResetInternalScreenSession(innerSession, extendSession);
+    EXPECT_EQ(innerSession->GetIsInternal(), false);
+    EXPECT_EQ(extendSession->GetIsInternal(), true);
+    ssm_->screenSessionMap_.erase(innerId);
+    ssm_->screenSessionMap_.erase(extendId);
+#endif
 }
 }
 } // namespace Rosen

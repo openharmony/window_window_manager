@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,15 @@
  */
 
 #include <gtest/gtest.h>
+
+#include "display_manager.cpp"
 #include "display_manager.h"
 #include "display_manager_proxy.h"
-#include "window.h"
 #include "dm_common.h"
-
 #include "mock_display_manager_adapter.h"
-#include "singleton_mocker.h"
-#include "display_manager.cpp"
-#include "window_scene.h"
 #include "scene_board_judgement.h"
+#include "singleton_mocker.h"
+#include "window_scene.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,8 +61,8 @@ class DisplayManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
 void DisplayManagerTest::SetUpTestCase()
@@ -419,7 +418,6 @@ HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener02, TestSize.Level1)
 HWTEST_F(DisplayManagerTest, UnregisterPrivateWindowListener, TestSize.Level1)
 {
     sptr<DisplayManager::IPrivateWindowListener> listener = nullptr;
-    sptr<DisplayManager::Impl> impl_;
     auto ret = DisplayManager::GetInstance().UnregisterPrivateWindowListener(listener);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
@@ -1758,7 +1756,11 @@ HWTEST_F(DisplayManagerTest, GetCutoutInfoWithRotation, Function | SmallTest | L
 {
     Rotation rotation = Rotation::ROTATION_0;
     sptr<CutoutInfo> info = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
-    ASSERT_NE(nullptr, info);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, info);
+    } else {
+        ASSERT_EQ(nullptr, info);
+    }
 }
 
 /**
@@ -1931,12 +1933,18 @@ HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_When
 {
     DisplayManager displayManager;
     displayManager.displayIdList_.clear();
-    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> obj =
-        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    ASSERT_TRUE(SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy());
+    sptr<IRemoteObject> obj;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
     sptr<IRemoteObject> weakPtr = obj;
     DisplayId displayId = DISPLAY_ID_INVALID;
-    displayManager.displayIdList_.push_back(std::make_pair(weakPtr, displayId));
+    displayManager.displayIdList_.emplace_back(weakPtr, displayId);
     EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), DISPLAY_ID_INVALID);
 }
 
@@ -1950,18 +1958,33 @@ HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_When
 {
     DisplayManager displayManager;
     displayManager.displayIdList_.clear();
-    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> obj =
-        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+
+    ASSERT_TRUE(SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy());
+    sptr<IRemoteObject> obj;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
     sptr<IRemoteObject> weakPtr = obj;
     DisplayId displayId = DISPLAY_ID_INVALID;
-    displayManager.displayIdList_.push_back(std::make_pair(weakPtr, displayId));
-    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> obj_01 =
-        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    displayManager.displayIdList_.emplace_back(weakPtr, displayId);
+
+    ASSERT_TRUE(SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy());
+    sptr<IRemoteObject> obj_01;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        obj_01 = SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        obj_01 = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
     sptr<IRemoteObject> weakPtr_01 = obj_01;
     DisplayId displayId_01 = 2;
-    displayManager.displayIdList_.push_back(std::make_pair(weakPtr_01, displayId_01));
+    displayManager.displayIdList_.emplace_back(weakPtr_01, displayId_01);
+
     EXPECT_EQ(displayManager.GetCallingAbilityDisplayId(), DISPLAY_ID_INVALID);
 }
 

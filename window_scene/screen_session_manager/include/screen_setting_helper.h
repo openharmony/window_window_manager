@@ -59,7 +59,7 @@ public:
     static void UnregisterSettingWireCastObserver();
     static void RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func);
     static void UnRegisterSettingExtendScreenDpiObserver();
-    static bool GetSettingExtendScreenDpi(bool& enable, const std::string& key = SETTING_EXTEND_DPI_KEY);
+    static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
     static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
 
 private:

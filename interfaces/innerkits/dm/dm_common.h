@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #ifndef OHOS_ROSEN_DM_COMMON_H
 #define OHOS_ROSEN_DM_COMMON_H
 
-#include <refbase.h>
-#include <string>
 #include <map>
+#include <string>
 
-namespace OHOS {
-namespace Rosen {
+#include <parcel.h>
+
+namespace OHOS::Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
+using NodeId = uint64_t;
 
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
@@ -139,7 +140,7 @@ enum class ScreenShape : uint32_t {
 };
 
 /**
- * @brief displayed soure mode
+ * @brief displayed source mode
  */
 enum class DisplaySourceMode : uint32_t {
     NONE = 0,
@@ -332,8 +333,12 @@ enum class Orientation : uint32_t {
     USER_ROTATION_PORTRAIT_INVERTED = 16,
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
-    INVALID = 19,
-    END = INVALID,
+    END = FOLLOW_DESKTOP,
+    USER_PAGE_ROTATION_PORTRAIT = 3000,
+    USER_PAGE_ROTATION_LANDSCAPE = 3001,
+    USER_PAGE_ROTATION_PORTRAIT_INVERTED = 3002,
+    USER_PAGE_ROTATION_LANDSCAPE_INVERTED = 3003,
+    INVALID = 3004,
 };
 
 /**
@@ -473,7 +478,7 @@ enum class ScreenCombination : uint32_t {
 };
 
 enum class MultiScreenPowerSwitchType : uint32_t {
-    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_ON = 0,
     SCREEN_SWITCH_OFF,
     SCREEN_SWITCH_EXTERNAL,
 };
@@ -503,11 +508,39 @@ enum class VirtualScreenType: uint32_t {
     HICAR,
 };
 
-struct Point {
-    int32_t posX_;
-    int32_t posY_;
-    Point() : posX_(0), posY_(0) {};
-    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
+/**
+ * @brief Enumerates the screen mode change events.
+ */
+enum class ScreenModeChangeEvent: uint32_t {
+    UNKNOWN = 0,
+    BEGIN,
+    END,
+};
+
+class Point : public Parcelable {
+public:
+    int32_t posX_{0};
+    int32_t posY_{0};
+
+    Point() = default;
+
+    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(posX_) && parcel.WriteInt32(posY_);
+    }
+
+    static Point* Unmarshalling(Parcel& parcel)
+    {
+        int32_t posX;
+        int32_t posY;
+        if (!(parcel.ReadInt32(posX) && parcel.ReadInt32(posY))) {
+            return nullptr;
+        }
+
+        return new (std::nothrow) Point(posX, posY);
+    }
 };
 
 struct SupportedScreenModes : public RefBase {
@@ -521,7 +554,8 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isCaptureFullOfScreen = false;
+    bool isCaptureFullOfScreen_ = false;
+    std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 
 struct ExpandOption {
@@ -545,10 +579,36 @@ struct MultiScreenPositionOptions {
 /**
  * @brief fold display physical resolution
  */
-struct DisplayPhysicalResolution {
-    FoldDisplayMode foldDisplayMode_;
-    uint32_t physicalWidth_;
-    uint32_t physicalHeight_;
+class DisplayPhysicalResolution : public Parcelable {
+public:
+    FoldDisplayMode foldDisplayMode_{FoldDisplayMode::UNKNOWN};
+    uint32_t physicalWidth_{0};
+    uint32_t physicalHeight_{0};
+
+    DisplayPhysicalResolution() = default;
+
+    DisplayPhysicalResolution(FoldDisplayMode foldDisplayMode, uint32_t physicalWidth, uint32_t physicalHeight)
+        : foldDisplayMode_(foldDisplayMode), physicalWidth_(physicalWidth), physicalHeight_(physicalHeight) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(foldDisplayMode_)) &&
+               parcel.WriteUint32(physicalWidth_) && parcel.WriteUint32(physicalHeight_);
+    }
+
+    static DisplayPhysicalResolution* Unmarshalling(Parcel& parcel)
+    {
+        uint32_t foldDisplayMode;
+        uint32_t physicalWidth;
+        uint32_t physicalHeight;
+        if (!(parcel.ReadUint32(foldDisplayMode) && parcel.ReadUint32(physicalWidth) &&
+            parcel.ReadUint32(physicalHeight))) {
+            return nullptr;
+        }
+
+        return new (std::nothrow) DisplayPhysicalResolution(static_cast<FoldDisplayMode>(foldDisplayMode),
+            physicalWidth, physicalHeight);
+    }
 };
 
 /**
@@ -625,6 +685,5 @@ enum class DMDeviceStatus: uint32_t {
     STATUS_TENT,
     STATUS_GLOBAL_FULL
 };
-}
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

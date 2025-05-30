@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,11 @@
 #define OHOS_ROSEN_SCREEN_SESSION_MANAGER_LITE_INTERFACE_H
 
 #include <iremote_broker.h>
-#include <cinttypes>
-#include "dm_common.h"
-#include "zidl/display_manager_agent_interface.h"
+
 #include "display_info.h"
+#include "dm_common.h"
 #include "fold_screen_info.h"
-#include "screen_group_info.h"
+#include "zidl/idisplay_manager_agent.h"
 
 namespace OHOS {
 namespace Rosen {

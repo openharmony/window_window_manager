@@ -18,6 +18,7 @@
 #include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
+#include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
@@ -80,7 +81,7 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool
     } else {
         pengdingTask_ --;
         if (pengdingTask_ != 0) {
-            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task left", pengdingTask_.load());
+            TLOGI(WmsLogTag::DMS, "displaymodechange 1 task finished, %{public}d task(s) left", pengdingTask_.load());
             return;
         }
         displayModeChangeRunning_ = false;
@@ -168,11 +169,11 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeProc(sptr<ScreenSessi
             break;
         }
         case FoldDisplayMode::UNKNOWN: {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is unknown");
+            TLOGI(WmsLogTag::DMS, "displayMode is unknown");
             break;
         }
         default: {
-            TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode displayMode is invalid");
+            TLOGI(WmsLogTag::DMS, "displayMode is invalid");
             break;
         }
     }
@@ -202,10 +203,10 @@ void SingleDisplayPocketFoldPolicy::LockDisplayStatus(bool locked)
 
 void SingleDisplayPocketFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
-    TLOGI(WmsLogTag::DMS, "SetOnBootAnimation onBootAnimation: %{public}d", onBootAnimation);
+    TLOGI(WmsLogTag::DMS, "onBootAnimation: %{public}d", onBootAnimation);
     onBootAnimation_ = onBootAnimation;
     if (!onBootAnimation_) {
-        TLOGI(WmsLogTag::DMS, "SetOnBootAnimation when boot animation finished, change display mode");
+        TLOGI(WmsLogTag::DMS, "when boot animation finished, change display mode");
         RecoverWhenBootAnimationExit();
         NotifyRefreshRateEvent(false);
     } else {
@@ -257,20 +258,20 @@ FoldDisplayMode SingleDisplayPocketFoldPolicy::GetModeMatchStatus()
 void SingleDisplayPocketFoldPolicy::ReportFoldDisplayModeChange(FoldDisplayMode displayMode)
 {
     int32_t mode = static_cast<int32_t>(displayMode);
-    TLOGI(WmsLogTag::DMS, "ReportFoldDisplayModeChange displayMode: %{public}d", mode);
+    TLOGI(WmsLogTag::DMS, "displayMode: %{public}d", mode);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "DISPLAY_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "FOLD_DISPLAY_MODE", mode);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "ReportFoldDisplayModeChange Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
 void SingleDisplayPocketFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen)
 {
-    TLOGI(WmsLogTag::DMS, "ReportFoldStatusChangeBegin offScreen: %{public}d, onScreen: %{public}d",
+    TLOGI(WmsLogTag::DMS, "offScreen: %{public}d, onScreen: %{public}d",
         offScreen, onScreen);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
@@ -279,7 +280,7 @@ void SingleDisplayPocketFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScree
         "POWER_OFF_SCREEN", offScreen,
         "POWER_ON_SCREEN", onScreen);
     if (ret != 0) {
-        TLOGE(WmsLogTag::DMS, "ReportFoldStatusChangeBegin Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 
@@ -456,7 +457,7 @@ void SingleDisplayPocketFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession>
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMainOnBootAnimation");
+    TLOGI(WmsLogTag::DMS, "enter!");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_MAIN);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -469,7 +470,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainOnBootAnimation
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession)
 {
-    TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFullOnBootAnimation");
+    TLOGI(WmsLogTag::DMS, "enter!");
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
     screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
@@ -523,16 +524,16 @@ void SingleDisplayPocketFoldPolicy::ChangeOffTentMode()
 
 void SingleDisplayPocketFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command)
 {
-    TLOGI(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenId: %{public}" PRIu64 ", command: %{public}d",
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", command: %{public}d",
         screenId, command);
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenSession is null");
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
     std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
     if (displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
     if (command == ADD_DISPLAY_NODE) {
@@ -541,11 +542,8 @@ void SingleDisplayPocketFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screen
         displayNode->RemoveDisplayNodeFromTree();
     }
     displayNode = nullptr;
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
+    TLOGI(WmsLogTag::DMS, "add or remove displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()

@@ -287,13 +287,6 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, TestSize.Level1)
         return;
     };
     callback->onUpdateAvoidArea_ = callbackFun;
-
-    callback->onUpdateOccupiedAreaIfNeed_ = nullptr;
-    UpdateOccupiedAreaIfNeedCallback updateCallbackFun = [&sceneSession](int32_t persistentId) {
-        sceneSession->RemoveToastSession(persistentId);
-        return;
-    };
-    callback->onUpdateOccupiedAreaIfNeed_ = updateCallbackFun;
     sceneSession->NotifyClientToUpdateAvoidArea();
     EXPECT_EQ(6, sceneSession->GetPersistentId());
 }
@@ -508,30 +501,6 @@ HWTEST_F(SceneSessionTest3, IsStartMoving, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleWindowSizeInPc
- * @tc.desc: SetCompatibleWindowSizeInPc
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetCompatibleWindowSizeInPc, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetCompatibleWindowSizeInPc";
-    info.bundleName_ = "SetCompatibleWindowSizeInPc";
-
-    int32_t portraitWidth = 10;
-    int32_t portraitHeight = 20;
-    int32_t landscapeWidth = 10;
-    int32_t landscapeHeight = 20;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-    ASSERT_EQ(
-        WSError::WS_OK,
-        sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
-}
-
-/**
  * @tc.name: SetAppSupportPhoneInPc
  * @tc.desc: SetAppSupportPhoneInPc
  * @tc.type: FUNC
@@ -546,29 +515,6 @@ HWTEST_F(SceneSessionTest3, SetAppSupportPhoneInPc, TestSize.Level1)
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetAppSupportPhoneInPc(false));
-}
-
-/**
- * @tc.name: CompatibleFullScreenRecover
- * @tc.desc: CompatibleFullScreenRecover
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, CompatibleFullScreenRecover, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CompatibleFullScreenRecover";
-    info.bundleName_ = "CompatibleFullScreenRecover";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    sceneSession->sessionStage_ = mockSessionStage;
-    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenRecover());
-
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenRecover());
 }
 
 /**
@@ -605,28 +551,6 @@ HWTEST_F(SceneSessionTest3, SetIsPcAppInPad, TestSize.Level1)
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetIsPcAppInPad(false));
-}
-
-/**
- * @tc.name: CompatibleFullScreenClose
- * @tc.desc: CompatibleFullScreenClose
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CompatibleFullScreenClose";
-    info.bundleName_ = "CompatibleFullScreenClose";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    sceneSession->sessionStage_ = mockSessionStage;
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
-    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
 }
 
 /**

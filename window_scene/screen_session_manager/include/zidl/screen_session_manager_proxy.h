@@ -82,7 +82,7 @@ public:
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
 
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
-    
+
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 
@@ -153,6 +153,7 @@ public:
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;
+    void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
 
@@ -161,6 +162,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
+    float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
@@ -223,6 +225,9 @@ public:
     void SetDefaultMultiScreenModeWhenSwitchUser() override;
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
+    void NotifyScreenMaskAppear() override;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

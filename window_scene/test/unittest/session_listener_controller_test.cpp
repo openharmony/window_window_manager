@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "pixel_map.h"
-#include "session_listener_controller.h"
-
 #include <gtest/gtest.h>
+#include <pixel_map.h>
 
 #include "display_manager_adapter.h"
 #include "mission_listener_stub.h"
+#include "scene_board_judgement.h"
+#include "scene_session_manager.h"
+#include "session/host/include/main_session.h"
+#include "session/host/include/scene_session.h"
+#include "session_listener_controller.h"
 #include "singleton_container.h"
 #include "zidl/session_lifecycle_listener_stub.h"
-#include "session/host/include/scene_session.h"
-#include "session/host/include/main_session.h"
-#include "scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -376,7 +376,11 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, TestSize.Level1)
     EXPECT_EQ(nullptr, remote);
 
     if (SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy()) {
-        remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+        } else {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        }
         slController->OnListenerDied(remote);
         EXPECT_NE(nullptr, remote);
     }
@@ -434,7 +438,11 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, TestSize.Level1)
 
     if (SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy()) {
         sptr<IRemoteObject> remote;
-        remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+        } else {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        }
         slController->listenerDeathRecipient_->OnRemoteDied(remote);
         EXPECT_NE(nullptr, remote);
     }
@@ -542,7 +550,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
     ASSERT_NE(listener, nullptr);
     std::vector<int32_t> persistentIdList = { 102 };
-
     SessionInfo info;
     info.bundleName_ = "com.example.myapp";
     info.abilityName_ = "MainAbility";
@@ -553,7 +560,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm->sceneSessionMap_.insert({ 102, sceneSession });
-
     slController->RegisterSessionLifecycleListener(listener, persistentIdList);
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
     ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
