@@ -136,6 +136,12 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         iface_cast<Rosen::ISession>(iSession), identityToken, isModuleAbilityHookEnd);
 }
 
+WMError Window::GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+    WindowType parentWindowType, WindowType& windowType)
+{
+    return WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(parentId, windowName, parentWindowType, windowType);
+}
+
 sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
 {

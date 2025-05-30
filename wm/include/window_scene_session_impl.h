@@ -86,6 +86,8 @@ public:
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     // only main window, sub window, dialog window can use
     static int32_t GetParentMainWindowId(int32_t windowId);
+    static WMError GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+        WindowType parentWindowType, WindowType& windowType);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;

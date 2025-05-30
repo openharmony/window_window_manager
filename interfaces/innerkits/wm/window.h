@@ -829,6 +829,18 @@ public:
         const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
 
     /**
+     * @brief get and verify windowType, include sub_window/system_window
+     *
+     * @param parentId parent window id
+     * @param windowName current window name
+     * @param parentWindowType parent window type
+     * @param windowType current window type
+     * @return WMError::WM_OK means check success, otherwise failed.
+     */
+    static WMError GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+        WindowType parentWindowType, WindowType& windowType);
+
+    /**
      * @brief create pip window with session
      *
      * @param option window propertion
