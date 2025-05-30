@@ -540,7 +540,7 @@ protected:
         const sptr<DisplayInfo>& info = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    void NofityUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason);
+    void NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;

@@ -312,7 +312,8 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     auto ret = SendExtensionMessageToHost(
         static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER), want);
     if (ret != WMError::WM_OK) {
-        return ret;
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send unregister host window rect change listener message failed, errCode: "
+            "%{public}d", ret);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Erase in set, id: %{public}d.", GetPersistentId());
     if (context_) {

@@ -1796,16 +1796,34 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     sptr<IWindowRectChangeListener> listener1 = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->rectChangeUIExtListenerIds_.emplace(111);
-    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    ASSERT_TRUE(WindowHelper::IsUIExtensionWindow(window->GetType()));
-    sptr<IWindowRectChangeListener> listener2 = sptr<MockWindowRectChangeListener>::MakeSptr();
-    window->RegisterWindowRectChangeListener(listener2);
-    window->NotifySizeChange(rect, WindowSizeChangeReason::MOVE);
     window->Destroy(true);
+}
+
+/**
+ * @tc.name: NotifyUIExtHostWindowRectChangeListeners
+ * @tc.desc: NotifyUIExtHostWindowRectChangeListeners test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostWindowRectChangeListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyUIExtHostWindowRectChangeListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->uiContent_ = nullptr;
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(window->rectChangeUIExtListenerIds_.empty());
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
 }
 
 /**

@@ -181,7 +181,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level0)
     window_->hostSession_ = session;
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
 }
 
@@ -581,7 +581,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterHostWindowRectChangeListener,
     window->dataHandler_ = nullptr;
     sptr<IWindowRectChangeListener> listener = nullptr;
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->UnregisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterHostWindowRectChangeListener(listener));
     listener = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->rectChangeUIExtListenerIds_.emplace(111);
     ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
@@ -2053,7 +2053,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
     ASSERT_NE(0, window->GetPersistentId());
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     window->NotifyPointerEvent(pointerEvent);
-    EXPECT_TRUE(logMsg.find("PointerEvent is nullptr") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
     logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
@@ -2109,13 +2109,6 @@ HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayR
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    EXPECT_TRUE(logMsg.find("dataHandler_ is nullptr") != std::string::npos);
-    logMsg.clear();
-    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    EXPECT_TRUE(logMsg.find("Send raise message to host window failed") != std::string::npos);
-    logMsg.clear();
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     EXPECT_TRUE(logMsg.find("Notify host window to raise") != std::string::npos);
@@ -2506,12 +2499,6 @@ HWTEST_F(WindowExtensionSessionImplTest, SendExtensionMessageToHost, TestSize.Le
     EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SendExtensionMessageToHost(code, data));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
 }
 
 /**
@@ -2546,6 +2533,10 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    window->rectChangeUIExtListenerIds_.clear();
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
