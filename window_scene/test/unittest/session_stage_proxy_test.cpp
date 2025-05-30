@@ -313,7 +313,7 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | Sma
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
-    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);

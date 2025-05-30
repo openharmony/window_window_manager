@@ -2126,7 +2126,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
     window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     auto status = window_->RegisterKeyboardWillHideListener(listener);
-    EXPECT_EQ(status, WMError::WM_OK);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
  
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     status = window_->RegisterKeyboardWillHideListener(listener);
