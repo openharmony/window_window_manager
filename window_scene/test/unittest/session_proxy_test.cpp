@@ -22,10 +22,20 @@
 #include "pointer_event.h"
 #include "ui/rs_canvas_node.h"
 #include "transaction/rs_transaction.h"
+#include "window_manager_hilog.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -1496,12 +1506,25 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
  */
 HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool registered = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
@@ -1511,12 +1534,25 @@ HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTes
  */
 HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool registered = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**

@@ -46,6 +46,13 @@ void ScreenSessionLogCallback(const LogType type,
 {
     g_errlog = msg;
 }
+
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
 } // namespace
 
 class SceneSessionTest6 : public testing::Test {
@@ -580,11 +587,36 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateFollowScreenChange, TestSize.Level
 
 /**
  * @tc.name: NotifyKeyboardAnimationWillBegin
- * @tc.desc: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: test for NotifyKeyboardAnimationWillBegin when sessionStage_ is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginInvalidSessionStage, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    bool withAnimation = false;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
+    EXPECT_TRUE(logMsg.find("sessionStage_ is null") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin when willShow notification not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginNotRegisteredWillShow, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -601,20 +633,91 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBegin, Function | SmallTe
 
     sceneSession->NotifyKeyboardWillShowRegistered(false);
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
+    EXPECT_TRUE(logMsg.find("keyboard will show listener is not registered") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin when willHide notification not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginNotRegisteredWillHide, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    bool withAnimation = false;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = false;
-    sceneSession->NotifyKeyboardWillShowRegistered(false);
+    sceneSession->NotifyKeyboardWillHideRegistered(false);
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
+    EXPECT_TRUE(logMsg.find("keyboard will hide listener is not registered") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin when willShow notification registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginRegisteredWillShow, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    bool withAnimation = false;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = true;
     sceneSession->NotifyKeyboardWillShowRegistered(true);
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
+    EXPECT_TRUE(logMsg.find("keyboard will show listener is not registered") == std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin when willHide notification registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginRegisteredWillHide, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = property;
+    sceneSession->sessionStage_ = nullptr;
+    bool isShowAnimation = true;
+    WSRect beginRect = {0, 2720, 1260, 1020};
+    WSRect endRect = {0, 1700, 1260, 1020};
+    bool withAnimation = false;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = false;
-    sceneSession->NotifyKeyboardWillShowRegistered(true);
-    beginRect = {0, 1700, 1260, 1020};
-    endRect = {0, 2720, 1260, 1020};
+    sceneSession->NotifyKeyboardWillHideRegistered(true);
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
+    EXPECT_TRUE(logMsg.find("keyboard will hide listener is not registered") == std::string::npos);
 }
 
 /**
@@ -645,6 +748,36 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardWillHideRegistered, Function | SmallTe
     EXPECT_EQ(true, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_);
     sceneSession->NotifyKeyboardWillHideRegistered(false);
     EXPECT_EQ(false, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_);
+}
+
+/**
+ * @tc.name: NotifyKeyboardDidShowRegistered
+ * @tc.desc: NotifyKeyboardDidShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardDidShowRegistered, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->NotifyKeyboardDidShowRegistered(true);
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_);
+    sceneSession->NotifyKeyboardDidShowRegistered(false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardDidShowRegistered_);
+}
+
+/**
+ * @tc.name: NotifyKeyboardDidHideRegistered
+ * @tc.desc: NotifyKeyboardDidHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyKeyboardDidHideRegistered, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->NotifyKeyboardDidHideRegistered(true);
+    EXPECT_EQ(true, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_);
+    sceneSession->NotifyKeyboardDidHideRegistered(false);
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_);
 }
 
 /**
