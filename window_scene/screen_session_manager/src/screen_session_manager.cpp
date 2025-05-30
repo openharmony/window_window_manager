@@ -4692,6 +4692,9 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenCanvasRotation(ScreenId scre
         TLOGE(WmsLogTag::DMS, "failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        screenSession->SetIsEnableCanvasRotation(autoRotate);
+    }
     TLOGW(WmsLogTag::DMS, "success");
     return DMError::DM_OK;
 }
