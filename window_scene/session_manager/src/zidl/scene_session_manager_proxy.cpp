@@ -3096,48 +3096,6 @@ WMError SceneSessionManagerProxy::SetImageForRecent(uint32_t imgResourceId, Imag
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-    const sptr<CompatibleModeProperty>& property)
-{
-    if (property == nullptr || token == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "input is nullptr");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write interfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteRemoteObject(token)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write token failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<CompatibleModeProperty> compatInfo = reply.ReadParcelable<CompatibleModeProperty>();
-    if (!compatInfo) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Read compatibility info failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    property->CopyFrom(compatInfo);
-    uint32_t ret = 0;
-    if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
 WMError SceneSessionManagerProxy::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     MessageParcel data;

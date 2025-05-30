@@ -307,12 +307,6 @@ public:
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
-
-    /*
-     * Compatible Mode
-     */
-    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) { return WMError::WM_OK; }
 };
 }
 }
