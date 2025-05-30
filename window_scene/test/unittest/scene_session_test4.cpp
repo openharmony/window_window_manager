@@ -1623,11 +1623,11 @@ HWTEST_F(SceneSessionTest4, CheckGetSystemWindowAvoidAreaAvailable, TestSize.Lev
     sptr<WindowSessionProperty> property = session->GetSessionProperty();
     property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
     session->SetSessionProperty(property);
-    EXPECT_EQ(true, session->CheckGetSystemWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(true, session->CheckGetSystemWindowAvoidAreaAvailable());
 
     property->SetAvoidAreaOption(0);
     session->SetSessionProperty(property);
-    EXPECT_EQ(false, session->CheckGetSystemWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(false, session->CheckGetSystemWindowAvoidAreaAvailable());
 }
 
 /**
