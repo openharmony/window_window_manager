@@ -4790,10 +4790,10 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
             }
         }
     }
-    NofityUIExtHostWindowRectChangeListeners(rect, reason);
+    NotifyUIExtHostWindowRectChangeListeners(rect, reason);
 }
 
-void WindowSessionImpl::NofityUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason)
+void WindowSessionImpl::NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
