@@ -456,7 +456,7 @@ void RootScene::GetExtensionConfig(AAFwk::WantParams& want) const
     want.SetParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, AAFwk::Integer::Box(rootHostWindowType));
 }
 
-std::pair<Ace::UIContent*, bool> RootScene::GetUIContentByDisplayId(DisplayId displayId)
+UIContentResult RootScene::GetUIContentByDisplayId(DisplayId displayId)
 {
     auto iter = rootSceneMap_.find(displayId);
     if (iter == rootSceneMap_.end()) {
