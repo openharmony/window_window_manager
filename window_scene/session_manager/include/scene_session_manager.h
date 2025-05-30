@@ -374,12 +374,6 @@ public:
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
     /*
-     * Compatible Mode
-     */
-    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) override;
-
-    /*
      * Sub Window
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;

@@ -17,6 +17,7 @@
 
 #include <ability_context_impl.h>
 #include <context_impl.h>
+#include <float_wrapper.h>
 #include <int_wrapper.h>
 #include <transaction/rs_transaction.h>
 #include <want_params_wrapper.h>
@@ -1740,6 +1741,25 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, TestSize.Level1
 }
 
 /**
+ * @tc.name: GetVirtualPixelRatio_compat
+ * @tc.desc: GetVirtualPixelRatio_compat test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_compat, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio_compat");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    auto value = window->GetVirtualPixelRatio(nullptr);
+    EXPECT_NEAR(value, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
@@ -2328,6 +2348,161 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, TestSize
 }
 
 /**
+ * @tc.name: SetCompatInfo
+ * @tc.desc: SetCompatInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetCompatInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCompatInfo");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    AAFwk::WantParams configParam;
+    EXPECT_EQ(WMError::WM_DO_NOTHING, window->SetCompatInfo(configParam));
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(WMError::WM_OK, window->SetCompatInfo(configParam));
+
+    window->property_->SetCompatibleModeProperty(nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    configParam.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(true)));
+    float compatScaleX = 0.5f;
+    float compatScaleY = 0.55f;
+    configParam.SetParam(Extension::COMPAT_SCALE_X_FIELD, AAFwk::Float::Box(compatScaleX));
+    configParam.SetParam(Extension::COMPAT_SCALE_Y_FIELD, AAFwk::Float::Box(compatScaleY));
+    EXPECT_EQ(WMError::WM_OK, window->SetCompatInfo(configParam));
+    EXPECT_NEAR(window->compatScaleX_, compatScaleX, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, compatScaleY, 0.00001f);
+}
+
+/**
+ * @tc.name: OnHostWindowCompatInfoChange
+ * @tc.desc: OnHostWindowCompatInfoChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowCompatInfoChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnHostWindowCompatInfoChange");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, false);
+    auto res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_OK, res);
+
+    window->property_->SetCompatibleModeProperty(nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, true);
+    float compatScaleX = 0.5f;
+    float compatScaleY = 0.55f;
+    want.SetParam(Extension::COMPAT_SCALE_X_FIELD, compatScaleX);
+    want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, compatScaleY);
+    res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_NEAR(window->compatScaleX_, compatScaleX, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, compatScaleY, 0.00001f);
+}
+
+/**
+ * @tc.name: GetSystemViewportConfig
+ * @tc.desc: GetSystemViewportConfig Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetSystemViewportConfig, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSystemViewportConfig");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetDisplayId(0);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(display, nullptr);
+    ASSERT_NE(display->GetDisplayInfo(), nullptr);
+    auto vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    SessionViewportConfig config;
+    EXPECT_EQ(WMError::WM_OK, window->GetSystemViewportConfig(config));
+    EXPECT_NEAR(config.density_, vpr, 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(WMError::WM_OK, window->GetSystemViewportConfig(config));
+    EXPECT_NEAR(config.density_, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetDisplayId(0);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(display, nullptr);
+    ASSERT_NE(display->GetDisplayInfo(), nullptr);
+    auto vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    SessionViewportConfig config;
+    config.displayId_ = window->property_->GetDisplayId();
+    config.isDensityFollowHost_ = true;
+    config.density_ = 2.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_TRUE(window->isDensityFollowHost_);
+    if (window->hostDensityValue_ != std::nullopt) {
+        EXPECT_NEAR(config.density_, window->hostDensityValue_->load(), 0.00001f);
+    }
+    config.isDensityFollowHost_ = false;
+    window->UpdateExtensionDensity(config);
+    EXPECT_FALSE(window->isDensityFollowHost_);
+    EXPECT_NEAR(config.density_, vpr, 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->UpdateExtensionDensity(config);
+    EXPECT_FALSE(window->isDensityFollowHost_);
+    EXPECT_NEAR(config.density_, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: GetDefaultDensity
+ * @tc.desc: GetDefaultDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetDefaultDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDefaultDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    sptr<DisplayInfo> displayInfo = nullptr;
+    EXPECT_NEAR(1.0f, window->GetDefaultDensity(displayInfo), 0.00001f);
+    auto systemDensity = 2.0;
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(systemDensity);
+    EXPECT_NEAR(systemDensity, window->GetDefaultDensity(displayInfo), 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_NEAR(COMPACT_SIMULATION_SCALE_DPI, window->GetDefaultDensity(displayInfo), 0.00001f);
+}
+
+/**
  * @tc.name: NotifyExtensionDataConsumer01
  * @tc.desc: Test NotifyExtensionDataConsumer with valid window mode data
  * @tc.type: FUNC
@@ -2547,30 +2722,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
-}
-
-/**
- * @tc.name: GetHostWindowCompatiblityInfo
- * @tc.desc: GetHostWindowCompatiblityInfo Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, window_);
-    auto ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-
-    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
-    window_->abilityToken_ = iRemoteObject;
-    WindowAdapterMocker mocker;
-    EXPECT_CALL(mocker.Mock(), GetHostWindowCompatiblityInfo(_, _))
-        .WillOnce(Return(WMError::WM_DO_NOTHING))
-        .WillOnce(Return(WMError::WM_OK));
-
-    ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-    ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
