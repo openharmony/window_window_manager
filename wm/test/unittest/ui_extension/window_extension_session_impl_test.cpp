@@ -1162,7 +1162,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig4, TestSize.
     config.displayId_ = 999;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(999, window_GetDisplayId());  
+    ASSERT_EQ(999, window_->GetDisplayId());  
 }
 
 /**
