@@ -8342,7 +8342,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sp
 WSError SceneSessionManager::ProcessSubWindowRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is null");
         return WSError::WS_DO_NOTHING;
     }
     std::vector<sptr<SceneSession>> subSessionVec = sceneSession->GetSubSession();

@@ -971,10 +971,9 @@ HWTEST_F(SceneSessionManagerTest5, CheckRequestFocusImmediately02, TestSize.Leve
     sessionInfo.abilityName_ = "CheckRequestFocusImmediately02";
     sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
     EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
     bool ret = ssm_->CheckRequestFocusImmediately(sceneSession);
-    ASSERT_EQ(ret, false);
+    EXPECT_EQ(ret, false);
 }
 
 /**
