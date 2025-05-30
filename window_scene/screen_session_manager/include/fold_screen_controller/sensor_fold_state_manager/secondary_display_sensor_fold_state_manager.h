@@ -44,6 +44,9 @@ private:
     bool isHasReflexioned = false;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
     FoldStatus mNextStateBC = FoldStatus::UNKNOWN;
+    uint16_t curHallPrimary = -1;
+    uint16_t curHallSecondary = -1;
+    std::mutex secondaryFoldStatusMutex;
 };
 } // namespace Rosen
 } // namespace OHOS
