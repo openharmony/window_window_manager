@@ -1456,11 +1456,11 @@ void ScreenSessionManager::HandleMainScreenDisconnect(sptr<ScreenSession>& scree
         MultiScreenModeChange(internalSession->GetRSScreenId(), screenSession->GetRSScreenId(),
             SCREEN_MIRROR);
     }
-    if (screenSession->GetScreenId() != screenSession->GetRSScreenId()) {
+    if (screenSession->GetScreenId() == screenSession->GetRSScreenId()) {
         TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
         screenSession = internalSession;
     } else {
-        if (!screenSession->GetIsInternal() && screenSession->GetIsCurrentInUse()){
+        if (!screenSession->GetIsInternal() && screenSession->GetIsCurrentInUse()) {
             TLOGW(WmsLogTag::DMS, "main screen not changed, reset internal session.");
             sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
             ResetInternalScreenSession(newInternalSession, screenSession);
@@ -9857,8 +9857,12 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
         return;
     }
     ScreenProperty property = screenSession->GetScreenProperty();
-    property.SetPropertyChangeReason("screen mode change");
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGW(WmsLogTag::DMS, "super fold device, change by rotation.");
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
+    } else {
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
