@@ -294,21 +294,25 @@ void ScreenSession::EnableMirrorScreenRegion()
     const auto& rect = mirrorScreenRegionPair.second;
     ScreenId screenId = INVALID_SCREEN_ID;
     bool isEnableRegionRotation = GetIsEnableRegionRotation();
+    bool isEnableCanvasRotation = GetIsEnableCanvasRotation();
+    bool isSupportRotation = isEnableRegionRotation | isEnableCanvasRotation;
+    TLOGI(WmsLogTag::DMS, "isEnableRegionRotation: %{public}d, isEnableCanvasRotation: %{public}d",
+        isEnableRegionRotation, isEnableCanvasRotation);
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;
     } else {
         screenId = rsId_;
     }
     auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
-        { rect.posX_, rect.posY_, rect.width_, rect.height_ }, isEnableRegionRotation);
+        { rect.posX_, rect.posY_, rect.width_, rect.height_ }, isSupportRotation);
     if (ret != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "Fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isSupportRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isSupportRotation);
     } else {
         TLOGE(WmsLogTag::DMS, "Success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
-        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isEnableRegionRotation:%{public}d", screenId, ret,
-        rect.posX_, rect.posY_, rect.width_, rect.height_, isEnableRegionRotation);
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u, isSupportRotation:%{public}d", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, isSupportRotation);
     }
 }
 
@@ -2409,5 +2413,17 @@ std::shared_ptr<RSUIContext> ScreenSession::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64,
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), screenId_);
     return rsUIContext;
+}
+
+void ScreenSession::SetIsEnableCanvasRotation(bool isEnableCanvasRotation)
+{
+    std::lock_guard<std::mutex> lock(isEnableCanvasRotationMutex_);
+    isEnableCanvasRotation_ = isEnableCanvasRotation;
+}
+
+bool ScreenSession::GetIsEnableCanvasRotation()
+{
+    std::lock_guard<std::mutex> lock(isEnableCanvasRotationMutex_);
+    return isEnableCanvasRotation_;
 }
 } // namespace OHOS::Rosen

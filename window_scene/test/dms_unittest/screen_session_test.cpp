@@ -3403,6 +3403,32 @@ HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
     session->SetTouchEnabledFromJs(true);
     EXPECT_EQ(session->IsTouchEnabled(), true);
 }
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsEnableCanvasRotation(false);
+    EXPECT_EQ(session->GetIsEnableCanvasRotation(), false);
+}
+
+/**
+ * @tc.name: GetIsEnableCanvasRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsEnableCanvasRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsEnableCanvasRotation(true);
+    EXPECT_EQ(session->GetIsEnableCanvasRotation(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
