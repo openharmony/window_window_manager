@@ -1343,7 +1343,7 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to convert parameter to displayId");
                 return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
             }
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "query all displays by default");
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "explicit set undefined or null");
         } else if (inputDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64, inputDisplayId);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
