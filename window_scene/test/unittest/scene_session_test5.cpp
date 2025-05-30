@@ -1054,11 +1054,11 @@ HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, Function | SmallTest | 
 }
 
 /**
- * @tc.name: HandleActionUpdateSetBrightness
+ * @tc.name: HandleActionUpdateSetBrightness01
  * @tc.desc: HandleActionUpdateSetBrightness function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateSetBrightness";
@@ -1106,6 +1106,26 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, Function | SmallTes
     EXPECT_EQ(WSError::WS_OK, session4->SetBrightness(brightness));
     EXPECT_EQ(brightness, session4->GetBrightness());
 }
+
+/**
+ * @tc.name: HandleActionUpdateSetBrightness02
+ * @tc.desc: WINDOW_TYPE_WALLET_SWIPE_CARD
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateSetBrightness";
+    info.bundleName_ = "HandleActionUpdateSetBrightness";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    info.isSystem_ = false;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
+    auto res = session->HandleActionUpdateSetBrightness(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+} 
 
 /**
  * @tc.name: HandleActionUpdateMaximizeState
