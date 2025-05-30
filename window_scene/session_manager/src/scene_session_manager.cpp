@@ -5061,14 +5061,15 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+          sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD ||
           sceneSession->GetSessionInfo().isSystem_)) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window can set brightness");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window or wallet swipe card can set brightness");
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (IsNeedUpdateBrightness(brightness)) {
+        if (IsNeedUpdateBrightness(persistentId, brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
@@ -5086,13 +5087,16 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-bool SceneSessionManager::IsNeedUpdateBrightness(float brightness)
+bool SceneSessionManager::IsNeedUpdateBrightness(int32_t persistentId, float brightness)
 {
     if (std::fabs(brightness - GetDisplayBrightness()) < std::numeric_limits<float>::min()) {
         return false;
     }
-    auto sceneSession = GetSceneSession(brightnessSessionId_);
-    if (sceneSession != nullptr && sceneSession->IsSessionForeground()) {
+    if (brightnessSessionId_ == persistentId) {
+        return true;
+    }
+    auto brightnessSession = GetSceneSession(brightnessSessionId_);
+    if (brightnessSession != nullptr && brightnessSession->IsSessionForeground()) {
         return false;
     }
     return true;
@@ -7289,9 +7293,11 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             RequestSessionUnfocus(persistentId, FocusChangeReason::APP_BACKGROUND);
             UpdateForceHideState(sceneSession, sceneSession->GetSessionProperty(), false);
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-            HandleKeepScreenOn(sceneSession, false, WINDOW_SCREEN_LOCK_PREFIX, sceneSession->keepScreenLock_);
-            HandleKeepScreenOn(sceneSession, false, VIEW_SCREEN_LOCK_PREFIX, sceneSession->viewKeepScreenLock_);
-            UpdatePrivateStateAndNotify(persistentId);
+            if (persistentId == brightnessSessionId_) {
+                auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+                auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
+                UpdateBrightness(focusedSessionId);
+            }
             if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 ProcessSubSessionBackground(sceneSession);
             }
@@ -8969,6 +8975,10 @@ WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
             if (sessionId == windowId) {
                 TLOGNI(WmsLogTag::DEFAULT, "persistentId: %{public}d is parameter chosen", sessionId);
                 FillUnreliableWindowInfo(sceneSession, infos);
+                continue;
+            }
+            if (sceneSession->GetSystemTouchable() && sceneSession->GetForegroundInteractiveStatus()) {
+                TLOGND(WmsLogTag::DEFAULT, "persistentId: %{public}d is system touchable", sessionId);
                 continue;
             }
             if (!sceneSession->GetRSVisible()) {
