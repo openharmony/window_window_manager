@@ -4774,8 +4774,8 @@ napi_value JsSceneSessionManager::OnSupportZLevel(napi_env env, napi_callback_in
 
 napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc count is invalid: %{public}zu", argc);
@@ -4790,7 +4790,12 @@ napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeObj");
         return NapiGetUndefined(env);
     }
-    napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue);
+    if (napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeRawValue");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     funcType = static_cast<SupportFunctionType>(funcTypeRawValue);
     SceneSessionManager::GetInstance().ConfigSupportFunctionType(funcType);
     return NapiGetUndefined(env);
