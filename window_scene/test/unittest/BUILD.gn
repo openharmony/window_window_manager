@@ -690,8 +690,6 @@ ohos_unittest("ws_scene_session_manager_test8") {
 
   deps = [ ":ws_unittest_common" ]
 
-  include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
-
   external_deps = test_external_deps
   external_deps += [
     "ability_base:configuration",
