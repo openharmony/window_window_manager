@@ -2439,6 +2439,156 @@ HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
     window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
 }
+
+/**
+ * @tc.name: GetAndVerifyWindowTypeForArkUI01
+ * @tc.desc: GetAndVerifyWindowTypeForArkUI01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetAndVerifyWindowTypeForArkUI01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAndVerifyWindowTypeForArkUI");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    windowSceneSession->property_->SetPersistentId(100);
+    windowSceneSession->property_->SetParentPersistentId(99);
+    windowSceneSession->property_->SetParentId(99);
+    windowSceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+
+    auto parentWindow = WindowSceneSessionImpl::GetWindowWithId(100);
+    EXPECT_EQ(parentWindow != nullptr, true);
+
+    std::string windowName ="GetAndVerifyWindowTypeForArkUIWindowName";
+    WindowType windowType;
+    WindowType parentWindowType = WindowType::WINDOW_TYPE_SCENE_BOARD;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    auto ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUI",
+        parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_REPEAT_OPERATION, ret);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(100, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    parentWindowType = WindowType::WINDOW_TYPE_DESKTOP;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(100, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    parentWindowType = WindowType::WINDOW_TYPE_UI_EXTENSION;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(100, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
+ * @tc.name: GetAndVerifyWindowTypeForArkUI02
+ * @tc.desc: GetAndVerifyWindowTypeForArkUI02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetAndVerifyWindowTypeForArkUI02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAndVerifyWindowTypeForArkUI");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    windowSceneSession->property_->SetPersistentId(101);
+    windowSceneSession->property_->SetParentPersistentId(100);
+    windowSceneSession->property_->SetParentId(100);
+    windowSceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+
+    auto parentWindow = WindowSceneSessionImpl::GetWindowWithId(101);
+    EXPECT_EQ(parentWindow != nullptr, true);
+
+    std::string windowName ="GetAndVerifyWindowTypeForArkUIWindowName";
+    WindowType windowType;
+    WindowType parentWindowType = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
+    auto ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+
+    parentWindowType = WindowType::WINDOW_TYPE_FLOAT;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, true);
+
+    parentWindowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(102, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    parentWindowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
+ * @tc.name: GetAndVerifyWindowTypeForArkUI03
+ * @tc.desc: GetAndVerifyWindowTypeForArkUI03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetAndVerifyWindowTypeForArkUI03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAndVerifyWindowTypeForArkUI");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    windowSceneSession->property_->SetPersistentId(101);
+    windowSceneSession->property_->SetParentPersistentId(100);
+    windowSceneSession->property_->SetParentId(100);
+    windowSceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+
+    auto parentWindow = WindowSceneSessionImpl::GetWindowWithId(101);
+    EXPECT_EQ(parentWindow != nullptr, true);
+
+    std::string windowName ="GetAndVerifyWindowTypeForArkUIWindowName";
+    WindowType windowType;
+    WindowType parentWindowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowSceneSession->property_->SetSubWindowLevel(1);
+    auto ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName,
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
