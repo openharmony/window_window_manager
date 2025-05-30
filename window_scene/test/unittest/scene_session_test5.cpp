@@ -145,17 +145,20 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, TestSize.Level1)
     avoidArea.bottomRect_ = { -1, -1, -1, -1 };
     Rect invalidRect = { -1, -1, -1, -1 };
     // hook Func only support compatibleMode
-    session->SetCompatibleModeInPc(false, true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(false);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
-    session->SetCompatibleModeInPc(true, true);
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
 
     // test top system avoidArea
-    session->SetCompatibleModeInPc(true, true);
+    session->property_->GetCompatibleModeProperty()->SetIsAdaptToImmersive(true);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     auto vpr = 3.5f;
@@ -687,9 +690,6 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, TestSize.Level1)
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
-    session->property_->compatibleModeInPc_ = true;
-    session->OnMoveDragCallback(reason);
-    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 }
 
 /**
@@ -927,19 +927,32 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
 
     SizeChangeReason reason = { SizeChangeReason::DRAG };
-    WSRect rect = { 0, 0, 0, 0 };
+    WSRect rect = { 0, 0, 10, 10 };
+    WSRect rectNew = { 100, 100, 100, 100 };
     session->lastKeyFrameRect_ = rect;
     session->lastKeyFrameStamp_ = 0;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), false);
+    // no running
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), false);
     session->keyFramePolicy_.running_ = true;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, SizeChangeReason::DRAG_START), true);
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, SizeChangeReason::DRAG_END), false);
+    // other reason
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_START), true);
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_END), false);
     session->keyFrameAnimating_ = true;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    // for same rect
+    session->keyFrameAnimating_ = false;
+    session->lastKeyFrameRect_ = rect;
+    session->lastKeyFrameStamp_ = 0;
     EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), true);
     session->keyFrameAnimating_ = false;
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), false);
-    EXPECT_EQ(session->KeyFrameNotifyFilter(rect, reason), true);
     session->lastKeyFrameRect_ = rect;
+    session->lastKeyFrameStamp_ = 0;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), false);
+    // not meet time condition
+    session->keyFrameAnimating_ = false;
+    session->lastKeyFrameRect_ = rect;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    // for distance condition
     WSRect moveToRect = {
         0, 0, static_cast<int>(session->keyFramePolicy_.distance_), static_cast<int>(session->keyFramePolicy_.distance_)
     };
@@ -949,6 +962,27 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     session->lastKeyFrameRect_ = rect;
     session->keyFrameAnimating_ = false;
     EXPECT_EQ(session->KeyFrameNotifyFilter(moveToRect, reason), true);
+}
+
+/**
+ * @tc.name: KeyFrameRectAlmostSame
+ * @tc.desc: KeyFrameRectAlmostSame function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, KeyFrameRectAlmostSame, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rect = { 10, 10, 10, 10 };
+    const int32_t DIFF_TEST = 13;
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { DIFF_TEST + 1, 10, 10, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, DIFF_TEST + 1, 10, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, 10, DIFF_TEST + 1, 10 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { 10, 10, 10, DIFF_TEST + 1 }), false);
+    EXPECT_EQ(session->KeyFrameRectAlmostSame(rect, { DIFF_TEST, DIFF_TEST, DIFF_TEST, DIFF_TEST }), true);
 }
 
 /**
@@ -1316,11 +1350,11 @@ HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleActionUpdateSetBrightness
+ * @tc.name: HandleActionUpdateSetBrightness01
  * @tc.desc: HandleActionUpdateSetBrightness function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, TestSize.Level1)
+HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness01, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateSetBrightness";
@@ -1368,6 +1402,26 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, session4->SetBrightness(brightness));
     EXPECT_EQ(brightness, session4->GetBrightness());
 }
+
+/**
+ * @tc.name: HandleActionUpdateSetBrightness02
+ * @tc.desc: WINDOW_TYPE_WALLET_SWIPE_CARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateSetBrightness";
+    info.bundleName_ = "HandleActionUpdateSetBrightness";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    info.isSystem_ = false;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
+    auto res = session->HandleActionUpdateSetBrightness(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+} 
 
 /**
  * @tc.name: HandleActionUpdateMaximizeState
@@ -1831,6 +1885,167 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, TestSize.Level1
     rect = rect1;
     controller->RecordMoveRects(rect);
     EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+}
+
+/**
+ * @tc.name: WindowScaleTransfer01
+ * @tc.desc: WindowScaleTransfer01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowScaleTransfer01";
+    info.bundleName_ = "WindowScaleTransfer01";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->winRect_ = rect;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->winRect_, resultRect);
+}
+
+/**
+ * @tc.name: WindowScaleTransfer02
+ * @tc.desc: WindowScaleTransfer02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowScaleTransfer02";
+    info.bundleName_ = "WindowScaleTransfer02";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 400, 400 };
+    float scaleX = 2.0f;
+    float scaleY = 2.0f;
+    mainSession->winRect_ = rect;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->winRect_, resultRect);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeScale01
+ * @tc.desc: IsCompatibilityModeScale01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeScale01";
+    info.bundleName_ = "IsCompatibilityModeScale01";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    auto property = mainSession->GetSessionProperty();
+    float scaleX = 2.0f;
+    float scaleY = 2.0f;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, true);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeScale02
+ * @tc.desc: IsCompatibilityModeScale02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCompatibilityModeScale02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeScale02";
+    info.bundleName_ = "IsCompatibilityModeScale02";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    auto property = mainSession->GetSessionProperty();
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    bool res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = mainSession->IsCompatibilityModeScale(scaleX, scaleY);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: HookStartMoveRect
+ * @tc.desc: HookStartMoveRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HookStartMoveRect";
+    info.bundleName_ = "HookStartMoveRect";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect preRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->SetSessionRect(preRect);
+    EXPECT_EQ(preRect, mainSession->GetSessionRect());
+    auto property = mainSession->GetSessionProperty();
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    WSRect currRect;
+    mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
+    EXPECT_EQ(preRect, currRect);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    mainSession->HookStartMoveRect(currRect, mainSession->GetSessionRect());
+    EXPECT_EQ(resultRect, currRect);
+}
+
+/**
+ * @tc.name: CompatibilityModeWindowScaleTransfer
+ * @tc.desc: CompatibilityModeWindowScaleTransfer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CompatibilityModeWindowScaleTransfer";
+    info.bundleName_ = "CompatibilityModeWindowScaleTransfer";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect preRect = { 100, 100, 400, 400 };
+    WSRect noChangeRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    bool isScale = true;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(noChangeRect, preRect);
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(resultRect, preRect);
+    isScale = false;
+    mainSession->CompatibilityModeWindowScaleTransfer(preRect, isScale);
+    EXPECT_EQ(noChangeRect, preRect);
 }
 
 /**

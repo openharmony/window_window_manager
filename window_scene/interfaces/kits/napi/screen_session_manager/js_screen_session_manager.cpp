@@ -38,7 +38,6 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager" };
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 } // namespace
 
@@ -49,7 +48,7 @@ JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env)
 
 napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGD("Init.");
+    TLOGD(WmsLogTag::DMS, "Init.");
     if (env == nullptr || exportObj == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to init, env or exportObj is null!");
         return nullptr;
@@ -74,6 +73,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsSuperFoldStatus(env));
     napi_set_named_property(env, exportObj, "ExtendScreenConnectStatus",
         JsScreenUtils::CreateJsExtendScreenConnectStatus(env));
+    napi_set_named_property(env, exportObj, "ScreenModeChangeEvent",
+        JsScreenUtils::CreateJsScreenModeChangeEvent(env));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);
@@ -105,6 +106,7 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
+    BindNativeFunction(env, exportObj, "getSuperRotation", moduleName, JsScreenSessionManager::GetSuperRotation);
     BindNativeFunction(env, exportObj, "setLandscapeLockStatus", moduleName,
         JsScreenSessionManager::SetLandscapeLockStatus);
     BindNativeFunction(env, exportObj, "setForceCloseHdr", moduleName,
@@ -126,6 +128,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyExtendScreenCreateFinish);
     BindNativeFunction(env, exportObj, "notifyExtendScreenDestroyFinish", moduleName,
         JsScreenSessionManager::NotifyExtendScreenDestroyFinish);
+    BindNativeFunction(env, exportObj, "notifyScreenMaskAppear", moduleName,
+        JsScreenSessionManager::NotifyScreenMaskAppear);
     return NapiGetUndefined(env);
 }
 
@@ -137,7 +141,7 @@ JsScreenSessionManager::~JsScreenSessionManager()
 void JsScreenSessionManager::Finalizer([[maybe_unused]]napi_env env, void* data, [[maybe_unused]]void* hint)
 {
     if (data == nullptr) {
-        WLOGFE("data is nullptr");
+        TLOGE(WmsLogTag::DMS, "data is nullptr");
         return;
     }
     TLOGI(WmsLogTag::DMS, "[NAPI]Finalizer. jsScreenSessionManager refcount before DecStrongRef: %{public}d",
@@ -148,84 +152,84 @@ void JsScreenSessionManager::Finalizer([[maybe_unused]]napi_env env, void* data,
 
 napi_value JsScreenSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]RegisterCallback");
+    TLOGD(WmsLogTag::DMS, "[NAPI]RegisterCallback");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::UpdateScreenRotationProperty(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateScreenRotationProperty");
+    TLOGD(WmsLogTag::DMS, "[NAPI]UpdateScreenRotationProperty");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateScreenRotationProperty(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetCurvedCompressionArea(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetCurvedCompressionArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetCurvedCompressionArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetCurvedCompressionArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::RegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]RegisterShutdownCallback");
+    TLOGD(WmsLogTag::DMS, "[NAPI]RegisterShutdownCallback");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnRegisterShutdownCallback(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::UnRegisterShutdownCallback(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UnRegisterShutdownCallback");
+    TLOGD(WmsLogTag::DMS, "[NAPI]UnRegisterShutdownCallback");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUnRegisterShutdownCallback(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetPhyScreenProperty(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetPhyScreenProperty");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetPhyScreenProperty");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetPhyScreenProperty(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyScreenLockEvent(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]NotifyScreenLockEvent");
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyScreenLockEvent");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyScreenLockEvent(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::UpdateSuperFoldAvailableArea(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateSuperFoldAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]UpdateSuperFoldAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSuperFoldAvailableArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::ExtraDestroyScreen(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]ExtraDestroyScreen");
+    TLOGD(WmsLogTag::DMS, "[NAPI]ExtraDestroyScreen");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnExtraDestroyScreen(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]UpdateSuperFoldExpandAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]UpdateSuperFoldExpandAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSuperFoldExpandAvailableArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetScreenOffDelayTime(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]SetScreenOffDelayTime");
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetScreenOffDelayTime");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetScreenOffDelayTime(env, info) : nullptr;
 }
@@ -238,35 +242,42 @@ napi_value JsScreenSessionManager::SetScreenOnDelayTime(napi_env env, napi_callb
 
 napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]NotifyFoldToExpandCompletion");
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::RecordEventFromScb(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]RecordEventFromScb");
+    TLOGD(WmsLogTag::DMS, "[NAPI]RecordEventFromScb");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnRecordEventFromScb(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetFoldStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetFoldStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetFoldStatus(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetSuperFoldStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetSuperFoldStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetSuperFoldStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSuperFoldStatus(env, info) : nullptr;
 }
 
+napi_value JsScreenSessionManager::GetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetSuperRotation");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSuperRotation(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::SetLandscapeLockStatus(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]SetLandscapeLockStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetLandscapeLockStatus");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetLandscapeLockStatus(env, info) : nullptr;
 }
@@ -280,7 +291,7 @@ napi_value JsScreenSessionManager::SetForceCloseHdr(napi_env env, napi_callback_
 
 napi_value JsScreenSessionManager::GetScreenSnapshot(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]GetScreenSnapshot");
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetScreenSnapshot");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetScreenSnapshot(env, info) : nullptr;
 }
@@ -294,36 +305,43 @@ napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_call
 
 napi_value JsScreenSessionManager::GetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]GetExtendScreenConnectStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Get extend screen status");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetExtendScreenConnectStatus(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]SetDefaultMultiScreenModeWhenSwitchUser");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Set to default mode.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetDefaultMultiScreenModeWhenSwitchUser(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyExtendScreenCreateFinish(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenCreateFinish");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify create finish.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenCreateFinish(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyExtendScreenDestroyFinish(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenDestroyFinish");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify destroy finish.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenDestroyFinish(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify mask appear.");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenMaskAppear(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenConnectionCallback_ == nullptr) {
-        WLOGE("[NAPI]screenConnectionCallback is nullptr");
+        TLOGE(WmsLogTag::DMS, "[NAPI]screenConnectionCallback is nullptr");
         return;
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenConnected");
@@ -351,10 +369,10 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenConnected: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenConnected: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenConnected: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenConnected: env is nullptr");
     }
 }
 
@@ -396,10 +414,10 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenDisconnected: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenDisconnected: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenDisconnected: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenDisconnected: env is nullptr");
     }
 }
 
@@ -423,10 +441,10 @@ bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& in
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnTakeOverShutdown: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnTakeOverShutdown: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnTakeOverShutdown: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnTakeOverShutdown: env is nullptr");
     }
     return true;
 }
@@ -462,7 +480,7 @@ napi_value JsScreenSessionManager::OnRegisterShutdownCallback(napi_env env, cons
     sptr<PowerMgr::ITakeOverShutdownCallback> callback(this);
     PowerMgr::ShutdownClient::GetInstance().RegisterShutdownCallback(callback, PowerMgr::ShutdownPriority::LOW);
 #else
-    WLOGFD("Can not find the sub system of PowerMgr");
+    TLOGD(WmsLogTag::DMS, "Can not find the sub system of PowerMgr");
 #endif
     return NapiGetUndefined(env);
 }
@@ -479,7 +497,7 @@ napi_value JsScreenSessionManager::OnUnRegisterShutdownCallback(napi_env env, co
     sptr<PowerMgr::ITakeOverShutdownCallback> callback(this);
     PowerMgr::ShutdownClient::GetInstance().UnRegisterShutdownCallback(callback);
 #else
-    WLOGFD("Can not find the sub system of PowerMgr");
+    TLOGD(WmsLogTag::DMS, "Can not find the sub system of PowerMgr");
 #endif
     shutdownCallback_ = nullptr;
     return NapiGetUndefined(env);
@@ -609,7 +627,7 @@ napi_value JsScreenSessionManager::OnNotifyScreenLockEvent(napi_env env,
 
 napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetCurvedCompressionArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetCurvedCompressionArea");
     napi_value result = nullptr;
     napi_create_uint32(env, ScreenSessionManagerClient::GetInstance().GetCurvedCompressionArea(), &result);
     return result;
@@ -617,7 +635,7 @@ napi_value JsScreenSessionManager::OnGetCurvedCompressionArea(napi_env env, cons
 
 napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetPhyScreenProperty");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetPhyScreenProperty");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -640,7 +658,7 @@ napi_value JsScreenSessionManager::OnGetPhyScreenProperty(napi_env env, const na
 
 napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnUpdateAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateAvailableArea");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -672,7 +690,7 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
 
 napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnUpdateSuperFoldAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateSuperFoldAvailableArea");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -713,7 +731,7 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, 
 
 napi_value JsScreenSessionManager::OnExtraDestroyScreen(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnExtraDestroyScreen");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnExtraDestroyScreen");
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -736,7 +754,7 @@ napi_value JsScreenSessionManager::OnExtraDestroyScreen(napi_env env, const napi
 
 napi_value JsScreenSessionManager::OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnUpdateSuperFoldExpandAvailableArea");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateSuperFoldExpandAvailableArea");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -768,7 +786,7 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldExpandAvailableArea(napi_env
 
 napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnSetScreenOffDelayTime");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnSetScreenOffDelayTime");
     size_t argc = 1;
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
@@ -796,7 +814,7 @@ napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const n
 
 napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnNotifyFoldToExpandCompletion");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnNotifyFoldToExpandCompletion");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -819,7 +837,7 @@ napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, 
 
 napi_value JsScreenSessionManager::OnRecordEventFromScb(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnRecordEventFromScb");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnRecordEventFromScb");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -849,7 +867,7 @@ napi_value JsScreenSessionManager::OnRecordEventFromScb(napi_env env, const napi
 
 napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetFoldStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetFoldStatus");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -860,30 +878,28 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     FoldStatus status = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
-    WLOGI("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
 napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetSuperFoldStatus");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
-    WLOGI("[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);
+}
+
+napi_value JsScreenSessionManager::OnGetSuperRotation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetSuperRotation");
+    float rotation = ScreenSessionManagerClient::GetInstance().GetSuperRotation();
+    TLOGI(WmsLogTag::DMS, "[NAPI] getSuperRotation = %{public}f", rotation);
+    return CreateJsValue(env, rotation);
 }
 
 napi_value JsScreenSessionManager::OnSetLandscapeLockStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnSetLandscapeLockStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnSetLandscapeLockStatus");
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -935,7 +951,7 @@ napi_value JsScreenSessionManager::OnSetForceCloseHdr(napi_env env, napi_callbac
 
 napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnGetScreenSnapshot");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetScreenSnapshot");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -966,14 +982,15 @@ napi_value JsScreenSessionManager::OnGetScreenSnapshot(napi_env env, const napi_
     auto pixelMap = ScreenSessionManagerClient::GetInstance().GetScreenSnapshot(screenId,
         static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]));
     if (pixelMap == nullptr) {
-        WLOGE("[NAPI]pixelMap is nullptr");
+        TLOGE(WmsLogTag::DMS, "[NAPI]pixelMap is nullptr");
         return nativeData;
     }
     nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
     if (nativeData != nullptr) {
-        WLOGD("[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        TLOGD(WmsLogTag::DMS, "[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(),
+            pixelMap->GetHeight());
     } else {
-        WLOGE("[NAPI]create native pixelmap failed");
+        TLOGE(WmsLogTag::DMS, "[NAPI]create native pixelmap failed");
     }
     return nativeData;
 }
@@ -993,7 +1010,7 @@ napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const n
 
 napi_value JsScreenSessionManager::OnSetCameraStatus(napi_env env, const napi_callback_info info)
 {
-    WLOGFD("[NAPI]OnSetCameraStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnSetCameraStatus");
     size_t argc = 2;
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
@@ -1057,7 +1074,7 @@ napi_value JsScreenSessionManager::OnSetScreenOnDelayTime(napi_env env, const na
 napi_value JsScreenSessionManager::OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
     ExtendScreenConnectStatus status = ScreenSessionManagerClient::GetInstance().GetExtendScreenConnectStatus();
-    WLOGI("[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnGetExtendScreenConnectStatus = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
@@ -1065,20 +1082,26 @@ napi_value JsScreenSessionManager::OnSetDefaultMultiScreenModeWhenSwitchUser(nap
     const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().SetDefaultMultiScreenModeWhenSwitchUser();
-    WLOGI("[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnSetDefaultMultiScreenModeWhenSwitchUser");
     return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnNotifyExtendScreenCreateFinish(napi_env env, const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().NotifyExtendScreenCreateFinish();
-    WLOGI("[NAPI] OnNotifyExtendScreenCreateFinish");
+    TLOGI(WmsLogTag::DMS, "[NAPI] OnNotifyExtendScreenCreateFinish");
     return NapiGetUndefined(env);
 }
 
 napi_value JsScreenSessionManager::OnNotifyExtendScreenDestroyFinish(napi_env env, const napi_callback_info info)
 {
     ScreenSessionManagerClient::GetInstance().NotifyExtendScreenDestroyFinish();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyScreenMaskAppear(napi_env env, const napi_callback_info info)
+{
+    ScreenSessionManagerClient::GetInstance().NotifyScreenMaskAppear();
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

@@ -1165,6 +1165,20 @@ HWTEST_F(PictureInPictureControllerTest, GetPipPossible, TestSize.Level1)
     pipControl->GetPipPossible(pipSupported);
     ASSERT_EQ(isDeviceSupported, pipSupported);
 }
+
+/**
+ * @tc.name: GetPipEnabled
+ * @tc.desc: GetPipEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetPipEnabled, TestSize.Level1)
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    bool isDeviceSupported = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
+        multiWindowUIType == "TabletSmartWindow";
+    bool pipSupported = PictureInPictureControllerBase::GetPipEnabled();
+    ASSERT_EQ(isDeviceSupported, pipSupported);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

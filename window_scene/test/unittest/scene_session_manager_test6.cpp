@@ -21,6 +21,7 @@
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_ibundle_mgr.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "session_info.h"
@@ -137,6 +138,19 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, TestSize.Level1)
 
     ssm_->currentUserId_ = 100;
     ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+}
+
+/**
+ * @tc.name: SetBehindWindowFilterEnabled
+ * @tc.desc: SetBehindWindowFilterEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetBehindWindowFilterEnabled, TestSize.Level1)
+{
+    int ret = 0;
+    ssm_->SetBehindWindowFilterEnabled(true);
+    ssm_->SetBehindWindowFilterEnabled(false);
+    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -841,6 +855,96 @@ HWTEST_F(SceneSessionManagerTest6, GetAbilityInfosFromBundleInfo, TestSize.Level
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
     EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: GetCollaboratorAbilityInfos01
+ * @tc.desc: GetCollaboratorAbilityInfos01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetCollaboratorAbilityInfos01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    std::vector<SCBAbilityInfo> scbAbilityInfos;
+    int32_t userId = 0;
+    ssm_->GetCollaboratorAbilityInfos(bundleInfos, scbAbilityInfos, userId);
+    EXPECT_EQ(scbAbilityInfos.size(), 0);
+}
+
+/**
+ * @tc.name: GetCollaboratorAbilityInfos02
+ * @tc.desc: GetCollaboratorAbilityInfos02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetCollaboratorAbilityInfos02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string launcherBundleName = "launcherBundleName";
+    std::string launcherModuleName = "launcherModuleName";
+    std::string launcherAbilityName = "launcherAbilityName";
+    AppExecFwk::AbilityInfo launcherAbility;
+    launcherAbility.bundleName = launcherBundleName;
+    launcherAbility.moduleName = launcherModuleName;
+    launcherAbility.name = launcherAbilityName;
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, QueryLauncherAbilityInfos(_, _, _))
+        .WillOnce([launcherAbility](const AAFwk::Want &want, int32_t userId,
+            std::vector<AppExecFwk::AbilityInfo>& abilityInfos) {
+            abilityInfos.emplace_back(launcherAbility);
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.name = launcherBundleName;
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    AppExecFwk::AbilityInfo abilityInfo;
+    hapModuleInfo.abilityInfos.emplace_back(abilityInfo);
+    hapModuleInfo.abilityInfos.emplace_back(launcherAbility);
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+    bundleInfos.emplace_back(bundleInfo);
+    std::vector<SCBAbilityInfo> scbAbilityInfos;
+    int32_t userId = 0;
+    ssm_->GetCollaboratorAbilityInfos(bundleInfos, scbAbilityInfos, userId);
+    EXPECT_EQ(scbAbilityInfos.size(), 1);
+    EXPECT_EQ(scbAbilityInfos[0].abilityInfo_.moduleName, launcherModuleName);
+    EXPECT_EQ(scbAbilityInfos[0].abilityInfo_.name, launcherAbilityName);
+}
+
+/**
+ * @tc.name: GetCollaboratorAbilityInfos03
+ * @tc.desc: GetCollaboratorAbilityInfos03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetCollaboratorAbilityInfos03, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, QueryLauncherAbilityInfos(_, _, _))
+        .WillOnce([](const AAFwk::Want &want, int32_t userId,
+            std::vector<AppExecFwk::AbilityInfo> &abilityInfos) {
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo bundleInfo;
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    std::string abilityName1 = "testAbilityName1";
+    AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.name = abilityName1;
+    hapModuleInfo.abilityInfos.emplace_back(abilityInfo1);
+    std::string abilityName2 = "testAbilityName2";
+    AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.name = abilityName2;
+    hapModuleInfo.abilityInfos.emplace_back(abilityInfo2);
+    bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+    bundleInfos.emplace_back(bundleInfo);
+    std::vector<SCBAbilityInfo> scbAbilityInfos;
+    int32_t userId = 0;
+    ssm_->GetCollaboratorAbilityInfos(bundleInfos, scbAbilityInfos, userId);
+    EXPECT_EQ(scbAbilityInfos.size(), 1);
+    EXPECT_EQ(scbAbilityInfos[0].abilityInfo_.name, abilityName1);
 }
 
 /**
@@ -2041,6 +2145,20 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, TestSize.Level
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
     ASSERT_FALSE(sceneSession->GetRSVisible());
+}
+
+/**
+ * @tc.name: GetApplicationInfo
+ * @tc.desc: GetApplicationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetApplicationInfo, TestSize.Level1)
+{
+    std::string bundleName = "com.ohos.sceneboard";
+    SCBApplicationInfo applicationInfo;
+    ASSERT_NE(nullptr, ssm_);
+    WSError ret = ssm_->GetApplicationInfo(bundleName, applicationInfo);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 } // namespace
 } // namespace Rosen

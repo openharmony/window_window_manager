@@ -548,7 +548,8 @@ HWTEST_F(WindowSessionTest4, SetSessionIcon, TestSize.Level1)
     session_->updateSessionIconFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->SetSessionIcon(icon));
 
-    NotifyTerminateSessionFuncNew func3 = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {};
+    NotifyTerminateSessionFuncNew func3 = 
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     session_->terminateSessionFuncNew_ = func3;
     ASSERT_EQ(WSError::WS_OK, session_->Clear());
 }
@@ -1091,30 +1092,30 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SafelyGetWant01
- * @tc.desc: SafelyGetWant Test
+ * @tc.name: GetWantSafely01
+ * @tc.desc: GetWantSafely Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SafelyGetWant01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, GetWantSafely01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     ASSERT_EQ(nullptr, sessionInfo.want);
-    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "");
+    EXPECT_EQ(sessionInfo.GetWantSafely().GetBundle(), "");
 }
 
 /**
- * @tc.name: SafelySetWant01
- * @tc.desc: SafelySetWant Test
+ * @tc.name: SetWantSafely01
+ * @tc.desc: SetWantSafely Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SafelySetWant01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetWantSafely01, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     AAFwk::Want wantObj;
-    wantObj.SetBundle("SafelySetWantTest");
-    sessionInfo.SafelySetWant(wantObj);
+    wantObj.SetBundle("SetWantSafelyTest");
+    sessionInfo.SetWantSafely(wantObj);
     ASSERT_NE(nullptr, sessionInfo.want);
-    EXPECT_EQ(sessionInfo.SafelyGetWant().GetBundle(), "SafelySetWantTest");
+    EXPECT_EQ(sessionInfo.GetWantSafely().GetBundle(), "SetWantSafelyTest");
 }
 
 /**
@@ -1276,6 +1277,49 @@ HWTEST_F(WindowSessionTest4, ReportWindowTimeout_WindowAnimationDuration, TestSi
 
     session->SetWindowAnimationDuration(false);
     EXPECT_TRUE(g_logMsg.find("window configured animation") == std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: check func NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_CONNECT;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
+    EXPECT_EQ(WSError::WS_OK, session_->NotifyAppForceLandscapeConfigUpdated());
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->NotifyAppForceLandscapeConfigUpdated());
+}
+
+/**
+ * @tc.name: SetLifeCycleTaskRunning
+ * @tc.desc: check func SetLifeCycleTaskRunning
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLifeCycleTaskRunning, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    auto task = [](){};
+    std::string name = "testTask";
+    sptr<Session::SessionLifeCycleTask> lifeCycleTask =
+        sptr<Session::SessionLifeCycleTask>::MakeSptr(std::move(task), name, LifeCycleTaskType::STOP);
+
+    bool ret = session_->SetLifeCycleTaskRunning(lifeCycleTask);
+
+    EXPECT_TRUE(lifeCycleTask->running);
+    EXPECT_TRUE(ret);
+
+    ret = session_->SetLifeCycleTaskRunning(lifeCycleTask);
+    EXPECT_FALSE(ret);
+
+    sptr<Session::SessionLifeCycleTask> lifeCycleNullTask = nullptr;
+    ret = session_->SetLifeCycleTaskRunning(lifeCycleNullTask);
+    EXPECT_FALSE(ret);
 }
 } // namespace
 } // namespace Rosen

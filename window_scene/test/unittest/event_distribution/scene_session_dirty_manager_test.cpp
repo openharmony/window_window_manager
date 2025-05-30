@@ -1017,25 +1017,47 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, TestSize.Level1)
     sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
     sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    if (sceneSession == nullptr) {
-        return;
+    ASSERT_NE(sceneSession, nullptr);
+    float vpr = 1.5f; // 1.5: default vp
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        vpr = screenSession->GetScreenProperty().GetDensity();
     }
+    uint32_t offset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
     WSRect rect = { 0, 0, 320, 240 };
     sceneSession->SetSessionRect(rect);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
+    empty.clear();
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
+    ASSERT_EQ(empty[0].x, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
+    sceneSession->singleHandModeFlag_ = true;
+    SceneSessionManager::GetInstance().singleHandScreenInfo_.mode = SingleHandMode::LEFT;
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+    SceneSessionManager::GetInstance().singleHandScreenInfo_.mode = SingleHandMode::MIDDLE;
 }
 
 /**

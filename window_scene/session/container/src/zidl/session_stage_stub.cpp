@@ -126,8 +126,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleDumpSessionElementInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE):
             return HandleNotifyTouchOutside(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SECURE_LIMIT_CHANGE):
+            return HandleNotifySecureLimitChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE):
             return HandleUpdateWindowMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
+            return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
             return HandleNotifyForegroundInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE):
@@ -164,16 +168,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_RECOVER):
-            return HandleCompatibleFullScreenRecover(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_MINIMIZE):
-            return HandleCompatibleFullScreenMinimize(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_COMPATIBLE_FULLSCREEN_CLOSE):
-            return HandleCompatibleFullScreenClose(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE):
             return HandlePcAppInPadNormalClose(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE):
-            return HandleNotifyCompatibleModeEnableInPad(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_PROPERTY_CHANGE):
+            return HandleNotifyCompatibleModePropertyChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
@@ -208,12 +206,20 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
             return HandleNotifyKeyboardAnimationCompleted(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN):
+            return HandleNotifyKeyboardAnimationWillBegin(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
             return HandleNotifyRotationProperty(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
             return HandleSetCurrentRotation(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
+            return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
+            return HandleNotifyNonInteractiveStatus(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
+            return HandleCloseSpecificScene(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -397,7 +403,44 @@ int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Occupied info is nullptr");
         return ERR_INVALID_VALUE;
     }
-
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!(data.ReadInt32(posX) && data.ReadInt32(posY) && data.ReadUint32(width) && data.ReadUint32(height))) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read callingSessionRect failed");
+        return ERR_INVALID_VALUE;
+    }
+    Rect callingSessionRect = { posX, posY, width, height };
+    std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area size failed");
+        return ERR_INVALID_VALUE;
+    }
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Avoid area size: %{public}d is invalid", size);
+        return ERR_INVALID_VALUE;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = static_cast<uint32_t>(AvoidAreaType::TYPE_START);
+        if (!data.ReadUint32(type)) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area size failed");
+            return ERR_INVALID_VALUE;
+        }
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid avoid area type: %{public}d", type);
+            return ERR_INVALID_VALUE;
+        }
+        sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Read avoid area failed");
+            return ERR_INVALID_VALUE;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
     bool hasRSTransaction = data.ReadBool();
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
@@ -405,9 +448,9 @@ int SessionStageStub::HandleNotifyOccupiedAreaChange(MessageParcel& data, Messag
             TLOGE(WmsLogTag::WMS_KEYBOARD, "transaction unMarsh failed");
             return ERR_INVALID_VALUE;
         }
-        NotifyOccupiedAreaChangeInfo(info, transaction);
+        NotifyOccupiedAreaChangeInfo(info, transaction, callingSessionRect, avoidAreas);
     } else {
-        NotifyOccupiedAreaChangeInfo(info);
+        NotifyOccupiedAreaChangeInfo(info, nullptr, callingSessionRect, avoidAreas);
     }
 
     return ERR_NONE;
@@ -455,11 +498,36 @@ int SessionStageStub::HandleNotifyTouchOutside(MessageParcel& data, MessageParce
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifySecureLimitChange!");
+    bool isLimit = true;
+    if (!data.ReadBool(isLimit)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isLimit failed.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyExtensionSecureLimitChange(isLimit);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleUpdateWindowMode!");
     WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
     WSError errCode = UpdateWindowMode(mode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    uint32_t mode = static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED);
+    if (!data.ReadUint32(mode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyLayoutFinishAfterWindowModeChange(static_cast<WindowMode>(mode));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -478,6 +546,13 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     WLOGFD("NotifyForegroundInteractiveStatus!");
     bool interactive = data.ReadBool();
     NotifyForegroundInteractiveStatus(interactive);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "called");
+    NotifyNonInteractiveStatus();
     return ERR_NONE;
 }
 
@@ -643,37 +718,16 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenRecover();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenMinimize();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = CompatibleFullScreenClose();
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = PcAppInPadNormalClose();
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool enable = data.ReadBool();
-    WSError errCode = NotifyCompatibleModeEnableInPad(enable);
+    sptr<CompatibleModeProperty> property = data.ReadParcelable<CompatibleModeProperty>();
+    WSError errCode = NotifyCompatibleModePropertyChange(property);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -899,8 +953,8 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    int32_t rotation = 0;
-    if (!data.ReadInt32(rotation)) {
+    uint32_t rotation = 0;
+    if (!data.ReadUint32(rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
         return ERR_INVALID_VALUE;
     }
@@ -998,6 +1052,34 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
         return ERR_INVALID_VALUE;
     }
     SetCurrentRotation(currentRotation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    NotifyAppForceLandscapeConfigUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    sptr<KeyboardAnimationInfo> keyboardAnimationInfo = data.ReadParcelable<KeyboardAnimationInfo>();
+    if (keyboardAnimationInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardAnimationInfo is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
+    NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    CloseSpecificScene();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

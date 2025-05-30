@@ -30,6 +30,7 @@
 namespace OHOS {
 namespace Rosen {
 class WindowSessionProperty;
+class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 
@@ -42,6 +43,7 @@ public:
     void CopyFrom(const sptr<WindowSessionProperty>& property);
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
+    void SetTransitionAnimationConfig(WindowTransitionType transitionType, const TransitionAnimation& animation);
     void SetRequestRect(const struct Rect& rect);
     void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
@@ -58,8 +60,10 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetViewKeepScreenOn(bool keepScreenOn);
+    void SetWindowShadowEnabled(bool isEnabled);
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
+    void SetUserRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetSnapshotSkip(bool isSkip);
@@ -98,14 +102,8 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
-    void SetCompatibleModeInPc(bool compatibleModeInPc);
-    void SetCompatibleModeInPcTitleVisible(bool compatibleModeInPcTitleVisible);
-    void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-        int32_t landscapeWidth, int32_t landscapeHeight);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
-    void SetCompatibleModeEnableInPad(bool enable);
     void SetIsAtomicService(bool isAtomicService);
     
     /*
@@ -117,6 +115,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> GetTransitionAnimationConfig() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
@@ -132,10 +131,12 @@ public:
     bool GetSystemCalling() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
+    bool GetWindowShadowEnabled() const;
     bool IsViewKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
     bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
+    Orientation GetUserRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     bool GetSnapshotSkip() const;
@@ -167,16 +168,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
-    bool GetCompatibleModeInPc() const;
-    bool GetCompatibleModeInPcTitleVisible() const;
-    int32_t GetCompatibleInPcPortraitWidth() const;
-    int32_t GetCompatibleInPcPortraitHeight() const;
-    int32_t GetCompatibleInPcLandscapeWidth() const;
-    int32_t GetCompatibleInPcLandscapeHeight() const;
     bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
-    bool GetIsSupportDragInPcCompatibleMode() const;
-    bool GetCompatibleModeEnableInPad() const;
     bool GetIsAtomicService() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
@@ -193,6 +186,10 @@ public:
     static void UnmarshallingMainWindowTopmost(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingSessionInfo(Parcel& parcel) const;
     static bool UnmarshallingSessionInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingTransitionAnimationMap(Parcel& parcel) const;
+    static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingShadowsInfo(Parcel& parcel) const;
+    static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -221,24 +218,32 @@ public:
     bool GetIsAbilityHookOff() const;
     void SetIsAbilityHook(bool isAbilityHook);
     bool GetIsAbilityHook() const;
+    void SetFollowScreenChange(bool isFollowScreenChange);
+    bool GetFollowScreenChange() const;
 
     /*
      * Sub Window
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+    void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
+    bool IsSubWindowOutlineEnabled() const;
 
     /*
      * Window Hierarchy
      */
     void SetSubWindowZLevel(int32_t zLevel);
     int32_t GetSubWindowZLevel() const;
+    void SetZIndex(int32_t zIndex);
+    int32_t GetZIndex() const;
 
     /*
      * Window Property
      */
     void SetWindowCornerRadius(float cornerRadius);
     float GetWindowCornerRadius() const;
+    void SetWindowShadows(const ShadowsInfo& shadowsInfo);
+    ShadowsInfo GetWindowShadows() const;
 
     /*
      * UIExtension
@@ -277,6 +282,23 @@ public:
     bool GetIsFullScreenWaterfallMode() const;
 
     /*
+     * Compatible mode
+     */
+    sptr<CompatibleModeProperty> GetCompatibleModeProperty() const;
+    void SetCompatibleModeProperty(const sptr<CompatibleModeProperty> property);
+    bool IsAdaptToImmersive() const;
+    bool IsAdaptToEventMapping() const;
+    bool IsAdaptToProportionalScale() const;
+    bool IsAdaptToBackButton() const;
+    bool IsDragResizeDisabled() const;
+    bool IsResizeWithDpiDisabled() const;
+    bool IsFullScreenDisabled() const;
+    bool IsWindowLimitDisabled() const;
+    bool IsSupportRotateFullScreen() const;
+    bool IsAdaptToSubWindow() const;
+    bool IsAdaptToSimulationScale() const;
+
+    /*
      * Keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
@@ -304,6 +326,7 @@ private:
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateViewKeepScreenOn(Parcel& parcel);
+    bool WriteActionUpdateWindowShadowEnabled(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
     bool WriteActionUpdateTouchable(Parcel& parcel);
     bool WriteActionUpdateSetBrightness(Parcel& parcel);
@@ -331,9 +354,11 @@ private:
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    bool WriteActionUpdateFollowScreenChange(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateViewKeepScreenOn(Parcel& parcel);
+    void ReadActionUpdateWindowShadowEnabled(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
     void ReadActionUpdateTouchable(Parcel& parcel);
     void ReadActionUpdateSetBrightness(Parcel& parcel);
@@ -361,6 +386,7 @@ private:
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
+    void ReadActionUpdateFollowScreenChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -378,14 +404,17 @@ private:
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
     bool viewKeepScreenOn_ = false;
+    bool windowShadowEnabled_ { true };
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
     bool needRotateAnimation_ = true;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
+    Orientation userRequestedOrientation_ = Orientation::UNSPECIFIED;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
+    bool isFollowScreenChange_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
@@ -435,17 +464,9 @@ private:
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
-    bool compatibleModeInPc_ = false;
-    bool compatibleModeInPcTitleVisible_ = false;
-    int32_t compatibleInPcPortraitWidth_ = 0;
-    int32_t compatibleInPcPortraitHeight_ = 0;
-    int32_t compatibleInPcLandscapeWidth_ = 0;
-    int32_t compatibleInPcLandscapeHeight_ = 0;
     bool isAppSupportPhoneInPc_ = false;
-    bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
-    bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
@@ -457,11 +478,13 @@ private:
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
+    bool subWindowOutlineEnabled_ = false;
 
     /*
      * Window Hierarchy
      */
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     /*
      * UIExtension
@@ -511,6 +534,86 @@ private:
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
+    ShadowsInfo shadowsInfo_;
+    mutable std::mutex shadowsInfoMutex_;
+
+    sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
+};
+ 
+class CompatibleModeProperty : public Parcelable {
+public:
+    void SetIsAdaptToImmersive(bool isAdaptToImmersive);
+    bool IsAdaptToImmersive() const;
+
+    void SetIsAdaptToEventMapping(bool isAdaptToEventMapping);
+    bool IsAdaptToEventMapping() const;
+
+    void SetIsAdaptToProportionalScale(bool isAdaptToProportionalScale);
+    bool IsAdaptToProportionalScale() const;
+
+    void SetIsAdaptToBackButton(bool isAdaptToBackButton);
+    bool IsAdaptToBackButton() const;
+
+    void SetDisableDragResize(bool disableDragResize);
+    bool IsDragResizeDisabled() const;
+
+    void SetDisableResizeWithDpi(bool disableResizeWithDpi);
+    bool IsResizeWithDpiDisabled() const;
+
+    void SetDisableFullScreen(bool setDisableFullScreen);
+    bool IsFullScreenDisabled() const;
+
+    void SetDisableWindowLimit(bool disableWindowLimit);
+    bool IsWindowLimitDisabled() const;
+
+    void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
+    bool IsSupportRotateFullScreen() const;
+
+    void SetIsAdaptToSubWindow(bool isAdaptToSubWindow);
+    bool IsAdaptToSubWindow() const;
+
+    void SetIsAdaptToSimulationScale(bool isAdaptToSimulationScale);
+    bool IsAdaptToSimulationScale() const;
+
+    bool Marshalling(Parcel& parcel) const override;
+    static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
+
+    void CopyFrom(const sptr<CompatibleModeProperty>& property);
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "isAdaptToImmersive_:" << isAdaptToImmersive_ << " ";
+        ss << "isAdaptToEventMapping_:" << isAdaptToEventMapping_ << " ";
+        ss << "isAdaptToProportionalScale_:" << isAdaptToProportionalScale_ << " ";
+        ss << "isAdaptToBackButton_:" << isAdaptToBackButton_<< " ";
+        ss << "disableDragResize_:" << disableDragResize_<< " ";
+        ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
+        ss << "disableFullScreen_:" << disableFullScreen_<< " ";
+        ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
+        ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
+        ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
+        return ss.str();
+    }
+
+private:
+    bool isAdaptToImmersive_ { false };
+    bool isAdaptToEventMapping_ { false };
+    bool isAdaptToProportionalScale_ { false };
+    bool isAdaptToBackButton_ { false };
+    bool disableDragResize_ { false };
+    bool disableResizeWithDpi_ { false };
+    bool disableFullScreen_ { false };
+    bool disableWindowLimit_ { false };
+    bool isSupportRotateFullScreen_ { false };
+    bool isAdaptToSubWindow_ { false };
+    bool isAdaptToSimulationScale_ { false };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
@@ -550,14 +653,19 @@ struct FreeMultiWindowConfig : public Parcelable {
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
     std::string homePage_;
+    bool isSupportSplitMode_ = false;
 
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage) : mode_(mode), homePage_(homePage) {}
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, bool isSupportSplitMode)
+        : mode_(mode), homePage_(homePage), isSupportSplitMode_(isSupportSplitMode)
+    {
+    }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
-            !parcel.WriteString(homePage_)) {
+            !parcel.WriteString(homePage_) ||
+            !parcel.WriteBool(isSupportSplitMode_)) {
             return false;
         }
         return true;
@@ -569,8 +677,12 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (config == nullptr) {
             return nullptr;
         }
-        config->mode_ = parcel.ReadInt32();
-        config->homePage_ = parcel.ReadString();
+        if (!parcel.ReadInt32(config->mode_) ||
+            !parcel.ReadString(config->homePage_) ||
+            !parcel.ReadBool(config->isSupportSplitMode_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
 };
@@ -606,6 +718,10 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t maxMidSceneNum_ = 4;
     // Product configuration
     bool supportFollowParentWindowLayout_ = false;
+    bool supportFollowRelativePositionToParent_ = false;
+    bool supportZLevel_ = false;
+    bool skipRedundantWindowStatusNotifications_ = false;
+    uint32_t supportFunctionType_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -650,6 +766,13 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportFollowRelativePositionToParent_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportZLevel_) ||
+            !parcel.WriteBool(skipRedundantWindowStatusNotifications_) || !parcel.WriteUint32(supportFunctionType_)) {
             return false;
         }
         return true;
@@ -697,6 +820,10 @@ struct SystemSessionConfig : public Parcelable {
         config->supportTypeFloatWindow_ = parcel.ReadBool();
         config->maxMidSceneNum_ = parcel.ReadUint32();
         config->supportFollowParentWindowLayout_ = parcel.ReadBool();
+        config->supportFollowRelativePositionToParent_ = parcel.ReadBool();
+        config->supportZLevel_ = parcel.ReadBool();
+        config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
+        config->supportFunctionType_ = parcel.ReadUint32();
         return config;
     }
 

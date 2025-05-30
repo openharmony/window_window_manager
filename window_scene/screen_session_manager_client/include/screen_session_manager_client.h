@@ -84,6 +84,7 @@ public:
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    float GetSuperRotation();
     void SetLandscapeLockStatus(bool isLocked);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
@@ -115,6 +116,13 @@ public:
     void SetDefaultMultiScreenModeWhenSwitchUser();
     void NotifyExtendScreenCreateFinish();
     void NotifyExtendScreenDestroyFinish();
+    void NotifyScreenMaskAppear();
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
+    std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
 
 protected:
     ScreenSessionManagerClient() = default;
@@ -142,6 +150,7 @@ private:
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
     void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;

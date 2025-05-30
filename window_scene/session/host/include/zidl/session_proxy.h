@@ -78,6 +78,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
@@ -106,6 +107,8 @@ public:
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -115,6 +118,7 @@ public:
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
+    WMError NotifySnapshotUpdate() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
@@ -137,6 +141,7 @@ public:
      * Window Property
      */
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
@@ -155,6 +160,7 @@ public:
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;
+    WSError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Pattern
@@ -165,9 +171,17 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
 
     /**
      * window rotation

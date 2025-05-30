@@ -39,6 +39,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {LIFECYCLE_EVENT_CB, RegisterListenerType::LIFECYCLE_EVENT_CB},
     {WINDOW_EVENT_CB, RegisterListenerType::WINDOW_EVENT_CB},
     {KEYBOARD_HEIGHT_CHANGE_CB, RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
+    {KEYBOARD_WILL_SHOW_CB, RegisterListenerType::KEYBOARD_WILL_SHOW_CB},
+    {KEYBOARD_WILL_HIDE_CB, RegisterListenerType::KEYBOARD_WILL_HIDE_CB},
     {KEYBOARD_DID_SHOW_CB, RegisterListenerType::KEYBOARD_DID_SHOW_CB},
     {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
@@ -46,12 +48,14 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
     {DIALOG_DEATH_RECIPIENT_CB, RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB},
     {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
+    {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
+    {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
     {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
     {WINDOW_WILL_CLOSE_CB, RegisterListenerType::WINDOW_WILL_CLOSE_CB},
@@ -164,6 +168,38 @@ WmErrorCode JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWi
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillShowListener> thisListener(listener);
+    if (isRegister) {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillShowListener(thisListener));
+    } else {
+        return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillShowListener(thisListener));
+    }
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<JsWindowListener> listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardWillHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardWillHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillHideListener(thisListener));
     }
     return ret;
 }
@@ -424,42 +460,6 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
     return false;
 }
 
-void JsWindowRegisterManager::CleanReferenceWithType(std::string type, NativeReference* callbackRef)
-{
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end() ||
-            jsCbMap_[type].find(callbackRef) == jsCbMap_[type].end()) {
-            TLOGW(WmsLogTag::DEFAULT, "type %{public}s was not registered", type.c_str());
-            return;
-        }
-        jsCbMap_[type].erase(callbackRef);
-        TLOGI(WmsLogTag::DEFAULT, "type %{public}s erase callbackRef", type.c_str());
-        delete callbackRef;
-        if (jsCbMap_[type].empty()) {
-            TLOGI(WmsLogTag::DEFAULT, "type %{public}s is empty()", type.c_str());
-            jsCbMap_.erase(type);
-        }
-    }
-}
-
-static void CleanUp(void* data)
-{
-    auto reference = reinterpret_cast<JsWindowRegisterManager::TypeWithRef*>(data);
-    if (reference == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "reference is null");
-        return;
-    }
-    auto jsWindowManager = reference->jsWindowManager.lock();
-    if (jsWindowManager == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "jsWindowManager is null");
-        delete reference;
-        return;
-    }
-    jsWindowManager->CleanReferenceWithType(reference->type, reference->callbackRef);
-    delete reference;
-}
-
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
     CaseType caseType, napi_env env, napi_value callback, napi_value parameter)
 {
@@ -480,13 +480,10 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     RegisterListenerType listenerType = iterCallbackType->second;
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
-    NativeReference* callbackRef = reinterpret_cast<NativeReference*>(result);
-    auto callbackData = new TypeWithRef{ type, callbackRef, this->getWeak() };
-    napi_add_env_cleanup_hook(env, CleanUp, callbackData);
+    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
         WLOGFE("New JsWindowListener failed");
-        napi_delete_reference(env, result);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
@@ -494,7 +491,6 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         env, parameter);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("Register type %{public}s failed", type.c_str());
-        napi_delete_reference(env, result);
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
@@ -535,6 +531,10 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
                 return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_SHOW_CB):
+                return ProcessKeyboardWillShowRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_WILL_HIDE_CB):
+                return ProcessKeyboardWillHideRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_SHOW_CB):
                 return ProcessKeyboardDidShowRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_DID_HIDE_CB):
@@ -549,6 +549,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessDialogDeathRecipientRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
                 return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
+                return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
                 return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env,
                     parameter);
@@ -562,6 +564,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB):
+                return ProcessExtensionSecureLimitChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
@@ -620,9 +624,6 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
                 WLOGFE("Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            if (it->first != nullptr) {
-                delete it->first;
-            }
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -642,9 +643,6 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             if (ret != WmErrorCode::WM_OK) {
                 WLOGFE("Unregister type %{public}s failed", type.c_str());
                 return ret;
-            }
-            if (it->first != nullptr) {
-                delete it->first;
             }
             jsCbMap_[type].erase(it);
             break;
@@ -680,6 +678,23 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStatusDidChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusDidChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusDidChangeListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -692,6 +707,22 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWind
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterExtensionSecureLimitChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterExtensionSecureLimitChangeListener(thisListener));
     }
     return ret;
 }

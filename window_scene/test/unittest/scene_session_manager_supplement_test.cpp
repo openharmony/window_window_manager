@@ -684,6 +684,29 @@ HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_07, Test
 }
 
 /**
+ * @tc.name: TestCreateAndConnectSession_08
+ * @tc.desc: Test for CreateAndConnectSpecificSession with WindowType is WINDOW_TYPE_MUTISCREEN_COLLABORATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_08, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    property->SetWindowType(WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: ClosePipWindowIfExist
  * @tc.desc: ClosePipWindowIfExist
  * @tc.type: FUNC

@@ -122,8 +122,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1
 
     auto ret = scbSystemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, ret);
-    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -132,7 +130,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -144,7 +141,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = scbSystemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, ret);
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -153,7 +149,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);

@@ -1105,6 +1105,23 @@ HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowShadowEnabled
+ * @tc.desc: SetWindowShadowEnabled And GetWindowShadowEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowShadowEnabled, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool isEnabled = true;
+    property->SetWindowShadowEnabled(isEnabled);
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+    isEnabled = false;
+    property->SetWindowShadowEnabled(isEnabled);
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+}
+
+/**
  * @tc.name: MarshallingSessionInfo
  * @tc.desc: MarshallingSessionInfo test
  * @tc.type: FUNC
@@ -1136,6 +1153,48 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSessionInfo, TestSize.Level1)
     bool result = property->MarshallingSessionInfo(parcel);
     ASSERT_EQ(result, true);
     result = property->UnmarshallingSessionInfo(parcel, &windowSessionProperty);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: MarshallingTransitionAnimationMap
+ * @tc.desc: MarshallingTransitionAnimationMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingTransitionAnimationMap, TestSize.Level1)
+{
+    Parcel parcel;
+    TransitionAnimation animation;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, true);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] =
+        std::make_shared<TransitionAnimation>(animation);
+    result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, true);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] = nullptr;
+    result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UnmarshallingTransitionAnimationMap
+ * @tc.desc: UnmarshallingTransitionAnimationMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingTransitionAnimationMap, TestSize.Level1)
+{
+    Parcel parcel;
+    TransitionAnimation animation;
+    WindowSessionProperty windowSessionProperty;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] =
+        std::make_shared<TransitionAnimation>(animation);
+    bool result = property->MarshallingSessionInfo(parcel);
+    ASSERT_EQ(result, true);
+    result = property->UnmarshallingTransitionAnimationMap(parcel, &windowSessionProperty);
     ASSERT_EQ(result, true);
 }
 
@@ -1340,6 +1399,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
     ASSERT_EQ(zLevel, property->zLevel_);
 }
 
+/**
+ * @tc.name: GetZIndex
+ * @tc.desc: GetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->zIndex_ = zIndex;
+    ASSERT_EQ(zIndex, property->GetZIndex());
+}
+
+/**
+ * @tc.name: SetZIndex
+ * @tc.desc: SetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->SetZIndex(zIndex);
+    ASSERT_EQ(zIndex, property->zIndex_);
+}
 /**
  * @tc.name: SetAndIsSystemKeyboard
  * @tc.desc: SetIsSystemKeyboard and IsSystemKeyboard Test

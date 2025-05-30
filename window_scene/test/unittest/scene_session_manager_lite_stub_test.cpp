@@ -247,6 +247,19 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override
+    {
+        return WSError::WS_OK;
+    }
+    WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override
+    {
+        return WMError::WM_OK;
+    }
+
+    WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -1050,6 +1063,20 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, TestSi
     data.WriteBool(isLock);
 
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetRecentMainSessionInfoList
+ * @tc.desc: test function : HandleGetRecentMainSessionInfoList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace

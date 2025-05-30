@@ -39,7 +39,7 @@ private:
     /* source combination */
     using ScreenModeChangeEvent = std::pair<ScreenCombination, ScreenCombination>;
     using HandleScreenModeChangeMap = std::map<ScreenModeChangeEvent, HandleScreenModeChange>;
-    HandleScreenModeChangeMap HandleMultiScreenModeChangeMap_ {};
+    HandleScreenModeChangeMap handleMultiScreenModeChangeMap_ {};
     void InitMultiScreenModeChangeMap();
     void InitMultiScreenInnerMainExternalExtendModeModeChangeMap();
     void InitMultiScreenInnerMainExternalMirrorModeModeChangeMap();
@@ -51,22 +51,22 @@ private:
     using HandleScreenCombinationChange = std::function<DMError(sptr<ScreenSession> &, sptr<ScreenSession> &)>;
     using HandleScreenCombinationChangeMap = std::map<ScreenCombinationChangeEvent, HandleScreenCombinationChange>;
 
-    HandleScreenCombinationChangeMap HandleMultiScreenInnerMainExternalExtendModeChangeMap_ {};
+    HandleScreenCombinationChangeMap handleMultiScreenInnerMainExternalExtendModeChangeMap_ {};
     DMError HandleInnerMainExternalExtendChange(sptr<ScreenSession>& innerScreen,
         ScreenCombination innerTargetCombination, sptr<ScreenSession>& externalScreen,
         ScreenCombination externalTargetCombination);
 
-    HandleScreenCombinationChangeMap HandleMultiScreenInnerMainExternalMirrorModeChangeMap_ {};
+    HandleScreenCombinationChangeMap handleMultiScreenInnerMainExternalMirrorModeChangeMap_ {};
     DMError HandleInnerMainExternalMirrorChange(sptr<ScreenSession>& innerScreen,
         ScreenCombination innerTargetCombination, sptr<ScreenSession>& externalScreen,
         ScreenCombination externalTargetCombination);
 
-    HandleScreenCombinationChangeMap HandleMultiScreenInnerExtendExternalMainModeChangeMap_ {};
+    HandleScreenCombinationChangeMap handleMultiScreenInnerExtendExternalMainModeChangeMap_ {};
     DMError HandleInnerExtendExternalMainChange(sptr<ScreenSession>& innerScreen,
         ScreenCombination innerTargetCombination, sptr<ScreenSession>& externalScreen,
         ScreenCombination externalTargetCombination);
 
-    HandleScreenCombinationChangeMap HandleMultiScreenInnerMirrorExternalMainModeChangeMap_ {};
+    HandleScreenCombinationChangeMap handleMultiScreenInnerMirrorExternalMainModeChangeMap_ {};
     DMError HandleInnerMirrorExternalMainChange(sptr<ScreenSession>& innerScreen,
         ScreenCombination innerTargetCombination, sptr<ScreenSession>& externalScreen,
         ScreenCombination externalTargetCombination);

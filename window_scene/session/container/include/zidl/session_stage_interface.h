@@ -19,7 +19,7 @@
 #include <iremote_broker.h>
 #include <list>
 #include <map>
-
+#include "common/include/window_session_property.h"
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
 
@@ -88,6 +88,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyExtensionSecureLimitChange(bool isLimit) = 0;
     virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
@@ -103,14 +104,17 @@ public:
     virtual WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams) = 0;
     virtual void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                              const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void NotifyScreenshot() = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
+    virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
+    virtual void NotifyNonInteractiveStatus() = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
@@ -172,23 +176,11 @@ public:
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
     virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
-    virtual WSError CompatibleFullScreenRecover()
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError CompatibleFullScreenMinimize()
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError CompatibleFullScreenClose()
-    {
-        return WSError::WS_OK;
-    }
     virtual WSError PcAppInPadNormalClose()
     {
         return WSError::WS_OK;
     }
-    virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
+    virtual WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
     {
         return WSError::WS_OK;
     }
@@ -253,12 +245,16 @@ public:
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info) { return WSError::WS_DO_NOTHING; }
     virtual RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
     {
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
+    virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
+    virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

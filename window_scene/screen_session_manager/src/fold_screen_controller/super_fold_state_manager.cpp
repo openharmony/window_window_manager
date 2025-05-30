@@ -291,11 +291,13 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
     return curState_.load();
 }
 
 void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
 {
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
     curState_.store(curState);
 }
 
@@ -537,6 +539,12 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
         screenWidth, screenHeight, static_cast<long>(response));
     return true;
+}
+
+bool SuperFoldStateManager::GetKeyboardState()
+{
+    TLOGI(WmsLogTag::DMS, "GetKeyboardState isKeyboardOn_ : %{public}d", isKeyboardOn_);
+    return isKeyboardOn_;
 }
 } // Rosen
 } // OHOS

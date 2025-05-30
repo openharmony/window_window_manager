@@ -45,6 +45,7 @@ public:
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    sptr<WindowSceneSessionImpl> InitialWindowState();
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
@@ -69,6 +70,18 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest2::CreateRSSurfaceNode()
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindowTestSurfaceNode";
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     return surfaceNode;
+}
+
+sptr<WindowSceneSessionImpl> WindowSceneSessionImplTest2::InitialWindowState()
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->state_ = WindowState::STATE_SHOWN;
+    return windowSceneSession;
 }
 
 namespace {
@@ -939,30 +952,9 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    windowSceneSession->property_->SetCompatibleModeInPc(true);
     int ret = 0;
     windowSceneSession->GetConfigurationFromAbilityInfo();
     ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: GetConfigurationFromAbilityInfo03
- * @tc.desc: GetConfigurationFromAbilityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo03, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetConfigurationFromAbilityInfo03");
-    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    windowSceneSession->property_->SetCompatibleModeInPc(true);
-    windowSceneSession->GetConfigurationFromAbilityInfo();
-    auto supportType = windowSceneSession->property_->GetWindowModeSupportType();
-    bool isSupportFullScreen = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FULLSCREEN);
-    bool isSupportFloating = WindowHelper::IsWindowModeSupported(supportType, WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(isSupportFullScreen, true);
-    ASSERT_EQ(isSupportFloating, true);
 }
 
 /**
@@ -1023,6 +1015,57 @@ HWTEST_F(WindowSceneSessionImplTest2, Snapshot01, TestSize.Level1)
     int ret = 0;
     windowSceneSession->Snapshot();
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SnapshotSync01
+ * @tc.desc: Test WMError::WM_ERROR_INVALID_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Snapshot(pixelMap));
+
+    windowSceneSession->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->state_ = WindowState::STATE_CREATED;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Snapshot(pixelMap));
+}
+
+/**
+ * @tc.name: SnapshotSync02
+ * @tc.desc: Test WMError::WM_ERROR_INVALID_OPERATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync02, TestSize.Level1)
+{
+    auto windowSceneSession = InitialWindowState();
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->surfaceNode_ = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSceneSession->Snapshot(pixelMap));
+}
+
+/**
+ * @tc.name: SnapshotSync03
+ * @tc.desc: Test WMError::WM_ERROR_TIMEOUT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SnapshotSync03, TestSize.Level1)
+{
+    auto windowSceneSession = InitialWindowState();
+    ASSERT_NE(nullptr, windowSceneSession);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    auto surfaceNode_mocker = CreateRSSurfaceNode();
+    ASSERT_NE(nullptr, surfaceNode_mocker);
+    windowSceneSession->surfaceNode_ = surfaceNode_mocker;
+    EXPECT_EQ(WMError::WM_ERROR_TIMEOUT, windowSceneSession->Snapshot(pixelMap));
 }
 
 /**

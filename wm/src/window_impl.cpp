@@ -31,6 +31,7 @@
 #include "display_manager.h"
 #include "display_info.h"
 #include "ressched_report.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "surface_capture_future.h"
 #include "sys_cap_util.h"
@@ -115,6 +116,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
@@ -179,7 +182,12 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
     if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
+    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+          "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
+    return surfaceNode;
 }
 
 WindowImpl::~WindowImpl()
@@ -284,19 +292,20 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl window is null");
             continue;
         }
-        auto context = window->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
-            continue;
-        }
-        if (ignoreWindowCtxSet.count(context) == 0) {
+        if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
         }
     }
 }
@@ -497,7 +506,7 @@ WMError WindowImpl::SetAlpha(float alpha)
     }
     property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -2858,20 +2867,21 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
             TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
+        auto rsUIContext = window->GetRSUIContext();
         if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve);
         if ((rectToAce != lastOriRect) || (reason != window->lastSizeChangeReason_)) {
             window->NotifySizeChange(rectToAce, reason, rsTransaction);
             window->lastSizeChangeReason_ = reason;
         }
         window->UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
-        RSNode::CloseImplicitAnimation();
+        RSNode::CloseImplicitAnimation(rsUIContext);
         if (rsTransaction) {
             rsTransaction->Commit();
         }
@@ -3513,13 +3523,25 @@ bool WindowImpl::IsFocused() const
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfiguration(configuration);
     }
 }
@@ -3528,17 +3550,25 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subWindow, winId: %{public}u", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
@@ -3546,14 +3576,25 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
 void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfigurationSyncForAll(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_IMMS, "no subWindow, winId: %{public}d", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationSync(configuration);
     }
 }
@@ -3561,8 +3602,11 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfigurationSync(configuration);
         }
     }
@@ -4372,7 +4416,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
     WLOGI("Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     surfaceNode_->SetCornerRadius(cornerRadius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4387,7 +4431,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowRadius(radius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4403,7 +4447,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowColor(colorValue);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4415,7 +4459,7 @@ WMError WindowImpl::SetShadowOffsetX(float offsetX)
     }
     WLOGI("Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4427,7 +4471,7 @@ WMError WindowImpl::SetShadowOffsetY(float offsetY)
     }
     WLOGI("Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4444,7 +4488,7 @@ WMError WindowImpl::SetBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("[Client] Window %{public}s set blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4461,7 +4505,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("[Client] Window %{public}s set backdrop blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4489,7 +4533,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
                                                                          display->GetVirtualPixelRatio()));
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4580,6 +4624,23 @@ WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo
     windowPropertyInfo.id = GetWindowId();
     windowPropertyInfo.displayId = GetDisplayId();
     return WMError::WM_OK;
+}
+
+std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

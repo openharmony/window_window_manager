@@ -14,8 +14,12 @@
  */
 
 #include "session/container/include/zidl/session_stage_proxy.h"
-#include "iremote_object_mocker.h"
+
 #include <gtest/gtest.h>
+#include <transaction/rs_transaction.h>
+
+#include "iremote_object_mocker.h"
+#include "mock_message_parcel.h"
 #include "proto.h"
 #include "string_wrapper.h"
 #include "util.h"
@@ -270,7 +274,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
 {
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
-    sessionStage_->NotifyOccupiedAreaChangeInfo(info);
+    sessionStage_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 }
 
 /**
@@ -283,6 +287,19 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardPanelInfo keyboardPanelInfo;
     sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: test function : NotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardAnimationInfo keyboardAnimationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
 }
 
 /**
@@ -364,6 +381,36 @@ HWTEST_F(SessionStageProxyTest, NotifySessionFullScreen, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isLimit = false;
+    res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyExtensionSecureLimitChange02
+ * @tc.desc: test function : NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Level1)
+{
+    bool isLimit = true;
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+}
+
+/**
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: test function : NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
@@ -418,14 +465,15 @@ HWTEST_F(SessionStageProxyTest, NotifySessionBackground, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyCompatibleModeEnableInPad
- * @tc.desc: test function : NotifyCompatibleModeEnableInPad
+ * @tc.name: NotifyCompatibleModePropertyChange
+ * @tc.desc: test function : NotifyCompatibleModePropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, NotifyCompatibleModeEnableInPad, TestSize.Level1)
+HWTEST_F(SessionStageProxyTest, NotifyCompatibleModePropertyChange, TestSize.Level1)
 {
     ASSERT_TRUE((sessionStage_ != nullptr));
-    WSError res = sessionStage_->NotifyCompatibleModeEnableInPad(true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    WSError res = sessionStage_->NotifyCompatibleModePropertyChange(compatibleModeProperty);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 
@@ -537,42 +585,6 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardPanelInfoChange, TestSize.Level1)
     ASSERT_TRUE(sessionStage_ != nullptr);
     KeyboardPanelInfo keyboardPanelInfo;
     sessionStage_->NotifyKeyboardPanelInfoChange(keyboardPanelInfo);
-}
-
-/**
- * @tc.name: CompatibleFullScreenRecover
- * @tc.desc: test function : CompatibleFullScreenRecover
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenRecover, TestSize.Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenRecover();
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
- * @tc.name: CompatibleFullScreenMinimize
- * @tc.desc: test function : CompatibleFullScreenMinimize
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenMinimize, TestSize.Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(WSError::WS_OK, res);
-}
-
-/**
- * @tc.name: CompatibleFullScreenClose
- * @tc.desc: test function : CompatibleFullScreenClose
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, TestSize.Level1)
-{
-    ASSERT_TRUE(sessionStage_ != nullptr);
-    WSError res = sessionStage_->CompatibleFullScreenClose();
-    ASSERT_EQ(WSError::WS_OK, res);
 }
 
 /**
@@ -762,6 +774,33 @@ HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | Sma
 }
 
 /**
+ * @tc.name: LinkKeyFrameCanvasNode
+ * @tc.desc: test function : LinkKeyFrameCanvasNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, LinkKeyFrameCanvasNode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    WSError res = sessionStage_->LinkKeyFrameCanvasNode(rsCanvasNode);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetKeyFramePolicy
+ * @tc.desc: test function : SetKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetKeyFramePolicy, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    KeyFramePolicy keyFramePolicy;
+    WSError res = sessionStage_->SetKeyFramePolicy(keyFramePolicy);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: NotifyWindowCrossAxisChange
  * @tc.desc: test function : NotifyWindowCrossAxisChange
  * @tc.type: FUNC
@@ -772,6 +811,30 @@ HWTEST_F(SessionStageProxyTest, NotifyWindowCrossAxisChange, Function | SmallTes
     ASSERT_TRUE(sessionStage_ != nullptr);
     sessionStage_->NotifyWindowCrossAxisChange(state);
     ASSERT_NE(nullptr, sessionStage_);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: test function : NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    sessionStage_->CloseSpecificScene();
+    EXPECT_NE(nullptr, sessionStage_);
 }
 } // namespace
 } // namespace Rosen
