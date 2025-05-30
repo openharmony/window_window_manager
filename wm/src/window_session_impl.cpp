@@ -352,7 +352,10 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
     if (IsPcOrFreeMultiWindowCapabilityEnabled() && windowOption_ != nullptr) {
+        // The context of the UEC child window is not the context of the main window
         auto mainWindow = FindMainWindowWithContext();
+        // The child Windows created by compatible applications are mounted within the parent window,
+        // with the same specifications as the mobile phone. No child Windows with title bars are created
         if (mainWindow && mainWindow->IsAdaptToSubWindow()) {
             TLOGE(WmsLogTag::WMS_COMPAT, "compat sub window not has title");
             return;
