@@ -556,6 +556,22 @@ struct KeyFramePolicy : public Parcelable {
     bool running_ = false;
     bool stopping_ = false;
 
+    bool operator==(const KeyFramePolicy& right) const
+    {
+        return dragResizeType_ == right.dragResizeType_ &&
+            interval_ == right.interval_ &&
+            distance_ == right.distance_ &&
+            animationDuration_ == right.animationDuration_ &&
+            animationDelay_ == right.animationDelay_ &&
+            running_ == right.running_ &&
+            stopping_ == right.stopping_;
+    }
+
+    bool operator!=(const KeyFramePolicy& right) const
+    {
+        return !(*this == right);
+    }
+
     bool enabled() const
     {
         return dragResizeType_ == DragResizeType::RESIZE_KEY_FRAME;
