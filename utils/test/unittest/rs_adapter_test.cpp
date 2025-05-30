@@ -39,7 +39,8 @@ public:
         rsNode_ = RSSurfaceNode::Create(config, true, rsUIContext_);
     }
 
-    static void TearDownTestCase() {
+    static void TearDownTestCase()
+    {
         rsNode_.reset();
         rsUIContext_.reset();
         rsUIDirector_.reset();
