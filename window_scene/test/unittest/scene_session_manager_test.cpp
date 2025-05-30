@@ -2707,7 +2707,7 @@ HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
 {
     ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
-    EXPECT_EQ(true,
+    EXPECT_EQ(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION,
         (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
 }
 } // namespace
