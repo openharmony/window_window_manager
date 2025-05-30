@@ -52,11 +52,26 @@ struct SceneSessionChangeInfo {
 class SessionChangeRecorder {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionChangeRecorder)
 public:
-    void Init();
+    /**
+     * @brief Record scene session change info.<unnamed>
+     * 
+     * @param recordType The type of record info.
+     * @param changeInfo The detailed change info.
+     */
     WSError RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo);
+
+    /**
+     * @brief Set record size
+     * 
+     * @param recordType The type of record info.
+     * @param recordSize Set the size of records for each record type. Its range is from 1 to 10.
+     */
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
+
+    void Init();
     void GetSceneSessionNeedDumpInfo(const std::vector<std::string>& dumpParams, std::string& dumpInfo);
     std::atomic<bool> stopLogFlag { false };
+    bool isInitFlag = false;
 
 private:
     SessionChangeRecorder() = default;
