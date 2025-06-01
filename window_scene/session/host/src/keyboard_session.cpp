@@ -671,8 +671,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto callingId = animationInfo.callingId;
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, callingId: %{public}d, isKeyboardShow: %{public}d",
-            callingId, isKeyboardShow);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, callingId: %{public}d, isKeyboardShow: %{public}d,"
+            " isGravityChanged: %{public}d", callingId, isKeyboardShow, animationInfo.isGravityChanged);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
@@ -694,9 +694,15 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
             }
+            if (session->IsSessionForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
+                !animationInfo.isGravityChanged) {
+                session->GetSessionProperty()->SetCallingSessionId(callingId);
+            }
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
-            session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+            if (!animationInfo.isGravityChanged) {
+                session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+            }
         }
         if (isLayoutFinished) {
             session->CloseRSTransaction();
