@@ -671,6 +671,7 @@ struct WindowAnimationInfo {
     WSRect endRect { 0, 0, 0, 0 };
     bool animated { false };
     uint32_t callingId { 0 };
+    bool isGravityChanged { false };
 };
 
 struct WindowShadowConfig {
