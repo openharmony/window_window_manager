@@ -24,6 +24,7 @@
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -787,12 +788,35 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, TestSize.
  */
 HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionScreenshotAppEventListener, TestSize.Level1)
 {
+    MockMessageParcel::ClearAllErrorFlag();
     int32_t persistendId = 0;
     bool haveListener = true;
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(nullptr, ssmProxy);
-    EXPECT_EQ(WSError::WS_OK, ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener));
+    ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -802,10 +826,30 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionScreenshotAppEventListener, 
  */
 HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
 {
+    MockMessageParcel::ClearAllErrorFlag();
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WS_ERROR_IPC_FAILED, ret);
+
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(nullptr, ssmProxy);
-    EXPECT_EQ(WMError::WM_OK, ssmProxy->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START));
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
