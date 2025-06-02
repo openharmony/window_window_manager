@@ -3361,6 +3361,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
 WMError WindowSceneSessionImpl::SetSupportedWindowModes(
     const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
+    
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
