@@ -55,6 +55,7 @@ public:
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;

@@ -53,6 +53,11 @@ struct WindowSnapshotDataPack {
     WMError result = WMError::WM_OK;
 };
 
+struct NavDestinationNameDataPack {
+    std::string topNavDestName;
+    WMError result = WMError::WM_OK;
+};
+
 /**
  * @class IWMSConnectionChangedListener
  *
@@ -872,6 +877,15 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
+
+    /**
+     * @brief Get the name of the top page.
+     *
+     * @param windowId Window id which want to get.
+     * @param topNavDestName The top page name of specified window.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const;
 
     /**
      * @brief Get visibility window info.

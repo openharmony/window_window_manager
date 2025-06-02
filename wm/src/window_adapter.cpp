@@ -264,6 +264,14 @@ WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return wmsProxy->GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowAdapter::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetTopNavDestinationName(windowId, topNavDestName);
+}
+
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
