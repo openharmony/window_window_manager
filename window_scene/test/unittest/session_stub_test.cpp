@@ -887,6 +887,20 @@ HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSnapshotUpdate
+ * @tc.desc: sessionStub HandleSnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSnapshotUpdate, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSnapshotUpdate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSyncSessionEvent
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
