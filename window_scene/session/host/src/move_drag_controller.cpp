@@ -288,6 +288,7 @@ void MoveDragController::ResetCrossMoveDragProperty()
     originalDisplayOffsetY_ = 0;
     moveDragIsInterrupted_ = false;
     parentRect_ = {0, 0, 0, 0};
+    ClearSpecifyMoveStartDisplay();
 }
 
 void MoveDragController::SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
