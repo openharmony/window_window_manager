@@ -1125,7 +1125,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness01, Function | SmallT
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
     auto res = session->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-} 
+}
 
 /**
  * @tc.name: HandleActionUpdateMaximizeState
