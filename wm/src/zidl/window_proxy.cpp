@@ -476,12 +476,7 @@ WMError WindowProxy::NotifyScreenshotAppEvent(ScreenshotEventType type)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t errCode = 0;
-    if (!reply.ReadInt32(errCode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(errCode);
+    return WMError::WM_OK;
 }
 
 WMError WindowProxy::DumpInfo(const std::vector<std::string>& params)

@@ -489,8 +489,7 @@ int SessionStageStub::HandleNotifyScreenshotAppEvent(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenshotEventType failed");
         return ERR_INVALID_VALUE;
     }
-    WSError errCode = NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
     return ERR_NONE;
 }
 

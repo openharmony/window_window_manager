@@ -4674,9 +4674,9 @@ WMError WindowSessionImpl::UnregisterScreenshotListener(const sptr<IScreenshotLi
 WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_IMMS, "winId %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -4701,9 +4701,9 @@ WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotA
 WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_IMMS, "winId %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
     if (listener == nullptr) {
-        WLOGFE("listener is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
