@@ -350,8 +350,7 @@ HWTEST_F(SessionStageProxyTest, NotifyScreenshotAppEvent, TestSize.Level1)
 {
     ASSERT_NE(sessionStage_, nullptr);
     ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
     auto ret = sessionStage_->NotifyScreenshotAppEvent(type);
     EXPECT_EQ(WSError::WS_OK, ret);
 
