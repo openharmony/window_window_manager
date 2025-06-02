@@ -1024,6 +1024,24 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcFirstMoveTargetRect002
+ * @tc.desc: test function : CalcFirstMoveTargetRect002
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect002, TestSize.Level1)
+{
+    WSRect windowRect = { 1, 2, 3, 4 };
+    moveDragController->InitMoveDragProperty();
+    moveDragController->SetStartMoveFlag(true);
+    moveDragController->specifyMoveStartDisplayId_ = 0;
+    moveDragController->isSpecifyMoveStart_ = true;
+    moveDragController->CalcFirstMoveTargetRect(windowRect, true);
+    WSRect targetRect =
+        moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+    ASSERT_EQ(targetRect.posX_, 0);
+}
+
+/**
  * @tc.name: GetFullScreenToFloatingRect
  * @tc.desc: test function : GetFullScreenToFloatingRect
  * @tc.type: FUNC
