@@ -1318,14 +1318,11 @@ WMError WindowSessionImpl::NotifySnapshotUpdate()
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "NotifySnapshotUpdate, id: %u", GetWindowId());
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}u", GetWindowId());
-    auto ret = WMError::WM_OK;
     if (auto session = GetHostSession()) {
-        ret = session->NotifySnapshotUpdate();
-    } else {
-        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
-        ret = WMError::WM_ERROR_INVALID_SESSION;
+        return session->NotifySnapshotUpdate();
     }
-    return ret;
+    TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr");
+    return WMError::WM_ERROR_INVALID_SESSION;
 }
 
 void WindowSessionImpl::GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton,
