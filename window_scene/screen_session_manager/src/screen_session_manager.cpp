@@ -3998,6 +3998,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         if (physicalScreen) {
             physicalScreen->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
         }
+        NotifyScreenModeChange();
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
