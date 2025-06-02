@@ -1010,10 +1010,17 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
             pointerY += PcFoldScreenManager::GetInstance().GetVirtualDisplayPosY();
             TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: virtual display pointerY:%{public}d", where, pointerY);
         }
+        WSRect winRect = {
+            pointerPosX - offsetX,
+            pointerY - offsetY,
+            session->winRect_.width_,
+            session->winRect_.height_
+        }
         session->InitializeCrossMoveDrag();
         session->moveDragController_->InitMoveDragProperty();
         session->moveDragController_->HandleStartMovingWithCoordinate(offsetX,
-            offsetY, pointerPosX, pointerY, displayId, session->winRect_);
+            offsetY, pointerPosX, pointerY, displayId, winRect);
+        session->moveDragController_->SetSpecifyMoveStartDisplay(displayId);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
     }, __func__);

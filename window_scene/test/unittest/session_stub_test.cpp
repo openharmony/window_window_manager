@@ -1423,6 +1423,13 @@ HWTEST_F(SessionStubTest, HandleStartMovingWithCoordinate, Function | SmallTest 
     data.WriteInt32(1);
     data.WriteInt32(1);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteInt32(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 

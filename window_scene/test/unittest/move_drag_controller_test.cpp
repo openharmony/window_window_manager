@@ -1421,9 +1421,62 @@ HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, TestSize.Level
     ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
     ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
     ASSERT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posX_);
-    ASSERT_EQ(450, moveDragController->moveDragProperty_.targetRect_.posY_);
+    ASSERT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posY_);
     ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.width_);
     ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.height_);
+}
+
+/**
+ * @tc.name: SetSpecifyMoveStartDisplay
+ * @tc.desc: test function : SetSpecifyMoveStartDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, SetSpecifyMoveStartDisplay, TestSize.Level1)
+{
+    moveDragController->specifyMoveStartDisplayId_ = 0;
+    moveDragController->isSpecifyMoveStart_ = false;
+    moveDragController->SetSpecifyMoveStartDisplay(1);
+    ASSERT_EQ(1, moveDragController->specifyMoveStartDisplayId_);
+    ASSERT_EQ(true, moveDragController->isSpecifyMoveStart_);
+}
+
+/**
+ * @tc.name: ClearSpecifyMoveStartDisplay
+ * @tc.desc: test function : ClearSpecifyMoveStartDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ClearSpecifyMoveStartDisplay, TestSize.Level1)
+{
+    moveDragController->specifyMoveStartDisplayId_ = 1;
+    moveDragController->isSpecifyMoveStart_ = true;
+    moveDragController->ClearSpecifyMoveStartDisplay();
+    ASSERT_EQ(DISPLAY_ID_INVALID, moveDragController->specifyMoveStartDisplayId_);
+    ASSERT_EQ(false, moveDragController->isSpecifyMoveStart_);
+}
+
+/**
+ * @tc.name: GetTargetDisplayRectRelatedToStartDisplay
+ * @tc.desc: test function : GetTargetDisplayRectRelatedToStartDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetTargetDisplayRectRelatedToStartDisplay, TestSize.Level1)
+{
+    WSRect winRect = { 200, 200, 1000, 1000 };
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    WSRect ret = moveDragController->GetTargetDisplayRectRelatedToStartDisplay(winRect, 0);
+    ASSERT_EQ(ret, winRect);
+
+    ScreenProperty screenProperty0;
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+        sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
+    ret = moveDragController->GetTargetDisplayRectRelatedToStartDisplay(winRect, 0);
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty0.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty0.GetStartY());
+    WSRect testRect = { winRect.posX_ + currentDisplayOffsetX - moveDragController->originalDisplayOffsetX_,
+                        winRect.posY_ + currentDisplayOffsetY - moveDragController->originalDisplayOffsetY_,
+                        winRect.width_,
+                        winRect.height_ };
+    ASSERT_EQ(ret, testRect);
 }
 
 /**

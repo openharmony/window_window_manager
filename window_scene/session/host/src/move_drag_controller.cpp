@@ -93,10 +93,14 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
             hasPointDown_, isStartDrag_);
+        ClearSpecifyMoveStartDisplay();
         return;
     }
     NotifyWindowInputPidChange(flag);
     isStartMove_ = flag;
+    if (!isStartMove_) {
+        ClearSpecifyMoveStartDisplay();
+    }
     ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_MOVE_WINDOW, flag);
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
@@ -193,6 +197,23 @@ WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
             moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_ - currentDisplayOffsetY,
             moveDragProperty_.targetRect_.width_,
             moveDragProperty_.targetRect_.height_};
+}
+
+WSRect MoveDragController::GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return relative coordinates.");
+        return rect;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    return {rect.posX_ + currentDisplayOffsetX - originalDisplayOffsetX_,
+            rect.posY_ + currentDisplayOffsetY - originalDisplayOffsetY_,
+            rect.width_,
+            rect.height_};
 }
 
 void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
@@ -1413,6 +1434,20 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     return WSError::WS_OK;
 }
 
+void MoveDragController::SetSpecifyMoveStartDisplay(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set specify display called");
+    specifyMoveStartDisplayId_ = displayId;
+    isSpecifyMoveStart_ = true;
+}
+
+void MoveDragController::ClearSpecifyMoveStartDisplay()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "clear specify display called");
+    specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
+    isSpecifyMoveStart_ = false;
+}
+
 void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
     int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect)
 {
@@ -1423,31 +1458,12 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
     moveTempProperty_.lastDownPointerWindowX_ = offsetX;
     moveTempProperty_.lastDownPointerWindowY_ = offsetY;
 
-    int32_t displayOffsetX = 0;
-    int32_t displayOffsetY = 0;
-    sptr<ScreenSession> screenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(static_cast<uint64_t>(displayId));
-    if (screenSession) {
-        ScreenProperty screenProperty = screenSession->GetScreenProperty();
-        displayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
-        displayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "displayOffsetX %{public}d, displayOffsetY %{public}d, displayId %{public}d",
-        displayOffsetX, displayOffsetY, displayId);
-    int32_t originalPointerPosX = pointerPosX + displayOffsetX - originalDisplayOffsetX_;
-    int32_t originalPointerPosY = pointerPosY + displayOffsetY - originalDisplayOffsetY_;
-    WSRect targetRect = {
-        originalPointerPosX - offsetX,
-        originalPointerPosY - offsetY,
-        winRect.width_,
-        winRect.height_
-    };
+    WSRect targetRect = GetTargetDisplayRectRelatedToStartDisplay(winRect, displayId);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "targetRect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
-    moveDragProperty_.originalRect_ = winRect;
     moveDragProperty_.targetRect_ = targetRect;
     moveDragEndDisplayId_ = static_cast<uint64_t>(displayId);
-    ProcessSessionRectChange(SizeChangeReason::DRAG_END);
+    ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
 /** @note @window.drag */
@@ -1483,6 +1499,10 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.width_,
         originalRect.height_
     };
+    if (isSpecifyMoveStart_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}d" PRIu64, specifyMoveStartDisplayId_);
+        targetRect = GetTargetDisplayRectRelatedToStartDisplay(targetRect, specifyMoveStartDisplayId_);
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     moveDragProperty_.targetRect_ = targetRect;
