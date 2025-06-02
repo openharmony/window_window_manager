@@ -828,9 +828,9 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
-    sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     auto ret = ssmProxy->NotifyScreenshotEvent(type);
-    EXPECT_EQ(WMError::WS_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);

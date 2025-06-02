@@ -49,6 +49,11 @@ public:
     MOCK_METHOD0(OnScreenshot, void());
 };
 
+class MockScreenshotAppEventListener : public IScreenshotAppEventListener {
+public:
+    MOCK_METHOD1(OnScreenshotAppEvent, void(ScreenshotEventType type));
+};
+
 class MockDialogTargetTouchListener : public IDialogTargetTouchListener {
 public:
     MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
@@ -188,13 +193,15 @@ HWTEST_F(WindowImplTest3, NotifyScreenshotAppEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
 
-    sptr<IScreenshotAppEventListener> listener = nullptr;
-    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
-    listener = sptr<IScreenshotAppEventListener>::MakeSptr();
-    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
-    auto ret = window->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    sptr<MockScreenshotAppEventListener> listener;
+    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    listener = sptr<MockScreenshotAppEventListener>::MakeSptr();
+    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    EXPECT_CALL(*listener, OnScreenshotAppEvent(_)).Times(1);
+    autp ret = window->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
     window->screenshotListeners_[window->GetWindowId()].clear();
 }
 
