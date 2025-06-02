@@ -542,12 +542,8 @@ WMError WindowManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t errCode = 0;
-    if (!reply.ReadInt32(errCode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(errCode)
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
