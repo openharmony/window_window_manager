@@ -4940,6 +4940,28 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     return static_cast<WSError>(ret);
 }
 
+WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDestName)
+{
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}u", GetWindowId());
+        return WSError::WS_DO_NOTHING;
+    }
+    std::string navDestInfoJsonStr = uiContent->GetTopNavDestinationInfo();
+    nlohmann::json navDestInfoJson = nlohmann::json::parse(navDestInfoJsonStr, nullptr, false);
+    if (navDestInfoJson.is_discarded()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse json error: winId=%{public}u, navDestInfoJsonStr=%{public}s",
+            GetWindowId(), navDestInfoJsonStr.c_str());
+        return WSError::WS_DO_NOTHING;
+    }
+    if (navDestInfoJson.contains("name")) {
+        navDestInfoJson.get_to(topNavDestName);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, navDestInfoJsonStr=%{public}s, topNavDestName=%{public}s",
+        GetWindowId(), navDestInfoJsonStr.c_str(), topNavDestName.c_str());
+    return WSError::WS_OK;
+}
+
 WMError WindowSceneSessionImpl::UpdateWindowModeImmediately(WindowMode mode)
 {
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {

@@ -48,6 +48,7 @@ public:
     static napi_value ShiftAppWindowFocus(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowLayoutInfo(napi_env env, napi_callback_info info);
     static napi_value GetGlobalWindowMode(napi_env env, napi_callback_info info);
+    static napi_value GetTopNavDestinationName(napi_env env, napi_callback_info info);
     static napi_value GetVisibleWindowInfo(napi_env env, napi_callback_info info);
     static napi_value GetWindowsByCoordinate(napi_env env, napi_callback_info info);
     static napi_value ShiftAppWindowPointerEvent(napi_env env, napi_callback_info info);
@@ -72,6 +73,7 @@ private:
     static napi_value OnShiftAppWindowFocus(napi_env env, napi_callback_info info);
     static napi_value OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info);
     static napi_value OnGetGlobalWindowMode(napi_env env, napi_callback_info info);
+    static napi_value OnGetTopNavDestinationName(napi_env env, napi_callback_info info);
     static napi_value OnGetVisibleWindowInfo(napi_env env, napi_callback_info info);
     static napi_value OnGetWindowsByCoordinate(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowPointerEvent(napi_env env, napi_callback_info info);

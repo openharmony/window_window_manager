@@ -155,6 +155,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetAllWindowLayoutInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_WINDOW_MODE):
             return HandleGetGlobalWindowMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME):
+            return HandleGetTopNavDestinationName(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
@@ -1362,6 +1364,35 @@ int SceneSessionManagerStub::HandleGetGlobalWindowMode(MessageParcel& data, Mess
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t windowId = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowId fail");
+        return ERR_INVALID_DATA;
+    }
+    std::string topNavDestName;
+    WMError errCode = GetTopNavDestinationName(windowId, topNavDestName);
+    if (errCode != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get top page name failed");
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "top page name: %{public}s", topNavDestName.c_str());
+    uint32_t size = static_cast<uint32_t>(topNavDestName.length());
+    if (!reply.WriteUint32(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write the size of top page name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > 0 && !reply.WriteRawData(topNavDestName.c_str(), size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write top page name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

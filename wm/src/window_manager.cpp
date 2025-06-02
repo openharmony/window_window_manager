@@ -1465,6 +1465,11 @@ WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return SingletonContainer::Get<WindowAdapter>().GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const
+{
+    return SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
