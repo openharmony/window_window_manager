@@ -691,8 +691,6 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, TestSize.Level1)
     EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), static<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
 }
 
-
-
 /**
  * @tc.name: UpdateSessionWindowVisibilityListener02
  * @tc.desc: UpdateSessionWindowVisibilityListener

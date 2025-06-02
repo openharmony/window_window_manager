@@ -1360,6 +1360,48 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, TestSi
 }
 
 /**
+ * @tc.name: HandleRegisterWindowManagerAgent01
+ * @tc.desc: test HandleRegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    data.WriteUint32(interestInfo);
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    int res = stub_->HandleRegisterWindowPropertyChangeAgent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUnregisterWindowPropertyChangeAgent01
+ * @tc.desc: test HandleUnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    data.WriteUint32(interestInfo);
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    int res = stub_->HandleUnregisterWindowPropertyChangeAgent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSkipSnapshotForAppProcess
  * @tc.desc: test HandleSkipSnapshotForAppProcess
  * @tc.type: FUNC
