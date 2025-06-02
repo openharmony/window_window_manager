@@ -3172,9 +3172,12 @@ public:
      * @brief Sets the supported window modes.
      *
      * @param supportedWindowModes Supported window modes of the window.
+     * @param grayOutMaximizeButton Whether to gray out the window maximize button.
+                                    The value true means to gray out the button, and false means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

@@ -1758,6 +1758,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool hideMinimizeButton = false;
     bool hideCloseButton = false;
     GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    hideMaximizeButton = hideMaximizeButton && !grayOutMaximizeButton_;
     TLOGI(WmsLogTag::WMS_DECOR, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);

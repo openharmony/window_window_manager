@@ -736,6 +736,11 @@ protected:
      */
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
+    /*
+     * Window Decor
+     */
+    bool grayOutMaximizeButton_ = false;
+    
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
