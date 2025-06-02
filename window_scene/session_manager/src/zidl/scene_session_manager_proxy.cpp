@@ -576,9 +576,9 @@ WSError SceneSessionManagerProxy::UpdateSessionScreenshotAppEventListener(int32_
     int32_t errCode = 0;
     if (!reply.ReadInt32(errCode)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(errCode);
+    return static_cast<WSError>(errCode);
 }
 
 WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
