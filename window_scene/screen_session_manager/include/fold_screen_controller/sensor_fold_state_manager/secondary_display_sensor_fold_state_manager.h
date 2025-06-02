@@ -44,9 +44,11 @@ private:
     bool isHasReflexioned = false;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
     FoldStatus mNextStateBC = FoldStatus::UNKNOWN;
-    uint16_t curHallAB = 2;
-    uint16_t curHallBC = 2;
-    std::mutex secondaryFoldStatusMutex;
+    // used to record the current hall value between the A and B screens.
+    uint16_t curHallAB_ = 2;
+    // used to record the current hall value between the B and C screens.
+    uint16_t curHallBC_ = 2;
+    std::mutex secondaryFoldStatusMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

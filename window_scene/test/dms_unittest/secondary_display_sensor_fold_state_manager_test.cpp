@@ -144,7 +144,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, 
 
 /**
  * @tc.name: HandleAngleOrHallChange05
- * @tc.desc: test curHallAB && curHallBC
+ * @tc.desc: test curHallAB_ && curHallBC_
  * @tc.type: FUNC
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange05, TestSize.Level1)
@@ -152,24 +152,24 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange05, 
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
     }
-    std::vector<float> angels = {180, 180, 0};
-    std::vector<uint16_t> halls = {1, 1};
+    std::vector<float> angels = { 180, 180, 0 };
+    std::vector<uint16_t> halls = { 1, 1 };
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     sptr<FoldScreenPolicy> foldScreenPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex,
         screenPowerTaskScheduler);
-    EXPECT_NE(foldScreenPolicy, nullptr);
+    ASSERT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
-    manager.curHallAB = 0;
-    manager.curHallBC = 0;
+    manager.curHallAB_ = 0;
+    manager.curHallBC_ = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
-    manager.curHallAB = 0;
-    manager.curHallBC = 1;
+    manager.curHallAB_ = 0;
+    manager.curHallBC_ = 1;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
-    manager.curHallAB = 1;
-    manager.curHallBC = 0;
+    manager.curHallAB_ = 1;
+    manager.curHallBC_ = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_EQ(manager.GetNextFoldState(angels, halls), FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
@@ -186,13 +186,13 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange06, 
     }
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    std::vector<float> angels = {180, 180, 0};
-    std::vector<uint16_t> halls = {1, 1, 1};
+    std::vector<float> angels = { 180, 180, 0 };
+    std::vector<uint16_t> halls = { 1, 1, 1 };
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     sptr<FoldScreenPolicy> foldScreenPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex,
         screenPowerTaskScheduler);
-    EXPECT_NE(foldScreenPolicy, nullptr);
+    ASSERT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy);
     EXPECT_TRUE(g_errLog.find("halls size is not right") != std::string::npos);

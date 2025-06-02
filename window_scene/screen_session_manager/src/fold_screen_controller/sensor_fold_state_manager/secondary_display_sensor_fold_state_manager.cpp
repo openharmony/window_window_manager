@@ -59,8 +59,8 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
     }
     bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     {
-        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex);
-        if (!isPowerOn && curHallAB == halls[0] && curHallBC == halls[1]) {
+        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
+        if (!isPowerOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
             TLOGI(WmsLogTag::DMS, "hall value is not change in unPower");
             return;
         }
@@ -101,9 +101,9 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::v
         return state;
     }
     {
-        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex);
-        curHallAB = halls[0];
-        curHallBC = halls[1];
+        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
+        curHallAB_ = halls[0];
+        curHallBC_ = halls[1];
     }
     if (!isPowerOn) {
         state = GetFoldStateUnpower(halls);
