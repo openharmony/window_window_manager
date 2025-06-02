@@ -27,8 +27,8 @@ class SecondaryDisplaySensorFoldStateManager : public SensorFoldStateManager {
 public:
     SecondaryDisplaySensorFoldStateManager();
     virtual ~SecondaryDisplaySensorFoldStateManager();
-    void HandleAngleOrHallChange(const std::vector<float> &angles,
-        const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleAngleOrHallChange(const std::vector<float>& angles,
+        const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
 private:
     FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls);
     FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,

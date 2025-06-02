@@ -50,8 +50,8 @@ constexpr int32_t REFLEXION_VALUE = 2;
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
 SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager() {}
 
-void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
-    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
+void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float>& angles,
+    const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     if (halls.size() != HALLS_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
