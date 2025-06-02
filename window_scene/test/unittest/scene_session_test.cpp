@@ -976,6 +976,24 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyAddOrRemoveSnapshotWindowTest
+ * @tc.desc: NotifyAddOrRemoveSnapshotWindowTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyAddOrRemoveSnapshotWindowTest, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.windowType_ = 1;
+    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->showRecent_ = true;
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+}
+
+/**
  * @tc.name: ProcessWindowMoving
  * @tc.desc: ProcessWindowMoving
  * @tc.type: FUNC

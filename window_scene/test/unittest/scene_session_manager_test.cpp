@@ -2400,6 +2400,47 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetImageForRecent001
+ * @tc.desc: SetImageForRecent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetImageForRecent001, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 1999;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    auto result = ssm_->SetImageForRecent(1, ImageFit::FILL, 1);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    applicationInfo.isSystemApp = false;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    applicationInfo.isSystemApp = true;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
  * @tc.name: IsWindowRectAutoSave
  * @tc.desc: IsWindowRectAutoSave
  * @tc.type: FUNC
