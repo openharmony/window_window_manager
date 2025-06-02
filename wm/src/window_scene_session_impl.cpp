@@ -3359,9 +3359,8 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModes(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes, bool grayOutMaximizeButton)
 {
-    
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3377,7 +3376,41 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    if (grayOutMaximizeButton) {
+        auto size = supportedWindowModes.size();
+        if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        bool isSupportFullScreen = false;
+        for (auto& mode : supportedWindowModes) {
+            if (mode == AppExecFwk::SupportWindowMode::FULLSCREEN) {
+                isSupportFullScreen = true;
+                break;
+            }
+        }
+        if (isSupportFullScreen) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Supports full screen cannot be grayed out");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        GrayOutMaximizeButton(true);
+    } else if (grayOutMaximizeButton_) {
+        GrayOutMaximizeButton(false);
+    }
+
     return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::GrayOutMaximizeButton(bool isGrayOut)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    grayOutMaximizeButton_ = isGrayOut;
+    uiContent->OnContainerModalEvent(WINDOW_GRAY_OUT_MAXIMIZE_EVENT, isGrayOut ? "true" : "false");
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(

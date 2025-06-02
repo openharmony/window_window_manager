@@ -94,10 +94,10 @@ class WindowStage {
     return this.windowStage_.isWindowRectAutoSave();
   }
 
-  setSupportedWindowModes(supportedWindowModes) {
-    return this.windowStage_.setSupportedWindowModes(supportedWindowModes);
+  setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton) {
+    return this.windowStage_.setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton);
   }
-  
+
   setImageForRecent(imgResourceId, value) {
     return this.windowStage_.setImageForRecent(imgResourceId, value);
   }
