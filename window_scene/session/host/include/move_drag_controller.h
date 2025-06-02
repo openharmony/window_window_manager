@@ -137,6 +137,9 @@ public:
      */
     void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect);
+    void SetSpecifyMoveStartDisplay(DisplayId displayId);
+    void ClearSpecifyMoveStartDisplay();
+    WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
     int32_t GetLastMovePointerPosX() const;
     void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
@@ -343,6 +346,8 @@ private:
     int32_t originalDisplayOffsetX_ = 0;
     int32_t originalDisplayOffsetY_ = 0;
     float originalPositionZ_ = 0.0f;
+    DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
+    bool isSpecifyMoveStart_ = false;
     std::mutex displayIdSetDuringMoveDragMutex_;
     std::set<uint64_t> displayIdSetDuringMoveDrag_;
     DMRect moveAvailableArea_ = {0, 0, 0, 0};
