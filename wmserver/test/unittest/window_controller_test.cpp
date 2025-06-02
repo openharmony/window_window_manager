@@ -1618,7 +1618,7 @@ HWTEST_F(WindowControllerTest, NotifyScreenshotEvent, TestSize.Level1)
 
     uint32_t windowId = windowNode->GetWindowId();
     struct RSSurfaceNodeConfig surfaceNodeConfig;
-    surfaceNodeConfig.SurfaceNodeName = "ToggleShownStateForAllAppWindows";
+    surfaceNodeConfig.SurfaceNodeName = "NotifyScreenshotEvent";
     surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     EXPECT_EQ(WMError::WM_OK,
         windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));

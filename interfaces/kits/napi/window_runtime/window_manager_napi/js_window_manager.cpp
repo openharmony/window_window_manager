@@ -1566,8 +1566,8 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
     }
     int32_t type = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
     if (!ConvertFromJsValue(env, argv[0], type) ||
-        type < static_cast<uint32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT) ||
-        type > static_cast<uint32_t>(ScreenshotEventType::SCROLL_SHOT_ABORT)) {
+        type < static_cast<int32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT) ||
+        type > static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_ABORT)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
