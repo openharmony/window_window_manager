@@ -196,13 +196,13 @@ HWTEST_F(WindowImplTest3, NotifyScreenshotAppEvent, TestSize.Level1)
     ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
 
     sptr<MockScreenshotAppEventListener> listener;
-    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
     listener = sptr<MockScreenshotAppEventListener>::MakeSptr();
-    window->screenshotListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
     EXPECT_CALL(*listener, OnScreenshotAppEvent(_)).Times(1);
-    autp ret = window->NotifyScreenshotAppEvent(type);
+    auto ret = window->NotifyScreenshotAppEvent(type);
     EXPECT_EQ(ret, WMError::WM_OK);
-    window->screenshotListeners_[window->GetWindowId()].clear();
+    window->screenshotAppEventListeners_[window->GetWindowId()].clear();
 }
 
 /**
