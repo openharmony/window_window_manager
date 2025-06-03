@@ -2408,7 +2408,7 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
     }
 }
 
-bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
+bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type)
 {
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
         return true;
@@ -2423,7 +2423,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
         return false;
     }
     if (parentSession->GetSessionRect() != GetSessionRect()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "rect mismatch: win %{public}d parent %{public}d", 
+        TLOGE(WmsLogTag::WMS_IMMS, "rect mismatch: win %{public}d parent %{public}d",
             GetPersistentId(), parentSession->GetPersistentId());
     }
     return parentSession->CheckGetAvoidAreaAvailable(type);
@@ -2468,7 +2468,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowType winType = GetWindowType();
     bool isAvailable = false;
     if (WindowHelper::IsSubWindow(winType)) {
-        isAvailable = CheckGetSubWindowAvoidAreaAvailable(type);
+        isAvailable = CheckGetSubWindowAvoidAreaAvailable(winMode, type);
     } else if (WindowHelper::IsMainWindow(winType)) {
         isAvailable = CheckGetMainWindowAvoidAreaAvailable(winMode, type);
     } else if (WindowHelper::IsSystemWindow(winType)) {
