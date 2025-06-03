@@ -1501,7 +1501,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.height_
     };
     if (isSpecifyMoveStart_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}d" PRIu64, specifyMoveStartDisplayId_);
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}" PRIu64, specifyMoveStartDisplayId_);
         targetRect = GetTargetDisplayRectRelatedToStartDisplay(targetRect, specifyMoveStartDisplayId_);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,

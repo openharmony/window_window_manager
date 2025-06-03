@@ -1032,10 +1032,11 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect002, TestSize.Level1)
 {
     WSRect windowRect = { 1, 2, 3, 4 };
     moveDragController->InitMoveDragProperty();
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->moveTempProperty_ = { 1, 1, 1, 1, 1, 1, 1, 1 };
+    moveDragController->isStartMove_ = true;
     moveDragController->specifyMoveStartDisplayId_ = 0;
     moveDragController->isSpecifyMoveStart_ = true;
-    moveDragController->CalcFirstMoveTargetRect(windowRect, true);
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
     WSRect targetRect =
         moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
     ASSERT_EQ(targetRect.posX_, 0);
