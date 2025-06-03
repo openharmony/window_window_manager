@@ -1580,11 +1580,13 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
     session->SetSessionProperty(property);
-    EXPECT_EQ(true, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(true, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+            AvoidAreaType::TYPE_SYSTEM));
 
     property->SetAvoidAreaOption(0);
     session->SetSessionProperty(property);
-    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
 
     systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
     systemConfig.freeMultiWindowEnable_ = true;
@@ -1592,7 +1594,8 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     session->SetSystemConfig(systemConfig);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->SetSessionProperty(property);
-    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
 
     systemConfig.freeMultiWindowEnable_ = false;
     systemConfig.freeMultiWindowSupport_ = false;
@@ -1608,13 +1611,15 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     parentProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     parentSession->SetSessionProperty(parentProperty);
     session->SetParentSession(parentSession);
-    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 
     WSRect sessionRect({0, 0, 10, 10});
     WSRect parentSessionRect({0, 0, 100, 100});
     session->SetSessionRect(sessionRect);
     parentSession->SetSessionRect(parentSessionRect);
-    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 }
 
 /**
