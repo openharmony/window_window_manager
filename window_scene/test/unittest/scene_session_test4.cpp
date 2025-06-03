@@ -726,6 +726,12 @@ HWTEST_F(SceneSessionTest4, UpdateOrMarkAvoidArea, TestSize.Level1)
     };
     EXPECT_EQ(WSError::WS_OK, session->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_END));
     EXPECT_EQ(WSError::WS_OK, session->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+        return false;
+    };
+    EXPECT_EQ(WSError::WS_OK, session->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_END));
+    EXPECT_EQ(WSError::WS_OK, session->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 }
 
 /**

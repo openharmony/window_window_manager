@@ -501,7 +501,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
-        session->UpdateOrMarkAvoid();
+        session->UpdateOrMarkAvoidArea();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -2080,7 +2080,7 @@ WSError SceneSession::UpdateOrMarkAvoidArea(AvoidAreaType avoidAreaType)
         auto area = GetAvoidAreaByType(avoidAreaType);
         // code below aims to check if ai bar avoid area reaches window rect's bottom
         // it should not be removed until unexpected window rect update issues were solved
-        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
+        if (avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
             !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
             return WSError::WS_OK;
