@@ -698,10 +698,10 @@ HWTEST_F(SceneSessionTest4, UpdateOrMarkAvoidArea, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     
     session->isLastFrameLayoutFinishedFunc_ = nullptr;
-    session->isAINavigationBarAvoidAreaValid = nullptr;
+    session->isAINavigationBarAvoidAreaValid_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_END));
 
-    session->isLastFrameLayoutFinishedFunc_ = [](bool& IsLayoutFinished) {
+    session->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
         isLayoutFinished = false;
         return WSError::WS_ERROR_NULLPTR;
     };
