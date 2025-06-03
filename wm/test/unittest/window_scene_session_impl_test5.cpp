@@ -1399,6 +1399,11 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function |
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_OK);
 
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -1432,11 +1437,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
-    property->SetWindowState(WindowState::STATE_SHOWN);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ret = window->GetWindowTransitionAnimation(type);
-    ASSERT_EQ(ret, nullptr);
-
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ret = window->GetWindowTransitionAnimation(type);
@@ -1448,9 +1448,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ASSERT_EQ(ret, nullptr);
 
     TransitionAnimation animation;
+    property->SetWindowState(WindowState::STATE_SHOWN);
     property->SetTransitionAnimationConfig(type, animation);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_NE(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
 }
 
 /**
