@@ -2111,7 +2111,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
 {
-    int32_t FORCE_SPLIT_MODE = 5;
+    constexpr int32_t FORCE_SPLIT_MODE = 5;
 
     std::string bundleName = "com.example.app";
     AppForceLandscapeConfig config;
@@ -2133,7 +2133,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
 {
-    int32_t FORCE_SPLIT_MODE = 5;
+    constexpr int32_t FORCE_SPLIT_MODE = 5;
 
     std::string bundleName = "com.example.app";
     AppForceLandscapeConfig preConfig;
