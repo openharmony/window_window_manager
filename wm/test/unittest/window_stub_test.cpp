@@ -615,7 +615,13 @@ HWTEST_F(WindowStubTest, OnRemoteRequest_TRANS_ID_NOTIFY_SCREEN_SHOT, TestSize.L
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(0);
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
+    res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
 }
 
 /**
