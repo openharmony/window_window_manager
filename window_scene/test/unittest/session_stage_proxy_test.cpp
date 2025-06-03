@@ -831,7 +831,7 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated01, TestSize.Level1)
-{    
+{
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
@@ -845,7 +845,7 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated01, TestSize
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated02, TestSize.Level1)
-{    
+{
     sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
     WSError res = sessionStage->NotifyAppForceLandscapeConfigUpdated();
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
