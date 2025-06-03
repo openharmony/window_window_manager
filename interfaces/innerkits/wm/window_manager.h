@@ -1149,9 +1149,9 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
 
     /**
-     * @brief Notify screen shot event.
+     * @brief Notify screenshot event.
      *
-     * @param type screen shot event type.
+     * @param type screenshot event type.
      * @return WM_OK means set success, others means set failed.
      */
     WMError NotifyScreenshotEvent(ScreenshotEventType type);

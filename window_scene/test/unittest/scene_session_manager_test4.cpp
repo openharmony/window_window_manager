@@ -36,6 +36,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class SceneSessionManagerTest4 : public testing::Test {
@@ -751,13 +760,35 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, Te
  */
 HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->screenshotAppEventListenerSessionSet_.insert(1);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_TRUE(logMsg.find("session is null") == std::string::npos);
+
     SessionInfo info;
     info.abilityName_ = "NotifyScreenshotEvent";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetPersistentId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_TRUE(logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
