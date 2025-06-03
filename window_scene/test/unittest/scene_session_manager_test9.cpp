@@ -290,7 +290,8 @@ HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_14, TestSize.Level1)
 
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
-    ssm_->windowFocusController_->UpdateFocusedSessionId(DEFAULT_DISPLAY_ID, 0);
+
+    ssm_->focusedSessionId_ = 0;
     WSError ret = ssm_->RequestSessionFocus(2, false, FocusChangeReason::DEFAULT);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
 }
@@ -661,7 +662,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately2, Te
 
 /**
  * @tc.name: ProcessSubWindowRequestFocusImmdediately3
- * @tc.desc: Test sub session is focused
+ * @tc.desc: Test sub Session is focused
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately3, TestSize.Level1)
@@ -694,7 +695,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately3, Te
 
 /**
  * @tc.name: ProcessSubWindowRequestFocusImmdediately4
- * @tc.desc: Test sub session is not visible
+ * @tc.desc: Test sub Session is not visible
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately4, TestSize.Level1)
@@ -746,8 +747,6 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately5, Te
     subSession->persistentId_ = 2;
     subSession->SetFocusable(true);
     subSession->SetFocusedOnShow(true);
-    subSession->UpdateVisibilityInner(true);
-    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->subSession_.push_back(subSession);
 
     sceneSession->subSession_.push_back(nullptr);
@@ -755,6 +754,8 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately5, Te
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
 
+    subSession->UpdateVisibilityInner(true);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->focusedSessionId_ = 1;
     WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
     EXPECT_EQ(ret, WSError::WS_OK);
