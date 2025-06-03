@@ -525,7 +525,7 @@ int SessionStageStub::HandleGetTopNavDestinationName(MessageParcel& data, Messag
 {
     std::string topNavDestName;
     WSError errCode = GetTopNavDestinationName(topNavDestName);
-    if (errCode != WMError::WM_OK) {
+    if (errCode != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get stage failed, errCode=%{public}d", static_cast<int32_t>(errCode));
         return ERR_INVALID_DATA;
     }

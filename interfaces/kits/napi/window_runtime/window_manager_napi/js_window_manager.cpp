@@ -1399,7 +1399,7 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
                 where, dataPack->topNavDestName.c_str(), windowId);
-            task->Resolve(env, CreateJsValue(env, dataPack->topNavDestName));
+            task.Resolve(env, CreateJsValue(env, dataPack->topNavDestName));
         };
     napi_value result = nullptr;
     auto asyncTask = CreateAsyncTask(env, nullptr,
