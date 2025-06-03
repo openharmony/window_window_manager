@@ -1586,9 +1586,19 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     session->SetSessionProperty(property);
     EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
 
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = true;
+    systemConfig.freeMultiWindowSupport_ = true;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     SystemSessionConfig parentSystemConfig;
     parentSystemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
     parentSession->SetSystemConfig(parentSystemConfig);
     sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
     parentProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
