@@ -227,8 +227,8 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId02, TestSize.Level1)
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
-    EXPECT_EQ(session_->GetPropertyDirtyFlags(), static<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
-    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_); 
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
 /**

@@ -245,7 +245,7 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowPropertyChange01, TestSi
 
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
-    SessionManagerAgentController::GetInstance().NotifyWindowStyleChange(propertyDirtyFlags, windowInfoList);
+    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
 }
