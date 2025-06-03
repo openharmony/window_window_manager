@@ -2411,7 +2411,7 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
 bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
 {
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
-        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
+        return true;
     }
     auto parentSession = GetParentSession();
     if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
