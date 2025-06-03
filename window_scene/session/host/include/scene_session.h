@@ -526,6 +526,7 @@ public:
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
     bool UpdateInteractiveInner(bool interactive);
+    static std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& GetAllAppUseControlMap();
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -817,6 +818,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, ControlInfo> appUseControlMap_;
+    static std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseControlMap_;
 
     /*
      * PC Fold Screen
