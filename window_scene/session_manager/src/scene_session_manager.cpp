@@ -5253,7 +5253,6 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     if (checkRet != WSError::WS_OK) {
         return checkRet;
     }
-
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
     ShiftFocus(sceneSession, false, reason);

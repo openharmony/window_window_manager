@@ -780,6 +780,13 @@ HWTEST_F(SceneSessionManagerTest9, NotifyCompleteFirstFrameDrawing03, Function |
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = nullptr;
+    ssm_->NotifyCompleteFirstFrameDrawing(1);
+
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    sessionInfo.isSystem_ = false;
+    ssm_->eventHandler_ = nullptr;
     ssm_->NotifyCompleteFirstFrameDrawing(1);
 
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler = std::make_shared<AppExecFwk::EventHandler>();
