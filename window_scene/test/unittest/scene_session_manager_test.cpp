@@ -2111,17 +2111,15 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
 {
-    constexpr int32_t FORCE_SPLIT_MODE = 5;
-
     std::string bundleName = "com.example.app";
     AppForceLandscapeConfig config;
-    config.mode_ = FORCE_SPLIT_MODE;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "homePage";
     config.isSupportSplitMode_ = true;
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
-    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, FORCE_SPLIT_MODE);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "homePage");
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
 }
@@ -2131,10 +2129,8 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
  * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig03, TestSize.Level1)
 {
-    constexpr int32_t FORCE_SPLIT_MODE = 5;
-
     std::string bundleName = "com.example.app";
     AppForceLandscapeConfig preConfig;
     preConfig.mode_ = 0;
@@ -2143,13 +2139,13 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
     ssm_->appForceLandscapeMap_[bundleName] = preConfig;
 
     AppForceLandscapeConfig config;
-    config.mode_ = FORCE_SPLIT_MODE;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "newHomePage";
     config.isSupportSplitMode_ = true;
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
-    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, FORCE_SPLIT_MODE);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
 }
