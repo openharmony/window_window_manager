@@ -6796,7 +6796,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         }
-        if (!windowToken_->IsPcWindow()) {
+        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
