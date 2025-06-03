@@ -304,8 +304,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterResizeListener(NativeP
     return UnregisterListenerWithType(ListenerType::SIZE_CHANGE_CB, listener);
 }
 
-WMError WebPictureInPictureControllerInterface::CheckRegisterParam(ListenerType type,
-    const sptr<NativePiPWindowListener>& listener)
+WMError WebPictureInPictureControllerInterface::CheckRegisterParam(const sptr<NativePiPWindowListener>& listener)
 {
     if (sptrWebPipController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "WebPipController is nullptr");
@@ -322,7 +321,7 @@ WMError WebPictureInPictureControllerInterface::RegisterListenerWithType(Listene
     const sptr<NativePiPWindowListener>& listener)
 {
     WMError ret = WMError::WM_OK;
-    if ((ret = CheckRegisterParam(type, listener)) != WMError::WM_OK) {
+    if ((ret = CheckRegisterParam(listener)) != WMError::WM_OK) {
         return ret;
     }
     if (IsRegistered(type, listener)) {
@@ -366,7 +365,7 @@ WMError WebPictureInPictureControllerInterface::UnregisterListenerWithType(Liste
     const sptr<NativePiPWindowListener>& listener)
 {
     WMError ret = WMError::WM_OK;
-    if ((ret = CheckRegisterParam(type, listener)) != WMError::WM_OK) {
+    if ((ret = CheckRegisterParam(listener)) != WMError::WM_OK) {
         return ret;
     }
     if (!IsRegistered(type, listener)) {

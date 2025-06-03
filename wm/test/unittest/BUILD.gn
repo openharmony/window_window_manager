@@ -558,8 +558,7 @@ ohos_unittest("wm_picture_in_picture_option_test") {
 ohos_unittest("wm_web_picture_in_picture_controller_interface_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-    [ "${window_base_path}/interfaces/innerkits/wm/" ]
+  include_dirs = [ "${window_base_path}/interfaces/innerkits/wm/" ]
 
   sources = [ "web_picture_in_picture_controller_interface_test.cpp" ]
 
@@ -594,15 +593,14 @@ ohos_unittest("wm_web_picture_in_picture_controller_test") {
 ohos_unittest("wm_oh_window_pip_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-    [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
+  include_dirs = [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
 
   sources = [ "oh_window_pip_test.cpp" ]
 
   deps = [
     ":wm_unittest_common",
     "${window_base_path}/wm:libpip_ndk",
-   ]
+  ]
 
   external_deps = [
     "ability_runtime:runtime",
