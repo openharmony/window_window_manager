@@ -443,7 +443,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, int32_t displayId) { return WSError::WS_OK; }
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) { return WSError::WS_OK; }
     virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
 
     /**

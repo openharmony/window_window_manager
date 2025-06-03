@@ -1742,8 +1742,8 @@ int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessagePar
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosY failed!");
         return ERR_INVALID_DATA;
     }
-    int32_t displayId;
-    if (!data.ReadInt32(displayId)) {
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read displayId failed!");
         return ERR_INVALID_DATA;
     }

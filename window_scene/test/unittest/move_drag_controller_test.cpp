@@ -1039,7 +1039,7 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect002, TestSize.Level1)
     moveDragController->CalcFirstMoveTargetRect(windowRect, false);
     WSRect targetRect =
         moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    ASSERT_EQ(targetRect.posX_, 0);
+    EXPECT_EQ(targetRect.posX_, 0);
 }
 
 /**
@@ -1433,16 +1433,16 @@ HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, TestSize.Level
 {
     WSRect winRect = { 200, 200, 1000, 1000 };
     moveDragController->HandleStartMovingWithCoordinate(100, 50, 300, 500, 0, winRect);
-    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
-    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
-    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastMovePointerPosX_);
-    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
-    ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
-    ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
-    ASSERT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posX_);
-    ASSERT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posY_);
-    ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.width_);
-    ASSERT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.height_);
+    EXPECT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
+    EXPECT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
+    EXPECT_EQ(300, moveDragController->moveTempProperty_.lastMovePointerPosX_);
+    EXPECT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
+    EXPECT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
+    EXPECT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
+    EXPECT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posX_);
+    EXPECT_EQ(200, moveDragController->moveDragProperty_.targetRect_.posY_);
+    EXPECT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.width_);
+    EXPECT_EQ(1000, moveDragController->moveDragProperty_.targetRect_.height_);
 }
 
 /**
@@ -1455,8 +1455,8 @@ HWTEST_F(MoveDragControllerTest, SetSpecifyMoveStartDisplay, TestSize.Level1)
     moveDragController->specifyMoveStartDisplayId_ = 0;
     moveDragController->isSpecifyMoveStart_ = false;
     moveDragController->SetSpecifyMoveStartDisplay(1);
-    ASSERT_EQ(1, moveDragController->specifyMoveStartDisplayId_);
-    ASSERT_EQ(true, moveDragController->isSpecifyMoveStart_);
+    EXPECT_EQ(1, moveDragController->specifyMoveStartDisplayId_);
+    EXPECT_EQ(true, moveDragController->isSpecifyMoveStart_);
 }
 
 /**
@@ -1469,8 +1469,8 @@ HWTEST_F(MoveDragControllerTest, ClearSpecifyMoveStartDisplay, TestSize.Level1)
     moveDragController->specifyMoveStartDisplayId_ = 1;
     moveDragController->isSpecifyMoveStart_ = true;
     moveDragController->ClearSpecifyMoveStartDisplay();
-    ASSERT_EQ(DISPLAY_ID_INVALID, moveDragController->specifyMoveStartDisplayId_);
-    ASSERT_EQ(false, moveDragController->isSpecifyMoveStart_);
+    EXPECT_EQ(DISPLAY_ID_INVALID, moveDragController->specifyMoveStartDisplayId_);
+    EXPECT_EQ(false, moveDragController->isSpecifyMoveStart_);
 }
 
 /**
@@ -1483,7 +1483,7 @@ HWTEST_F(MoveDragControllerTest, GetTargetDisplayRectRelatedToStartDisplay, Test
     WSRect winRect = { 200, 200, 1000, 1000 };
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     WSRect ret = moveDragController->GetTargetDisplayRectRelatedToStartDisplay(winRect, 0);
-    ASSERT_EQ(ret, winRect);
+    EXPECT_EQ(ret, winRect);
 
     ScreenProperty screenProperty0;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
@@ -1495,7 +1495,7 @@ HWTEST_F(MoveDragControllerTest, GetTargetDisplayRectRelatedToStartDisplay, Test
                         winRect.posY_ + currentDisplayOffsetY - moveDragController->originalDisplayOffsetY_,
                         winRect.width_,
                         winRect.height_ };
-    ASSERT_EQ(ret, testRect);
+    EXPECT_EQ(ret, testRect);
 }
 
 /**
