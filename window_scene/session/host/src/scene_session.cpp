@@ -407,11 +407,11 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
-        session->MarkAvoidAreaAsDirty();
+        session->UpdateOrMarkAvoidArea();
         auto subSessions = session->GetSubSession();
         for (const auto& subSession : subSessions) {
             if (subSession) {
-                subSession->MarkAvoidAreaAsDirty();
+                subSession->UpdateOrMarkAvoidArea();
             }
         }
         if (session->specificCallback_ != nullptr) {
@@ -501,7 +501,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
-        session->MarkAvoidAreaAsDirty();
+        session->UpdateOrMarkAvoid();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -2061,6 +2061,11 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
+    return UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_SYSTEM);
+}
+
+WSError SceneSession::UpdateOrMarkAvoidArea(AvoidAreaType avoidAreaType)
+{
     if (isLastFrameLayoutFinishedFunc_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
@@ -2071,8 +2076,32 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
         return ret;
     }
-    if (isLayoutFinished) {
-        UpdateAvoidArea(new AvoidArea(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)), AvoidAreaType::TYPE_SYSTEM);
+    if (isLayoutFinished && avoidAreaType != AvoidAreaType::TYPE_END) {
+        auto area = GetAvoidAreaByType(avoidAreaType);
+        // code below aims to check if ai bar avoid area reaches window rect's bottom
+        // it should not be removed until unexpected window rect update issues were solved
+        if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
+            !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
+            return WSError::WS_OK;
+        }
+        UpdateAvoidArea(new AvoidArea(area), avoidAreaType);
+    } else if (isLayoutFinished && avoidAreaType == AvoidAreaType::TYPE_END) {
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
+            avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
+            auto type = static_cast<AvoidAreaType>(avoidType);
+            auto area = GetAvoidAreaByType(type);
+            // code below aims to check if ai bar avoid area reaches window rect's bottom
+            // it should not be removed until unexpected window rect update issues were solved
+            if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
+                !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom "
+                    "of the rect while traversing all avoid area type");
+                continue;
+            }
+            UpdateAvoidArea(new AvoidArea(area), type);
+        }
     } else {
         MarkAvoidAreaAsDirty();
     }
@@ -4184,7 +4213,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
         }
-        MarkAvoidAreaAsDirty();
+        UpdateOrMarkAvoidArea();
     }
 }
 
