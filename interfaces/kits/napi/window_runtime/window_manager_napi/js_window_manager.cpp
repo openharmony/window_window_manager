@@ -1646,7 +1646,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
-    BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName, JsWindowManager::GetTopNavDestinationName);
+    BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName,
+        JsWindowManager::GetTopNavDestinationName);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
