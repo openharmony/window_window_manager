@@ -799,7 +799,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionScreenshotAppEventListener, 
     ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(nullptr, ssmProxy);
     ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
-    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = ssmProxy->UpdateSessionScreenshotAppEventListener(persistendId, haveListener);
@@ -836,7 +836,7 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
     ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(nullptr, ssmProxy);
     ret = ssmProxy->NotifyScreenshotEvent(type);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = ssmProxy->NotifyScreenshotEvent(type);

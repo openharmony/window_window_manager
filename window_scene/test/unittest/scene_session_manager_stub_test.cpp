@@ -2047,11 +2047,50 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Leve
     ASSERT_NE(stub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int res = stub_->HandleNotifyScreenshotEvent(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     data.WriteInt32(2);
     res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SCREEN_SHOT_APP_EVENT_LISTENER);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateSessionScreenshotAppEventListener
+ * @tc.desc: test HandleUpdateSessionScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenshotAppEventListener, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int res = stub_->HandleUpdateSessionScreenshotAppEventListener(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    res = stub_->HandleUpdateSessionScreenshotAppEventListener(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    res = stub_->HandleUpdateSessionScreenshotAppEventListener(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(2);
+    data.WriteBool(true);
+    res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SCREEN_SHOT_APP_EVENT_LISTENER);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
 
