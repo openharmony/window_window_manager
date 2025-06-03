@@ -989,7 +989,7 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     bool grayOutMaximizeButton = false;
     if (argc == ARG_COUNT_TWO && !ConvertFromJsValue(env, argv[INDEX_ONE], grayOutMaximizeButton)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert grayOutMaximizeButton parameter");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM));
         return NapiGetUndefined(env);
     }
 
