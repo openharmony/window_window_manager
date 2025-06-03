@@ -4942,12 +4942,17 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 
 WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDestName)
 {
+    topNavDestName = "";
     auto uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}u", GetWindowId());
         return WSError::WS_DO_NOTHING;
     }
     std::string navDestInfoJsonStr = uiContent->GetTopNavDestinationInfo();
+    if (navDestInfoJsonStr.empty()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, empty navDestInfoJsonStr", GetWindowId());
+        return WSError::WS_OK;
+    }
     nlohmann::json navDestInfoJson = nlohmann::json::parse(navDestInfoJsonStr, nullptr, false);
     if (navDestInfoJson.is_discarded()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse json error: winId=%{public}u, navDestInfoJsonStr=%{public}s",
