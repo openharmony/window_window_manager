@@ -2413,6 +2413,10 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
         return true;
     }
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
+        return false;
+    }
     auto parentSession = GetParentSession();
     if (!parentSession) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}d parent session is nullptr", GetPersistentId());
@@ -2422,7 +2426,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
         TLOGE(WmsLogTag::WMS_IMMS, "rect mismatch: win %{public}d parent %{public}d", 
             GetPersistentId(), parentSession->GetPersistentId());
     }
-    return return parentSession->CheckGetAvoidAreaAvailable(type);
+    return parentSession->CheckGetAvoidAreaAvailable(type);
 }
 
 bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type)
@@ -2433,6 +2437,10 @@ bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, Avoi
     }
     if (winMode == WindowMode::WINDOW_MODE_FLOATING &&
         (type != AvoidAreaType::TYPE_SYSTEM || (systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()))) {
+        return false;
+    }
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
         return false;
     }
     if (winMode != WindowMode::WINDOW_MODE_FLOATING || systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) {
@@ -2458,10 +2466,6 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     }
     WindowMode winMode = GetWindowMode();
     WindowType winType = GetWindowType();
-    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
-        return false;
-    }
     bool isAvailable = false;
     if (WindowHelper::IsSubWindow(winType)) {
         isAvailable = CheckGetSubWindowAvoidAreaAvailable(type);
