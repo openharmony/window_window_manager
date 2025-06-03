@@ -2414,14 +2414,15 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(AvoidAreaType type)
         return true;
     }
     auto parentSession = GetParentSession();
-    if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
-        return parentSession->CheckGetAvoidAreaAvailable(type);
-    } else if (parentSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
-    } else {
-        TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
+    if (!parentSession) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win %{public}d parent session is nullptr", GetPersistentId());
+        return false;
     }
-    return false;
+    if (parentSession->GetSessionRect() != GetSessionRect()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "rect mismatch: win %{public}d parent %{public}d", 
+            GetPersistentId(), parentSession->GetPersistentId());
+    }
+    return return parentSession->CheckGetAvoidAreaAvailable(type);
 }
 
 bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type)
