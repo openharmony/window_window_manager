@@ -255,6 +255,133 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcSubWindowRectByAnchor01
+ * @tc.desc: CalcSubWindowRectByAnchor01, check the param
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor01, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+
+    WindowAnchorInfo windowAnchorInfo = { false, WindowAnchor::TOP_START, 0, 0 };
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    WSRect parentRect;
+    WSRect subRect;
+    WSRect retRect;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    EXPECT_EQ(subRect, retRect);
+
+    parentRect = {0, 0, 1000, 1000};
+    subRect = {0, 0, 400, 400};
+    retRect = {0, 0, 400, 400};
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.isAnchorEnabled_ = true;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    EXPECT_EQ(subRect, retRect);
+}
+
+/**
+ * @tc.name: CalcSubWindowRectByAnchor02
+ * @tc.desc: CalcSubWindowRectByAnchor02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor02, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    WSRect parentRect = {0, 0, 1000, 1000};
+    WSRect subRect = {0, 0, 400, 400};
+    WSRect retRect;
+
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {0, 0, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::TOP;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {300, 0, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::TOP_END;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {600, 0, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::START;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {0, 300, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+}
+
+/**
+ * @tc.name: CalcSubWindowRectByAnchor03
+ * @tc.desc: CalcSubWindowRectByAnchor03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor03, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->subWindowLevel_ = 1;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::CENTER, 0, 0 };
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    WSRect parentRect = {0, 0, 1000, 1000};
+    WSRect subRect = {0, 0, 400, 400};
+    WSRect retRect;
+
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {300, 300, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::END;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {600, 300, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::BOTTOM_START;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {0, 600, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::BOTTOM;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {300, 600, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+
+    sceneSession->windowAnchorInfo_.windowAnchor_ = WindowAnchor::BOTTOM_END;
+    sceneSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+    retRect = {600, 600, 400, 400};
+    EXPECT_EQ(subRect, retRect);
+}
+
+/**
  * @tc.name: SetFollowParentRectFunc
  * @tc.desc: SetFollowParentRectFunc
  * @tc.type: FUNC
