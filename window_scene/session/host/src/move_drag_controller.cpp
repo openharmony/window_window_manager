@@ -1437,20 +1437,20 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
 
 void MoveDragController::SetSpecifyMoveStartDisplay(DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set specify display called");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
     specifyMoveStartDisplayId_ = displayId;
     isSpecifyMoveStart_ = true;
 }
 
 void MoveDragController::ClearSpecifyMoveStartDisplay()
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "clear specify display called");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
     specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
     isSpecifyMoveStart_ = false;
 }
 
 void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect)
+    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId, const WSRect& winRect)
 {
     moveTempProperty_.lastDownPointerPosX_ = pointerPosX;
     moveTempProperty_.lastDownPointerPosY_ = pointerPosY;
@@ -1460,10 +1460,10 @@ void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_
     moveTempProperty_.lastDownPointerWindowY_ = offsetY;
 
     WSRect targetRect = GetTargetDisplayRectRelatedToStartDisplay(winRect, displayId);
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "targetRect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
-        targetRect.posY_, targetRect.width_, targetRect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "displayId:%{public}" PRIu64 " targetRect: %{public}s",
+        displayId, targetRect.ToString().c_str());
     moveDragProperty_.targetRect_ = targetRect;
-    moveDragEndDisplayId_ = static_cast<uint64_t>(displayId);
+    moveDragEndDisplayId_ = displayId;
     ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 

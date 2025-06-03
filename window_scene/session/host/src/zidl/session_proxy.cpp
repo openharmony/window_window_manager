@@ -2698,7 +2698,7 @@ WSError SessionProxy::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy
 }
 
 WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, int32_t displayId)
+    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2723,7 +2723,7 @@ WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write pointerPosY failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(displayId)) {
+    if (!data.WriteUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

@@ -990,7 +990,7 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
 }
 
 WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, int32_t displayId)
+    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId)
 {
     return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY,
         displayId, where = __func__] {
@@ -1004,7 +1004,7 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offset:[%{public}d,%{public}d] pointer:[%{public}d,%{public}d]"
-            " displayId:%{public}d", where, offsetX, offsetY, pointerPosX, pointerPosY, displayId);
+            " displayId:%{public}" PRIu64, where, offsetX, offsetY, pointerPosX, pointerPosY, displayId);
         int32_t pointerY = pointerPosY;
         if (displayId == VIRTUAL_DISPLAY_ID) {
             pointerY += PcFoldScreenManager::GetInstance().GetVirtualDisplayPosY();

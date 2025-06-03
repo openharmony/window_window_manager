@@ -136,7 +136,7 @@ public:
      * PC Window Layout
      */
     void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, int32_t displayId, const WSRect& winRect);
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId, const WSRect& winRect);
     void SetSpecifyMoveStartDisplay(DisplayId displayId);
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
