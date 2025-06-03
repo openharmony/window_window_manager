@@ -3442,8 +3442,8 @@ void SceneSession::WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY)
     const float HALF = 0.5f;
     auto curWidth = rect.width_;
     auto curHeight = rect.height_;
-    rect.width_ = static_cast<uint32_t>(curWidth * scaleX);
-    rect.height_ = static_cast<uint32_t>(curHeight * scaleY);
+    rect.width_ = static_cast<int32_t>(curWidth * scaleX);
+    rect.height_ = static_cast<int32_t>(curHeight * scaleY);
     auto widthDifference = static_cast<int32_t>((curWidth - rect.width_) * HALF);
     auto heightDifference = static_cast<int32_t>((curHeight - rect.height_) * HALF);
     rect.posX_ = rect.posX_ + widthDifference;

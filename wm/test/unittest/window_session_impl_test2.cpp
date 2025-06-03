@@ -380,6 +380,7 @@ HWTEST_F(WindowSessionImplTest2, SetKeyFramePolicy, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     KeyFramePolicy keyFramePolicy;
     ASSERT_EQ(window->SetKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
+    ASSERT_EQ(window->keyFramePolicy_, keyFramePolicy);
     window->Destroy();
 }
 
