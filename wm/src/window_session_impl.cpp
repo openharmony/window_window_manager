@@ -1808,9 +1808,14 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage,
-        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
-        type, ability);
+    WindowSetUIContentType setUIContentType;
+    if (!navDestinationInfo_.empty()) {
+        setUIContentType = WindowSetUIContentType::BY_SHARED;
+    } else {
+        setUIContentType =
+            type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE;
+    }
+    return SetUIContentInner(contentInfo, env, storage, setUIContentType, type, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
@@ -1874,6 +1879,12 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            break;
+        case WindowSetUIContentType::BY_SHARED:
+            TLOGI(WmsLogTag::WMS_LIFE, "By shared, restoreNavDestinationInfo, id:%{public}d", GetPersistentId());
+            uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
+            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            navDestinationInfo_ = "";
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
@@ -2753,6 +2764,17 @@ void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 {
     WLOGFI("[name:%{public}s, id:%{public}d]",
         property_->GetWindowName().c_str(), GetPersistentId());
+    navDestinationInfo_ = want.GetStringParam(AAFwk::Want::ATOMIC_SERVICE_SHARE_ROUTER);
+    if (!navDestinationInfo_.empty()) {
+        auto uiContent = GetUIContentSharedPtr();
+        if (uiContent != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "call uiContent RestoreNavDestinationInfo.");
+            uiContent->RestoreNavDestinationInfo(navDestinationInfo_, false);
+            navDestinationInfo_ = "";
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
+        }
+    }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->OnNewWant(want);
     }
@@ -7016,6 +7038,11 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+void WindowSessionImpl::SetNavDestinationInfo(const std::string& navDestinationInfo)
+{
+    navDestinationInfo_ = navDestinationInfo;
 }
 
 WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,

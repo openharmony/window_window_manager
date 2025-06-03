@@ -4137,6 +4137,13 @@ public:
     }
 
     /**
+     * @brief Set the navDestinationInfo of atomicService to arkui.
+     *
+     * @param navDestinationInfo navDestinationInfo in atomicService hap
+     */
+    virtual void SetNavDestinationInfo(const std::string& navDestinationInfo) {}
+
+    /**
      * @brief Inject a pointerEvent to arkui.
      *
      * @param pointerEvent PointerEvent of Multi-Model Input.
