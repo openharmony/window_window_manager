@@ -248,6 +248,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
+        // mark keyboard session as dirty if params change
+        if (session->IsSessionForeground() && sessionProperty->GetKeyboardLayoutParams() != params) {
+            session->MarkOccupiedAreaAsDirty();
+        }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
@@ -694,8 +698,9 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
+            } else {
+                session->MarkOccupiedAreaAsDirty();
             }
-            session->MarkOccupiedAreaAsDirty();
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
@@ -729,6 +734,21 @@ std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
         rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
     }
     return rsTransaction;
+}
+
+void KeyboardSession::MarkOccupiedAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
+}
+
+void KeyboardSession::ResetOccupiedAreaDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
+}
+
+uint32_t KeyboardSession::GetOccupiedAreaDirtyFlags()
+{
+    return dirtyFlags_;
 }
 
 std::string KeyboardSession::GetSessionScreenName()
