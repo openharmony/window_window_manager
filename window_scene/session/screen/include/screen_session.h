@@ -342,8 +342,8 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
-    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+    std::shared_ptr<RSUIDirector> GetRSUIDirector();
+    std::shared_ptr<RSUIContext> GetRSUIContext();
 
 private:
     ScreenProperty property_;

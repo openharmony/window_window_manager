@@ -350,14 +350,14 @@ void WindowInnerManager::SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDire
     rsUIDirector_ = rsUIDirector;
 }
 
-std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector() const
+std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
     return rsUIDirector_;
 }
 
-std::shared_ptr<RSUIContext> WindowInnerManager::GetRSUIContext() const
+std::shared_ptr<RSUIContext> WindowInnerManager::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;

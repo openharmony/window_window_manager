@@ -4626,7 +4626,7 @@ WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo
     return WMError::WM_OK;
 }
 
-std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
+std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
@@ -4634,7 +4634,7 @@ std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
     return rsUIDirector_;
 }
 
-std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
+std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;

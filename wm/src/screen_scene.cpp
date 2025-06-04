@@ -272,7 +272,7 @@ Ace::UIContent* ScreenScene::GetUIContent() const
     }
 }
 
-std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
+std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     sptr<Display> display;
@@ -293,7 +293,7 @@ std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
     return rsUIDirector;
 }
 
-std::shared_ptr<RSUIContext> ScreenScene::GetRSUIContext() const
+std::shared_ptr<RSUIContext> ScreenScene::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIDirector = GetRSUIDirector();

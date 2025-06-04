@@ -366,8 +366,8 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
-    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() override;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
