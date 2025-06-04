@@ -2099,7 +2099,7 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
 
 /**
  * @tc.name: RegisterKeyboardWillShowListener
- * @tc.desc: RegisterKeyboardWillShowListener UnregisterKeyboardWillShowListener
+ * @tc.desc: RegisterKeyboardWillShowListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2107,23 +2107,35 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
     sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
-    window_->RegisterKeyboardWillShowListener(listener);
-    KeyboardAnimationInfo animationInfo;
-    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
-    animationInfo.isShow = true;
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillShowListener(listener);
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
-    ASSERT_FALSE(window_->keyboardWillShowListeners_[window_->GetPersistentId()].empty());
+    status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillShowListener
+ * @tc.desc: UnregisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
 
     EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
 }
 
 /**
  * @tc.name: RegisterKeyboardWillHideListener
- * @tc.desc: RegisterKeyboardWillHideListener UnregisterKeyboardWillHideListener
+ * @tc.desc: RegisterKeyboardWillHideListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2131,16 +2143,27 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
-    window_->RegisterKeyboardWillHideListener(listener);
-    KeyboardAnimationInfo animationInfo;
-    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
-    animationInfo.isShow = false;
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
  
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillHideListener(listener);
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
-    ASSERT_FALSE(window_->keyboardWillHideListeners_[window_->GetPersistentId()].empty());
+    status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillHideListener
+ * @tc.desc: UnregisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
  
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }
