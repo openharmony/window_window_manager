@@ -457,7 +457,30 @@ HWTEST_F(SessionProxyTest, SetWindowTransitionAnimation, Function | SmallTest | 
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     TransitionAnimation animation;
-    ASSERT_EQ(WSError::WS_OK, sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation));
+    WSError res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SetWindowTransitionAnimation: SetWindowTransitionAnimation end";
 }
 
