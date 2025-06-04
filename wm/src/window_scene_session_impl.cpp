@@ -3380,7 +3380,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         auto size = supportedWindowModes.size();
         if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
-            return WMError::WM_ERROR_INVALID_PARAM;
+            return WMError::WM_ERROR_ILLEGAL_PARAM;
         }
         bool isSupportFullScreen = false;
         for (auto& mode : supportedWindowModes) {
