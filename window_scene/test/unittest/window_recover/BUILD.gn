@@ -30,6 +30,7 @@ ohos_unittest("ws_window_recover_session_test") {
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
+    "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "ability_runtime:session_handler",
     "bundle_framework:appexecfwk_base",
