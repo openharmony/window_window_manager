@@ -611,8 +611,7 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginNotRegisteredWillSho
     LOG_SetCallback(ScreenSessionLogCallback);
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = property;
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     bool isShowAnimation = true;
     WSRect beginRect = { 0, 2720, 1260, 1020 };
     WSRect endRect = { 0, 1700, 1260, 1020 };
