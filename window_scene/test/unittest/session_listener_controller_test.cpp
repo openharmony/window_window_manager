@@ -147,7 +147,7 @@ private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
-sptr<SceneSessionManager> SessionListenerController::ssm_ = nullptr;
+sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
 
 void SessionListenerControllerTest::SetUpTestCase()
 {
@@ -507,7 +507,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, T
     info.appIndex_ = 0;
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm->sceneSessionMap_.insert({ 101, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 101, sceneSession });
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
     EXPECT_EQ(res, WMError::WM_OK);
 }
