@@ -310,6 +310,17 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | Sma
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardAnimationInfo keyboardAnimationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("KeyboardPanelInfo marshalling failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
     EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }

@@ -2702,7 +2702,7 @@ enum DefaultSpecificZIndex {
  */
 enum SupportFunctionType : uint32_t {
     /**
-     * Supports callbacks triggered begore the keyboard show/hide animations begin.
+     * Supports callbacks triggered before the keyboard show/hide animations begin.
      */
     ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
 
