@@ -1000,6 +1000,54 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
 }
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromServer
+ * @tc.desc: GetScreenWidthAndHeightFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
+    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(nullptr, screenWidth, screenHeight), true);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+
+    property->SetDisplayId(DISPLAY_ID_INVALID);
+    EXPECT_EQ(property->GetDisplayId(), DISPLAY_ID_INVALID);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+
+    sceneSession->SetIsSystemKeyboard(true);
+    EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+}
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromClient
+ * @tc.desc: GetScreenWidthAndHeightFromClient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromClient, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetScreenWidthAndHeightFromClient";
+    info.abilityName_ = "GetScreenWidthAndHeightFromClient";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
+
+    sceneSession->SetIsSystemKeyboard(true);
+    EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
