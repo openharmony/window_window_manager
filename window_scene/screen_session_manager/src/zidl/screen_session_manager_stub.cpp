@@ -231,7 +231,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .missionIds_ = missionIds,
                 .virtualScreenType_ = virtualScreenType
             };
-            ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
+            bool isSecurity = data.ReadBool();
+            ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent, isSecurity);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
             break;
         }
