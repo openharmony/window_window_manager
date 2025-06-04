@@ -770,7 +770,8 @@ bool SceneSession::IsNeedConvertToRelativeRect(SizeChangeReason reason) const
         return true;
     }
     if (WindowHelper::IsSubWindow(GetWindowType())) {
-        return IsNeedCrossDisplayRendering();
+        return IsNeedCrossDisplayRendering() ||
+               (GetWindowAnchorInfo().isAnchorEnabled_ && IsAnyParentSessionDragMoving());
     }
     return false;
 }
@@ -3104,7 +3105,8 @@ bool SceneSession::IsMovable()
     }
 
     bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
-                           moveDragController_->HasPointDown() && moveDragController_->GetMovable();
+                           moveDragController_->HasPointDown() && moveDragController_->GetMovable() &&
+                           !GetWindowAnchorInfo().isAnchorEnabled_;
     auto property = GetSessionProperty();
     if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR &&
         property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -3423,13 +3425,16 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
 
-    if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+    uint64_t endDisplayId = moveDragController_->GetMoveDragEndDisplayId();
+    if ((endDisplayId == moveDragController_->GetMoveDragStartDisplayId() ||
         !moveDragController_->IsSupportWindowDragCrossDisplay()) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
+        NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
         displayChangedByMoveDrag_ = true;
-        NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
-        CheckSubSessionShouldFollowParent(moveDragController_->GetMoveDragEndDisplayId());
+        NotifySessionRectChange(rect, reason, endDisplayId);
+        NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
+        CheckSubSessionShouldFollowParent(endDisplayId);
     }
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -4021,6 +4026,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
+            HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
@@ -4040,6 +4046,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
+            HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     }
 }
@@ -4152,6 +4159,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     auto surfaceNode = GetSurfaceNode();
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     NotifySubAndDialogFollowRectChange(rect, isGlobal, needFlush);
+    SetSubWindowBoundsDuringCross(rect, isGlobal, needFlush);
     if (surfaceNode && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);

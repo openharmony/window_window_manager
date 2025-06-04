@@ -383,6 +383,40 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
     }
 }
 
+void MainSession::SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+            WSRect subRect = subSession->GetSessionRect();
+            subSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+            subSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+            subSession->SetSurfaceBounds(subRect, isGlobal, needFlush);
+        }
+    }
+}
+
+void MainSession::NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
+    SizeChangeReason reason, DisplayId displayId)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+            WSRect subRect = subSession->GetSessionRect();
+            subSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+            subSession->NotifySessionRectChange(subRect, reason, displayId);
+        }
+    }
+}
+
+void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+    const sptr<ScreenSession>& screenSession)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, screenSession);
+        }
+    }
+}
+
 void MainSession::NotifySessionLockStateChange(bool isLockedState)
 {
     PostTask([weakThis = wptr(this), isLockedState] {
