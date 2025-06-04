@@ -204,16 +204,16 @@ WSRect MoveDragController::GetTargetDisplayRectRelatedToStartDisplay(WSRect rect
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
     if (!screenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return relative coordinates.");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null, return relative coordinates.");
         return rect;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
     int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
-    return {rect.posX_ + currentDisplayOffsetX - originalDisplayOffsetX_,
-            rect.posY_ + currentDisplayOffsetY - originalDisplayOffsetY_,
-            rect.width_,
-            rect.height_};
+    return { rect.posX_ + currentDisplayOffsetX - originalDisplayOffsetX_,
+             rect.posY_ + currentDisplayOffsetY - originalDisplayOffsetY_,
+             rect.width_,
+             rect.height_ };
 }
 
 void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
@@ -1502,6 +1502,12 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     };
     if (isSpecifyMoveStart_) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}" PRIu64, specifyMoveStartDisplayId_);
+        moveDragProperty_.originalRect_.posX_ = moveTempProperty_.lastDownPointerPosX_ -
+            moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_;
+        moveDragProperty_.originalRect_.posY_ = moveTempProperty_.lastDownPointerPosY_ -
+            moveTempProperty_.lastDownPointerWindowY_ - parentRect_.posY_;
+        targetRect.posX_ = moveDragProperty_.originalRect_.posX_ + offsetX;
+        targetRect.posY_ = moveDragProperty_.originalRect_.posY_ + offsetY;
         targetRect = GetTargetDisplayRectRelatedToStartDisplay(targetRect, specifyMoveStartDisplayId_);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
