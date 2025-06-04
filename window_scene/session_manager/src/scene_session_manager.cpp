@@ -1712,6 +1712,7 @@ WSError SceneSessionManager::UpdateParentSessionForDialog(const sptr<SceneSessio
             TLOGE(WmsLogTag::WMS_DIALOG, "Parent session is nullptr, parentId:%{public}d", parentPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
+        sceneSession->GetSessionProperty()->SetSubWindowZLevel(property->GetSubWindowZLevel());
         parentSession->BindDialogSessionTarget(sceneSession);
         parentSession->BindDialogToParentSession(sceneSession);
         sceneSession->SetParentSession(parentSession);
