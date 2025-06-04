@@ -600,8 +600,8 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginInvalidSessionStage,
     sceneSession->property_ = property;
     sceneSession->sessionStage_ = nullptr;
     bool isShowAnimation = true;
-    WSRect beginRect = {0, 2720, 1260, 1020};
-    WSRect endRect = {0, 1700, 1260, 1020};
+    WSRect beginRect = { 0, 2720, 1260, 1020 };
+    WSRect endRect = { 0, 1700, 1260, 1020 };
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
@@ -623,13 +623,13 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginNotRegisteredWillSho
     sceneSession->property_ = property;
     sceneSession->sessionStage_ = nullptr;
     bool isShowAnimation = true;
-    WSRect beginRect = {0, 2720, 1260, 1020};
-    WSRect endRect = {0, 1700, 1260, 1020};
+    WSRect beginRect = { 0, 2720, 1260, 1020 };
+    WSRect endRect = { 0, 1700, 1260, 1020 };
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    ASSERT_NE(nullptr, sceneSession->sessionStage_);
 
     sceneSession->NotifyKeyboardWillShowRegistered(false);
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
@@ -651,12 +651,12 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginNotRegisteredWillHid
     sceneSession->property_ = property;
     sceneSession->sessionStage_ = nullptr;
     bool isShowAnimation = true;
-    WSRect beginRect = {0, 2720, 1260, 1020};
-    WSRect endRect = {0, 1700, 1260, 1020};
+    WSRect beginRect = { 0, 2720, 1260, 1020 };
+    WSRect endRect = { 0, 1700, 1260, 1020 };
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    ASSERT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = false;
     sceneSession->NotifyKeyboardWillHideRegistered(false);
@@ -679,12 +679,12 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginRegisteredWillShow, 
     sceneSession->property_ = property;
     sceneSession->sessionStage_ = nullptr;
     bool isShowAnimation = true;
-    WSRect beginRect = {0, 2720, 1260, 1020};
-    WSRect endRect = {0, 1700, 1260, 1020};
+    WSRect beginRect = { 0, 2720, 1260, 1020 };
+    WSRect endRect = { 0, 1700, 1260, 1020 };
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    ASSERT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = true;
     sceneSession->NotifyKeyboardWillShowRegistered(true);
@@ -707,12 +707,12 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginRegisteredWillHide, 
     sceneSession->property_ = property;
     sceneSession->sessionStage_ = nullptr;
     bool isShowAnimation = true;
-    WSRect beginRect = {0, 2720, 1260, 1020};
-    WSRect endRect = {0, 1700, 1260, 1020};
+    WSRect beginRect = { 0, 2720, 1260, 1020 };
+    WSRect endRect = { 0, 1700, 1260, 1020 };
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    ASSERT_NE(nullptr, sceneSession->sessionStage_);
 
     isShowAnimation = false;
     sceneSession->NotifyKeyboardWillHideRegistered(true);
