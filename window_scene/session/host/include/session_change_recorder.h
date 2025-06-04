@@ -71,7 +71,7 @@ public:
     void Init();
     void GetSceneSessionNeedDumpInfo(const std::vector<std::string>& dumpParams, std::string& dumpInfo);
     std::atomic<bool> stopLogFlag { false };
-    bool isInitFlag = false;
+    std::atomic<bool> isInitFlag { false };
 
 private:
     SessionChangeRecorder() = default;

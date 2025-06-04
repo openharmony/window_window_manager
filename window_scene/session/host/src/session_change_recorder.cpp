@@ -52,11 +52,11 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionChangeRecorder)
 void SessionChangeRecorder::Init()
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
-    if (isInitFlag) {
+    if (isInitFlag.load()) {
         return;
     }
 
-    isInitFlag = true;
+    isInitFlag.store(true);
     if (!HiLogIsLoggable(HILOG_DOMAIN_WINDOW, g_domainContents[static_cast<uint32_t>(WmsLogTag::DEFAULT)], LOG_DEBUG)) {
         stopLogFlag.store(true);
         return;
