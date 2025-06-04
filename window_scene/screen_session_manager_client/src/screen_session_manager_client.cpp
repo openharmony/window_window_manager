@@ -846,6 +846,8 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     float rotation, RRect bounds, ScreenId screenId)
 {
     currentstate_ = GetSuperFoldStatus();
+    screenSession->SetPointerActiveWidth(0);
+    screenSession->SetPointerActiveHeight(0);
     screenSession->UpdateToInputManager(bounds, static_cast<int>(rotation), static_cast<int>(rotation),
         FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
