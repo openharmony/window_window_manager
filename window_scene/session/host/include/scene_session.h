@@ -727,6 +727,7 @@ public:
     void SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFunc&& func);
     WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
+    void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
     void SetTempRect(WSRect rect)
     {
         tempRect_ = rect;

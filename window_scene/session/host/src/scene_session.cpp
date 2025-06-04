@@ -81,6 +81,7 @@ constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr uint32_t ROTATION_DEGREE = 90;
+constexpr int32_t HALF_VALUE = 2;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -7081,6 +7082,67 @@ WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorIn
         }
     });
     return WSError::WS_OK;
+}
+
+void SceneSession::CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect)
+{
+    if (SessionHelper::IsEmptyRect(parentRect) || SessionHelper::IsEmptyRect(subRect)) {
+        TLOGE(WmsLogTag::WMS_SUB, "parent or sub window rect is invalid");
+        return;
+    }
+    if (!windowAnchorInfo_.isAnchorEnabled_) {
+        TLOGI(WmsLogTag::WMS_SUB, "sub window anchor disabled");
+        return;
+    }
+
+    WindowAnchor anchorMode = windowAnchorInfo_.windowAnchor_;
+    int32_t offsetX = windowAnchorInfo_.offsetX_;
+    int32_t offsetY = windowAnchorInfo_.offsetY_;
+    switch (anchorMode) {
+        case WindowAnchor::TOP_START:
+            subRect.posX_ = parentRect.posX_;
+            subRect.posY_ = parentRect.posY_;
+            break;
+        case WindowAnchor::TOP:
+            subRect.posX_ = parentRect.posX_ + (parentRect.width_ - subRect.width_) / HALF_VALUE;
+            subRect.posY_ = parentRect.posY_;
+            break;
+        case WindowAnchor::TOP_END:
+            subRect.posX_ = parentRect.posX_ + parentRect.width_ - subRect.width_;
+            subRect.posY_ = parentRect.posY_;
+            break;
+        case WindowAnchor::START:
+            subRect.posX_ = parentRect.posX_;
+            subRect.posY_ = parentRect.posY_ + (parentRect.height_ - subRect.height_) / HALF_VALUE;
+            break;
+        case WindowAnchor::CENTER:
+            subRect.posX_ = parentRect.posX_ + (parentRect.width_ - subRect.width_) / HALF_VALUE;
+            subRect.posY_ = parentRect.posY_ + (parentRect.height_ - subRect.height_) / HALF_VALUE;
+            break;
+        case WindowAnchor::END:
+            subRect.posX_ = parentRect.posX_ + parentRect.width_ - subRect.width_;
+            subRect.posY_ = parentRect.posY_ + (parentRect.height_ - subRect.height_) / HALF_VALUE;
+            break;
+        case WindowAnchor::BOTTOM_START:
+            subRect.posX_ = parentRect.posX_;
+            subRect.posY_ = parentRect.posY_ + parentRect.height_ - subRect.height_;
+            break;
+        case WindowAnchor::BOTTOM:
+            subRect.posX_ = parentRect.posX_ + (parentRect.width_ - subRect.width_) / HALF_VALUE;
+            subRect.posY_ = parentRect.posY_ + parentRect.height_ - subRect.height_;
+            break;
+        case WindowAnchor::BOTTOM_END:
+            subRect.posX_ = parentRect.posX_ + parentRect.width_ - subRect.width_;
+            subRect.posY_ = parentRect.posY_ + parentRect.height_ - subRect.height_;
+            break;
+        default:
+            TLOGE(WmsLogTag::WMS_SUB, "invalid anchor mode");
+            return;
+    }
+    subRect.posX_ += offsetX;
+    subRect.posY_ += offsetY;
+    TLOGI(WmsLogTag::WMS_SUB, "win %{public}d, anchorMode %{public}u, rect %{public}s",
+        GetPersistentId(), anchorMode, subRect.ToString().c_str());
 }
 
 void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
