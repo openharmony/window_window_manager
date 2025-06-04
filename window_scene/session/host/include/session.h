@@ -97,7 +97,7 @@ using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType ty
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;

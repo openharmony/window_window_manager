@@ -124,6 +124,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "SceneType", SceneTypeInit(env));
     napi_set_named_property(env, exportObj, "KeyboardGravity", KeyboardGravityInit(env));
     napi_set_named_property(env, exportObj, "KeyboardViewMode", KeyboardViewModeInit(env));
+    napi_set_named_property(env, exportObj, "KeyboardFlowLightMode", KeyboardFlowlightModeInit(env));
+    napi_set_named_property(env, exportObj, "KeyboardGradientMode", KeyboardGradientModeInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
     napi_set_named_property(env, exportObj, "RSUIFirstSwitch", CreateJsRSUIFirstSwitch(env));
     napi_set_named_property(env, exportObj, "StartupVisibility", CreateJsSessionStartupVisibility(env));
