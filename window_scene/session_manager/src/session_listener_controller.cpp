@@ -285,7 +285,7 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
             newListenerList.emplace_back(listener);
             listenerMapById_.emplace(id, newListenerList);
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "Register SessionLifecycleListener, id:%{public}d.", id);
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", id);
     }
     return hasValidId ? WMError::WM_OK : WMError::WM_ERROR_INVALID_PARAM;
 }

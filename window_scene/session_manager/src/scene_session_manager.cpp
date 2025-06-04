@@ -2894,10 +2894,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->requestId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    if (sceneSession->GetSessionState() != SessionState::STATE_ACTIVE &&
-            sceneSession->GetSessionState() != SessionState::STATE_FORGROUND) {
-                listenerController_->NotifySessionLifecycleEvent(
-                    ISessionLifecycleListener::SessionLifecycleEvent::FOREGROUND, sceneSession->GetSessionInfo());
+    if (!sceneSession->IsSessionForeground()) {
+        listenerController_->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::FOREGROUND,
+            sceneSession->GetSessionInfo());
     }
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
