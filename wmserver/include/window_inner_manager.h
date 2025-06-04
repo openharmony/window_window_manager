@@ -73,8 +73,8 @@ public:
      * RS Client Multi Instance
      */
     void SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector);
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
-    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+    std::shared_ptr<RSUIDirector> GetRSUIDirector();
+    std::shared_ptr<RSUIContext> GetRSUIContext();
 
 protected:
     WindowInnerManager();

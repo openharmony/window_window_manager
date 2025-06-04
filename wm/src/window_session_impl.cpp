@@ -6984,7 +6984,7 @@ nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle
     return decorJson;
 }
 
-std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
+std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
@@ -6992,7 +6992,7 @@ std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
     return rsUIDirector_;
 }
 
-std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
+std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;

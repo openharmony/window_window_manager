@@ -2408,7 +2408,7 @@ bool ScreenSession::GetIsAvailableAreaNeedNotify() const
     return isAvailableAreaNeedNotify_;
 }
 
-std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector() const
+std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64,
@@ -2416,7 +2416,7 @@ std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector() const
     return rsUIDirector_;
 }
 
-std::shared_ptr<RSUIContext> ScreenSession::GetRSUIContext() const
+std::shared_ptr<RSUIContext> ScreenSession::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;

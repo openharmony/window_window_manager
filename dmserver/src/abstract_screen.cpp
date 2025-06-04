@@ -487,7 +487,7 @@ uint32_t AbstractScreen::GetPhyHeight() const
     return phyHeight_;
 }
 
-std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
+std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;

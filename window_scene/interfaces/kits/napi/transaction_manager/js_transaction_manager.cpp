@@ -106,13 +106,13 @@ ScreenId ParseScreenIdFromArgs(napi_env env, napi_callback_info info)
         return SCREEN_ID_INVALID;
     }
 
-    int64_t screenIdValue = SCREEN_ID_INVALID;
+    int64_t screenIdValue = static_cast<int64_t>(SCREEN_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[0], screenIdValue)) {
         TLOGW(WmsLogTag::DEFAULT, "Failed to convert parameter to screenId");
         return SCREEN_ID_INVALID;
     }
 
-    if (screenIdValue == SCREEN_ID_INVALID) {
+    if (screenIdValue == static_cast<int64_t>(SCREEN_ID_INVALID)) {
         TLOGW(WmsLogTag::DEFAULT, "Invalid screenId");
         return SCREEN_ID_INVALID;
     }

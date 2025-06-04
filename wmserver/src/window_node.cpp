@@ -439,7 +439,7 @@ bool WindowNode::GetTouchable() const
     return property_->GetTouchable();
 }
 
-std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext() const
+std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext()
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     std::shared_ptr<RSUIContext> rsUIContext;
