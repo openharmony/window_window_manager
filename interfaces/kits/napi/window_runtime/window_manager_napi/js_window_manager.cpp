@@ -1553,10 +1553,6 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
 napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1564,30 +1560,33 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int32_t type = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
+    int32_t type = static_cast<int32_t>(ScreenshotEventType::END);
     if (!ConvertFromJsValue(env, argv[0], type) ||
-        type < static_cast<int32_t>(ScreenshotEventType::SYSTEM_SCREENSHOT) ||
-        type > static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_ABORT)) {
+        type < static_cast<int32_t>(ScreenshotEventType::START) ||
+        type >= static_cast<int32_t>(ScreenshotEventType::END)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(type);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [env, task = napiAsyncTask, screenshotEventType, where = __func__] {
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [errCodePtr, screenshotEventType, where] {
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d", where, screenshotEventType);
-        if (ret == WmErrorCode::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d, result: %{public}d",
+            where, screenshotEventType, *errCodePtr);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "NotifyScreenshotEvent failed"));
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "send event failed"));
-    }
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnNotifyScreenshotEvent",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 

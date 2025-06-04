@@ -714,7 +714,6 @@ WSError SessionStageProxy::NotifyScreenshotAppEvent(ScreenshotEventType type)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
