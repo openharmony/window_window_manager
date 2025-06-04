@@ -55,6 +55,22 @@ public:
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) = 0;
+
+    /**
+     * @brief Update the window's rectangle in global coordinates from server-side state.
+     *
+     * This method is invoked internally by the server to synchronize the window's
+     * position and size in global coordinates after layout or state changes.
+     *
+     * @param rect The updated rectangle (position and size) in global coordinates.
+     * @param reason The reason for the size or position change.
+     * @return WSError::WS_OK if the update succeeds; otherwise, returns the corresponding error code.
+     */
+    virtual WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
+    {
+        return WSError::WS_DO_NOTHING;
+    }
+
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
 

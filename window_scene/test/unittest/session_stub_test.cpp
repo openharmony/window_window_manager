@@ -1729,6 +1729,75 @@ HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | 
     auto result = session_->HandleGetFloatingBallWindowId(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClient
+ * @tc.desc: Test HandleUpdateGlobalDisplayRectFromClient handles input correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+
+    const int32_t posX = 100;
+    const int32_t posY = 200;
+    const int32_t width = 300;
+    const int32_t height = 400;
+    const SizeChangeReason reason = SizeChangeReason::RESIZE;
+    const uint32_t reasonValue = static_cast<uint32_t>(reason);
+
+    // Case 1: Write all valid data
+    {
+        MessageParcel reply;
+        MessageOption option;
+        MessageParcel data;
+        EXPECT_TRUE(data.WriteInt32(posX));
+        EXPECT_TRUE(data.WriteInt32(posY));
+        EXPECT_TRUE(data.WriteInt32(width));
+        EXPECT_TRUE(data.WriteInt32(height));
+        EXPECT_TRUE(data.WriteUint32(reasonValue));
+        uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+        EXPECT_EQ(ERR_NONE, session_->ProcessRemoteRequest(code, data, reply, option));
+    }
+
+    // Case 2: Malformed rect (missing height)
+    {
+        MessageParcel reply;
+        MessageOption option;
+        MessageParcel data;
+        data.WriteInt32(posX);
+        data.WriteInt32(posY);
+        data.WriteInt32(width);
+        // missing height
+        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+    }
+
+    // Case 3: Missing reason
+    {
+        MessageParcel reply;
+        MessageOption option;
+        MessageParcel data;
+        data.WriteInt32(posX);
+        data.WriteInt32(posY);
+        data.WriteInt32(width);
+        data.WriteInt32(height);
+        // missing reason
+        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+    }
+
+    // Case 4: Invalid reason
+    {
+        MessageParcel reply;
+        MessageOption option;
+        MessageParcel data;
+        data.WriteInt32(posX);
+        data.WriteInt32(posY);
+        data.WriteInt32(width);
+        data.WriteInt32(height);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
+        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

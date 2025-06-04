@@ -59,6 +59,7 @@
 #include "res_sched_client.h"
 #include "rs_adapter.h"
 #include "scene_input_manager.h"
+#include "scene_screen_change_listener.h"
 #include "scene_system_ability_listener.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/ability_info_manager.h"
@@ -11528,6 +11529,9 @@ void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>
     if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
         SceneSessionManager::GetInstance().AddFocusGroup(screenSession->GetScreenId());
     }
+
+    // Window Layout Global Coordinate System: monitors screen position changes in the global coordinate system
+    screenSession->RegisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());
 }
 
 void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
@@ -11542,6 +11546,9 @@ void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSessi
     if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
         SceneSessionManager::GetInstance().RemoveFocusGroup(screenSession->GetScreenId());
     }
+
+    // Window Layout Global Coordinate System
+    screenSession->UnregisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());
 }
 
 void DisplayChangeListener::OnScreenshot(DisplayId displayId)
@@ -16242,5 +16249,19 @@ void SceneSessionManager::RegisterKioskModeChangeCallback(KioskModeChangeFunc&& 
         kioskModeChangeFunc_ = std::move(callback);
         kioskModeChangeFunc_(isKioskMode_, kioskAppPersistentId_);
     }, __func__);
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId screenId)
+{
+    std::vector<sptr<SceneSession>> sceneSessions;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetScreenId() == screenId) {
+            sceneSessions.emplace_back(sceneSession);
+        }
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "screenId: %{public}" PRIu64 ", sceneSession count: %{public}zu",
+        screenId, sceneSessions.size());
+    return sceneSessions;
 }
 } // namespace OHOS::Rosen

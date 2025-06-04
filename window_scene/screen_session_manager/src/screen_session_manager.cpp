@@ -9232,10 +9232,10 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
-    firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
-        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     CalculateXYPosition(firstScreenSession, secondScreenSession);
+    firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     if (g_isPcDevice) {

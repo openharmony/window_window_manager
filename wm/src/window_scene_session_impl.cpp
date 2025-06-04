@@ -2047,6 +2047,39 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y, MoveConfigurat
     return static_cast<WMError>(ret);
 }
 
+/** @note @window.layout */
+WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
+    int32_t x, int32_t y, MoveConfiguration /*moveConfiguration*/)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto winId = GetPersistentId();
+    const auto curGlobalDisplayRect = GetGlobalDisplayRect();
+    if (curGlobalDisplayRect.IsSamePosition(x, y)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, request same position: [%{public}d, %{public}d]",
+            winId, x, y);
+        return WMError::WM_DO_NOTHING;
+    }
+
+    // Use RequestRect to quickly get width and height from Resize method.
+    const auto requestRect = GetRequestRect();
+    if (!Rect::IsRightBottomValid(x, y, requestRect.width_, requestRect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, illegal position: [%{public}d, %{public}d]", winId, x, y);
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    WSRect newGlobalDisplayRect = { x, y, requestRect.width_, requestRect.height_ };
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, newGlobalDisplayRect: %{public}s",
+        winId, newGlobalDisplayRect.ToString().c_str());
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto ret = hostSession->UpdateGlobalDisplayRectFromClient(newGlobalDisplayRect, SizeChangeReason::MOVE);
+    return static_cast<WMError>(ret);
+}
+
 WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
 {
     if (IsWindowSessionInvalid()) {

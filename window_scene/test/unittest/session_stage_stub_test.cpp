@@ -1171,6 +1171,64 @@ HWTEST_F(SessionStageStubTest, HandleSendFbActionEvent, TestSize.Level1)
     code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT);
     ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data1, reply, option));
 }
+
+/**
+ * @tc.name: TestHandleUpdateGlobalDisplayRectFromServer
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer for various data scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServer, TestSize.Level1)
+{
+    // Case 1: Invalid rect fields
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        // Only write 2 of 4 required fields
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 2: Missing reason field
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        data.WriteInt32(100); // width
+        data.WriteInt32(200); // height
+        // No reason written
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 3: Invalid reason
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(10);
+        data.WriteInt32(20);
+        data.WriteInt32(100);
+        data.WriteInt32(200);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1); // Invalid reason
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 4: All fields valid
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(10);
+        data.WriteInt32(20);
+        data.WriteInt32(100);
+        data.WriteInt32(200);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED));
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_NONE);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -244,6 +244,42 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write interface token");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write reason");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int sendRet = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT), data, reply, option);
+    if (sendRet != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send request, error = %{public}d", sendRet);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 void SessionStageProxy::UpdateDensity()
 {
     MessageParcel data;

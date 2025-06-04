@@ -1876,5 +1876,25 @@ bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
     option.SetZIndex(zIndex);
     return true;
 }
+
+napi_value PositionToJsObject(napi_env env, const Position& position)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value jsPosition = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, jsPosition);
+
+    napi_value jsX = CreateJsValue(env, position.x);
+    if (napi_set_named_property(env, jsPosition, "x", jsX) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set 'x' property");
+        return nullptr;
+    }
+    napi_value jsY = CreateJsValue(env, position.y);
+    if (napi_set_named_property(env, jsPosition, "y", jsY) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set 'y' property");
+        return nullptr;
+    }
+    return jsPosition;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -1349,6 +1349,37 @@ HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
     EXPECT_TRUE(session_->GetHidingStartingWindow());
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: SetAndGetGlobalDisplayRect
+ * @tc.desc: Verify that setting and getting global display rect works as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetAndGetGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    session_->SetGlobalDisplayRect(rect);
+    WSRect result = session_->GetGlobalDisplayRect();
+    EXPECT_EQ(result, rect);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRect
+ * @tc.desc: Verify that updating global display rect works as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    session_->SetGlobalDisplayRect(rect);
+    auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+
+    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    WSRect updated = { 30, 40, 200, 100 };
+    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
