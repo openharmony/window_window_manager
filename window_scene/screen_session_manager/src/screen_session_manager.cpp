@@ -4485,7 +4485,7 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
 }
 
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
-                                                   const sptr<IRemoteObject>& displayManagerAgent)
+                                                   const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity)
 {
     if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
         !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
@@ -4530,6 +4530,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+        screenSession->SetSecurity(isSecurity);
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
@@ -4906,16 +4907,10 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
 
 void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
 {
-    for (ScreenId screenId : mirrorScreenIds) {
-        auto screenSession = GetScreenSession(screenId);
-        if (GetVirtualScreenFlag(screenId) == VirtualScreenFlag::CAST &&
-            screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            mirrorScreenIds_ = mirrorScreenIds;
-            TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
-            SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
-            ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
-        }
-    }
+    mirrorScreenIds_ = mirrorScreenIds;
+    TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
+    ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
 }
 
 void ScreenSessionManager::SetCastFromSettingData()

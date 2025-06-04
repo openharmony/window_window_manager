@@ -938,6 +938,11 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
+void ScreenSession::SetSecurity(bool isSecurity)
+{
+    isSecurity_ = isSecurity;
+}
+
 void ScreenSession::UpdateTouchBoundsAndOffset()
 {
     property_.SetPhysicalTouchBounds();
@@ -1759,8 +1764,8 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
     auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
     if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
-        displayNode_->SetSecurityDisplay(true);
-        TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success");
+        displayNode_->SetSecurityDisplay(isSecurity_);
+        TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success, isSecurity:%{public}d", isSecurity_);
     }
     // If setDisplayOffset is not valid for SetFrame/SetBounds
     TLOGI(WmsLogTag::DMS, "InitRSDisplayNode screenId:%{public}" PRIu64" width:%{public}u height:%{public}u",

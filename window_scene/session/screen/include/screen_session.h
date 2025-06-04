@@ -217,6 +217,7 @@ public:
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
+    void SetSecurity(bool isSecurity);
 
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
@@ -382,6 +383,7 @@ private:
     bool isEnableRegionRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
+    bool isSecurity_ = true;
 
     /*
      * RS Client Multi Instance
