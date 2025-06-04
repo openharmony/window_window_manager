@@ -41,6 +41,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 
 class SceneSession;
+class ScreenSession;
 
 using NotifySessionLockStateChangeCallback = std::function<void(bool isLockedState)>;
 using SpecificSessionCreateCallback =
@@ -237,6 +238,9 @@ public:
      * Window Layout
      */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
+    virtual void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
+        const RectAnimationConfig& rectAnimationConfig = {});
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
@@ -256,6 +260,9 @@ public:
     void HandleCrossMoveTo(WSRect& globalRect);
     virtual void HandleCrossMoveToSurfaceNode(WSRect& globalRect) {}
     virtual bool IsNeedCrossDisplayRendering() const { return false; }
+    virtual void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+        const sptr<ScreenSession>& screenSession) {}
+    virtual void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
@@ -906,9 +913,8 @@ protected:
     WindowAnchorInfo windowAnchorInfo_;
     int32_t cloneNodeCount_ = 0;
 
-    virtual void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
-        const RectAnimationConfig& rectAnimationConfig = {});
+    virtual void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) {}
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
         const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {});
     void NotifySessionDisplayIdChange(uint64_t displayId);
@@ -1166,6 +1172,8 @@ private:
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId);
+    virtual void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+        const sptr<ScreenSession>& screenSession) {}
     virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
@@ -1272,12 +1280,12 @@ private:
     void SetSurfaceBoundsWithAnimation(
         const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
         const WSRect& rect, const std::function<void()>& finishCallback = nullptr, bool isGlobal = false);
-    virtual void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     WSRect requestRectWhenFollowParent_;
     MoveConfiguration requestMoveConfiguration_;
     virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
+    virtual void SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush) {}
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     bool isDragging_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;

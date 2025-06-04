@@ -91,6 +91,11 @@ private:
      * Window Layout
      */
     void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) override;
+    void SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush) override;
+    void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
+    void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+        const sptr<ScreenSession>& screenSession) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H
