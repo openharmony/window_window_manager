@@ -117,6 +117,9 @@ private:
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
+    void MarkOccupiedAreaAsDirty() override;
+    void ResetOccupiedAreaDirtyFlags() override;
+    uint32_t GetOccupiedAreaDirtyFlags() override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
