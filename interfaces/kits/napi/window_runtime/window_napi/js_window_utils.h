@@ -303,6 +303,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
     { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::SCREEN_CHANGE,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
@@ -474,6 +475,15 @@ public:
         }
         return true;
     }
+
+    /**
+     * @brief Convert a native Position structure to a JavaScript object.
+     *
+     * @param env The NAPI environment.
+     * @param position The native Position instance to convert.
+     * @return The JavaScript object representing the position, or nullptr on failure.
+     */
+    napi_value PositionToJsObject(napi_env env, const Position& position);
 }
 }
 #endif

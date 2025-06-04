@@ -250,6 +250,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     WSRect GetSessionGlobalRectWithSingleHandScale();
     void UpdateSessionState(SessionState state) override;

@@ -528,6 +528,7 @@ enum class SizeChangeReason : uint32_t {
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
+    SCREEN_CHANGE,
     END,
 };
 
@@ -658,6 +659,28 @@ struct WSRectT {
         return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
+    /**
+     * @brief Compute the intersection area with another rectangle.
+     *
+     * @tparam F The result type for intersection area calculation.
+     *           Allows returning higher precision or larger integer to avoid overflow.
+     *           By default, F = T.
+     *
+     * @param other The other rectangle to intersect with.
+     * @return The intersection area as type F.
+     */
+    template<typename F = T>
+    F IntersectionArea(const WSRectT<T>& other) const
+    {
+        const T left   = std::max(posX_, other.posX_);
+        const T top    = std::max(posY_, other.posY_);
+        const T right  = std::min(posX_ + width_, other.posX_ + other.width_);
+        const T bottom = std::min(posY_ + height_, other.posY_ + other.height_);
+        const T interWidth  = std::max(static_cast<T>(0), right - left);
+        const T interHeight = std::max(static_cast<T>(0), bottom - top);
+        return static_cast<F>(interWidth) * static_cast<F>(interHeight);
+    }
+
     inline std::string ToString() const
     {
         constexpr int precision = 2;
@@ -674,6 +697,25 @@ inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
+
+/**
+ * @struct WSRelativeDisplayRect
+ *
+ * @brief Represent the rectangle of a window relative to a specific display.
+ */
+struct WSRelativeDisplayRect {
+    // The ID of the associated display.
+    uint64_t displayId = UINT64_MAX;
+    // The window rectangle relative to the specified display.
+    WSRect rect = WSRect::EMPTY_RECT;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << displayId << ", " << rect.ToString();
+        return oss.str();
+    }
+};
 
 struct WindowAnimationInfo {
     WSRect beginRect { 0, 0, 0, 0 };

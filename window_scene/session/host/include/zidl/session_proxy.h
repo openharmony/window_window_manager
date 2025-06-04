@@ -57,6 +57,7 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;

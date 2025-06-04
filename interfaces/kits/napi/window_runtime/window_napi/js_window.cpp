@@ -210,6 +210,14 @@ napi_value JsWindow::MoveWindowToGlobal(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::MoveWindowToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnMoveWindowToGlobalDisplay(env, info) : nullptr;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
@@ -246,6 +254,22 @@ napi_value JsWindow::ResizeWindowWithAnimation(napi_env env, napi_callback_info 
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindowWithAnimation(env, info) : nullptr;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::ClientToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnClientToGlobalDisplay(env, info) : nullptr;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::GlobalDisplayToClient(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGlobalDisplayToClient(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
@@ -1931,6 +1955,58 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != TWO_PARAMS_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid argc: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), x, y, env, napiAsyncTask, where = __func__] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+
+        auto moveResult = window->MoveWindowToGlobalDisplay(x, y);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(moveResult);
+        WmErrorCode ret = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (ret == WmErrorCode::WM_OK) {
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+        } else {
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, ret, "Failed to move window"));
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT,
+            "%{public}s: window: [%{public}u, %{public}s], x: %{public}d, y: %{public}d, ret: %{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), x, y, static_cast<int32_t>(ret));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to send event"));
+    }
+    return result;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -2225,6 +2301,85 @@ napi_value JsWindow::OnResizeWindowWithAnimation(napi_env env, napi_callback_inf
     NapiAsyncTask::Schedule("JsWindow::OnResizeWindowWithAnimation",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
+}
+
+/** @note @window.layout */
+template <typename PositionTransformFunc>
+napi_value JsWindow::HandlePositionTransform(
+    napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller)
+{
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != TWO_PARAMS_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid argc: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), x, y, env, napiAsyncTask, transformFunc, caller] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", caller);
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+
+        Position inputPos { x, y };
+        Position resultPos = transformFunc(window, inputPos);
+
+        auto jsPosition = PositionToJsObject(env, resultPos);
+        if (!jsPosition) {
+            napiAsyncTask->Reject(env,
+                JsErrUtils::CreateJsError(
+                    env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to convert position to JS value"));
+            return;
+        }
+
+        napiAsyncTask->Resolve(env, jsPosition);
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
+            caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_ok) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to send event"));
+    }
+    return result;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnClientToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    return HandlePositionTransform(
+        env, info,
+        [](const sptr<Window>& window, const Position& pos) {
+            return window->ClientToGlobalDisplay(pos);
+        },
+        __func__);
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnGlobalDisplayToClient(napi_env env, napi_callback_info info)
+{
+    return HandlePositionTransform(
+        env, info,
+        [](const sptr<Window>& window, const Position& pos) {
+            return window->GlobalDisplayToClient(pos);
+        },
+        __func__);
 }
 
 napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
@@ -8635,12 +8790,15 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
     BindNativeFunction(env, object, "moveWindowToGlobal", moduleName, JsWindow::MoveWindowToGlobal);
+    BindNativeFunction(env, object, "moveWindowToGlobalDisplay", moduleName, JsWindow::MoveWindowToGlobalDisplay);
     BindNativeFunction(env, object, "getGlobalRect", moduleName, JsWindow::GetGlobalScaledRect);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
     BindNativeFunction(env, object, "resize", moduleName, JsWindow::ResizeWindow);
     BindNativeFunction(env, object, "resizeAsync", moduleName, JsWindow::ResizeWindowAsync);
     BindNativeFunction(env, object, "resizeWindowWithAnimation",
         moduleName, JsWindow::ResizeWindowWithAnimation);
+    BindNativeFunction(env, object, "clientToGlobalDisplay", moduleName, JsWindow::ClientToGlobalDisplay);
+    BindNativeFunction(env, object, "globalDisplayToClient", moduleName, JsWindow::GlobalDisplayToClient);
     BindNativeFunction(env, object, "setWindowType", moduleName, JsWindow::SetWindowType);
     BindNativeFunction(env, object, "setWindowMode", moduleName, JsWindow::SetWindowMode);
     BindNativeFunction(env, object, "getProperties", moduleName, JsWindow::GetProperties);

@@ -41,25 +41,25 @@ using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
-    virtual void OnConnect(ScreenId screenId) = 0;
-    virtual void OnDisconnect(ScreenId screenId) = 0;
+    virtual void OnConnect(ScreenId screenId) {}
+    virtual void OnDisconnect(ScreenId screenId) {}
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
-        ScreenId screenId) = 0;
+        ScreenId screenId) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
-        PowerStateChangeReason reason) = 0;
-    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
-    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
-    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
-    virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
-    virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
-    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
-    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
-    virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
-    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
+        PowerStateChangeReason reason) {}
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
+    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) {}
+    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) {}
+    virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) {}
+    virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) {}
+    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) {}
+    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) {}
+    virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) {}
+    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) {}
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
-        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
-    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
-    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) = 0;
+        ExtendScreenConnectStatus extendScreenConnectStatus) {}
+    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) {}
+    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) {}
 };
 
 enum class MirrorScreenType : int32_t {

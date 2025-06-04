@@ -93,7 +93,9 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_CLOSE_SPECIFIC_SCENE,
     // Layout
     TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST,
-    // Floating ball
+    TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
+
+    // Floaing ball
     TRANS_ID_SEND_FB_ACTION_EVENT,
 };
 }   // namespace Rosen
