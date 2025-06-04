@@ -2808,6 +2808,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
     }
     nlohmann::json decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
     uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
+    TLOGD(WmsLogTag::WMS_DECOR, "set decor button style: %{public}s", decorJson.dump().c_str());
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
