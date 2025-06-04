@@ -10652,16 +10652,16 @@ WSError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t per
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     return taskScheduler_->PostSyncTask([this, persistentId, haveListener, callingPid, where = __func__]() {
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d haveListener %{public}u",
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d haveListener: %{public}u",
             where, persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d sceneSession is nullptr", where, persistentId);
             return WSError::WS_DO_NOTHING;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s Permission denied, not called by the same process", where);
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+            return WSError::WS_ERROR_INVALID_CALLING;
         }
         if (haveListener) {
             screenshotAppEventListenerSessionSet_.insert(persistentId);
@@ -11236,15 +11236,19 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
 WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     taskScheduler_->PostAsyncTask([this, type, where = __func__] {
         for (auto persistentId : screenshotAppEventListenerSessionSet_) {
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public} session is null", where, persistentId);
                 continue;
             }
             auto state = sceneSession->GetSessionState();
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, state: %{public}u, event: %{public}d",
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d, state: %{public}u, event: %{public}d",
                 where, sceneSession->GetPersistentId(), state, type);
             if (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) {
                 sceneSession->NotifyScreenshotAppEvent(type);

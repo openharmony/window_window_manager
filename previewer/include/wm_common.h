@@ -1754,35 +1754,33 @@ enum class SubWindowSource : uint32_t {
  * @brief Screenshot event type.
  */
 enum class ScreenshotEventType : int32_t {
-    /**
-     * screenshot event type undefined.
-     */
-    EVENT_TYPE_UNDEFINED = -1,
+    START = 0,
 
     /**
      * System screenshot.
      */
-    SYSTEM_SCREENSHOT = 0,
+    SYSTEM_SCREENSHOT = START,
 
     /**
      * System screenshot abort.
      */
-    SYSTEM_SCREENSHOT_ABORT,
+    SYSTEM_SCREENSHOT_ABORT = 1,
 
     /**
      * Scroll shot start.
      */
-    SCROLL_SHOT_START,
+    SCROLL_SHOT_START = 2,
 
     /**
      * Scroll shot end.
      */
-    SCROLL_SHOT_END,
+    SCROLL_SHOT_END = 3,
 
     /**
      * Scroll shot abort.
      */
-    SCROLL_SHOT_ABORT,
+    SCROLL_SHOT_ABORT = 4,
+    END = 5,
 };
 }
 }

@@ -2080,7 +2080,7 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
 
 int SceneSessionManagerStub::HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::EVENT_TYPE_UNDEFINED);
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::END);
     if (!data.ReadInt32(screenshotEventType)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read screenshotEventType");
         return ERR_INVALID_DATA;

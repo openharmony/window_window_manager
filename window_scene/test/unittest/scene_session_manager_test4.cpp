@@ -36,17 +36,16 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace OHOS {
+namespace Rosen {
 namespace {
-    std::string logMsg;
+    std::string g_logMsg;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
         const char* msg)
     {
-        logMsg = msg;
+        g_logMsg = msg;
     }
 }
-
-namespace OHOS {
-namespace Rosen {
 class SceneSessionManagerTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -760,7 +759,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, Te
  */
 HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 {
-    logMsg.clear();
+    g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
@@ -768,7 +767,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 
     ssm_->screenshotAppEventListenerSessionSet_.insert(1);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_TRUE(logMsg.find("session is null") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
 
     SessionInfo info;
     info.abilityName_ = "NotifyScreenshotEvent";
@@ -778,12 +777,12 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_TRUE(logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    EXPECT_TRUE(logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
