@@ -53,8 +53,8 @@ class SessionChangeRecorder {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionChangeRecorder)
 public:
     /**
-     * @brief Record scene session change info.<unnamed>
-     * 
+     * @brief Record scene session change info.
+     *
      * @param recordType The type of record info.
      * @param changeInfo The detailed change info.
      */
@@ -62,7 +62,7 @@ public:
 
     /**
      * @brief Set record size
-     * 
+     *
      * @param recordType The type of record info.
      * @param recordSize Set the size of records for each record type. Its range is from 1 to 10.
      */
