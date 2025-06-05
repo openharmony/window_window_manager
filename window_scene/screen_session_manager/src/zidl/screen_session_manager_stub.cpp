@@ -24,7 +24,6 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerStub" };
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
@@ -33,9 +32,9 @@ const static int32_t MAX_BUFF_SIZE = 100;
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    WLOGFD("OnRemoteRequest code is %{public}u", code);
+    TLOGD(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("InterfaceToken check failed");
+        TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
         return ERR_TRANSACTION_FAILED;
     }
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
@@ -125,7 +124,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER: {
             ScreenId dmsScreenId;
             if (!data.ReadUint64(dmsScreenId)) {
-                WLOGFE("fail to read dmsScreenId.");
+                TLOGE(WmsLogTag::DMS, "fail to read dmsScreenId.");
                 return ERR_INVALID_DATA;
             }
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId))));
@@ -184,7 +183,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DMError ret  = GetAllScreenInfos(screenInfos);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
-                WLOGE("fail to marshalling screenInfos in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to marshalling screenInfos in stub.");
             }
             break;
         }
@@ -338,7 +337,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;
             if (!data.ReadUInt64Vector(&mirrorScreenId)) {
-                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
@@ -351,7 +350,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;
             if (!data.ReadUInt64Vector(&mirrorScreenId)) {
-                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
@@ -364,7 +363,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;
             if (!data.ReadUInt64Vector(&mirrorScreenId)) {
-                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
             int32_t posX = data.ReadInt32();
@@ -410,7 +409,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
             std::vector<ScreenId> mirrorScreenIds;
             if (!data.ReadUInt64Vector(&mirrorScreenIds)) {
-                WLOGE("fail to receive mirror screens in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive mirror screens in stub.");
                 break;
             }
             DMError ret = StopMirror(mirrorScreenIds);
@@ -425,14 +424,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
-                WLOGE("fail to receive expand screen in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive expand screen in stub.");
                 break;
             }
             std::vector<Point> startPoint;
             if (!MarshallingHelper::UnmarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, Point& point) {
                     return parcel.ReadInt32(point.posX_) && parcel.ReadInt32(point.posY_);
                 })) {
-                WLOGE("fail to receive startPoint in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive startPoint in stub.");
                 break;
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
@@ -444,7 +443,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND: {
             std::vector<ScreenId> expandScreenIds;
             if (!data.ReadUInt64Vector(&expandScreenIds)) {
-                WLOGE("fail to receive expand screens in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive expand screens in stub.");
                 break;
             }
             DMError ret = StopExpand(expandScreenIds);
@@ -460,7 +459,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
-                WLOGE("fail to receive screens in stub.");
+                TLOGE(WmsLogTag::DMS, "fail to receive screens in stub.");
                 break;
             }
             RemoveVirtualScreenFromGroup(screenId);
@@ -470,9 +469,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
             bool isUseDma = data.ReadBool();
-            bool isFullScreenCapture = data.ReadBool();
+            bool isCaptureFullOfScreen = data.ReadBool();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma,
-                isFullScreenCapture);
+                isCaptureFullOfScreen);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
             break;
@@ -808,11 +807,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             std::vector<ScreenId> uniqueScreenIds;
             uint32_t size = data.ReadUint32();
             if (size > MAX_SCREEN_SIZE) {
-                WLOGFE("screenIds size is bigger than %{public}u", MAX_SCREEN_SIZE);
+                TLOGE(WmsLogTag::DMS, "screenIds size is bigger than %{public}u", MAX_SCREEN_SIZE);
                 break;
             }
             if (!data.ReadUInt64Vector(&uniqueScreenIds)) {
-                WLOGFE("failed to receive unique screens in stub");
+                TLOGE(WmsLogTag::DMS, "failed to receive unique screens in stub");
                 break;
             }
             std::vector<DisplayId> displayIds;
@@ -825,7 +824,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto remoteObject = data.ReadRemoteObject();
             auto clientProxy = iface_cast<IScreenSessionManagerClient>(remoteObject);
             if (clientProxy == nullptr) {
-                WLOGFE("clientProxy is null");
+                TLOGE(WmsLogTag::DMS, "clientProxy is null");
                 break;
             }
             SetClient(clientProxy);
@@ -834,7 +833,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             if (!RSMarshallingHelper::Marshalling(reply, GetScreenProperty(screenId))) {
-                WLOGFE("Write screenProperty failed");
+                TLOGE(WmsLogTag::DMS, "Write screenProperty failed");
             }
             break;
         }
@@ -842,7 +841,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto displayNode = GetDisplayNode(screenId);
             if (!displayNode || !displayNode->Marshalling(reply)) {
-                WLOGFE("Write displayNode failed");
+                TLOGE(WmsLogTag::DMS, "Write displayNode failed");
             }
             break;
         }
@@ -866,7 +865,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             RRect bounds;
             if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
-                WLOGFE("Read bounds failed");
+                TLOGE(WmsLogTag::DMS, "Read bounds failed");
                 break;
             }
             auto rotation = data.ReadFloat();
@@ -882,14 +881,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_PHY_SCREEN_PROPERTY: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             if (!RSMarshallingHelper::Marshalling(reply, GetPhyScreenProperty(screenId))) {
-                WLOGFE("Write screenProperty failed");
+                TLOGE(WmsLogTag::DMS, "Write screenProperty failed");
             }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO: {
             sptr<DisplayChangeInfo> info = DisplayChangeInfo::Unmarshalling(data);
             if (!info) {
-                WLOGFE("Read DisplayChangeInfo failed");
+                TLOGE(WmsLogTag::DMS, "Read DisplayChangeInfo failed");
                 return ERR_INVALID_DATA;
             }
             NotifyDisplayChangeInfoChanged(info);
@@ -1238,7 +1237,7 @@ void ScreenSessionManagerStub::ProcProxyForFreeze(MessageParcel& data, MessagePa
     std::set<int32_t> pidList;
     int32_t size = data.ReadInt32();
     if (size > MAX_BUFF_SIZE) {
-        WLOGFE("pid List size invalid: %{public}d", size);
+        TLOGE(WmsLogTag::DMS, "pid List size invalid: %{public}d", size);
         size = MAX_BUFF_SIZE;
     }
     for (int32_t i = 0; i < size; i++) {
@@ -1255,23 +1254,23 @@ void ScreenSessionManagerStub::ProcGetAllDisplayPhysicalResolution(MessageParcel
     size_t infoSize = physicalInfos.size();
     bool writeRet = reply.WriteInt32(static_cast<int32_t>(infoSize));
     if (!writeRet) {
-        WLOGFE("write physical size error");
+        TLOGE(WmsLogTag::DMS, "write physical size error");
         return;
     }
     for (const auto &physicalItem : physicalInfos) {
         writeRet = reply.WriteUint32(static_cast<uint32_t>(physicalItem.foldDisplayMode_));
         if (!writeRet) {
-            WLOGFE("write display mode error");
+            TLOGE(WmsLogTag::DMS, "write display mode error");
             break;
         }
         writeRet = reply.WriteUint32(physicalItem.physicalWidth_);
         if (!writeRet) {
-            WLOGFE("write physical width error");
+            TLOGE(WmsLogTag::DMS, "write physical width error");
             break;
         }
         writeRet = reply.WriteUint32(physicalItem.physicalHeight_);
         if (!writeRet) {
-            WLOGFE("write physical height error");
+            TLOGE(WmsLogTag::DMS, "write physical height error");
             break;
         }
     }
@@ -1309,7 +1308,7 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
         TLOGE(WmsLogTag::DMS, "Read node blackList failed");
         return;
     }
-    option.isFullScreenCapture_ = static_cast<bool>(data.ReadBool());
+    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());

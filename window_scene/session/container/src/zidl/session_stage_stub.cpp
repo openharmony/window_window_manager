@@ -219,7 +219,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
             return HandleNotifyNonInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
-            return HandleCloseSpecificScene(data, reply); 
+            return HandleCloseSpecificScene(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -953,8 +953,8 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    int32_t rotation = 0;
-    if (!data.ReadInt32(rotation)) {
+    uint32_t rotation = 0;
+    if (!data.ReadUint32(rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
         return ERR_INVALID_VALUE;
     }

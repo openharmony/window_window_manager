@@ -486,24 +486,6 @@ HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, 
 }
 
 /**
- * @tc.name: CheckRequestFocusImmdediately
- * @tc.desc: test function : CheckRequestFocusImmdediately
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.abilityName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
-    bool ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
-}
-
-/**
  * @tc.name: HandleTurnScreenOn
  * @tc.desc: test function : HandleTurnScreenOn
  * @tc.type: FUNC
@@ -1046,7 +1028,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
     auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
     EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestedFlags_);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestedFlags_ = 0;
 }
@@ -1065,7 +1047,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSi
     ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
     EXPECT_EQ(0, ssm_->observedFlags_);
     EXPECT_EQ(0, ssm_->interestedFlags_);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ssm_->observedFlags_ = 0;
     ssm_->interestedFlags_ = 0;
 }

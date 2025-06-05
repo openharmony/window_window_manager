@@ -57,7 +57,7 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
-constexpr float POS_ZERO = 0.001f;
+constexpr double POS_ZERO = 0.001f;
 }
 
 /**
@@ -403,11 +403,11 @@ enum class WindowSizeChangeReason : uint32_t {
     AVOID_AREA_CHANGE,
     MAXIMIZE_TO_SPLIT,
     SPLIT_TO_MAXIMIZE,
+    PAGE_ROTATION,
     SPLIT_DRAG_START,
     SPLIT_DRAG,
     SPLIT_DRAG_END,
     RESIZE_BY_LIMIT,
-    PAGE_ROTATION,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     END
@@ -446,6 +446,72 @@ enum class DragEvent : uint32_t {
     DRAG_EVENT_OUT,
     DRAG_EVENT_MOVE,
     DRAG_EVENT_END
+};
+
+/**
+ * @brief Enumerates drag resize type.
+ */
+enum class DragResizeType : uint32_t {
+    RESIZE_TYPE_UNDEFINED = 0,
+    RESIZE_EACH_FRAME = 1,
+    RESIZE_WHEN_DRAG_END = 2,
+    RESIZE_KEY_FRAME = 3,
+    RESIZE_MAX_VALUE,  // invalid value begin, add new value above
+};
+
+/**
+ * @struct KeyFramePolicy
+ *
+ * @brief info for drag key frame policy.
+ */
+struct KeyFramePolicy : public Parcelable {
+    DragResizeType dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    uint32_t interval_ = 1000;
+    uint32_t distance_ = 1000;
+    uint32_t animationDuration_ = 100;
+    uint32_t animationDelay_ = 100;
+    bool running_ = false;
+    bool stopping_ = false;
+
+    bool enabled() const
+    {
+        return dragResizeType_ == DragResizeType::RESIZE_KEY_FRAME;
+    }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(dragResizeType_)) &&
+            parcel.WriteUint32(interval_) && parcel.WriteUint32(distance_) &&
+            parcel.WriteUint32(animationDuration_) && parcel.WriteUint32(animationDelay_) &&
+            parcel.WriteBool(running_) && parcel.WriteBool(stopping_);
+    }
+
+    static KeyFramePolicy* Unmarshalling(Parcel& parcel)
+    {
+        KeyFramePolicy* keyFramePolicy = new KeyFramePolicy();
+        uint32_t dragResizeType;
+        if (!parcel.ReadUint32(dragResizeType) || !parcel.ReadUint32(keyFramePolicy->interval_) ||
+            !parcel.ReadUint32(keyFramePolicy->distance_) || !parcel.ReadUint32(keyFramePolicy->animationDuration_) ||
+            !parcel.ReadUint32(keyFramePolicy->animationDelay_) || !parcel.ReadBool(keyFramePolicy->running_) ||
+            !parcel.ReadBool(keyFramePolicy->stopping_)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete keyFramePolicy;
+            return nullptr;
+        }
+        keyFramePolicy->dragResizeType_ = static_cast<DragResizeType>(dragResizeType);
+        return keyFramePolicy;
+    }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << static_cast<uint32_t>(dragResizeType_) << " " << interval_ << " " << distance_;
+        oss << " " << animationDuration_ << " " << animationDelay_ << "]";
+        return oss.str();
+    }
 };
 
 /**

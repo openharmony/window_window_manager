@@ -25,22 +25,14 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS {
-namespace Rosen {
-namespace {
-constexpr uint32_t SLEEP_TIME_US = 100000;
-}
+namespace OHOS::Rosen {
 
 class DisplayManagerIpcServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 
     static std::unique_ptr<DisplayManagerIpcService> dms_;
-    static constexpr DisplayId DEFAULT_DISPLAY = 0ULL;
-    static constexpr DisplayId DEFAULT_SCREEN = 0ULL;
 };
 
 std::unique_ptr<DisplayManagerIpcService> DisplayManagerIpcServiceTest::dms_ = nullptr;
@@ -66,15 +58,6 @@ void DisplayManagerIpcServiceTest::SetUpTestCase()
 void DisplayManagerIpcServiceTest::TearDownTestCase()
 {
     dms_ = nullptr;
-}
-
-void DisplayManagerIpcServiceTest::SetUp()
-{
-}
-
-void DisplayManagerIpcServiceTest::TearDown()
-{
-    usleep(SLEEP_TIME_US);
 }
 
 namespace {
@@ -146,7 +129,7 @@ HWTEST_F(DisplayManagerIpcServiceTest, GetScreenBrightness, TestSize.Level1)
 {
     uint32_t level = 0;
     ASSERT_EQ(ERR_OK, dms_->GetScreenBrightness(0, level));
-    EXPECT_GT(static_cast<int32_t>(level), -1);
+    EXPECT_GT(level, 0);
 }
 
 /**
@@ -248,7 +231,7 @@ HWTEST_F(DisplayManagerIpcServiceTest, VirtualScreen, TestSize.Level1)
 HWTEST_F(DisplayManagerIpcServiceTest, OrientationAndRotation, TestSize.Level1)
 {
     int32_t dmError = 0;
-    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
+    auto orientation = static_cast<uint32_t>(Orientation::VERTICAL);
     ASSERT_EQ(ERR_OK, dms_->SetOrientation(0, orientation, dmError));
     EXPECT_NE(static_cast<int32_t>(DMError::DM_OK), dmError);
     orientation = static_cast<uint32_t>(Orientation::SENSOR_VERTICAL);
@@ -415,15 +398,15 @@ HWTEST_F(DisplayManagerIpcServiceTest, VirtualPixelRatio, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveSurfaceNodeFromDisplay
- * @tc.desc: add/remove surfaceNode to/from display
+ * @tc.name: RemoveSurfaceNodeFromDisplay01
+ * @tc.desc: RemoveSurfaceNodeFromDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerIpcServiceTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
+HWTEST_F(DisplayManagerIpcServiceTest, RemoveSurfaceNodeFromDisplay01, TestSize.Level1)
 {
     std::shared_ptr<DmRsSurfaceNode> dmRsSurfaceNode = std::make_shared<DmRsSurfaceNode>(nullptr);
     int32_t dmError = 0;
-    ASSERT_EQ(ERR_OK, dms_->RemoveSurfaceNodeFromDisplay(DEFAULT_DISPLAY, dmRsSurfaceNode, dmError));
+    ASSERT_EQ(ERR_OK, dms_->RemoveSurfaceNodeFromDisplay(0, dmRsSurfaceNode, dmError));
     EXPECT_EQ(static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), dmError);
 }
 
@@ -546,11 +529,11 @@ HWTEST_F(DisplayManagerIpcServiceTest, StopMirror, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveSurfaceNodeFromDisplay
+ * @tc.name: RemoveSurfaceNodeFromDisplay02
  * @tc.desc: RemoveSurfaceNodeFromDisplay
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerIpcServiceTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
+HWTEST_F(DisplayManagerIpcServiceTest, RemoveSurfaceNodeFromDisplay02, TestSize.Level1)
 {
     DisplayId displayId = 1;
     struct RSSurfaceNodeConfig config;
@@ -569,7 +552,7 @@ HWTEST_F(DisplayManagerIpcServiceTest, RemoveSurfaceNodeFromDisplay, TestSize.Le
 HWTEST_F(DisplayManagerIpcServiceTest, SetOrientation, TestSize.Level1)
 {
     ScreenId screenId = 0;
-    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
+    auto orientation = static_cast<uint32_t>(Orientation::VERTICAL);
     int32_t dmError = 0;
     ASSERT_EQ(ERR_OK, dms_->SetOrientation(screenId, orientation, dmError));
     EXPECT_EQ(static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), dmError);
@@ -715,11 +698,10 @@ HWTEST_F(DisplayManagerIpcServiceTest, GetAllDisplayPhysicalResolution01, TestSi
  */
 HWTEST_F(DisplayManagerIpcServiceTest, GetAllDisplayPhysicalResolution02, TestSize.Level1)
 {
-    dms_->displayManagerService_.allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
+    dms_->displayManagerService_.allDisplayPhysicalResolution_.emplace_back();
     std::vector<DisplayPhysicalResolution> displayPhysicalResolutions;
     ASSERT_EQ(ERR_OK, dms_->GetAllDisplayPhysicalResolution(displayPhysicalResolutions));
     EXPECT_FALSE(displayPhysicalResolutions.empty());
 }
 } // namespace
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen

@@ -333,8 +333,12 @@ enum class Orientation : uint32_t {
     USER_ROTATION_PORTRAIT_INVERTED = 16,
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
-    INVALID = 19,
-    END = INVALID,
+    END = FOLLOW_DESKTOP,
+    USER_PAGE_ROTATION_PORTRAIT = 3000,
+    USER_PAGE_ROTATION_LANDSCAPE = 3001,
+    USER_PAGE_ROTATION_PORTRAIT_INVERTED = 3002,
+    USER_PAGE_ROTATION_LANDSCAPE_INVERTED = 3003,
+    INVALID = 3004,
 };
 
 /**
@@ -474,7 +478,7 @@ enum class ScreenCombination : uint32_t {
 };
 
 enum class MultiScreenPowerSwitchType : uint32_t {
-    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_ON = 0,
     SCREEN_SWITCH_OFF,
     SCREEN_SWITCH_EXTERNAL,
 };
@@ -550,7 +554,7 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isFullScreenCapture_ = false;
+    bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 

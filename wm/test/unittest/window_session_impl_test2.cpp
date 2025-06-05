@@ -380,6 +380,7 @@ HWTEST_F(WindowSessionImplTest2, SetKeyFramePolicy, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     KeyFramePolicy keyFramePolicy;
     ASSERT_EQ(window->SetKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
+    ASSERT_EQ(window->keyFramePolicy_, keyFramePolicy);
     window->Destroy();
 }
 
@@ -1355,6 +1356,24 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDragKeyFramePolicy
+ * @tc.desc: SetDragKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("SetDragKeyFramePolicy");
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = hostSession;
+    KeyFramePolicy keyFramePolicy;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC
@@ -1778,16 +1797,34 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     sptr<IWindowRectChangeListener> listener1 = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->rectChangeUIExtListenerIds_.emplace(111);
-    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    ASSERT_TRUE(WindowHelper::IsUIExtensionWindow(window->GetType()));
-    sptr<IWindowRectChangeListener> listener2 = sptr<MockWindowRectChangeListener>::MakeSptr();
-    window->RegisterWindowRectChangeListener(listener2);
-    window->NotifySizeChange(rect, WindowSizeChangeReason::MOVE);
     window->Destroy(true);
+}
+
+/**
+ * @tc.name: NotifyUIExtHostWindowRectChangeListeners
+ * @tc.desc: NotifyUIExtHostWindowRectChangeListeners test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostWindowRectChangeListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyUIExtHostWindowRectChangeListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->uiContent_ = nullptr;
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(window->rectChangeUIExtListenerIds_.empty());
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
 }
 
 /**
@@ -2062,7 +2099,7 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
 
 /**
  * @tc.name: RegisterKeyboardWillShowListener
- * @tc.desc: RegisterKeyboardWillShowListener UnregisterKeyboardWillShowListener
+ * @tc.desc: RegisterKeyboardWillShowListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2070,17 +2107,35 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
     sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
-    window_->RegisterKeyboardWillShowListener(listener);
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillShowListener(listener);
+    status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillShowListener
+ * @tc.desc: UnregisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
 
     EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
 }
 
 /**
  * @tc.name: RegisterKeyboardWillHideListener
- * @tc.desc: RegisterKeyboardWillHideListener UnregisterKeyboardWillHideListener
+ * @tc.desc: RegisterKeyboardWillHideListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2088,10 +2143,27 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
-    window_->RegisterKeyboardWillHideListener(listener);
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
  
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillHideListener(listener);
+    status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillHideListener
+ * @tc.desc: UnregisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
  
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }

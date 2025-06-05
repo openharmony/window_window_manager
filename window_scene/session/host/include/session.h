@@ -89,7 +89,6 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
-using NotifyDisplayIdChangeFunc = std::function<void(uint32_t windowId, DisplayId displayId)>;
 using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisible, bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
@@ -98,7 +97,7 @@ using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType ty
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
@@ -512,7 +511,6 @@ public:
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
-    void SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -702,7 +700,6 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
@@ -793,7 +790,6 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
-    NotifyDisplayIdChangeFunc displayIdChnageFunc_;
     std::mutex highlightChangeFuncMutex_;
     NotifyHighlightChangeFunc highlightChangeFunc_;
 
@@ -1010,6 +1006,7 @@ private:
      * Window Lifecycle
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
+    bool SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask);
 
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
@@ -1036,7 +1033,6 @@ private:
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
     bool isDragStart_ = { false };
-    NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
 

@@ -113,7 +113,7 @@ public:
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
@@ -175,6 +175,7 @@ public:
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
 
     /**
      * Window Transition Animation For PC

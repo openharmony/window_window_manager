@@ -248,7 +248,7 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_CALLING;
     }
 
-    TLOGI(WmsLogTag::DMS, "DestroyVirtualScreen::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:DestroyVirtualScreen(%" PRIu64 ")", screenId);
@@ -257,7 +257,7 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 
 DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
-    TLOGI(WmsLogTag::DMS, "SetVirtualScreenSurface::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     bool isCallingByThirdParty = Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
@@ -279,7 +279,7 @@ DMError DisplayManagerService::SetOrientation(ScreenId screenId, Orientation ori
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (orientation < Orientation::UNSPECIFIED || orientation > Orientation::REVERSE_HORIZONTAL) {
-        TLOGE(WmsLogTag::DMS, "SetOrientation::orientation: %{public}u", static_cast<uint32_t>(orientation));
+        TLOGE(WmsLogTag::DMS, "orientation: %{public}u", static_cast<uint32_t>(orientation));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetOrientation(%" PRIu64 ")", screenId);
@@ -299,7 +299,7 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64 ")", displayId);
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -318,21 +318,21 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(Displ
 DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
-    TLOGI(WmsLogTag::DMS, "GetScreenSupportedColorGamuts::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
 }
 
 DMError DisplayManagerService::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
-    TLOGI(WmsLogTag::DMS, "GetScreenColorGamut::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenColorGamut(screenId, colorGamut);
 }
 
 DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
-    TLOGI(WmsLogTag::DMS, "SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId,
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId,
         colorGamutIdx);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenColorGamut(screenId, colorGamutIdx);
@@ -340,14 +340,14 @@ DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t co
 
 DMError DisplayManagerService::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
 {
-    TLOGI(WmsLogTag::DMS, "GetScreenGamutMap::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->GetScreenGamutMap(screenId, gamutMap);
 }
 
 DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
 {
-    TLOGI(WmsLogTag::DMS, "SetScreenGamutMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenGamutMap(screenId, gamutMap);
@@ -355,7 +355,7 @@ DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutM
 
 DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
 {
-    TLOGI(WmsLogTag::DMS, "SetScreenColorTransform::ScreenId: %{public}" PRIu64, screenId);
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, screenId);
     CHECK_SCREEN_AND_RETURN(screenId, DMError::DM_ERROR_INVALID_PARAM);
     return abstractScreenController_->SetScreenColorTransform(screenId);
 }
@@ -507,7 +507,7 @@ bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t leve
 uint32_t DisplayManagerService::GetScreenBrightness(uint64_t screenId)
 {
     uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
-    TLOGI(WmsLogTag::DMS, "GetScreenBrightness screenId:%{public}" PRIu64 ", level:%{public}u,", screenId, level);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ", level:%{public}u,", screenId, level);
     return level;
 }
 
@@ -537,7 +537,7 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
         TLOGE(WmsLogTag::DMS, "make mirror permission denied!");
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    TLOGI(WmsLogTag::DMS, "MakeMirror. mainScreenId :%{public}" PRIu64, mainScreenId);
+    TLOGI(WmsLogTag::DMS, "mainScreenId :%{public}" PRIu64, mainScreenId);
     auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
     auto iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
     if (iter != allMirrorScreenIds.end()) {

@@ -675,6 +675,56 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
     ASSERT_EQ(true, isCall);
 }
+
+/**
+ * @tc.name: NotifySubAndDialogFollowRectChange_scaleMode
+ * @tc.desc: NotifySubAndDialogFollowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_scaleMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySubAndDialogFollowRectChange_scaleMode";
+    info.bundleName_ = "NotifySubAndDialogFollowRectChange_scaleMode";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession3 = nullptr;
+
+    WSRect updateRect1;
+    auto task1 = [&updateRect1](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect1 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession1->GetPersistentId(), std::move(task1));
+    WSRect updateRect2;
+    auto task2 = [&updateRect2](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect2 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession2->GetPersistentId(), std::move(task2));
+    EXPECT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession1->GetPersistentId()]);
+    WSRect rect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->SetSessionRect(rect);
+    EXPECT_EQ(rect, mainSession->GetSessionRect());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    subSession1->isFollowParentLayout_ = true;
+    subSession2->isFollowParentLayout_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    mainSession->specificCallback_ = callBack;
+    auto getSessionCallBack = [&subSession1, &subSession2, &subSession3](int32_t persistentId) {
+        if (subSession1->GetPersistentId() == persistentId) {
+            return subSession1;
+        } else if (subSession2->GetPersistentId() == persistentId) {
+            return subSession2;
+        }
+        return subSession3;
+    };
+    callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    EXPECT_EQ(resultRect, updateRect1);
+    EXPECT_EQ(resultRect, updateRect2);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

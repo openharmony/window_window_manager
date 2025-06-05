@@ -75,6 +75,7 @@ napi_value JsWindowManager::Create(napi_env env, napi_callback_info info)
 
 napi_value JsWindowManager::CreateWindow(napi_env env, napi_callback_info info)
 {
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnCreateWindow(env, info) : nullptr;
 }
@@ -546,6 +547,11 @@ bool JsWindowManager::ParseConfigOption(napi_env env, napi_value jsObject,
         option.SetDialogTitle(dialogTitle);
     }
 
+    bool defaultDensityEnabled = false;
+    if (ParseJsValue(jsObject, env, "defaultDensityEnabled", defaultDensityEnabled)) {
+        option.SetDefaultDensityEnabled(defaultDensityEnabled);
+    }
+
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (ParseJsValue(jsObject, env, "displayId", displayId)) {
         if (displayId < 0 ||
@@ -594,8 +600,11 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
-    auto asyncTask = [option, contextPtr, env, task = napiAsyncTask] {
+    auto asyncTask = [option, contextPtr, env, task = napiAsyncTask, where = __func__] {
         sptr<WindowOption> windowOption = new WindowOption(option);
+        TLOGND(WmsLogTag::WMS_LIFE, "%{public}s type=%{public}u, name=%{public}s, defaultDensity=%{public}d",
+            where, static_cast<uint32_t>(option.GetWindowType()), option.GetWindowName().c_str(),
+            option.IsDefaultDensityEnabled());
         if (WindowHelper::IsSystemWindow(option.GetWindowType())) {
             return CreateNewSystemWindowTask(contextPtr, windowOption, env, *task);
         }
@@ -1328,14 +1337,19 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     if (argc == ARGC_ONE) {
         int64_t inputDisplayId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], inputDisplayId)) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
-        }
-        if (inputDisplayId < 0) {
+            napi_valuetype paramType = napi_undefined;
+            napi_typeof(env, argv[INDEX_ZERO], &paramType);
+            if (paramType != napi_undefined && paramType != napi_null) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed to convert parameter to displayId");
+                return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            }
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "explicit set undefined or null");
+        } else if (inputDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64, inputDisplayId);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        } else {
+            displayId = static_cast<DisplayId>(inputDisplayId);
         }
-        displayId = static_cast<DisplayId>(inputDisplayId);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);

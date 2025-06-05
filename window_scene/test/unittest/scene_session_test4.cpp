@@ -45,6 +45,9 @@ public:
     sptr<WindowSessionProperty> property;
     SessionInfo info;
     WSPropertyChangeAction action;
+private:
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void SceneSessionTest4::SetUpTestCase()
@@ -60,6 +63,11 @@ void SceneSessionTest4::SetUp()
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     property = sptr<WindowSessionProperty>::MakeSptr();
     action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    if (!handler_) {
+        auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    sceneSession->SetEventHandler(handler_, nullptr);
 }
 
 void SceneSessionTest4::TearDown()
@@ -1320,27 +1328,22 @@ HWTEST_F(SceneSessionTest4, IsLayoutFullScreen, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, TestSize.Level1)
 {
-    SessionInfo info;
-    info.abilityName_ = "UpdateAllModalUIExtensions";
-    info.bundleName_ = "UpdateAllModalUIExtensions";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
     WSRect globalRect = { 100, 100, 100, 100 };
-    session->SetSessionGlobalRect(globalRect);
+    sceneSession->SetSessionGlobalRect(globalRect);
+
+    WSRect newGlobalRect = { 150, 150, 100, 100 };
+    sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
 
     Rect windowRect = { 100, 100, 100, 100 };
     Rect uiExtRect = { 0, 0, 100, 100 };
     ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
     ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
-    session->modalUIExtensionInfoList_.push_back(extensionInfo);
-    session->modalUIExtensionInfoList_.push_back(extensionInfo2);
-
-    WSRect newGlobalRect = { 150, 150, 100, 100 };
-    session->UpdateAllModalUIExtensions(newGlobalRect);
+    sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo);
+    sceneSession->modalUIExtensionInfoList_.push_back(extensionInfo2);
+    sceneSession->UpdateAllModalUIExtensions(newGlobalRect);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(sceneSession->modalUIExtensionInfoList_[1].windowRect.posX_, 150);
+    EXPECT_EQ(sceneSession->modalUIExtensionInfoList_[1].windowRect.posY_, 150);
 }
 
 /**
@@ -1446,23 +1449,255 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, TestSize.Level1)
     info.abilityName_ = "CheckGetAvoidAreaAvailable";
     info.bundleName_ = "CheckGetAvoidAreaAvailable";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
     sptr<WindowSessionProperty> property = session->GetSessionProperty();
+    
+    // main window
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    // pad free multi window mode
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = true;
+    systemConfig.freeMultiWindowSupport_ = true;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    // phone
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    // PC
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+}
+
+/**
+ * @tc.name: CheckGetAvoidAreaAvailable02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetAvoidAreaAvailable02";
+    info.bundleName_ = "CheckGetAvoidAreaAvailable02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SystemSessionConfig systemConfig;
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+    // system window
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    property->SetAvoidAreaOption(0);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    // sub window
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    property->SetAvoidAreaOption(0);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+
+    // UIExtension
+    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM));
+}
+
+/**
+ * @tc.name: CheckGetMainWindowAvoidAreaAvailable
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    // pad free multi window mode
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = true;
+    systemConfig.freeMultiWindowSupport_ = true;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+
+    // phone
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FULLSCREEN,
+        AvoidAreaType::TYPE_SYSTEM));
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+}
+
+
+/**
+ * @tc.name: CheckGetMainWindowAvoidAreaAvailable02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetMainWindowAvoidAreaAvailable";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+
+    SystemSessionConfig systemConfig;
+    // pad
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+
+    // PC
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->SetSystemConfig(systemConfig);
+    EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+    
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    property->SetCompatibleModeProperty(compatibleModeProperty);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+}
+
+/**
+ * @tc.name: CheckGetSubWindowAvoidAreaAvailable
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetSubWindowAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetSubWindowAvoidAreaAvailable";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
     SystemSessionConfig systemConfig;
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
     session->SetSystemConfig(systemConfig);
 
-    bool ret;
-    property->SetAvoidAreaOption(0);
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    session->SetSessionProperty(property);
-    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(false, ret);
-
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
     session->SetSessionProperty(property);
-    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(false, ret);
+    EXPECT_EQ(true, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+            AvoidAreaType::TYPE_SYSTEM));
+
+    property->SetAvoidAreaOption(0);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+
+    systemConfig.windowUIType_ = WindowUIType::PAD_WINDOW;
+    systemConfig.freeMultiWindowEnable_ = true;
+    systemConfig.freeMultiWindowSupport_ = true;
+    session->SetSystemConfig(systemConfig);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_SYSTEM));
+
+    systemConfig.freeMultiWindowEnable_ = false;
+    systemConfig.freeMultiWindowSupport_ = false;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSessionProperty(property);
+
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SystemSessionConfig parentSystemConfig;
+    parentSystemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    parentSession->SetSystemConfig(parentSystemConfig);
+    sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
+    parentProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    parentSession->SetSessionProperty(parentProperty);
+    session->SetParentSession(parentSession);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    WSRect sessionRect({0, 0, 10, 10});
+    WSRect parentSessionRect({0, 0, 100, 100});
+    session->SetSessionRect(sessionRect);
+    parentSession->SetSessionRect(parentSessionRect);
+    EXPECT_EQ(false, session->CheckGetSubWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
+        AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+}
+
+/**
+ * @tc.name: CheckGetSystemWindowAvoidAreaAvailable
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetSystemWindowAvoidAreaAvailable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckGetSystemWindowAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetSystemWindowAvoidAreaAvailable";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+    property->SetAvoidAreaOption(static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
+    session->SetSessionProperty(property);
+    EXPECT_EQ(true, session->CheckGetSystemWindowAvoidAreaAvailable());
+
+    property->SetAvoidAreaOption(0);
+    session->SetSessionProperty(property);
+    EXPECT_EQ(false, session->CheckGetSystemWindowAvoidAreaAvailable());
 }
 
 /**
