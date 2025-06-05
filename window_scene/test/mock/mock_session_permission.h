@@ -26,5 +26,5 @@ public:
     static void SetIsStartByHdcdFlag(const bool isStartByHdcdFlag);
 };
 }// namespace Rosen
-} // namespace OHOS
+}// namespace OHOS
 #endif
