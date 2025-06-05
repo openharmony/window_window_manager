@@ -1773,11 +1773,20 @@ void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
     }
 }
 
+void WindowImpl::SetShowWithOptions(bool showWithOptions)
+{
+    showWithOptions_ = showWithOptions;
+}
+
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetWindowMode(), reason, withAnimation);
+    if (showWithOptions_) {
+        showWithOptions_ = false;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
