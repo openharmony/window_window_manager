@@ -2879,6 +2879,7 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea01, TestSize.Level1)
 {
+}
     GTEST_LOG_(INFO) << "UpdateExpandAvailableArea start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -3431,19 +3432,6 @@ HWTEST_F(ScreenSessionTest, GetIsEnableCanvasRotation, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetIsEnableCanvasRotation
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, GetIsEnableCanvasRotation, TestSize.Level1)
-{
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    ASSERT_NE(session, nullptr);
-    session->SetIsEnableCanvasRotation(true);
-    EXPECT_EQ(session->GetIsEnableCanvasRotation(), true);
-}
-
-/**
  * @tc.name: GetIsExtend
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -3723,7 +3711,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateScreenPivotCallback, TestSize.Level1)
         session->GetScreenSnapshot(x, y);
     };
     session->SetUpdateScreenPivotCallback(func);
-    EXPECT_NE(nullptr, &func);
+    EXPECT_NE(nullptr, screenSession->updateScreenPivotCallback_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateScreenPivotCallback end";
 }
 
@@ -3745,7 +3733,7 @@ HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->UpdateTouchBoundsAndOffset();
-    EXPECT_EQ(100, screenSession->screenId_);
+    EXPECT_EQ(0, screenSession->property_.GetInputOffsetY());
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateTouchBoundsAndOffset end";
 }
 
@@ -3931,7 +3919,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
     float pivotY = 0.5f;
     float translateX = 0.0f;
     float translateY = 0.0f;
-    screenSession.SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+    screenSession->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     EXPECT_EQ(screenSession.property_.GetScaleX(), scaleX);
     EXPECT_EQ(screenSession.property_.GetScaleY(), scaleY);
     EXPECT_EQ(screenSession.property_.GetPivotX(), pivotX);
@@ -4103,6 +4091,133 @@ HWTEST_F(ScreenSessionTest, SetDisplayNode, TestSize.Level1)
     screenSession->SetDisplayNode(displayNode);
     EXPECT_NE(nullptr, screenSession->GetDisplayNode());
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNode end";
+}
+
+/**
+ * @tc.name: SetRSScreenId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRSScreenId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetRSScreenId start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetRSScreenId(1);
+    EXPECT_EQ(1, screenSession->GetRSScreenId());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetRSScreenId end";
+}
+
+/**
+ * @tc.name: SetActiveId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetActiveId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetActiveId start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetActiveId(1);
+    EXPECT_EQ(1, screenSession->GetActiveId());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetActiveId end";
+}
+
+/**
+ * @tc.name: SetIsAvailableAreaNeedNotify01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify01 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsAvailableAreaNeedNotify(false);
+    EXPECT_EQ(false, screenSession->GetIsAvailableAreaNeedNotify());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify01 end";
+}
+
+
+/**
+ * @tc.name: SetIsAvailableAreaNeedNotify02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify02 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsAvailableAreaNeedNotify(true);
+    EXPECT_EQ(true, screenSession->GetIsAvailableAreaNeedNotify());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify02 end";
+}
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation01 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsEnableCanvasRotation(false);
+    EXPECT_EQ(false, screenSession->GetIsEnableCanvasRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation01 end";
+}
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation02 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsEnableCanvasRotation(true);
+    EXPECT_EQ(true, screenSession->GetIsEnableCanvasRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation02 end";
 }
 } // namespace
 } // namespace Rosen
