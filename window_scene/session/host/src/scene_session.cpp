@@ -4028,6 +4028,8 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         TLOGD(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
     }
+    const auto startDisplayId = moveDragController_->GetMoveDragStartDisplayId();
+    auto startScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(startDisplayId);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
         AutoRSTransaction trans(GetRSUIContext());
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
@@ -4039,8 +4041,13 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 continue;
             }
-            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+            bool isStartScreenMainOrExtend = startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
+                || startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
+            bool isDestScreenMainOrExtend = screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
+                || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
+            // Not main to extend or extend to main or extend to extend, no need to add cross parent child
+            if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations");
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
@@ -4058,8 +4065,13 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 continue;
             }
-            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
+            bool isStartScreenMainOrExtend = startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
+                || startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
+            bool isDestScreenMainOrExtend = screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
+                || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
+            // Not main to extend or extend to main or extend to extend, no need to add cross parent child
+            if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations");
                 continue;
             }
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
