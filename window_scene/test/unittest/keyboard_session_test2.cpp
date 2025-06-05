@@ -512,7 +512,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession02, TestSize.Level1
 
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(callingSession, nullptr);
-    callingSession->isSubWinowResizingOrMoving_ = true;
+    callingSession->isSubWindowResizingOrMoving_ = true;
     callingSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     auto ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, false);
     EXPECT_EQ(ret, true);

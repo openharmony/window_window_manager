@@ -2063,7 +2063,12 @@ WSError SessionProxy::ChangeKeyboardEffectOption(const KeyboardEffectOption& eff
         TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read reply failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 
 WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
