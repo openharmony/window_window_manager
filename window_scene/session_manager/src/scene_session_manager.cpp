@@ -2905,6 +2905,10 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->requestId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
+    if (!sceneSession->IsSessionForeground()) {
+        listenerController_->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::FOREGROUND,
+            sceneSession->GetSessionInfo());
+    }
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
@@ -8614,8 +8618,6 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
         sceneSession->GetSessionInfo().abilityInfo &&
         !(sceneSession->GetSessionInfo().abilityInfo)->excludeFromMissions) {
         listenerController_->NotifySessionMovedToFront(persistentId);
-        listenerController_->NotifySessionLifecycleEvent(
-            ISessionLifecycleListener::SessionLifecycleEvent::FOREGROUND, sceneSession->GetSessionInfo());
     }
 }
 
@@ -15186,11 +15188,11 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_NO_MEM;
     }
-    taskScheduler_->PostAsyncTask([this, listener, persistentIdList, where = __func__] {
+    return taskScheduler_->PostSyncTask([this, listener, persistentIdList, where = __func__] {
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, persistentIdList);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
+        return ret;
     }, __func__);
-    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
