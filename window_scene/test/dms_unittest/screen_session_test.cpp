@@ -3404,7 +3404,6 @@ HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
     EXPECT_EQ(session->IsTouchEnabled(), true);
 }
 
-
 /**
  * @tc.name: SetIsEnableCanvasRotation
  * @tc.desc: normal function
