@@ -356,4 +356,19 @@ WMError SceneSessionManagerLite::TransferSessionToTargetScreen(const TransferSes
 {
     return SceneSessionManager::GetInstance().NotifyTransferSessionToTargetScreen(info);
 }
+
+WMError SceneSessionManagerLite::UpdateKioskAppList(const std::vector<std::string>& kioskAppList)
+{
+    return SceneSessionManager::GetInstance().UpdateKioskAppList(kioskAppList);
+}
+
+WMError SceneSessionManagerLite::EnterKioskMode(const sptr<IRemoteObject>& token)
+{
+    return SceneSessionManager::GetInstance().EnterKioskMode(token);
+}
+
+WMError SceneSessionManagerLite::ExitKioskMode(const sptr<IRemoteObject>& token)
+{
+    return SceneSessionManager::GetInstance().ExitKioskMode();
+}
 } // namespace OHOS::Rosen

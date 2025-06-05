@@ -15694,4 +15694,85 @@ WMError SceneSessionManager::RemoveInstanceKey(const std::string& bundleName, co
         instanceKey.c_str(), bundleName.c_str());
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::UpdateKioskAppList(const std::vector<std::string>& kioskAppList)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "kioskAppList size: %{public}zu", kioskAppList.size());
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (kioskAppList.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "empty kioskAppList");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, kioskAppList] {
+        if (updateKioskAppListFunc_ != nullptr) {
+            updateKioskAppListFunc_(kioskAppList);
+            return WMError::WM_OK;
+        }
+        kioskAppListCache_ = kioskAppList;
+        return WMError::WM_OK;
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func)
+{
+    taskScheduler_->PostAsyncTask([this, callback = std::move(func)] {
+        updateKioskAppListFunc_ = std::move(callback);
+        if (!kioskAppListCache_.empty()) {
+            updateKioskAppListFunc_(kioskAppListCache_);
+        }
+    }, __func__);
+}
+
+WMError SceneSessionManager::EnterKioskMode(const sptr<IRemoteObject>& token)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    taskScheduler_->PostAsyncTask([this, token, where = __func__] {
+        auto session = FindSessionByToken(token, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "token is invalid");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        if (kioskModeChangeFunc_ != nullptr) {
+            kioskModeChangeFunc_(true, session->GetPersistentId());
+            return WMError::WM_OK;
+        } 
+        isKioskMode_ = true;
+        kioskAppPersistentId_ = session->GetPersistentId();
+        return WMError::WM_OK;
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::ExitKioskMode()
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    taskScheduler_->PostAsyncTask([this, where = __func__] {
+        if (kioskModeChangeFunc_ != nullptr) {
+            kioskModeChangeFunc_(false, INVALID_SESSION_ID);
+            return WMError::WM_OK;
+        }
+        isKioskMode_ = false;
+        kioskAppPersistentId_ = INVALID_SESSION_ID;
+        return WMError::WM_OK;
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterKioskModeChangeCallback(KioskModeChangeFunc&& func)
+{
+    taskScheduler_->PostAsyncTask([this, callback = std::move(func)] {
+        kioskModeChangeFunc_ = std::move(callback);
+        kioskModeChangeFunc_(isKioskMode_, kioskAppPersistentId_);
+    }, __func__);
+}
 } // namespace OHOS::Rosen

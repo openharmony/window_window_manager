@@ -157,6 +157,12 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleTransferSessionToTargetScreen(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND):
             return HandlePendingSessionToBackground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_KIOSK_APP_LIST):
+            return HandleUpdateKioskAppList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_ENTER_KIOSK_MODE):
+            return HandleEnterKioskMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_EXIT_KIOSK_MODE):
+            return HandleExitKioskMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1246,6 +1252,50 @@ int SceneSessionManagerLiteStub::HandleTransferSessionToTargetScreen(MessageParc
     }
     WMError ret = TransferSessionToTargetScreen(info);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateKioskAppList(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::vector<std::string> kioskAppList;
+    if (!data.ReadStringVector(&kioskAppList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read kioskAppList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UpdateKioskAppList(kioskAppList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read token");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = EnterKioskMode(token);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleExitKioskMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> token = nullptr;
+    WMError ret = ExitKioskMode(token);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
