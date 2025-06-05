@@ -95,6 +95,9 @@ class WindowStage {
   }
 
   setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton) {
+    if (grayOutMaximizeButton === undefined) {
+      return this.windowStage_.setSupportedWindowModes(supportedWindowModes);
+    }
     return this.windowStage_.setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton);
   }
 
