@@ -113,7 +113,7 @@ public:
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;

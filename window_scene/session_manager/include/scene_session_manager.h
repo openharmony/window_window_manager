@@ -374,12 +374,6 @@ public:
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
     /*
-     * Compatible Mode
-     */
-    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) override;
-
-    /*
      * Sub Window
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
@@ -705,6 +699,7 @@ public:
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
+    void refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
 
     /*
      * Window Pattern
@@ -718,9 +713,9 @@ public:
     void GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     WSError RegisterRemoveSnapshotFunc(const sptr<SceneSession>& sceneSession);
-    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t resourceId,
+    std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resourceId,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
-    bool GetPersistentImageFit(int persistentId, int32_t& imageFit);
+    bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
 
@@ -852,8 +847,8 @@ private:
     WSError RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmediately(const sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
@@ -879,9 +874,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
-    WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    WSError ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -1440,7 +1435,6 @@ private:
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    void RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifyWindowPropertyChange(ScreenId screenId);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -1509,7 +1503,7 @@ private:
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
 };
 } // namespace OHOS::Rosen
 

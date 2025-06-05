@@ -312,6 +312,8 @@ public:
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
     void SetIsEnableRegionRotation(bool isEnableRegionRotation);
     bool GetIsEnableRegionRotation();
+    void SetIsEnableCanvasRotation(bool isEnableCanvasRotation);
+    bool GetIsEnableCanvasRotation();
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
@@ -381,7 +383,9 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
+    bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
+    std::mutex isEnableCanvasRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
 

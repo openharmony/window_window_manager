@@ -245,7 +245,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
             return HandleSetSessionLabelAndIcon(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
-            return HandleChangeKeyboardViewMode(data, reply);
+            return HandleChangeKeyboardEffectOption(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS):
             return HandleSetWindowCornerRadius(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
@@ -466,6 +466,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
+        reply.WriteUint32(static_cast<uint32_t>(property->GetUserRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
@@ -1012,6 +1013,11 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
     Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
     uint32_t size = data.ReadUint32();
+    constexpr uint32_t maxMapSize = 100;
+    if (size > maxMapSize) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "size is invalid");
+        return ERR_INVALID_DATA;
+    }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t type = data.ReadUint32();
         if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
@@ -1566,18 +1572,21 @@ int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    sptr<KeyboardEffectOption> effectOption = data.ReadStrongParcelable<KeyboardEffectOption>();
+    if (effectOption == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
         return ERR_INVALID_DATA;
     }
-    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+    if (effectOption->viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
+        effectOption->flowLightMode_ >= KeyboardFlowLightMode::END ||
+        effectOption->gradientMode_ >= KeyboardGradientMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{publc}s",
+            effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    WSError ret = ChangeKeyboardEffectOption(*effectOption);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

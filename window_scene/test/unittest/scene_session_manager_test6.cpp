@@ -803,11 +803,11 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange02, TestSize.Level1)
 }
 
 /**
- * @tc.name: ProcessModalTopmostRequestFocusImmdediately
- * @tc.desc: ProcessModalTopmostRequestFocusImmdediately
+ * @tc.name: ProcessModalTopmostRequestFocusImmediately
+ * @tc.desc: ProcessModalTopmostRequestFocusImmediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, ProcessModalTopmostRequestFocusImmdediately, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, ProcessModalTopmostRequestFocusImmediately, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -816,17 +816,17 @@ HWTEST_F(SceneSessionManagerTest6, ProcessModalTopmostRequestFocusImmdediately, 
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_NE(nullptr, ssm_);
-    auto ret = ssm_->ProcessModalTopmostRequestFocusImmdediately(sceneSession);
+    auto ret = ssm_->ProcessModalTopmostRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->ProcessModalTopmostRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessModalTopmostRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->ProcessModalTopmostRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessModalTopmostRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
 }
 
@@ -1508,11 +1508,11 @@ HWTEST_F(SceneSessionManagerTest6, RegisterGetStateFromManagerFunc, TestSize.Lev
 }
 
 /**
- * @tc.name: ProcessDialogRequestFocusImmdediately
- * @tc.desc: ProcessDialogRequestFocusImmdediately
+ * @tc.name: ProcessDialogRequestFocusImmediately
+ * @tc.desc: ProcessDialogRequestFocusImmediately
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, ProcessDialogRequestFocusImmdediately, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, ProcessDialogRequestFocusImmediately, TestSize.Level1)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -1521,17 +1521,17 @@ HWTEST_F(SceneSessionManagerTest6, ProcessDialogRequestFocusImmdediately, TestSi
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_NE(nullptr, ssm_);
-    auto ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    auto ret = ssm_->ProcessDialogRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessDialogRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+    ret = ssm_->ProcessDialogRequestFocusImmediately(sceneSession);
     EXPECT_EQ(WSError::WS_DO_NOTHING, ret);
 }
 

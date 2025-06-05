@@ -33,7 +33,7 @@ bool SuperFoldPolicy::IsNeedSetSnapshotRect(DisplayId displayId)
     return (displayId == DEFAULT_DISPLAY_ID) || (displayId == DISPLAY_ID_FAKE);
 }
 
-Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isFullScreenCapture)
+Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isCaptureFullOfScreen)
 {
     Drawing::Rect snapshotRect = {0, 0, 0, 0};
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
@@ -47,7 +47,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isFullS
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
-    if (displayId == DISPLAY_ID_FAKE && !isFullScreenCapture) {
+    if (displayId == DISPLAY_ID_FAKE && !isCaptureFullOfScreen) {
         if (fakeInfo != nullptr) {
             snapshotRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
                 screenWidth, screenHeight};
@@ -56,7 +56,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isFullS
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
         bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
         if (status == SuperFoldStatus::KEYBOARD ||
-            (fakeInfo != nullptr && !isFullScreenCapture)|| isSystemKeyboardOn) {
+            (fakeInfo != nullptr && !isCaptureFullOfScreen)|| isSystemKeyboardOn) {
             snapshotRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
             snapshotRect = {0, 0, screenWidth, screenHeight};
@@ -68,7 +68,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isFullS
         << " top:" << snapshotRect.top_
         << " right:" << snapshotRect.right_
         << " bottom:" << snapshotRect.bottom_
-        << " isFullScreenCapture:" << isFullScreenCapture;
+        << " isCaptureFullOfScreen:" << isCaptureFullOfScreen;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return snapshotRect;
 }

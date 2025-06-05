@@ -60,7 +60,7 @@ constexpr int32_t API_VERSION_INVALID = -1;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL_GROUP = 8;
 constexpr uint32_t MAX_SIZE_PIP_CONTROL = 9;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
-constexpr float POS_ZERO = 0.001f;
+constexpr double POS_ZERO = 0.001f;
 /*
  * PC Window Sidebar Blur
  */
@@ -555,6 +555,22 @@ struct KeyFramePolicy : public Parcelable {
     uint32_t animationDelay_ = 100;
     bool running_ = false;
     bool stopping_ = false;
+
+    bool operator==(const KeyFramePolicy& right) const
+    {
+        return dragResizeType_ == right.dragResizeType_ &&
+            interval_ == right.interval_ &&
+            distance_ == right.distance_ &&
+            animationDuration_ == right.animationDuration_ &&
+            animationDelay_ == right.animationDelay_ &&
+            running_ == right.running_ &&
+            stopping_ == right.stopping_;
+    }
+
+    bool operator!=(const KeyFramePolicy& right) const
+    {
+        return !(*this == right);
+    }
 
     bool enabled() const
     {
@@ -2264,6 +2280,69 @@ enum class KeyboardViewMode: uint32_t {
     VIEW_MODE_END,
 };
 
+enum class KeyboardFlowLightMode: uint32_t {
+    NONE = 0,
+    BACKGROUND_FLOW_LIGHT,
+    END,
+};
+
+enum class KeyboardGradientMode: uint32_t {
+    NONE = 0,
+    LINEAR_GRADIENT,
+    END,
+};
+
+struct KeyboardEffectOption : public Parcelable {
+    KeyboardViewMode viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    KeyboardFlowLightMode flowLightMode_ = KeyboardFlowLightMode::NONE;
+    KeyboardGradientMode gradientMode_ = KeyboardGradientMode::NONE;
+    uint32_t blurHeight_ = 0;
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return (parcel.WriteUint32(static_cast<uint32_t>(viewMode_)) &&
+                parcel.WriteUint32(static_cast<uint32_t>(flowLightMode_)) &&
+                parcel.WriteUint32(static_cast<uint32_t>(gradientMode_)) &&
+                parcel.WriteUint32(blurHeight_));
+    }
+
+    static KeyboardEffectOption* Unmarshalling(Parcel& parcel)
+    {
+        KeyboardEffectOption* option = new KeyboardEffectOption();
+        uint32_t viewMode = 0;
+        uint32_t flowLightMode = 0;
+        uint32_t gradientMode = 0;
+        if (!parcel.ReadUint32(viewMode) ||
+            !parcel.ReadUint32(flowLightMode) ||
+            !parcel.ReadUint32(gradientMode) ||
+            !parcel.ReadUint32(option->blurHeight_)) {
+            delete option;
+            return nullptr;
+        }
+        option->viewMode_ = static_cast<KeyboardViewMode>(viewMode);
+        option->flowLightMode_ = static_cast<KeyboardFlowLightMode>(flowLightMode);
+        option->gradientMode_ = static_cast<KeyboardGradientMode>(gradientMode);
+        return option;
+    }
+
+    bool operator==(const KeyboardEffectOption& option) const
+    {
+        return (viewMode_ == option.viewMode_ &&
+                flowLightMode_ == option.flowLightMode_ &&
+                gradientMode_ == option.gradientMode_ &&
+                blurHeight_ == option.blurHeight_);
+    }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "viewMode: " << std::to_string(static_cast<uint32_t>(viewMode_)) << ", flowLightMode: " << \
+            std::to_string(static_cast<uint32_t>(flowLightMode_)) << ", gradientMode: " << \
+            std::to_string(static_cast<uint32_t>(gradientMode_)) << ", blurHeight: " << std::to_string(blurHeight_);
+        return oss.str();
+    }
+};
+
 /*
  * Multi User
  */
@@ -2407,7 +2486,7 @@ enum class WindowInfoKey : int32_t {
  * @brief orientation info
  */
 struct OrientationInfo {
-    int32_t rotation = 0;
+    uint32_t rotation = 0;
     Rect rect = {0, 0, 0, 0};
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };
@@ -2623,7 +2702,7 @@ enum DefaultSpecificZIndex {
  */
 enum SupportFunctionType : uint32_t {
     /**
-     * Supports callbacks triggered begore the keyboard show/hide animations begin.
+     * Supports callbacks triggered before the keyboard show/hide animations begin.
      */
     ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
 
