@@ -2718,10 +2718,10 @@ enum SupportFunctionType : uint32_t {
  * @brief window shadows info
  */
 struct ShadowsInfo : public Parcelable {
-    float radius_;
+    float radius_ = 0.0f;
     std::string color_;
-    float offsetX_;
-    float offsetY_;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
     bool hasRadiusValue_ = false;
     bool hasColorValue_ = false;
     bool hasOffsetXValue_ = false;
