@@ -771,7 +771,6 @@ public:
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
-    bool isSubWinowResizingOrMoving_ = false;
 
     /*
      * Keyboard
@@ -796,6 +795,7 @@ public:
     virtual void ResetOccupiedAreaDirtyFlags() {}
     virtual uint32_t GetOccupiedAreaDirtyFlags() { return dirtyFlags_; }
     void ProcessCallingSessionRectDirty();
+    bool isSubWindowResizingOrMoving_ = false;
 
     /*
      * Window Focus

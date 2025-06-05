@@ -46,6 +46,15 @@ namespace OHOS::Rosen {
         }                                                      \
     } while (0)
 
+#define NAPI_CHECK_RETURN_IF_NULL(func, msg)                                                            \
+    do {                                                                                                \
+        napi_status status = func;                                                                      \
+        if (status != napi_ok) {                                                                        \
+            TLOGE(WmsLogTag::DEFAULT, "Failed with reason %{public}s, code: %{public}d", msg, status);  \
+            return nullptr;                                                                             \
+        }                                                                                               \
+    } while (0)
+
 enum class JsSessionType : uint32_t {
     TYPE_UNDEFINED = 0,
     TYPE_APP,
@@ -238,7 +247,7 @@ napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
-napi_value KeyboardFlowlightModeInit(napi_env env);
+napi_value KeyboardFlowLightModeInit(napi_env env);
 napi_value KeyboardGradientModeInit(napi_env env);
 napi_value WindowTransitionTypeInit(napi_env env);
 napi_value WindowAnimationCurveInit(napi_env env);

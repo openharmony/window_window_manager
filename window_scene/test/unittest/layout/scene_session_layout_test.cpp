@@ -202,14 +202,14 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner02, TestSize.Level0)
     sceneSession->SetForegroundInteractiveStatus(true);
 
     sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    sceneSession->isSubWinowResizingOrMoving_ = true;
+    sceneSession->isSubWindowResizingOrMoving_ = true;
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
-    ASSERT_EQ(true, sceneSession->isSubWinowResizingOrMoving_);
+    ASSERT_EQ(true, sceneSession->isSubWindowResizingOrMoving_);
 
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
-    ASSERT_EQ(false, sceneSession->isSubWinowResizingOrMoving_);
+    ASSERT_EQ(false, sceneSession->isSubWindowResizingOrMoving_);
 }
 
 /**
