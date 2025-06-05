@@ -4988,6 +4988,7 @@ WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDest
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}u", GetWindowId());
         return WSError::WS_DO_NOTHING;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "call uicontent: winId=%{public}u", GetWindowId());
     std::string navDestInfoJsonStr = uiContent->GetTopNavDestinationInfo();
     if (navDestInfoJsonStr.empty()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, empty navDestInfoJsonStr", GetWindowId());
@@ -5000,7 +5001,7 @@ WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDest
         return WSError::WS_DO_NOTHING;
     }
     if (navDestInfoJson.contains("name")) {
-        navDestInfoJson.get_to(topNavDestName);
+        navDestInfoJson["name"].get_to(topNavDestName);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, navDestInfoJsonStr=%{public}s, topNavDestName=%{public}s",
         GetWindowId(), navDestInfoJsonStr.c_str(), topNavDestName.c_str());
