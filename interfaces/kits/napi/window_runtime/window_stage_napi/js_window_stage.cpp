@@ -46,7 +46,7 @@ namespace {
 const int CONTENT_STORAGE_ARG = 2;
 const uint32_t MIN_RESOURCE_ID = 0x1000000;
 const uint32_t MAX_RESOURCE_ID = 0xffffffff;
-constexpr size_t ARG_COUNT_ZERO = 0;
+constexpr size_t ARG_COUNT_ONE = 1;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
@@ -967,7 +967,7 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc == ARG_COUNT_ZERO || argc > ARG_COUNT_TWO) {
+    if (!(argc == ARG_COUNT_ONE || argc == ARG_COUNT_TWO)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
