@@ -684,6 +684,16 @@ HWTEST_F(SceneSessionTest6, GetFollowScreenChange01, TestSize.Level1)
     sceneSession->SetFollowScreenChange(isFollowScreenChange);
     bool res = sceneSession->GetFollowScreenChange();
     EXPECT_EQ(res, isFollowScreenChange);
+
+    isFollowScreenChange = false;
+    sceneSession->SetFollowScreenChange(isFollowScreenChange);
+    res = sceneSession->GetFollowScreenChange();
+    EXPECT_EQ(res, isFollowScreenChange);
+
+    isFollowScreenChange = true;
+    sceneSession->SetFollowScreenChange(isFollowScreenChange);
+    res = sceneSession->GetFollowScreenChange();
+    EXPECT_EQ(res, isFollowScreenChange);
 }
 
 /**
