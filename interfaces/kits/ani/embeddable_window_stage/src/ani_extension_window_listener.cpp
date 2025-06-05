@@ -124,7 +124,8 @@ void AniExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason 
     currentHeight_ = rect.height_;
 }
 
-void AniExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void AniExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]OnAvoidAreaChanged");
 }

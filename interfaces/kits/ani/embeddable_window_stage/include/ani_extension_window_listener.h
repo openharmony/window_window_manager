@@ -38,7 +38,8 @@ public:
     ~AniExtensionWindowListener();
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr) override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void SetMainEventHandler();
