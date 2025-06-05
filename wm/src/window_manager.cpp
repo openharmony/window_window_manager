@@ -483,7 +483,7 @@ WindowManager::~WindowManager()
 WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
-    // Only system applications or services with a userId of 0 are allowed to communicate
+    // only system applications or services with a userId of 0 are allowed to communicate
     // with multiple WMS-Servers and are permitted to listen for WMS connection status.
     if (clientUserId != SYSTEM_USERID) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "Permission denied");
