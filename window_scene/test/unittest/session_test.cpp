@@ -1246,6 +1246,24 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    session_->sessionStage_ = nullptr;
+    auto ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    session_->sessionStage_ = mockSessionStage_;
+    ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TransferBackPressedEventForConsumed02
  * @tc.desc: windowEventChannel_ is not nullptr
  * @tc.type: FUNC

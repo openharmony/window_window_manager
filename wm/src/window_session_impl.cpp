@@ -135,6 +135,8 @@ std::map<int32_t, std::vector<sptr<IKBWillHideListener>>> WindowSessionImpl::key
 std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> WindowSessionImpl::keyboardDidShowListeners_;
 std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> WindowSessionImpl::keyboardDidHideListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
+std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>>
+    WindowSessionImpl::screenshotAppEventListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
@@ -167,6 +169,7 @@ std::recursive_mutex WindowSessionImpl::keyboardWillHideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::keyboardDidShowListenerMutex_;
 std::recursive_mutex WindowSessionImpl::keyboardDidHideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
+std::recursive_mutex WindowSessionImpl::screenshotAppEventListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
@@ -3748,6 +3751,15 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        if (screenshotAppEventListeners_.find(persistentId) != screenshotAppEventListeners_.end() &&
+            !screenshotAppEventListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
+            }
+        }
+    }
 }
 
 template<typename T>
@@ -4017,6 +4029,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(screenshotListenerMutex_);
         ClearUselessListeners(screenshotListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        ClearUselessListeners(screenshotAppEventListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
@@ -4684,6 +4700,68 @@ WMError WindowSessionImpl::UnregisterScreenshotListener(const sptr<IScreenshotLi
     return UnregisterListener(screenshotListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        ret = RegisterListener(screenshotAppEventListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (screenshotAppEventListeners_[persistentId].size() == 1) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        ret = UnregisterListener(screenshotAppEventListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (screenshotAppEventListeners_[persistentId].empty()) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, false);
+    }
+    return ret;
+}
+
 template<typename T>
 EnableIfSame<T, IDialogDeathRecipientListener, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::
     GetListeners()
@@ -4714,6 +4792,12 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
         screenshotListeners.push_back(listener);
     }
     return screenshotListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return screenshotAppEventListeners_[GetPersistentId()];
 }
 
 WSError WindowSessionImpl::NotifyDestroy()
@@ -4790,6 +4874,20 @@ void WindowSessionImpl::NotifyScreenshot()
             listener->OnScreenshot();
         }
     }
+}
+
+WSError WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, screenshotEvent: %{public}d",
+        GetPersistentId(), type);
+    std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+    auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
+    for (auto& listener : screenshotAppEventListeners) {
+        if (listener != nullptr) {
+            listener->OnScreenshotAppEvent(type);
+        }
+    }
+    return WSError::WS_OK;
 }
 
 /** @note @window.layout */

@@ -108,6 +108,7 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void NotifyScreenshot() = 0;
+    virtual WSError NotifyScreenshotAppEvent(ScreenshotEventType type) = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;

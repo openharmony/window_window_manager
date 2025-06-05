@@ -1083,6 +1083,26 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleUpdateScreenshotAppEventRegistered
+ * @tc.desc: sessionStub HandleUpdateScreenshotAppEventRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(u"OHOS.ISession");
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardWillShowRegistered
  * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
  * @tc.type: FUNC

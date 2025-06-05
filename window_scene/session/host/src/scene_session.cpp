@@ -7011,6 +7011,11 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
+void SceneSession::SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func)
+{
+    updateScreenshotAppEventRegisteredFunc_ = std::move(func);
+}
+
 void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
 {
     notifyVisibleChangeFunc_ = func;
@@ -8559,6 +8564,24 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
         session->sessionStage_->SetCurrentRotation(currentRotation);
         }, __func__);
     return WSError::WS_OK;
+}
+
+WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister)
+{
+    PostTask([weakThis = wptr(this), persistentId, isRegister, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d session is null", where, persistentId);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d isRegister %{public}uu",
+            where, persistentId, isRegister);
+        if (session->updateScreenshotAppEventRegisteredFunc_) {
+            session->updateScreenshotAppEventRegisteredFunc_(persistentId, isRegister);
+        }
+        }, __func__);
+
+    return WMError::WM_OK;
 }
 
 WMError SceneSession::NotifyDisableDelegatorChange()

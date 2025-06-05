@@ -186,6 +186,17 @@ WMError WindowAgent::NotifyScreenshot()
     return WMError::WM_OK;
 }
 
+WMError WindowAgent::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, event: %{public}d", window_->GetWindowId(), type);
+    window_->NotifyScreenshotAppEvent(type);
+    return WMError::WM_OK;
+}
+
 WMError WindowAgent::DumpInfo(const std::vector<std::string>& params)
 {
     if (window_ == nullptr) {
