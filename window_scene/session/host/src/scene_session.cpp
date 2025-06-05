@@ -2087,7 +2087,11 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
         return ret;
     }
-    if (isLayoutFinished && avoidAreaType != AvoidAreaType::TYPE_END) {
+    if (!isLayoutFinished) {
+        MarkAvoidAreaAsDirty();
+        return WSError::WS_OK;
+    }
+    if (avoidAreaType != AvoidAreaType::TYPE_END) {
         auto area = GetAvoidAreaByType(avoidAreaType);
         // code below aims to check if ai bar avoid area reaches window rect's bottom
         // it should not be removed until unexpected window rect update issues were solved
@@ -2097,7 +2101,9 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
             return WSError::WS_OK;
         }
         UpdateAvoidArea(new AvoidArea(area), avoidAreaType);
-    } else if (isLayoutFinished && avoidAreaType == AvoidAreaType::TYPE_END) {
+        return WSError::WS_OK;
+    } else {
+        // avoidAreaType equal to TYPE_END means traversing and updating all avoid area types
         using T = std::underlying_type_t<AvoidAreaType>;
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
@@ -2113,8 +2119,6 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
             }
             UpdateAvoidArea(new AvoidArea(area), type);
         }
-    } else {
-        MarkAvoidAreaAsDirty();
     }
     return WSError::WS_OK;
 }
@@ -2247,8 +2251,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
     bool isAvailableWindowType = WindowHelper::IsMainWindow(windowType) || isAvailableSystemWindow ||
                                  isAvailableAppSubWindow;
-    bool isAvailableDevice = systemConfig_.IsPhoneWindow() ||
-                             (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode());
+    bool isAvailableDevice = ((systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) &&
+                              !IsFreeMultiWindowMode());
     DisplayId displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     bool isAvailableScreen = !screenSession || (screenSession->GetName() != "HiCar");
@@ -2451,7 +2455,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, Avoid
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
         return true;
     }
-    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && IsFreeMultiWindowMode()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
         return false;
     }
@@ -2477,7 +2481,7 @@ bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, Avoi
     if (winMode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
         return false;
     }
-    if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && IsFreeMultiWindowMode()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
         return false;
     }
