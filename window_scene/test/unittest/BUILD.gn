@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":ws_ability_info_manager_test",
     ":ws_anomaly_detection_test",
+    ":ws_compatible_mode_property_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_ffrt_helper_test",
@@ -98,7 +99,6 @@ group("unittest") {
     ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
-    ":ws_compatible_mode_property_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_window_session_property_animation_test",
@@ -1606,6 +1606,7 @@ ohos_unittest("ws_session_change_recorder_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
+    "hilog:libhilog",
   ]
 }
 ## Build ws_unittest_common.a }}}

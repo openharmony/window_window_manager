@@ -497,9 +497,7 @@ ohos_shared_library("libpip_web") {
     debug = false
   }
   install_enable = true
-  sources = [
-    "src/web_picture_in_picture_controller_interface.cpp",
-  ]
+  sources = [ "src/web_picture_in_picture_controller_interface.cpp" ]
 
   configs = [
     ":libpip_web_private_config",
@@ -509,6 +507,7 @@ ohos_shared_library("libpip_web") {
   public_configs = [ ":libpip_web_public_config" ]
 
   deps = [
+    "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
@@ -518,7 +517,6 @@ ohos_shared_library("libpip_web") {
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/wm:libwm",
-    "${window_base_path}/dm:libdm",
   ]
 
   external_deps = [
@@ -560,9 +558,7 @@ ohos_shared_library("libpip_web") {
 }
 
 config("libpip_ndk_public_config") {
-  include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/ndk/wm",
-  ]
+  include_dirs = [ "//foundation/window/window_manager/interfaces/kits/ndk/wm" ]
 }
 
 ## Build libpip_ndk.so
@@ -587,9 +583,7 @@ ohos_shared_library("libpip_ndk") {
     "//foundation/window/window_manager/wm/include",
   ]
 
-  sources = [
-    "src/oh_window_pip.cpp",
-  ]
+  sources = [ "src/oh_window_pip.cpp" ]
 
   deps = [
     ":libwm",
