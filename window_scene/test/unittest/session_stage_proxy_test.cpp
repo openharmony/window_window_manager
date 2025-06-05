@@ -31,6 +31,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class SessionStageProxyTest : public testing::Test {
@@ -296,10 +305,24 @@ HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, TestSize.Level
  */
 HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationWillBegin, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE((sessionStage_ != nullptr));
     KeyboardAnimationInfo keyboardAnimationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("KeyboardPanelInfo marshalling failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sessionStage_->NotifyKeyboardAnimationWillBegin(keyboardAnimationInfo, rsTransaction);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
@@ -823,6 +846,32 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated, TestSize.L
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated01
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated_ShouldReturnIpcFailed_WhenWriteInterfaceTokenFails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated01, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    WSError res = sessionStage_->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated02
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated_ShouldReturnIpcFailed_WhenSessionStageIsNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated02, TestSize.Level1)
+{
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    WSError res = sessionStage->NotifyAppForceLandscapeConfigUpdated();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**

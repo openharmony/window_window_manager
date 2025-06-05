@@ -172,12 +172,6 @@ public:
     virtual WMError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit);
 
     /*
-     * Compatible Mode
-     */
-    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property);
-
-    /*
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId);
@@ -192,7 +186,7 @@ public:
     /*
      * Window Pattern
      */
-    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId);
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
 
     /*
      * Window Animation

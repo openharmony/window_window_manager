@@ -279,8 +279,8 @@ public:
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) { return WMError::WM_OK; }
-    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
-        int persistentId) { return WMError::WM_OK; }
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+        int32_t persistentId) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType) { return WMError::WM_OK; }
@@ -310,12 +310,6 @@ public:
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
-
-    /*
-     * Compatible Mode
-     */
-    virtual WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) { return WMError::WM_OK; }
 };
 }
 }

@@ -478,7 +478,7 @@ enum class ScreenCombination : uint32_t {
 };
 
 enum class MultiScreenPowerSwitchType : uint32_t {
-    SCREEN_SWITCH_ON,
+    SCREEN_SWITCH_ON = 0,
     SCREEN_SWITCH_OFF,
     SCREEN_SWITCH_EXTERNAL,
 };
@@ -554,7 +554,7 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
-    bool isFullScreenCapture_ = false;
+    bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
 };
 

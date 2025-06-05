@@ -236,8 +236,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetForegroundWindowNum(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_USE_IMPLICIT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO):
-            return HandleGetHostWindowCompatiblityInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
             return HandleSetImageForRecent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
@@ -1924,17 +1922,17 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply)
 {
-    int imgResourceId = 0;
-    if (!data.ReadInt32(imgResourceId)) {
+    uint32_t imgResourceId = 0;
+    if (!data.ReadUint32(imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imgResourceId failed.");
         return ERR_INVALID_DATA;
     }
-    uint32_t imageFit;
+    uint32_t imageFit = 0;
     if (!data.ReadUint32(imageFit)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
         return ERR_INVALID_DATA;
     }
-    int persistentId = 0;
+    int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
         return ERR_INVALID_DATA;
@@ -1942,26 +1940,6 @@ int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, Messag
     WMError errCode = SetImageForRecent(imgResourceId, static_cast<ImageFit>(imageFit), persistentId);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (token == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "token is nullptr");
-        return ERR_INVALID_DATA;
-    }
-    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
-    WMError errCode = GetHostWindowCompatiblityInfo(token, property);
-    if (!reply.WriteParcelable(property)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write property failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

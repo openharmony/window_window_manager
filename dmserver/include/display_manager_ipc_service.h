@@ -78,7 +78,7 @@ public:
         uint64_t displayId,
         int32_t& errorCode,
         bool isUseDma,
-        bool isFullScreenCapture,
+        bool isCaptureFullOfScreen,
         std::shared_ptr<PixelMap>& pixelMap) override;
 
     ErrCode GetScreenSupportedColorGamuts(
