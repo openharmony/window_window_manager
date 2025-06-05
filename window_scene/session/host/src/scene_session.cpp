@@ -8448,7 +8448,7 @@ WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
             return;
         }
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d isRegister %{public}uu",
-            persistentId, isRegister);
+            where, persistentId, isRegister);
         if (session->updateScreenshotAppEventRegisteredFunc_) {
             session->updateScreenshotAppEventRegisteredFunc_(persistentId, isRegister);
         }
