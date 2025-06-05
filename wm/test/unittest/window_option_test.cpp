@@ -567,6 +567,20 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDefaultDensityEnabled
+ * @tc.desc: test SetIsDensityFollowHost and IsDefaultDensityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDefaultDensityEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    EXPECT_EQ(false, option->IsDefaultDensityEnabled());
+    option->SetDefaultDensityEnabled(true);
+    EXPECT_EQ(true, option->IsDefaultDensityEnabled());
+}
+
+/**
  * @tc.name: SetSubWindowZLevel
  * @tc.desc: test SetSubWindowZLevel
  * @tc.type: FUNC

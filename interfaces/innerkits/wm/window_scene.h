@@ -126,11 +126,18 @@ public:
     WMError GoDestroyHookWindow();
 
     /**
-     * Window go resume.
+     * Window go resume. GoResume will be deleted later.
      *
      * @return the error code of window
      */
     WMError GoResume();
+
+    /**
+     * Window enter interactive state.
+     *
+     * @return the error code of window
+     */
+    WMError GoInteractive();
 
     /**
      * Window handle new want.
@@ -194,6 +201,14 @@ public:
      * @return the error code of window
      */
     WMError SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName);
+
+    /**
+     * @brief Set the navDestinationInfo of atomicService to arkui.
+     *
+     * @param navDestinationInfo navDestinationInfo in atomicService hap
+     * @return the error code of window
+     */
+    WMError SetNavDestinationInfo(const std::string& navDestinationInfo) { return WMError::WM_OK; }
 
 public:
     static const DisplayId DEFAULT_DISPLAY_ID = 0;

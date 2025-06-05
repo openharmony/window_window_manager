@@ -42,7 +42,7 @@ using ConfigItem = WindowSceneConfig::ConfigItem;
 ConfigItem ReadConfig(const std::string& xmlStr)
 {
     ConfigItem config;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return config;
     }
@@ -1124,11 +1124,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, TestSize.
 }
 
 /**
- * @tc.name: UpdateBrightness
+ * @tc.name: UpdateBrightness01
  * @tc.desc: SceneSesionManager update brightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness01, TestSize.Level1)
 {
     int32_t persistentId = 10086;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1136,6 +1136,26 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, TestSize.Level1)
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     result01 = ssm_->UpdateBrightness(persistentId);
+    EXPECT_EQ(result01, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateBrightness02
+ * @tc.desc: WINDOW_TYPE_WALLET_SWIPE_CARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, TestSize.Level1)
+{
+    int32_t persistentId = 10086;
+    SessionInfo info;
+    info.abilityName_ = "UpdateBrightness";
+    info.bundleName_ = "UpdateBrightness";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, session));
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto  result01 = ssm_->UpdateBrightness(persistentId);
     EXPECT_EQ(result01, WSError::WS_OK);
 }
 
@@ -1711,6 +1731,55 @@ HWTEST_F(SceneSessionManagerTest3, ConfigDialogWindowSizeLimits01, TestSize.Leve
     mainFloat02.SetValue(subFloat);
     mainFloat02.SetValue({ { "miniHeight", mainFloat02 } });
     ssm_->ConfigDialogWindowSizeLimits(mainFloat02);
+}
+
+/**
+ * @tc.name: RegisterSetForegroundWindowNumCallback
+ * @tc.desc: call RegisterSetForegroundWindowNumCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, RegisterSetForegroundWindowNumCallback, TestSize.Level1)
+{
+    EXPECT_NE(ssm_, nullptr);
+    std::function<void(uint32_t windowNum)> func = [](uint32_t windowNum) {
+        return;
+    };
+    ssm_->RegisterSetForegroundWindowNumCallback(std::move(func));
+    EXPECT_NE(ssm_->setForegroundWindowNumFunc_, nullptr);
+}
+
+/**
+ * @tc.name: ConfigSingleHandCompatibleMode
+ * @tc.desc: call ConfigSingleHandCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Level1)
+{
+    EXPECT_NE(ssm_, nullptr);
+    WindowSceneConfig::ConfigItem configItem;
+    configItem.SetValue(true);
+    configItem.SetValue({ { "test", configItem } });
+    ssm_->ConfigSingleHandCompatibleMode(configItem);
+    EXPECT_EQ(ssm_->singleHandCompatibleModeConfig_.enabled, configItem.boolValue_);
+}
+
+/**
+ * @tc.name: UpdateRootSceneAvoidArea
+ * @tc.desc: call UpdateRootSceneAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
+{
+    EXPECT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testbundleName";
+    sessionInfo.abilityName_ = "testabilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->rootSceneSession_->specificCallback_ = nullptr;
+    ssm_->UpdateRootSceneAvoidArea();
+    auto res = ssm_->rootSceneSession_->GetPersistentId();
+    EXPECT_NE(res, 0);
 }
 } // namespace
 } // namespace Rosen

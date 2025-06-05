@@ -145,7 +145,8 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     }
 }
 
-void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
@@ -250,6 +251,20 @@ void JsWindowListener::AfterPaused()
     }
 }
 
+void JsWindowListener::AfterInteractive()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::INTERACTIVE);
+    }
+}
+
+void JsWindowListener::AfterNonInteractive()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        LifeCycleCallBack(LifeCycleEventType::NONINTERACTIVE);
+    }
+}
+
 void JsWindowListener::AfterDestroyed()
 {
     if (caseType_ == CaseType::CASE_WINDOW) {
@@ -279,13 +294,69 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     }
 }
 
+void JsWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+}
+
+void JsWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+}
+
+void JsWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+{
+    auto jsCallback = [self = weakRef_, env = env_, keyboardAnimationInfo, curve, callBackName, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.beginRect);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
+            return;
+        }
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.endRect);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+
+        napi_value configObjValue = CreateJsWindowAnimationConfigObject(env, curve);
+        if (configObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert config to jsObject", funcName);
+            return;
+        }
+
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
+        napi_set_named_property(env, objValue, "animated", CreateJsValue(env, keyboardAnimationInfo.withAnimation));
+        napi_set_named_property(env, objValue, "config", configObjValue);
+
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(callBackName.c_str(), argv, ArraySize(argv));
+    };
+    jsCallback();
+}
+
 void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
     auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
         HandleScope handleScope(env);
@@ -488,6 +559,25 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     }
 }
 
+void JsWindowListener::OnWindowStatusDidChange(WindowStatus windowstatus)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, windowstatus, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
+        thisListener->CallJsMethod(WINDOW_STATUS_DID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
@@ -613,6 +703,24 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         TLOGD(WmsLogTag::WMS_LAYOUT, "ignore undefined reason to change last reason");
     } else {
         currentReason_ = rectChangeReason;
+    }
+}
+
+void JsWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto jsCallback = [self = weakRef_, isLimit, env = env_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isLimit) };
+        thisListener->CallJsMethod(EXTENSION_SECURE_LIMIT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
     }
 }
 

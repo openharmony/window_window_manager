@@ -566,6 +566,48 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlurMaximize02, TestSize.Level1)
     EXPECT_EQ(SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT, brightnessMaximizeLight);
     EXPECT_EQ(SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT, colorMaximizeLight.AsArgbInt());
 }
+
+/**
+ * @tc.name: SetWindowShadowsCallback
+ * @tc.desc: SetWindowShadowsCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionAnimationTest, SetWindowShadowsCallback, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowShadowsCallback";
+    info.bundleName_ = "SetWindowShadowsCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifySetWindowShadowsFunc func = [](ShadowsInfo shadowsInfo) {
+        return;
+    };
+    sceneSession->SetWindowShadowsCallback(std::move(func));
+    ASSERT_NE(nullptr, sceneSession->onSetWindowShadowsFunc_);
+}
+
+/**
+ * @tc.name: OnSetWindowShadows
+ * @tc.desc: OnSetWindowShadows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionAnimationTest, OnSetWindowShadows, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSetWindowShadows";
+    info.bundleName_ = "OnSetWindowShadows";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowShadows(shadowsInfo));
+
+    NotifySetWindowShadowsFunc func = [](ShadowsInfo shadowsInfo) {
+        return;
+    };
+    session->onSetWindowShadowsFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowShadows(shadowsInfo));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

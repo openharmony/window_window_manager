@@ -29,23 +29,31 @@ class RSAdapterTest : public Test {
 public:
     static void SetUpTestCase()
     {
-        rsUIDirector_ = RSUIDirector::Create();
-        rsUIDirector_->Init(true, true);
-        rsUIContext_ = rsUIDirector_->GetRSUIContext();
+        rsClientMultiInstanceEnabled_ = RSAdapterUtil::IsClientMultiInstanceEnabled();
+        if (rsClientMultiInstanceEnabled_) {
+            rsUIDirector_ = RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsUIContext_ = rsUIDirector_->GetRSUIContext();
+        }
         struct RSSurfaceNodeConfig config;
         rsNode_ = RSSurfaceNode::Create(config, true, rsUIContext_);
-        rsClientMultiInstanceEnabled_ = rsUIContext_ != nullptr;
     }
 
-    static void TearDownTestCase() {}
+    static void TearDownTestCase()
+    {
+        rsNode_.reset();
+        rsUIContext_.reset();
+        rsUIDirector_.reset();
+    }
+
     void SetUp() override {}
     void TearDown() override {}
 
 private:
+    static bool rsClientMultiInstanceEnabled_;
     static std::shared_ptr<RSNode> rsNode_;
     static std::shared_ptr<RSUIContext> rsUIContext_;
     static std::shared_ptr<RSUIDirector> rsUIDirector_;
-    static bool rsClientMultiInstanceEnabled_;
 };
 
 std::shared_ptr<RSNode> RSAdapterTest::rsNode_ = nullptr;
@@ -68,7 +76,6 @@ public:
     MOCK_METHOD(void, OpenSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
     MOCK_METHOD(void, CloseSyncTransaction, (const std::shared_ptr<AppExecFwk::EventHandler>& handler), (override));
 };
-    
 
 /**
  * @tc.name: RSTransactionAdapterConstructor
@@ -311,20 +318,6 @@ HWTEST_F(RSAdapterTest, AllowInMultiThreadGuardLifecycle, Function | SmallTest |
 }
 
 /**
- * @tc.name: RSAdapterUtilIsClientMultiInstanceEnabledTest
- * @tc.desc: Verify IsClientMultiInstanceEnabled returns correct value.
- * @tc.type: FUNC
- */
-HWTEST_F(RSAdapterTest, RSAdapterUtilIsClientMultiInstanceEnabledTest, Function | SmallTest | Level1)
-{
-    if (rsClientMultiInstanceEnabled_) {
-        EXPECT_TRUE(RSAdapterUtil::IsClientMultiInstanceEnabled());
-    } else {
-        EXPECT_FALSE(RSAdapterUtil::IsClientMultiInstanceEnabled());
-    }
-}
-
-/**
  * @tc.name: RSAdapterUtilInitRSUIDirectorTest
  * @tc.desc: Verify InitRSUIDirector initializes RSUIDirector correctly.
  * @tc.type: FUNC
@@ -347,6 +340,10 @@ HWTEST_F(RSAdapterTest, RSAdapterUtilInitRSUIDirectorTest, Function | SmallTest 
  */
 HWTEST_F(RSAdapterTest, RSAdapterUtilSetRSUIContextTest, Function | SmallTest | Level1)
 {
+    if (!rsClientMultiInstanceEnabled_) {
+        GTEST_SKIP() << "Skip test when RS client multi-instance is disabled.";
+    }
+
     // Case 1: rsNode is nullptr
     {
         RSAdapterUtil::SetRSUIContext(nullptr, rsUIContext_, true);
@@ -374,6 +371,24 @@ HWTEST_F(RSAdapterTest, RSAdapterUtilSetRSUIContextTest, Function | SmallTest | 
         RSAdapterUtil::SetRSUIContext(newNode, rsUIContext_, true);
         EXPECT_EQ(newNode->GetRSUIContext(), rsUIContext_);
     }
+}
+
+/**
+ * @tc.name: RSAdapterUtilSetSkipCheckInMultiInstance
+ * @tc.desc: Verify SetSkipCheckInMultiInstance sets flag correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RSAdapterTest, RSAdapterUtilSetSkipCheckInMultiInstance, Function | SmallTest | Level1)
+{
+    if (!rsClientMultiInstanceEnabled_) {
+        GTEST_SKIP() << "Skip test when RS client multi-instance is disabled.";
+    }
+
+    RSAdapterUtil::SetSkipCheckInMultiInstance(rsNode_, true);
+    EXPECT_TRUE(rsNode_->isSkipCheckInMultiInstance_);
+
+    RSAdapterUtil::SetSkipCheckInMultiInstance(rsNode_, false);
+    EXPECT_FALSE(rsNode_->isSkipCheckInMultiInstance_);
 }
 
 /**

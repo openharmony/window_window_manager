@@ -117,6 +117,7 @@ private:
 
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleSnapshotUpdate(MessageParcel& data, MessageParcel& reply);
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
@@ -130,22 +131,33 @@ private:
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
-    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply);
 
     // Window Property
     int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);
+    int HandleSetWindowShadows(MessageParcel& data, MessageParcel& reply);
     // Layout
     int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
 
     // KeyFrame
     int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
+    int HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply);
+
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
+    
+    // Window Transition Animation For PC
+    int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

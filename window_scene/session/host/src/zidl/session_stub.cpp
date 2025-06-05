@@ -222,6 +222,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SNAPSHOT_UPDATE):
+            return HandleSnapshotUpdate(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
@@ -243,7 +245,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
             return HandleSetSessionLabelAndIcon(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
-            return HandleChangeKeyboardViewMode(data, reply);
+            return HandleChangeKeyboardEffectOption(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS):
             return HandleSetWindowCornerRadius(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
@@ -260,12 +262,22 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO):
+            return HandleSetWindowAnchorInfo(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
+            return HandleSetWindowTransitionAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
             return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
             return HandleKeyFrameAnimateEnd(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
             return HandleUpdateKeyFrameCloneNode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DRAG_KEY_FRAME_POLICY):
+            return HandleSetDragKeyFramePolicy(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED):
+            return HandleNotifyKeyboardWillShowRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED):
+            return HandleNotifyKeyboardWillHideRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
@@ -278,6 +290,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
             return HandleNotifyDisableDelegatorChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS):
+            return HandleSetWindowShadows(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
+            return HandleSetSubWindowSource(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -450,6 +466,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
+        reply.WriteUint32(static_cast<uint32_t>(property->GetUserRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
@@ -465,6 +482,17 @@ int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParce
     bool notifyListener = data.ReadBool();
     WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadInt32(), data.ReadInt32() };
     NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSnapshotUpdate(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "In");
+    WMError errCode = NotifySnapshotUpdate();
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -985,6 +1013,11 @@ int SessionStub::HandleGetTargetOrientationConfigInfo(MessageParcel& data, Messa
     Orientation targetOrientation = static_cast<Orientation>(data.ReadUint32());
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
     uint32_t size = data.ReadUint32();
+    constexpr uint32_t maxMapSize = 100;
+    if (size > maxMapSize) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "size is invalid");
+        return ERR_INVALID_DATA;
+    }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t type = data.ReadUint32();
         if (type < static_cast<uint32_t>(WindowType::APP_WINDOW_BASE) ||
@@ -1539,18 +1572,21 @@ int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    sptr<KeyboardEffectOption> effectOption = data.ReadStrongParcelable<KeyboardEffectOption>();
+    if (effectOption == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
         return ERR_INVALID_DATA;
     }
-    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+    if (effectOption->viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
+        effectOption->flowLightMode_ >= KeyboardFlowLightMode::END ||
+        effectOption->gradientMode_ >= KeyboardGradientMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{publc}s",
+            effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    WSError ret = ChangeKeyboardEffectOption(*effectOption);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -1567,6 +1603,25 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetWindowShadows(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<ShadowsInfo> shadowsInfo = data.ReadParcelable<ShadowsInfo>();
+    if (shadowsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read shadowsInfo error");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_ANIMATION, "shadow radius is %{public}f, color is %{public}s, "
+        "offsetX is %{public}f, offsetY is %{public}f", shadowsInfo->radius_, shadowsInfo->color_.c_str(),
+        shadowsInfo->offsetX_, shadowsInfo->offsetY_);
+    WSError errCode = SetWindowShadows(*shadowsInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGI(WmsLogTag::WMS_ANIMATION, "HandleSetWindowShadows end");
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply)
 {
     bool isFollow = false;
@@ -1578,6 +1633,43 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
     WSError errCode = SetFollowParentWindowLayoutEnabled(isFollow);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t type = 0;
+    if (!data.ReadUint32(type)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read type failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<TransitionAnimation> animation =
+        std::shared_ptr<TransitionAnimation>(data.ReadParcelable<TransitionAnimation>());
+    if (animation == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Read animation failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowTransitionAnimation(static_cast<WindowTransitionType>(type), *animation);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "run");
+    sptr<WindowAnchorInfo> windowAnchorInfo = data.ReadParcelable<WindowAnchorInfo>();
+    if (windowAnchorInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowAnchorInfo is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetWindowAnchorInfo(*windowAnchorInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1608,6 +1700,22 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, tranaction);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    sptr<KeyFramePolicy> keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    if (keyFramePolicy == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetDragKeyFramePolicy(*keyFramePolicy);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail.");
         return ERR_INVALID_DATA;
@@ -1739,6 +1847,30 @@ int SessionStub::HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillShowRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "registered: %{public}d", registered);
+    NotifyKeyboardWillHideRegistered(registered);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
 {
     std::string flag;
@@ -1783,6 +1915,23 @@ int SessionStub::HandleNotifyDisableDelegatorChange(MessageParcel& data, Message
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WMError ret = NotifyDisableDelegatorChange();
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t sourceType = 0;
+    if (!data.ReadUint32(sourceType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Read sourceType failed.");
+        return ERR_INVALID_DATA;
+    }
+    SubWindowSource source = static_cast<SubWindowSource>(sourceType);
+    TLOGD(WmsLogTag::WMS_SUB, "source: %{public}d", source);
+    WSError errCode = SetSubWindowSource(source);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

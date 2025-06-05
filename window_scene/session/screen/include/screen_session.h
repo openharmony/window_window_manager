@@ -243,8 +243,8 @@ public:
     ScreenShape GetScreenShape() const;
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
-    int32_t GetValidHeight() const;
-    int32_t GetValidWidth() const;
+    uint32_t GetValidHeight() const;
+    uint32_t GetValidWidth() const;
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
@@ -311,6 +311,8 @@ public:
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
     void SetIsEnableRegionRotation(bool isEnableRegionRotation);
     bool GetIsEnableRegionRotation();
+    void SetIsEnableCanvasRotation(bool isEnableCanvasRotation);
+    bool GetIsEnableCanvasRotation();
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
@@ -328,6 +330,7 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
     void SetScreenAvailableStatus(bool isScreenAvailable);
@@ -379,7 +382,9 @@ private:
     std::mutex mirrorScreenRegionMutex_;
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
+    bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
+    std::mutex isEnableCanvasRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
 
     /*
