@@ -531,6 +531,42 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession04
+ * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetWindowFlags(123);
+    property->SetParentPersistentId(11);
+    res = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
+
+    SessionInfo sessionInfo;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    parentSession->persistentId_ = 11;
+    ExtensionWindowFlags extWindowFlags;
+    extWindowFlags.hideNonSecureWindowsFlag = true;
+    parentSession->UpdateExtWindowFlags(parentSession->GetPersistentId(), extWindowFlags, extWindowFlags);
+    ssm_->sceneSessionMap_.insert( {parentSession->GetPersistentId(), parentSession} );
+    res = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
+}
+
+/**
  * @tc.name: SetCreateKeyboardSessionListener
  * @tc.desc: SetCreateKeyboardSessionListener
  * @tc.type: FUNC
