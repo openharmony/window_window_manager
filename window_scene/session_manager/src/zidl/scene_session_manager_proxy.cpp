@@ -544,43 +544,6 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t persist
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerProxy::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write persistentId failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(haveListener)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write screenshot app event listener failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_SCREEN_SHOT_APP_EVENT_LISTENER),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t errCode = 0;
-    if (!reply.ReadInt32(errCode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(errCode);
-}
-
 WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
 {
     MessageParcel data;

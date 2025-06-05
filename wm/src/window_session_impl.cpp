@@ -3724,13 +3724,6 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
-    {
-        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
-        if (screenshotAppEventListeners_.find(persistentId) != screenshotAppEventListeners_.end() &&
-            !screenshotAppEventListeners_[persistentId].empty()) {
-            SingletonContainer::Get<WindowAdapter>().UpdateSessionScreenshotAppEventListener(persistentId, true);
-        }
-    }
 }
 
 template<typename T>
@@ -4695,8 +4688,13 @@ WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotA
     if (isUpdate) {
         ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionScreenshotAppEventListener(persistentId, true);
     }
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr && ret == WMError::WM_OK) {
+        hostSession->UpdateRotationChangeRegistered(persistentId, true);
+    }
     return ret;
 }
+
 
 WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {

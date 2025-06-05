@@ -11244,7 +11244,7 @@ WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
         for (auto persistentId : screenshotAppEventListenerSessionSet_) {
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public} session is null", where, persistentId);
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d session is null", where, persistentId);
                 continue;
             }
             auto state = sceneSession->GetSessionState();
