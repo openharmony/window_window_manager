@@ -110,12 +110,14 @@ constexpr int ARG_COUNT_2 = 2;
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_COUNT_6 = 6;
+constexpr int ARG_COUNT_7 = 7;
 constexpr int ARG_INDEX_0 = 0;
 constexpr int ARG_INDEX_1 = 1;
 constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
 constexpr int ARG_INDEX_4 = 4;
 constexpr int ARG_INDEX_5 = 5;
+constexpr int ARG_INDEX_6 = 6;
 constexpr uint32_t DISALLOW_ACTIVATION_ISOLATE_VERSION = 20;
 
 const std::map<std::string, ListenerFuncType> ListenerFuncMap {
@@ -3385,10 +3387,10 @@ bool JsSceneSession::HandleCloseKeyboardSyncTransactionBoolParams(napi_env env,
 
 napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_COUNT_6;
-    napi_value argv[ARG_COUNT_6] = { nullptr };
+    size_t argc = ARG_COUNT_7;
+    napi_value argv[ARG_COUNT_7] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_COUNT_6) {
+    if (argc < ARG_COUNT_7) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3400,6 +3402,7 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
     WSRect beginRect = { 0, 0, 0, 0 };
     WSRect endRect = { 0, 0, 0, 0 };
     bool animated = false;
+    bool isGravityChanged = false;
 
     if (!HandleCloseKeyboardSyncTransactionWSRectParams(env, argv, ARG_INDEX_0, keyboardPanelRect) ||
         !HandleCloseKeyboardSyncTransactionBoolParams(env, argv, ARG_INDEX_1, isKeyboardShow) ||
@@ -3416,6 +3419,9 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    if (!HandleCloseKeyboardSyncTransactionBoolParams(env, argv, ARG_INDEX_6, isGravityChanged)) {
+        return NapiGetUndefined(env);
+    }
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -3428,6 +3434,7 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
     animationInfo.endRect = endRect;
     animationInfo.animated =  animated;
     animationInfo.callingId = callingId;
+    animationInfo.isGravityChanged = isGravityChanged;
 
     session->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo);
     return NapiGetUndefined(env);
