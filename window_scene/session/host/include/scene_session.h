@@ -100,6 +100,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
+using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using GetConstrainedModalExtWindowInfoFunc =
@@ -800,6 +801,8 @@ public:
     void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
+    void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
+    WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
 
     /*
      * Window Pattern
@@ -1322,6 +1325,7 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
+    UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 
     /*
      * PC Window Sidebar Blur

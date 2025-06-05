@@ -785,6 +785,18 @@ HWTEST_F(WindowManagerServiceTest, SetWindowLayoutMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: NotifyScreenshotEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WMError res = wms->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetAccessibilityWindowInfo
  * @tc.desc: GetAccessibilityWindowInfo test
  * @tc.type: FUNC

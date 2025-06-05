@@ -2238,6 +2238,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
         });
+        sceneSession->SetNotifyScreenshotAppEventRegisteredFunc([this](int32_t persistentId, bool isRegister) {
+            this->UpdateSessionScreenshotAppEventListener(persistentId, isRegister);
+        });
         sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
             this->NotifyVisibleChange(persistentId);
         });
@@ -3310,6 +3313,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             isForceClean, isUserRequestedExit);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         avoidAreaListenerSessionSet_.erase(persistentId);
+        screenshotAppEventListenerSessionSet_.erase(persistentId);
         DestroyDialogWithMainWindow(sceneSession);
         DestroyToastSession(sceneSession);
         DestroySubSession(sceneSession); // destroy sub session by destruction
@@ -10681,6 +10685,25 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
+WMError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
+{
+    return taskScheduler_->PostSyncTask([this, persistentId, haveListener, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d haveListener: %{public}u",
+            where, persistentId, haveListener);
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d sceneSession is nullptr", where, persistentId);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (haveListener) {
+            screenshotAppEventListenerSessionSet_.insert(persistentId);
+        } else {
+            screenshotAppEventListenerSessionSet_.erase(persistentId);
+        }
+        return WMError::WM_OK;
+    }, __func__);
+}
+
 void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
 {
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
@@ -11240,6 +11263,31 @@ void SceneSessionManager::OnScreenshot(DisplayId displayId)
             }
         }
     }, "OnScreenshot:PID:" + std::to_string(displayId));
+}
+
+WMError SceneSessionManager::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    taskScheduler_->PostAsyncTask([this, type, where = __func__] {
+        for (auto persistentId : screenshotAppEventListenerSessionSet_) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d session is null", where, persistentId);
+                continue;
+            }
+            auto state = sceneSession->GetSessionState();
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d, state: %{public}u, event: %{public}d",
+                where, sceneSession->GetPersistentId(), state, type);
+            if (state == SessionState::STATE_FOREGROUND || state == SessionState::STATE_ACTIVE) {
+                sceneSession->NotifyScreenshotAppEvent(type);
+            }
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 
 WSError SceneSessionManager::ClearSession(int32_t persistentId)

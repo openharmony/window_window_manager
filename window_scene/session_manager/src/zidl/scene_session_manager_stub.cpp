@@ -224,6 +224,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT):
+            return HandleNotifyScreenshotEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR):
             return HandleSetStartWindowBackgroundColor(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
@@ -2032,6 +2034,21 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!data.ReadInt32(screenshotEventType)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read screenshotEventType");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = NotifyScreenshotEvent(static_cast<ScreenshotEventType>(screenshotEventType));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

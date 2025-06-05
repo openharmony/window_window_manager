@@ -203,6 +203,12 @@ napi_value JsWindowManager::ShiftAppWindowTouchEvent(napi_env env, napi_callback
     return (me != nullptr) ? me->OnShiftAppWindowTouchEvent(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenshotEvent(env, info) : nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -1558,6 +1564,46 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     return result;
 }
 
+napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t type = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!ConvertFromJsValue(env, argv[0], type) ||
+        type < static_cast<int32_t>(ScreenshotEventType::START) ||
+        type >= static_cast<int32_t>(ScreenshotEventType::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(type);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [errCodePtr, screenshotEventType, where] {
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d, result: %{public}d",
+            where, screenshotEventType, *errCodePtr);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnNotifyScreenshotEvent",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1572,6 +1618,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowType", WindowTypeInit(env));
     napi_set_named_property(env, exportObj, "AvoidAreaType", AvoidAreaTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
+    napi_set_named_property(env, exportObj, "ScreenshotEventType", ScreenshotEventTypeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnchor", WindowAnchorInit(env));
@@ -1619,6 +1666,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetStartWindowBackgroundColor);
     BindNativeFunction(env, exportObj, "shiftAppWindowTouchEvent", moduleName,
         JsWindowManager::ShiftAppWindowTouchEvent);
+    BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName,
+        JsWindowManager::NotifyScreenshotEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
