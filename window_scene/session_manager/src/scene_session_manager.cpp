@@ -366,7 +366,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
-    SessionChangeRecorder::GetInstance().stopLogFlag.store(true);
+    SessionChangeRecorder::GetInstance().stopLogFlag_.store(true);
 }
 
 void SceneSessionManager::Init()
@@ -6086,16 +6086,24 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(VALUE_MAX_WIDTH) << rect.height_
         << "]"
         << " [ "
-        << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetX()
-        << std::left << std::setw(OFFSET_MAX_WIDTH) << session->GetOffsetY()
+        << std::left << std::setw(OFFSET_MAX_WIDTH) << GetFloatWidth(OFFSET_MAX_WIDTH, session->GetOffsetX())
+        << std::left << std::setw(OFFSET_MAX_WIDTH) << GetFloatWidth(OFFSET_MAX_WIDTH, session->GetOffsetY())
         << "]"
         << " [ "
-        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetScaleX()
-        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetScaleY()
-        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetPivotX()
-        << std::left << std::setw(SCALE_MAX_WIDTH) << session->GetPivotY()
+        << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetScaleX())
+        << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetScaleY())
+        << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotX())
+        << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotY())
         << "]"
         << std::endl;
+}
+
+std::string SceneSessionManager::GetFloatWidth(const int width, float value)
+{
+    std::ostringstream oss;
+    oss << value;
+    std::string strValue = oss.str();
+    return (strValue.size() > width) ? strValue.substr(0, width) : strValue;
 }
 
 void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
