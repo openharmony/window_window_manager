@@ -282,6 +282,11 @@ enum class FocusChangeReason {
      */
     VOICE_INTERACTION,
     /**
+     * focus change when pressing alt+tab or dock click
+     */
+    REQUEST_WITH_CHECK_SUB_WINDOW,
+
+    /**
      * focus change max.
      */
     MAX,

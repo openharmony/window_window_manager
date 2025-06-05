@@ -209,6 +209,94 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionFocus02, Function | SmallTest |
 }
 
 /**
+ * @tc.name: TestRequestSessionFocus_12
+ * @tc.desc: Test RequestSessionFocus with REQUEST_WITH_CHECK_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_12, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "RequestSessionFocus12";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: TestRequestSessionFocus_13
+ * @tc.desc: Test RequestSessionFocus with REQUEST_WITH_CHECK_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_13, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "RequestSessionFocus13";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->UpdateVisibilityInner(true);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->subSession_.push_back(subSession);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+    ssm_->focusedSessionId_ = 2;
+
+    WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: TestRequestSessionFocus_14
+ * @tc.desc: Test RequestSessionFocus with windowType is APP_SUB_WINDOW_BASE and parent is not visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, TestRequestSessionFocus_14, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "TestRequestSessionFocus_14";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->UpdateVisibilityInner(true);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    subSession->SetFocusedOnShow(true);
+    subSession->SetFocusableOnShow(true);
+    subSession->property_->SetParentPersistentId(1);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+
+    ssm_->focusedSessionId_ = 0;
+    WSError ret = ssm_->RequestSessionFocus(2, false, FocusChangeReason::DEFAULT);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
  * @tc.name: RequestSessionUnfocus02
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC
@@ -539,6 +627,139 @@ HWTEST_F(SceneSessionManagerTest9, ProcessDialogRequestFocusImmdediately02, Func
 
     dialogSceneSession->persistentId_ = 0;
     ssm_->ProcessDialogRequestFocusImmdediately(sceneSession);
+}
+
+/**
+ * @tc.name: ProcessSubWindowRequestFocusImmdediately1
+ * @tc.desc: Test sceneSession is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately1, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    sptr<SceneSession> sceneSession = nullptr;
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: ProcessSubWindowRequestFocusImmdediately2
+ * @tc.desc: Test subSession list is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately2, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: ProcessSubWindowRequestFocusImmdediately3
+ * @tc.desc: Test sub Session is focused
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately3, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately3";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->SetFocusedOnShow(true);
+    sceneSession->subSession_.push_back(subSession);
+
+    sceneSession->subSession_.push_back(nullptr);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+
+    ssm_->focusedSessionId_ = 2;
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessSubWindowRequestFocusImmdediately4
+ * @tc.desc: Test sub Session is not visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately4, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately4";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->SetFocusedOnShow(true);
+    sceneSession->subSession_.push_back(subSession);
+
+    sceneSession->subSession_.push_back(nullptr);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+
+    ssm_->focusedSessionId_ = 1;
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: ProcessSubWindowRequestFocusImmdediately5
+ * @tc.desc: Test sub session request focus success
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessSubWindowRequestFocusImmdediately5, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessSubWindowRequestFocusImmdediately5";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+
+    SessionInfo subSessionInfo;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+    subSession->persistentId_ = 2;
+    subSession->SetFocusable(true);
+    subSession->SetFocusedOnShow(true);
+    sceneSession->subSession_.push_back(subSession);
+
+    sceneSession->subSession_.push_back(nullptr);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+
+    subSession->UpdateVisibilityInner(true);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->focusedSessionId_ = 1;
+    WSError ret = ssm_->ProcessSubWindowRequestFocusImmdediately(sceneSession);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**

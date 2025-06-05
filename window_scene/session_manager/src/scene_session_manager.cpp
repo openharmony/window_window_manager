@@ -5244,44 +5244,15 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, by foreground: %{public}d, reason: %{public}d",
         persistentId, byForeground, reason);
-    WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
-    if (basicCheckRet != WSError::WS_OK) {
-        return basicCheckRet;
-    }
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("[WMSComm]session is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "[WMSComm]session is nullptr");
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    if (!sceneSession->GetFocusable() || !IsSessionVisibleForeground(sceneSession)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable or not visible!");
-        return WSError::WS_DO_NOTHING;
+    WSError checkRet = RequestSessionFocusCheck(sceneSession, persistentId, byForeground, reason);
+    if (checkRet != WSError::WS_OK) {
+        return checkRet;
     }
-    if (!sceneSession->IsFocusedOnShow()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focused on show!");
-        return WSError::WS_DO_NOTHING;
-    }
-    if (!sceneSession->IsFocusableOnShow() &&
-        (reason == FocusChangeReason::FOREGROUND || reason == FocusChangeReason::APP_FOREGROUND)) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable on show!");
-        return WSError::WS_DO_NOTHING;
-    }
-
-    // subwindow/dialog state block
-    if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
-        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
-        GetSceneSession(sceneSession->GetParentPersistentId()) &&
-        !IsSessionVisibleForeground(GetSceneSession(sceneSession->GetParentPersistentId()))) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "parent session id: %{public}d is not visible!",
-                sceneSession->GetParentPersistentId());
-            return WSError::WS_DO_NOTHING;
-    }
-    // specific block
-    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground, reason);
-    if (specificCheckRet != WSError::WS_OK) {
-        return specificCheckRet;
-    }
-
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
     ShiftFocus(sceneSession, false, reason);
@@ -5343,6 +5314,48 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
     needBlockNotifyUnfocusStatus_ = needBlockNotifyFocusStatusUntilForeground_;
     needBlockNotifyFocusStatusUntilForeground_ = false;
     return ShiftFocus(nextSession, true, FocusChangeReason::WIND);
+}
+
+WSError SceneSessionManager::RequestSessionFocusCheck(sptr<SceneSession>& sceneSession, int32_t persistentId,
+    bool byForeground, FocusChangeReason reason)
+{
+    if (reason == FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW &&
+        CheckRequestFocusSubWindowImmdediately(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "sub window focused");
+        return WSError::WS_DO_NOTHING;
+    }
+    WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
+    if (basicCheckRet != WSError::WS_OK) {
+        return basicCheckRet;
+    }
+    if (!sceneSession->GetFocusable() || !IsSessionVisibleForeground(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable or not visible!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!sceneSession->IsFocusedOnShow()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focused on show!");
+        return WSError::WS_DO_NOTHING;
+    }
+    if (!sceneSession->IsFocusableOnShow() &&
+        (reason == FocusChangeReason::FOREGROUND || reason == FocusChangeReason::APP_FOREGROUND)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is not focusable on show!");
+        return WSError::WS_DO_NOTHING;
+    }
+    // subwindow/dialog state block
+    if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+        GetSceneSession(sceneSession->GetParentPersistentId()) &&
+        !IsSessionVisibleForeground(GetSceneSession(sceneSession->GetParentPersistentId()))) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "parent session id: %{public}d is not visible!",
+                sceneSession->GetParentPersistentId());
+            return WSError::WS_DO_NOTHING;
+    }
+    // specific block
+    WSError specificCheckRet = RequestFocusSpecificCheck(sceneSession, byForeground, reason);
+    if (specificCheckRet != WSError::WS_OK) {
+        return specificCheckRet;
+    }
+    return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId)
@@ -5447,6 +5460,18 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession>& scen
         (ProcessModalTopmostRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
          ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "dialog or modal subwindow get focused");
+        return true;
+    }
+    return false;
+}
+
+bool SceneSessionManager::CheckRequestFocusSubWindowImmdediately(sptr<SceneSession>& sceneSession)
+{
+    if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+         SessionHelper::IsSubWindow(sceneSession->GetWindowType())) &&
+        (ProcessSubWindowRequestFocusImmdediately(sceneSession) == WSError::WS_OK ||
+         ProcessDialogRequestFocusImmdediately(sceneSession) == WSError::WS_OK)) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "dialog or sub window get focused");
         return true;
     }
     return false;
@@ -6719,6 +6744,41 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<Sc
         }
         // no need to consider order, since rule of zOrder
         if (RequestSessionFocusImmediately(topmostSession->GetPersistentId()) == WSError::WS_OK) {
+            ret = WSError::WS_OK;
+        }
+    }
+    return ret;
+}
+
+WSError SceneSessionManager::ProcessSubWindowRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        return WSError::WS_DO_NOTHING;
+    }
+    std::vector<sptr<SceneSession>> subSessionVec = sceneSession->GetSubSession();
+    if (subSessionVec.empty()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "has no sub window");
+        return WSError::WS_DO_NOTHING;
+    }
+    auto conditionFunc =  [this](const sptr<SceneSession>& iter) {
+        return iter && iter->GetPersistentId() == focusedSessionId_;
+    };
+    if (std::find_if(subSessionVec.begin(), subSessionVec.end(), std::move(conditionFunc)) != subSessionVec.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d has been focused!", focusedSessionId_);
+        return WSError::WS_OK;
+    }
+    WSError ret = WSError::WS_DO_NOTHING;
+    for (auto session : subSessionVec) {
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
+            continue;
+        }
+        if (!IsSessionVisibleForeground(session)) {
+            continue;
+        }
+        if (RequestSessionFocus(session->GetPersistentId(), true, FocusChangeReason::REQUEST_WITH_CHECK_SUB_WINDOW) ==
+            WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
