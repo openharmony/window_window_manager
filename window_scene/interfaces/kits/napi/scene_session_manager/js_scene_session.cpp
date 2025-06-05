@@ -7119,7 +7119,7 @@ napi_value JsSceneSession::OnSetSidebarBlur(napi_env env, napi_callback_info inf
         return NapiGetUndefined(env);
     }
     bool isNeedAnimation = false;
-    if (!ConvertFromJsValue(env, argv[0], isNeedAnimation)) {
+    if (!ConvertFromJsValue(env, argv[1], isNeedAnimation)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to isNeedAnimation");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
