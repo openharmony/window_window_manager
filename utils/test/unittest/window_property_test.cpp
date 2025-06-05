@@ -61,7 +61,6 @@ HWTEST_F(WindowPropertyTest, MarshallingUnmarshalling, TestSize.Level1)
     EXPECT_EQ(winPropDst->GetTransparent(), true);
     EXPECT_EQ(winPropDst->GetTransform(), Transform::Identity());
     EXPECT_EQ(winPropDst->GetFollowScreenChange(), true);
-    delete winPropDst;
 }
 
 /**
