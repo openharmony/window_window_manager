@@ -34,6 +34,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_window_manager_agent_lite.h"
 #include "session_manager/include/session_manager_agent_controller.h"
+#include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2220,6 +2221,51 @@ HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, F
     auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo01
+ * @tc.desc: test function : GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo01, Function | SmallTest | Level1)
+{
+    class TestListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& info) override {}
+    };
+
+    int32_t persistentId = -1;
+    auto listener = sptr<TestListener>::MakeSptr();
+
+    auto result = ssm_->GetRouterStackInfo(persistentId, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    result = ssm_->GetRouterStackInfo(persistentId, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo02
+ * @tc.desc: test function : GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo02, Function | SmallTest | Level1)
+{
+    class TestListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& info) override {}
+    };
+
+    SessionInfo info;
+    info.bundleName_ = "GetRouterStackInfo02";
+    info.abilityName_ = "GetRouterStackInfo02";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    auto listener = sptr<TestListener>::MakeSptr();
+
+    auto result = ssm_->GetRouterStackInfo(sceneSession->GetPersistentId(), listener);
+    EXPECT_EQ(result, WMError::WM_OK);
 }
 
 /**

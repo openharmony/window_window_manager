@@ -7017,6 +7017,18 @@ WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& heigh
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::GetRouterStackInfo(std::string& routerStackInfo)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    routerStackInfo = uiContent->GetTopNavDestinationInfo();
+    return WMError::WM_OK;
+}
+
 RotationChangeResult WindowSessionImpl::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, orientation: %{public}d, "

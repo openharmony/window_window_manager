@@ -57,6 +57,7 @@
 #include "window_scene_config.h"
 #include "wm_single_instance.h"
 #include "zidl/session_lifecycle_listener_interface.h"
+#include "zidl/session_router_stack_listener.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -703,6 +704,7 @@ public:
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
     sptr<SceneSession> GetMainSessionByPersistentId(int32_t persistentId) const;
+    WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);

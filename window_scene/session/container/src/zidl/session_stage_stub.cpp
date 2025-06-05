@@ -222,6 +222,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyNonInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
+            return HandleGetRouterStackInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1087,6 +1089,19 @@ int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data
 
     std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
     NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::string routerStackInfo;
+    WMError errCode = GetRouterStackInfo(routerStackInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteString(routerStackInfo)) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
