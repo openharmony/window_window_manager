@@ -3724,6 +3724,15 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(screenshotAppEventListenerMutex_);
+        if (screenshotAppEventListeners_.find(persistentId) != screenshotAppEventListeners_.end() &&
+            !screenshotAppEventListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
+            }
+        }
+    }
 }
 
 template<typename T>

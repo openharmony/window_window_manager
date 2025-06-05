@@ -1936,7 +1936,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterScreenshotAppEventListener(
-        const IScreenshotAppEventListenerSptr& listener){ return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister screen shot app event listener.
