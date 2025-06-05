@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "mock/mock_message_parcel.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
@@ -24,7 +25,6 @@
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;

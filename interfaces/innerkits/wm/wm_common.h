@@ -2849,7 +2849,8 @@ enum class ScreenshotEventType : int32_t {
      * Scroll shot abort.
      */
     SCROLL_SHOT_ABORT = 4,
-    END = 5,
+
+    END,
 };
 }
 }

@@ -398,8 +398,12 @@ WmErrorCode JsWindowRegisterManager::ProcessScreenshotAppEventRegister(sptr<JsWi
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
-    if (window == nullptr || listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     return isRegister ?

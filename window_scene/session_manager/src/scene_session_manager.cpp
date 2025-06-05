@@ -2237,6 +2237,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
         });
+        sceneSession->SetNotifyScreenshotAppEventRegisteredFunc([this](int32_t persistentId, bool isRegister) {
+            this->UpdateSessionScreenshotAppEventListener(persistentId, isRegister);
+        });
         sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
             this->NotifyVisibleChange(persistentId);
         });
@@ -10648,27 +10651,22 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
-WSError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
+WMError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener)
 {
-    const auto callingPid = IPCSkeleton::GetCallingRealPid();
-    return taskScheduler_->PostSyncTask([this, persistentId, haveListener, callingPid, where = __func__]() {
+    return taskScheduler_->PostSyncTask([this, persistentId, haveListener, where = __func__]() {
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d haveListener: %{public}u",
             where, persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d sceneSession is nullptr", where, persistentId);
-            return WSError::WS_DO_NOTHING;
-        }
-        if (callingPid != sceneSession->GetCallingPid()) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s Permission denied, not called by the same process", where);
-            return WSError::WS_ERROR_INVALID_CALLING;
+            return WMError::WM_DO_NOTHING;
         }
         if (haveListener) {
             screenshotAppEventListenerSessionSet_.insert(persistentId);
         } else {
             screenshotAppEventListenerSessionSet_.erase(persistentId);
         }
-        return WSError::WS_OK;
+        return WMError::WM_OK;
     }, __func__);
 }
 
