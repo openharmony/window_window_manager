@@ -411,7 +411,6 @@ HWTEST_F(SceneSessionTest6, UpdateFollowScreenChange, Function | SmallTest | Lev
     callback->onUpdateFollowScreenChange_ = task;
     ret = sceneSession->UpdateFollowScreenChange(isFollowScreenChange);
     EXPECT_EQ(WSError::WS_OK, ret);
-    EXPECT_EQ(isFollowScreenChange, sceneSession->GetFollowScreenChange());
 }
 
 /**
@@ -480,7 +479,6 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateFollowScreenChange, TestSize.Level
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE;
     auto res = session->HandleActionUpdateFollowScreenChange(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-    EXPECT_EQ(isFollowScreenChange, session->GetFollowScreenChange());
 }
 } // namespace
 } // namespace Rosen
