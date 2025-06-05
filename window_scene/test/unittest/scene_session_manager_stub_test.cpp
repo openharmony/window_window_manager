@@ -2057,7 +2057,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Leve
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SCREEN_SHOT_APP_EVENT_LISTENER);
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
     res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
