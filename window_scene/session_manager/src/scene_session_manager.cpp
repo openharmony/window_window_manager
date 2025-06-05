@@ -15560,7 +15560,9 @@ void SceneSessionManager::UpdateRecentMainSessionInfos(const std::vector<int32_t
 
 void SceneSessionManager::RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func)
 {
-    onTransferSessionToTargetScreen_ = std::move(func);
+    taskScheduler_->PostAsyncTask([this, func] {
+        onTransferSessionToTargetScreen_ = std::move(func);
+    }, __func__);
 }
 
 WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info)
