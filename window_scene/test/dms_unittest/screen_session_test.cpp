@@ -2184,8 +2184,7 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId start";
     ScreenProperty property;
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(
-        ScreenSession("OpenHarmony", 1, 100, 0);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr("OpenHarmony", 1, 100, 0);
     EXPECT_EQ(100, session->GetRSScreenId());
 
     RSDisplayNodeConfig displayNodeConfig;
@@ -3732,7 +3731,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateScreenPivotCallback, TestSize.Level1)
         session->GetScreenSnapshot(x, y);
     };
     session->SetUpdateScreenPivotCallback(func);
-    EXPECT_NE(nullptr, screenSession->updateScreenPivotCallback_);
+    EXPECT_NE(nullptr, session->updateScreenPivotCallback_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateScreenPivotCallback end";
 }
 
@@ -3984,7 +3983,7 @@ HWTEST_F(ScreenSessionTest, SetStartPosition, TestSize.Level1)
     float scaleX = 1.0f;
     float scaleY = 1.0f;
     screenSession->SetStartPosition(scaleX, scaleY);
-    EXPECT_NE(0, screenSession->property_.scaleX);
+    EXPECT_NE(0, screenSession->property_.scaleX_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetStartPosition end";
 }
 
