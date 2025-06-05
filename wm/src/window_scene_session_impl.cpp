@@ -3399,7 +3399,7 @@ WMError WindowSceneSessionImpl::GrayOutMaximizeButton(bool isGrayOut)
 {
     if (grayOutMaximizeButton_ == isGrayOut) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Duplicate settings are gray out: %{public}d", isGrayOut);
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
