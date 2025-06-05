@@ -81,7 +81,8 @@ void AniWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Sys
 {
 }
 
-void AniWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void AniWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
 }
 
