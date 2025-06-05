@@ -4656,7 +4656,7 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 void JsSceneSession::PendingSessionToBackground(const SessionInfo& info, const BackgroundParams& params)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
-        info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
+        info.bundleName_.c_str(), info.abilityName_.c_str(), params.shouldBackToCaller);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, params] {

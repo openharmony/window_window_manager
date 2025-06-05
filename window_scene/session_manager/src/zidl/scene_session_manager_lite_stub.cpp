@@ -1228,7 +1228,7 @@ int SceneSessionManagerLiteStub::HandleRemoveInstanceKey(MessageParcel& data, Me
 
 int SceneSessionManagerLiteStub::HandleTransferSessionToTargetScreen(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "run");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     TransferSessionInfo info;
     if (!data.ReadInt32(info.persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
@@ -1242,7 +1242,7 @@ int SceneSessionManagerLiteStub::HandleTransferSessionToTargetScreen(MessageParc
     if (wantParams == nullptr) {
         TLOGI(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
     } else {
-        params.wantParams = *wantParams;
+        info.wantParams = *wantParams;
     }
     WMError ret = TransferSessionToTargetScreen(info);
     reply.WriteInt32(static_cast<int32_t>(ret));

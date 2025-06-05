@@ -10573,7 +10573,7 @@ WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject
     const BackgroundParams& params)
 {
     return taskScheduler_->PostSyncTask([this, &token, params] {
-        auto session = FindSessionByToken(token)
+        auto session = FindSessionByToken(token);
         if (session != nullptr) {
             return session->PendingSessionToBackground(params);
         }
@@ -15579,7 +15579,7 @@ WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferS
         if (onTransferSessionToTargetScreen_) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, persistentId: %{public}d toScreenId: %{public}d",
                 where, info.persistentId, info.toScreenId);
-            onTransferSessionToTargetScreen_(windowNum);
+            onTransferSessionToTargetScreen_(info);
         }
     }, __func__);
     return WMError::WM_OK;

@@ -304,7 +304,7 @@ public:
      * @permission SA permission or SystemApp permission
      *
      * @param info The session infomation to be transferred
-     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
     virtual WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) = 0;
 };
