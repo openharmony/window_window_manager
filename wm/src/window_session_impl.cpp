@@ -178,7 +178,7 @@ std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::secureLimitChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
-std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
+std::recursive_mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::preferredOrientationChangeListenerMutex_;
 std::mutex WindowSessionImpl::windowOrientationChangeListenerMutex_;
@@ -3638,7 +3638,7 @@ WMError WindowSessionImpl::RegisterWindowWillCloseListeners(const sptr<IWindowWi
         TLOGE(WmsLogTag::WMS_DECOR, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    std::lock_guard<std::mutex> lockListener(windowWillCloseListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowWillCloseListenersMutex_);
     return RegisterListener(windowWillCloseListeners_[GetPersistentId()], listener);
 }
 
@@ -3659,7 +3659,7 @@ WMError WindowSessionImpl::UnRegisterWindowWillCloseListeners(const sptr<IWindow
         TLOGE(WmsLogTag::WMS_DECOR, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    std::lock_guard<std::mutex> lockListener(windowWillCloseListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowWillCloseListenersMutex_);
     return UnregisterListener(windowWillCloseListeners_[GetPersistentId()], listener);
 }
 
@@ -4058,7 +4058,7 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(mainWindowCloseListeners_, persistentId);
     }
     {
-        std::lock_guard<std::mutex> lockListener(windowWillCloseListenersMutex_);
+        std::lock_guard<std::recursive_mutex> lockListener(windowWillCloseListenersMutex_);
         ClearUselessListeners(windowWillCloseListeners_, persistentId);
     }
     {
@@ -4862,7 +4862,7 @@ WMError WindowSessionImpl::NotifyMainWindowClose(bool& terminateCloseProcess)
 
 WMError WindowSessionImpl::NotifyWindowWillClose(sptr<Window> window)
 {
-    std::lock_guard<std::mutex> lockListener(windowWillCloseListenersMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowWillCloseListenersMutex_);
     const auto& windowWillCloseListeners = GetListeners<IWindowWillCloseListener>();
     auto res = WMError::WM_ERROR_NULLPTR;
     for (const auto& listener : windowWillCloseListeners) {
