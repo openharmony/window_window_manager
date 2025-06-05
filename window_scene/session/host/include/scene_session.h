@@ -425,7 +425,7 @@ public:
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
-    WSError UpdateAvoidArea(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END) override;
+    WSError HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;

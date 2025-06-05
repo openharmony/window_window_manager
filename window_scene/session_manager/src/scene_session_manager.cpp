@@ -10864,6 +10864,7 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     const char* const where = __func__;
     auto task = [this, displayId, isVisible] {
         statusBarConstantlyShowMap_[displayId] = isVisible;
+        UpdateRootSceneAvoidArea();
         return WMError::WM_OK;
     };
     taskScheduler_->PostAsyncTask(task, where);
@@ -10946,7 +10947,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
         TLOGD(WmsLogTag::WMS_IMMS, "scene session is nullptr or not visible");
         return;
     }
-    sceneSession->UpdateAvoidArea(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    sceneSession->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
