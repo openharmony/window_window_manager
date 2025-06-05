@@ -4983,7 +4983,6 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
 
 WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDestName)
 {
-    topNavDestName = "";
     auto uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null: winId=%{public}u", GetWindowId());

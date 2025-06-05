@@ -12653,10 +12653,9 @@ WMError SceneSessionManager::GetTopNavDestinationName(int32_t windowId, std::str
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no session with id: %{public}d", windowId);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsMainWindow(session->GetWindowType()) || !session->IsSessionForeground()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid operation: win=%{public}d, type=%{public}u, stat: %{public}u",
-            session->GetWindowId(), static_cast<uint32_t>(session->GetWindowType()),
-            static_cast<uint32_t>(session->GetSessionState()));
+    if (!session->IsSessionForeground()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid operation: win=%{public}d, stat: %{public}u",
+            session->GetWindowId(), static_cast<uint32_t>(session->GetSessionState()));
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto wsErrCode = session->GetTopNavDestinationName(topNavDestName);
