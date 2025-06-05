@@ -410,11 +410,11 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
-        session->UpdateOrMarkAvoidArea();
+        session->UpdateAvoidArea();
         auto subSessions = session->GetSubSession();
         for (const auto& subSession : subSessions) {
             if (subSession) {
-                subSession->UpdateOrMarkAvoidArea();
+                subSession->UpdateAvoidArea();
             }
         }
         if (session->specificCallback_ != nullptr) {
@@ -504,7 +504,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
-        session->UpdateOrMarkAvoidArea();
+        session->UpdateAvoidArea();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -2072,10 +2072,10 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
-    return UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_SYSTEM);
+    return UpdateAvoidArea(AvoidAreaType::TYPE_SYSTEM);
 }
 
-WSError SceneSession::UpdateOrMarkAvoidArea(AvoidAreaType avoidAreaType)
+WSError SceneSession::UpdateAvoidArea(AvoidAreaType avoidAreaType)
 {
     if (isLastFrameLayoutFinishedFunc_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
@@ -2463,6 +2463,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, Avoid
     if (parentSession->GetSessionRect() != GetSessionRect()) {
         TLOGE(WmsLogTag::WMS_IMMS, "rect mismatch: win %{public}d parent %{public}d",
             GetPersistentId(), parentSession->GetPersistentId());
+        return false;
     }
     return parentSession->CheckGetAvoidAreaAvailable(type);
 }
@@ -2473,8 +2474,7 @@ bool SceneSession::CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, Avoi
     if (GetSessionProperty()->IsAdaptToImmersive()) {
         return true;
     }
-    if (winMode == WindowMode::WINDOW_MODE_FLOATING &&
-        (type != AvoidAreaType::TYPE_SYSTEM || (systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()))) {
+    if (winMode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
         return false;
     }
     if (winMode == WindowMode::WINDOW_MODE_FLOATING && systemConfig_.IsPadWindow() && IsFreeMultiWindowMode()) {
@@ -4261,7 +4261,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
         }
-        UpdateOrMarkAvoidArea();
+        UpdateAvoidArea();
     }
 }
 

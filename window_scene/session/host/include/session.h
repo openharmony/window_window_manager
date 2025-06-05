@@ -232,6 +232,7 @@ public:
         bool isPreImeEvent = false);
     WSError TransferFocusActiveEvent(bool isFocusActive);
     WSError TransferFocusStateEvent(bool focusState);
+    virtual WSError UpdateAvoidArea(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END) { return WSError::WS_OK; }
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
