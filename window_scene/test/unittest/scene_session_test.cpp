@@ -604,7 +604,7 @@ HWTEST_F(SceneSessionTest, UpdateScreenshotAppEventRegistered01, TestSize.Level0
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     auto ret = sceneSession->UpdateScreenshotAppEventRegistered(0, true);
-    EXPECT_NE(ret, WMError::WS_OK);
+    EXPECT_NE(ret, WMError::WM_OK);
 }
 
 /**
