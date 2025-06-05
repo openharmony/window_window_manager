@@ -2071,8 +2071,32 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
-void WindowSessionImpl::UpdateConfigWhenSetUIContent()
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    int isAni)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, state:%{public}u, persistentId: %{public}d",
+        contentInfo.c_str(), state_, GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window is invalid! window state: %{public}d",
+            state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    NotifySetUIContentComplete();
+    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
+        isAni);
+    if (initUIContentRet != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
+        return initUIContentRet;
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, posX:%{public}d, posY:%{public}d, "
+              "scaleX:%{public}f, scaleY:%{public}f", GetPersistentId(),
+              singleHandTransform_.posX, singleHandTransform_.posY,
+              singleHandTransform_.scaleX, singleHandTransform_.scaleY);
+        uiContent->UpdateSingleHandTransform(singleHandTransform_);
+    }
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -2133,43 +2157,6 @@ void WindowSessionImpl::UpdateConfigWhenSetUIContent()
         NotifyUIContentHighlightStatus(isHighlighted_);
         shouldReNotifyHighlight_ = false;
     }
-}
-
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-    int isAni)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s state:%{public}u", contentInfo.c_str(), state_);
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "window is invalid! window state: %{public}d",
-            state_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
-        isAni);
-    if (initUIContentRet != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
-        return initUIContentRet;
-    }
-
-    WindowType winType = GetType();
-    bool isSubWindow = WindowHelper::IsSubWindow(winType);
-    bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
-    if (IsDecorEnable()) {
-        if (isSubWindow) {
-            SetAPPWindowLabel(subWindowTitle_);
-        } else if (isDialogWindow) {
-            SetAPPWindowLabel(dialogTitle_);
-        }
-    }
-
-    AppForceLandscapeConfig config = {};
-    if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.mode_ == FORCE_SPLIT_MODE) {
-        SetForceSplitEnable(true, config.homePage_);
-    }
-    UpdateConfigWhenSetUIContent();
     if (aceRet != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
         WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
