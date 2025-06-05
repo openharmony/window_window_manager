@@ -265,5 +265,16 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
         }
     }
 }
+
+void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    for (const auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {
+        if (agent != nullptr) {
+            agent->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -37,8 +37,11 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr uint32_t CURVE_TYPE_SPRING = 1;
+constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
+const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
 constexpr std::array<DefaultSpecificZIndex, 1> DefaultSpecificZIndexList = {
     DefaultSpecificZIndex::MUTISCREEN_COLLABORATION
 };
@@ -105,6 +108,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_NAVIGATION)));
     napi_set_named_property(env, objValue, "TYPE_DYNAMIC", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_DYNAMIC)));
+    napi_set_named_property(env, objValue, "TYPE_MUTISCREEN_COLLABORATION", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_MUTISCREEN_COLLABORATION)));
 
     return objValue;
 }
@@ -238,6 +243,33 @@ napi_value WindowStageEventTypeInit(napi_env env)
         static_cast<int32_t>(LifeCycleEventType::RESUMED)));
     napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::PAUSED)));
+    return objValue;
+}
+
+napi_value WindowAnchorInit(napi_env env)
+{
+    WLOGFD("WindowAnchorInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "TOP_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END", CreateJsValue(env,
+        static_cast<int32_t>(WindowAnchor::BOTTOM_END)));
     return objValue;
 }
 
@@ -446,6 +478,53 @@ napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, rect.posY_));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
     napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
+    return objValue;
+}
+
+napi_value CreateJsWindowAnimationConfigObject(napi_env env, const KeyboardAnimationCurve& curve)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_status status = napi_invalid_arg;
+    if (curve.curveType_ == INTERPOLATINGSPRING) {
+        status = napi_set_named_property(env, objValue, "curve", CreateJsValue(env, CURVE_TYPE_SPRING));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set curve to napi property");
+            return NapiGetUndefined(env);
+        }
+    }
+    status = napi_set_named_property(env, objValue, "duration", CreateJsValue(env, curve.duration_));
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set duration to napi property");
+        return NapiGetUndefined(env);
+    }
+    auto paramSize = curve.curveParams_.size();
+    if (paramSize == ANIMATION_FOUR_PARAMS_SIZE) {
+        napi_value jsArray = nullptr;
+        status = napi_create_array_with_length(env, paramSize, &jsArray);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to create jsArray");
+            return NapiGetUndefined(env);
+        }
+        for (size_t i = 0; i < paramSize; i++) {
+            napi_value param = nullptr;
+            status = napi_create_double(env, static_cast<double>(curve.curveParams_[i]), &param);
+            if (status != napi_ok) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to create jsDoubleValue");
+                return NapiGetUndefined(env);
+            }
+            status = napi_set_element(env, jsArray, i, param);
+            if (status != napi_ok) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set element to jsArray");
+                return NapiGetUndefined(env);
+            }
+        }
+        status = napi_set_named_property(env, objValue, "param", jsArray);
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Fail to set param to napi property");
+            return NapiGetUndefined(env);
+        }
+    }
     return objValue;
 }
 
@@ -1367,6 +1446,28 @@ napi_value RectTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    return objValue;
+}
+
 static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     bool isModal = false;
@@ -1503,6 +1604,70 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
     return ParseZLevelParam(env, jsObject, windowOption);
+}
+
+bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "jsObject is null");
+        return false;
+    }
+    bool enable = false;
+    if (ParseJsValue(jsObject, env, "enable", enable)) {
+        keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
+            DragResizeType::RESIZE_TYPE_UNDEFINED;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to enable");
+        return false;
+    }
+    int32_t data = 0;
+    if (ParseJsValueOrGetDefault(jsObject, env, "interval", data,
+        static_cast<int32_t>(keyFramePolicy.interval_)) && data > 0) {
+        keyFramePolicy.interval_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to interval");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "distance", data,
+        static_cast<int32_t>(keyFramePolicy.distance_)) && data >= 0) {
+        keyFramePolicy.distance_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to distance");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "animationDuration", data,
+        static_cast<int32_t>(keyFramePolicy.animationDuration_)) && data >= 0) {
+        keyFramePolicy.animationDuration_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDuration");
+        return false;
+    }
+    if (ParseJsValueOrGetDefault(jsObject, env, "animationDelay", data,
+        static_cast<int32_t>(keyFramePolicy.animationDelay_)) && data >= 0) {
+        keyFramePolicy.animationDelay_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to animationDelay");
+        return false;
+    }
+    return true;
+}
+
+napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(
+        env, objValue, "enable", CreateJsValue(env, keyFramePolicy.enabled()));
+    napi_set_named_property(
+        env, objValue, "interval", CreateJsValue(env, keyFramePolicy.interval_));
+    napi_set_named_property(
+        env, objValue, "distance", CreateJsValue(env, keyFramePolicy.distance_));
+    napi_set_named_property(
+        env, objValue, "animationDuration", CreateJsValue(env, keyFramePolicy.animationDuration_));
+    napi_set_named_property(
+        env, objValue, "animationDelay", CreateJsValue(env, keyFramePolicy.animationDelay_));
+    return objValue;
 }
 
 bool CheckPromise(napi_env env, napi_value promiseObj)

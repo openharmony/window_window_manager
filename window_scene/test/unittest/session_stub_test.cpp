@@ -36,6 +36,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+const uint32_t MAX_INT = -1;
 }
 
 namespace OHOS::Accessibility {
@@ -415,6 +416,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
         reply,
         option);
     ASSERT_EQ(ERR_NONE, res);
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true , true };
+    ASSERT_EQ(data.WriteParcelable(&shadowsInfo), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -674,6 +680,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPTemplateInfo, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: HandleSetWindowTransitionAnimation
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowTransitionAnimation, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    data.WriteInt32(10);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    TransitionAnimation animation;
+    data.WriteUint32(static_cast<uint32_t>(WindowTransitionType::DESTROY));
+    data.WriteParcelable(&animation);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetWindowTransitionAnimation(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -859,6 +888,20 @@ HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSnapshotUpdate
+ * @tc.desc: sessionStub HandleSnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSnapshotUpdate, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSnapshotUpdate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSyncSessionEvent
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
@@ -1040,6 +1083,40 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardWillShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetTargetOrientationConfigInfo
  * @tc.desc: sessionStub HandleGetTargetOrientationConfigInfo
  * @tc.type: FUNC
@@ -1081,25 +1158,6 @@ HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
     MessageParcel reply;
     auto result = session_->HandleGetIsHighlighted(data, reply);
     ASSERT_EQ(result, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleChangeKeyboardViewMode
- * @tc.desc: sessionStub HandleChangeKeyboardViewMode
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleChangeKeyboardViewMode, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-    data.WriteUint32(static_cast<uint32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE));
-    result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
-    data.WriteUint32(static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END));
-    result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -1385,6 +1443,89 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest
     data.WriteInt64(1);
     result = session_->HandleTransferAccessibilityEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSubWindowSource
+ * @tc.desc: test function : HandleSetSubWindowSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+    data.WriteUint32(1);
+    auto result = session_->HandleSetSubWindowSource(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption01
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    KeyboardEffectOption effectOption;
+    data.WriteParcelable(&effectOption);
+    result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption02
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = static_cast<KeyboardViewMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption03
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.flowLightMode_ = static_cast<KeyboardFlowLightMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption04
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption04, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.gradientMode_ = static_cast<KeyboardGradientMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

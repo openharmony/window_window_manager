@@ -347,7 +347,7 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    WMError GetGestureBackEnabled(bool& enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    WMError GetGestureBackEnabled(bool& enable) const override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /*
      * Window Property
@@ -361,7 +361,7 @@ public:
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
 
     /*
      * RS Client Multi Instance

@@ -33,7 +33,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
 using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+}
 class WindowSceneSessionImplTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -377,6 +379,8 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, TestSize.Level1
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(false, window->GetDefaultDensityEnabled());
+    window->isEnableDefaultDensityWhenCreate_ = true;
+    EXPECT_EQ(window->IsDefaultDensityEnabled(), true);
 }
 
 
@@ -550,24 +554,32 @@ HWTEST_F(WindowSceneSessionImplTest5, ShowKeyboard01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     keyboardWindow->property_->SetPersistentId(1000);
     keyboardWindow->hostSession_ = session;
-    keyboardWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    keyboardWindow->property_->SetWindowName("ShowKeyboard01");
     keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardWindow->state_ = WindowState::STATE_DESTROYED;
 
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT;
+    effectOption.gradientMode_ = KeyboardGradientMode::LINEAR_GRADIENT;
     // normal value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
 
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    effectOption.gradientMode_ = KeyboardGradientMode::END;
     // exception value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(KeyboardViewMode::VIEW_MODE_END), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_EQ(keyboardWindow->property_->GetKeyboardViewMode(), KeyboardViewMode::NON_IMMERSIVE_MODE);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
+    ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::NON_IMMERSIVE_MODE);
 }
 
 /**
- * @tc.name: ChangeKeyboardViewMode01
+ * @tc.name: ChangeKeyboardEffectOption01
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardViewMode01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardEffectOption01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -576,34 +588,85 @@ HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardViewMode01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     keyboardWindow->property_->SetPersistentId(1000);
     keyboardWindow->hostSession_ = session;
-    keyboardWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    keyboardWindow->property_->SetWindowName("ChangeKeyboardEffectOption01");
     keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    keyboardWindow->property_->SetKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE);
 
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    keyboardWindow->property_->SetKeyboardEffectOption(effectOption);
     auto result = WMError::WM_OK;
     // exception mode value
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::VIEW_MODE_END);
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     // same mode
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::NONE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 
     // invalid window state
     keyboardWindow->state_ = WindowState::STATE_DESTROYED;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
 
     // window state not shown
     keyboardWindow->state_ = WindowState::STATE_HIDDEN;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
 
     keyboardWindow->state_ = WindowState::STATE_SHOWN;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_OK);
-    auto currentMode = keyboardWindow->property_->GetKeyboardViewMode();
-    ASSERT_EQ(currentMode, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
+    ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+}
+
+/**
+ * @tc.name: ChangeKeyboardEffectOption02
+ * @tc.desc: SwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardEffectOption02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    keyboardWindow->property_->SetPersistentId(1000);
+    keyboardWindow->hostSession_ = session;
+    keyboardWindow->property_->SetWindowName("ChangeKeyboardEffectOption02");
+    keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    keyboardWindow->property_->SetKeyboardEffectOption(effectOption);
+    auto result = WMError::WM_OK;
+    // exception mode value
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::NONE;
+    effectOption.gradientMode_ = KeyboardGradientMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -810,11 +873,11 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, TestSize.Level1)
 }
 
 /**
- * @tc.name: Resume
- * @tc.desc: Resume
+ * @tc.name: Interactive
+ * @tc.desc: Interactive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, Interactive, TestSize.Level1)
 {
     sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
     sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
@@ -830,13 +893,12 @@ HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
-    window->SetTargetAPIVersion(20);
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
 
-    EXPECT_CALL(*mockListener, AfterResumed()).Times(1);
-    window->Resume();
+    EXPECT_CALL(*mockListener, AfterInteractive()).Times(1);
+    window->Interactive();
     EXPECT_EQ(window->isDidForeground_, true);
     EXPECT_EQ(window->isColdStart_, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
@@ -1250,6 +1312,47 @@ HWTEST_F(WindowSceneSessionImplTest5, IsFullScreenSizeWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowAnchorInfo01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::BOTTOM_END, 0, 0 };
+    WMError ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+    window->state_ = WindowState::STATE_CREATED;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 100;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+
+    property->subWindowLevel_ = 1;
+    window->windowSystemConfig_.supportFollowRelativePositionToParent_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.supportFollowRelativePositionToParent_ = true;
+    session->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetFollowParentWindowLayoutEnabled
  * @tc.desc: SetFollowParentWindowLayoutEnabled
  * @tc.type: FUNC
@@ -1284,6 +1387,11 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFollowParentWindowLayoutEnabled01, Func
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
 
     property->subWindowLevel_ = 1;
+    window->windowSystemConfig_.supportFollowParentWindowLayout_ = false;
+    ret = window->SetFollowParentWindowLayoutEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.supportFollowParentWindowLayout_ = true;
     ret = window->SetFollowParentWindowLayoutEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
@@ -1315,6 +1423,100 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
     window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+}
+
+/**
+ * @tc.name: SetWindowTransitionAnimation
+ * @tc.desc: SetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowTransitionAnimation01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+    TransitionAnimation animation;
+
+    property->SetWindowState(WindowState::STATE_DESTROYED);
+    WMError ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
+ * @tc.name: GetWindowTransitionAnimation
+ * @tc.desc: GetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowTransitionAnimation01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+
+    property->SetWindowState(WindowState::STATE_DESTROYED);
+    std::shared_ptr<TransitionAnimation> ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
+
+    TransitionAnimation animation;
+    property->SetWindowState(WindowState::STATE_SHOWN);
+    property->SetTransitionAnimationConfig(type, animation);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_NE(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
 }
 
 /**
@@ -1565,31 +1767,6 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDecorEnable1, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitEnable, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-
-    isForceSplit = true;
-    window->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-}
-
-/**
  * @tc.name: GetAppForceLandscapeConfig01
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -1672,6 +1849,93 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated02, Te
 
     WSError res = window->NotifyAppForceLandscapeConfigUpdated();
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn01
+ * @tc.desc: Test SetFrameRectForParticalZoomIn when window type is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    // window type is WINDOW_TYPE_APP_MAIN_WINDOW
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn02
+ * @tc.desc: Test SetFrameRectForParticalZoomIn when surfaceNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->surfaceNode_ = nullptr;
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn03
+ * @tc.desc: Test SetFrameRectForParticalZoomIn when display is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn03");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    EXPECT_NE(nullptr, window->surfaceNode_);
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    // default displayId is -1 
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn04
+ * @tc.desc: SetFrameRectForParticalZoomIn when parameter frameRect is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn04");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    EXPECT_NE(nullptr, window->surfaceNode_);
+    Rect frameRect = { -1, 10, 10, 10 }; // -1 is invalid frame rect posX, 10 is valid frame rect param
+    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn05
+ * @tc.desc: SetFrameRectForParticalZoomIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFrameRectForParticalZoomIn05");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    EXPECT_NE(nullptr, window->surfaceNode_);
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
+    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
 }
 }
 } // namespace Rosen

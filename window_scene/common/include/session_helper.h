@@ -119,6 +119,11 @@ public:
         return usage == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
     }
 
+    static inline bool IsMagnificationWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
+    }
+
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
         int32_t sourceType, int outside, float vpr, const WSRect& rect)
     {

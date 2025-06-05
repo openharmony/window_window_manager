@@ -357,6 +357,8 @@ public:
     virtual void NotifyScreenMaskAppear() {}
     virtual bool GetKeyboardState() { return false; }
     virtual uint32_t GetDeviceStatus() { return 0; }
+    virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

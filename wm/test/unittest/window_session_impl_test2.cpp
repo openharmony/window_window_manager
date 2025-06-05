@@ -16,6 +16,7 @@
 #include "window_session_impl.h"
 
 #include <gtest/gtest.h>
+#include <transaction/rs_transaction.h>
 
 #include "ability_context_impl.h"
 #include "display_info.h"
@@ -27,6 +28,15 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -370,6 +380,7 @@ HWTEST_F(WindowSessionImplTest2, SetKeyFramePolicy, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     KeyFramePolicy keyFramePolicy;
     ASSERT_EQ(window->SetKeyFramePolicy(keyFramePolicy), WSError::WS_OK);
+    ASSERT_EQ(window->keyFramePolicy_, keyFramePolicy);
     window->Destroy();
 }
 
@@ -662,29 +673,29 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, TestSize.Level1)
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window->windowSessionMap_.insert(
         { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), nullptr) });
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
     window->windowSessionMap_.clear();
 
     window->windowSessionMap_.insert(
         { "test1", std::pair<int32_t, sptr<WindowSessionImpl>>(window->GetPersistentId(), window) });
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
 
     window->handler_ = nullptr;
-    window->NotifyOccupiedAreaChangeInfo(info);
+    window->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
     window->Destroy();
 }
 
@@ -1345,6 +1356,24 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDragKeyFramePolicy
+ * @tc.desc: SetDragKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetDragKeyFramePolicy, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("SetDragKeyFramePolicy");
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = hostSession;
+    KeyFramePolicy keyFramePolicy;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_OK);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(window->SetDragKeyFramePolicy(keyFramePolicy), WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC
@@ -1688,11 +1717,11 @@ HWTEST_F(WindowSessionImplTest2, GetListeners02, TestSize.Level1)
     ASSERT_NE(window_, nullptr);
     window_->occupiedAreaChangeListeners_.clear();
     sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr);
+    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr, {}, {});
     ASSERT_TRUE(window_->occupiedAreaChangeListeners_[window_->GetPersistentId()].empty());
     sptr<IOccupiedAreaChangeListener> listener = sptr<MockIOccupiedAreaChangeListener>::MakeSptr();
     window_->RegisterOccupiedAreaChangeListener(listener);
-    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr);
+    window_->NotifyOccupiedAreaChangeInfo(occupiedAreaChangeInfo, nullptr, {}, {});
     ASSERT_FALSE(window_->occupiedAreaChangeListeners_[window_->GetPersistentId()].empty());
     window_->Destroy();
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetListeners02 end";
@@ -1769,6 +1798,33 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
     window->Destroy(true);
+}
+
+/**
+ * @tc.name: NotifyUIExtHostWindowRectChangeListeners
+ * @tc.desc: NotifyUIExtHostWindowRectChangeListeners test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostWindowRectChangeListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyUIExtHostWindowRectChangeListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->uiContent_ = nullptr;
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(window->rectChangeUIExtListenerIds_.empty());
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
 }
 
 /**
@@ -2039,6 +2095,105 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
     EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
               WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: RegisterKeyboardWillShowListener
+ * @tc.desc: RegisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillShowListener
+ * @tc.desc: UnregisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+
+    EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RegisterKeyboardWillHideListener
+ * @tc.desc: RegisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+ 
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillHideListener
+ * @tc.desc: UnregisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+ 
+    EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyKeyboardAnimationWillBegin
+ * @tc.desc: NotifyKeyboardAnimationWillBegin
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+    window_->RegisterKeyboardWillShowListener(listener);
+    sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->RegisterKeyboardWillHideListener(listener1);
+    
+    KeyboardAnimationInfo animationInfo;
+    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);
+    animationInfo.isShow = true;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    animationInfo.isShow = false;
+    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+
+    EXPECT_TRUE(logMsg.find("handler is nullptr") == std::string::npos);
 }
 } // namespace
 } // namespace Rosen

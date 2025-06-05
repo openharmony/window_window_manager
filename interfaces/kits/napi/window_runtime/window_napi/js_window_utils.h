@@ -91,6 +91,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_SCREEN_CONTROL,
     TYPE_FLOAT_NAVIGATION,
     TYPE_DYNAMIC,
+    TYPE_MUTISCREEN_COLLABORATION,
     TYPE_END
 };
 
@@ -99,67 +100,71 @@ enum class LifeCycleEventType : uint32_t {
     ACTIVE,
     INACTIVE,
     BACKGROUND,
-    RESUMED,
+    RESUMED, // RESUMED and PAUSED deprecated since api version 20, use INTERACTIVE and NONINTERACTIVE instead.
     PAUSED,
     DESTROYED,
+    INTERACTIVE,
+    NONINTERACTIVE,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
-    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP               },
-    { WindowType::WINDOW_TYPE_DIALOG,              ApiWindowType::TYPE_DIALOG            },
-    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT      },
-    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD      },
-    { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR        },
-    { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL             },
-    { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD          },
-    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY    },
-    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR    },
-    { WindowType::WINDOW_TYPE_FLOAT,               ApiWindowType::TYPE_FLOAT             },
-    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,        ApiWindowType::TYPE_FLOAT_CAMERA      },
-    { WindowType::WINDOW_TYPE_WALLPAPER,           ApiWindowType::TYPE_WALLPAPER         },
-    { WindowType::WINDOW_TYPE_DESKTOP,             ApiWindowType::TYPE_DESKTOP           },
-    { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,     ApiWindowType::TYPE_LAUNCHER_RECENT   },
-    { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,       ApiWindowType::TYPE_LAUNCHER_DOCK     },
-    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   ApiWindowType::TYPE_VOICE_INTERACTION },
-    { WindowType::WINDOW_TYPE_POINTER,             ApiWindowType::TYPE_POINTER           },
-    { WindowType::WINDOW_TYPE_SCREENSHOT,          ApiWindowType::TYPE_SCREENSHOT        },
-    { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
-    { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
-    { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
-    { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
-    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
-    { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
-    { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,    ApiWindowType::TYPE_FLOAT_NAVIGATION  },
-    { WindowType::WINDOW_TYPE_DYNAMIC,             ApiWindowType::TYPE_DYNAMIC           },
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,           ApiWindowType::TYPE_APP                      },
+    { WindowType::WINDOW_TYPE_DIALOG,                   ApiWindowType::TYPE_DIALOG                   },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,      ApiWindowType::TYPE_SYSTEM_ALERT             },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,       ApiWindowType::TYPE_INPUT_METHOD             },
+    { WindowType::WINDOW_TYPE_STATUS_BAR,               ApiWindowType::TYPE_STATUS_BAR               },
+    { WindowType::WINDOW_TYPE_PANEL,                    ApiWindowType::TYPE_PANEL                    },
+    { WindowType::WINDOW_TYPE_KEYGUARD,                 ApiWindowType::TYPE_KEYGUARD                 },
+    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,           ApiWindowType::TYPE_VOLUME_OVERLAY           },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,           ApiWindowType::TYPE_NAVIGATION_BAR           },
+    { WindowType::WINDOW_TYPE_FLOAT,                    ApiWindowType::TYPE_FLOAT                    },
+    { WindowType::WINDOW_TYPE_FLOAT_CAMERA,             ApiWindowType::TYPE_FLOAT_CAMERA             },
+    { WindowType::WINDOW_TYPE_WALLPAPER,                ApiWindowType::TYPE_WALLPAPER                },
+    { WindowType::WINDOW_TYPE_DESKTOP,                  ApiWindowType::TYPE_DESKTOP                  },
+    { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,          ApiWindowType::TYPE_LAUNCHER_RECENT          },
+    { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,            ApiWindowType::TYPE_LAUNCHER_DOCK            },
+    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,        ApiWindowType::TYPE_VOICE_INTERACTION        },
+    { WindowType::WINDOW_TYPE_POINTER,                  ApiWindowType::TYPE_POINTER                  },
+    { WindowType::WINDOW_TYPE_SCREENSHOT,               ApiWindowType::TYPE_SCREENSHOT               },
+    { WindowType::WINDOW_TYPE_SYSTEM_TOAST,             ApiWindowType::TYPE_SYSTEM_TOAST             },
+    { WindowType::WINDOW_TYPE_DOCK_SLICE,               ApiWindowType::TYPE_DIVIDER                  },
+    { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,            ApiWindowType::TYPE_GLOBAL_SEARCH            },
+    { WindowType::WINDOW_TYPE_HANDWRITE,                ApiWindowType::TYPE_HANDWRITE                },
+    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        ApiWindowType::TYPE_WALLET_SWIPE_CARD        },
+    { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           ApiWindowType::TYPE_SCREEN_CONTROL           },
+    { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         ApiWindowType::TYPE_FLOAT_NAVIGATION         },
+    { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
+    { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
-    { ApiWindowType::TYPE_APP,                 WindowType::WINDOW_TYPE_APP_SUB_WINDOW      },
-    { ApiWindowType::TYPE_DIALOG,              WindowType::WINDOW_TYPE_DIALOG              },
-    { ApiWindowType::TYPE_SYSTEM_ALERT,        WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW },
-    { ApiWindowType::TYPE_INPUT_METHOD,        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT  },
-    { ApiWindowType::TYPE_STATUS_BAR,          WindowType::WINDOW_TYPE_STATUS_BAR          },
-    { ApiWindowType::TYPE_PANEL,               WindowType::WINDOW_TYPE_PANEL               },
-    { ApiWindowType::TYPE_KEYGUARD,            WindowType::WINDOW_TYPE_KEYGUARD            },
-    { ApiWindowType::TYPE_VOLUME_OVERLAY,      WindowType::WINDOW_TYPE_VOLUME_OVERLAY      },
-    { ApiWindowType::TYPE_NAVIGATION_BAR,      WindowType::WINDOW_TYPE_NAVIGATION_BAR      },
-    { ApiWindowType::TYPE_FLOAT,               WindowType::WINDOW_TYPE_FLOAT               },
-    { ApiWindowType::TYPE_FLOAT_CAMERA,        WindowType::WINDOW_TYPE_FLOAT_CAMERA        },
-    { ApiWindowType::TYPE_WALLPAPER,           WindowType::WINDOW_TYPE_WALLPAPER           },
-    { ApiWindowType::TYPE_DESKTOP,             WindowType::WINDOW_TYPE_DESKTOP             },
-    { ApiWindowType::TYPE_LAUNCHER_RECENT,     WindowType::WINDOW_TYPE_LAUNCHER_RECENT     },
-    { ApiWindowType::TYPE_LAUNCHER_DOCK,       WindowType::WINDOW_TYPE_LAUNCHER_DOCK       },
-    { ApiWindowType::TYPE_VOICE_INTERACTION,   WindowType::WINDOW_TYPE_VOICE_INTERACTION   },
-    { ApiWindowType::TYPE_POINTER,             WindowType::WINDOW_TYPE_POINTER             },
-    { ApiWindowType::TYPE_SCREENSHOT,          WindowType::WINDOW_TYPE_SCREENSHOT          },
-    { ApiWindowType::TYPE_SYSTEM_TOAST,        WindowType::WINDOW_TYPE_SYSTEM_TOAST        },
-    { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
-    { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
-    { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
-    { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
-    { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
-    { ApiWindowType::TYPE_FLOAT_NAVIGATION,    WindowType::WINDOW_TYPE_FLOAT_NAVIGATION    },
-    { ApiWindowType::TYPE_DYNAMIC,             WindowType::WINDOW_TYPE_DYNAMIC             },
+    { ApiWindowType::TYPE_APP,                      WindowType::WINDOW_TYPE_APP_SUB_WINDOW           },
+    { ApiWindowType::TYPE_DIALOG,                   WindowType::WINDOW_TYPE_DIALOG                   },
+    { ApiWindowType::TYPE_SYSTEM_ALERT,             WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW      },
+    { ApiWindowType::TYPE_INPUT_METHOD,             WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT       },
+    { ApiWindowType::TYPE_STATUS_BAR,               WindowType::WINDOW_TYPE_STATUS_BAR               },
+    { ApiWindowType::TYPE_PANEL,                    WindowType::WINDOW_TYPE_PANEL                    },
+    { ApiWindowType::TYPE_KEYGUARD,                 WindowType::WINDOW_TYPE_KEYGUARD                 },
+    { ApiWindowType::TYPE_VOLUME_OVERLAY,           WindowType::WINDOW_TYPE_VOLUME_OVERLAY           },
+    { ApiWindowType::TYPE_NAVIGATION_BAR,           WindowType::WINDOW_TYPE_NAVIGATION_BAR           },
+    { ApiWindowType::TYPE_FLOAT,                    WindowType::WINDOW_TYPE_FLOAT                    },
+    { ApiWindowType::TYPE_FLOAT_CAMERA,             WindowType::WINDOW_TYPE_FLOAT_CAMERA             },
+    { ApiWindowType::TYPE_WALLPAPER,                WindowType::WINDOW_TYPE_WALLPAPER                },
+    { ApiWindowType::TYPE_DESKTOP,                  WindowType::WINDOW_TYPE_DESKTOP                  },
+    { ApiWindowType::TYPE_LAUNCHER_RECENT,          WindowType::WINDOW_TYPE_LAUNCHER_RECENT          },
+    { ApiWindowType::TYPE_LAUNCHER_DOCK,            WindowType::WINDOW_TYPE_LAUNCHER_DOCK            },
+    { ApiWindowType::TYPE_VOICE_INTERACTION,        WindowType::WINDOW_TYPE_VOICE_INTERACTION        },
+    { ApiWindowType::TYPE_POINTER,                  WindowType::WINDOW_TYPE_POINTER                  },
+    { ApiWindowType::TYPE_SCREENSHOT,               WindowType::WINDOW_TYPE_SCREENSHOT               },
+    { ApiWindowType::TYPE_SYSTEM_TOAST,             WindowType::WINDOW_TYPE_SYSTEM_TOAST             },
+    { ApiWindowType::TYPE_DIVIDER,                  WindowType::WINDOW_TYPE_DOCK_SLICE               },
+    { ApiWindowType::TYPE_GLOBAL_SEARCH,            WindowType::WINDOW_TYPE_GLOBAL_SEARCH            },
+    { ApiWindowType::TYPE_HANDWRITE,                WindowType::WINDOW_TYPE_HANDWRITE                },
+    { ApiWindowType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD        },
+    { ApiWindowType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL           },
+    { ApiWindowType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION         },
+    { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
+    { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -283,11 +288,11 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
     { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
@@ -328,6 +333,7 @@ public:
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
+    napi_value CreateJsWindowAnimationConfigObject(napi_env env, const KeyboardAnimationCurve& curve);
     napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo& windowPropertyInfo);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     napi_value CreateRotationChangeInfoObject(napi_env env, const RotationChangeInfo& rotationChangeInfo);
@@ -362,6 +368,7 @@ public:
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowAnchorInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);
@@ -372,6 +379,8 @@ public:
     napi_value RectChangeReasonInit(napi_env env);
     napi_value RotationChangeTypeInit(napi_env env);
     napi_value RectTypeInit(napi_env env);
+    napi_value WindowTransitionTypeInit(napi_env env);
+    napi_value WindowAnimationCurveInit(napi_env env);
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
@@ -392,6 +401,8 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy);
+    napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
     bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
     bool CheckZIndex(int32_t zIndex);
@@ -412,6 +423,26 @@ public:
         }
         return true;
     }
+
+    template<class T>
+    bool ParseJsValueOrGetDefault(napi_value jsObject, napi_env env,
+        const std::string& name, T& data, const T& defaultVal)
+    {
+        napi_value value = nullptr;
+        napi_get_named_property(env, jsObject, name.c_str(), &value);
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env, value, &type);
+        if (type != napi_undefined) {
+            if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
+                return false;
+            }
+        } else {
+            data = defaultVal;
+            return true;
+        }
+        return true;
+    }
+
     template<class T>
     inline bool ConvertNativeValueToVector(napi_env env, napi_value nativeArray, std::vector<T>& out)
     {

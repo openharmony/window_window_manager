@@ -21,7 +21,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayCutoutController"};
 const uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 }
 
@@ -36,7 +35,7 @@ void DisplayCutoutController::SetBuiltInDisplayCutoutSvgPath(const std::string& 
 
 void DisplayCutoutController::SetIsWaterfallDisplay(bool isWaterfallDisplay)
 {
-    WLOGFI("Set isWaterfallDisplay: %{public}u", isWaterfallDisplay);
+    TLOGI(WmsLogTag::DMS, "Set isWaterfallDisplay: %{public}u", isWaterfallDisplay);
     isWaterfallDisplay_ = isWaterfallDisplay;
 }
 
@@ -50,13 +49,13 @@ void DisplayCutoutController::SetCurvedScreenBoundary(std::vector<int> curvedScr
     while (curvedScreenBoundary.size() < 4) { // 4 directions.
         curvedScreenBoundary.emplace_back(0);
     }
-    WLOGFI("Set curvedScreenBoundary");
+    TLOGI(WmsLogTag::DMS, "Set curvedScreenBoundary");
     curvedScreenBoundary_ = curvedScreenBoundary;
 }
 
 void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::string& svgPath)
 {
-    WLOGFI("Set SvgPath: %{public}s", svgPath.c_str());
+    TLOGI(WmsLogTag::DMS, "Set SvgPath: %{public}s", svgPath.c_str());
     if (svgPaths_.count(displayId) == 1) {
         svgPaths_[displayId].emplace_back(svgPath);
     } else {
@@ -76,7 +75,7 @@ void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::s
 
 sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
 {
-    WLOGFD("Get Cutout Info");
+    TLOGD(WmsLogTag::DMS, "Get Cutout Info");
     std::vector<DMRect> boundingRects;
     WaterfallDisplayAreaRects waterfallDisplayAreaRects;
     if (boundingRects_.count(displayId) == 1) {
@@ -95,7 +94,7 @@ void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, st
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
     if (modes == nullptr) {
-        WLOGFE("DisplayId is invalid");
+        TLOGE(WmsLogTag::DMS, "DisplayId is invalid");
         return;
     }
     uint32_t displayHeight = modes->height_;
@@ -107,7 +106,7 @@ void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, st
             static_cast<int32_t>(boundingRect.height_) + boundingRect.posY_ > static_cast<int32_t>(displayHeight) ||
             boundingRect.width_ > displayWidth || boundingRect.height_ > displayHeight ||
             boundingRect.IsUninitializedRect()) {
-            WLOGFE("boundingRect boundary is invalid");
+            TLOGE(WmsLogTag::DMS, "boundingRect boundary is invalid");
             iter = boundingRects.erase(iter);
         } else {
             iter++;
@@ -120,24 +119,25 @@ DMRect DisplayCutoutController::CalcCutoutBoundingRect(std::string svgPath)
     DMRect emptyRect = {0, 0, 0, 0};
     SkPath skCutoutSvgPath;
     if (!SkParsePath::FromSVGString(svgPath.c_str(), &skCutoutSvgPath)) {
-        WLOGFE("Parse svg string path failed.");
+        TLOGE(WmsLogTag::DMS, "Parse svg string path failed.");
         return emptyRect;
     }
     SkRect skRect = skCutoutSvgPath.computeTightBounds();
     if (skRect.isEmpty()) {
-        WLOGFW("Get empty skRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skRect");
         return emptyRect;
     }
     SkIRect skiRect = skRect.roundOut();
     if (skiRect.isEmpty()) {
-        WLOGFW("Get empty skiRect");
+        TLOGW(WmsLogTag::DMS, "Get empty skiRect");
         return emptyRect;
     }
     int32_t left = static_cast<int32_t>(skiRect.left());
     int32_t top = static_cast<int32_t>(skiRect.top());
     uint32_t width = static_cast<uint32_t>(skiRect.width());
     uint32_t height = static_cast<uint32_t>(skiRect.height());
-    WLOGFI("calc rect from path,[%{public}d, %{public}d, %{public}u, %{public}u]", left, top, width, height);
+    TLOGI(WmsLogTag::DMS, "calc rect from path,[%{public}d, %{public}d, %{public}u, %{public}u]", left, top, width,
+        height);
     DMRect cutoutMinOuterRect = {.posX_ = left, .posY_ = top, .width_ = width, .height_ = height};
     return cutoutMinOuterRect;
 }
@@ -146,12 +146,12 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
 {
     WaterfallDisplayAreaRects emptyRects = {};
     if (!isWaterfallDisplay_) {
-        WLOGFI("not waterfall display");
+        TLOGI(WmsLogTag::DMS, "not waterfall display");
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
     if (curvedScreenBoundary_.empty()) {
-        WLOGFI("curved screen boundary is empty");
+        TLOGI(WmsLogTag::DMS, "curved screen boundary is empty");
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
@@ -167,7 +167,7 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(
             DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId());
     if (!modes) {
-        WLOGE("support screen modes get failed");
+        TLOGE(WmsLogTag::DMS, "support screen modes get failed");
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
@@ -176,7 +176,7 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
 
     if ((left > displayWidth / 2) || (right > displayWidth / 2) || // invalid if more than 1/2 width
         (top > displayHeight / 2) || (bottom > displayHeight / 2)) { // invalid if more than 1/2 height
-        WLOGFE("Curved screen boundary data is not valid.");
+        TLOGE(WmsLogTag::DMS, "Curved screen boundary data is not valid.");
         waterfallDisplayAreaRects_ = emptyRects;
         return;
     }
@@ -244,7 +244,7 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
     }
     sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     if (!displayInfo) {
-        WLOGFE("display invaild");
+        TLOGE(WmsLogTag::DMS, "display invaild");
         return;
     }
     Rotation currentRotation = displayInfo->GetRotation();
@@ -256,7 +256,7 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
     if (!modes) {
-        WLOGE("support screen modes get failed");
+        TLOGE(WmsLogTag::DMS, "support screen modes get failed");
         return;
     }
     uint32_t displayHeight = modes->height_;
@@ -328,7 +328,7 @@ bool DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal()
 uint32_t DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal()
 {
     if (!isWaterfallDisplay_ || !isWaterfallAreaCompressionEnableWhenHorizontal_) {
-        WLOGFW("Not waterfall display or not enable waterfall compression");
+        TLOGW(WmsLogTag::DMS, "Not waterfall display or not enable waterfall compression");
         return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
     }
     return waterfallAreaCompressionSizeWhenHorizontal_;
