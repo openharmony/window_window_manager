@@ -24,6 +24,6 @@ public:
     static void SetVerifyCallingPermissionFlag(const bool verifyCallingPermissionFlag);
     static void SetIsStartByHdcdFlag(const bool isStartByHdcdFlag);
 };
-}
-}
+}// namespace Rosen
+} // namespace OHOS
 #endif
