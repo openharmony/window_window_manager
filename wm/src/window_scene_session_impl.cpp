@@ -4989,7 +4989,7 @@ WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDest
         return WSError::WS_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "call uicontent: winId=%{public}u", GetWindowId());
-    std::string navDestInfoJsonStr = uiContent->GetTopNavDestinationInfo();
+    std::string navDestInfoJsonStr = uiContent->GetTopNavDestinationInfo(false, false);
     if (navDestInfoJsonStr.empty()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, empty navDestInfoJsonStr", GetWindowId());
         return WSError::WS_OK;
