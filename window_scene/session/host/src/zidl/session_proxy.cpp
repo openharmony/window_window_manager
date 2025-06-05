@@ -3090,7 +3090,7 @@ WMError SessionProxy::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return ret;
+    return static_cast<WMError>(ret);
 }
 
 WSError SessionProxy::RequestFocus(bool isFocused)
