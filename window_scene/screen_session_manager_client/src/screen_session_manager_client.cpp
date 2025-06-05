@@ -556,7 +556,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
             UpdatePropertyWhenSwitchUser(screenSession, rotation, bounds, screenId);
         } else {
             screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-                ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
+                ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY, true);
         }
     }
     TLOGI(WmsLogTag::DMS, "switch user callback end");
@@ -853,7 +853,7 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
         ScreenPropertyChangeType::UNSPECIFIED);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-        ScreenPropertyChangeType::UNSPECIFIED);
+        ScreenPropertyChangeType::UNSPECIFIED, true);
     ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
     if (property.GetValidHeight() == INT32_MAX || property.GetValidHeight() == 0) {
         TLOGW(WmsLogTag::DMS, "invalid property, validheight is bounds");

@@ -1904,14 +1904,20 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, TestSize.Level1
     bounds.rect_.height_ = 2772;
     int rotation = 1;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType, false);
     auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(virtualOption,
         displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, rotation,
-        screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_END;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, true);
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ScreenSessionManager::GetInstance().InitAndGetScreen(2));
     ssm_->DestroyVirtualScreen(screenId);
