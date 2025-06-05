@@ -6332,7 +6332,7 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
         WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkFlag")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkFlag") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -6452,7 +6452,7 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                 where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetAspectRatio")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetAspectRatio") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -6499,7 +6499,7 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnResetAspectRatio")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResetAspectRatio") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -6547,7 +6547,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] minimize end, ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMinimize")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMinimize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -6599,7 +6599,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Maximize failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -6831,7 +6831,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set window limits failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowLimits")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowLimits") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -7003,7 +7003,7 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
             "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}hhu",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isModal, modalityType);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowModal")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowModal") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
