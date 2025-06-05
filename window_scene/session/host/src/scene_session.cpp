@@ -8447,14 +8447,14 @@ WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d session is null", where, persistentId);
             return;
         }
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d isRegister %{public}d",
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d isRegister %{public}uu",
             persistentId, isRegister);
         if (session->updateScreenshotAppEventRegisteredFunc_) {
             session->updateScreenshotAppEventRegisteredFunc_(persistentId, isRegister);
         }
         }, __func__);
 
-    return WMError::WS_OK;
+    return WMError::WM_OK;
 }
 
 WMError SceneSession::NotifyDisableDelegatorChange()

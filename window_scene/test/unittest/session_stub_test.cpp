@@ -1059,10 +1059,27 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageParcel option;
     data.WriteInt32(0);
     data.WriteBool(false);
     auto result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateScreenshotAppEventRegistered
+ * @tc.desc: sessionStub HandleUpdateScreenshotAppEventRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageParcel option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(u"OHOS.ISession");
