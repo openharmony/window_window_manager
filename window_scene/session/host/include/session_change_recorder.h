@@ -64,14 +64,15 @@ public:
      * @brief Set record size
      *
      * @param recordType The type of record info.
-     * @param recordSize Set the size of records for each record type. Its range is from 1 to 10.
+     * @param recordSize Set the size of records for each record type.
+     *                   Its range is from 1 to 10. The valid range is 1 to 10.
      */
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
 
     void Init();
     void GetSceneSessionNeedDumpInfo(const std::vector<std::string>& dumpParams, std::string& dumpInfo);
-    std::atomic<bool> stopLogFlag { false };
-    std::atomic<bool> isInitFlag { false };
+    std::atomic<bool> stopLogFlag_ { false };
+    std::atomic<bool> isInitFlag_ { false };
 
 private:
     SessionChangeRecorder() = default;

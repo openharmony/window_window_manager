@@ -366,7 +366,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 SceneSessionManager::~SceneSessionManager()
 {
     ScbDumpSubscriber::UnSubscribe(scbDumpSubscriber_);
-    SessionChangeRecorder::GetInstance().stopLogFlag.store(true);
+    SessionChangeRecorder::GetInstance().stopLogFlag_.store(true);
 }
 
 void SceneSessionManager::Init()
