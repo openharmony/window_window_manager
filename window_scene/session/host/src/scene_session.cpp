@@ -410,11 +410,11 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
-        session->UpdateAvoidArea();
+        session->MarkAvoidAreaAsDirty();
         auto subSessions = session->GetSubSession();
         for (const auto& subSession : subSessions) {
             if (subSession) {
-                subSession->UpdateAvoidArea();
+                subSession->MarkAvoidAreaAsDirty();
             }
         }
         if (session->specificCallback_ != nullptr) {
@@ -504,7 +504,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(true);
         }
-        session->UpdateAvoidArea();
+        session->MarkAvoidAreaAsDirty();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -2072,10 +2072,10 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
-    return UpdateAvoidArea(AvoidAreaType::TYPE_SYSTEM);
+    return HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM);
 }
 
-WSError SceneSession::UpdateAvoidArea(AvoidAreaType avoidAreaType)
+WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
 {
     if (isLastFrameLayoutFinishedFunc_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
@@ -4261,7 +4261,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
         }
-        UpdateAvoidArea();
+        MarkAvoidAreaAsDirty();
     }
 }
 
