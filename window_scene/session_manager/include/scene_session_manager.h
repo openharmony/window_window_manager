@@ -783,6 +783,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    std::string GetFloatWidth(const int width, float value);
 
     /*
      * Window Pipeline
