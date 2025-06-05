@@ -572,6 +572,31 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int SceneSessionManagerLiteStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t windowId = INVALID_WINDOW_ID;
+    int32_t choice = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(choice)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = TestWindow(windowId, choice);
+    if (errCode != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to TestWindow, windowId:%{public}d, choice:%{public}d", windowId, choice);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to TestWindow, errCode:%{public}d", errCode);
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: called");

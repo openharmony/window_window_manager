@@ -855,6 +855,8 @@ public:
      */
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
 
+    WMError TestWindow(int32_t windowId, int32_t choice) const;
+
     /**
      * @brief Get window layout info.
      *

@@ -59,6 +59,7 @@ public:
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
+    virtual WMError TestWindow(int32_t windowId, int32_t choice);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;

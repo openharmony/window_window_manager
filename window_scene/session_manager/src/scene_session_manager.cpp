@@ -1941,6 +1941,22 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
+WSError SceneSessionManager::TestWindow(int32_t windowId, int32_t choice)
+{
+    auto task = [this, windowId, choice, where = __FUNCTION__] {
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr, windowId:%{public}d, choice:%{public}d",
+                windowId, choice);
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId:%{public}d, choice:%{public}d", where , windowId, choice);
+        return sceneSession->TestWindow(windowId, choice);
+    };
+    return taskScheduler_->PostSyncTask(task,
+        "TestWindow windowId:" + std::to_string(windowId) + " choice:" + std::to_string(choice));
+}
+
 WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& windowLimits)
 {
     if (!systemConfig_.IsPcWindow()) {

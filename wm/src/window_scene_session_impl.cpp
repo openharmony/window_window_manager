@@ -2291,6 +2291,28 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
     return WMError::WM_OK;
 }
 
+WSError WindowSceneSessionImpl::TestWindow(int32_t windowId, int32_t choice)
+{
+    switch (choice)
+    {
+    case 1:
+        return Maximize();
+        break;
+    case 2:
+        return Recover();
+        break;
+    case 3:
+        return SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+        break;
+    case 4:
+        return SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+        break;
+    default:
+        break;
+    }
+    return WSError::WS_DO_NOTHING;
+}
+
 WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,
     const std::map<WindowType, SystemBarProperty>& properties, Ace::ViewportConfig& config,
     std::map<AvoidAreaType, AvoidArea>& avoidAreas)

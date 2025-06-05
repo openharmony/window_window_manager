@@ -847,6 +847,41 @@ WSError SessionStageProxy::NotifyLayoutFinishAfterWindowModeChange(WindowMode mo
     return WSError::WS_OK;
 }
 
+WMError SessionStageProxy::TestWindow(int32_t windowId, int32_t choice)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<int32_t>(windowId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(static_cast<int32_t>(choice))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write choice failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t messageCode =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TEST_WINDOW);
+    if (remote->SendRequest(messageCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
 void SessionStageProxy::NotifyForegroundInteractiveStatus(bool interactive)
 {
     MessageParcel data;

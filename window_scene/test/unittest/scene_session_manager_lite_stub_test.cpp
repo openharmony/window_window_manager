@@ -140,6 +140,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError TestWindow(int32_t windowId, int32_t choice) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override
     {
         MainWindowInfo mainWindowInfo;

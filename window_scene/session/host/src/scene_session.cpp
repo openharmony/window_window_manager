@@ -4122,6 +4122,20 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
     }, __func__);
 }
 
+/** @note @Window.Layout */
+WMError SceneSession::TestWindow(int32_t windowId, int32_t choice)
+{
+    return PostSyncTask([weakThis = wptr(this), windowId, choice, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s windowId:%{public}d, choice:%{public}d", where, windowId, choice);
+        return session->sessionStage_->TestWindow(windowId, choice);
+    }, __func__);
+}
+
 /** @note @window.drag */
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
