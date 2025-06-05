@@ -67,6 +67,7 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_WINDOW_INFO,
         TRANS_ID_CHECK_WINDOW_ID,
+        TRANS_ID_TEST_WINDOW,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_GET_WINDOW_MODE_TYPE,
@@ -96,6 +97,11 @@ public:
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
         TRANS_ID_REMOVE_INSTANCE_KEY,
     };
+
+    /*
+     * Window Layout
+     */
+    virtual WMError TestWindow(int32_t windowId, int32_t choice) = 0;
 
     /*
      * Window Lifecycle

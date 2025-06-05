@@ -59,6 +59,7 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
+    WMError TestWindow(int32_t windowId, int32_t choice) override;
 
     /*
      * Window Hierarchy

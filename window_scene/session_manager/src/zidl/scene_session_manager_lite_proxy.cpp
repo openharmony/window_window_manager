@@ -767,6 +767,36 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerLiteProxy::TestWindow(int32_t windowId, int32_t choice)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(choice)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write choice failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TEST_WINDOW),
+        data, reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+}
+
 void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("get focus Winow info lite proxy");
