@@ -131,7 +131,7 @@ private:
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
-    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
@@ -146,6 +146,7 @@ private:
     // KeyFrame
     int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
+    int HandleSetDragKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 

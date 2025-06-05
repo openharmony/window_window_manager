@@ -1818,6 +1818,54 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize
 }
 
 /**
+ * @tc.name: CheckBlockingFocus
+ * @tc.desc: CheckBlockingFocus
+ * 1.session with blockfocus porperty need be blocked
+ * 2.main window need be blocked
+ * 3.WINDOW_TYPE_VOICE_INTERACTION window type need be blocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    bool ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, false);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = ssm_->CheckBlockingFocus(sceneSession, true);
+    EXPECT_EQ(ret, true);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, true);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    sceneSession->blockingFocus_ = true;
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, true);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->blockingFocus_ = false;
+    sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->SetParentSession(sceneSession01);
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, false);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = ssm_->CheckBlockingFocus(sceneSession, true);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: RequestFocusSpecificCheck
  * @tc.desc: RequestFocusSpecificCheck
  * @tc.type: FUNC

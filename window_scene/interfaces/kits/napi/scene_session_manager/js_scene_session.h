@@ -90,7 +90,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_LOCK_STATE_CHANGE_CB,
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
-    KEYBOARD_VIEW_MODE_CHANGE_CB,
+    KEYBOARD_EFFECT_OPTION_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
@@ -380,7 +380,7 @@ private:
     void ProcessWindowMovingRegister();
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
-    void ProcessKeyboardViewModeChangeRegister();
+    void ProcessKeyboardEffectOptionChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessWindowAnchorInfoChangeRegister();
     void ProcessFollowParentRectRegister();
@@ -462,8 +462,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
-    void OnKeyboardViewModeChange(KeyboardViewMode mode);
+    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption);
+    void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
     void NotifyFollowParentRect(bool isFollow);

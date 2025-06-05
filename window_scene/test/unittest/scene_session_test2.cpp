@@ -573,32 +573,6 @@ HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateExtWindowFlags01
- * @tc.desc: update uiextension window flags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateExtWindowFlags";
-    info.bundleName_ = "UpdateExtWindowFlags";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
-    int32_t persistentId = 123456;
-    ExtensionWindowFlags flags(7);
-    ExtensionWindowFlags actions(7);
-    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
-    flags.bitData = 3;
-    actions.bitData = 7;
-    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
-    actions.bitData = 4;
-    sceneSession->UpdateExtWindowFlags(persistentId, flags, actions);
-}
-
-/**
  * @tc.name: GetCombinedExtWindowFlags
  * @tc.desc: get combined uiextension window flags
  * @tc.type: FUNC
@@ -1600,30 +1574,6 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, TestSize.Level1)
     sceneSession->SetSessionProperty(property);
     auto result = sceneSession->GetSubWindowModalType();
     ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);
-}
-
-/**
- * @tc.name: CheckGetAvoidAreaAvailable
- * @tc.desc: CheckGetAvoidAreaAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CheckGetAvoidAreaAvailable";
-    info.bundleName_ = "CheckGetAvoidAreaAvailable";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
 }
 
 /**

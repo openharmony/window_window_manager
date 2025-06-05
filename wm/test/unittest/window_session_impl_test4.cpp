@@ -1511,7 +1511,6 @@ HWTEST_F(WindowSessionImplTest4, NotifyExtensionSecureLimitChange01, TestSize.Le
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->NotifyExtensionSecureLimitChange(false);
     sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
     window->RegisterExtensionSecureLimitChangeListener(listener);
     WSError res = window->NotifyExtensionSecureLimitChange(false);
@@ -1578,7 +1577,9 @@ HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener01,
     window->hostSession_ = session;
 
     sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
-    WMError res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->UnregisterExtensionSecureLimitChangeListener(listener);
     EXPECT_EQ(res, WMError::WM_OK);
 }
 
@@ -1767,15 +1768,15 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerModalColor04, TestSize.Level1
 }
 
 /**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled test
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPcOrPadCapabilityEnabled");
+    option->SetWindowName("IsPcOrFreeMultiWindowCapabilityEnabled");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
@@ -1787,15 +1788,15 @@ HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
     window->hostSession_ = session;
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->property_->SetIsPcAppInPad(true);
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled end";
 }
 
 /**
@@ -2445,6 +2446,30 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, TestSize.Level1)
     ASSERT_EQ(window->enableFrameLayoutFinishCb_, false);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize end";
+}
+
+/**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifySnapshotUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySnapshotUpdate");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo sessioninfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    window->hostSession_ = session;
+    ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate end";
 }
 
 /**

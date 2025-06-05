@@ -150,6 +150,32 @@ HWTEST_F(WindowSessionImplTest, Connect01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
+
+/**
+ * @tc.name: Connect_RegisterWindowScaleCallback
+ * @tc.desc: Connect test RegisterWindowScaleCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, Connect_RegisterWindowScaleCallback, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Connect_RegisterWindowScaleCallback");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*(session), Connect(_, _, _, _, _, _, _)).WillRepeatedly(Return(WSError::WS_OK));
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    EXPECT_EQ(WMError::WM_OK, window->Connect());
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(WMError::WM_OK, window->Connect());
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
 /**
  * @tc.name: Show01
  * @tc.desc: Show session
@@ -363,14 +389,23 @@ HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble05, TestS
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(true, window->property_->IsDecorEnable());
     window->property_->SetDecorEnable(false);
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToSubWindow(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->MakeSubOrDialogWindowDragableAndMoveble();
-    EXPECT_EQ(false, window->property_->IsDecorEnable());
-    window->property_->SetIsUIExtensionAbilityProcess(true);
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble05_mainWindow");
+    sptr<WindowSessionImpl> mainWindow = sptr<WindowSessionImpl>::MakeSptr(option1);
+    mainWindow->property_->SetPersistentId(1);
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
     window->MakeSubOrDialogWindowDragableAndMoveble();
     EXPECT_EQ(true, window->property_->IsDecorEnable());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSubWindow(true);
+    mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    window->context_ = mainWindow->context_;
+    window->property_->SetDecorEnable(false);
+    window->MakeSubOrDialogWindowDragableAndMoveble();
+    EXPECT_EQ(false, window->property_->IsDecorEnable());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble05 end";
 }
 

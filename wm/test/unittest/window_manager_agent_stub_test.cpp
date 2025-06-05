@@ -425,31 +425,9 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, TestSize.Level1)
 
 /**
  * @tc.name: OnRemoteRequest21
- * @tc.desc: test TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID success
- */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    uint32_t windowId = 0;
-    DisplayId displayId = -1ULL;
-    data.WriteUint32(windowId);
-    data.WriteUint64(displayId);
-
-    uint32_t code =
-        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest22
  * @tc.desc: test TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE success
  */
-HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest22, TestSize.Level1)
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -28,6 +28,7 @@ group("unittest") {
     ":dmserver_display_dumper_test",
     ":dmserver_display_manager_agent_controller_test",
     ":dmserver_display_manager_config_test",
+    ":dmserver_display_manager_ipc_service_test",
     ":dmserver_display_manager_proxy_test",
     ":dmserver_display_manager_service_inner_test",
     ":dmserver_display_manager_service_test",
@@ -117,6 +118,7 @@ ohos_unittest("dmserver_display_manager_ipc_service_test") {
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "libxml2:libxml2",
+    "samgr:samgr_proxy",
     "safwk:system_ability_fwk",
     "selinux_adapter:librestorecon",
   ]
@@ -325,6 +327,7 @@ ohos_static_library("dmserver_unittest_common") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_single",

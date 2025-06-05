@@ -288,11 +288,11 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
     { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
@@ -401,6 +401,8 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy);
+    napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
     bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
     bool CheckZIndex(int32_t zIndex);
@@ -421,6 +423,26 @@ public:
         }
         return true;
     }
+
+    template<class T>
+    bool ParseJsValueOrGetDefault(napi_value jsObject, napi_env env,
+        const std::string& name, T& data, const T& defaultVal)
+    {
+        napi_value value = nullptr;
+        napi_get_named_property(env, jsObject, name.c_str(), &value);
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env, value, &type);
+        if (type != napi_undefined) {
+            if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
+                return false;
+            }
+        } else {
+            data = defaultVal;
+            return true;
+        }
+        return true;
+    }
+
     template<class T>
     inline bool ConvertNativeValueToVector(napi_env env, napi_value nativeArray, std::vector<T>& out)
     {

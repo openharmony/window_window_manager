@@ -221,6 +221,7 @@ public:
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
     virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+    virtual WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
 
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
@@ -371,13 +372,13 @@ public:
     virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for set Image for recent.
+     * @brief Callback for set image for recent.
      *
      * @param imgResourceId resourceId of static image.
      * @param imageFit imageFit.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetImageForRecent(int imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+    virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
     
     /**
      * @brief Callback for setting to radius of window.
@@ -429,7 +430,7 @@ public:
     virtual WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
 
-    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
+    virtual WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) { return WSError::WS_OK; };
 
     /**
      * @brief Start Moving window with coordinate.
