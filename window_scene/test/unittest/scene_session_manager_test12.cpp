@@ -33,6 +33,7 @@
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_window_manager_agent_lite.h"
+#include "mock/mock_session_permission.h"
 #include "session_manager/include/session_manager_agent_controller.h"
 
 using namespace testing;
@@ -547,23 +548,58 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.
     int32_t id = 0;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    MockSessionPermission::SetIsSystemCallingFlag(false);
+    MockSessionPermission::SetVerifyCallingPermissionFlag(true);
+    MockSessionPermission::SetIsStartByHdcdFlag(true);
     property->SetWindowFlags(123);
     property->SetParentPersistentId(11);
-    res = ssm_->CreateAndConnectSpecificSession(
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetFloatingWindowAppType(true);
+    ssm_->shouldHideNonSecureFloatingWindows_ = true;
+    WSError res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_OK, res);
+    ASSERT_EQ(ssm_->systemConfig_.IsPcWindow()? WSError::WS_OK : WSError::WS_ERROR_INVALID_OPERATION, res);
+    MockSessionPermission::ClearAllFlag();
+}
 
+/**
+ * @tc.name: CreateAndConnectSpecificSession05
+ * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession05, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    MockSessionPermission::SetIsSystemCallingFlag(false);
+    property->SetWindowFlags(123);
+    property->SetParentPersistentId(11);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     SessionInfo sessionInfo;
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     parentSession->persistentId_ = 11;
-    ExtensionWindowFlags extWindowFlags;
+    ExtensionWindowFlags extWindowFlags(0);
     extWindowFlags.hideNonSecureWindowsFlag = true;
     parentSession->UpdateExtWindowFlags(parentSession->GetPersistentId(), extWindowFlags, extWindowFlags);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert( {parentSession->GetPersistentId(), parentSession} );
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
+
+    ssm_->sceneSessionMap_.erase(parentSession->GetPersistentId());
+    res = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
+    MockSessionPermission::ClearAllFlag();
 }
 
 /**

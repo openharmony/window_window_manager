@@ -766,9 +766,21 @@ ohos_unittest("ws_scene_session_manager_test11") {
 
 ohos_unittest("ws_scene_session_manager_test12") {
   module_out_path = module_out_path
-  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  include_dirs = [
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/test/mock",
+  ]
 
-  sources = [ "scene_session_manager_test12.cpp" ]
+  sources = [
+    "scene_session_manager_test12.cpp",
+    "mock_session_permission.cpp",
+  ]
+
+  defines = [
+    "ENABLE_MOCK_IS_SYSTEM_CALLING",
+    "ENABLE_MOCK_VERIFY_CALLING_PERMISSION",
+    "ENABLE_MOCK_START_BY_HDCD",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
