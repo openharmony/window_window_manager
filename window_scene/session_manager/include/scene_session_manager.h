@@ -605,12 +605,15 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
+    WSError RequestSessionFocusCheck(sptr<SceneSession>& sceneSession, int32_t persistentId, bool byForeground,
+        FocusChangeReason reason);
     WSError RequestFocusBasicCheck(int32_t persistentId);
     bool CheckLastFocusedAppSessionFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession);
     WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
     bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmdediately(sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
         sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
@@ -634,6 +637,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
+    WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
 
@@ -880,8 +886,6 @@ private:
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
 
     void CheckAndNotifyWaterMarkChangedResult();
