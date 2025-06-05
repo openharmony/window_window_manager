@@ -2429,6 +2429,7 @@ void ScreenSession::SetIsEnableCanvasRotation(bool isEnableCanvasRotation)
 {
     std::lock_guard<std::mutex> lock(isEnableCanvasRotationMutex_);
     isEnableCanvasRotation_ = isEnableCanvasRotation;
+}
 
 bool ScreenSession::GetIsEnableCanvasRotation()
 {
