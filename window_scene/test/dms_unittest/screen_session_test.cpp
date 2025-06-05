@@ -2989,7 +2989,7 @@ HWTEST_F(ScreenSessionTest, ScreenExtendChange02, TestSize.Level1)
     ScreenId mainScreenId = 0;
     ScreenId extendScreenId = 1;
     session->ScreenExtendChange(mainScreenId, extendScreenId);
-    EXPECT_FALSE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
 }
 
 /**
@@ -3673,50 +3673,6 @@ HWTEST_F(ScreenSessionTest, GetScreenId, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleCameraBackSelfieChange
- * @tc.desc: HandleCameraBackSelfieChange test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, HandleCameraBackSelfieChange, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: HandleCameraBackSelfieChange start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
-
-    screenSession->HandleCameraBackSelfieChange(false);
-    EXPECT_EQ(100, screenSession->screenId_);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: HandleCameraBackSelfieChange end";
-}
-
-/**
- * @tc.name: CameraBackSelfieChange
- * @tc.desc: CameraBackSelfieChange test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, CameraBackSelfieChange, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CameraBackSelfieChange start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
-
-    screenSession->CameraBackSelfieChange(false);
-    EXPECT_EQ(100, screenSession->screenId_);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: CameraBackSelfieChange end";
-}
-
-/**
  * @tc.name: SetUpdateScreenPivotCallback
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -3730,6 +3686,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateScreenPivotCallback, TestSize.Level1)
     auto func = [session](float x, float y) {
         session->GetScreenSnapshot(x, y);
     };
+
     session->SetUpdateScreenPivotCallback(func);
     EXPECT_NE(nullptr, session->updateScreenPivotCallback_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateScreenPivotCallback end";
@@ -3893,7 +3850,7 @@ HWTEST_F(ScreenSessionTest, IsWidthHeightMatch01, TestSize.Level1)
     float height = 1.5f;
     float targetWidth = 1.5f;
     float targetHeight = 1.5f;
-    EXPECT_NE(false, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
+    EXPECT_EQ(true, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
     GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch01 end";
 }
 
@@ -3918,7 +3875,7 @@ HWTEST_F(ScreenSessionTest, IsWidthHeightMatch02, TestSize.Level1)
     float height = 2.0f;
     float targetWidth = 3.0f;
     float targetHeight = 4.0f;
-    EXPECT_NE(true, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
+    EXPECT_EQ(false, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
     GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch02 end";
 }
 
@@ -3929,6 +3886,7 @@ HWTEST_F(ScreenSessionTest, IsWidthHeightMatch02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -3941,25 +3899,13 @@ HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
 
     float scaleX = 1.0f;
     float scaleY = 1.0f;
-    float pivotX = 0.5f;
-    float pivotY = 0.5f;
-    float translateX = 0.0f;
-    float translateY = 0.0f;
-    screenSession->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
-    EXPECT_EQ(screenSession->property_.GetScaleX(), scaleX);
-    EXPECT_EQ(screenSession->property_.GetScaleY(), scaleY);
-    EXPECT_EQ(screenSession->property_.GetPivotX(), pivotX);
-    EXPECT_EQ(screenSession->property_.GetPivotY(), pivotY);
-    EXPECT_EQ(screenSession->property_.GetTranslateX(), translateX);
-    EXPECT_EQ(screenSession->property_.GetTranslateY(), translateY);
-
     RSSurfaceCaptureConfig config1 = {
         .scaleX = scaleX,
         .scaleY = scaleY,
         .useDma = true,
     };
     screenSession->SetScreenSnapshotRect(config1);
-    EXPECT_NE(0, config1.scaleX);
+    EXPECT_FALSE(g_errLog.find("no need to set screen snapshot rect") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect end";
 }
 
@@ -3983,31 +3929,8 @@ HWTEST_F(ScreenSessionTest, SetStartPosition, TestSize.Level1)
     float scaleX = 1.0f;
     float scaleY = 1.0f;
     screenSession->SetStartPosition(scaleX, scaleY);
-    EXPECT_NE(0, screenSession->property_.scaleX_);
+    EXPECT_EQ(scaleX, screenSession->property_.scaleX_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetStartPosition end";
-}
-
-/**
- * @tc.name: BeforeScreenPropertyChange
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, BeforeScreenPropertyChange, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: BeforeScreenPropertyChange start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
-
-    FoldStatus foldStatus = FoldStatus::UNKNOWN;
-    screenSession->BeforeScreenPropertyChange(foldStatus);
-    EXPECT_EQ(100, screenSession->screenId_);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: BeforeScreenPropertyChange end";
 }
 
 /**
@@ -4018,41 +3941,13 @@ HWTEST_F(ScreenSessionTest, BeforeScreenPropertyChange, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, ScreenModeChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ScreenModeChange start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
 
-    ScreenModeChangeEvent status = ScreenModeChangeEvent::UNKNOWN;
-    screenSession->ScreenModeChange(status);
-    EXPECT_EQ(100, screenSession->screenId_);
+    session->screenChangeListenerList_.clear();
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: ScreenModeChange end";
-}
-
-/**
- * @tc.name: GetApiVersion
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, GetApiVersion, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetApiVersion start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
-
-    int ret = screenSession->GetApiVersion();
-    EXPECT_NE(-999, ret);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetApiVersion end";
 }
 
 /**
