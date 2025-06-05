@@ -260,6 +260,14 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override
+    {
+        return WMError::WM_OK;
+    }
+    WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) override
+    {
+        return WSError::WS_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
