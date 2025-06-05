@@ -1960,8 +1960,7 @@ HWTEST_F(WindowSceneSessionImplTest3, GrayOutMaximizeButton, TestSize.Level1)
     window->uiContent_ = std::move(uiContent);
     ret = window->GrayOutMaximizeButton(true);
     EXPECT_EQ(WMError::WM_OK, ret);
-    window->grayOutMaximizeButton_ = false;
-    ret = window->GrayOutMaximizeButton(false);
+    ret = window->GrayOutMaximizeButton(true);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
