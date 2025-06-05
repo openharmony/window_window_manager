@@ -1911,7 +1911,7 @@ int SessionStub::HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, M
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateRotationChangeRegistered(persistentId, isRegister);
+    WMError errCode = UpdateScreenshotAppEventRegistered(persistentId, isRegister);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
         return ERR_INVALID_DATA;

@@ -1420,6 +1420,44 @@ HWTEST_F(SessionProxyTest, UpdateRotationChangeRegistered, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateScreenshotAppEventRegistered
+ * @tc.desc: UpdateScreenshotAppEventRegistered test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: GetTargetOrientationConfigInfo
  * @tc.desc: GetTargetOrientationConfigInfo test
  * @tc.type: FUNC

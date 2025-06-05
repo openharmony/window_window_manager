@@ -10659,7 +10659,7 @@ WMError SceneSessionManager::UpdateSessionScreenshotAppEventListener(int32_t per
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win: %{public}d sceneSession is nullptr", where, persistentId);
-            return WMError::WM_DO_NOTHING;
+            return WMError::WM_ERROR_NULLPTR;
         }
         if (haveListener) {
             screenshotAppEventListenerSessionSet_.insert(persistentId);

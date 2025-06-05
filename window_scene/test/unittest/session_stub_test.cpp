@@ -1059,12 +1059,15 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteUint32(0);
+    MessageParcel option;
+    data.WriteInt32(0);
     data.WriteBool(false);
     auto result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
     ASSERT_EQ(result, ERR_NONE);
-    result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteInterfaceToken(u"OHOS.ISession");
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**

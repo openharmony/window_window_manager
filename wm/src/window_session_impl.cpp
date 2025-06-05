@@ -4721,7 +4721,7 @@ WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreensho
     }
     auto hostSession = GetHostSession();
     if (isUpdate && hostSession != nullptr) {
-        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
+        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, false);
     }
     return ret;
 }
