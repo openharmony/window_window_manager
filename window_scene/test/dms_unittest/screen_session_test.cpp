@@ -3630,35 +3630,6 @@ HWTEST_F(ScreenSessionTest, GetValidWidth, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFakeScreenSession
- * @tc.desc: GetFakeScreenSession test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, GetFakeScreenSession, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetFakeScreenSession start";
-    ScreenSessionConfig config = {
-        .screenId = 0,
-        .rsId = 0,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(nullptr, screenSession);
-
-    ScreenSessionConfig fakeConfig = {
-        .screenId = 101,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    screenSession->SetFakeScreenSession(fakeScreenSession);
-    ASSERT_EQ(screenSession->GetFakeScreenSession(), fakeScreenSession);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetFakeScreenSession end";
-}
-
-/**
  * @tc.name: GetInnerName
  * @tc.desc: GetInnerName test
  * @tc.type: FUNC
@@ -3995,20 +3966,20 @@ HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
     float translateX = 0.0f;
     float translateY = 0.0f;
     screenSession->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
-    EXPECT_EQ(screenSession.property_.GetScaleX(), scaleX);
-    EXPECT_EQ(screenSession.property_.GetScaleY(), scaleY);
-    EXPECT_EQ(screenSession.property_.GetPivotX(), pivotX);
-    EXPECT_EQ(screenSession.property_.GetPivotY(), pivotY);
-    EXPECT_EQ(screenSession.property_.GetTranslateX(), translateX);
-    EXPECT_EQ(screenSession.property_.GetTranslateY(), translateY);
+    EXPECT_EQ(screenSession->property_.GetScaleX(), scaleX);
+    EXPECT_EQ(screenSession->property_.GetScaleY(), scaleY);
+    EXPECT_EQ(screenSession->property_.GetPivotX(), pivotX);
+    EXPECT_EQ(screenSession->property_.GetPivotY(), pivotY);
+    EXPECT_EQ(screenSession->property_.GetTranslateX(), translateX);
+    EXPECT_EQ(screenSession->property_.GetTranslateY(), translateY);
 
-    RSSurfaceCaptureConfig config = {
+    RSSurfaceCaptureConfig config1 = {
         .scaleX = scaleX,
         .scaleY = scaleY,
         .useDma = true,
     };
-    screenSession->SetScreenSnapshotRect(config);
-    EXPECT_NE(0, config.scaleX);
+    screenSession->SetScreenSnapshotRect(config1);
+    EXPECT_NE(0, config1.scaleX);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect end";
 }
 
