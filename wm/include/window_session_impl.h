@@ -511,6 +511,7 @@ public:
      * Window LifeCycle
      */
     void NotifyAfterInteractive();
+    WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     void NotifyAfterNonInteractive();
     void NotifyNonInteractiveStatus() override;
 

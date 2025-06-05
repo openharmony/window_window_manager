@@ -107,6 +107,7 @@ public:
 
     // Window LifeCycle
     void NotifyNonInteractiveStatus() override;
+    WMError GetRouterStackInfo(std::string& routerStackInfo) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

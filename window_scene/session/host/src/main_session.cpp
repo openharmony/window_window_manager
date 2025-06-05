@@ -488,6 +488,15 @@ WSError MainSession::UpdateFlag(const std::string& flag)
     return WSError::WS_OK;
 }
 
+WMError MainSession::GetRouterStackInfo(std::string& routerStackInfo) const
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return sessionStage_->GetRouterStackInfo(routerStackInfo);
+}
+
 void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionState& state)
 {
     switch (state) {

@@ -15653,6 +15653,36 @@ WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationPr
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetRouterStackInfo(int32_t persistentId,
+    const sptr<ISessionRouterStackListener>& listener)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Session with persistentId %{public}d not found", persistentId);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, session, listener, where = __func__] {
+        std::string routerStack;
+        auto ret = session->GetRouterStackInfo(routerStack);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "failed, persistentId %{public}d", session->GetPersistentId());
+            return;
+        }
+        sptr<RouterStackInfo> routerStackInfo = sptr<RouterStackInfo>::MakeSptr(session->GetPersistentId(), routerStack);
+        listener->SendRouterStackInfo(routerStackInfo);
+    };
+    ffrtQueueHelper_->SubmitTask(task);
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {

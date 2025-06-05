@@ -583,6 +583,7 @@ public:
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
+    virtual WMError GetRouterStackInfo(std::string& routerStackInfo) const { return WMError::WM_OK; }
     bool UpdateInteractiveInner(bool interactive);
     void HookSceneSessionActivation(NotifyHookSceneSessionActivationFunc&& func);
     void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);

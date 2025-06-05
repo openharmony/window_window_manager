@@ -2022,6 +2022,34 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_OK;
 }
 
+WMError SessionStageProxy::GetRouterStackInfo(std::string& routerStackInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read reply falied");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    routerStackInfo = reply.ReadString();
+    return static_cast<WMError>(errCode);
+}
+
 WSError SessionStageProxy::CloseSpecificScene()
 {
     MessageParcel data;
