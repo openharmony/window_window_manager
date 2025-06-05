@@ -1449,21 +1449,20 @@ void MoveDragController::ClearSpecifyMoveStartDisplay()
     isSpecifyMoveStart_ = false;
 }
 
-void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId, const WSRect& winRect)
+void MoveDragController::HandleStartMovingWithCoordinate(MoveCoordinateProperty property)
 {
-    moveTempProperty_.lastDownPointerPosX_ = pointerPosX;
-    moveTempProperty_.lastDownPointerPosY_ = pointerPosY;
-    moveTempProperty_.lastMovePointerPosX_ = pointerPosX;
-    moveTempProperty_.lastMovePointerPosY_ = pointerPosY;
-    moveTempProperty_.lastDownPointerWindowX_ = offsetX;
-    moveTempProperty_.lastDownPointerWindowY_ = offsetY;
+    moveTempProperty_.lastDownPointerPosX_ = property.pointerPosX;
+    moveTempProperty_.lastDownPointerPosY_ = property.pointerPosY;
+    moveTempProperty_.lastMovePointerPosX_ = property.pointerPosX;
+    moveTempProperty_.lastMovePointerPosY_ = property.pointerPosY;
+    moveTempProperty_.lastDownPointerWindowX_ = property.pointerWindowX;
+    moveTempProperty_.lastDownPointerWindowY_ = property.pointerWindowY;
 
-    WSRect targetRect = GetTargetDisplayRectRelatedToStartDisplay(winRect, displayId);
+    WSRect targetRect = GetTargetDisplayRectRelatedToStartDisplay(property.winRect, property.displayId);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "displayId:%{public}" PRIu64 " targetRect: %{public}s",
-        displayId, targetRect.ToString().c_str());
+        property.displayId, targetRect.ToString().c_str());
     moveDragProperty_.targetRect_ = targetRect;
-    moveDragEndDisplayId_ = displayId;
+    moveDragEndDisplayId_ = property.displayId;
     ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
