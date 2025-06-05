@@ -15,7 +15,7 @@
 
 #include "js_scene_utils.h"
 #include "js_scene_session.h"
-
+#include "napi_common_want.h"
 #include "pixel_map_napi.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/session.h"
@@ -63,6 +63,7 @@ const std::string SESSION_EXCEPTION_CB = "sessionException";
 const std::string SYSTEMBAR_PROPERTY_CHANGE_CB = "systemBarPropertyChange";
 const std::string NEED_AVOID_CB = "needAvoid";
 const std::string PENDING_SESSION_TO_FOREGROUND_CB = "pendingSessionToForeground";
+const std::string PENDING_SESSION_TO_BACKGROUND_CB = "pendingSessionToBackground";
 const std::string PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB = "pendingSessionToBackgroundForDelegator";
 const std::string CUSTOM_ANIMATION_PLAYING_CB = "isCustomAnimationPlaying";
 const std::string NEED_DEFAULT_ANIMATION_FLAG_CHANGE_CB = "needDefaultAnimationFlagChange";
@@ -152,6 +153,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SYSTEMBAR_PROPERTY_CHANGE_CB,          ListenerFuncType::SYSTEMBAR_PROPERTY_CHANGE_CB},
     {NEED_AVOID_CB,                         ListenerFuncType::NEED_AVOID_CB},
     {PENDING_SESSION_TO_FOREGROUND_CB,      ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB},
+    {PENDING_SESSION_TO_BACKGROUND_CB,      ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_CB},
     {PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB,
         ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB},
     {CUSTOM_ANIMATION_PLAYING_CB,           ListenerFuncType::CUSTOM_ANIMATION_PLAYING_CB},
@@ -1535,6 +1537,27 @@ void JsSceneSession::ProcessPendingSessionToForegroundRegister()
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
+void JsSceneSession::ProcessPendingSessionToBackgroundRegister()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetPendingSessionToBackgroundListener([weakThis = wptr(this), where](
+        const SessionInfo& info, const BackgroundParams& params) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->PendingSessionToBackground(info, params);
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
+}
+
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -2824,6 +2847,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::PENDING_SESSION_TO_FOREGROUND_CB):
             ProcessPendingSessionToForegroundRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_CB):
+            ProcessPendingSessionToBackgroundRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::PENDING_SESSION_TO_BACKGROUND_FOR_DELEGATOR_CB):
             ProcessPendingSessionToBackgroundForDelegatorRegister();
@@ -4625,6 +4651,37 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionToForeground:" + info.bundleName_);
+}
+
+void JsSceneSession::PendingSessionToBackground(const SessionInfo& info, const BackgroundParams& params)
+{
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
+        info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
+
+    std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, params] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(PENDING_SESSION_TO_BACKGROUND_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
+        napi_value jsShouldBackToCaller = CreateJsValue(env, params.shouldBackToCaller);
+        napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, params.wantParams);
+        if (jsSessionInfo == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsSessionInfo, jsShouldBackToCaller, jsWantParams};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "PendingSessionToBackground, name:" + info.bundleName_);
 }
 
 void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller)

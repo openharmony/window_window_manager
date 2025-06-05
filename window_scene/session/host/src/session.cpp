@@ -2036,6 +2036,28 @@ WSError Session::PendingSessionToForeground()
     return WSError::WS_OK;
 }
 
+void Session::SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->pendingSessionToBackgroundFunc_ = std::move(func);
+    }, __func__);
+}
+
+WSError Session::PendingSessionToBackground(const BackgroundParams& params)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), params.shouldBackToCaller);
+    if (pendingSessionToBackgroundFunc_) {
+        pendingSessionToBackgroundFunc_(GetSessionInfo(), params);
+    }
+    return WSError::WS_OK;
+}
+
 void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {

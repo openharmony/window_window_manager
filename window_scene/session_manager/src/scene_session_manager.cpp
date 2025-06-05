@@ -10569,6 +10569,19 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
     }, __func__);
 }
 
+WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject>& token,
+    const BackgroundParams& params)
+{
+    return taskScheduler_->PostSyncTask([this, &token, params] {
+        auto session = FindSessionByToken(token)
+        if (session != nullptr) {
+            return session->PendingSessionToBackground(params);
+        }
+        TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }, __func__);
+}
+
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
     bool shouldBackToCaller)
 {
@@ -15543,6 +15556,31 @@ void SceneSessionManager::UpdateRecentMainSessionInfos(const std::vector<int32_t
             }
         }
     }, __func__);
+}
+
+void SceneSessionManager::RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func)
+{
+    onTransferSessionToTargetScreen_ = std::move(func);
+}
+
+WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (info.persistentId < 0 || info.toScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Param is invalid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, info, where = __func__]() {
+        if (onTransferSessionToTargetScreen_) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, persistentId: %{public}d toScreenId: %{public}d",
+                where, info.persistentId, info.toScreenId);
+            onTransferSessionToTargetScreen_(windowNum);
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
