@@ -792,7 +792,7 @@ public:
     void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
-    void SetNotifyScreenshotAppEventRegisteredFunc(const UpdateScreenshotAppEventRegisteredFunc& func);
+    void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
 
     /*

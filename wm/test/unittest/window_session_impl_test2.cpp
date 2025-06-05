@@ -1851,6 +1851,14 @@ HWTEST_F(WindowSessionImplTest2, RegisterScreenshotAppEventListener01, TestSize.
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IScreenshotAppEventListener> listener = nullptr;
     WMError ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IScreenshotAppEventListener>::MakeSptr();
@@ -1881,6 +1889,14 @@ HWTEST_F(WindowSessionImplTest2, unregisterScreenshotAppEventListener01, TestSiz
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IScreenshotAppEventListener> listener = nullptr;
     WMError ret = window->UnregisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IScreenshotAppEventListener>::MakeSptr();
