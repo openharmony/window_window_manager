@@ -3879,13 +3879,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
         keyFramePolicy_.running_ = false;
         keyFramePolicy_.stopping_ = true;
-        KeyFramePolicy dragEndPolicy = keyFramePolicy_;
-        if (keyFrameAnimating_) {
-            const int32_t minDelay = 150;
-            dragEndPolicy.animationDelay_ += dragEndPolicy.animationDuration_ + minDelay;
-            TLOGI(WmsLogTag::WMS_LAYOUT, "stop with repeat animate %{public}d", dragEndPolicy.animationDelay_);
-        }
-        sessionStage_->SetKeyFramePolicy(dragEndPolicy);
+        sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
         keyFrameCloneNode_ = nullptr;
     }
 }
