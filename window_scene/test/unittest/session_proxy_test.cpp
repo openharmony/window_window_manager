@@ -1434,7 +1434,7 @@ HWTEST_F(SessionProxyTest, UpdateScreenshotAppEventRegistered, Function | SmallT
 
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
     EXPECT_EQ(ret, WMError::WM_OK);
