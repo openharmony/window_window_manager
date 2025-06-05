@@ -756,20 +756,20 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 
 /**
  * @tc.name: UpdateSessionScreenshotAppEventListener01
- * @tc.desc: test WS_DO_NOTHING
+ * @tc.desc: test WM_ERROR_NULLPTR
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
 {
     int32_t persistentId = 10086;
     bool haveListener = true;
-    WSError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
-    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+    WMError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
  * @tc.name: UpdateSessionScreenshotAppEventListener02
- * @tc.desc: test WS_ERROR_INVALID_PERMISSION and WS_OK
+ * @tc.desc: test WS_OK
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, TestSize.Level1)
@@ -782,9 +782,9 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, Te
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     int32_t persistentId = 1;
     auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
     ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, false);
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
