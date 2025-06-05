@@ -29,7 +29,7 @@ public:
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
         bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
     WMError DestroyHookWindow();
@@ -111,7 +111,7 @@ public:
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
-    WMError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -290,7 +290,7 @@ public:
     /*
      * Window Pattern
      */
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit) override;
     /**
      * Window Transition Animation For PC
      */
@@ -426,6 +426,7 @@ private:
     bool IsDefaultDensityEnabled();
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
+    bool isEnableDefaultDensityWhenCreate_ = false;
     std::string specifiedColorMode_;
 
     /*

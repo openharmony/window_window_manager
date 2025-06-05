@@ -116,6 +116,7 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
+    float GetDefaultDensity(const sptr<DisplayInfo>& displayInfo);
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
@@ -166,8 +167,13 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
-    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data);
+    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
+    WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -205,14 +211,13 @@ private:
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
-    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
      */
-    WMError GetHostWindowCompatiblityInfo();
+    WMError OnHostWindowCompatInfoChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError SetCompatInfo(const AAFwk::WantParams& configParam);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
