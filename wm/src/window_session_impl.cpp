@@ -4768,8 +4768,7 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
 }
 
 template<typename T>
-EnableIfSame<T, IScreenshotAppEventListener,
-    std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return screenshotAppEventListeners_[GetPersistentId()];
 }
