@@ -470,9 +470,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
             bool isUseDma = data.ReadBool();
-            bool isFullScreenCapture = data.ReadBool();
+            bool isCaptureFullOfScreen = data.ReadBool();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma,
-                isFullScreenCapture);
+                isCaptureFullOfScreen);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
             break;
@@ -1309,7 +1309,7 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
         TLOGE(WmsLogTag::DMS, "Read node blackList failed");
         return;
     }
-    option.isFullScreenCapture_ = static_cast<bool>(data.ReadBool());
+    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());

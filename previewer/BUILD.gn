@@ -86,11 +86,13 @@ if (!ispreview) {
 
     external_deps = [
       "ace_engine:ace_uicontent",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
     ]
 
     cflags = [ "-std=c++11" ]
+    cflags_cc = [ "-std=c++17" ]
     part_name = "window_manager"
     subsystem_name = "window"
   }

@@ -1109,13 +1109,13 @@ public:
     virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Sets static Image resource for recent.
+     * @brief Set static Image resource for recent.
      *
-     * @param imgResourceId resourceId of static Image.
-     * @param imageFit imageFit of static Image.
+     * @param imgResourceId resourceId of static image.
+     * @param imageFit imageFit of static image.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetImageForRecent(int imgResourceId, ImageFit imageFit)
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2150,7 +2150,14 @@ public:
      *
      * @param orientation Orientation set by developer
      */
-    virtual void SetPreferredRequestedOrientation(Orientation orientation) {}
+    virtual void SetUserRequestedOrientation(Orientation orientation) {}
+
+    /**
+     * @brief Is needed forcibly set orientation.
+     *
+     * @param orientation Requested orientation.
+     */
+    virtual bool isNeededForciblySetOrientation(Orientation orientation) { return false; }
 
     /**
      * @brief Register SystemBarProperty listener.
@@ -3664,21 +3671,21 @@ public:
     /**
      * @brief Show keyboard window
      *
-     * @param mode Keyboard will show with special mode.
+     * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief Change keyboard view mode
+     * @brief Change keyboard effect with option
      *
-     * @param mode Keyboard will update to the special mode.
-     * @return WM_OK means view mode update success, others means failed.
+     * @param effectOption Keyboard will update to the special effect option.
+     * @return WM_OK means effect update success, others means failed.
      */
-    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    virtual WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }

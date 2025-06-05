@@ -2449,6 +2449,30 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifySnapshotUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySnapshotUpdate");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo sessioninfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    window->hostSession_ = session;
+    ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate end";
+}
+
+/**
  * @tc.name: RegisterDisplayIdChangeListener01
  * @tc.desc: RegisterDisplayIdChangeListener01
  * @tc.type: FUNC

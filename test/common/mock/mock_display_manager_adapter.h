@@ -31,7 +31,7 @@ public:
     MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
     MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
     MOCK_METHOD4(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId, DmErrorCode* errorCode,
-        bool isUseDma, bool isFullScreenCapture));
+        bool isUseDma, bool isCaptureFullOfScreen));
 
     MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(WakeUpEnd, bool());

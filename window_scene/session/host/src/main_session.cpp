@@ -371,10 +371,14 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
+    WSRect newRect;
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
-            func(rect, isGlobal, needFlush);
+            if (newRect.IsEmpty()) {
+                HookStartMoveRect(newRect, rect);
+            }
+            func(newRect, isGlobal, needFlush);
         }
     }
 }

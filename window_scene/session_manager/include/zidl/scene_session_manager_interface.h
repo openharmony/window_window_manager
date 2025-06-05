@@ -140,7 +140,6 @@ public:
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
-        TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
@@ -392,8 +391,8 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
-        int persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

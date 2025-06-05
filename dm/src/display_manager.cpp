@@ -760,7 +760,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -768,7 +768,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode,
-            isUseDma, isFullScreenCapture);
+            isUseDma, isCaptureFullOfScreen);
     if (screenShot == nullptr) {
         TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
@@ -815,7 +815,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const S
     DmErrorCode* errorCode, bool isUseDma)
 {
     std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma,
-        snapShotConfig.isFullScreenCapture_);
+        snapShotConfig.isCaptureFullOfScreen_);
     if (screenShot == nullptr) {
         TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
