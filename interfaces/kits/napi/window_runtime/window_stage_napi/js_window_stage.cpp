@@ -651,7 +651,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isModal);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowModal")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowModal") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -897,7 +897,7 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Notify remove starting window failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRemoveStartingWindow")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRemoveStartingWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -947,7 +947,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
                 "enable:%{public}d", where, window->GetWindowId(), isSaveBySpecifiedFlag, enabled);
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowRectAutoSave")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowRectAutoSave") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1073,7 +1073,7 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set image for recemt failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnSetImageForRecent")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetImageForRecent") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1112,7 +1112,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
             task->Resolve(env, jsEnabled);
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high, "OnIsWindowRectAutoSave")) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnIsWindowRectAutoSave") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }

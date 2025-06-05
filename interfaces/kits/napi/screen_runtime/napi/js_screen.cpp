@@ -257,7 +257,7 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
 void JsScreen::NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
     std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask, const std::string& taskName)
 {
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate, taskName.c_str())) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, taskName.c_str()) != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {

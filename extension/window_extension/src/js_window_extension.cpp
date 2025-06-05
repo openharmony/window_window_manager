@@ -249,7 +249,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         napi_value argv[] = { napiWant };
         CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high, "OnConnect")) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnConnect") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 
@@ -366,7 +366,7 @@ void JsWindowExtension::OnWindowCreated() const
         napi_value argv[] = { value };
         CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high, "OnWindowCreated")) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnWindowCreated") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 }
