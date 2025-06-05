@@ -513,7 +513,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
         thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high, "OnWaterMarkFlagUpdate")) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWaterMarkFlagUpdate") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
