@@ -3376,7 +3376,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (grayOutMaximizeButton && !grayOutMaximizeButton_) {
+    if (grayOutMaximizeButton) {
         size_t size = supportedWindowModes.size();
         if (size == 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
@@ -3397,6 +3397,10 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
 
 WMError WindowSceneSessionImpl::GrayOutMaximizeButton(bool isGrayOut)
 {
+    if (grayOutMaximizeButton_ == isGrayOut) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Duplicate settings are gray out: %{public}d", isGrayOut);
+        return WMError::WM_OK;
+    }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "uicontent is empty");
