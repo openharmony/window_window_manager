@@ -10946,7 +10946,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
         TLOGD(WmsLogTag::WMS_IMMS, "scene session is nullptr or not visible");
         return;
     }
-    sceneSession->UpdateOrMarkAvoidArea(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    sceneSession->UpdateAvoidArea(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
