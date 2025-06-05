@@ -1401,25 +1401,32 @@ HWTEST_F(SessionStubTest, HandleStartMovingWithCoordinate, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     auto result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteInt32(1);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteInt32(1);
     data.WriteInt32(1);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint64(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**q

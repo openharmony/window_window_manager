@@ -1592,6 +1592,53 @@ HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
 }
+
+/**
+ * @tc.name: StartMovingWithCoordinate
+ * @tc.desc: StartMovingWithCoordinate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, StartMovingWithCoordinate, TestSize.Level2)
+{
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+ 
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+ 
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+ 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    res = sProxy->StartMovingWithCoordinate(-1, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, -1, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, -1, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, -1, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
