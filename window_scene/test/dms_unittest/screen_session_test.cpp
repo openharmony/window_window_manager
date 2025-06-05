@@ -3767,7 +3767,7 @@ HWTEST_F(ScreenSessionTest, GetDensityInCurResolution, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float density = 1.5f;
@@ -3790,7 +3790,7 @@ HWTEST_F(ScreenSessionTest, SetDefaultDensity, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float density = 1.5f;
@@ -3861,7 +3861,7 @@ HWTEST_F(ScreenSessionTest, IsWidthHeightMatch01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float width = 1.5f;
@@ -3885,7 +3885,7 @@ HWTEST_F(ScreenSessionTest, IsWidthHeightMatch02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float width = 1.0f;
@@ -3909,7 +3909,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float scaleX = 1.0f;
@@ -3949,7 +3949,7 @@ HWTEST_F(ScreenSessionTest, SetStartPosition, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     float scaleX = 1.0f;
@@ -3972,7 +3972,7 @@ HWTEST_F(ScreenSessionTest, BeforeScreenPropertyChange, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     FoldStatus foldStatus = FoldStatus::UNKNOWN;
@@ -3994,7 +3994,7 @@ HWTEST_F(ScreenSessionTest, ScreenModeChange, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     ScreenModeChangeEvent status = ScreenModeChangeEvent::UNKNOWN;
@@ -4016,7 +4016,7 @@ HWTEST_F(ScreenSessionTest, GetApiVersion, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     int ret = screenSession->GetApiVersion();
@@ -4037,7 +4037,7 @@ HWTEST_F(ScreenSessionTest, GetSensorRotation, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
     Rotation sensorRotation = Rotation::ROTATION_0;
@@ -4059,7 +4059,7 @@ HWTEST_F(ScreenSessionTest, GetDisplayId, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetScreenId(1);
@@ -4080,7 +4080,7 @@ HWTEST_F(ScreenSessionTest, SetDisplayNode, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     RSDisplayNodeConfig displayNodeConfig;
@@ -4105,7 +4105,7 @@ HWTEST_F(ScreenSessionTest, SetRSScreenId, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetRSScreenId(1);
@@ -4126,7 +4126,7 @@ HWTEST_F(ScreenSessionTest, SetActiveId, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetActiveId(1);
@@ -4147,7 +4147,7 @@ HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetIsAvailableAreaNeedNotify(false);
@@ -4169,7 +4169,7 @@ HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetIsAvailableAreaNeedNotify(true);
@@ -4190,7 +4190,7 @@ HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetIsEnableCanvasRotation(false);
@@ -4211,7 +4211,7 @@ HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
 
     screenSession->SetIsEnableCanvasRotation(true);
