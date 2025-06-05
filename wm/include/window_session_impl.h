@@ -148,6 +148,11 @@ public:
      * Compatible Mode
      */
     bool IsAdaptToSimulationScale() const;
+    bool IsAdaptToProportionalScale() const;
+    bool IsInCompatScaleMode() const;
+    bool IsInCompatScaleStatus() const;
+    WMError UpdateCompatScaleInfo(const Transform& transform);
+    void SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const;
     bool IsAdaptToSubWindow() const;
     static void RegisterWindowScaleCallback();
     static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
@@ -265,6 +270,11 @@ public:
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
     void GetExtensionConfig(AAFwk::WantParams& want) const override;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    virtual WMError HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data);
+    virtual WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
@@ -510,6 +520,8 @@ protected:
     void NotifyAfterInactive();
     void NotifyBeforeDestroy(std::string windowName);
     void NotifyAfterDestroy();
+    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     void ClearListenersById(int32_t persistentId);
 
     /*
@@ -533,6 +545,7 @@ protected:
         const sptr<DisplayInfo>& info = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
@@ -567,7 +580,6 @@ protected:
      * UIExtension
      */
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
-    std::mutex rectChangeUIExtListenerIdsMutex_;
 
     /*
      * Sub Window
@@ -627,6 +639,12 @@ protected:
      */
     static std::recursive_mutex subWindowSessionMutex_;
     static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+
+    /*
+     * Compatible Mode
+     */
+    float compatScaleX_ = 1.0f;
+    float compatScaleY_ = 1.0f;
 
     /*
      * DFX
@@ -725,13 +743,16 @@ protected:
      */
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
+    /*
+     * Window Decor
+     */
+    bool grayOutMaximizeButton_ = false;
+    
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
-    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T>
@@ -959,7 +980,7 @@ private:
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
     static std::mutex mainWindowCloseListenersMutex_;
     static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
-    static std::mutex windowWillCloseListenersMutex_;
+    static std::recursive_mutex windowWillCloseListenersMutex_;
     static std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> windowWillCloseListeners_;
 
     /*

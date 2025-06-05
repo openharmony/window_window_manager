@@ -287,15 +287,15 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
     uint32_t height = 0;
     {
         std::lock_guard<std::recursive_mutex> lock_mode(foldScreenPolicy_->displayModeMutex_);
-        if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
+        if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::FULL) {
             y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X];
             height = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH];
-        } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::MAIN) {
             height = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH];
-        } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
             height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
         } else {
-            TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->currentDisplayMode_);
+            TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->lastDisplayMode_);
             return;
         }
     }

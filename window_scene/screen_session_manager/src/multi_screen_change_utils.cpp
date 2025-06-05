@@ -110,7 +110,7 @@ void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& scree
 void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
-    if (!innerScreen || !externalScreen) {
+    if (innerScreen == nullptr || externalScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
@@ -139,11 +139,11 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
-    if (innerScreen) {
+    if (innerScreen != nullptr) {
         TLOGW(WmsLogTag::DMS, "inner screen offScreen rendering.");
         innerScreen->SetScreenOffScreenRendering();
     }
-    if (externalScreen) {
+    if (externalScreen != nullptr) {
         TLOGW(WmsLogTag::DMS, "external screen offScreen rendering.");
         externalScreen->SetScreenOffScreenRendering();
     }
@@ -250,7 +250,7 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     sptr<ScreenSession> externalPhyScreen =
         ScreenSessionManager::GetInstance().GetPhysicalScreenSession(externalScreen->GetRSScreenId());
 
-    if (!innerPhyScreen || !externalPhyScreen) {
+    if (innerPhyScreen == nullptr || externalPhyScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "physicalScreen is null!");
         return;
     }

@@ -27,11 +27,21 @@ constexpr const char* const ROOT_HOST_WINDOW_TYPE_FIELD = "rootHostWindowType";
 constexpr const char* const GESTURE_BACK_ENABLED = "gestureBackEnabled";
 constexpr const char* const IMMERSIVE_MODE_ENABLED = "immersiveModeEnabled";
 constexpr const char* const HOST_WINDOW_DELAY_RAISE_STATE_FIELD = "hostWindowDelayRaiseState";
+constexpr const char* const ATOMICSERVICE_KEY_FUNCTION = "ohos.atomicService.window.function";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLE = "ohos.atomicService.window.param.enable";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_STATUS = "ohos.atomicService.window.param.status";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAVIGATION = "ohos.atomicService.window.param.navigation";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAME = "ohos.atomicService.window.param.name";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLEANIMATION = "ohos.atomicService.window.param.enableAnimation";
 constexpr const char* const RECT_X = "rectX";
 constexpr const char* const RECT_Y = "rectY";
 constexpr const char* const RECT_WIDTH = "rectWidth";
 constexpr const char* const RECT_HEIGHT = "rectHeight";
 constexpr const char* const RECT_CHANGE_REASON = "rectChangeReason";
+constexpr const char* const COMPAT_IS_SIMULATION_SCALE_FIELD = "compat.isSimulationScale";
+constexpr const char* const COMPAT_IS_PROPORTION_SCALE_FIELD = "compat.isProportionScale";
+constexpr const char* const COMPAT_SCALE_X_FIELD = "compat.scaleX";
+constexpr const char* const COMPAT_SCALE_Y_FIELD = "compat.scaleY";
 
 enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
@@ -42,6 +52,7 @@ enum class Businesscode : uint32_t {
     SYNC_HOST_GESTURE_BACK_ENABLED,
     SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
     NOTIFY_HOST_WINDOW_RECT_CHANGE,
+    SYNC_COMPAT_INFO,
 
     // IPC messages corresponding to the Businesscode between 10000 and 20000
     // will be forwarded to the host window by the UEC

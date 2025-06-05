@@ -2092,6 +2092,65 @@ HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAppForceLandscapeConfig01
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldReturnNullptrError_WhenBundleNameIsEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig01, TestSize.Level1)
+{
+    std::string bundleName = "";
+    AppForceLandscapeConfig config;
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig02
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig02, TestSize.Level1)
+{
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig config;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
+    config.homePage_ = "homePage";
+    config.isSupportSplitMode_ = true;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "homePage");
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig03
+ * @tc.desc: SetAppForceLandscapeConfig_ShouldUpdateConfig_WhenBundleNameIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig03, TestSize.Level1)
+{
+    std::string bundleName = "com.example.app";
+    AppForceLandscapeConfig preConfig;
+    preConfig.mode_ = 0;
+    preConfig.homePage_ = "homePage";
+    preConfig.isSupportSplitMode_ = false;
+    ssm_->appForceLandscapeMap_[bundleName] = preConfig;
+
+    AppForceLandscapeConfig config;
+    config.mode_ = 5; // 5: FORCE_SPLIT_MODE
+    config.homePage_ = "newHomePage";
+    config.isSupportSplitMode_ = true;
+
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -2397,6 +2456,47 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
     bool isPcOrPadFreeMultiWindowMode = false;
     auto result = ssm_->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
     ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetImageForRecent001
+ * @tc.desc: SetImageForRecent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetImageForRecent001, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 1999;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    auto result = ssm_->SetImageForRecent(1, ImageFit::FILL, 1);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    applicationInfo.isSystemApp = false;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    applicationInfo.isSystemApp = true;
+    abilityInfo->applicationInfo = applicationInfo;
+    sceneSession->SetAbilitySessionInfo(abilityInfo);
+    result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 
 /**
@@ -2707,7 +2807,7 @@ HWTEST_F(SceneSessionManagerTest, CloneWindow, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest, ConfigSupportFunctionType, Function | SmallTest | Level3)
 {
     ssm_->ConfigSupportFunctionType(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION);
-    EXPECT_EQ(true,
+    EXPECT_EQ(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION,
         (ssm_->systemConfig_.supportFunctionType_ & SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION));
 }
 } // namespace

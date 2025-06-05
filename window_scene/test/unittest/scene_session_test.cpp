@@ -976,6 +976,24 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyAddOrRemoveSnapshotWindowTest
+ * @tc.desc: NotifyAddOrRemoveSnapshotWindowTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyAddOrRemoveSnapshotWindowTest, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.windowType_ = 1;
+    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->showRecent_ = true;
+    sceneSession->NotifyAddOrRemoveSnapshotWindow(true);
+}
+
+/**
  * @tc.name: ProcessWindowMoving
  * @tc.desc: ProcessWindowMoving
  * @tc.type: FUNC
@@ -1205,10 +1223,35 @@ HWTEST_F(SceneSessionTest, CalcRectForStatusBar, TestSize.Level1)
     info.abilityName_ = "CalcRectForStatusBar";
     info.bundleName_ = "CalcRectForStatusBar";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    uint32_t width = sceneSession->CalcRectForStatusBar().width_;
-    uint32_t height = sceneSession->CalcRectForStatusBar().height_;
-    EXPECT_EQ(width, 0);
-    EXPECT_EQ(height, 0);
+    DMRect statusBarRect = sceneSession->CalcRectForStatusBar();
+    ASSERT_EQ(statusBarRect.width_, 0);
+    ASSERT_EQ(statusBarRect.height_, 0);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    statusBarRect = sceneSession->CalcRectForStatusBar();
+    ASSERT_EQ(statusBarRect.width_, 0);
+    ASSERT_EQ(statusBarRect.height_, 0);
+
+    WSRect rect({0, 0, 1, 1});
+    sceneSession->winRect_ = rect;
+    sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+
+    sceneSession->isVisible_ = false;
+    statusBarRect = sceneSession->CalcRectForStatusBar();
+    EXPECT_EQ(statusBarRect.width_, 1);
+    EXPECT_EQ(statusBarRect.height_, 0);
+
+    sceneSession->isVisible_ = true;
+    statusBarRect = sceneSession->CalcRectForStatusBar();
+    EXPECT_EQ(statusBarRect.width_, 1);
+    EXPECT_EQ(statusBarRect.height_, 1);
 }
 
 /**

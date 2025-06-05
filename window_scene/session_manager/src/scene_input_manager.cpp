@@ -225,8 +225,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         auto screenHeight = screenProperty.GetPhysicalTouchBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
-        transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
-            screenProperty.GetPivotY() * screenHeight).Inverse();
+        transform = transform.Scale(scale, screenProperty.GetPivotX() * screenProperty.GetBounds().rect_.GetWidth(),
+            screenProperty.GetPivotY() * screenProperty.GetBounds().rect_.GetHeight()).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         int32_t screenOneHandX = DEFAULT_SCREEN_POS;
         int32_t screenOneHandY = DEFAULT_SCREEN_POS;

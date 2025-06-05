@@ -2040,7 +2040,7 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
+WSError SessionProxy::ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2049,7 +2049,7 @@ WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+    if (!data.WriteParcelable(&effectOption)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard layout params write failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -2698,7 +2698,7 @@ WSError SessionProxy::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy
 }
 
 WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY)
+    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2721,6 +2721,10 @@ WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
     }
     if (!data.WriteInt32(pointerPosY)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write pointerPosY failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

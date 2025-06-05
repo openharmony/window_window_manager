@@ -2594,21 +2594,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleGetHostWindowCompatiblityInfo
- * @tc.desc: test HandleGetHostWindowCompatiblityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    data.WriteRemoteObject(token);
-    int res = stub_->HandleGetHostWindowCompatiblityInfo(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleGetAppDragResizeType
  * @tc.desc: test HandleGetAppDragResizeType
  * @tc.type: FUNC
