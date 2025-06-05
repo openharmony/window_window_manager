@@ -1432,7 +1432,7 @@ HWTEST_F(MoveDragControllerTest, StopMoving, TestSize.Level1)
 HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, TestSize.Level1)
 {
     WSRect winRect = { 200, 200, 1000, 1000 };
-    MoveDragController::MoveCoordinateProperty property = { 100, 50, 300, 500, 0, winRect }
+    MoveDragController::MoveCoordinateProperty property = { 100, 50, 300, 500, 0, winRect };
     moveDragController->HandleStartMovingWithCoordinate(property);
     EXPECT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
     EXPECT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
