@@ -1438,6 +1438,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
 void MoveDragController::SetSpecifyMoveStartDisplay(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
+    std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
     specifyMoveStartDisplayId_ = displayId;
     isSpecifyMoveStart_ = true;
 }
@@ -1445,11 +1446,12 @@ void MoveDragController::SetSpecifyMoveStartDisplay(DisplayId displayId)
 void MoveDragController::ClearSpecifyMoveStartDisplay()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
+    std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
     specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
     isSpecifyMoveStart_ = false;
 }
 
-void MoveDragController::HandleStartMovingWithCoordinate(MoveCoordinateProperty property)
+void MoveDragController::HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property)
 {
     moveTempProperty_.lastDownPointerPosX_ = property.pointerPosX;
     moveTempProperty_.lastDownPointerPosY_ = property.pointerPosY;
@@ -1499,7 +1501,12 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.width_,
         originalRect.height_
     };
-    if (isSpecifyMoveStart_) {
+    bool isSpecifyMoveStart = false;
+    {
+        std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
+        isSpecifyMoveStart = isSpecifyMoveStart_;
+    }
+    if (isSpecifyMoveStart) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}" PRIu64, specifyMoveStartDisplayId_);
         moveDragProperty_.originalRect_.posX_ = moveTempProperty_.lastDownPointerPosX_ -
             moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_;
