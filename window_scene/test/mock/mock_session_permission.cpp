@@ -21,7 +21,7 @@ namespace {
 bool g_isSystemCallingFlag = true;
 bool g_verifyCallingPermissionFlag = false;
 bool g_isStartByHdcdFlag = false;
-} // namespace
+}
 namespace Rosen {
 void MockSessionPermission::ClearAllFlag()
 {
