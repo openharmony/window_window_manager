@@ -65,7 +65,7 @@ public:
      *
      * @param recordType The type of record info.
      * @param recordSize Set the size of records for each record type.
-     *                   Its range is from 1 to 10. The valid range is 1 to 10.
+     *                   The valid range is 1 to 10.
      */
     WSError SetRecordSize(RecordType recordType, uint32_t recordSize);
 
