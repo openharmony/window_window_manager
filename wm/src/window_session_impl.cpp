@@ -4666,6 +4666,9 @@ WMError WindowSessionImpl::UnregisterScreenshotListener(const sptr<IScreenshotLi
 
 WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
     if (listener == nullptr) {
@@ -4685,19 +4688,18 @@ WMError WindowSessionImpl::RegisterScreenshotAppEventListener(const IScreenshotA
             isUpdate = true;
         }
     }
-    if (isUpdate) {
-        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionScreenshotAppEventListener(persistentId, true);
-    }
     auto hostSession = GetHostSession();
-    if (hostSession != nullptr && ret == WMError::WM_OK) {
-        hostSession->UpdateRotationChangeRegistered(persistentId, true);
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
     }
     return ret;
 }
 
-
 WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
     if (listener == nullptr) {
@@ -4717,8 +4719,9 @@ WMError WindowSessionImpl::UnregisterScreenshotAppEventListener(const IScreensho
             isUpdate = true;
         }
     }
-    if (isUpdate) {
-        ret = SingletonContainer::Get<WindowAdapter>().UpdateSessionScreenshotAppEventListener(persistentId, false);
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateScreenshotAppEventRegistered(persistentId, true);
     }
     return ret;
 }
