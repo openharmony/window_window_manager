@@ -45,7 +45,6 @@ void MockSessionPermission::SetIsStartByHdcdFlag(const bool isStartByHdcdFlag)
     g_isStartByHdcdFlag = isStartByHdcdFlag;
 }
 
-
 #ifdef ENABLE_MOCK_IS_SYSTEM_CALLING
 bool SessionPermission::IsSystemCalling()
 {
@@ -67,4 +66,4 @@ bool SessionPermission::IsStartByHdcd()
 }
 #endif
 }// namespace Rosen
-} // namespace OHOS
+}// namespace OHOS
