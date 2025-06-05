@@ -162,22 +162,18 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackground(const sptr<IRem
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteRemoteObject(token)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write token failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
-    if (!data.WriteBool(shouldBackToCaller)) {
+    if (!data.WriteBool(params.shouldBackToCaller)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write shouldBackToCaller failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteParcelable(&params.wantParams)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write wantParams failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
@@ -1943,7 +1939,6 @@ WMError SceneSessionManagerLiteProxy::TransferSessionToTargetScreen(
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid param");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -1959,6 +1954,10 @@ WMError SceneSessionManagerLiteProxy::TransferSessionToTargetScreen(
         TLOGE(WmsLogTag::WMS_LIFE, "Write toScreenId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (!data.WriteParcelable(&info.wantParams)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write wantParams failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
@@ -1967,7 +1966,7 @@ WMError SceneSessionManagerLiteProxy::TransferSessionToTargetScreen(
     if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
