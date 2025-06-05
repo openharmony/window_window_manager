@@ -198,6 +198,7 @@ enum class DMError : int32_t {
     DM_ERROR_NOT_SYSTEM_APP = 202,
     DM_ERROR_DEVICE_NOT_SUPPORT = 801,
     DM_ERROR_UNKNOWN = -1,
+    DM_ERROR_ILLEGAL_PARAM = 1400004,
 };
 
 /**
@@ -212,6 +213,7 @@ enum class DmErrorCode : int32_t {
     DM_ERROR_INVALID_SCREEN = 1400001,
     DM_ERROR_INVALID_CALLING = 1400002,
     DM_ERROR_SYSTEM_INNORMAL = 1400003,
+    DM_ERROR_ILLEGAL_PARAM = 1400004,
 };
 
 /**
@@ -235,6 +237,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_ERROR_NOT_SYSTEM_APP,                  DmErrorCode::DM_ERROR_NOT_SYSTEM_APP        },
     {DMError::DM_ERROR_UNKNOWN,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_DEVICE_NOT_SUPPORT,              DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT    },
+    {DMError::DM_ERROR_ILLEGAL_PARAM,                   DmErrorCode::DM_ERROR_ILLEGAL_PARAM    },
 };
 
 using DisplayStateCallback = std::function<void(DisplayState)>;
@@ -684,6 +687,22 @@ enum class DMDeviceStatus: uint32_t {
     STATUS_TENT_HOVER,
     STATUS_TENT,
     STATUS_GLOBAL_FULL
+};
+
+/**
+ * @brief Coordinate of points on the screen
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+};
+
+/**
+ * @brief Relative coordinate of points relative to the display
+ */
+struct RelativePosition {
+    DisplayId displayId = 0;
+    Position position = {0, 0};
 };
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
