@@ -336,6 +336,19 @@ SessionInfo& WindowSessionProperty::EditSessionInfo()
     return sessionInfo_;
 }
 
+void WindowSessionProperty::SetGlobalDisplayRect(const Rect& globalDisplayRect)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "globalDisplayRect=%{public}s", globalDisplayRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    globalDisplayRect_ = globalDisplayRect;
+}
+
+Rect WindowSessionProperty::GetGlobalDisplayRect() const
+{
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    return globalDisplayRect_;
+}
+
 Rect WindowSessionProperty::GetWindowRect() const
 {
     std::lock_guard<std::mutex> lock(windowRectMutex_);

@@ -244,6 +244,8 @@ public:
     float GetWindowCornerRadius() const;
     void SetWindowShadows(const ShadowsInfo& shadowsInfo);
     ShadowsInfo GetWindowShadows() const;
+    Rect GetGlobalDisplayRect() const;
+    void SetGlobalDisplayRect(const Rect& globalDisplayRect);
 
     /*
      * UIExtension
@@ -536,6 +538,8 @@ private:
     mutable std::mutex cornerRadiusMutex_;
     ShadowsInfo shadowsInfo_;
     mutable std::mutex shadowsInfoMutex_;
+    mutable std::mutex globalDisplayRectMutex_;
+    Rect globalDisplayRect_ { 0, 0, 0, 0 };
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
