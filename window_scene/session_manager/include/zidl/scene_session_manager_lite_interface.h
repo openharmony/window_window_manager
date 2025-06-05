@@ -95,12 +95,15 @@ public:
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
         TRANS_ID_REMOVE_INSTANCE_KEY,
+        TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN,
+        TRANS_ID_PENDING_SESSION_TO_BACKGROUND,
     };
 
     /*
      * Window Lifecycle
      */
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
@@ -291,6 +294,19 @@ public:
      * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
      */
     virtual WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) = 0;
+
+    /**
+     * @brief Transfer a session to the target screen
+     *
+     * This function is used to transfer a session to the target screen
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param info The session infomation to be transferred
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

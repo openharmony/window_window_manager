@@ -83,6 +83,7 @@ const std::string WATCH_FOCUS_ACTIVE_CHANGE_CB = "watchFocusActiveChange";
 const std::string SET_FOREGROUND_WINDOW_NUM_CB = "setForegroundWindowNum";
 const std::string MINIMIZE_BY_WINDOW_ID_CB = "minimizeByWindowId";
 const std::string SCENE_SESSION_DESTRUCT_CB = "sceneSessionDestruct";
+const std::string SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB = "sceneSessionTransferToTargetScreen";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -104,6 +105,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {SET_FOREGROUND_WINDOW_NUM_CB,             ListenerFunctionType::SET_FOREGROUND_WINDOW_NUM_CB},
     {MINIMIZE_BY_WINDOW_ID_CB,                 ListenerFunctionType::MINIMIZE_BY_WINDOW_ID_CB},
     {SCENE_SESSION_DESTRUCT_CB,    ListenerFunctionType::SCENE_SESSION_DESTRUCT_CB},
+    {SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,    ListenerFunctionType::SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB},
 };
 } // namespace
 
@@ -1551,6 +1553,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::SCENE_SESSION_DESTRUCT_CB:
             RegisterSceneSessionDestructCallback();
+            break;
+        case ListenerFunctionType::SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB:
+            RegisterTransferSessionToTargetScreenCallback();
             break;
         default:
             break;
@@ -4755,6 +4760,31 @@ void JsSceneSessionManager::OnSceneSessionDestruct(int32_t persistentId)
             napi_value argv[] = { CreateJsValue(env, persistentId) };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         }, "OnSceneSessionDestruct, perisistentId: " + std::to_string(persistentId));
+}
+
+void JsSceneSessionManager::RegisterTransferSessionToTargetScreenCallback()
+{
+    SceneSessionManager::GetInstance().RegisterTransferSessionToTargetScreenCallback(
+        [this](const TransferSessionInfo& info) {
+            this->OnTransferSessionToTargetScreen(info);
+    });
+}
+
+void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessionInfo& info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    taskScheduler_->PostMainThreadTask(
+        [this, info, jsCallBack = GetJSCallback(SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB), env = env_] {
+            if (jsCallBack == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+                return;
+            }
+            napi_value persistentId = CreateJsValue(env, info.persistentId);
+            napi_value toScreenId = CreateJsValue(env, info.toScreenId);
+            napi_value wantParams = OHOS::AppExecFwk::WrapWantParams(env, info.wantParams);
+            napi_value argv[] = { persistentId, toScreenId, wantParams };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, __func__);
 }
 
 napi_value JsSceneSessionManager::OnSupportFollowParentWindowLayout(napi_env env, napi_callback_info info)

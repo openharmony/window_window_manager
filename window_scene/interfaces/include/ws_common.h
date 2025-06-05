@@ -800,6 +800,17 @@ struct SessionEventParam {
     uint32_t dragResizeType = 0;
 };
 
+struct BackgroundParams {
+    bool shouldBackToCaller = true;
+    AAFwk::WantParams wantParams {};
+};
+
+struct TransferSessionInfo {
+    int32_t persistentId = -1;
+    int32_t toScreenId = -1;
+    AAFwk::WantParams wantParams {};
+};
+
 /**
  * @brief Enumerates session gravity.
  */
