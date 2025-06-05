@@ -135,8 +135,15 @@ public:
     /*
      * PC Window Layout
      */
-    void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId, const WSRect& winRect);
+    struct MoveCoordinateProperty {
+        int32_t pointerWindowX = 0;
+        int32_t pointerWindowY = 0;
+        int32_t pointerPosX = 0;
+        int32_t pointerPosY = 0;
+        DisplayId displayId = DISPLAY_ID_INVALID;
+        WSRect winRect = { 0, 0, 0, 0 };
+    }
+    void HandleStartMovingWithCoordinate(MoveCoordinateProperty property);
     void SetSpecifyMoveStartDisplay(DisplayId displayId);
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
