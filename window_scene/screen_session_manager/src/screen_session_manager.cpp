@@ -1302,9 +1302,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
             SetMultiScreenDefaultRelativePosition();
             ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
         }
-        sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
-        if (newInternalSession != nullptr && internalSession != nullptr &&
-            internalSession->GetScreenId() != newInternalSession->GetScreenId()) {
+        if (screenSession->GetScreenId() != screenSession->GetRSScreenId()) {
             TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
             screenSession = internalSession;
         }
@@ -1421,7 +1419,7 @@ void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession>& screenS
         return;
     }
     if (screenCombination == ScreenCombination::SCREEN_MAIN) {
-        TLOGW(WmsLogTag::DMS, "reset to innrt screen to main.");
+        TLOGW(WmsLogTag::DMS, "reset to inner screen to main.");
         HandleMainScreenDisconnect(screenSession);
     }
     screenCombination = screenSession->GetScreenCombination();
@@ -1438,6 +1436,7 @@ void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession>& screenS
 
 void ScreenSessionManager::HandleMainScreenDisconnect(sptr<ScreenSession>& screenSession)
 {
+#ifdef WM_MULTI_SCREEN_ENABLE
     if (!g_isPcDevice) {
         TLOGE(WmsLogTag::DMS, "not PC device, return before process.");
         return;
@@ -1457,24 +1456,23 @@ void ScreenSessionManager::HandleMainScreenDisconnect(sptr<ScreenSession>& scree
         MultiScreenModeChange(internalSession->GetRSScreenId(), screenSession->GetRSScreenId(),
             SCREEN_MIRROR);
     }
-    sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
-    auto clientProxy = GetClientProxy();
-    if (clientProxy == nullptr) {
-        if (!screenSession->GetIsInternal() && screenSession->GetIsCurrentInUse()){
-            TLOGW(WmsLogTag::DMS, "client is null, reset internal session.");
-            ResetInternalScreenSession(newInternalSession, screenSession);
-        }
+    if (screenSession->GetScreenId() == screenSession->GetRSScreenId()) {
+        TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
+        screenSession = internalSession;
     } else {
-        if (newInternalSession != nullptr && internalSession != nullptr &&
-            internalSession->GetScreenId() != newInternalSession->GetScreenId()) {
-            TLOGW(WmsLogTag::DMS, "main screen changed, reset screenSession.");
-            screenSession = internalSession;
+        if (!screenSession->GetIsInternal() && screenSession->GetIsCurrentInUse()) {
+            TLOGW(WmsLogTag::DMS, "main screen not changed, reset internal session.");
+            sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
+            ResetInternalScreenSession(newInternalSession, screenSession);
+            screenSession = newInternalSession;
         }
     }
+#endif
 }
 
 void ScreenSessionManager::ResetInternalScreenSession(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen)
 {
+#ifdef WM_MULTI_SCREEN_ENABLE
     if (innerScreen == nullptr || externalScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "screen sessions null.");
         return;
@@ -1510,19 +1508,16 @@ void ScreenSessionManager::ResetInternalScreenSession(sptr<ScreenSession>& inner
     innerScreen->SetStartPosition(0, 0);
     externalScreen->SetStartPosition(0, 0);
 
-    /* reset dpi */
-    SetVirtualPixelRatio(innerScreen->GetScreenId(), innerScreen->GetScreenProperty().GetVirtualPixelRatio());
-    SetVirtualPixelRatio(externalScreen->GetScreenId(), externalScreen->GetScreenProperty().GetVirtualPixelRatio());
-
     /* reset combination */
-    innerScreen->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
-    externalScreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    innerScreen->SetIsExtend(false);
-    externalScreen->SetIsExtend(true);
+    innerScreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    externalScreen->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    innerScreen->SetIsExtend(true);
+    externalScreen->SetIsExtend(false);
 
     /* set screen available */
     innerScreen->SetScreenAvailableStatus(true);
     externalScreen->SetScreenAvailableStatus(true);
+#endif
 }
 
 void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
@@ -4003,6 +3998,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         if (physicalScreen) {
             physicalScreen->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
         }
+        NotifyScreenModeChange();
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
@@ -4696,6 +4692,9 @@ DMError ScreenSessionManager::SetVirtualMirrorScreenCanvasRotation(ScreenId scre
     if (!res) {
         TLOGE(WmsLogTag::DMS, "failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        screenSession->SetIsEnableCanvasRotation(autoRotate);
     }
     TLOGW(WmsLogTag::DMS, "success");
     return DMError::DM_OK;
@@ -9859,8 +9858,12 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
         return;
     }
     ScreenProperty property = screenSession->GetScreenProperty();
-    property.SetPropertyChangeReason("screen mode change");
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGW(WmsLogTag::DMS, "super fold device, change by rotation.");
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
+    } else {
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }

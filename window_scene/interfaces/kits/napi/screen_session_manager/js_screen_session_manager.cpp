@@ -305,35 +305,35 @@ napi_value JsScreenSessionManager::GetDeviceScreenConfig(napi_env env, napi_call
 
 napi_value JsScreenSessionManager::GetExtendScreenConnectStatus(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]GetExtendScreenConnectStatus");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Get extend screen status");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetExtendScreenConnectStatus(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]SetDefaultMultiScreenModeWhenSwitchUser");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Set to default mode.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetDefaultMultiScreenModeWhenSwitchUser(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyExtendScreenCreateFinish(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenCreateFinish");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify create finish.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenCreateFinish(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyExtendScreenDestroyFinish(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyExtendScreenDestroyFinish");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify destroy finish.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyExtendScreenDestroyFinish(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyScreenMaskAppear");
+    TLOGD(WmsLogTag::DMS, "[NAPI]Notify mask appear.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyScreenMaskAppear(env, info) : nullptr;
 }
@@ -884,7 +884,6 @@ napi_value JsScreenSessionManager::OnGetFoldStatus(napi_env env, napi_callback_i
 
 napi_value JsScreenSessionManager::OnGetSuperFoldStatus(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetSuperFoldStatus");
     SuperFoldStatus status = ScreenSessionManagerClient::GetInstance().GetSuperFoldStatus();
     TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", getSuperFoldStatus = %{public}u", status);
     return CreateJsValue(env, status);

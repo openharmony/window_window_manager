@@ -266,11 +266,13 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    bool hasValidId = false;
     for (const int32_t id : persistentIdList) {
         if (!SceneSessionManager::GetInstance().IsMainWindowByPersistentId(id)) {
             TLOGW(WmsLogTag::WMS_LIFE, "invalid persistentId");
             continue;
         }
+        hasValidId = true;
         auto it = listenerMapById_.find(id);
         if (it != listenerMapById_.end()) {
             if (it->second.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
@@ -283,9 +285,9 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
             newListenerList.emplace_back(listener);
             listenerMapById_.emplace(id, newListenerList);
         }
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", id);
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Register SessionLifecycleListener By Id Finished.");
-    return WMError::WM_OK;
+    return hasValidId ? WMError::WM_OK : WMError::WM_ERROR_INVALID_PARAM;
 }
 
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,

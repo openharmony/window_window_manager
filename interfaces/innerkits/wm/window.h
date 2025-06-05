@@ -3172,9 +3172,12 @@ public:
      * @brief Sets the supported window modes.
      *
      * @param supportedWindowModes Supported window modes of the window.
+     * @param grayOutMaximizeButton Whether to gray out the window maximize button.
+                                    The value true means to gray out the button, and false means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3671,21 +3674,21 @@ public:
     /**
      * @brief Show keyboard window
      *
-     * @param mode Keyboard will show with special mode.
+     * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief Change keyboard view mode
+     * @brief Change keyboard effect with option
      *
-     * @param mode Keyboard will update to the special mode.
-     * @return WM_OK means view mode update success, others means failed.
+     * @param effectOption Keyboard will update to the special effect option.
+     * @return WM_OK means effect update success, others means failed.
      */
-    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    virtual WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }

@@ -119,6 +119,7 @@ ohos_unittest("dmserver_display_manager_ipc_service_test") {
     "hilog:libhilog",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
   ]
 }

@@ -374,12 +374,6 @@ public:
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
 
     /*
-     * Compatible Mode
-     */
-    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) override;
-
-    /*
      * Sub Window
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
@@ -789,6 +783,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    std::string GetFloatWidth(const int width, float value);
 
     /*
      * Window Pipeline
@@ -853,8 +848,8 @@ private:
     WSError RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusSubWindowImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusSubWindowImmediately(const sptr<SceneSession>& sceneSession);
     bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
         const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
@@ -880,9 +875,9 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
-    WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    WSError ProcessSubWindowRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessSubWindowRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);

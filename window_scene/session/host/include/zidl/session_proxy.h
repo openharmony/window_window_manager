@@ -113,7 +113,7 @@ public:
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
@@ -156,7 +156,7 @@ public:
      * PC Window
      */
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY) override;
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;

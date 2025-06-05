@@ -124,6 +124,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "SceneType", SceneTypeInit(env));
     napi_set_named_property(env, exportObj, "KeyboardGravity", KeyboardGravityInit(env));
     napi_set_named_property(env, exportObj, "KeyboardViewMode", KeyboardViewModeInit(env));
+    napi_set_named_property(env, exportObj, "KeyboardFlowLightMode", KeyboardFlowlightModeInit(env));
+    napi_set_named_property(env, exportObj, "KeyboardGradientMode", KeyboardGradientModeInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
     napi_set_named_property(env, exportObj, "RSUIFirstSwitch", CreateJsRSUIFirstSwitch(env));
     napi_set_named_property(env, exportObj, "StartupVisibility", CreateJsSessionStartupVisibility(env));
@@ -628,7 +630,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this](DisplayId displayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus, displayId: %{public}" PRIu64, displayId);
-        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId).first;
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
@@ -637,7 +639,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
     };
     NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this](DisplayId displayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus, displayId: %{public}" PRIu64, displayId);
-        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId);
+        const auto& uiContent = rootScene_->GetUIContentByDisplayId(displayId).first;
         if (uiContent == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
@@ -648,9 +650,10 @@ void JsSceneSessionManager::ProcessShiftFocus()
         DisplayId prevDisplayId, DisplayId currDisplayId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb focus change, prevId: %{public}" PRIu64 " currId: %{public}" PRIu64,
             prevDisplayId, currDisplayId);
-        const auto& prevUIContent = rootScene_->GetUIContentByDisplayId(prevDisplayId);
-        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId);
-        if (prevUIContent == currUIContent) {
+        const auto& prevUIContentPair = rootScene_->GetUIContentByDisplayId(prevDisplayId);
+        const auto& prevUIContent = prevUIContentPair.first;
+        const auto& currUIContent = rootScene_->GetUIContentByDisplayId(currDisplayId).first;
+        if (prevUIContentPair.second && prevUIContent == currUIContent) {
             TLOGND(WmsLogTag::WMS_FOCUS, "not need to update focus");
             return;
         }
@@ -4774,8 +4777,8 @@ napi_value JsSceneSessionManager::OnSupportZLevel(napi_env env, napi_callback_in
 
 napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc count is invalid: %{public}zu", argc);
@@ -4790,7 +4793,12 @@ napi_value JsSceneSessionManager::OnSetSupportFunctionType(napi_env env, napi_ca
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeObj");
         return NapiGetUndefined(env);
     }
-    napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue);
+    if (napi_get_value_uint32(env, funcTypeObj, &funcTypeRawValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get funcTypeRawValue");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     funcType = static_cast<SupportFunctionType>(funcTypeRawValue);
     SceneSessionManager::GetInstance().ConfigSupportFunctionType(funcType);
     return NapiGetUndefined(env);

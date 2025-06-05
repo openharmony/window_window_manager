@@ -64,10 +64,10 @@ ohos_shared_library("window_native_kit") {
     "window_napi/js_extension_window_config.cpp",
     "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
+    "window_napi/js_window_animation_utils.cpp",
     "window_napi/js_window_listener.cpp",
     "window_napi/js_window_register_manager.cpp",
     "window_napi/js_window_utils.cpp",
-    "window_napi/js_window_animation_utils.cpp",
   ]
 
   public_configs = [ ":window_native_kit_public_config" ]
@@ -137,9 +137,9 @@ ohos_shared_library("window_napi") {
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
+    "../../../../window_scene/interfaces/innerkits:libwsutils",
     "../../../../wm:libwm",
     "../common:wm_napi_util",
-    "../../../../window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [

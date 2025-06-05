@@ -22,10 +22,20 @@
 #include "pointer_event.h"
 #include "ui/rs_canvas_node.h"
 #include "transaction/rs_transaction.h"
+#include "window_manager_hilog.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -457,7 +467,30 @@ HWTEST_F(SessionProxyTest, SetWindowTransitionAnimation, Function | SmallTest | 
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     TransitionAnimation animation;
-    ASSERT_EQ(WSError::WS_OK, sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation));
+    WSError res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->SetWindowTransitionAnimation(WindowTransitionType::DESTROY, animation);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SetWindowTransitionAnimation: SetWindowTransitionAnimation end";
 }
 
@@ -1010,6 +1043,12 @@ HWTEST_F(SessionProxyTest, NotifySnapshotUpdate, TestSize.Level1)
 
     WMError res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->NotifySnapshotUpdate();
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
     sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     res = sProxy->NotifySnapshotUpdate();
     EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
@@ -1490,12 +1529,25 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
  */
 HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool registered = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sProxy->NotifyKeyboardWillShowRegistered(registered);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
@@ -1505,12 +1557,25 @@ HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTes
  */
 HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool registered = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sProxy->NotifyKeyboardWillHideRegistered(registered);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
 }
 
 /**
@@ -1526,6 +1591,53 @@ HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
     ASSERT_NE(sProxy, nullptr);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate
+ * @tc.desc: StartMovingWithCoordinate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, StartMovingWithCoordinate, TestSize.Level2)
+{
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+ 
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+ 
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+ 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    res = sProxy->StartMovingWithCoordinate(-1, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, -1, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, -1, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, -1, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen
