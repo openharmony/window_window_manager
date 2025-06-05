@@ -15,6 +15,7 @@
 
 #ifndef MOCK_SESSION_PERMISSION_H
 #define MOCK_SESSION_PERMISSION_H
+
 namespace OHOS {
 namespace Rosen {
 class MockSessionPermission {
