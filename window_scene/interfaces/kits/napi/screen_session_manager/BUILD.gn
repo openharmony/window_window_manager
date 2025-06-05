@@ -18,6 +18,7 @@ config("screen_session_manager_napi_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${window_base_path}/window_scene/interfaces/kits/napi",
+    "${window_base_path}/window_scene/interfaces/include",
     "${window_base_path}/wm/include",
   ]
 }
