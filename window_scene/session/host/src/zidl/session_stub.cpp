@@ -1745,7 +1745,12 @@ int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessagePar
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosY failed!");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = StartMovingWithCoordinate(offsetX, offsetY, pointerPosX, pointerPosY);
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read displayId failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = StartMovingWithCoordinate(offsetX, offsetY, pointerPosX, pointerPosY, displayId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
