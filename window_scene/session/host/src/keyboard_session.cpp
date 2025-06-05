@@ -248,6 +248,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
+        // mark keyboard session as dirty if params change
+        if (session->IsSessionForeground() && sessionProperty->GetKeyboardLayoutParams() != params) {
+            session->MarkOccupiedAreaAsDirty();
+        }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
@@ -679,20 +683,23 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         }
 
         // The callingId may change in WindowManager. Use scb's callingId to properly handle callingWindow raise/restore.
-        bool isLayoutFinished = true;
         sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
         if (callingSession != nullptr) {
             callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
                 animationInfo.endRect, animationInfo.animated, rsTransaction);
         }
+        bool isLayoutFinished = true;
         if (isKeyboardShow) {
-            // If vsync acquisition fails or the vsync period terminates, immediately notify all registered listeners.
+            // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
                 session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
                     isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
             }
             if (isLayoutFinished) {
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
+            } else {
+                session->MarkOccupiedAreaAsDirty();
             }
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
@@ -727,6 +734,21 @@ std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
         rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
     }
     return rsTransaction;
+}
+
+void KeyboardSession::MarkOccupiedAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
+}
+
+void KeyboardSession::ResetOccupiedAreaDirtyFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
+}
+
+uint32_t KeyboardSession::GetOccupiedAreaDirtyFlags()
+{
+    return dirtyFlags_;
 }
 
 std::string KeyboardSession::GetSessionScreenName()
