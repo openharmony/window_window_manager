@@ -142,6 +142,7 @@ test_external_deps = [
   "ability_runtime:session_handler",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
+  "access_token:libaccesstoken_sdk",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
@@ -766,9 +767,15 @@ ohos_unittest("ws_scene_session_manager_test11") {
 
 ohos_unittest("ws_scene_session_manager_test12") {
   module_out_path = module_out_path
-  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/test/common/utils/include/",
+  ]
 
-  sources = [ "scene_session_manager_test12.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "scene_session_manager_test12.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 

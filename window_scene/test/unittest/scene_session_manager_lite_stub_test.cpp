@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <ipc_types.h>
 
+#include "iremote_object_mocker.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 
 using namespace testing;
@@ -267,6 +268,18 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) override
     {
         return WSError::WS_OK;
+    }
+    WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError ExitKioskMode(const sptr<IRemoteObject>& token) override
+    {
+        return WMError::WM_OK;
     }
 };
 
@@ -1085,6 +1098,52 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Fu
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUpdateKioskAppList
+ * @tc.desc: test function : HandleUpdateKioskAppList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateKioskAppList, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateKioskAppList(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleEnterKioskMode
+ * @tc.desc: test function : HandleEnterKioskMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleEnterKioskMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleEnterKioskMode(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleExitKioskMode
+ * @tc.desc: test function : HandleExitKioskMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleExitKioskMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleExitKioskMode(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace
