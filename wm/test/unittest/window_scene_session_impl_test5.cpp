@@ -1937,6 +1937,99 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn05, Function 
     EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
     EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
 }
+
+/**
+ * @tc.name: GetDragType01
+ * @tc.desc: GetDragType01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragType01, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragType01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 0.0f);
+    AreaType dragType = windowSceneSessionImpl->GetDragType(pointerEvent, pointerItem);
+    ASSERT_EQ(dragType, AreaType::UNDEFINED);
+}
+
+/**
+ * @tc.name: GetDragType02
+ * @tc.desc: GetDragType02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragType02, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragType02");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    AreaType dragType = windowSceneSessionImpl->GetDragType(pointerEvent, pointerItem);
+    ASSERT_EQ(dragType, AreaType::LEFT_TOP);
+}
+
+/**
+ * @tc.name: GetDragType03
+ * @tc.desc: GetDragType03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragType03, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragType03");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    AreaType dragType = windowSceneSessionImpl->GetDragType(pointerEvent, pointerItem);
+    ASSERT_EQ(dragType, AreaType::LEFT_TOP);
+}
+
+/**
+ * @tc.name: GetDragType04
+ * @tc.desc: GetDragType04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragType04, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragType04");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    AreaType dragType = windowSceneSessionImpl->GetDragType(pointerEvent, pointerItem);
+    ASSERT_EQ(dragType, AreaType::UNDEFINED);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
