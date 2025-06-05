@@ -15,6 +15,7 @@
 
 #include "session_permission.h"
 #include "mock_session_permission.h"
+
 namespace OHOS {
 namespace {
 bool g_isSystemCallingFlag = true;

@@ -773,7 +773,7 @@ ohos_unittest("ws_scene_session_manager_test12") {
 
   sources = [
     "scene_session_manager_test12.cpp",
-    "mock_session_permission.cpp",
+    "../mock/mock_session_permission.cpp",
   ]
 
   defines = [

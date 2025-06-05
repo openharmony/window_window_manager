@@ -533,7 +533,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
 
 /**
  * @tc.name: CreateAndConnectSpecificSession04
- * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureWindows
+ * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureFloatWindows
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.Level1)
@@ -564,7 +564,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.
 
 /**
  * @tc.name: CreateAndConnectSpecificSession05
- * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureWindows
+ * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureSubWindows
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession05, TestSize.Level1)
