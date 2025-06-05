@@ -6298,6 +6298,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     } else {
         uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
     }
+    windowPropertyInfo.globalDisplayRect = property_->GetGlobalDisplayRect();
     windowPropertyInfo.type = GetType();
     windowPropertyInfo.isLayoutFullScreen = IsLayoutFullScreen();
     windowPropertyInfo.isFullScreen = IsFullScreen();
@@ -6310,6 +6311,8 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     windowPropertyInfo.isTransparent = IsTransparent();
     windowPropertyInfo.id = GetWindowId();
     windowPropertyInfo.displayId = GetDisplayId();
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, globalDisplayRect=%{public}s", GetWindowId(),
+        windowPropertyInfo.globalDisplayRect.ToString().c_str());
     return WMError::WM_OK;
 }
 
