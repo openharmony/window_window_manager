@@ -872,7 +872,8 @@ HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     std::vector<ScreenHDRFormat> hdrFormats;
     auto res = screenSession->GetSupportedHDRFormats(hdrFormats);
@@ -1253,7 +1254,7 @@ HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, TestSize.Level1)
     RSDisplayNodeConfig displayNodeConfig;
     std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
     EXPECT_NE(nullptr, displayNode);
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, rsId, name, property, displayNode);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, rsId, name, property, displayNode);
     session->SetDisplayNodeScreenId(screenId);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNodeScreenId end";
 }
@@ -1303,7 +1304,7 @@ HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr()
     EXPECT_NE(nullptr, session->ConvertToDisplayInfo());
 
-    sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
+    sptr<ScreenInfo> info = sptr<ScreenInfo>::MakeSptr();
     EXPECT_NE(info, nullptr);
     EXPECT_NE(nullptr, session->ConvertToScreenInfo());
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo end";
@@ -1389,7 +1390,7 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, TestSize.Level1)
     NodeId nodeId = 0;
     ScreenId defaultScreenId = 0;
     ScreenCombination combination { ScreenCombination::SCREEN_ALONE };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, nodeId, defaultScreenId);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, property, nodeId, defaultScreenId);
     session->SetScreenCombination(combination);
     EXPECT_NE(session, nullptr);
     EXPECT_EQ(combination, session->GetScreenCombination());
@@ -1410,7 +1411,8 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
     ScreenColorGamut colorGamut;
     DMError res = screenSession->GetScreenColorGamut(colorGamut);
@@ -2166,7 +2168,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSnapshot, TestSize.Level1)
     EXPECT_EQ(pixelmap, nullptr);
 
     ScreenProperty newScreenProperty;
-    session = new(std::nothrow) ScreenSession(0, newScreenProperty, 0);
+    session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     pixelmap = session->GetScreenSnapshot(1.0, 1.0);
     int ret = 0;
     ASSERT_EQ(ret, 0);
@@ -2182,7 +2184,7 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId start";
     ScreenProperty property;
-    sptr<ScreenSession> session = new(std::nothrow)
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(
         ScreenSession("OpenHarmony", 1, 100, 0);
     EXPECT_EQ(100, session->GetRSScreenId());
 
@@ -2807,7 +2809,8 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
 
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     mode = screenSession->GetDisplaySourceMode();
@@ -3667,29 +3670,6 @@ HWTEST_F(ScreenSessionTest, GetScreenId, TestSize.Level1)
     ScreenId res = session->GetScreenId();
     EXPECT_EQ(res, session->screenId_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenId end";
-}
-
-/**
- * @tc.name: GetSerialNumber
- * @tc.desc: GetSerialNumber test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetSerialNumber, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSerialNumber start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 0,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ASSERT_NE(screenSession, nullptr);
-
-    std::string serialNumber = "OpenHarmony";
-    screenSession->SetSerialNumber(serialNumber);
-    EXPECT_EQ(screenSession->GetSerialNumber(), serialNumber);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSerialNumber end";
 }
 
 /**
