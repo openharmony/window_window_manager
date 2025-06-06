@@ -520,6 +520,8 @@ public:
 
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
+    virtual WMError IsImmersiveLayout(bool& isImmersiveLayout) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
