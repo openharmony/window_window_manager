@@ -213,6 +213,7 @@ public:
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+    WMError IsImmersiveLayout(bool& isImmersiveLayout) const override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;

@@ -2095,6 +2095,34 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsImmersiveLayout01
+ * @tc.desc: IsImmersiveLayout test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayout01, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->isIgnoreSafeArea_ = true;
+    window->state_ = WindowState::STATE_CREATED;
+
+    bool isImmersiveLayout = false;
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayout(isImmersiveLayout));
+    EXPECT_EQ(true, isImmersiveLayout);
+
+    window->isIgnoreSafeArea_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayout(isImmersiveLayout));
+    EXPECT_EQ(false, isImmersiveLayout);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->IsImmersiveLayout(isImmersiveLayout));
+}
+
+/**
  * @tc.name: SetLayoutFullScreen01
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
