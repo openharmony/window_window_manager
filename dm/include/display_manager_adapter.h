@@ -124,7 +124,7 @@ class ScreenManagerAdapter : public BaseAdapter {
 WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapter);
 public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
-        const sptr<IDisplayManagerAgent>& displayManagerAgent);
+        const sptr<IDisplayManagerAgent>& displayManagerAgent, bool isSecurity = true);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);

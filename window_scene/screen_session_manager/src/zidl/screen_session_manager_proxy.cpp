@@ -1077,7 +1077,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
 }
 
 ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
-                                                        const sptr<IRemoteObject>& displayManagerAgent)
+                                                        const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity)
 {
     TLOGI(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1110,6 +1110,7 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         res = res &&
             data.WriteRemoteObject(displayManagerAgent);
     }
+    res = res && data.WriteBool(isSecurity);
     if (!res) {
         TLOGE(WmsLogTag::DMS, "SCB: ScreenSessionManagerProxy::Write data failed");
         return SCREEN_ID_INVALID;

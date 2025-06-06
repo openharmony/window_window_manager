@@ -3429,6 +3429,32 @@ HWTEST_F(ScreenSessionTest, GetIsEnableCanvasRotation, TestSize.Level1)
     session->SetIsEnableCanvasRotation(true);
     EXPECT_EQ(session->GetIsEnableCanvasRotation(), true);
 }
+
+/**
+ * @tc.name: SetSecurity01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSecurity01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetSecurity(true);
+    EXPECT_EQ(session->isSecurity_, true);
+}
+
+/**
+ * @tc.name: SetSecurity02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSecurity02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetSecurity(false);
+    EXPECT_EQ(session->isSecurity_, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
