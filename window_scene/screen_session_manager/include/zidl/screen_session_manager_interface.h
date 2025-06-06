@@ -48,7 +48,7 @@ public:
     virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {}
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
-        const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity = true) { return -1; }
+        const sptr<IRemoteObject>& displayManagerAgent) { return SCREEN_ID_INVALID; }
     virtual DMError DestroyVirtualScreen(ScreenId screenId) { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
     {
