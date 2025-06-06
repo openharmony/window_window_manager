@@ -387,6 +387,38 @@ HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotForAppProcess, TestSize.Level
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName rpc proxy is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetTopNavDestinationName, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    EXPECT_NE(ssmProxy, nullptr);
+
+    int32_t windowId = 888;
+    std::string topNavDestName;
+    MockMessageParcel::ClearAllErrorFlag();
+    WMError res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    sptr<SceneSessionManagerProxy> ssmProxyTmp = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    EXPECT_NE(ssmProxy, nullptr);
+    res = ssmProxyTmp->GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SetGestureNavigationEnabled
  * @tc.desc: normal function
  * @tc.type: FUNC

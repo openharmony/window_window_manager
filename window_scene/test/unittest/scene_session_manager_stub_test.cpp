@@ -1377,6 +1377,41 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, TestSize.
 }
 
 /**
+ * @tc.name: HandleGetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName rpc stub is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetTopNavDestinationName, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+
+    uint32_t code = static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME);
+    ASSERT_TRUE((stub_ != nullptr));
+    int32_t windowId = 8888888;
+    data.WriteInt32(windowId);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_NONE);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+
+    MockMessageParcel::SetWriteString16ErrorFlag(true);
+    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: HandleGetFocusSessionInfo
  * @tc.desc: test HandleGetFocusSessionInfo
  * @tc.type: FUNC
