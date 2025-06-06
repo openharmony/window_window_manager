@@ -947,6 +947,21 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyKeyEvent05
+ * @tc.desc: NotifyKeyEvent05 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent05, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    bool notifyInputMethod = false;
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
  * @tc.name: ArkUIFrameworkSupport01
  * @tc.desc: ArkUIFrameworkSupport01 Test, context_ is nullptr
  * @tc.type: FUNC
@@ -2077,6 +2092,18 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ConsumePointerEvent02
+ * @tc.desc: ConsumePointerEvent02 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    window_->ConsumePointerEvent(pointerEvent);
+}
+/**
  * @tc.name: NotifyPointerEvent
  * @tc.desc: NotifyPointerEvent Test
  * @tc.type: FUNC
@@ -2196,6 +2223,20 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreNotifyKeyEvent02
+ * @tc.desc: PreNotifyKeyEvent02 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent02, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(nullptr, keyEvent);
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    ASSERT_FALSE(window_->PreNotifyKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: GetFreeMultiWindowModeEnabledState
  * @tc.desc: GetFreeMultiWindowModeEnabledState Test
  * @tc.type: FUNC
@@ -2271,6 +2312,10 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Te
     window_->modalUIExtensionMayBeCovered_ = true;
     EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
     EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::PREVIEW_EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -2293,6 +2338,12 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Tes
     ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
 
     window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+    ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
+    ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::PREVIEW_EMBEDDED;
     window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
     window_->NotifyModalUIExtensionMayBeCovered(false);
     ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
