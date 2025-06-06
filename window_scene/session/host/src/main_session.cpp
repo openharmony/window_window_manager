@@ -234,8 +234,9 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         return;
     }
     const auto state = GetSessionState();
+    TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
     if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        WLOGFI("%{public}d", interactive);
+        TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
         sessionStage_->NotifyForegroundInteractiveStatus(interactive);
         isClientInteractive_ = interactive;
     }
@@ -370,10 +371,14 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
+    WSRect newRect;
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
-            func(rect, isGlobal, needFlush);
+            if (newRect.IsEmpty()) {
+                HookStartMoveRect(newRect, rect);
+            }
+            func(newRect, isGlobal, needFlush);
         }
     }
 }
@@ -481,5 +486,39 @@ WSError MainSession::UpdateFlag(const std::string& flag)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionState& state)
+{
+    switch (state) {
+        case SessionState::STATE_DISCONNECT: {
+            info.sessionState = RecentSessionState::DISCONNECT;
+            break;
+        }
+        case SessionState::STATE_CONNECT: {
+            info.sessionState = RecentSessionState::CONNECT;
+            break;
+        }
+        case SessionState::STATE_FOREGROUND: {
+            info.sessionState = RecentSessionState::FOREGROUND;
+            break;
+        }
+        case SessionState::STATE_BACKGROUND: {
+            info.sessionState = RecentSessionState::BACKGROUND;
+            break;
+        }
+        case SessionState::STATE_ACTIVE: {
+            info.sessionState = RecentSessionState::ACTIVE;
+            break;
+        }
+        case SessionState::STATE_INACTIVE: {
+            info.sessionState = RecentSessionState::INACTIVE;
+            break;
+        }
+        default: {
+            info.sessionState = RecentSessionState::END;
+            break;
+        } 
+    }
 }
 } // namespace OHOS::Rosen

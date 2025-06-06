@@ -27,12 +27,6 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "../../../../wmserver/include",
     "../../../../interfaces/innerkits/wm",
     "../../../../interfaces/innerkits/dm",
-
-    # for abilityContext
-    "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-
-    # abilityContext end
   ]
 
   configs = [
@@ -57,6 +51,7 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
     "hilog:libhilog",
@@ -64,6 +59,7 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
     "resource_management:global_resmgr",
   ]
 }

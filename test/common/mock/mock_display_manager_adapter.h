@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,8 +30,8 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
     MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
-    MOCK_METHOD3(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId, DmErrorCode* errorCode,
-        bool isUseDma));
+    MOCK_METHOD4(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId, DmErrorCode* errorCode,
+        bool isUseDma, bool isCaptureFullOfScreen));
 
     MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(WakeUpEnd, bool());
@@ -43,8 +43,6 @@ public:
     MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
     MOCK_METHOD1(GetCutoutInfo, sptr<CutoutInfo>(DisplayId displayId));
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
-    MOCK_METHOD2(GetSupportedHDRFormats, DMError(ScreenId screenId, std::vector<uint32_t>& hdrFormats));
-    MOCK_METHOD2(GetSupportedColorSpaces, DMError(ScreenId screenId, std::vector<uint32_t>& colorSpaces));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
 };
 
@@ -55,7 +53,6 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD2(UnregisterDisplayManagerAgent, DMError(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
-    MOCK_METHOD2(RequestRotation, bool(ScreenId screenId, Rotation rotation));
     MOCK_METHOD2(CreateVirtualScreen, ScreenId(VirtualScreenOption option,
         const sptr<IDisplayManagerAgent>& displayManagerAgent));
     MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
@@ -94,7 +91,7 @@ public:
     MOCK_METHOD1(IsScreenRotationLocked, DMError(bool& isLocked));
     MOCK_METHOD4(SetResolution, DMError(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio));
 };
-}
+} // namespace Rosen
 } // namespace OHOS
 
 #endif // FRAMEWORKS_WM_TEST_UT_MOCK_DISPLAY_MANAGER_ADAPTER_H

@@ -14,6 +14,8 @@
  */
 
 #include "window_node.h"
+
+#include "rs_adapter.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -435,6 +437,23 @@ WindowVisibilityState WindowNode::GetVisibilityState() const
 bool WindowNode::GetTouchable() const
 {
     return property_->GetTouchable();
+}
+
+std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    std::shared_ptr<RSUIContext> rsUIContext;
+    for (const auto& node : {surfaceNode_, leashWinSurfaceNode_, startingWinSurfaceNode_, closeWinSurfaceNode_}) {
+        if (node) {
+            rsUIContext = node->GetRSUIContext();
+            if (rsUIContext) {
+                break;
+            }
+        }
+    }
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

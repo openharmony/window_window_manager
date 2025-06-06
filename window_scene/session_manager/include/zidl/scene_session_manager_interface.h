@@ -98,6 +98,7 @@ public:
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
+        TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
@@ -133,10 +134,18 @@ public:
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
+        TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT,
+        TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
-        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_PARENT_WINDOW,
+        TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
+        TRANS_ID_USE_IMPLICIT_ANIMATION,
+        TRANS_ID_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
+        TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
+        TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
+        TRANS_ID_ANIMATE_TO_WINDOW,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -255,6 +264,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK;}
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
@@ -267,6 +280,8 @@ public:
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetGlobalWindowMode(DisplayId displayId,
+        GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {
@@ -295,7 +310,7 @@ public:
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
-    WMError SetForegroundWindowNum(int32_t windowNum) override { return WMError::WM_OK; }
+    WMError SetForegroundWindowNum(uint32_t windowNum) override { return WMError::WM_OK; }
 
     /**
      * @brief Raise a window to screen top by id of window.
@@ -327,6 +342,10 @@ public:
         return WSError::WS_OK;
     }
     WSError GetHostWindowRect(int32_t hostWindowId, Rect& rect) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect) override
     {
         return WSError::WS_OK;
     }
@@ -373,6 +392,9 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
+        
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 
@@ -384,10 +406,16 @@ public:
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
     WMError SetAppKeyFramePolicy(const std::string& bundleName,
         const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
-        int32_t targetPersistentId) override { return WMError::WM_OK; }
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
+        int32_t fingerId) override { return WMError::WM_OK; }
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override { return WMError::WM_OK; }
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override { return WMError::WM_OK; }
+    WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override { return WSError::WS_OK; };
+    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

@@ -25,9 +25,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerLite"};
-}
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerLite)
 
 class DisplayManagerLite::Impl : public RefBase {
@@ -102,11 +99,11 @@ public:
     void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
     {
         if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
-            WLOGFE("onDisplayCreate: displayInfo is nullptr");
+            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("onDisplayCreate: pImpl_ is nullptr");
+            TLOGE(WmsLogTag::DMS, "pImpl_ is nullptr");
             return;
         }
         pImpl_->NotifyDisplayCreate(displayInfo);
@@ -123,11 +120,11 @@ public:
     void OnDisplayDestroy(DisplayId displayId) override
     {
         if (displayId == DISPLAY_ID_INVALID) {
-            WLOGFE("onDisplayDestroy: displayId is invalid");
+            TLOGE(WmsLogTag::DMS, "displayId is invalid");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("onDisplayDestroy: impl is nullptr");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr");
             return;
         }
         pImpl_->NotifyDisplayDestroy(displayId);
@@ -144,14 +141,14 @@ public:
     void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
         if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
-            WLOGFE("onDisplayChange: displayInfo is nullptr");
+            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("onDisplayChange: pImpl_ is nullptr");
+            TLOGE(WmsLogTag::DMS, "pImpl_ is nullptr");
             return;
         }
-        WLOGD("onDisplayChange: display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
+        TLOGD(WmsLogTag::DMS, "display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener : pImpl_->displayListeners_) {
@@ -235,7 +232,7 @@ void DisplayManagerLite::Impl::Clear()
     }
     displayManagerListener_ = nullptr;
     if (res != DMError::DM_OK) {
-        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed");
     }
     ClearDisplayStateCallback();
 }
@@ -266,7 +263,7 @@ DMError DisplayManagerLite::Impl::RegisterDisplayListener(sptr<IDisplayListener>
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed");
         displayManagerListener_ = nullptr;
     } else {
         displayListeners_.insert(listener);
@@ -277,7 +274,7 @@ DMError DisplayManagerLite::Impl::RegisterDisplayListener(sptr<IDisplayListener>
 DMError DisplayManagerLite::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterDisplayListener listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayListener(listener);
@@ -288,7 +285,7 @@ DMError DisplayManagerLite::Impl::UnregisterDisplayListener(sptr<IDisplayListene
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayListeners_.begin(), displayListeners_.end(), listener);
     if (iter == displayListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     displayListeners_.erase(iter);
@@ -305,7 +302,7 @@ DMError DisplayManagerLite::Impl::UnregisterDisplayListener(sptr<IDisplayListene
 DMError DisplayManagerLite::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterDisplayListener listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayListener(listener);
@@ -319,7 +316,7 @@ void DisplayManagerLite::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 
 void DisplayManagerLite::Impl::NotifyDisplayDestroy(DisplayId displayId)
 {
-    WLOGFD("displayId:%{public}" PRIu64".", displayId);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64".", displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayMap_.erase(displayId);
 }
@@ -333,18 +330,18 @@ void DisplayManagerLite::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo
 bool DisplayManagerLite::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is null");
+        TLOGE(WmsLogTag::DMS, "displayInfo is null");
         return false;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
-    WLOGFD("displayId:%{public}" PRIu64".", displayId);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64".", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId is invalid");
+        TLOGE(WmsLogTag::DMS, "displayId is invalid");
         return false;
     }
     auto iter = displayMap_.find(displayId);
     if (iter != displayMap_.end() && iter->second != nullptr) {
-        WLOGFD("get screen in screen map");
+        TLOGD(WmsLogTag::DMS, "get screen in screen map");
         iter->second->UpdateDisplayInfo(displayInfo);
         return true;
     }
@@ -356,7 +353,7 @@ bool DisplayManagerLite::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> display
 DMError DisplayManagerLite::RegisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IFoldStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IFoldStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterFoldStatusListener(listener);
@@ -373,10 +370,10 @@ DMError DisplayManagerLite::Impl::RegisterFoldStatusListener(sptr<IFoldStatusLis
             DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterFoldStatusListener failed !");
+        TLOGW(WmsLogTag::DMS, "failed !");
         foldStatusListenerAgent_ = nullptr;
     } else {
-        WLOGI("IFoldStatusListener register success");
+        TLOGI(WmsLogTag::DMS, "IFoldStatusListener register success");
         foldStatusListeners_.insert(listener);
     }
     return ret;
@@ -385,7 +382,7 @@ DMError DisplayManagerLite::Impl::RegisterFoldStatusListener(sptr<IFoldStatusLis
 DMError DisplayManagerLite::UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterFoldStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterFoldStatusListener(listener);
@@ -396,7 +393,7 @@ DMError DisplayManagerLite::Impl::UnregisterFoldStatusListener(sptr<IFoldStatusL
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(foldStatusListeners_.begin(), foldStatusListeners_.end(), listener);
     if (iter == foldStatusListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     foldStatusListeners_.erase(iter);
@@ -425,7 +422,7 @@ void DisplayManagerLite::Impl::NotifyFoldStatusChanged(FoldStatus foldStatus)
 DMError DisplayManagerLite::RegisterDisplayModeListener(sptr<IDisplayModeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IDisplayModeListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IDisplayModeListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayModeListener(listener);
@@ -442,10 +439,10 @@ DMError DisplayManagerLite::Impl::RegisterDisplayModeListener(sptr<IDisplayModeL
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayModeListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayModeListener failed !");
         displayModeListenerAgent_ = nullptr;
     } else {
-        WLOGI("IDisplayModeListener register success");
+        TLOGI(WmsLogTag::DMS, "IDisplayModeListener register success");
         displayModeListeners_.insert(listener);
     }
     return ret;
@@ -454,7 +451,7 @@ DMError DisplayManagerLite::Impl::RegisterDisplayModeListener(sptr<IDisplayModeL
 DMError DisplayManagerLite::UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterDisplayModeListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayModeListener(listener);
@@ -465,7 +462,7 @@ DMError DisplayManagerLite::Impl::UnregisterDisplayModeListener(sptr<IDisplayMod
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayModeListeners_.begin(), displayModeListeners_.end(), listener);
     if (iter == displayModeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     displayModeListeners_.erase(iter);
@@ -567,7 +564,7 @@ void DisplayManagerLite::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 
 void DisplayManagerLite::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    TLOGI(WmsLogTag::DMS, "dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerListener_ = nullptr;
 }
@@ -579,7 +576,7 @@ void DisplayManagerLite::OnRemoteDied()
 
 sptr<DisplayLite> DisplayManagerLite::Impl::GetDisplayById(DisplayId displayId)
 {
-    WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS, "GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapterLite>().GetDisplayInfo(displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
@@ -603,38 +600,38 @@ sptr<DisplayLite> DisplayManagerLite::GetDisplayById(DisplayId displayId)
  */
 bool DisplayManagerLite::WakeUpBegin(PowerStateChangeReason reason)
 {
-    WLOGFD("[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(reason);
 }
 
 bool DisplayManagerLite::WakeUpEnd()
 {
-    WLOGFD("[UL_POWER]WakeUpEnd start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd start");
     return SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpEnd();
 }
 
 bool DisplayManagerLite::SuspendBegin(PowerStateChangeReason reason)
 {
     // dms->wms notify other windows to hide
-    WLOGFD("[UL_POWER]SuspendBegin start, reason:%{public}u", reason);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SuspendBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(reason);
 }
 
 bool DisplayManagerLite::SuspendEnd()
 {
-    WLOGFD("[UL_POWER]SuspendEnd start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendEnd();
 }
 
 ScreenId DisplayManagerLite::GetInternalScreenId()
 {
-    WLOGFD("[UL_POWER]GetInternalScreenId start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId start");
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetInternalScreenId();
 }
 
 bool DisplayManagerLite::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFD("[UL_POWER]SetScreenPowerById start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById start");
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenPowerById(screenId, state, reason);
 }
 
@@ -650,16 +647,16 @@ DisplayState DisplayManagerLite::GetDisplayState(DisplayId displayId)
 
 bool DisplayManagerLite::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
-    WLOGFD("[UL_POWER]state:%{public}u", state);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
     bool ret = true;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
             if (displayStateCallback_ != nullptr) {
-                WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
             if (callback == nullptr) {
-                WLOGFI("[UL_POWER]Invalid callback received");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]Invalid callback received");
             }
             return false;
         }
@@ -681,7 +678,7 @@ bool DisplayManagerLite::Impl::SetDisplayState(DisplayState state, DisplayStateC
 
 void DisplayManagerLite::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
-    WLOGFD("state:%{public}u", state);
+    TLOGD(WmsLogTag::DMS, "state:%{public}u", state);
     DisplayStateCallback displayStateCallback = nullptr;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -692,16 +689,16 @@ void DisplayManagerLite::Impl::NotifyDisplayStateChanged(DisplayId id, DisplaySt
         ClearDisplayStateCallback();
         return;
     }
-    WLOGFW("callback_ target is not set!");
+    TLOGW(WmsLogTag::DMS, "callback_ target is not set!");
 }
 
 void DisplayManagerLite::Impl::ClearDisplayStateCallback()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGFD("[UL_POWER]Clear displaystatecallback enter");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]Clear displaystatecallback enter");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
-        WLOGFI("[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
         SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
@@ -711,7 +708,7 @@ void DisplayManagerLite::Impl::ClearDisplayStateCallback()
 DMError DisplayManagerLite::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IScreenMagneticStateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IScreenMagneticStateListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenMagneticStateListener(listener);
@@ -728,10 +725,13 @@ DMError DisplayManagerLite::Impl::RegisterScreenMagneticStateListener(sptr<IScre
             DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterScreenMagneticStateListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterScreenMagneticStateListener failed !");
         screenMagneticStateListenerAgent_ = nullptr;
-    } else {
-        WLOGD("IScreenMagneticStateListener register success");
+    } else if (listener != nullptr) {
+        TLOGD(WmsLogTag::DMS, "IScreenMagneticStateListener register success");
+        bool isKeyboardOn = SingletonContainer::Get<DisplayManagerAdapterLite>().GetKeyboardState();
+        TLOGI(WmsLogTag::DMS, "RegisterScreenMagneticStateListener isKeyboardOn : %{public}d", isKeyboardOn);
+        listener->OnScreenMagneticStateChanged(isKeyboardOn);
         screenMagneticStateListeners_.insert(listener);
     }
     return ret;
@@ -740,7 +740,7 @@ DMError DisplayManagerLite::Impl::RegisterScreenMagneticStateListener(sptr<IScre
 DMError DisplayManagerLite::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterScreenMagneticStateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterScreenMagneticStateListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenMagneticStateListener(listener);
@@ -751,7 +751,7 @@ DMError DisplayManagerLite::Impl::UnregisterScreenMagneticStateListener(sptr<ISc
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenMagneticStateListeners_.begin(), screenMagneticStateListeners_.end(), listener);
     if (iter == screenMagneticStateListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenMagneticStateListeners_.erase(iter);
@@ -779,13 +779,14 @@ void DisplayManagerLite::Impl::NotifyScreenMagneticStateChanged(bool isMagneticS
 
 bool DisplayManagerLite::TryToCancelScreenOff()
 {
-    WLOGFD("[UL_POWER]TryToCancelScreenOff start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]TryToCancelScreenOff start");
     return SingletonContainer::Get<DisplayManagerAdapterLite>().TryToCancelScreenOff();
 }
 
 bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFD("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
+        level);
     SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenBrightness(screenId, level);
     return true;
 }
@@ -793,7 +794,8 @@ bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(screenId);
-    WLOGFD("[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
+        level);
     return level;
 }
 

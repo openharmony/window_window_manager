@@ -39,6 +39,7 @@
 #include "permission.h"
 #include "persistent_storage.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "starting_window.h"
 #include "ui/rs_ui_director.h"
@@ -88,11 +89,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     handler_->PostTask([]() { MemoryGuard cacheGuard; }, "WindowManagerService:cacheGuard", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
     // init RSUIDirector, it will handle animation callback
-    rsUiDirector_ = RSUIDirector::Create();
-    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
-        PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
-    });
-    rsUiDirector_->Init(false);
+    InitRSUIDirector();
 }
 
 void WindowManagerService::OnStart()
@@ -971,6 +968,9 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     int pid = IPCSkeleton::GetCallingRealPid();
     int uid = IPCSkeleton::GetCallingUid();
     property->isSystemCalling_ = Permission::IsSystemCalling();
+    if (rsUiDirector_) {
+        RSAdapterUtil::SetRSUIContext(surfaceNode, rsUiDirector_->GetRSUIContext(), true);
+    }
     auto task = [this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
@@ -1337,6 +1337,20 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
     return PostSyncTask(task, "SetWindowLayoutMode");
 }
 
+WMError WindowManagerService::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify screen shot event type permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
+    auto task = [this, type]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:NotifyScreenshotEvent");
+        return windowController_->NotifyScreenshotEvent(type);
+    };
+    return PostSyncTask(task, "SetWindowLayoutMode");
+}
+
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask)
 {
@@ -1644,6 +1658,28 @@ void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Displa
 {
     WLOGFD("Get Focus window info in wms");
     windowController_->GetFocusWindowInfo(focusInfo);
+}
+
+void WindowManagerService::InitRSUIDirector()
+{
+    rsUiDirector_ = RSUIDirector::Create();
+    if (!rsUiDirector_) {
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Failed to create RSUIDirector");
+        return;
+    }
+    int32_t instanceId = INSTANCE_ID_UNDEFINED;
+    bool useMultiInstance = false;
+    RunIfRSClientMultiInstanceEnabled([&] {
+        instanceId = 0;
+        useMultiInstance = true;
+        WindowInnerManager::GetInstance().SetRSUIDirector(rsUiDirector_);
+    });
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
+            PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
+        }, instanceId, useMultiInstance);
+    rsUiDirector_->Init(false, useMultiInstance);
+    TLOGI(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSUIDirector: %{public}s",
+          RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
 }
 } // namespace Rosen
 } // namespace OHOS

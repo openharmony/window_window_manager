@@ -29,32 +29,32 @@ const std::string SCREEN_MIRROR = "mirror";
 
 void MultiScreenModeChangeManager::InitMultiScreenModeChangeMap()
 {
-    if (HandleMultiScreenModeChangeMap_.size() != 0) {
+    if (handleMultiScreenModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen mode change map has init!");
         return;
     }
-    HandleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
+    handleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, ScreenCombination innerTargetCombination,
         sptr<ScreenSession>& externalScreen, ScreenCombination externalTargetCombination) {
             return HandleInnerMainExternalExtendChange(innerScreen, innerTargetCombination,
                 externalScreen, externalTargetCombination);
         };
 
-    HandleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
+    handleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, ScreenCombination innerTargetCombination,
         sptr<ScreenSession>& externalScreen, ScreenCombination externalTargetCombination) {
             return HandleInnerMainExternalMirrorChange(innerScreen, innerTargetCombination,
                 externalScreen, externalTargetCombination);
         };
 
-    HandleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
+    handleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, ScreenCombination innerTargetCombination,
         sptr<ScreenSession>& externalScreen, ScreenCombination externalTargetCombination) {
             return HandleInnerExtendExternalMainChange(innerScreen, innerTargetCombination,
                 externalScreen, externalTargetCombination);
         };
 
-    HandleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN}] =
+    handleMultiScreenModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, ScreenCombination innerTargetCombination,
         sptr<ScreenSession>& externalScreen, ScreenCombination externalTargetCombination) {
             return HandleInnerMirrorExternalMainChange(innerScreen, innerTargetCombination,
@@ -86,9 +86,9 @@ DMError MultiScreenModeChangeManager::OnMultiScreenModeChangeRequest(
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
-    auto modeHandleCall = HandleMultiScreenModeChangeMap_.find({innerScreen->GetScreenCombination(),
+    auto modeHandleCall = handleMultiScreenModeChangeMap_.find({innerScreen->GetScreenCombination(),
         externalScreen->GetScreenCombination()});
-    if (modeHandleCall != HandleMultiScreenModeChangeMap_.end()) {
+    if (modeHandleCall != handleMultiScreenModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, innerTargetCombination, externalScreen,
             externalTargetCombination);
@@ -102,24 +102,24 @@ DMError MultiScreenModeChangeManager::OnMultiScreenModeChangeRequest(
 /* inner main external extend change */
 void MultiScreenModeChangeManager::InitMultiScreenInnerMainExternalExtendModeModeChangeMap()
 {
-    if (HandleMultiScreenInnerMainExternalExtendModeChangeMap_.size() != 0) {
+    if (handleMultiScreenInnerMainExternalExtendModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen inner main external extend mode change map has init!");
         return;
     }
     /* inner main external extend change to inner main external mirror */
-    HandleMultiScreenInnerMainExternalExtendModeChangeMap_[{
+    handleMultiScreenInnerMainExternalExtendModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalExtendToInnerMainExternalMirrorChange(innerScreen, externalScreen);
         };
     /* inner main external extend change to inner extend external main */
-    HandleMultiScreenInnerMainExternalExtendModeChangeMap_[{
+    handleMultiScreenInnerMainExternalExtendModeChangeMap_[{
         ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalExtendToInnerExtendExternalMainChange(innerScreen, externalScreen);
         };
     /* inner main external extend change to inner mirror external main */
-    HandleMultiScreenInnerMainExternalExtendModeChangeMap_[{
+    handleMultiScreenInnerMainExternalExtendModeChangeMap_[{
         ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalExtendToInnerMirrorExternalMainChange(innerScreen, externalScreen);
@@ -129,24 +129,24 @@ void MultiScreenModeChangeManager::InitMultiScreenInnerMainExternalExtendModeMod
 /* inner main external mirror change */
 void MultiScreenModeChangeManager::InitMultiScreenInnerMainExternalMirrorModeModeChangeMap()
 {
-    if (HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.size() != 0) {
+    if (handleMultiScreenInnerMainExternalMirrorModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen inner main external mirror mode change map has init!");
         return;
     }
     /* inner main external mirror change to inner main external extend */
-    HandleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
+    handleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalMirrorToInnerMainExternalExtendChange(innerScreen, externalScreen);
         };
     /* inner main external mirror change to inner mirror external main */
-    HandleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
+    handleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
         ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalMirrorToInnerMirrorExternalMainChange(innerScreen, externalScreen);
         };
     /* inner main external mirror change to inner extend external main */
-    HandleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
+    handleMultiScreenInnerMainExternalMirrorModeChangeMap_[{
         ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalMirrorToInnerExtendExternalMainChange(innerScreen, externalScreen);
@@ -156,24 +156,24 @@ void MultiScreenModeChangeManager::InitMultiScreenInnerMainExternalMirrorModeMod
 /* inner extend external main change */
 void MultiScreenModeChangeManager::InitMultiScreenInnerExtendExternalMainModeModeChangeMap()
 {
-    if (HandleMultiScreenInnerExtendExternalMainModeChangeMap_.size() != 0) {
+    if (handleMultiScreenInnerExtendExternalMainModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen inner extend external main mode change map has init!");
         return;
     }
     /* inner extend external main change to inner mirror external main */
-    HandleMultiScreenInnerExtendExternalMainModeChangeMap_[{
+    handleMultiScreenInnerExtendExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerExtendExternalMainToInnerMirrorExternalMainChange(innerScreen, externalScreen);
         };
     /* inner extend external main change to inner main external extend */
-    HandleMultiScreenInnerExtendExternalMainModeChangeMap_[{
+    handleMultiScreenInnerExtendExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerExtendExternalMainToInnerMainExternalExtendChange(innerScreen, externalScreen);
         };
     /* inner extend external main change to inner main external mirror */
-    HandleMultiScreenInnerExtendExternalMainModeChangeMap_[{
+    handleMultiScreenInnerExtendExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerExtendExternalMainToInnerMainExternalMirrorChange(innerScreen, externalScreen);
@@ -183,24 +183,24 @@ void MultiScreenModeChangeManager::InitMultiScreenInnerExtendExternalMainModeMod
 /* inner mirror external main change */
 void MultiScreenModeChangeManager::InitMultiScreenInnerMirrorExternalMainModeModeChangeMap()
 {
-    if (HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.size() != 0) {
+    if (handleMultiScreenInnerMirrorExternalMainModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen inner mirror external main mode change map has init!");
         return;
     }
     /* inner mirror external main change to inner extend external main */
-    HandleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
+    handleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMirrorExternalMainToInnerExtendExternalMainChange(innerScreen, externalScreen);
         };
     /* inner mirror external main change to inner main external mirror */
-    HandleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
+    handleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMirrorExternalMainToInnerMainExternalMirrorChange(innerScreen, externalScreen);
         };
     /* inner mirror external main change to inner main external extend */
-    HandleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
+    handleMultiScreenInnerMirrorExternalMainModeChangeMap_[{
         ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMirrorExternalMainToInnerMainExternalExtendChange(innerScreen, externalScreen);
@@ -216,9 +216,9 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendChange(
         TLOGE(WmsLogTag::DMS, "parameters nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto modeHandleCall = HandleMultiScreenInnerMainExternalExtendModeChangeMap_.find(
+    auto modeHandleCall = handleMultiScreenInnerMainExternalExtendModeChangeMap_.find(
         {innerTargetCombination, externalTargetCombination});
-    if (modeHandleCall != HandleMultiScreenInnerMainExternalExtendModeChangeMap_.end()) {
+    if (modeHandleCall != handleMultiScreenInnerMainExternalExtendModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -238,9 +238,9 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorChange(
         TLOGE(WmsLogTag::DMS, "parameters nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto modeHandleCall = HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.find(
+    auto modeHandleCall = handleMultiScreenInnerMainExternalMirrorModeChangeMap_.find(
         {innerTargetCombination, externalTargetCombination});
-    if (modeHandleCall != HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.end()) {
+    if (modeHandleCall != handleMultiScreenInnerMainExternalMirrorModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -260,9 +260,9 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainChange(
         TLOGE(WmsLogTag::DMS, "parameters nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto modeHandleCall = HandleMultiScreenInnerExtendExternalMainModeChangeMap_.find(
+    auto modeHandleCall = handleMultiScreenInnerExtendExternalMainModeChangeMap_.find(
         {innerTargetCombination, externalTargetCombination});
-    if (modeHandleCall != HandleMultiScreenInnerExtendExternalMainModeChangeMap_.end()) {
+    if (modeHandleCall != handleMultiScreenInnerExtendExternalMainModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -282,9 +282,9 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainChange(
         TLOGE(WmsLogTag::DMS, "parameters nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto modeHandleCall = HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.find(
+    auto modeHandleCall = handleMultiScreenInnerMirrorExternalMainModeChangeMap_.find(
         {innerTargetCombination, externalTargetCombination});
-    if (modeHandleCall != HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.end()) {
+    if (modeHandleCall != handleMultiScreenInnerMirrorExternalMainModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -382,6 +382,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external extend change to inner main external mirror";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalExtendToInnerMainExternalMirrorChange");
 
     std::ostringstream oss;
@@ -393,20 +394,19 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerMainEx
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create external screen mirror */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
         return DMError::DM_ERROR_NULLPTR;
     }
-
     ScreenChangeToMirrorMode(ssmClient, externalScreen, innerScreen);
 
     /* step3: change inner screen combination */
     MultiScreenChangeUtils::ScreenCombinationChange(innerScreen, externalScreen, ScreenCombination::SCREEN_MIRROR);
 
     /* step4: set inner screen position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen, externalScreen);
     TLOGW(WmsLogTag::DMS, "inner main external extend to inner main external mirror end.");
     return DMError::DM_OK;
 }
@@ -421,6 +421,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerExtend
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external extend change to inner extend external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalExtendToInnerExtendExternalMainChange");
 
     std::ostringstream oss;
@@ -438,7 +439,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerExtend
     }
 
     /* step2: scb client change display node */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     DMError displayNodeChangeRet = ScreenDisplayNodeChangeNotify(ssmClient, innerScreen, externalScreen);
     if (displayNodeChangeRet != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "change displayNode failed.");
@@ -449,7 +450,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerExtend
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step4: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen);
+    MultiScreenChangeUtils::ScreenExtendPositionChange(innerScreen, externalScreen);
 
     /* step5: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -473,6 +474,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerMirror
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external extend change to inner mirror external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalExtendToInnerMirrorExternalMainChange");
 
     std::ostringstream oss;
@@ -490,7 +492,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerMirror
     }
 
     /* step2: scb client change display node */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     DMError displayNodeChangeRet = ScreenDisplayNodeChangeNotify(ssmClient, innerScreen, externalScreen);
     if (displayNodeChangeRet != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "change displayNode failed.");
@@ -501,7 +503,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalExtendToInnerMirror
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step4: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen, externalScreen);
 
     /* step5: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -528,6 +530,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external mirror change to inner main external extend";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalMirrorToInnerMainExternalExtendChange");
 
     std::ostringstream oss;
@@ -539,13 +542,12 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerMainEx
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: change external screen from mirror to extend */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
         return DMError::DM_ERROR_NULLPTR;
     }
-
     ScreenChangeToExtendMode(ssmClient, externalScreen);
 
     /* step3: set inner screen combination */
@@ -566,6 +568,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerMirror
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external mirror change to inner mirror external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalMirrorToInnerMirrorExternalMainChange");
 
     std::ostringstream oss;
@@ -576,7 +579,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerMirror
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -596,7 +599,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerMirror
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step5: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen, externalScreen);
 
     /* step6: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -619,6 +622,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerExtend
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner main external mirror change to inner extend external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMainExternalMirrorToInnerExtendExternalMainChange");
 
     std::ostringstream oss;
@@ -630,7 +634,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMainExternalMirrorToInnerExtend
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create screen session for client */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -676,6 +680,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMirror
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner extend external main change to inner mirror external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerExtendExternalMainToInnerMirrorExternalMainChange");
 
     std::ostringstream oss;
@@ -687,7 +692,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMirror
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: notify client screen disconnect */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -701,7 +706,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMirror
     MultiScreenChangeUtils::ScreenCombinationChange(innerScreen, externalScreen, ScreenCombination::SCREEN_MIRROR);
 
     /* step5: set inner screen position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen, innerScreen);
     return DMError::DM_OK;
 }
 
@@ -715,6 +720,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner extend external main change to inner main external extend";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerExtendExternalMainToInnerMainExternalExtendChange");
 
     std::ostringstream oss;
@@ -726,7 +732,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMainEx
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create screenSession for client */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -768,6 +774,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner extend external main change to inner main external mirror";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerExtendExternalMainToInnerMainExternalMirrorChange");
 
     std::ostringstream oss;
@@ -779,7 +786,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMainEx
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create screenSession for client */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -797,7 +804,7 @@ DMError MultiScreenModeChangeManager::HandleInnerExtendExternalMainToInnerMainEx
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step5: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(externalScreen, innerScreen);
 
     /* step5: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -824,6 +831,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerExtend
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner mirror external main change to inner extend external main";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMirrorExternalMainToInnerExtendExternalMainChange");
 
     std::ostringstream oss;
@@ -835,7 +843,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerExtend
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create inner extend mode */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -862,6 +870,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner mirror external main change to inner main external mirror";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMirrorExternalMainToInnerMainExternalMirrorChange");
 
     std::ostringstream oss;
@@ -873,7 +882,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerMainEx
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
     /* step2: create client inner session only */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -892,7 +901,7 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerMainEx
     MultiScreenChangeUtils::ScreenPhysicalInfoChange(innerScreen, externalScreen);
 
     /* step5: change position */
-    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen);
+    MultiScreenChangeUtils::ScreenMainPositionChange(innerScreen, externalScreen);
 
     /* step6: notify external screen property change */
     MultiScreenChangeUtils::ScreenPropertyChangeNotify(innerScreen, externalScreen);
@@ -916,10 +925,11 @@ DMError MultiScreenModeChangeManager::HandleInnerMirrorExternalMainToInnerMainEx
         TLOGE(WmsLogTag::DMS, "current combination not change.");
         return DMError::DM_OK;
     }
+    std::string trackInfo = "inner mirror external main change to inner main external extend";
     MultiScreenChangeUtils::SetMultiScreenModeChangeTracker("InnerMirrorExternalMainToInnerMainExternalExtendChange");
 
     /* step2: create client inner session only */
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "modeChange[%s]", trackInfo.c_str());
     sptr<IScreenSessionManagerClient> ssmClient = ScreenSessionManager::GetInstance().GetClientProxy();
     if (ssmClient == nullptr) {
         TLOGE(WmsLogTag::DMS, "ssmClient null");
@@ -987,11 +997,11 @@ MultiScreenModeChangeManager::MultiScreenModeChangeManager()
 
 MultiScreenModeChangeManager::~MultiScreenModeChangeManager()
 {
-    HandleMultiScreenModeChangeMap_.clear();
-    HandleMultiScreenInnerMainExternalExtendModeChangeMap_.clear();
-    HandleMultiScreenInnerMainExternalMirrorModeChangeMap_.clear();
-    HandleMultiScreenInnerExtendExternalMainModeChangeMap_.clear();
-    HandleMultiScreenInnerMirrorExternalMainModeChangeMap_.clear();
+    handleMultiScreenModeChangeMap_.clear();
+    handleMultiScreenInnerMainExternalExtendModeChangeMap_.clear();
+    handleMultiScreenInnerMainExternalMirrorModeChangeMap_.clear();
+    handleMultiScreenInnerExtendExternalMainModeChangeMap_.clear();
+    handleMultiScreenInnerMirrorExternalMainModeChangeMap_.clear();
     TLOGI(WmsLogTag::DMS, "destructor");
 }
 } // namespace OHOS::Rosen

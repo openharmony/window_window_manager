@@ -50,9 +50,9 @@ public:
 
     static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const Rect& rect)
     {
-        if ((pointPosX > rect.posX_) &&
+        if ((pointPosX >= rect.posX_) &&
             (pointPosX < (rect.posX_ + static_cast<int32_t>(rect.width_)) - 1) &&
-            (pointPosY > rect.posY_) &&
+            (pointPosY >= rect.posY_) &&
             (pointPosY < (rect.posY_ + static_cast<int32_t>(rect.height_)) - 1)) {
             return true;
         }
@@ -112,6 +112,11 @@ public:
     static inline bool IsNonSecureToUIExtension(WindowType type)
     {
         return IsSubWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG;
+    }
+
+    static inline bool IsMagnificationWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
     }
 
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,

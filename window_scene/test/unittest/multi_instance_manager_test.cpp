@@ -26,33 +26,28 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string BUNDLE_NAME = "bundleName";
-    const int32_t USER_ID { 100 };
-    const int32_t SLEEP_TIME { 10000 };
-}
+const std::string BUNDLE_NAME = "bundleName";
+const int32_t USER_ID{ 100 };
+const int32_t SLEEP_TIME{ 10000 };
+} // namespace
 class MultiInstanceManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     sptr<SceneSession> GetSceneSession(const std::string& instanceKey = "");
     void Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount);
     std::shared_ptr<TaskScheduler> GetTaskScheduler();
 };
 
-void MultiInstanceManagerTest::SetUpTestCase()
-{
-}
+void MultiInstanceManagerTest::SetUpTestCase() {}
 
-void MultiInstanceManagerTest::TearDownTestCase()
-{
-}
+void MultiInstanceManagerTest::TearDownTestCase() {}
 
-void MultiInstanceManagerTest::SetUp()
-{
-}
+void MultiInstanceManagerTest::SetUp() {}
 
 void MultiInstanceManagerTest::TearDown()
 {
@@ -76,16 +71,17 @@ sptr<SceneSession> MultiInstanceManagerTest::GetSceneSession(const std::string& 
 void MultiInstanceManagerTest::Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _)).WillOnce([modeType, maxCount](
-        const AppExecFwk::ApplicationFlag flag, const int32_t userId,
-        std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
-        AppExecFwk::ApplicationInfo appInfo;
-        appInfo.bundleName = BUNDLE_NAME;
-        appInfo.multiAppMode.multiAppModeType = modeType;
-        appInfo.multiAppMode.maxCount = maxCount;
-        appInfos.push_back(appInfo);
-        return true;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _))
+        .WillOnce([modeType, maxCount](const AppExecFwk::ApplicationFlag flag,
+                                       const int32_t userId,
+                                       std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
+            AppExecFwk::ApplicationInfo appInfo;
+            appInfo.bundleName = BUNDLE_NAME;
+            appInfo.multiAppMode.multiAppModeType = modeType;
+            appInfo.multiAppMode.maxCount = maxCount;
+            appInfos.push_back(appInfo);
+            return true;
+        });
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
     usleep(SLEEP_TIME);
@@ -374,6 +370,18 @@ HWTEST_F(MultiInstanceManagerTest, IsInstanceKeyExist, TestSize.Level1)
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession3);
 }
+
+/**
+ * @tc.name: GetApplicationInfo
+ * @tc.desc: test function : GetApplicationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiInstanceManagerTest, GetApplicationInfo, TestSize.Level1)
+{
+    std::string bundleName = "com.ohos.sceneboard";
+    AppExecFwk::ApplicationInfo applicationInfo = MultiInstanceManager::GetInstance().GetApplicationInfo(bundleName);
+    EXPECT_EQ(applicationInfo.startMode, AppExecFwk::StartMode::MAIN_TASK);
 }
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

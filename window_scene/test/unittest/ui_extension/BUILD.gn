@@ -16,7 +16,11 @@ import("../../../../windowmanager_aafwk.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ ":extension_data_handler_test" ]
+  deps = [
+    ":extension_data_handler_test",
+    ":ws_extension_session_manager_test",
+    ":ws_extension_session_test",
+  ]
 }
 
 module_out_path = "window_manager/window_manager/window_scene/ui_extension"
@@ -27,5 +31,52 @@ ohos_unittest("extension_data_handler_test") {
   sources = [ "data_handler/extension_data_handler_test.cpp" ]
   include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
   deps = [ ws_unittest_common ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+  ]
+}
+
+ohos_unittest("ws_extension_session_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "extension_session_manager_test.cpp" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-napi",
+  ]
+}
+
+ohos_unittest("ws_extension_session_test") {
+  module_out_path = module_out_path
+
+  sources = [ "extension_session_test.cpp" ]
+  include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
+
+  deps = [ ws_unittest_common ]
+  defines = [ "ACCESSIBILITY_MOCK" ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "accessibility:accessibility_common",
+    "accessibility:accessibility_interface",
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-napi",
+  ]
 }

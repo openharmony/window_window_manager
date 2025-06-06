@@ -40,6 +40,7 @@ class RSInterfaces;
 
 struct MultiScreenInfo {
     bool isExtendMain;
+    bool outerOnly;
     MultiScreenMode multiScreenMode;
     MultiScreenPositionOptions mainScreenOption;
     MultiScreenPositionOptions secondaryScreenOption;

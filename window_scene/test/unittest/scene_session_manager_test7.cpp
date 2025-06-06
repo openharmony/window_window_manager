@@ -30,7 +30,7 @@ namespace Rosen {
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
-}
+} // namespace
 class SceneSessionManagerTest7 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,6 +41,7 @@ public:
     static bool gestureNavigationEnabled_;
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
@@ -48,18 +49,12 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest7::ssm_ = nullptr;
 
 bool SceneSessionManagerTest7::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest7::callbackFunc_ = [](bool enable,
-    const std::string& bundleName, GestureBackType type) {
-    gestureNavigationEnabled_ = enable;
-};
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest7::callbackFunc_ =
+    [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerTest7::SetUpTestCase()
 {
@@ -328,7 +323,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent, TestSize.Level1)
     ssm_->rootSceneProcessBackEventFunc_ = nullptr;
     ret = ssm_->ProcessBackEvent();
     EXPECT_EQ(ret, WSError::WS_OK);
-    RootSceneProcessBackEventFunc func = [](){};
+    RootSceneProcessBackEventFunc func = []() {};
     ssm_->rootSceneProcessBackEventFunc_ = func;
     ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
     ret = ssm_->ProcessBackEvent();
@@ -370,8 +365,7 @@ HWTEST_F(SceneSessionManagerTest7, DestroySpecificSession, TestSize.Level1)
  * @tc.desc: DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionWithDetachCallback,
-    TestSize.Level0)
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionWithDetachCallback, TestSize.Level0)
 {
     int32_t persistentId = 1;
     sptr<IRemoteObject> callback = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -983,7 +977,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent03, TestSize.Level1)
     focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
-    RootSceneProcessBackEventFunc func = [](){};
+    RootSceneProcessBackEventFunc func = []() {};
     ssm_->rootSceneProcessBackEventFunc_ = func;
     ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
     auto ret = ssm_->ProcessBackEvent();
@@ -1031,7 +1025,7 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, TestSize.Level1)
     focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
-    RootSceneProcessBackEventFunc func = [](){};
+    RootSceneProcessBackEventFunc func = []() {};
     ssm_->rootSceneProcessBackEventFunc_ = func;
     ASSERT_NE(nullptr, ssm_->rootSceneProcessBackEventFunc_);
     auto ret = ssm_->ProcessBackEvent();
@@ -1251,6 +1245,6 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Leve
     ssm_->avoidAreaListenerSessionSet_.insert(persistentId);
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

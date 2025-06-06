@@ -24,6 +24,8 @@
 
 namespace OHOS::AppExecFwk {
 class Configuration;
+class Ability;
+class ElementName;
 }
 
 namespace OHOS {
@@ -66,7 +68,7 @@ public:
      */
     WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option, const sptr<IRemoteObject>& iSession,
-        const std::string& identityToken = "");
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
 
     /**
      * Create a window instance based on the parameters windowName and option.
@@ -111,16 +113,31 @@ public:
     /**
      * Window go distroy.
      *
+     * @param reason the reason of window to go to destroy, default 0.
      * @return the error code of window
      */
-    WMError GoDestroy();
+    WMError GoDestroy(uint32_t reason = 0);
 
     /**
-     * Window go resume.
+     * Hook Window go distroy.
+     *
+     * @return the error code of window
+     */
+    WMError GoDestroyHookWindow();
+
+    /**
+     * Window go resume. GoResume will be deleted later.
      *
      * @return the error code of window
      */
     WMError GoResume();
+
+    /**
+     * Window enter interactive state.
+     *
+     * @return the error code of window
+     */
+    WMError GoInteractive();
 
     /**
      * Window handle new want.
@@ -176,6 +193,22 @@ public:
      * @return the error code of window
      */
     WMError NotifyMemoryLevel(int32_t level);
+
+    /**
+     * @brief Set the bundleName, moduleName and abilityName of the hooked window
+     *
+     * @param elementName includes bundleName, moduleName and abilityName
+     * @return the error code of window
+     */
+    WMError SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName);
+
+    /**
+     * @brief Set the navDestinationInfo of atomicService to arkui.
+     *
+     * @param navDestinationInfo navDestinationInfo in atomicService hap
+     * @return the error code of window
+     */
+    WMError SetNavDestinationInfo(const std::string& navDestinationInfo) { return WMError::WM_OK; }
 
 public:
     static const DisplayId DEFAULT_DISPLAY_ID = 0;

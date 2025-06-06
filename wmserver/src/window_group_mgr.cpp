@@ -19,6 +19,7 @@
 
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_group_mgr.h"
@@ -56,7 +57,7 @@ WMError WindowGroupMgr::MoveMissionsToForeground(const std::vector<int32_t>& mis
         WLOGFD("raise zOrder, missindId: %{public}d ", topMissionId);
         auto windowNode = windowRoot_->GetWindowNodeByMissionId(topMissionId);
         windowRoot_->RaiseZOrderForAppWindow(windowNode);
-        OHOS::Rosen::RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(windowNode->GetRSUIContext());
     }
     return res;
 }

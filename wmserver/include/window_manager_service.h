@@ -109,6 +109,7 @@ public:
     WMError MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
     WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent) override;
@@ -194,6 +195,11 @@ private:
     void ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig);
     bool ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowManagerConfig::ConfigItem& shadowConfig, WindowShadowParameters& outShadow);
+
+    /*
+     * RS Client Multi Instance
+     */
+    void InitRSUIDirector();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::string name_ = "WindowManagerService";

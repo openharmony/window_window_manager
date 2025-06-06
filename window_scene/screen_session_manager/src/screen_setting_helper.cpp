@@ -15,11 +15,13 @@
 
 #include "screen_setting_helper.h"
 
-#include "window_manager_hilog.h"
+#include <cerrno>
+#include <parameters.h>
+
+#include "screen_session_manager/include/screen_session_manager.h"
 #include "setting_provider.h"
 #include "system_ability_definition.h"
-#include "screen_session_manager/include/screen_session_manager.h"
-#include <parameters.h>
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -42,6 +44,13 @@ constexpr uint32_t DATA_INDEX_TWO = 2;
 constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
 constexpr uint32_t SCREEN_EXTEND_IN_DATA = 2;
+constexpr ScreenId RS_ID_INTERNAL = 0;
+constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_ZERO = 0;
+constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_ONE = 1;
+constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_TWO = 2;
+constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.7f;
+constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 0.85f;
+constexpr float EXTEND_SCREEN_DPI_TWO_PARAMETER = 1.00f;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 
@@ -322,6 +331,20 @@ bool ScreenSettingHelper::IsNumber(const std::string& str)
     return hasDigit;
 }
 
+bool ScreenSettingHelper::ConvertStrToUint64(const std::string& str, uint64_t& num)
+{
+    char *endFlag;
+    errno = 0;
+    uint64_t tmp = static_cast<uint64_t>(std::strtoull(str.c_str(), &endFlag, BASE_TEN));
+    if (errno == ERANGE) {
+        return false;
+    } else if (endFlag == nullptr || *endFlag != '\0') {
+        return false;
+    }
+    num = tmp;
+    return true;
+}
+
 std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(const std::string& key)
 {
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = {};
@@ -448,12 +471,13 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", startX: %{public}d, startY: %{public}d",
         screenId, startX, startY);
 
-    ScreenId internalScreenId = ScreenSessionManager::GetInstance().GetInternalScreenId();
-    if ((info.isExtendMain && screenId != internalScreenId) || (!info.isExtendMain && screenId == internalScreenId)) {
+    if ((RS_ID_INTERNAL == screenId && !info.isExtendMain) || (RS_ID_INTERNAL != screenId && info.isExtendMain)) {
+        TLOGI(WmsLogTag::DMS, "find main screen option");
         info.mainScreenOption.screenId_ = screenId;
         info.mainScreenOption.startX_ = startX;
         info.mainScreenOption.startY_ = startY;
     } else {
+        TLOGI(WmsLogTag::DMS, "find secondary screen option");
         info.secondaryScreenOption.screenId_ = screenId;
         info.secondaryScreenOption.startX_ = startX;
         info.secondaryScreenOption.startY_ = startY;
@@ -468,7 +492,15 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     std::string shape;
     while (std::getline(iss, id, ':')) {
         std::getline(iss, shape, ';');
+        if (!IsNumber(id)) {
+            TLOGI(WmsLogTag::DMS, "id is invalid");
+            continue;
+        }
         if (screenId == static_cast<ScreenId>(std::stoi(id))) {
+            if (!IsNumber(shape)) {
+                TLOGE(WmsLogTag::DMS, "shape is invalid");
+                return ScreenShape::RECTANGLE;
+            }
             return static_cast<ScreenShape>(std::stoi(shape));
         }
     }
@@ -542,7 +574,7 @@ void ScreenSettingHelper::UnRegisterSettingExtendScreenDpiObserver()
     extendScreenDpiObserver_ = nullptr;
 }
 
-bool ScreenSettingHelper::GetSettingExtendScreenDpi(bool& enable, const std::string& key)
+bool ScreenSettingHelper::GetSettingExtendScreenDpi(float& coef, const std::string& key)
 {
     SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     int32_t value = INDEX_EXTEND_SCREEN_DPI_POSITION;
@@ -552,7 +584,20 @@ bool ScreenSettingHelper::GetSettingExtendScreenDpi(bool& enable, const std::str
         return false;
     }
     TLOGI(WmsLogTag::DMS, "get setting extend dpi is %{public}d", value);
-    enable = static_cast<bool>(value);
+    switch (value) {
+        case EXTEND_SCREEN_DPI_LEVEL_ZERO:
+            coef = EXTEND_SCREEN_DPI_ZERO_PARAMETER;
+            break;
+        case EXTEND_SCREEN_DPI_LEVEL_ONE:
+            coef = EXTEND_SCREEN_DPI_ONE_PARAMETER;
+            break;
+        case EXTEND_SCREEN_DPI_LEVEL_TWO:
+            coef = EXTEND_SCREEN_DPI_TWO_PARAMETER;
+            break;
+        default:
+            coef = EXTEND_SCREEN_DPI_ONE_PARAMETER;
+            break;
+    }
     return true;
 }
 } // namespace Rosen

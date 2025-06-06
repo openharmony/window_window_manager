@@ -38,6 +38,7 @@ struct SnapShotConfig {
     Media::Size imageSize_;
     Media::Rect imageRect_;
     int rotation_;
+    bool isCaptureFullOfScreen_ = false;
 };
 
 class DisplayManager {
@@ -256,10 +257,12 @@ public:
      *
      * @param displayId Display id.
      * @param errorCode error code.
+     * @param isUseDma Whether to use DMA, not used by default.
+     * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
      * @return PixelMap object of screenshot.
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -731,9 +734,10 @@ public:
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
      * @param surfaceIdList The surfaceId list to shield on cast screen.
+     * @param typeBlackList The surface type list to shield on cast screen.
     */
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {});
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
 
     /**
      * @brief Set virtual display mute flag to RS.
@@ -836,7 +840,7 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
-    
+
     /**
      * @brief Get CutoutInfo with rotation
      *
@@ -846,11 +850,17 @@ public:
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
 
     /**
-     * @brief Get device status.
+     * @brief Get screenInfo of display area
      *
-     * @return Device status.
+     * @param DisplayId displayId.
+     * @param DMRect displayArea.
+     * @param ScreenId screenId.
+     * @param DMRect screenArea.
+     * @return DM_OK means process get screenArea success.
      */
-    uint32_t GetDeviceStatus() const;
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
+
 private:
     DisplayManager();
     ~DisplayManager();

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <transaction/rs_sync_transaction_controller.h>
 
+#include "rs_adapter.h"
 #include "window_agent.h"
 #include "window_stub.h"
 
@@ -202,14 +203,17 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, TestSize.Level1)
 {
     Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
-    auto syncTransactionController = RSSyncTransactionController::GetInstance();
+    std::shared_ptr<RSUIContext> rsUIContext;
+    if (windowAgent_->window_) {
+        rsUIContext = windowAgent_->window_->GetRSUIContext();
+    }
+    auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(rsUIContext);
 
-    WMError err =
-        windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, syncTransactionController->GetRSTransaction());
+    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
-    err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, syncTransactionController->GetRSTransaction());
+    err = windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, rsTransaction);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 
@@ -286,6 +290,21 @@ HWTEST_F(WindowAgentTest, NotifyScreenshot, TestSize.Level1)
     windowAgent_->window_ = nullptr;
     err = windowAgent_->NotifyScreenshot();
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAgentTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    WMError err = windowAgent_->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(err, WMError::WM_OK);
+
+    windowAgent_->window_ = nullptr;
+    err = windowAgent_->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 
 /**

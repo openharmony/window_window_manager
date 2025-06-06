@@ -17,12 +17,20 @@
 
 #include <hisysevent.h>
 #include "pointer_event.h"
+#include "rs_adapter.h"
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SCBSystemSession" };
+const std::unordered_map<std::string, SurfaceWindowType> surfaceWindowTypeMap = {
+    { "SCBDesktop", SurfaceWindowType::SCB_DESKTOP },
+    { "SCBWallpaper", SurfaceWindowType::SCB_WALLPAPER },
+    { "SCBScreenLock", SurfaceWindowType::SCB_SCREEN_LOCK },
+    { "SCBNegativeScreen", SurfaceWindowType::SCB_NEGATIVE_SCREEN },
+    { "SCBDropdownPanel", SurfaceWindowType::SCB_DROPDOWN_PANEL }
+};
 } // namespace
 
 SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -35,7 +43,16 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         RSSurfaceNodeConfig config;
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
+        for (const auto& iter : surfaceWindowTypeMap) {
+            if (name.find(iter.first) != std::string::npos) {
+                config.surfaceWindowType = iter.second;
+                break;
+            }
+        }
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+              RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(), name.c_str());
         SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");
@@ -74,18 +91,12 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             }
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-            session->keyboardPanelRectUpdateCallback_ && session->isKeyboardPanelEnabled_) {
-            session->keyboardPanelRectUpdateCallback_();
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL && session->GetKeyboardSession()) {
+            session->GetKeyboardSession()->MarkOccupiedAreaAsDirty();
         }
         return ret;
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
-}
-
-void SCBSystemSession::SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func)
-{
-    keyboardPanelRectUpdateCallback_ = func;
 }
 
 void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
@@ -95,12 +106,6 @@ void SCBSystemSession::BindKeyboardSession(sptr<SceneSession> session)
         return;
     }
     keyboardSession_ = session;
-    KeyboardPanelRectUpdateCallback onKeyboardPanelRectUpdate = [this]() {
-        if (this->keyboardSession_ != nullptr) {
-            this->keyboardSession_->OnKeyboardPanelUpdated();
-        }
-    };
-    SetKeyboardPanelRectUpdateCallback(onKeyboardPanelRectUpdate);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Success, id: %{public}d", keyboardSession_->GetPersistentId());
 }
 
@@ -236,10 +241,6 @@ bool SCBSystemSession::IsVisibleForeground() const
 void SCBSystemSession::NotifyClientToUpdateAvoidArea()
 {
     SceneSession::NotifyClientToUpdateAvoidArea();
-    if (GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-        keyboardPanelRectUpdateCallback_ && isKeyboardPanelEnabled_) {
-        keyboardPanelRectUpdateCallback_();
-    }
 }
 
 void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)

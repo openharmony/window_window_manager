@@ -35,10 +35,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string BUNDLE_NAME = "bundleName";
-    const int32_t USER_ID { 100 };
-    const int32_t SLEEP_TIME { 10000 };
-}
+const std::string BUNDLE_NAME = "bundleName";
+const int32_t USER_ID{ 100 };
+const int32_t SLEEP_TIME{ 10000 };
+} // namespace
 class SceneSessionManagerTest11 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -47,6 +47,7 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
+
 private:
     sptr<SceneSession> GetSceneSession(const std::string& instanceKey = "");
     void Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount);
@@ -66,9 +67,7 @@ void SceneSessionManagerTest11::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerTest11::SetUp()
-{
-}
+void SceneSessionManagerTest11::SetUp() {}
 
 void SceneSessionManagerTest11::TearDown()
 {
@@ -93,16 +92,17 @@ sptr<SceneSession> SceneSessionManagerTest11::GetSceneSession(const std::string&
 void SceneSessionManagerTest11::Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _)).WillOnce([modeType, maxCount](
-        const AppExecFwk::ApplicationFlag flag, const int32_t userId,
-        std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
-        AppExecFwk::ApplicationInfo appInfo;
-        appInfo.bundleName = BUNDLE_NAME;
-        appInfo.multiAppMode.multiAppModeType = modeType;
-        appInfo.multiAppMode.maxCount = maxCount;
-        appInfos.push_back(appInfo);
-        return true;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _))
+        .WillOnce([modeType, maxCount](const AppExecFwk::ApplicationFlag flag,
+                                       const int32_t userId,
+                                       std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
+            AppExecFwk::ApplicationInfo appInfo;
+            appInfo.bundleName = BUNDLE_NAME;
+            appInfo.multiAppMode.multiAppModeType = modeType;
+            appInfo.multiAppMode.maxCount = maxCount;
+            appInfos.push_back(appInfo);
+            return true;
+        });
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
     usleep(SLEEP_TIME);
@@ -228,35 +228,6 @@ HWTEST_F(SceneSessionManagerTest11, GetLastInstanceKey, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateOccupiedAreaIfNeed
- * @tc.desc: SceneSesionManager update occupiedArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, TestSize.Level1)
-{
-    int ret = 0;
-    int32_t persistentId = 0;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.moduleName_ = "test3";
-    info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    persistentId = 1;
-    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
-
-    ssm_->sceneSessionMap_.erase(1);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetAbilityInfo
  * @tc.desc: SceneSesionManager test GetAbilityInfo
  * @tc.type: FUNC
@@ -300,11 +271,11 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo03, TestSize.Level1)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
-        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
-        bundleInfo.hapModuleInfos = {};
-        return 0;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            bundleInfo.hapModuleInfos = {};
+            return 0;
+        });
     ssm_->bundleMgr_ = bundleMgrMocker;
     std::string bundleName = "bundleName";
     std::string moduleName = "moduleName";
@@ -323,17 +294,17 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo03, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo04, TestSize.Level1)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
-        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
-        AppExecFwk::AbilityInfo abilityInfo;
-        abilityInfo.moduleName = "moduleName";
-        abilityInfo.name = "abilityName";
-        AppExecFwk::HapModuleInfo hapModuleInfo;
-        hapModuleInfo.abilityInfos = { abilityInfo };
-        bundleInfo.hapModuleInfos = { hapModuleInfo };
-        bundleInfo.applicationInfo.codePath = "testCodePath";
-        return 0;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName";
+            abilityInfo.name = "abilityName";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            bundleInfo.applicationInfo.codePath = "testCodePath";
+            return 0;
+        });
     ssm_->bundleMgr_ = bundleMgrMocker;
     std::string bundleName = "bundleName";
     std::string moduleName = "moduleName";
@@ -353,16 +324,16 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo04, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, TestSize.Level1)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
-        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
-        AppExecFwk::AbilityInfo abilityInfo;
-        abilityInfo.moduleName = "moduleName2";
-        abilityInfo.name = "abilityName2";
-        AppExecFwk::HapModuleInfo hapModuleInfo;
-        hapModuleInfo.abilityInfos = { abilityInfo };
-        bundleInfo.hapModuleInfos = { hapModuleInfo };
-        return 0;
-    });
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName2";
+            abilityInfo.name = "abilityName2";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
     ssm_->bundleMgr_ = bundleMgrMocker;
     std::string bundleName = "bundleName";
     std::string moduleName = "moduleName";
@@ -487,18 +458,19 @@ HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, TestSize.Level1)
     auto ret = ssm_->systemConfig_.IsPcWindow();
     ASSERT_EQ(ret, false);
 
-    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    int32_t fingerId = 0;
+    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
     sourcePersistentId = 1;
     ssm_->sceneSessionMap_.clear();
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
 }
 
@@ -574,7 +546,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByBundleNameAndAppIndex, TestS
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
 
     ssm_->GetMainSessionByBundleNameAndAppIndex(BUNDLE_NAME, appIndex, mainSessions);
@@ -601,7 +573,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainSessionByAbilityInfo, TestSize.Level1
     std::vector<sptr<SceneSession>> mainSessions;
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> sceneSession = GetSceneSession(bundleName);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->GetMainSessionByAbilityInfo(abilityInfo, mainSessions);
 
     abilityInfo.bundleName = BUNDLE_NAME;
@@ -639,7 +611,7 @@ HWTEST_F(SceneSessionManagerTest11, GetKeyboardSession, TestSize.Level1)
     info.screenId_ = 5;
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->GetKeyboardSession(displayId, isSystemKeyboard);
 
     displayId = 5;
@@ -690,8 +662,8 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    auto result = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
-        persistentId, session, systemConfig, iRemoteObjectMocker);
+    auto result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
     ASSERT_EQ(result, WSError::WS_ERROR_NOT_SYSTEM_APP);
 
     property->SetTopmost(false);
@@ -699,10 +671,10 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.
     std::string bundleName = "bundleName_test";
     sptr<SceneSession> parentSession = GetSceneSession(bundleName);
     parentSession->GetSessionProperty()->SetSubWindowLevel(10);
-    ssm_->sceneSessionMap_.insert({1, parentSession});
+    ssm_->sceneSessionMap_.insert({ 1, parentSession });
     property->SetParentPersistentId(1);
-    result = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property,
-        persistentId, session, systemConfig, iRemoteObjectMocker);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
 }
 
@@ -753,7 +725,7 @@ HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, TestSize.Lev
     bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
 
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ BUNDLE_NAME, startingWindowInfo }};
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { BUNDLE_NAME, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
     res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
@@ -777,7 +749,7 @@ HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, TestSize.L
     bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
     ASSERT_EQ(res, false);
 
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ "test", startingWindowInfo }};
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { "test", startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
 
     res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
@@ -934,6 +906,53 @@ HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch05, 
     ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
     ssm_->sceneSessionMap_.clear();
 }
-}  // namespace
+
+/**
+ * @tc.name: AnimateTo01
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, AnimateTo01, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "AnimateToTest";
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    float targetScale = 0;
+    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
+    sceneSession->RegisterAnimateToCallback([&targetScale, &curve](const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption) {
+        targetScale = animationProperty.targetScale;
+        curve = animationOption.curve;
+    });
+
+    auto persistenId = sceneSession->GetPersistentId();
+    ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
+    WindowAnimationProperty animationProperty;
+    animationProperty.targetScale = 10.5f;
+    WindowAnimationOption animationOption;
+    animationOption.curve = WindowAnimationCurve::INTERPOLATION_SPRING;
+    animationOption.duration = 1000;
+
+    ssm_->AnimateTo(0, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::LINEAR);
+    ASSERT_EQ(targetScale, 0);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_WINDOW_BASE);
+    ssm_->AnimateTo(persistenId, animationProperty, animationOption);
+    usleep(SLEEP_TIME);
+    ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
+    ASSERT_EQ(targetScale, animationProperty.targetScale);
+
 }
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

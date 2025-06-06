@@ -36,10 +36,13 @@ public:
     void SetInnerAndExternalCombination(ScreenCombination innerCombination, ScreenCombination externalCombination);
 
 private:
+    ScreenCombination innerCombination_ = ScreenCombination::SCREEN_MAIN;
+    ScreenCombination externalCombination_ = ScreenCombination::SCREEN_EXTEND;
+
     /* screen power status map */
     using HandleScreenPowerChange = std::function<DMError(sptr<ScreenSession> &, sptr<ScreenSession> &)>;
     using HandleScreenPowerChangeMap = std::map<MultiScreenPowerSwitchType, HandleScreenPowerChange>;
-    HandleScreenPowerChangeMap HandleScreenPowerChangeMap_ {};
+    HandleScreenPowerChangeMap handleScreenPowerChangeMap_ {};
 
     void InitMultiScreenPowerChangeMap();
     DMError HandleScreenOnChange(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
@@ -53,7 +56,7 @@ private:
     /* inner screen old combination and external screen old combination */
     using ScreenCombinationChangeEvent = std::pair<ScreenCombination, ScreenCombination>;
     using HandleScreenOffModeChangeMap = std::map<ScreenCombinationChangeEvent, HandleScreenOffModeChange>;
-    HandleScreenOffModeChangeMap HandleScreenOffModeChangeMap_ {};
+    HandleScreenOffModeChangeMap handleScreenOffModeChangeMap_ {};
 
     /* mode change handler: external only */
     void InitMultiScreenModeOffChangeMap();
@@ -61,7 +64,7 @@ private:
    /* recovery screen mode from power off */
     using HandleRecoveryScreenModeChange = std::function<DMError(sptr<ScreenSession> &, sptr<ScreenSession> &)>;
     using HandleRecoveryScreenModeChangeMap = std::map<ScreenCombinationChangeEvent, HandleRecoveryScreenModeChange>;
-    HandleRecoveryScreenModeChangeMap HandleRecoveryScreenModeChangeMap_ {};
+    HandleRecoveryScreenModeChangeMap handleRecoveryScreenModeChangeMap_ {};
 
     /* mode change handler: recovery */
     void InitRecoveryMultiScreenModeChangeMap();
@@ -100,14 +103,12 @@ private:
 
     void NotifyClientCreateSessionOnly(sptr<IScreenSessionManagerClient> ssmClient,
         sptr<ScreenSession> screenSession);
+    void CallRsSetScreenPowerStatusSyncToOn(ScreenId screenId);
 
     void CreateExternalScreenDisplayNodeOnly(sptr<ScreenSession>& innerScreen,
         sptr<ScreenSession>& externalScreen, ScreenCombination combination);
     void ScreenDisplayNodeRemove(sptr<ScreenSession>& screenScreen);
     void ScreenToExtendChange(sptr<IScreenSessionManagerClient> ssmClient, sptr<ScreenSession> screenSession);
-
-    ScreenCombination innerCombination_ = ScreenCombination::SCREEN_MAIN;
-    ScreenCombination externalCombination_ = ScreenCombination::SCREEN_EXTEND;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_MULTI_SCREEN_POWER_CHANGE_MANAGER_H

@@ -234,7 +234,8 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "OnIsPipEnabled called");
-    return CreateJsValue(env, true);
+    bool isPc = PictureInPictureManager::IsPcType();
+    return CreateJsValue(env, !isPc);
 }
 
 napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_info info)

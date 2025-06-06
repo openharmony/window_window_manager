@@ -38,9 +38,11 @@ namespace OHOS {
 namespace Rosen {
 class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using GetStatusBarHeightCallback = std::function<uint32_t()>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
+using UIContentResult = std::pair<Ace::UIContent*, bool>;
 
 class RootScene : public Window {
 public:
@@ -68,10 +70,13 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
+    uint32_t GetStatusBarHeight() const override;
+    void RegisterGetStatusBarHeightCallback(GetStatusBarHeightCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
-    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info = nullptr);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
@@ -117,7 +122,7 @@ public:
 
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
 
-    Ace::UIContent* GetUIContentByDisplayId(DisplayId displayId);
+    UIContentResult GetUIContentByDisplayId(DisplayId displayId);
 
     void AddRootScene(DisplayId displayId, wptr<Window> window);
 
@@ -130,6 +135,7 @@ public:
      */
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
     void SetTopWindowBoundaryByID(const std::string& stringId);
+    bool HasRequestedVsync() const { return vsyncStation_->HasRequestedVsync(); }
 
     /*
      * Window Property
@@ -138,6 +144,12 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     static sptr<RootScene> staticRootScene_;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     void RegisterInputEventListener();
@@ -162,6 +174,7 @@ private:
      * Window Immersive
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
+    GetStatusBarHeightCallback getStatusBarHeightCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;

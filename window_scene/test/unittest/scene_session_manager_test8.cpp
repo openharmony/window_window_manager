@@ -35,18 +35,15 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
 private:
     sptr<SceneSessionManager> ssm_;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
-void SceneSessionManagerTest8::SetUpTestCase()
-{
-}
+void SceneSessionManagerTest8::SetUpTestCase() {}
 
-void SceneSessionManagerTest8::TearDownTestCase()
-{
-}
+void SceneSessionManagerTest8::TearDownTestCase() {}
 
 void SceneSessionManagerTest8::SetUp()
 {
@@ -159,7 +156,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, TestSize.Level1)
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
 
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    PostProcessFocusState state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     sceneSession->SetFocusableOnShow(false);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
@@ -184,7 +181,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, TestSize.Level1)
     sceneSession->persistentId_ = 1;
 
     sceneSession->SetFocusedOnShow(false);
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    PostProcessFocusState state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
@@ -192,7 +189,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, TestSize.Level1)
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
-    state = {true, true, true, FocusChangeReason::FOREGROUND};
+    state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
@@ -324,6 +321,39 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SubtractIntersectArea
+ * @tc.desc: test function : SubtractIntersectArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
+{
+    SkIRect rect{ .fLeft = 0, .fTop = 0, .fRight = 2880, .fBottom = 1920 };
+    auto unaccountedSpace = std::make_shared<SkRegion>(rect);
+    EXPECT_NE(unaccountedSpace, nullptr);
+
+    sptr<SceneSession> sceneSession = nullptr;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), false);
+
+    SessionInfo sessionInfo;
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect wsRect{ .posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100 };
+    sceneSession->winRect_ = wsRect;
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
+
+    SessionInfo sessionInfo2;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    WSRect wsRect2 { .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
+    sceneSession2->winRect_ = wsRect2;
+    std::vector<Rect> hotAreas;
+    hotAreas.push_back(Rect::EMPTY_RECT);
+    hotAreas.push_back({.posX_ = 0, .posY_ = 0, .width_ = 10, .height_ = 10});
+    sceneSession2->GetSessionProperty()->SetTouchHotAreas(hotAreas);
+    EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession2), true);
+}
+
+/**
  * @tc.name: UpdateSubWindowVisibility
  * @tc.desc: test function : UpdateSubWindowVisibility
  * @tc.type: FUNC
@@ -368,8 +398,8 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, TestSize.Level1)
     sceneSession2->SetParentSession(sceneSession2);
     EXPECT_EQ(1998, sceneSession2->GetParentSession()->GetWindowId());
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
-    ssm_->UpdateSubWindowVisibility(sceneSession,
-        visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
+    ssm_->UpdateSubWindowVisibility(
+        sceneSession, visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
 }
 
 /**
@@ -391,13 +421,13 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
 
     sptr<WindowSessionProperty> property = nullptr;
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 
     property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
 }
 
 /**
@@ -420,31 +450,27 @@ HWTEST_F(SceneSessionManagerTest8, RegisterSessionChangeByActionNotifyManagerFun
     EXPECT_NE(nullptr, property);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+
+    sceneSession->NotifySessionChangeByActionNotifyManager(
+        property, WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
 
     sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+                                                           WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_FLAGS);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_MODE);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_MODE);
+    sceneSession->NotifySessionChangeByActionNotifyManager(
+        property, WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
 
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
-
-    sceneSession->NotifySessionChangeByActionNotifyManager(property,
-        WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
 }
 
 /**
@@ -457,24 +483,6 @@ HWTEST_F(SceneSessionManagerTest8, RegisterRequestFocusStatusNotifyManagerFunc, 
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     EXPECT_EQ(nullptr, sceneSession);
-}
-
-/**
- * @tc.name: CheckRequestFocusImmdediately
- * @tc.desc: test function : CheckRequestFocusImmdediately
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, CheckRequestFocusImmdediately, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.abilityName_ = "CheckRequestFocusImmdediately";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WindowType::APP_SUB_WINDOW_BASE, sceneSession->GetWindowType());
-    bool ret = ssm_->CheckRequestFocusImmdediately(sceneSession);
-    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -591,14 +599,10 @@ HWTEST_F(SceneSessionManagerTest8, IsLastFrameLayoutFinished, TestSize.Level1)
 {
     ssm_->closeTargetFloatWindowFunc_ = nullptr;
     std::string bundleName = "SetCloseTargetFloatWindowFunc";
-    ProcessCloseTargetFloatWindowFunc func = [](const std::string& bundleName1) {
-        return ;
-    };
+    ProcessCloseTargetFloatWindowFunc func = [](const std::string& bundleName1) { return; };
     ssm_->SetCloseTargetFloatWindowFunc(func);
 
-    IsRootSceneLastFrameLayoutFinishedFunc func1 = []() {
-        return true;
-    };
+    IsRootSceneLastFrameLayoutFinishedFunc func1 = []() { return true; };
     ssm_->isRootSceneLastFrameLayoutFinishedFunc_ = func1;
     ASSERT_NE(ssm_->isRootSceneLastFrameLayoutFinishedFunc_, nullptr);
     bool isLayoutFinished = false;
@@ -690,52 +694,80 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     sceneSession->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(sceneSession->GetScreenId(), 0);
     ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 100, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
 
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = {0, 1000, 100, 100};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = { 0, 1000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
-    sceneSession->winRect_ = {0, 2000, 100, 100};
+    sceneSession->winRect_ = { 0, 2000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
-    WSRect hostRect = {0, 2000, 100, 100};
+    WSRect hostRect = { 0, 2000, 100, 100 };
     sceneSession->TransformGlobalRectToRelativeRect(hostRect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, hostRect.posY_);
 
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 0, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::UNKNOWN, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 0, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = { 0, 100, 0, 0 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
 
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = {0, 1000, 100, 100};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = { 0, 1000, 100, 100 };
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
+}
+
+/**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: test function : GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->OnScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.bundleName_ = "GetHostGlobalScaledRect";
+    info.abilityName_ = "GetHostGlobalScaledRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    auto ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 
 /**
@@ -931,7 +963,7 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Test
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
 
     NotifyCreateKeyboardSessionFunc func = [](const sptr<SceneSession>& keyboardSession,
-        const sptr<SceneSession>& panelSession) {};
+                                              const sptr<SceneSession>& panelSession) {};
     ssm_->SetCreateKeyboardSessionListener(func);
 
     ProcessOutsideDownEventFunc func1 = [](int32_t x, int32_t y) {};
@@ -982,6 +1014,69 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID), ssm_->observedFlags_);
+    EXPECT_EQ(static_cast<uint32_t>(WindowInfoKey::WINDOW_ID), ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
 }
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: test function : UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    uint32_t interestInfo = 0;
+    interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
+    auto ret = ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    ret = ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent);
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
+}
+
+/**
+ * @tc.name: PackWindowPropertyChangeInfo01
+ * @tc.desc: test function : PackWindowPropertyChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Level1)
+{
+    ssm_->interestedFlags_ = -1;
+    SessionInfo sessionInfo1;
+    sessionInfo1.isSystem_ = false;
+    sessionInfo1.bundleName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.abilityName_ = "PackWindowPropertyChangeInfo";
+    sessionInfo1.appIndex_ = 10;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession1->GetSessionProperty()->SetDisplayId(0);
+
+    std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+    ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

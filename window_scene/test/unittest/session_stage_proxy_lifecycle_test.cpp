@@ -23,7 +23,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -39,21 +38,13 @@ public:
     sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void SessionStageProxyLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStageProxyLifecycleTest::SetUpTestCase() {}
 
-void SessionStageProxyLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStageProxyLifecycleTest::TearDownTestCase() {}
 
-void SessionStageProxyLifecycleTest::SetUp()
-{
-}
+void SessionStageProxyLifecycleTest::SetUp() {}
 
-void SessionStageProxyLifecycleTest::TearDown()
-{
-}
+void SessionStageProxyLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -134,6 +125,6 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyWindowVisibility, TestSize.Level1
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyWindowVisibility(true);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

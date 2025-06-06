@@ -17,6 +17,7 @@
 
 #include <transaction/rs_transaction.h>
 
+#include "rs_adapter.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
@@ -68,23 +69,24 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
         TLOGE(WmsLogTag::DMS, "screenSession null.");
         return;
     }
-    innerScreen->SetStartPosition(0, 0);
     innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
-    externalScreen->SetStartPosition(innerScreen->GetScreenProperty().GetBounds().rect_.GetWidth(), 0);
     externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
-    std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
-    std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
     {
+        std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
+        std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
         if (innerNode && externalNode) {
-            innerNode->SetDisplayOffset(0, 0);
-            externalNode->SetDisplayOffset(innerScreen->GetScreenProperty().GetBounds().rect_.GetWidth(), 0);
+            innerNode->SetDisplayOffset(innerScreen->GetScreenProperty().GetStartX(),
+                innerScreen->GetScreenProperty().GetStartY());
+            externalNode->SetDisplayOffset(externalScreen->GetScreenProperty().GetStartX(),
+                externalScreen->GetScreenProperty().GetStartY());
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& screenSession,
@@ -97,36 +99,51 @@ void MultiScreenChangeUtils::SetScreenAvailableStatus(sptr<ScreenSession>& scree
     ScreenId screenId = screenSession->GetScreenId();
     TLOGW(WmsLogTag::DMS, "screenId=%{public}" PRIu64, screenId);
     screenSession->SetScreenAvailableStatus(isScreenAvailable);
+    if (isScreenAvailable) {
+        ScreenSessionManager::GetInstance().NotifyDisplayCreate(
+            screenSession->ConvertToDisplayInfo());
+    } else {
+        ScreenSessionManager::GetInstance().NotifyDisplayDestroy(screenId);
+    }
 }
 
-void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& screenSession)
+void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
 {
-    if (!screenSession) {
+    if (innerScreen == nullptr || externalScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
-    screenSession->SetStartPosition(0, 0);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(),
+    innerScreen->SetStartPosition(0, 0);
+    innerScreen->SetXYPosition(0, 0);
+    innerScreen->PropertyChange(innerScreen->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    externalScreen->SetStartPosition(0, 0);
+    externalScreen->SetXYPosition(0, 0);
+    externalScreen->PropertyChange(externalScreen->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     {
-        std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
-        if (displayNode != nullptr) {
-            displayNode->SetDisplayOffset(0, 0);
+        std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
+        std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
+        if (innerNode && externalNode) {
+            innerNode->SetDisplayOffset(0, 0);
+            externalNode->SetDisplayOffset(0, 0);
         } else {
-            TLOGW(WmsLogTag::DMS, "displayNode is null");
+            TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(
+        {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
 }
 
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
-    if (innerScreen) {
+    if (innerScreen != nullptr) {
         TLOGW(WmsLogTag::DMS, "inner screen offScreen rendering.");
         innerScreen->SetScreenOffScreenRendering();
     }
-    if (externalScreen) {
+    if (externalScreen != nullptr) {
         TLOGW(WmsLogTag::DMS, "external screen offScreen rendering.");
         externalScreen->SetScreenOffScreenRendering();
     }
@@ -193,12 +210,13 @@ void MultiScreenChangeUtils::ScreenRSIdChange(sptr<ScreenSession>& innerScreen,
         TLOGE(WmsLogTag::DMS, "screen sessions null.");
         return;
     }
+    
+    ScreenSessionManager::GetInstance().UpdateScreenIdManager(innerScreen, externalScreen);
+
     ScreenId innerScreenId = innerScreen->GetRSScreenId();
     ScreenId externalScreenId = externalScreen->GetRSScreenId();
     innerScreen->SetRSScreenId(externalScreenId);
     externalScreen->SetRSScreenId(innerScreenId);
-
-    ScreenSessionManager::GetInstance().UpdateScreenIdManager(innerScreen, externalScreen);
 
     bool isInnerScreenInternal = innerScreen->GetIsInternal();
     bool isexternalScreenInternal = externalScreen->GetIsInternal();
@@ -232,7 +250,7 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     sptr<ScreenSession> externalPhyScreen =
         ScreenSessionManager::GetInstance().GetPhysicalScreenSession(externalScreen->GetRSScreenId());
 
-    if (!innerPhyScreen || !externalPhyScreen) {
+    if (innerPhyScreen == nullptr || externalPhyScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "physicalScreen is null!");
         return;
     }
@@ -248,6 +266,17 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     ScreenProperty externalPhyProperty = externalPhyScreen->GetScreenProperty();
     innerScreen->SetScreenProperty(externalPhyProperty);
     externalScreen->SetScreenProperty(innerPhyProperty);
+}
+
+void MultiScreenChangeUtils::SetScreenNotifyFlag(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
+{
+    if (innerScreen == nullptr || externalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen sessions null.");
+        return;
+    }
+    innerScreen->SetIsAvailableAreaNeedNotify(true);
+    externalScreen->SetIsAvailableAreaNeedNotify(true);
 }
 
 void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& innerScreen,
@@ -281,6 +310,9 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
 
     /* change active mode */
     ScreenActiveModesChange(innerScreen, externalScreen);
+
+    /* set notify flag */
+    SetScreenNotifyFlag(innerScreen, externalScreen);
     oss.str("");
     oss << "after innerScreen screenId: " << innerScreen->GetScreenId()
         << ", rsId: " << innerScreen->GetRSScreenId()

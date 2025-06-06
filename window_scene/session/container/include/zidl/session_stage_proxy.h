@@ -47,13 +47,16 @@ public:
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                 AAFwk::WantParams& reWantParams) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyScreenshot() override;
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
@@ -71,11 +74,8 @@ public:
     WSError SwitchFreeMultiWindow(bool enable) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
-    WSError CompatibleFullScreenRecover() override;
-    WSError CompatibleFullScreenMinimize() override;
-    WSError CompatibleFullScreenClose() override;
     WSError PcAppInPadNormalClose() override;
-    WSError NotifyCompatibleModeEnableInPad(bool enable) override;
+    WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyTargetRotationInfo(OrientationInfo& Info) override;
@@ -94,11 +94,19 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyExtensionSecureLimitChange(bool isLimit) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError CloseSpecificScene() override;
+
+    // Window LifeCycle
+    void NotifyNonInteractiveStatus() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
