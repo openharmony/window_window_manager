@@ -10088,6 +10088,15 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
     windowVisibilityInfo->SetZOrder(session->GetZOrder());
+
+    int32_t callingWindowId = session->GetSessionInfo().callerPersistentId_;
+    sptr<SceneSession> callerSession = GetSceneSession(callingWindowId);
+    if (callerSession) {
+        windowVisibilityInfo->SetCallingPid(callerSession->GetCallingPid());
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "callingWindowId %{public}d, callingPid %{public}d",
+        callingWindowId, windowVisibilityInfo->GetCallingPid());
+
     windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 
     visibilityInfo +=
