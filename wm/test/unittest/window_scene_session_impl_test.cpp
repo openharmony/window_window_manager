@@ -2095,11 +2095,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Leve
 }
 
 /**
- * @tc.name: IsImmersiveLayoutForNapi01
- * @tc.desc: IsImmersiveLayoutForNapi test
+ * @tc.name: IsImmersiveLayoutFor01
+ * @tc.desc: IsImmersiveLayoutFor test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayoutForNapi01, TestSize.Level0)
+HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayoutFor01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -2107,15 +2107,15 @@ HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayoutForNapi01, TestSize.Level0
     window->state_ = WindowState::STATE_CREATED;
 
     bool isImmersiveLayout = false;
-    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutFor(isImmersiveLayout));
     EXPECT_EQ(false, isImmersiveLayout);
 
     window->isIgnoreSafeArea_ = false;
-    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutFor(isImmersiveLayout));
     EXPECT_EQ(true, isImmersiveLayout);
 
     window->state_ = WindowState::STATE_DESTROYED;
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->IsImmersiveLayout(isImmersiveLayout));
 }
 
 /**
