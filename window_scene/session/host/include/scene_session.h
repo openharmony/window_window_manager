@@ -757,6 +757,7 @@ public:
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    bool isSubWinowResizingOrMoving_ = false;
 
     /*
      * Keyboard

@@ -185,6 +185,34 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateRectInner02
+ * @tc.desc: UpdateRectInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateRectInner02, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRectInner02";
+    info.bundleName_ = "UpdateRectInner02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SessionUIParam uiParam;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    sceneSession->SetForegroundInteractiveStatus(true);
+
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    sceneSession->isSubWinowResizingOrMoving_ = true;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+    ASSERT_EQ(true, sceneSession->isSubWinowResizingOrMoving_);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+    ASSERT_EQ(false, sceneSession->isSubWinowResizingOrMoving_);
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC

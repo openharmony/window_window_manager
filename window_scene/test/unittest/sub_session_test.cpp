@@ -531,6 +531,63 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionRectInner03
+ * @tc.desc: UpdateSessionRectInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInner03, TestSize.Level1)
+{
+    MoveConfiguration config;
+    WSRect rect = { 1, 1, 1, 1 };
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, false);
+
+    subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::UNDEFINED, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, false);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, false);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 1, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, true);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 1, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, true);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, false);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 1, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, true);
+
+    subSession_->isSubWinowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 1 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE, config);
+    ASSERT_EQ(subSession_->isSubWinowResizingOrMoving_, true);
+}
+
+/**
  * @tc.name: HandleCrossMoveToSurfaceNode
  * @tc.desc: HandleCrossMoveToSurfaceNode
  * @tc.type: FUNC
