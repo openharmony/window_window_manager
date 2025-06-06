@@ -7715,7 +7715,7 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    } 
+    }
     bool isImmersiveLayout = false;
     auto ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsImmersiveLayout(isImmersiveLayout));
     if (ret != WmErrorCode::WM_OK) {
