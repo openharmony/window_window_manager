@@ -119,6 +119,7 @@ public:
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
+    virtual WMError GetRouterStackInfo(std::string& routerStackInfo) = 0;
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
 
     /**

@@ -2128,6 +2128,27 @@ HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, TestSize.
 }
 
 /**
+ * @tc.name: GetRouterStackInfo
+ * @tc.desc: GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetRouterStackInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetRouterStackInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    std::string testInfo;
+    auto res = window->GetRouterStackInfo(testInfo);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    window->uiContent_ = nullptr;
+    res = window->GetRouterStackInfo(testInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: IsWaterfallModeEnabled
  * @tc.desc: IsWaterfallModeEnabled
  * @tc.type: FUNC

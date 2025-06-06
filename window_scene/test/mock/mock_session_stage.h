@@ -85,6 +85,7 @@ public:
     MOCK_METHOD0(NotifyNonInteractiveStatus, void(void));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
+    MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
 };
 } // namespace Rosen
 } // namespace OHOS

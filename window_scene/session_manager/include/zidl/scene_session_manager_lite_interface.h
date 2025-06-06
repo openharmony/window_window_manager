@@ -27,6 +27,8 @@
 #include "session_info.h"
 #include "zidl/window_manager_lite_interface.h"
 #include "session_lifecycle_listener_interface.h"
+#include "session_router_stack_listener.h"
+
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
@@ -94,6 +96,7 @@ public:
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
+        TRANS_ID_GET_ROUTER_STACK_INFO,
         TRANS_ID_REMOVE_INSTANCE_KEY,
         TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND,
@@ -283,6 +286,20 @@ public:
      * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
      */
     virtual WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) = 0;
+
+    /**
+     * @brief Get the router stack by persistentId
+     *
+     * This function is used to get the router stack by persistentId from arkui
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param persistentId the id of session
+     * @param listener the callback when get router stack from arkui
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener) = 0;
 
     /**
      * @brief Remove a instanceKey of a specific bundle

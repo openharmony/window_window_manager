@@ -18,6 +18,7 @@
 
 #include "iremote_object_mocker.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
+#include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -252,6 +253,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
+        override { return WMError::WM_OK; }
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override
     {
         return WMError::WM_OK;
@@ -997,6 +1000,23 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetCurrentPiPWindowInfo, TestSiz
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetCurrentPiPWindowInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetRouterStackInfo
+ * @tc.desc: test function : HandleGetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRouterStackInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetRouterStackInfo(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteInt32(1);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetRouterStackInfo(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

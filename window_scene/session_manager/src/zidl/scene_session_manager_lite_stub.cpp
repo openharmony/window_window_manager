@@ -151,6 +151,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetRecentMainSessionInfoList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CREATE_NEW_INSTANCE_KEY):
             return HandleCreateNewInstanceKey(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROUTER_STACK_INFO):
+            return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REMOVE_INSTANCE_KEY):
             return HandleRemoveInstanceKey(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN):
@@ -1184,6 +1186,31 @@ int SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(MessageParce
             return ERR_INVALID_DATA;
         }
     }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    int32_t persistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to readInt32 persistentId.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionRouterStackListener> listener = iface_cast<ISessionRouterStackListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = GetRouterStackInfo(persistentId, listener);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
