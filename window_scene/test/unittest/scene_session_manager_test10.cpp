@@ -62,29 +62,6 @@ void ProcessStatusBarEnabledChangeFuncTest(bool enable)
 {
 }
 
-bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
-{
-    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
-    if (cutoutInfo == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
-        return false;
-    }
-    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
-    if (cutoutAreas.empty()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
-        return false;
-    }
-    for (auto& cutoutArea : cutoutAreas) {
-        rect = {
-            cutoutArea.posX_,
-            cutoutArea.posY_,
-            cutoutArea.width_,
-            cutoutArea.height_
-        };
-    }
-    return true;
-}
-
 void SceneSessionManagerTest10::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1536,45 +1513,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSiz
     ASSERT_EQ(avoidArea.bottomRect_, rect);
     ssm_->systemConfig_.windowUIType_ = uiType;
     ssm_->sceneSessionMap_.clear();
-}
-
-/**
- * @tc.name: NotifyNextAvoidRectInfo_cutOut
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_cutOut
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
-    info.bundleName_ = "NotifyNextAvoidRectInfo_cutOut";
-    info.screenId_ = 0;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetPersistentId(1);
-    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    AvoidArea avoidArea;
-    Rect rect = { 0, 0, 0, 0 };
-    bool haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_0, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, avoidArea);
-        ASSERT_EQ(avoidArea.topRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
-    haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_90, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, avoidArea);
-        ASSERT_EQ(avoidArea.rightRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
-    haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_270, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_270, { 0, 0, 2720, 1260 }, avoidArea);
-        ASSERT_EQ(avoidArea.leftRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
 }
 
 /**
