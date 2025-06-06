@@ -551,7 +551,7 @@ void WindowImpl::SetShowWithOptions(bool showWithOptions)
     showWithOptions_ = showWithOptions;
 }
 
-virtual bool WindowImpl::IsShowWithOptions()
+bool WindowImpl::IsShowWithOptions()
 {
     return showWithOptions_;
 }
@@ -559,7 +559,7 @@ virtual bool WindowImpl::IsShowWithOptions()
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     if (IsShowWithOptions()) {
-        setShowWithOptions(false);
+        SetShowWithOptions(false);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return WMError::WM_OK;
