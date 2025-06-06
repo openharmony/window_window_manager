@@ -238,6 +238,8 @@ public:
     bool GetIsFakeInUse() const;
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
+    void SetIsExtendVirtual(bool isExtendVirtual);
+    bool GetIsExtendVirtual() const;
     void SetSerialNumber(std::string serialNumber);
     std::string GetSerialNumber() const;
     ScreenShape GetScreenShape() const;
@@ -360,6 +362,7 @@ private:
     bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
     bool isScreenAvailable_ = true;
+    bool isExtendVirtual_ {false};
     mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;

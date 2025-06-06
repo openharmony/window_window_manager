@@ -2590,6 +2590,32 @@ HWTEST_F(ScreenSessionTest, GetIsPcUse02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIsExtendVirtual001
+ * @tc.desc: Test when isPcUse is true, GetIsPcUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtendVirtual001, TestSize.Level1)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtendVirtual(true);
+    EXPECT_EQ(session->GetIsExtendVirtual(), true);
+}
+
+/**
+ * @tc.name: SetIsExtendVirtual002
+ * @tc.desc: Test when isPcUse is false, GetIsPcUse should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtendVirtual002, TestSize.Level1)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtendVirtual(false);
+    EXPECT_EQ(session->GetIsExtendVirtual(), false);
+}
+
+/**
  * @tc.name: GetIsBScreenHalf01
  * @tc.desc: Test when isBScreenHalf is true, GetIsBScreenHalf should return true
  * @tc.type: FUNC
