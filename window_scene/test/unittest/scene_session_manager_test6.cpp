@@ -1251,11 +1251,11 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo05, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSessionVisibilityInfo
- * @tc.desc: SetSessionVisibilityInfo
+ * @tc.name: SetSessionVisibilityInfo01
+ * @tc.desc: SetSessionVisibilityInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo01, TestSize.Level1)
 {
     sptr<SceneSession> session = nullptr;
     WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
@@ -1274,6 +1274,35 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo, TestSize.Level1)
     ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
     ssm_->windowVisibilityListenerSessionSet_.insert(1);
     ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
+}
+
+/**
+ * @tc.name: SetSessionVisibilityInfo02
+ * @tc.desc: SetSessionVisibilityInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo02, TestSize.Level1)
+{
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    std::string visibilityInfo = "";
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.callerPersistentId_ = 2;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    session1->persistentId_ = 1;
+    session2->persistentId_ = 2;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ 1, session1 });
+    ssm_->sceneSessionMap_.insert({ 2, session2 });
+    ssm_->windowVisibilityListenerSessionSet_.clear();
+    ssm_->windowVisibilityListenerSessionSet_.insert(1);
+    ssm_->SetSessionVisibilityInfo(session1, visibleState, windowVisibilityInfos, visibilityInfo);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
