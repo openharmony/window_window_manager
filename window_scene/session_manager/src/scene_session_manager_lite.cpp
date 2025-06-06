@@ -347,6 +347,12 @@ WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleN
     return SceneSessionManager::GetInstance().CreateNewInstanceKey(bundleName, instanceKey);
 }
 
+WMError SceneSessionManagerLite::GetRouterStackInfo(
+    int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
+{
+    return SceneSessionManager::GetInstance().GetRouterStackInfo(persistentId, listener);
+}
+
 WMError SceneSessionManagerLite::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
     return SceneSessionManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
