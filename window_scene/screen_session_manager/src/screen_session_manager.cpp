@@ -6458,6 +6458,10 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return nullptr;
+    }
     DmsXcollie dmsXcollie("DMS:GetCutoutInfoWithRotation", XCOLLIE_TIMEOUT_10S);
     return screenCutoutController_ ? screenCutoutController_->GetCutoutInfoWithRotation(displayId, rotation) : nullptr;
 }
@@ -7247,6 +7251,10 @@ void ScreenSessionManager::SetIsFoldStatusLocked(bool isFoldStatusLocked)
 
 void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "not super fold display device.");
@@ -7702,6 +7710,10 @@ void ScreenSessionManager::SwitchUser()
 
 void ScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "switching user, change screen mode.");
     if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not pc device");
@@ -9629,6 +9641,10 @@ bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
 
 void ScreenSessionManager::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
@@ -9811,6 +9827,10 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
 
 void ScreenSessionManager::NotifyExtendScreenCreateFinish()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not pc device.");
         return;
@@ -9903,6 +9923,10 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
 
 void ScreenSessionManager::NotifyExtendScreenDestroyFinish()
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
     if (!g_isPcDevice) {
         TLOGW(WmsLogTag::DMS, "not pc device.");
         return;
