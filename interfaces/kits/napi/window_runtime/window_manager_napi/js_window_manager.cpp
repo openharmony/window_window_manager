@@ -1395,25 +1395,25 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
-    std::shared_ptr<NavDestinationNameDataPack> dataPack = std::make_shared<NavDestinationNameDataPack>();
-    NapiAsyncTask::ExecuteCallback execute = [windowId, dataPack, where = __func__]() {
-        dataPack->result = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(
-            windowId, dataPack->topNavDestName);
+    std::string topNavDestName;
+    WMError retErrCode = WMError::WM_OK;
+    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
+        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
-            where, dataPack->topNavDestName.c_str(), windowId, static_cast<int32_t>(dataPack->result));
+            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
     };
-    NapiAsyncTask::CompleteCallback complete =
-        [windowId, dataPack, where = __func__](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (dataPack->result != WMError::WM_OK) {
+    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (retErrCode != WMError::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
-                    where, static_cast<int32_t>(dataPack->result), windowId);
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
+                    where, static_cast<int32_t>(retErrCode), windowId);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
-                where, dataPack->topNavDestName.c_str(), windowId);
-            task.Resolve(env, CreateJsValue(env, dataPack->topNavDestName));
+                where, topNavDestName.c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, topNavDestName));
         };
     napi_value result = nullptr;
     auto asyncTask = CreateAsyncTask(env, nullptr,
