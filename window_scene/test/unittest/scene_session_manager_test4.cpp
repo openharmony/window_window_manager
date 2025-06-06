@@ -38,6 +38,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg = msg;
+    }
+}
 class SceneSessionManagerTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -705,6 +713,78 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
     int32_t persistentId = 1;
     auto result = ssm_->UpdateSessionWindowVisibilityListener(persistentId, true);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: test WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->screenshotAppEventListenerSessionSet_.insert(1);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
+
+    SessionInfo info;
+    info.abilityName_ = "NotifyScreenshotEvent";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdateSessionScreenshotAppEventListener01
+ * @tc.desc: test WM_ERROR_NULLPTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
+{
+    int32_t persistentId = 10086;
+    bool haveListener = true;
+    WMError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateSessionScreenshotAppEventListener02
+ * @tc.desc: test WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionScreenshotAppEventListener";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    int32_t persistentId = 1;
+    auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1815,6 +1895,54 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession01, TestSize
     sceneSession02->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 2, true);
     EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: CheckBlockingFocus
+ * @tc.desc: CheckBlockingFocus
+ * 1.session with blockfocus porperty need be blocked
+ * 2.main window need be blocked
+ * 3.WINDOW_TYPE_VOICE_INTERACTION window type need be blocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName";
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    bool ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, false);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = ssm_->CheckBlockingFocus(sceneSession, true);
+    EXPECT_EQ(ret, true);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, true);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->sessionInfo_.isSystem_ = true;
+    sceneSession->blockingFocus_ = true;
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, true);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->blockingFocus_ = false;
+    sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->SetParentSession(sceneSession01);
+    ret = ssm_->CheckBlockingFocus(sceneSession, false);
+    EXPECT_EQ(ret, false);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = ssm_->CheckBlockingFocus(sceneSession, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**

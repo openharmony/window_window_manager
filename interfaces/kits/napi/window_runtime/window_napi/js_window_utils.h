@@ -288,11 +288,11 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
     { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
@@ -365,6 +365,7 @@ public:
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
+    napi_value ScreenshotEventTypeInit(napi_env env);
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);

@@ -45,6 +45,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {KEYBOARD_DID_HIDE_CB, RegisterListenerType::KEYBOARD_DID_HIDE_CB},
     {TOUCH_OUTSIDE_CB, RegisterListenerType::TOUCH_OUTSIDE_CB},
     {SCREENSHOT_EVENT_CB, RegisterListenerType::SCREENSHOT_EVENT_CB},
+    {SCREENSHOT_APP_EVENT_CB, RegisterListenerType::SCREENSHOT_APP_EVENT_CB},
     {DIALOG_TARGET_TOUCH_CB, RegisterListenerType::DIALOG_TARGET_TOUCH_CB},
     {DIALOG_DEATH_RECIPIENT_CB, RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB},
     {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
@@ -393,6 +394,23 @@ WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowList
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessScreenshotAppEventRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterScreenshotAppEventListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterScreenshotAppEventListener(listener));
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -543,6 +561,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
                 return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_APP_EVENT_CB):
+                return ProcessScreenshotAppEventRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
                 return ProcessDialogTargetTouchRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB):

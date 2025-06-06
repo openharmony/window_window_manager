@@ -51,6 +51,7 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyScreenshot() override;
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     void DumpSessionElementInfo(const std::vector<std::string>& params)  override;
     WSError NotifyTouchOutside() override;
     WSError NotifyWindowVisibility(bool isVisible) override;
@@ -106,6 +107,7 @@ public:
 
     // Window LifeCycle
     void NotifyNonInteractiveStatus() override;
+    WMError GetRouterStackInfo(std::string& routerStackInfo) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

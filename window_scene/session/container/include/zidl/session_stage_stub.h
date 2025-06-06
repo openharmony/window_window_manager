@@ -48,6 +48,7 @@ private:
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply);
@@ -96,6 +97,7 @@ private:
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

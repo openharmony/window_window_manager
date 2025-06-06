@@ -72,7 +72,7 @@ public:
     virtual bool SetDisplayState(DisplayState state) override;
     virtual DisplayState GetDisplayState(DisplayId displayId) override;
     virtual bool TryToCancelScreenOff() override;
-    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
+    ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) override;
 
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
@@ -114,7 +114,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
 
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture) override;
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
@@ -177,7 +177,7 @@ public:
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) override;
+        ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser) override;
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;

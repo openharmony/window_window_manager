@@ -24,6 +24,7 @@ public:
     static void SetWriteInt32ErrorFlag(bool flag);
     static void SetWriteInt64ErrorFlag(bool flag);
     static void SetWriteUint32ErrorFlag(bool flag);
+    static void SetWriteUint64ErrorFlag(bool flag);
     static void SetWriteFloatErrorFlag(bool flag);
     static void SetWriteString16ErrorFlag(bool flag);
     static void SetWriteParcelableErrorFlag(bool flag);

@@ -224,6 +224,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT):
+            return HandleNotifyScreenshotEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR):
             return HandleSetStartWindowBackgroundColor(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID):
@@ -234,8 +236,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetForegroundWindowNum(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_USE_IMPLICIT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO):
-            return HandleGetHostWindowCompatiblityInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_IMAGE_FOR_RECENT):
             return HandleSetImageForRecent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
@@ -1894,17 +1894,17 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply)
 {
-    int imgResourceId = 0;
-    if (!data.ReadInt32(imgResourceId)) {
+    uint32_t imgResourceId = 0;
+    if (!data.ReadUint32(imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imgResourceId failed.");
         return ERR_INVALID_DATA;
     }
-    uint32_t imageFit;
+    uint32_t imageFit = 0;
     if (!data.ReadUint32(imageFit)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read imageFit failed.");
         return ERR_INVALID_DATA;
     }
-    int persistentId = 0;
+    int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read persistentId failed.");
         return ERR_INVALID_DATA;
@@ -1912,26 +1912,6 @@ int SceneSessionManagerStub::HandleSetImageForRecent(MessageParcel& data, Messag
     WMError errCode = SetImageForRecent(imgResourceId, static_cast<ImageFit>(imageFit), persistentId);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write errCode failed.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleGetHostWindowCompatiblityInfo(MessageParcel& data, MessageParcel& reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (token == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "token is nullptr");
-        return ERR_INVALID_DATA;
-    }
-    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
-    WMError errCode = GetHostWindowCompatiblityInfo(token, property);
-    if (!reply.WriteParcelable(property)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write property failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -2054,6 +2034,21 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!data.ReadInt32(screenshotEventType)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read screenshotEventType");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = NotifyScreenshotEvent(static_cast<ScreenshotEventType>(screenshotEventType));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

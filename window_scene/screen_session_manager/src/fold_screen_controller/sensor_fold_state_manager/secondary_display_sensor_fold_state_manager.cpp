@@ -50,9 +50,21 @@ constexpr int32_t REFLEXION_VALUE = 2;
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
 SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager() {}
 
-void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
-    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
+void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float>& angles,
+    const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    if (halls.size() != HALLS_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
+        return;
+    }
+    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    {
+        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
+        if (!isPowerOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
+            TLOGI(WmsLogTag::DMS, "hall value is not change in unPower");
+            return;
+        }
+    }
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
@@ -87,6 +99,11 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::v
         TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
         return state;
+    }
+    {
+        std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
+        curHallAB_ = halls[0];
+        curHallBC_ = halls[1];
     }
     if (!isPowerOn) {
         state = GetFoldStateUnpower(halls);

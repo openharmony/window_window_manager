@@ -30,22 +30,22 @@ const ScreenId SCREEN_ID_FULL = 0;
 
 void MultiScreenPowerChangeManager::InitMultiScreenPowerChangeMap()
 {
-    if (HandleScreenPowerChangeMap_.size() != 0) {
+    if (handleScreenPowerChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "multi screen power change map has init!");
         return;
     }
     /* screen switch open */
-    HandleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_ON] =
+    handleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_ON] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleScreenOnChange(innerScreen, externalScreen);
         };
     /* screen switch close */
-    HandleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_OFF] =
+    handleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_OFF] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
         return HandleScreenOffChange(innerScreen, externalScreen);
     };
     /* setting switch external screen */
-    HandleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_EXTERNAL] =
+    handleScreenPowerChangeMap_[MultiScreenPowerSwitchType::SCREEN_SWITCH_EXTERNAL] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
         return HandleScreenOnlyExternalModeChange(innerScreen, externalScreen);
     };
@@ -59,8 +59,8 @@ DMError MultiScreenPowerChangeManager::OnMultiScreenPowerChangeRequest(sptr<Scre
         TLOGE(WmsLogTag::DMS, "parameters nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto handleCall = HandleScreenPowerChangeMap_.find(switchStatus);
-    if (handleCall != HandleScreenPowerChangeMap_.end() && handleCall->second != nullptr) {
+    auto handleCall = handleScreenPowerChangeMap_.find(switchStatus);
+    if (handleCall != handleScreenPowerChangeMap_.end() && handleCall->second != nullptr) {
         auto powerHandleFunction = handleCall->second;
         handleRet = powerHandleFunction(innerScreen, externalScreen);
     } else {
@@ -113,27 +113,27 @@ DMError MultiScreenPowerChangeManager::HandleScreenOffChange(sptr<ScreenSession>
 
 void MultiScreenPowerChangeManager::InitRecoveryMultiScreenModeChangeMap()
 {
-    if (HandleRecoveryScreenModeChangeMap_.size() != 0) {
+    if (handleRecoveryScreenModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "recovery multi screen mode change map has init!");
         return;
     }
     /* recovery inner main and external extend change from external main. */
-    HandleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
+    handleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleRecoveryInnerMainExternalExtendChange(innerScreen, externalScreen);
         };
     /* recovery inner main and external mirror change from external main. */
-    HandleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN }] =
+    handleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN }] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleRecoveryInnerMirrorExternalMainChange(innerScreen, externalScreen);
         };
     /* recovery inner extend and external main change from external main. */
-    HandleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
+    handleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleRecoveryInnerExtendExternalMainChange(innerScreen, externalScreen);
         };
     /* recovery inner mirror and external main change from external main. */
-    HandleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
+    handleRecoveryScreenModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleRecoveryInnerMainExternalMirrorChange(innerScreen, externalScreen);
         };
@@ -141,27 +141,27 @@ void MultiScreenPowerChangeManager::InitRecoveryMultiScreenModeChangeMap()
 
 void MultiScreenPowerChangeManager::InitMultiScreenModeOffChangeMap()
 {
-    if (HandleScreenOffModeChangeMap_.size() != 0) {
+    if (handleScreenOffModeChangeMap_.size() != 0) {
         TLOGW(WmsLogTag::DMS, "multi screen mode change map has init!");
         return;
     }
     /* form inner main and external extend change to external main. */
-    HandleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
+    handleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_EXTEND}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalExtendChange(innerScreen, externalScreen);
         };
     /* form inner main and external mirror change to external main. */
-    HandleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
+    handleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MAIN, ScreenCombination::SCREEN_MIRROR}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMainExternalMirrorChange(innerScreen, externalScreen);
         };
     /* form inner extend and external main change to external main. */
-    HandleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
+    handleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_EXTEND, ScreenCombination::SCREEN_MAIN}] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerExtendExternalMainChange(innerScreen, externalScreen);
         };
     /* form inner mirror and external main change to external main. */
-    HandleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN }] =
+    handleScreenOffModeChangeMap_[{ ScreenCombination::SCREEN_MIRROR, ScreenCombination::SCREEN_MAIN }] =
         [this](sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen) {
             return HandleInnerMirrorExternalMainChange(innerScreen, externalScreen);
         };
@@ -177,8 +177,8 @@ DMError MultiScreenPowerChangeManager::HandleScreenOnlyExternalModeChange(sptr<S
     }
     ScreenCombination innerCombination = innerScreen->GetScreenCombination();
     ScreenCombination externalCombination = externalScreen->GetScreenCombination();
-    auto modeHandleCall = HandleScreenOffModeChangeMap_.find({innerCombination, externalCombination});
-    if (modeHandleCall != HandleScreenOffModeChangeMap_.end()) {
+    auto modeHandleCall = handleScreenOffModeChangeMap_.find({innerCombination, externalCombination});
+    if (modeHandleCall != handleScreenOffModeChangeMap_.end()) {
         auto modeHandleFunction = modeHandleCall->second;
         handleRet = modeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -429,8 +429,8 @@ DMError MultiScreenPowerChangeManager::OnRecoveryScreenModeByPowerChange(sptr<Sc
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
-    auto recoveryModeHandleCall = HandleRecoveryScreenModeChangeMap_.find({innerCombination_, externalCombination_});
-    if (recoveryModeHandleCall != HandleRecoveryScreenModeChangeMap_.end()) {
+    auto recoveryModeHandleCall = handleRecoveryScreenModeChangeMap_.find({innerCombination_, externalCombination_});
+    if (recoveryModeHandleCall != handleRecoveryScreenModeChangeMap_.end()) {
         auto recoveryModeHandleFunction = recoveryModeHandleCall->second;
         handleRet = recoveryModeHandleFunction(innerScreen, externalScreen);
         MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(innerScreen, externalScreen);
@@ -467,13 +467,17 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerMainExternalExtendChan
     /* step1: create external screen mirror displayNode */
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
     CreateExternalScreenDisplayNodeOnly(innerScreen, externalScreen, ScreenCombination::SCREEN_EXTEND);
-    ssmClient->OnCreateScreenSessionOnly(innerScreen->GetScreenId(), innerScreen->GetRSScreenId(),
+    bool changeRet = ssmClient->OnCreateScreenSessionOnly(innerScreen->GetScreenId(), innerScreen->GetRSScreenId(),
         innerScreen->GetName(), innerScreen->GetIsExtend());
+    if (!changeRet) {
+        TLOGE(WmsLogTag::DMS, "create screenSession failed.");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
 
     /* step2: change display Node */
-    bool changeRet = ssmClient->OnExtendDisplayNodeChange(innerScreen->GetScreenId(), externalScreen->GetScreenId());
+    changeRet = ssmClient->OnExtendDisplayNodeChange(innerScreen->GetScreenId(), externalScreen->GetScreenId());
     if (!changeRet) {
-        TLOGE(WmsLogTag::DMS, "main_extend inner main external extend change external main failed.");
+        TLOGE(WmsLogTag::DMS, "extend displayNode change failed.");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -572,8 +576,12 @@ DMError MultiScreenPowerChangeManager::HandleRecoveryInnerExtendExternalMainChan
     /* step1: create external screen extend displayNode */
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "%s", __func__);
     CreateExternalScreenDisplayNodeOnly(innerScreen, externalScreen, ScreenCombination::SCREEN_EXTEND);
-    ssmClient->OnCreateScreenSessionOnly(innerScreen->GetScreenId(), innerScreen->GetRSScreenId(),
+    bool changeRet = ssmClient->OnCreateScreenSessionOnly(innerScreen->GetScreenId(), innerScreen->GetRSScreenId(),
         innerScreen->GetName(), innerScreen->GetIsExtend());
+    if (!changeRet) {
+        TLOGE(WmsLogTag::DMS, "create screenSession failed.");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
 
     /* step2: change screen combination */
     MultiScreenChangeUtils::ScreenCombinationChange(externalScreen, innerScreen, ScreenCombination::SCREEN_EXTEND);
@@ -649,9 +657,9 @@ MultiScreenPowerChangeManager::MultiScreenPowerChangeManager()
 
 MultiScreenPowerChangeManager::~MultiScreenPowerChangeManager()
 {
-    HandleScreenPowerChangeMap_.clear();
-    HandleRecoveryScreenModeChangeMap_.clear();
-    HandleScreenOffModeChangeMap_.clear();
+    handleScreenPowerChangeMap_.clear();
+    handleRecoveryScreenModeChangeMap_.clear();
+    handleScreenOffModeChangeMap_.clear();
     TLOGW(WmsLogTag::DMS, "destructor");
 }
 } // namespace OHOS::Rosen

@@ -695,6 +695,21 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.NotifyScreenshotEvent(type);
+    EXPECT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: UpdateScreenLockStatusForApp
  * @tc.desc: WindowAdapter/UpdateScreenLockStatusForApp
  * @tc.type: FUNC
@@ -875,20 +890,6 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHostWindowCompatiblityInfo
- * @tc.desc: WindowAdapter/GetHostWindowCompatiblityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    WindowAdapter windowAdapter;
-    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto err = windowAdapter.GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
-}
-
-/**
  * @tc.name: MinimizeByWindowId
  * @tc.desc: WindowAdapter/MinimizeByWindowId
  * @tc.type: FUNC
@@ -932,9 +933,9 @@ HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | Smal
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -950,9 +951,9 @@ HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | Sm
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen

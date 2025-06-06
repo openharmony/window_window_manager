@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "mock/mock_message_parcel.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
@@ -781,6 +782,39 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, TestSize.
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SetSessionLabel
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1526,29 +1560,6 @@ HWTEST_F(sceneSessionManagerProxyTest, SetParentWindow, TestSize.Level1)
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 2;
     WMError res = sceneSessionManagerProxy->SetParentWindow(subWindowId, newParentWindowId);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-}
-
-/**
- * @tc.name: GetHostWindowCompatiblityInfo
- * @tc.desc: GetHostWindowCompatiblityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-
-    sptr<CompatibleModeProperty> property = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    WMError res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-    property = sptr<CompatibleModeProperty>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
-    token = sptr<IRemoteObjectMocker>::MakeSptr();
-    res = sceneSessionManagerProxy->GetHostWindowCompatiblityInfo(token, property);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 

@@ -53,12 +53,6 @@ public:
      */
     WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
 
-    /*
-     * Compatible Mode
-     */
-    WMError GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-        const sptr<CompatibleModeProperty>& property) override;
-
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -151,7 +145,7 @@ public:
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
-    WMError SetImageForRecent(int imgResourceId, ImageFit ImageFit, int persistentId) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit, int32_t persistentId) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
@@ -161,6 +155,7 @@ public:
     WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy) override;
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) override;
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid) override;
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;

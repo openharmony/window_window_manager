@@ -299,6 +299,17 @@ WMError WindowScene::NotifyMemoryLevel(int32_t level)
     return mainWindow->NotifyMemoryLevel(level);
 }
 
+WMError WindowScene::SetNavDestinationInfo(const std::string& navDestinationInfo)
+{
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow->SetNavDestinationInfo(navDestinationInfo);
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::SetHookedWindowElementInfo(const AppExecFwk::ElementName& elementName)
 {
     auto mainWindow  = GetMainWindow();

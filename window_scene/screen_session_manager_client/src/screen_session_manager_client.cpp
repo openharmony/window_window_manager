@@ -556,7 +556,7 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
             UpdatePropertyWhenSwitchUser(screenSession, rotation, bounds, screenId);
         } else {
             screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-                ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
+                ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY, true);
         }
     }
     TLOGI(WmsLogTag::DMS, "switch user callback end");
@@ -845,6 +845,9 @@ void ScreenSessionManagerClient::OnExtendScreenConnectStatusChanged(ScreenId scr
 void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
     float rotation, RRect bounds, ScreenId screenId)
 {
+    currentstate_ = GetSuperFoldStatus();
+    screenSession->SetPointerActiveWidth(0);
+    screenSession->SetPointerActiveHeight(0);
     screenSession->UpdateToInputManager(bounds, static_cast<int>(rotation), static_cast<int>(rotation),
         FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
@@ -852,7 +855,7 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
         ScreenPropertyChangeType::UNSPECIFIED);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-        ScreenPropertyChangeType::UNSPECIFIED);
+        ScreenPropertyChangeType::UNSPECIFIED, true);
     ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
     if (property.GetValidHeight() == INT32_MAX || property.GetValidHeight() == 0) {
         TLOGW(WmsLogTag::DMS, "invalid property, validheight is bounds");
@@ -866,6 +869,13 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     } else {
         screenSession->SetValidWidth(property.GetValidWidth());
     }
+    TLOGI(WmsLogTag::DMS, "get property by screenId=%{public}" PRIu64 ", "
+        "bounds width=%{public}f, bounds height=%{public}f, "
+        "pointerActiveWidth=%{public}u, pointerActiveHeight=%{public}u, "
+        "validWidth=%{public}d, validHeight=%{public}d",
+        screenId, bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+        screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight(),
+        screenSession->GetValidWidth(), screenSession->GetValidHeight());
 }
 
 void ScreenSessionManagerClient::NotifyClientScreenConnect(sptr<ScreenSession>& screenSession)

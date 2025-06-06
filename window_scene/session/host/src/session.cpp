@@ -1022,9 +1022,6 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     if (displayId != clientDisplayId_) {
         AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
-    if (DisplayIdChangeFunc_ && clientDisplayId_ != displayId) {
-        DisplayIdChangeFunc_(GetWindowId(), displayId);
-    }
     clientDisplayId_ = displayId;
     return WSError::WS_OK;
 }
@@ -1283,10 +1280,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
+    property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
-        " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+        " defaultRequestedOrientation: %{public}u,"
+        " userRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
-        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
+        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()),
+        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()));
     property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
@@ -2036,6 +2036,28 @@ WSError Session::PendingSessionToForeground()
     return WSError::WS_OK;
 }
 
+void Session::SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->pendingSessionToBackgroundFunc_ = std::move(func);
+    }, __func__);
+}
+
+WSError Session::PendingSessionToBackground(const BackgroundParams& params)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), params.shouldBackToCaller);
+    if (pendingSessionToBackgroundFunc_) {
+        pendingSessionToBackgroundFunc_(GetSessionInfo(), params);
+    }
+    return WSError::WS_OK;
+}
+
 void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {
@@ -2070,6 +2092,16 @@ void Session::NotifyScreenshot()
         return;
     }
     sessionStage_->NotifyScreenshot();
+}
+
+WSError Session::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, event: %{public}d", GetPersistentId(), type);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyScreenshotAppEvent(type);
 }
 
 WSError Session::NotifyCloseExistPipWindow()
@@ -2720,7 +2752,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardViewMode());
+            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
@@ -4193,7 +4225,7 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.pid = GetCallingPid();
     windowMetaInfo.windowType = GetWindowType();
     if (auto parentSession = GetParentSession()) {
-        windowMetaInfo.parentWindowId = parentSession->GetWindowId();
+        windowMetaInfo.parentWindowId = static_cast<uint32_t>(parentSession->GetWindowId());
     }
     if (auto surfaceNode = GetSurfaceNode()) {
         windowMetaInfo.surfaceNodeId = static_cast<uint64_t>(surfaceNode->GetId());
@@ -4286,11 +4318,6 @@ void Session::PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventNa
         WindowInfoReporter::GetInstance().ReportSpecWindowLifeCycleChange(reportInfo);
     };
     PostTask(task, eventName, THRESHOLD);
-}
-
-void Session::SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func)
-{
-    DisplayIdChangeFunc_ = func;
 }
 
 void Session::DeletePersistentImageFit()

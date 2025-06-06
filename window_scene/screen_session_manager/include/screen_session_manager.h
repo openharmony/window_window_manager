@@ -117,7 +117,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyScreenshot(DisplayId displayId);
-    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent) override;
+    ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent) override;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
@@ -146,7 +146,7 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture) override;
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
@@ -173,7 +173,7 @@ public:
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, bool isUseDma = false,
-        bool isFullScreenCapture = false, const std::vector<NodeId>& blackList = {});
+        bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
@@ -336,9 +336,9 @@ public:
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) override;
+        ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) override;
     void UpdateScreenRotationPropertyForRs(sptr<ScreenSession>& screenSession,
-        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation);
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation, bool isSwitchUser);
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
@@ -525,6 +525,7 @@ private:
     void HandleMainScreenDisconnect(sptr<ScreenSession>& screenSession);
     void ResetInternalScreenSession(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
+    Rotation ConvertIntToRotation(int32_t rotation);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
         sptr<ScreenSession>& secondarySession, const std::string& operateMode);

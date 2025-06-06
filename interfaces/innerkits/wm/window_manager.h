@@ -807,15 +807,6 @@ public:
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     /**
-     * @brief notify display id change.
-     *
-     * @param windowId window id.
-     * @param displayid ID of the display where the window is located.
-     * @return WM_OK means notify success, others means notify failed.
-     */
-    WMError NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
-
-    /**
      * @brief Minimize all app window.
      *
      * @param displayId Display id.
@@ -1156,6 +1147,14 @@ public:
      * @return WM_OK means shift window pointer event success, others means failed.
      */
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
+
+    /**
+     * @brief Notify screenshot event.
+     *
+     * @param type screenshot event type.
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
     /**
      * @brief Request focus.

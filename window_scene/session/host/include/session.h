@@ -75,6 +75,8 @@ using NotifySessionExceptionFunc =
     std::function<void(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
+    const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
     bool shouldBackToCaller)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
@@ -89,7 +91,6 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
-using NotifyDisplayIdChangeFunc = std::function<void(uint32_t windowId, DisplayId displayId)>;
 using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisible, bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
@@ -98,7 +99,7 @@ using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType ty
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
@@ -170,6 +171,7 @@ public:
     void ResetSessionConnectState() REQUIRES(SCENE_GUARD);
     void ResetIsActive();
     WSError PendingSessionToForeground();
+    WSError PendingSessionToBackground(const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -180,6 +182,7 @@ public:
     void SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func);
     void SetBackPressedListenser(NotifyBackPressedFunc&& func);
     void SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func);
+    void SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func);
     void SetPendingSessionToBackgroundForDelegatorListener(NotifyPendingSessionToBackgroundForDelegatorFunc&& func);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
@@ -512,7 +515,6 @@ public:
 
     void SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func);
     void SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func);
-    void SetDisplayIdChangeListener(const NotifyDisplayIdChangeFunc& func);
     void NotifyScreenshot();
     void RemoveLifeCycleTask(const LifeCycleTaskType& taskType);
     void PostLifeCycleTask(Task &&task, const std::string& name, const LifeCycleTaskType& taskType);
@@ -674,6 +676,7 @@ public:
     uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
 
     /*
      * Window Pattern
@@ -792,7 +795,6 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
-    NotifyDisplayIdChangeFunc displayIdChnageFunc_;
     std::mutex highlightChangeFuncMutex_;
     NotifyHighlightChangeFunc highlightChangeFunc_;
 
@@ -801,6 +803,7 @@ protected:
      */
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
+    NotifyPendingSessionToBackgroundFunc pendingSessionToBackgroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
@@ -1036,7 +1039,6 @@ private:
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
     bool isDragStart_ = { false };
-    NotifyDisplayIdChangeFunc DisplayIdChangeFunc_;
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
 

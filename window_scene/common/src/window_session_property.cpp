@@ -275,6 +275,11 @@ void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientati
     defaultRequestedOrientation_ = orientation;
 }
 
+void WindowSessionProperty::SetUserRequestedOrientation(Orientation orientation)
+{
+    userRequestedOrientation_ = orientation;
+}
+
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
 {
     isPrivacyMode_ = isPrivate;
@@ -412,6 +417,11 @@ bool WindowSessionProperty::GetRequestedAnimation() const
 Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
 {
     return defaultRequestedOrientation_;
+}
+
+Orientation WindowSessionProperty::GetUserRequestedOrientation() const
+{
+    return userRequestedOrientation_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -1239,6 +1249,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(needRotateAnimation_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(userRequestedOrientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowMode_)) &&
         parcel.WriteUint32(flags_) && parcel.WriteBool(raiseEnabled_) &&
         parcel.WriteBool(topmost_) && parcel.WriteBool(mainWindowTopmost_) &&
@@ -1265,7 +1276,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
-        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteParcelable(&keyboardEffectOption_) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
@@ -1314,6 +1325,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
+    property->SetUserRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetRaiseEnabled(parcel.ReadBool());
@@ -1358,7 +1370,13 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
     property->SetBackgroundAlpha(parcel.ReadUint8());
-    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    sptr<KeyboardEffectOption> keyboardEffectOption = parcel.ReadParcelable<KeyboardEffectOption>();
+    if (keyboardEffectOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to read keyboardEffectOption");
+        delete property;
+        return nullptr;
+    }
+    property->SetKeyboardEffectOption(*keyboardEffectOption);
     property->SetWindowCornerRadius(parcel.ReadFloat());
     property->SetExclusivelyHighlighted(parcel.ReadBool());
     property->SetIsAtomicService(parcel.ReadBool());
@@ -1398,6 +1416,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     zIndex_ = property->zIndex_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
+    userRequestedOrientation_ = property->userRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
@@ -1457,7 +1476,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
     backgroundAlpha_ = property->backgroundAlpha_;
-    keyboardViewMode_ = property->keyboardViewMode_;
+    keyboardEffectOption_ = property->keyboardEffectOption_;
     isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
     cornerRadius_ = property->cornerRadius_;
     isAtomicService_ = property->isAtomicService_;
@@ -2017,14 +2036,14 @@ bool WindowSessionProperty::IsSystemKeyboard() const
     return isSystemKeyboard_;
 }
 
-void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+void WindowSessionProperty::SetKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
-    keyboardViewMode_ = mode;
+    keyboardEffectOption_ = effectOption;
 }
 
-KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+KeyboardEffectOption WindowSessionProperty::GetKeyboardEffectOption() const
 {
-    return keyboardViewMode_;
+    return keyboardEffectOption_;
 }
 
 uint8_t WindowSessionProperty::GetBackgroundAlpha() const
@@ -2332,6 +2351,7 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
 {
     sptr<ShadowsInfo> shadowsInfo = parcel.ReadParcelable<ShadowsInfo>();
     if (shadowsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "shadowsInfo is null");
         return;
     }
     property->SetWindowShadows(*shadowsInfo);

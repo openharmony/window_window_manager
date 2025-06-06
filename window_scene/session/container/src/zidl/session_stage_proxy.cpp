@@ -708,6 +708,32 @@ void SessionStageProxy::NotifyScreenshot()
     }
 }
 
+WSError SessionStageProxy::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write screenshot event type failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::NotifyTouchOutside()
 {
     MessageParcel data;
@@ -1806,7 +1832,7 @@ WSError SessionStageProxy::NotifyTargetRotationInfo(OrientationInfo& info)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteInt32(info.rotation)) {
+    if (!data.WriteUint32(info.rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write rotation failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1994,6 +2020,34 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigUpdated()
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WMError SessionStageProxy::GetRouterStackInfo(std::string& routerStackInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    ErrCode errCode = ERR_OK;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read reply falied");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    routerStackInfo = reply.ReadString();
+    return static_cast<WMError>(errCode);
 }
 
 WSError SessionStageProxy::CloseSpecificScene()

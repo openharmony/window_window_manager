@@ -14,12 +14,10 @@
  */
 
 #include "multi_screen_manager.h"
-
 #include "multi_screen_mode_change_manager.h"
 #include "multi_screen_power_change_manager.h"
 #include "screen_power_utils.h"
 #include "screen_scene_config.h"
-
 #ifdef RES_SCHED_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"

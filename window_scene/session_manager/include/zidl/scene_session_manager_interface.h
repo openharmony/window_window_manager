@@ -134,13 +134,13 @@ public:
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
+        TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT,
         TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_SET_PARENT_WINDOW,
         TRANS_ID_MINIMIZE_BY_WINDOW_ID,
         TRANS_ID_SET_FOREGROUND_WINDOW_NUM,
         TRANS_ID_USE_IMPLICIT_ANIMATION,
-        TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO,
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_REGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
@@ -392,8 +392,8 @@ public:
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) override { return WMError::WM_OK; }
 
-    WMError SetImageForRecent(int imgResourceId, ImageFit imageFit,
-        int persistentId) override { return WMError::WM_OK; }
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+        int32_t persistentId) override { return WMError::WM_OK; }
         
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
@@ -408,6 +408,7 @@ public:
         const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) override { return WMError::WM_OK; }
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override { return WMError::WM_OK; }
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

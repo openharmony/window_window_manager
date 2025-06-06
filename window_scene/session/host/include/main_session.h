@@ -71,6 +71,7 @@ public:
     bool GetSessionLockState() const;
     WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
     void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
+    WMError GetRouterStackInfo(std::string& routerStackInfo) const override;
     void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) override;
 
 protected:

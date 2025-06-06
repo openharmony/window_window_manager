@@ -2038,6 +2038,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestS
 }
 
 /**
+ * @tc.name: HandleNotifyScreenshotEvent
+ * @tc.desc: test HandleNotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(2);
+    res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleAddExtensionWindowStageToSCB
  * @tc.desc: test HandleAddExtensionWindowStageToSCB
  * @tc.type: FUNC
@@ -2486,11 +2511,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecent, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int imgResourceId = 1;
+    uint32_t imgResourceId = 1;
     ImageFit imageFit = ImageFit::FILL;
-    int persistentId = 1;
-    data.WriteInt32(imgResourceId);
-    data.WriteInt32(static_cast<uint32_t>(imageFit));
+    int32_t persistentId = 1;
+    data.WriteUint32(imgResourceId);
+    data.WriteUint32(static_cast<uint32_t>(imageFit));
     data.WriteInt32(persistentId);
     int res = stub_->HandleSetImageForRecent(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -2590,21 +2615,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetParentWindow, TestSize.Level1)
     data.WriteInt32(subWindowId);
     data.WriteInt32(newParentWindowId);
     int res = stub_->HandleSetParentWindow(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleGetHostWindowCompatiblityInfo
- * @tc.desc: test HandleGetHostWindowCompatiblityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
-    data.WriteRemoteObject(token);
-    int res = stub_->HandleGetHostWindowCompatiblityInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

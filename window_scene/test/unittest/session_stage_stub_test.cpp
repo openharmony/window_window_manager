@@ -320,6 +320,22 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationCompleted, TestSize.
 }
 
 /**
+ * @tc.name: HandleNotifyKeyboardAnimationWillBeginInvalidParams
+ * @tc.desc: test function : HandleNotifyKeyboardAnimationWillBeginInvalidParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardAnimationWillBeginInvalidParams, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    int32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN);
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardAnimationWillBegin
  * @tc.desc: test function : HandleNotifyKeyboardAnimationWillBegin
  * @tc.type: FUNC
@@ -368,6 +384,28 @@ HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyScreenshotAppEvent
+ * @tc.desc: test function : HandleNotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(22, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 /**
@@ -1061,6 +1099,23 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated, TestS
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppForceLandscapeConfigUpdated(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated01
+ * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyAppForceLandscapeConfigUpdated01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 
 /**

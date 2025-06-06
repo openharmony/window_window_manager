@@ -57,24 +57,6 @@ void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
-bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
-{
-    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
-    if (cutoutInfo == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
-        return false;
-    }
-    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
-    if (cutoutAreas.empty()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
-        return false;
-    }
-    for (auto& cutoutArea : cutoutAreas) {
-        rect = { cutoutArea.posX_, cutoutArea.posY_, cutoutArea.width_, cutoutArea.height_ };
-    }
-    return true;
-}
-
 void SceneSessionManagerTest10::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1568,45 +1550,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_keyboard_01, TestSiz
 }
 
 /**
- * @tc.name: NotifyNextAvoidRectInfo_cutOut
- * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_cutOut
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_cutOut, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyNextAvoidRectInfo_cutOut";
-    info.bundleName_ = "NotifyNextAvoidRectInfo_cutOut";
-    info.screenId_ = 0;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->property_->SetPersistentId(1);
-    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    AvoidArea avoidArea;
-    Rect rect = { 0, 0, 0, 0 };
-    bool haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_0, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_0, { 0, 0, 1260, 2720 }, avoidArea);
-        ASSERT_EQ(avoidArea.topRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
-    haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_90, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_90, { 0, 0, 2720, 1260 }, avoidArea);
-        ASSERT_EQ(avoidArea.rightRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
-    haveCutout = GetCutoutInfoByRotation(Rotation::ROTATION_270, rect);
-    if (haveCutout) {
-        sceneSession->GetCutoutAvoidAreaByRotation(Rotation::ROTATION_270, { 0, 0, 2720, 1260 }, avoidArea);
-        ASSERT_EQ(avoidArea.leftRect_, rect);
-    } else {
-        EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    }
-}
-
-/**
  * @tc.name: NotifyNextAvoidRectInfo_AIBar
  * @tc.desc: SceneSesionManager test NotifyNextAvoidRectInfo_AIBar
  * @tc.type: FUNC
@@ -1655,6 +1598,25 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     sceneSession->GetAvoidAreasByRotation(Rotation::ROTATION_0, { 0, 0, 2720, 1260 }, properties, avoidAreas);
     ASSERT_EQ(avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR].topRect_, rect);
     ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: refreshAllAppUseControlMap
+ * @tc.desc: refreshAllAppUseControlMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppUseControlInfo appUseControlInfo;
+    appUseControlInfo.bundleName_ = "app_bundle_name";
+    appUseControlInfo.isNeedControl_ = true;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
+
+    appUseControlInfo.isNeedControl_ = false;
+    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
 }
 } // namespace
 } // namespace Rosen

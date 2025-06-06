@@ -95,6 +95,10 @@ WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     WLOGFD("WindowEventChannel receive pointer event");
+    if (uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", pointerEvent->GetId());
+        return WSError::WS_OK;
+    }
     PrintPointerEvent(pointerEvent);
     if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ &&
         (uiExtensionUsage_ == UIExtensionUsage::MODAL ||
