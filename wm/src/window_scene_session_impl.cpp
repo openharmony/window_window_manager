@@ -5779,6 +5779,15 @@ bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
     return enableImmersiveMode_;
 }
 
+WMError WindowSceneSessionImpl::IsImmersiveLayout(bool& isImmersiveLayout) const
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    isImmersiveLayout = isIgnoreSafeArea_;
+    return WMError::WM_OK;
+}
+
 template <typename K, typename V>
 static V GetValueByKey(const std::unordered_map<K, V>& map, K key)
 {

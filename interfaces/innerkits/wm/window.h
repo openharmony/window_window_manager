@@ -3543,6 +3543,13 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
+     * @brief Get whether the window is in immersive layout or not.
+     *
+     * @return true means the window is in immersive layout, and false means the opposite.
+     */
+    virtual WMError IsImmersiveLayout(bool& isImmersiveLayout) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the height of status bar.
      *
      * @return the height of status bar.

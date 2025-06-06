@@ -1062,6 +1062,13 @@ napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
 }
 
+napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
+}
+
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -7703,6 +7710,23 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     return CreateJsValue(env, isEnabled);
 }
 
+napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    bool isImmersiveLayout = false;
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsImmersiveLayout(isImmersiveLayout));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isImmersiveLayout %{public}u end",
+        windowToken_->GetWindowId(), isImmersiveLayout);
+    return CreateJsValue(env, isImmersiveLayout);
+}
+
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
 {
     auto window = windowToken_;
@@ -8698,6 +8722,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setFollowParentWindowLayoutEnabled", moduleName,
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
+    BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
 }
 }  // namespace Rosen
 }  // namespace OHOS
