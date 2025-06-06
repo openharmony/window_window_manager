@@ -647,6 +647,7 @@ enum class WindowSetUIContentType : uint32_t {
     RESTORE,
     BY_NAME,
     BY_ABC,
+    BY_SHARED,
 };
 
 /**

@@ -513,6 +513,7 @@ public:
     void NotifyAfterInteractive();
     void NotifyAfterNonInteractive();
     void NotifyNonInteractiveStatus() override;
+    void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
 
 protected:
     WMError Connect();
@@ -676,6 +677,7 @@ protected:
     std::string intentParam_;
     std::function<void()> loadPageCallback_;
     bool isColdStart_ = true;
+    std::string navDestinationInfo_;
 
     /*
      * Window Layout
