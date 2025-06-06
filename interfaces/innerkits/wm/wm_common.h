@@ -1046,6 +1046,7 @@ enum class UIExtensionUsage : uint32_t {
     MODAL = 0,
     EMBEDDED,
     CONSTRAINED_EMBEDDED,
+    PREVIEW_EMBEDDED,
     UIEXTENSION_USAGE_END
 };
 
