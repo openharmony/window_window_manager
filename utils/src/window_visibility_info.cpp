@@ -58,7 +58,7 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
     windowVisibilityInfo->appIndex_ = parcel.ReadInt32();
     windowVisibilityInfo->isSystem_ = parcel.ReadBool();
     windowVisibilityInfo->zOrder_ = parcel.ReadUint32();
-    windowVisibilityInfo->callingPid = parcel.ReadInt32();
+    windowVisibilityInfo->callingPid_ = parcel.ReadInt32();
     return windowVisibilityInfo;
 }
 } // namespace OHOS::Rosen
