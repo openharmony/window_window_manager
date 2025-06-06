@@ -1002,7 +1002,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRouterStackInfo, TestSize.Lev
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     data.WriteInt32(1);
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetRouterStackInfo(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetRouterStackInfo(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 

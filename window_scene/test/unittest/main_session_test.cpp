@@ -687,9 +687,7 @@ HWTEST_F(MainSessionTest, GetRouterStackInfo, TestSize.Level1)
     info.abilityName_ = "GetRouterStackInfo";
     info.bundleName_ = "GetRouterStackInfo";
     sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(testSession, nullptr);
     testSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(testSession->sessionStage_, nullptr);
 
     std::string routerInfo;
     auto res = testSession->GetRouterStackInfo(routerInfo);
