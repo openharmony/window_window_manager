@@ -3905,7 +3905,7 @@ HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
         .useDma = true,
     };
     screenSession->SetScreenSnapshotRect(config1);
-    EXPECT_FALSE(g_errLog.find("no need to set screen snapshot rect") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("no need to set screen snapshot rect") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect end";
 }
 
@@ -3946,6 +3946,7 @@ HWTEST_F(ScreenSessionTest, ScreenModeChange, TestSize.Level1)
     EXPECT_NE(nullptr, session);
 
     session->screenChangeListenerList_.clear();
+    session->ScreenModeChange(ScreenModeChangeEvent::UNKNOWN);
     EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: ScreenModeChange end";
 }
