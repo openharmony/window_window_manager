@@ -7444,6 +7444,9 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
+    if (WindowHelper::IsSubWindow(GetWindowType())) {
+        isSubWinowResizingOrMoving_ = false;
+    }
     ProcessCallingSessionRectDirty();
     NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;

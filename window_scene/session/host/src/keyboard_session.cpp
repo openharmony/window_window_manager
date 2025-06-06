@@ -444,6 +444,17 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session, gravity: %{public}d", gravity);
         return false;
     }
+
+    /**
+     * When an app calls move or resize, if the layout pipeline hasn't yet refreshed the window size, the calling
+     * window dimensions obtained for keyboard avoidance will be incorrect. To prevent the app's intended dimensions
+     * from being overridden, avoidance is deliberately skipped.
+     */
+    if (callingSession->isSubWinowResizingOrMoving_ && WindowHelper::IsSubWindow(callingSession->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "subWindow is resizing or moving");
+        return false;
+    }
+
     bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
         (SessionHelper::IsNonSecureToUIExtension(callingSession->GetWindowType()) &&
          callingSession->GetParentSession() != nullptr &&
