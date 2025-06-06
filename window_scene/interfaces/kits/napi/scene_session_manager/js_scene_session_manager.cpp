@@ -729,7 +729,7 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 {
     rootScene_->RegisterUpdateRootSceneRectCallback([](const Rect& rect) {
         if (auto rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession()) {
-            WSRect rootSceneRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+            WSRect rootSceneRect = { 0, 0, rect.width_, rect.height_ };
             rootSceneSession->SetRootSessionRect(rootSceneRect);
         }
     });
