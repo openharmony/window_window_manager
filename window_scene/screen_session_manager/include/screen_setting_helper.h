@@ -59,7 +59,8 @@ public:
     static void UnregisterSettingWireCastObserver();
     static void RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func);
     static void UnRegisterSettingExtendScreenDpiObserver();
-    static bool GetSettingExtendScreenDpi(bool& enable, const std::string& key = SETTING_EXTEND_DPI_KEY);
+    static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
+    static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
@@ -68,6 +69,7 @@ private:
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_screen_mode_edid"};
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
+    static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;

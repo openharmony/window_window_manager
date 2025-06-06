@@ -25,6 +25,7 @@
 #include "display_group_info.h"
 #include "minimize_app.h"
 #include "parameters.h"
+#include "rs_adapter.h"
 #include "starting_window.h"
 #include "surface_draw.h"
 #include "window_helper.h"
@@ -195,15 +196,19 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         WindowInnerManager::GetInstance().UpdateMissionSnapShot(srcNode, pixelMap);
         struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
         rsSurfaceNodeConfig.SurfaceNodeName = "closeWin" + std::to_string(srcNode->GetWindowId());
+        RSTransactionAdapter rsTransAdapter(srcNode->leashWinSurfaceNode_);
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-            RSSurfaceNodeType::STARTING_WINDOW_NODE);
+            RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsTransAdapter.GetRSUIContext());
+        RSAdapterUtil::SetSkipCheckInMultiInstance(srcNode->closeWinSurfaceNode_, true);
+        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+              "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(srcNode->closeWinSurfaceNode_).c_str());
         auto rect = srcNode->GetWindowRect();
         srcNode->closeWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         SurfaceDraw::DrawImageRect(srcNode->closeWinSurfaceNode_, srcNode->GetWindowRect(),
             pixelMap, 0x00ffffff, true);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
         srcNode->leashWinSurfaceNode_->AddChild(srcNode->closeWinSurfaceNode_, -1);
-        RSTransaction::FlushImplicitTransaction();
+        rsTransAdapter.FlushImplicitTransaction();
         TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Draw surface snapshot in starting window for window:%{public}u",
             srcNode->GetWindowId());
     } else if (srcNode->surfaceNode_) {
@@ -270,18 +275,20 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::GetTransitionFinishedCa
         }
         MinimizeApp::ExecuteMinimizeAll(); // minimize execute in show animation
         RSAnimationTimingProtocol timingProtocol(200); // animation time
-        RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, [weakNode]() {
-            auto winRect = weakNode->GetWindowRect();
-            WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
-                weakNode->GetWindowName().c_str(), weakNode->GetWindowId(),
-                winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-            if (!weakNode->leashWinSurfaceNode_) {
-                return;
-            }
-            weakNode->leashWinSurfaceNode_->SetBounds(
-                winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-            RSTransaction::FlushImplicitTransaction();
-            weakNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
+        auto rsTransAdapter = std::make_shared<RSTransactionAdapter>(weakNode->leashWinSurfaceNode_);
+        RSNode::Animate(rsTransAdapter->GetRSUIContext(), timingProtocol, RSAnimationTimingCurve::EASE_OUT,
+            [weakNode, rsTransAdapter]() {
+                auto winRect = weakNode->GetWindowRect();
+                WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+                    weakNode->GetWindowName().c_str(), weakNode->GetWindowId(),
+                    winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+                if (!weakNode->leashWinSurfaceNode_) {
+                    return;
+                }
+                weakNode->leashWinSurfaceNode_->SetBounds(
+                    winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+                rsTransAdapter->FlushImplicitTransaction();
+                weakNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
         });
     };
     return CreateAnimationFinishedCallback(callback, dstNode);
@@ -794,7 +801,7 @@ void RemoteAnimation::PostProcessShowCallback(const sptr<WindowNode>& node)
             DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(displayId, requestOri, true);
         }
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(node->leashWinSurfaceNode_);
 }
 
 void RemoteAnimation::ExecuteFinalStateTask(sptr<WindowNode>& node)

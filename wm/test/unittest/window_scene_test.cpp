@@ -585,6 +585,54 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
 
+/**
+ * @tc.name: GoDestroyHookWindow
+ * @tc.desc: Destroy hook window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoDestroyHookWindow, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoDestroyHookWindow());
+}
+
+/**
+ * @tc.name: SetHookedWindowElementInfo
+ * @tc.desc: SetHookedWindowElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    AppExecFwk::ElementName elementName;
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+}
+
+/**
+ * @tc.name: SetNavDestinationInfo01
+ * @tc.desc: SetNavDestinationInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo01, TestSize.Level1)
+{
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+
+    EXPECT_EQ(WMError::WM_OK, scene->SetNavDestinationInfo("testNavInfo"));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -58,6 +58,8 @@ public:
 
     void HandleScreenConnectChange();
     void HandleScreenDisconnectChange();
+    void HandleFoldStatusLockedToExpand();
+    void HandleFoldStatusUnlocked();
 
 private:
     

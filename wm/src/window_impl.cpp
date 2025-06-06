@@ -31,6 +31,7 @@
 #include "display_manager.h"
 #include "display_info.h"
 #include "ressched_report.h"
+#include "rs_adapter.h"
 #include "singleton_container.h"
 #include "surface_capture_future.h"
 #include "sys_cap_util.h"
@@ -88,6 +89,7 @@ std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appDialogWindowMap_;
 std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> WindowImpl::screenshotListeners_;
+std::map<uint32_t, std::vector<sptr<IScreenshotAppEventListener>>> WindowImpl::screenshotAppEventListeners_;
 std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::touchOutsideListeners_;
 std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowImpl::dialogTargetTouchListeners_;
 std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> WindowImpl::lifecycleListeners_;
@@ -96,6 +98,7 @@ std::map<uint32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowImpl::avo
 std::map<uint32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowImpl::occupiedAreaChangeListeners_;
 std::map<uint32_t, sptr<IDialogDeathRecipientListener>> WindowImpl::dialogDeathRecipientListener_;
 std::recursive_mutex WindowImpl::globalMutex_;
+std::shared_mutex WindowImpl::windowMapMutex_;
 int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -113,6 +116,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
         property_->SetSystemBarProperty(it.first, it.second);
     }
     name_ = option->GetWindowName();
+
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
 
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {
@@ -178,7 +183,12 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
     if (windowSystemConfig_.IsPhoneWindow() && WindowHelper::IsWindowFollowParent(type)) {
         rsSurfaceNodeType = RSSurfaceNodeType::ABILITY_COMPONENT_NODE;
     }
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, false, GetRSUIContext());
+    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+          "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
+    return surfaceNode;
 }
 
 WindowImpl::~WindowImpl()
@@ -190,6 +200,7 @@ WindowImpl::~WindowImpl()
 
 sptr<Window> WindowImpl::Find(const std::string& name)
 {
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     auto iter = windowMap_.find(name);
     if (iter == windowMap_.end()) {
         return nullptr;
@@ -204,6 +215,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t WinId)
 {
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
         return nullptr;
@@ -236,17 +248,20 @@ sptr<Window> WindowImpl::GetWindowWithId(uint32_t WinId)
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    if (windowMap_.empty()) {
-        WLOGFE("Please create mainWindow First!");
-        return nullptr;
-    }
     uint32_t mainWinId = INVALID_WINDOW_ID;
-    for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
-        auto win = iter->second.second;
-        if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
-            mainWinId = win->GetWindowId();
-            WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
-            break;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+        if (windowMap_.empty()) {
+            WLOGFE("Please create mainWindow First!");
+            return nullptr;
+        }
+        for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
+            auto win = iter->second.second;
+            if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
+                mainWinId = win->GetWindowId();
+                WLOGI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
+                break;
+            }
         }
     }
     WLOGI("GetTopWindowfinal winId:%{public}u!", mainWinId);
@@ -277,19 +292,21 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
 {
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl window is null");
             continue;
         }
-        auto context = window->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
-            continue;
-        }
-        if (ignoreWindowCtxSet.count(context) == 0) {
+        if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
         }
     }
 }
@@ -490,7 +507,7 @@ WMError WindowImpl::SetAlpha(float alpha)
     }
     property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -1162,6 +1179,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
     }
 
     WLOGFI("In");
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1181,6 +1199,7 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
         return;
     }
 
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
     for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1272,6 +1291,7 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     }
 
     if (WindowHelper::IsAppFloatingWindow(GetType())) {
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
         for (const auto& winPair : windowMap_) {
             auto win = winPair.second.second;
             if (win != nullptr && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
@@ -1318,9 +1338,12 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
         return WMError::WM_ERROR_NULLPTR;
     }
     // check window name, same window names are forbidden
-    if (windowMap_.find(name_) != windowMap_.end()) {
-        WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
-        return WMError::WM_ERROR_REPEAT_OPERATION;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+        if (windowMap_.find(name_) != windowMap_.end()) {
+            WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
+            return WMError::WM_ERROR_REPEAT_OPERATION;
+        }
     }
     if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
         WLOGFE("Camera Floating Window already exists.");
@@ -1338,11 +1361,14 @@ WMError WindowImpl::WindowCreateCheck(uint32_t parentId)
         property_->SetParentId(parentId);
     } else {
         sptr<Window> parentWindow = nullptr;
-        for (const auto& winPair : windowMap_) {
-            if (winPair.second.first == parentId) {
-                property_->SetParentId(parentId);
-                parentWindow = winPair.second.second;
-                break;
+        {
+            std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+            for (const auto& winPair : windowMap_) {
+                if (winPair.second.first == parentId) {
+                    property_->SetParentId(parentId);
+                    parentWindow = winPair.second.second;
+                    break;
+                }
             }
         }
         if (WindowHelper::IsSystemSubWindow(property_->GetWindowType())) {
@@ -1434,7 +1460,10 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         surfaceNode_->SetWindowId(windowId);
     }
     sptr<Window> self(this);
-    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
+    {
+        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
+        windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
+    }
     if (parentId != INVALID_WINDOW_ID) {
         subWindowMap_[property_->GetParentId()].push_back(window);
     }
@@ -1602,18 +1631,18 @@ void WindowImpl::ClearVsyncStation()
     }
 }
 
-WMError WindowImpl::Destroy()
+WMError WindowImpl::Destroy(uint32_t reason)
 {
-    return Destroy(true);
+    return Destroy(true, true, reason);
 }
 
-WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
+WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     if (!IsWindowValid()) {
         return WMError::WM_OK;
     }
 
-    WLOGI("Window %{public}u Destroy", property_->GetWindowId());
+    WLOGI("Window %{public}u Destroy, reason: %{public}u", property_->GetWindowId(), reason);
     WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
@@ -1638,7 +1667,10 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
     if (needRemoveWindowInputChannel_) {
         InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
     }
-    windowMap_.erase(GetWindowName());
+    {
+        std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
+        windowMap_.erase(GetWindowName());
+    }
     if (needClearListener) {
         ClearListenersById(GetWindowId());
     }
@@ -1800,7 +1832,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(KeyboardViewMode mode)
+WMError WindowImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
     return Show();
 }
@@ -2580,6 +2612,20 @@ WMError WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>
     return UnregisterListener(screenshotListeners_[GetWindowId()], listener);
 }
 
+WMError WindowImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start register", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
+WMError WindowImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start unregister", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
 WMError WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
     WLOGFD("Start register");
@@ -2704,6 +2750,19 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
         }
     }
     return screenshotListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> WindowImpl::GetListeners()
+{
+    std::vector<IScreenshotAppEventListenerSptr> screenshotAppEventListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : screenshotAppEventListeners_[GetWindowId()]) {
+            screenshotAppEventListeners.push_back(listener);
+        }
+    }
+    return screenshotAppEventListeners;
 }
 
 template <typename T>
@@ -2836,20 +2895,21 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
             TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
             return;
         }
+        auto rsUIContext = window->GetRSUIContext();
         if (rsTransaction) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
         RSAnimationTimingProtocol protocol;
         protocol.SetDuration(600);
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        RSNode::OpenImplicitAnimation(protocol, curve);
+        RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve);
         if ((rectToAce != lastOriRect) || (reason != window->lastSizeChangeReason_)) {
             window->NotifySizeChange(rectToAce, reason, rsTransaction);
             window->lastSizeChangeReason_ = reason;
         }
         window->UpdateViewportConfig(rectToAce, display, reason, rsTransaction);
-        RSNode::CloseImplicitAnimation();
+        RSNode::CloseImplicitAnimation(rsUIContext);
         if (rsTransaction) {
             rsTransaction->Commit();
         }
@@ -3491,13 +3551,25 @@ bool WindowImpl::IsFocused() const
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfiguration(configuration);
     }
 }
@@ -3506,17 +3578,25 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subWindow, winId: %{public}u", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
@@ -3524,22 +3604,37 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
 void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfigurationSyncForAll(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_IMMS, "no subWindow, winId: %{public}d", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationSync(configuration);
     }
 }
 
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfigurationSync(configuration);
         }
     }
@@ -3822,6 +3917,17 @@ void WindowImpl::NotifyScreenshot()
             screenshotListener->OnScreenshot();
         }
     }
+}
+
+WMError WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
+    for (auto& screenshotAppEventListener : screenshotAppEventListeners) {
+        if (screenshotAppEventListener != nullptr) {
+            screenshotAppEventListener->OnScreenshotAppEvent(type);
+        }
+    }
+    return WMError::WM_OK;
 }
 
 void WindowImpl::NotifyTouchOutside()
@@ -4331,9 +4437,12 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
         return false;
     }
 
-    for (auto& winPair : windowMap_) {
-        if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
-            return true;
+    {
+        std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+        for (auto& winPair : windowMap_) {
+            if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+                return true;
+            }
         }
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
@@ -4346,7 +4455,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
     WLOGI("Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     surfaceNode_->SetCornerRadius(cornerRadius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4361,7 +4470,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowRadius(radius);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4377,7 +4486,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowColor(colorValue);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4389,7 +4498,7 @@ WMError WindowImpl::SetShadowOffsetX(float offsetX)
     }
     WLOGI("Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4401,7 +4510,7 @@ WMError WindowImpl::SetShadowOffsetY(float offsetY)
     }
     WLOGI("Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4418,7 +4527,7 @@ WMError WindowImpl::SetBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("[Client] Window %{public}s set blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4435,7 +4544,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
     radius = ConvertRadiusToSigma(radius);
     WLOGFI("[Client] Window %{public}s set backdrop blur radius after conversion %{public}f", name_.c_str(), radius);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4463,7 +4572,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
                                                                          display->GetVirtualPixelRatio()));
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
 
@@ -4524,9 +4633,53 @@ uint32_t WindowImpl::GetApiTargetVersion() const
 {
     uint32_t version = 0;
     if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
-        version = context_->GetApplicationInfo()->apiTargetVersion % API_VERSION_MOD;
+        version = static_cast<uint32_t>(context_->GetApplicationInfo()->apiTargetVersion) % API_VERSION_MOD;
     }
     return version;
+}
+
+WMError WindowImpl::GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo)
+{
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    windowPropertyInfo.windowRect = GetRect();
+    auto uicontent = GetUIContent();
+    if (uicontent == nullptr) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+    } else {
+        uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
+    }
+    windowPropertyInfo.type = GetType();
+    windowPropertyInfo.isLayoutFullScreen = IsLayoutFullScreen();
+    windowPropertyInfo.isFullScreen = IsFullScreen();
+    windowPropertyInfo.isTouchable = GetTouchable();
+    windowPropertyInfo.isFocusable = GetFocusable();
+    windowPropertyInfo.name = GetWindowName();
+    windowPropertyInfo.isPrivacyMode = IsPrivacyMode();
+    windowPropertyInfo.isKeepScreenOn = IsKeepScreenOn();
+    windowPropertyInfo.brightness = GetBrightness();
+    windowPropertyInfo.isTransparent = IsTransparent();
+    windowPropertyInfo.id = GetWindowId();
+    windowPropertyInfo.displayId = GetDisplayId();
+    return WMError::WM_OK;
+}
+
+std::shared_ptr<RSUIDirector> WindowImpl::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

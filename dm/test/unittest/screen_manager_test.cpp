@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,15 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "mock_display_manager_adapter.h"
+#include "scene_board_judgement.h"
+#include "screen_manager.cpp"
 #include "screen_manager.h"
 #include "screen_manager_utils.h"
-#include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
-#include "screen_manager.cpp"
-#include "window_manager_hilog.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -759,6 +759,56 @@ HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, TestSize.Level1)
     auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: MakeMirrorForRecord01
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size exceeds MAX_SCREEN_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord01, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE + 1);
+    ScreenId screenGroupId;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: MakeMirrorForRecord02
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE and screenGroupId is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord02, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
+    ScreenId screenGroupId = 2;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: MakeMirrorForRecord03
+ * @tc.desc: Test MakeMirrorForRecord function when mirrorScreenId size
+     does not exceed MAX_SCREEN_SIZE but screenGroupId is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> miirrorScreenId(MAX_SCREEN_SIZE - 1);
+    ScreenId screenGroupId = SCREEN_ID_INVALID;
+
+    DMError result = ScreenManager::GetInstance().MakeMirrorForRecord(mainScreenId, miirrorScreenId, screenGroupId);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

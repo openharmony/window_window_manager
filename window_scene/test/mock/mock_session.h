@@ -64,6 +64,7 @@ public:
     MOCK_METHOD1(GetGlobalMaximizeMode, WSError(MaximizeMode& mode));
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
+    MOCK_METHOD1(TransferExtensionData, int32_t(const AAFwk::WantParams& wantParams));
 };
 } // namespace Rosen
 } // namespace OHOS

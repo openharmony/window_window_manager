@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,9 @@
 
 #include <functional>
 #include <gtest/gtest.h>
+
 #include "display_manager_adapter.h"
-#include "window_manager_agent.h"
+#include "scene_board_judgement.h"
 #include "window_manager_agent_proxy.h"
 
 using namespace testing;
@@ -25,20 +26,38 @@ namespace OHOS {
 namespace Rosen {
 class WindowManagerAgentProxyTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
     void SetUp() override;
     void TearDown() override;
+    sptr<WindowManagerAgentProxy> windowManagerAgentProxy;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowManagerAgentProxyTest::SetUpTestCase() {}
+void WindowManagerAgentProxyTest::SetUpTestSuite()
+{
+    ASSERT_TRUE(SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy());
+}
 
-void WindowManagerAgentProxyTest::TearDownTestCase() {}
+void WindowManagerAgentProxyTest::SetUp()
+{
+    if (windowManagerAgentProxy) {
+        return;
+    }
 
-void WindowManagerAgentProxyTest::SetUp() {}
+    sptr<IRemoteObject> impl;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        impl = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+
+    windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
+    ASSERT_NE(windowManagerAgentProxy, nullptr);
+}
 
 void WindowManagerAgentProxyTest::TearDown()
 {
@@ -53,14 +72,9 @@ namespace {
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<FocusChangeInfo> focusChangeInfo = new (std::nothrow) FocusChangeInfo();
+    sptr<FocusChangeInfo> focusChangeInfo = new(std::nothrow) FocusChangeInfo();
     ASSERT_TRUE(focusChangeInfo != nullptr);
     bool focused = true;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -78,12 +92,6 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
     int resultValue = 0;
     std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateFocusChangeInfo(nullptr, false);
@@ -100,12 +108,6 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
     int resultValue = 0;
     WindowModeType type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
     std::function<void()> func = [&]() {
@@ -123,14 +125,8 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     DisplayId displayId = 0;
     SystemBarRegionTints tints = {};
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -148,14 +144,8 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, TestSize.Level
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     std::vector<sptr<AccessibilityWindowInfo>> infos = {};
     WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_REMOVED;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -173,13 +163,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Le
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     std::vector<sptr<WindowVisibilityInfo>> visibilityInfos = {};
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -197,13 +181,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, TestSize.Level
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos = {};
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -221,14 +199,8 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, TestSize.L
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     uint32_t accessTokenId = 0;
     bool isShowing = true;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -246,13 +218,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, TestSize.Le
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     bool showWaterMark = true;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -269,13 +235,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-    int resultValue = 0;
+{    int resultValue = 0;
     VisibleWindowNumInfo info;
     info.displayId = 1;
     info.visibleWindowNum = 1;
@@ -296,13 +256,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     bool enable = true;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -320,14 +274,8 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Test
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     uint32_t accessTokenId = 1;
     bool isShowing = false;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -345,13 +293,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
     WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
     std::function<void()> func = [&]() {
@@ -369,13 +311,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
     sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
 
     int resultValue = 0;
@@ -387,6 +322,24 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: NotifyWindowPropertyChange
+ * @tc.desc: test NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level1)
+{
+    uint32_t propertyDirtyFlags = 0;
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+        resultValue = 1;
+    };
+    func();
+    EXPECT_EQ(resultValue, 1);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

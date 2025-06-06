@@ -70,6 +70,16 @@ inline std::string ConvertSessionName(const std::string& bundleName, const std::
 
     return strName;
 }
+
+inline std::string GetBundleNameBySessionName(const std::string& name)
+{
+    const size_t len = std::char_traits<char>::length(SESSION_NAME_MARK_HEAD);
+    if (name.empty() || name.size() < len || name.compare(0, len, SESSION_NAME_MARK_HEAD) != 0) {
+        return "";
+    }
+    size_t pos = name.find(SESSION_NAME_SEPARATOR);
+    return pos != std::string::npos? name.substr(len, pos - 1) : name.substr(len);
+}
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H

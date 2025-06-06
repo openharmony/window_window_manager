@@ -733,6 +733,37 @@ namespace {
         //Assert
         EXPECT_TRUE(g_errLog.find("foldScreenPolicy_ is null") == std::string::npos);
     }
+
+    /**
+     * @tc.name: GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNull
+     * @tc.desc: Test GetTentMode function when sensorFoldStateManager_ is null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNull,
+        TestSize.Level1)
+    {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        foldScreenController.sensorFoldStateManager_ = nullptr;
+        EXPECT_FALSE(foldScreenController.GetTentMode());
+    }
+
+    /**
+     * @tc.name: GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNotNull
+     * @tc.desc: Test GetTentMode function when sensorFoldStateManager_ is not null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNotNull,
+        TestSize.Level1)
+    {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        foldScreenController.sensorFoldStateManager_ = new SensorFoldStateManager();
+        foldScreenController.sensorFoldStateManager_->SetTentMode(1);
+        EXPECT_TRUE(foldScreenController.GetTentMode());
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include "surface_draw.h"
 #include "display.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "surface_draw.h"
 #include "window_impl.h"
 
 using namespace testing;
@@ -29,8 +29,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
-const int WAIT_FOR_SYNC_US = 1000 * 500;  // 500ms
-}
+const int WAIT_FOR_SYNC_US = 1000 * 500; // 500ms
+} // namespace
 class SurfaceDrawTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -46,7 +46,7 @@ public:
         WindowMode mode;
         bool needAvoid;
         bool parentLimit;
-        bool forbidSplitMove {false};
+        bool forbidSplitMove{ false };
         bool showWhenLocked;
         uint32_t parentId;
     };
@@ -69,15 +69,13 @@ void SurfaceDrawTest::SetUpTestCase()
     displayHeight_ = display->GetHeight();
 }
 
-void SurfaceDrawTest::TearDownTestCase()
-{
-}
+void SurfaceDrawTest::TearDownTestCase() {}
 
 void SurfaceDrawTest::SetUp()
 {
     windowInfo_ = {
         .name = "main",
-        .rect = {100, 100, 250, 300},
+        .rect = { 100, 100, 250, 300 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -86,13 +84,11 @@ void SurfaceDrawTest::SetUp()
     };
 }
 
-void SurfaceDrawTest::TearDown()
-{
-}
+void SurfaceDrawTest::TearDown() {}
 
 sptr<Window> SurfaceDrawTest::CreateTestWindow(const std::string& name)
 {
-    sptr<WindowOption> option = new (std::nothrow)WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     if (option == nullptr) {
         return nullptr;
     }
@@ -154,8 +150,8 @@ HWTEST_F(SurfaceDrawTest, DecodeImageToPixelMap01, TestSize.Level1)
  */
 HWTEST_F(SurfaceDrawTest, DrawMasking01, TestSize.Level1)
 {
-    OHOS::Rosen::Rect screenRect = {0, 0, 0, 0};
-    OHOS::Rosen::Rect transRect = {0, 0, 0, 0};
+    OHOS::Rosen::Rect screenRect = { 0, 0, 0, 0 };
+    OHOS::Rosen::Rect transRect = { 0, 0, 0, 0 };
     ASSERT_FALSE(SurfaceDraw::DrawMasking(nullptr, screenRect, transRect));
 
     sptr<Window> window = CreateTestWindow("testDrawMasking");
@@ -231,7 +227,7 @@ HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, TestSize.Level1)
 
     auto surfaceNode = window->GetSurfaceNode();
     ASSERT_NE(surfaceNode, nullptr);
-    
+
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_NE(pixelMap, nullptr);
 
@@ -371,6 +367,6 @@ HWTEST_F(SurfaceDrawTest, DrawImageRect01, TestSize.Level1)
     SurfaceDraw::DrawImageRect(surfaceNode, rect, pixelMap, color, false);
     window->Destroy();
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

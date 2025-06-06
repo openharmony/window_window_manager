@@ -28,13 +28,9 @@ public:
     static void TearDownTestCase();
 };
 
-void WindowSessionPropertyTest::SetUpTestCase()
-{
-}
+void WindowSessionPropertyTest::SetUpTestCase() {}
 
-void WindowSessionPropertyTest::TearDownTestCase()
-{
-}
+void WindowSessionPropertyTest::TearDownTestCase() {}
 
 namespace {
 /**
@@ -208,8 +204,7 @@ HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, TestSize.Level1)
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     property->SetPiPTemplateInfo(pipTemplateInfo);
-    ASSERT_EQ(property->GetPiPTemplateInfo().pipTemplateType,
-        static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
+    ASSERT_EQ(property->GetPiPTemplateInfo().pipTemplateType, static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**
@@ -421,8 +416,8 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, TestSize.Level1)
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level0)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    Rect rect { 4, 4, 4, 4 };
-    std::vector<Rect> vRect { rect };
+    Rect rect{ 4, 4, 4, 4 };
+    std::vector<Rect> vRect{ rect };
     property->SetPersistentId(0);
     property->SetSessionPropertyChangeCallback(nullptr);
     EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
@@ -434,7 +429,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, TestSize.Level0)
     property->SetTouchHotAreas(vRect);
     EXPECT_NE(nullptr, property->touchHotAreasChangeCallback_);
 
-    Rect rect1 { 5, 5, 5, 5 };
+    Rect rect1{ 5, 5, 5, 5 };
     vRect.emplace_back(rect1);
     property->SetTouchHotAreas(vRect);
 }
@@ -448,7 +443,7 @@ HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
-    Rect rect { 4, 4, 4, 4 };
+    Rect rect{ 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
     hotAreas.landscapePanelHotAreas_.push_back(rect);
     hotAreas.portraitKeyboardHotAreas_.push_back(rect);
@@ -464,7 +459,7 @@ HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, TestSize.Level1)
     property->SetKeyboardTouchHotAreas(hotAreas);
     EXPECT_NE(nullptr, property->touchHotAreasChangeCallback_);
 
-    Rect rect1 { 5, 5, 5, 5 };
+    Rect rect1{ 5, 5, 5, 5 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect1);
     hotAreas.landscapePanelHotAreas_.push_back(rect1);
     hotAreas.portraitKeyboardHotAreas_.push_back(rect1);
@@ -510,8 +505,8 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, TestSize.Level1)
 {
     Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    Rect rect { 4, 4, 4, 4 };
-    std::vector<Rect> vRect { rect };
+    Rect rect{ 4, 4, 4, 4 };
+    std::vector<Rect> vRect{ rect };
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetTouchHotAreas(vRect);
     windowSessionProperty.MarshallingTouchHotAreas(parcel);
@@ -529,7 +524,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingKeyboardTouchHotAreas, TestSize
     Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
-    Rect rect { 4, 4, 4, 4 };
+    Rect rect{ 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
     hotAreas.landscapePanelHotAreas_.push_back(rect);
     hotAreas.portraitKeyboardHotAreas_.push_back(rect);
@@ -966,7 +961,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowRect, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    Rect rect = {0, 0, 0, 0};
+    Rect rect = { 0, 0, 0, 0 };
     property->SetWindowRect(rect);
     auto result = property->GetWindowRect();
     ASSERT_EQ(result, rect);
@@ -995,7 +990,7 @@ HWTEST_F(WindowSessionPropertyTest, GetRequestRect, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    Rect requestRect = {0, 0, 0, 0};
+    Rect requestRect = { 0, 0, 0, 0 };
     property->SetRequestRect(requestRect);
     auto result = property->GetRequestRect();
     ASSERT_EQ(result, requestRect);
@@ -1110,6 +1105,23 @@ HWTEST_F(WindowSessionPropertyTest, SetViewKeepScreenOn, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWindowShadowEnabled
+ * @tc.desc: SetWindowShadowEnabled And GetWindowShadowEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowShadowEnabled, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool isEnabled = true;
+    property->SetWindowShadowEnabled(isEnabled);
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+    isEnabled = false;
+    property->SetWindowShadowEnabled(isEnabled);
+    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+}
+
+/**
  * @tc.name: MarshallingSessionInfo
  * @tc.desc: MarshallingSessionInfo test
  * @tc.type: FUNC
@@ -1141,6 +1153,48 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSessionInfo, TestSize.Level1)
     bool result = property->MarshallingSessionInfo(parcel);
     ASSERT_EQ(result, true);
     result = property->UnmarshallingSessionInfo(parcel, &windowSessionProperty);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: MarshallingTransitionAnimationMap
+ * @tc.desc: MarshallingTransitionAnimationMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingTransitionAnimationMap, TestSize.Level1)
+{
+    Parcel parcel;
+    TransitionAnimation animation;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    bool result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, true);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] =
+        std::make_shared<TransitionAnimation>(animation);
+    result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, true);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] = nullptr;
+    result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UnmarshallingTransitionAnimationMap
+ * @tc.desc: UnmarshallingTransitionAnimationMap test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingTransitionAnimationMap, TestSize.Level1)
+{
+    Parcel parcel;
+    TransitionAnimation animation;
+    WindowSessionProperty windowSessionProperty;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->transitionAnimationConfig_[WindowTransitionType::DESTROY] =
+        std::make_shared<TransitionAnimation>(animation);
+    bool result = property->MarshallingTransitionAnimationMap(parcel);
+    ASSERT_EQ(result, true);
+    result = property->UnmarshallingTransitionAnimationMap(parcel, &windowSessionProperty);
     ASSERT_EQ(result, true);
 }
 
@@ -1212,7 +1266,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     std::vector<Rect> rects;
     for (int i = 0; i < 55; i++) {
-        Rect rect { i, i, i, i };
+        Rect rect{ i, i, i, i };
         rects.push_back(rect);
     }
     property->SetTouchHotAreas(rects);
@@ -1231,7 +1285,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, TestSize.L
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
     for (int i = 0; i < 55; i++) {
-        Rect rect { i, i, i, i };
+        Rect rect{ i, i, i, i };
         hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
         hotAreas.landscapePanelHotAreas_.push_back(rect);
         hotAreas.portraitKeyboardHotAreas_.push_back(rect);
@@ -1345,6 +1399,31 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
     ASSERT_EQ(zLevel, property->zLevel_);
 }
 
+/**
+ * @tc.name: GetZIndex
+ * @tc.desc: GetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->zIndex_ = zIndex;
+    ASSERT_EQ(zIndex, property->GetZIndex());
+}
+
+/**
+ * @tc.name: SetZIndex
+ * @tc.desc: SetZIndex Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZIndex, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int32_t zIndex = 1;
+    property->SetZIndex(zIndex);
+    ASSERT_EQ(zIndex, property->zIndex_);
+}
 /**
  * @tc.name: SetAndIsSystemKeyboard
  * @tc.desc: SetIsSystemKeyboard and IsSystemKeyboard Test

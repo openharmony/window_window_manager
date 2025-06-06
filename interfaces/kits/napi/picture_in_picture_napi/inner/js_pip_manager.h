@@ -18,7 +18,7 @@
 
 #include <set>
 
-#include "../js_pip_window_listener.h"
+#include "js_pip_window_listener.h"
 #include "js_runtime_utils.h"
 #include "wm_common.h"
 
@@ -31,6 +31,7 @@ public:
     ~JsPipManager();
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value InitXComponentController(napi_env env, napi_callback_info info);
+    static napi_value InitWebXComponentController(napi_env env, napi_callback_info info);
     static napi_value GetCustomUIController(napi_env env, napi_callback_info info);
     static napi_value GetTypeNode(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
@@ -48,6 +49,7 @@ private:
         UPDATE_TYPE_CB,
     };
     napi_value OnInitXComponentController(napi_env env, napi_callback_info info);
+    napi_value OnInitWebXComponentController(napi_env env, napi_callback_info info);
     napi_value OnGetCustomUIController(napi_env env, napi_callback_info info);
     napi_value OnGetTypeNode(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);

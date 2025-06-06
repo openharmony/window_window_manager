@@ -16,8 +16,8 @@
 // gtest
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
-#include "window_test_utils.h"
 #include "window_impl.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -35,25 +35,22 @@ public:
 
     std::vector<sptr<Window>> activeWindows_;
     Utils::TestWindowInfo fullInfo_;
+
 private:
     static constexpr uint32_t TEST_SLEEP_S = 1;
 };
 
-void WindowRaiseToAppTopTest::SetUpTestCase()
-{
-}
+void WindowRaiseToAppTopTest::SetUpTestCase() {}
 
-void WindowRaiseToAppTopTest::TearDownTestCase()
-{
-}
+void WindowRaiseToAppTopTest::TearDownTestCase() {}
 
 void WindowRaiseToAppTopTest::SetUp()
 {
     fullInfo_ = {
-            .name = "",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .parentId = INVALID_WINDOW_ID,
     };
     activeWindows_.clear();
 }
@@ -74,7 +71,7 @@ namespace {
  */
 HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, TestSize.Level1)
 {
-    fullInfo_.name  = "mainWindow.1";
+    fullInfo_.name = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
     if (mainWindow == nullptr) {
         return;
@@ -84,18 +81,18 @@ HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.1";
+    fullInfo_.name = "subWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, subWindow1);
     activeWindows_.push_back(subWindow1);
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.2";
+    fullInfo_.name = "subWindow.2";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow2 = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, subWindow2);
     activeWindows_.push_back(subWindow2);
@@ -115,7 +112,7 @@ HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, TestSize.Level1)
  */
 HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, TestSize.Level1)
 {
-    fullInfo_.name  = "mainWindow.1";
+    fullInfo_.name = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
     if (mainWindow == nullptr) {
         return;
@@ -125,27 +122,27 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.1";
+    fullInfo_.name = "subWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, subWindow1);
     activeWindows_.push_back(subWindow1);
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.2";
+    fullInfo_.name = "subWindow.2";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow2 = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, subWindow2);
     activeWindows_.push_back(subWindow2);
     ASSERT_EQ(WMError::WM_OK, subWindow2->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "dialog.2";
+    fullInfo_.name = "dialog.2";
     fullInfo_.type = WindowType::WINDOW_TYPE_DIALOG;
-    fullInfo_.parentId  = INVALID_WINDOW_ID;
+    fullInfo_.parentId = INVALID_WINDOW_ID;
     sptr<Window> dialog = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, dialog);
     activeWindows_.push_back(dialog);
@@ -163,7 +160,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, TestSize.Level1)
  */
 HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, TestSize.Level1)
 {
-    fullInfo_.name  = "mainWindow.1";
+    fullInfo_.name = "mainWindow.1";
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
     if (mainWindow == nullptr) {
         return;
@@ -173,9 +170,9 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.1";
+    fullInfo_.name = "subWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(fullInfo_);
     if (subWindow1 == nullptr) {
         return;
@@ -185,9 +182,9 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.2";
+    fullInfo_.name = "subWindow.2";
     fullInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow2 = Utils::CreateTestWindow(fullInfo_);
     ASSERT_NE(nullptr, subWindow2);
     activeWindows_.push_back(subWindow2);
@@ -215,7 +212,7 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, TestSize.Level1)
 HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, TestSize.Level1)
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("window_raisetoapptop_test");
-    fullInfo_.name  = "mainWindow.1";
+    fullInfo_.name = "mainWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     sptr<Window> mainWindow = Utils::CreateTestWindow(fullInfo_);
     if (mainWindow == nullptr) {
@@ -226,9 +223,9 @@ HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
     sleep(TEST_SLEEP_S);
 
-    fullInfo_.name  = "subWindow.1";
+    fullInfo_.name = "subWindow.1";
     fullInfo_.type = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
-    fullInfo_.parentId  = mainWindow->GetWindowId();
+    fullInfo_.parentId = mainWindow->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(fullInfo_);
     if (subWindow1 == nullptr) {
         return;
@@ -241,6 +238,6 @@ HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, TestSize.Level1)
     auto result = subWindow1->RaiseToAppTop();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, result);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

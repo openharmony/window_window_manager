@@ -1278,6 +1278,34 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterScreenshotAppEventListener
+ * @tc.desc: RegisterScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterScreenshotAppEventListener, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    auto ret = window->RegisterScreenshotAppEventListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterScreenshotAppEventListener
+ * @tc.desc: UnregisterScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterScreenshotAppEventListener, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    auto ret = window->UnregisterScreenshotAppEventListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: RegisterDialogTargetTouchListener
  * @tc.desc: get
  * @tc.type: FUNC
@@ -2662,15 +2690,42 @@ HWTEST_F(WindowTest, GetCompatibleModeInPc, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, TestSize.Level1)
+HWTEST_F(WindowTest, IsAdaptToCompatibleImmersive, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     ASSERT_NE(window, nullptr);
-    auto ret = window->IsPcOrPadCapabilityEnabled();
+    auto ret = window->IsAdaptToCompatibleImmersive();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->IsPcOrFreeMultiWindowCapabilityEnabled();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsSceneBoardEnabled, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->IsSceneBoardEnabled();
     EXPECT_EQ(false, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }

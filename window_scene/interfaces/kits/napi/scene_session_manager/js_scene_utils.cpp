@@ -47,21 +47,61 @@ enum class AceTouchType : int32_t {
     UP,
     MOVE,
     CANCEL,
+    HOVER_ENTER = 9,
+    HOVER_MOVE = 10,
+    HOVER_EXIT = 11,
+    HOVER_CANCEL = 12,
 };
 
-int32_t GetMMITouchType(int32_t aceType)
+// Refer to OHOS::Ace::SourceType
+enum class AceSourceType : int32_t {
+    NONE = 0,
+    MOUSE = 1,
+    TOUCH = 2,
+    TOUCH_PAD = 3,
+    KEYBOARD = 4
+};
+
+const std::map<int32_t, int32_t> TOUCH_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
+const std::map<int32_t, int32_t> MOUSE_ACTION_MAP = {
+    { (int32_t)AceTouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { (int32_t)AceTouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { (int32_t)AceTouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { (int32_t)AceTouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { (int32_t)AceTouchType::HOVER_ENTER, MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER },
+    { (int32_t)AceTouchType::HOVER_MOVE, MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE },
+    { (int32_t)AceTouchType::HOVER_EXIT, MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT },
+    { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
+};
+
+void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
 {
-    switch (aceType) {
-        case static_cast<int32_t>(AceTouchType::DOWN):
-            return MMI::PointerEvent::POINTER_ACTION_DOWN;
-        case static_cast<int32_t>(AceTouchType::UP):
-            return MMI::PointerEvent::POINTER_ACTION_UP;
-        case static_cast<int32_t>(AceTouchType::MOVE):
-            return MMI::PointerEvent::POINTER_ACTION_MOVE;
-        case static_cast<int32_t>(AceTouchType::CANCEL):
-            return MMI::PointerEvent::POINTER_ACTION_CANCEL;
-        default:
-            return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
+    auto sourceType = pointerEvent.GetSourceType();
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        auto it = TOUCH_ACTION_MAP.find(aceType);
+        if (it == TOUCH_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
+        }
+        pointerEvent.SetPointerAction(it->second);
+    } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        auto it = MOUSE_ACTION_MAP.find(aceType);
+        if (it == MOUSE_ACTION_MAP.end()) {
+            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+            return;
+        }
+        pointerEvent.SetPointerAction(it->second);
     }
 }
 } // namespace
@@ -78,6 +118,81 @@ napi_valuetype GetType(napi_env env, napi_value value)
     napi_valuetype res = napi_undefined;
     napi_typeof(env, value, &res);
     return res;
+}
+
+napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
+{
+    napi_value objValue = nullptr;
+    if (!transitionAnimation) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_value configJsValue = ConvertWindowAnimationOptionToJsValue(env, transitionAnimation->config);
+    if (!configJsValue) {
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "config", configJsValue);
+    napi_set_named_property(env, objValue, "opacity", CreateJsValue(env, transitionAnimation->opacity));
+
+    return objValue;
+}
+
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env, const WindowAnimationProperty& animationProperty)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "targetScale", CreateJsValue(env, animationProperty.targetScale));
+    return objValue;
+}
+
+napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
+    const WindowAnimationOption& animationConfig)
+{
+    napi_value configJsValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, configJsValue);
+    napi_set_named_property(env, configJsValue, "curve", CreateJsValue(env, animationConfig.curve));
+    switch (animationConfig.curve) {
+        case WindowAnimationCurve::LINEAR: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            break;
+        }
+        case WindowAnimationCurve::INTERPOLATION_SPRING: {
+            napi_value params = nullptr;
+            napi_create_array(env, &params);
+            for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
+                napi_value element;
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_set_element(env, params, i, element);
+            }
+            napi_set_named_property(env, configJsValue, "param", params);
+            break;
+        }
+        default:
+            break;
+    }
+    return configJsValue;
+}
+
+napi_value WindowTransitionTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(WindowTransitionType::DESTROY)));
+    return objValue;
+}
+
+napi_value WindowAnimationCurveInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "LINEAR",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
+    napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    return objValue;
 }
 
 WSError GetIntValueFromString(const std::string& str, uint32_t& value)
@@ -346,6 +461,19 @@ static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseCon
     return true;
 }
 
+static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsAbilityHook) != napi_undefined) {
+        bool isAbilityHook = false;
+        if (!ConvertFromJsValue(env, jsIsAbilityHook, isAbilityHook)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAbilityHook");
+            return false;
+        }
+        sessionInfo.isAbilityHook_ = isAbilityHook;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -368,6 +496,9 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isNewAppInstance", &jsIsNewAppInstance);
     napi_value jsInstanceKey = nullptr;
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
+    napi_value jsIsAbilityHook = nullptr;
+    napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
+
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -383,15 +514,12 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
-    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
+    if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
+        !IsJsFullScreenStartUndefined(env, jsFullScreenStart, sessionInfo) ||
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
-        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo)) {
+        !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
+        !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
         return false;
     }
     return true;
@@ -689,7 +817,7 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         WLOGFE("Failed to convert parameter to touchType");
         return false;
     }
-    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
+    TransferToMMIFormat(touchType, pointerEvent);
     double windowX;
     if (!ConvertFromJsValue(env, jsWindowX, windowX)) {
         WLOGFE("Failed to convert parameter to windowX");
@@ -756,6 +884,16 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
     return true;
 }
 
+int32_t ConvertMMISourceType(int32_t sourceType)
+{
+    if (sourceType == static_cast<int32_t>(AceSourceType::TOUCH)) {
+        return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    } else if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
+        return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
+    }
+    return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+}
+
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
 {
     napi_value jsSourceType = nullptr;
@@ -771,7 +909,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent.SetSourceType(ConvertMMISourceType(sourceType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");
@@ -965,7 +1103,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.posY_ = posY;
     }
     if (GetType(env, jsWidth_) != napi_undefined) {
-        int32_t width;
+        uint32_t width = 0;
         if (!ConvertFromJsValue(env, jsWidth_, width)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to width_");
             return false;
@@ -973,7 +1111,7 @@ bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect
         displayRect.width_ = width;
     }
     if (GetType(env, jsHeight_) != napi_undefined) {
-        int32_t height;
+        uint32_t height = 0;
         if (!ConvertFromJsValue(env, jsHeight_, height)) {
             TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to height_");
             return false;
@@ -1054,6 +1192,36 @@ bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& t
     }
     throwSlipMode = it->second;
     return true;
+}
+
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& compatibleModeProperty)
+{
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)> funcs = {
+        {"isAdaptToImmersive", &CompatibleModeProperty::SetIsAdaptToImmersive},
+        {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
+        {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
+        {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
+        {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
+        {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
+        {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
+    };
+    bool atLeastOneParam = false;
+    std::map<std::string, void (CompatibleModeProperty::*)(bool)>::iterator iter;
+    for (iter = funcs.begin(); iter != funcs.end(); ++iter) {
+        std::string paramStr = iter->first;
+        bool ret = false;
+        if (ParseJsValue(env, value, paramStr, ret)) {
+            void (CompatibleModeProperty::*func)(bool) = iter->second;
+            (compatibleModeProperty.*func)(ret);
+            atLeastOneParam = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "property: %{public}s", compatibleModeProperty.ToString().c_str());
+    return atLeastOneParam;
 }
 
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
@@ -1166,7 +1334,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
-        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
     }
     return objValue;
 }
@@ -1217,6 +1385,19 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
+
+    napi_value jsTransitionAnimationMapValue = nullptr;
+    napi_create_object(env, &jsTransitionAnimationMapValue);
+    if (jsTransitionAnimationMapValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to get jsObject");
+        return nullptr;
+    }
+    for (const auto& [transitionType, animation] : property->GetTransitionAnimationConfig()) {
+        napi_set_property(env, jsTransitionAnimationMapValue, CreateJsValue(env, static_cast<uint32_t>(transitionType)),
+            ConvertTransitionAnimationToJsValue(env, animation));
+    }
+    napi_set_named_property(env, objValue, "transitionAnimationMap", jsTransitionAnimationMapValue);
+
     return objValue;
 }
 
@@ -1386,6 +1567,12 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG)));
     napi_set_named_property(env, objValue, "SPLIT_DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SPLIT_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_BY_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RESIZE_BY_LIMIT)));
+    napi_set_named_property(env, objValue, "MAXIMIZE_IN_IMPLICT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
+    napi_set_named_property(env, objValue, "RECOVER_IN_IMPLICIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
@@ -1743,6 +1930,57 @@ static napi_value CreateJsSystemBarPropertyObject(
     return objValue;
 }
 
+napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "CreateJsShadowsInfo.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_status ret = napi_ok;
+    if (shadowsInfo.hasRadiusValue_) {
+        ret = napi_set_named_property(env, objValue, "radius", CreateJsValue(env, shadowsInfo.radius_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasColorValue_) {
+        ret = napi_set_named_property(env, objValue, "color", CreateJsValue(env, shadowsInfo.color_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasOffsetXValue_) {
+        ret = napi_set_named_property(env, objValue, "offsetX", CreateJsValue(env, shadowsInfo.offsetX_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (shadowsInfo.hasOffsetYValue_) {
+        ret = napi_set_named_property(env, objValue, "offsetY", CreateJsValue(env, shadowsInfo.offsetY_));
+    }
+    if (ret != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    if (!shadowsInfo.hasRadiusValue_ && !shadowsInfo.hasColorValue_ && !shadowsInfo.hasOffsetXValue_ &&
+        !shadowsInfo.hasOffsetYValue_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Obeject is undefined!");
+        return NapiGetUndefined(env);   
+    }
+    return objValue;
+}
+
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params)
 {
     napi_value objValue = nullptr;
@@ -1766,6 +2004,8 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         CreateJsSessionRect(env, params.LandscapePanelRect_));
     napi_set_named_property(env, objValue, "portraitPanelRect",
         CreateJsSessionRect(env, params.PortraitPanelRect_));
+    napi_set_named_property(env, objValue, "displayId",
+        CreateJsValue(env, static_cast<int64_t>(params.displayId_)));
     return objValue;
 }
 
@@ -1898,6 +2138,68 @@ napi_value KeyboardViewModeInit(napi_env env)
     return objValue;
 }
 
+napi_value KeyboardFlowlightModeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::NONE)));
+    napi_set_named_property(env, objValue, "BACKGROUND_FLOW_LIGHT", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::END)));
+    return objValue;
+}
+
+napi_value KeyboardGradientModeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::NONE)));
+    napi_set_named_property(env, objValue, "LINEAR_GRADIENT", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::LINEAR_GRADIENT)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::END)));
+    return objValue;
+}
+
+napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "viewMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.viewMode_)));
+    napi_set_named_property(env, objValue, "flowLightMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.flowLightMode_)));
+    napi_set_named_property(env, objValue, "gradientMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.gradientMode_)));
+    napi_set_named_property(env, objValue, "blurHeight", CreateJsValue(env,
+        effectOption.blurHeight_));
+    return objValue;
+}
+
 napi_value SessionTypeInit(napi_env env)
 {
     WLOGFD("in");
@@ -1952,6 +2254,10 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
+    SetTypeProperty(objValue, env, "TYPE_MUTISCREEN_COLLABORATION", JsSessionType::TYPE_MUTISCREEN_COLLABORATION);
+    SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
+    SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     return objValue;
 }
 
@@ -2012,6 +2318,69 @@ napi_value CreateRectType(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_SCREEN)));
     napi_set_named_property(env, objValue, "RELATIVE_TO_PARENT_WINDOW",
         CreateJsValue(env, static_cast<uint32_t>(RectType::RELATIVE_TO_PARENT_WINDOW)));
+    return objValue;
+}
+
+napi_value CreateSupportType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION)));
+    napi_set_named_property(env, objValue, "ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION",
+        CreateJsValue(env, static_cast<uint32_t>(SupportFunctionType::ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION)));
+    return objValue;
+}
+
+napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "isAnchorEnabled",
+        CreateJsValue(env, windowAnchorInfo.isAnchorEnabled_));
+    napi_set_named_property(env, objValue, "windowAnchor",
+        CreateJsValue(env, static_cast<uint32_t>(windowAnchorInfo.windowAnchor_)));
+    napi_set_named_property(env, objValue, "offsetX",
+        CreateJsValue(env, windowAnchorInfo.offsetX_));
+    napi_set_named_property(env, objValue, "offsetY",
+        CreateJsValue(env, windowAnchorInfo.offsetY_));
+    return objValue;
+}
+
+napi_value CreateWindowAnchorType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "TOP_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_START)));
+    napi_set_named_property(env, objValue, "TOP",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP)));
+    napi_set_named_property(env, objValue, "TOP_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::TOP_END)));
+    napi_set_named_property(env, objValue, "START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::START)));
+    napi_set_named_property(env, objValue, "CENTER",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::CENTER)));
+    napi_set_named_property(env, objValue, "END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::END)));
+    napi_set_named_property(env, objValue, "BOTTOM_START",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_START)));
+    napi_set_named_property(env, objValue, "BOTTOM",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM)));
+    napi_set_named_property(env, objValue, "BOTTOM_END",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnchor::BOTTOM_END)));
     return objValue;
 }
 

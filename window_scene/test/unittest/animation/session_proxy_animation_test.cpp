@@ -20,6 +20,7 @@
 #include "pointer_event.h"
 #include "session_proxy.h"
 #include "ws_common.h"
+#include "wm_common.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -28,7 +29,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SessionProxyAnimationTest : public testing::Test {
-  public:
+public:
     SessionProxyAnimationTest() {}
     ~SessionProxyAnimationTest() {}
 };
@@ -48,6 +49,25 @@ HWTEST_F(SessionProxyAnimationTest, SetWindowCornerRadius, TestSize.Level1)
     WSError res = sProxy->SetWindowCornerRadius(1.0f);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyAnimationTest: SetWindowCornerRadius end";
+}
+
+/**
+ * @tc.name: SetWindowShadows
+ * @tc.desc: SetWindowShadows
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyAnimationTest, SetWindowShadows, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyAnimationTest: SetWindowShadows start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    ShadowsInfo shadowsInfo = { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true };
+    WSError res = sProxy->SetWindowShadows(shadowsInfo);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyAnimationTest: SetWindowShadows end";
 }
 } // namespace
 } // namespace Rosen

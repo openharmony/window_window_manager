@@ -48,8 +48,8 @@ class PixelMap;
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
+class RSUIContext;
 class RSTransaction;
-class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
@@ -67,7 +67,7 @@ using NotifySessionTouchableChangeFunc = std::function<void(const bool touchable
 using NotifyClickFunc = std::function<void(bool requestFocus, bool isClick)>;
 using NotifyTerminateSessionFunc = std::function<void(const SessionInfo& info)>;
 using NotifyTerminateSessionFuncNew =
-    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker)>;
+    std::function<void(const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean)>;
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
@@ -93,13 +93,15 @@ using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisib
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
+using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType type, TransitionAnimation animation)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
-
+using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
+using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -118,6 +120,7 @@ public:
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void OnAppRemoveStartingWindow() {}
+    virtual void OnUpdateSnapshotWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -135,6 +138,9 @@ struct DetectTaskInfo {
     WindowMode taskWindowMode = WindowMode::WINDOW_MODE_UNDEFINED;
     DetectTaskState taskState = DetectTaskState::NO_TASK;
 };
+
+const std::string ATTACH_EVENT_NAME { "wms::ReportWindowTimeout_Attach" };
+const std::string DETACH_EVENT_NAME { "wms::ReportWindowTimeout_Detach" };
 
 class Session : public SessionStub {
 public:
@@ -201,8 +207,9 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false);
+    void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
+    void NotifyUpdateSnapshotWindow();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -241,7 +248,8 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
-    void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true,
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -263,6 +271,8 @@ public:
             addSnapshotCallback_ = std::move(task);
         }
     }
+    void SetEnableAddSnapshot(bool enableAddSnapshot = true);
+    bool GetEnableAddSnapshot() const;
 
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
@@ -294,6 +304,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
@@ -305,8 +316,6 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
-    DisplayId GetOriginDisplayId() const { return originDisplayId_; }
-    void SetOriginDisplayId(DisplayId displayId);
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -341,7 +350,8 @@ public:
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
-    WSError Clear(bool needStartCaller = false);
+    // Just terminate, not clear session
+    WSError Clear(bool needStartCaller = false, bool isForceClean = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
     WSError SetSessionIcon(const std::shared_ptr<Media::PixelMap>& icon);
@@ -368,6 +378,7 @@ public:
     std::vector<sptr<Session>> GetDialogVector() const;
     void ClearDialogVector();
     WSError NotifyDestroy();
+    WSError NotifyAppForceLandscapeConfigUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
@@ -379,14 +390,8 @@ public:
     bool GetStateFromManager(const ManagerState key);
     virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
     virtual WSError UpdateWindowMode(WindowMode mode);
-    WSError SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
-    WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
-        int32_t landscapeWidth, int32_t landscapeHeight);
-    WSError SetCompatibleModeEnableInPad(bool enable);
-    WSError CompatibleFullScreenRecover();
-    WSError CompatibleFullScreenMinimize();
-    WSError CompatibleFullScreenClose();
+    WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
     WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
@@ -405,7 +410,8 @@ public:
     WSError SetBrightness(float brightness);
     float GetBrightness() const;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const Rect& callingSessionRect = {}, const std::map<AvoidAreaType, AvoidArea>& = {});
     void SetSessionInfoLockedStateChangeListener(const NotifySessionInfoLockedStateChangeFunc& func);
     void NotifySessionInfoLockedStateChange(bool lockedState);
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
@@ -562,7 +568,6 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
-    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -636,6 +641,8 @@ public:
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
     virtual bool IsAnyParentSessionDragMoving() const { return false; }
     virtual bool IsAnyParentSessionDragZooming() const { return false; }
+    void SetHasRequestedVsyncFunc(HasRequestedVsyncFunc&& func);
+    void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
 
     /*
      * Screen Lock
@@ -662,13 +669,27 @@ public:
     WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
+    uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
+    void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
+    void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
 
     /*
      * Window Pattern
      */
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
-    
+
+    /*
+     * Specific Window
+     */
+    void SetWindowAnimationDuration(int32_t duration);
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -680,7 +701,6 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask);
     void GeneratePersistentId(bool isExtension, int32_t persistentId);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
@@ -748,6 +768,7 @@ protected:
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
+    int32_t currentRotation_ = 0;
 
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -827,6 +848,11 @@ protected:
         DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    HasRequestedVsyncFunc hasRequestedVsyncFunc_;
+    RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
+    WSError RequestNextVsyncWhenModeChange();
+    void OnVsyncReceivedAfterModeChanged();
+    void InitVsyncCallbackForModeChangeAndRequestNextVsync();
 
     /*
      * Window ZOrder
@@ -865,6 +891,12 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
+    
+    /*
+     * Window Pattern
+     */
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pipeline
@@ -880,6 +912,11 @@ protected:
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
+    /*
+     * Window Property
+     */
+    uint32_t propertyDirtyFlags_ = 0;
+
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
@@ -894,6 +931,8 @@ private:
     bool ShouldCreateDetectTask(bool isAttach, WindowMode windowMode) const;
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
+    void PostSpecificSessionLifeCycleTimeoutTask(const std::string& eventName);   // only report for specific window
+    bool IsNeedReportTimeout() const;
 
     /*
      * Window Rotate Animation
@@ -968,8 +1007,8 @@ private:
      * Window Lifecycle
      */
     void RecordWindowStateAttachExceptionEvent(bool isAttached);
+    bool SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask);
 
-    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
@@ -994,8 +1033,9 @@ private:
     SingleHandTransform singleHandTransform_;
     bool singleHandModeFlag_ = false;
     SingleHandScreenInfo singleHandScreenInfo_;
-    DisplayId originDisplayId_ = DISPLAY_ID_INVALID;
     bool isDragStart_ = { false };
+    std::atomic_bool isWindowModeDirty_ = false;
+    std::atomic<int32_t> timesToWaitForVsync_ = 0;
 
     /*
      * Screen Lock
@@ -1005,18 +1045,30 @@ private:
     /*
      * Window Scene Snapshot
      */
+    std::atomic<bool> enableAddSnapshot_ = true;
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
     Task addSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
     std::mutex addSnapshotCallbackMutex_;
-    std::atomic<bool> needNotifyAttachState_ = { false };
 
     /*
      * Window Pattern
      */
     bool borderUnoccupied_ = false;
+    void DeletePersistentImageFit();
+
+    /*
+     * Specific Window
+     */
+    int32_t windowAnimationDuration_;
+
+    /*
+     * RS Client Multi Instance
+     */
+    void InitRSUIContext();
+    std::shared_ptr<RSUIContext> rsUIContext_;
 };
 } // namespace OHOS::Rosen
 

@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void CutoutInfoTest::SetUpTestCase()
-{
-}
+void CutoutInfoTest::SetUpTestCase() {}
 
-void CutoutInfoTest::TearDownTestCase()
-{
-}
+void CutoutInfoTest::TearDownTestCase() {}
 
-void CutoutInfoTest::SetUp()
-{
-}
+void CutoutInfoTest::SetUp() {}
 
-void CutoutInfoTest::TearDown()
-{
-}
+void CutoutInfoTest::TearDown() {}
 
 namespace {
 /**
@@ -54,7 +46,7 @@ namespace {
 HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector01, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
-    DMRect rect = {0, 0, 0, 0};
+    DMRect rect = { 0, 0, 0, 0 };
     std::vector<DMRect> boundingRects;
     boundingRects.emplace_back(rect);
     Parcel parcel;
@@ -71,8 +63,8 @@ HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     std::vector<DMRect> boundingRects;
-    for (int i = 0; i < 21 ; i++){  // MAX_CUTOUT_INFO_SIZE + 1
-        DMRect rect = {0, 0, 0, 0};
+    for (int i = 0; i < 21; i++) { // MAX_CUTOUT_INFO_SIZE + 1
+        DMRect rect = { 0, 0, 0, 0 };
         boundingRects.emplace_back(rect);
     }
     Parcel parcel;
@@ -88,7 +80,7 @@ HWTEST_F(CutoutInfoTest, WriteBoundingRectsVector02, TestSize.Level1)
 HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector01, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
-    DMRect rect = {0, 0, 0, 0};
+    DMRect rect = { 0, 0, 0, 0 };
     std::vector<DMRect> boundingRects;
     boundingRects.emplace_back(rect);
     Parcel parcel;
@@ -105,14 +97,14 @@ HWTEST_F(CutoutInfoTest, ReadBoundingRectsVector02, TestSize.Level1)
 {
     sptr<CutoutInfo> info = new CutoutInfo();
     std::vector<DMRect> boundingRects;
-    for (int i = 0; i < 21 ; i++){  // MAX_CUTOUT_INFO_SIZE + 1
-        DMRect rect = {0, 0, 0, 0};
+    for (int i = 0; i < 21; i++) { // MAX_CUTOUT_INFO_SIZE + 1
+        DMRect rect = { 0, 0, 0, 0 };
         boundingRects.emplace_back(rect);
     }
     Parcel parcel;
     bool ret = info->ReadBoundingRectsVector(boundingRects, parcel);
     ASSERT_FALSE(ret);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -44,7 +44,7 @@ using ConfigItem = WindowSceneConfig::ConfigItem;
 ConfigItem ReadConfig(const std::string& xmlStr)
 {
     ConfigItem config;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return config;
     }
@@ -62,7 +62,7 @@ ConfigItem ReadConfig(const std::string& xmlStr)
     xmlFreeDoc(docPtr);
     return config;
 }
-}
+} // namespace
 
 class SSMgrSpecificWindowTest : public testing::Test {
 public:
@@ -75,6 +75,7 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
+
 private:
 };
 
@@ -90,9 +91,7 @@ void SSMgrSpecificWindowTest::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SSMgrSpecificWindowTest::SetUp()
-{
-}
+void SSMgrSpecificWindowTest::SetUp() {}
 
 void SSMgrSpecificWindowTest::TearDown()
 {
@@ -107,42 +106,44 @@ namespace {
  */
 HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
+        "<keyboardAnimation>"
+        "<animationIn>"
+        "<timing>"
+        "<duration>abv</duration>"
+        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+        "</timing>"
+        "</animationIn>"
+        "<animationOut>"
+        "<timing>"
+        "<duration>abv</duration>"
+        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+        "</timing>"
+        "</animationOut>"
+        "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
+        "<keyboardAnimation>"
+        "<animationIn>"
+        "<timing>"
+        "<duration>500</duration>"
+        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+        "</timing>"
+        "</animationIn>"
+        "<animationOut>"
+        "<timing>"
+        "<duration>300</duration>"
+        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
+        "</timing>"
+        "</animationOut>"
+        "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
@@ -157,21 +158,22 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation01, TestSize.Level1)
  */
 HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<duration>600</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
+        "<keyboardAnimation>"
+        "<animationIn>"
+        "<timing>"
+        "<duration>500</duration>"
+        "<duration>600</duration>"
+        "</timing>"
+        "</animationIn>"
+        "<animationOut>"
+        "<timing>"
+        "<duration>300</duration>"
+        "</timing>"
+        "</animationOut>"
+        "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -185,21 +187,22 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation02, TestSize.Level1)
  */
 HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<duration>400</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
+        "<keyboardAnimation>"
+        "<animationIn>"
+        "<timing>"
+        "<duration>500</duration>"
+        "</timing>"
+        "</animationIn>"
+        "<animationOut>"
+        "<timing>"
+        "<duration>300</duration>"
+        "<duration>400</duration>"
+        "</timing>"
+        "</animationOut>"
+        "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -213,15 +216,16 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation03, TestSize.Level1)
  */
 HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-            "</keyboardAnimation>"
+        "<keyboardAnimation>"
+        "<animationIn>"
+        "<timing>"
+        "<duration>500</duration>"
+        "</timing>"
+        "</animationIn>"
+        "</keyboardAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -246,7 +250,7 @@ HWTEST_F(SSMgrSpecificWindowTest, IsKeyboardForeground, TestSize.Level1)
     auto result = ssm_->IsKeyboardForeground();
     ASSERT_EQ(result, false);
 
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(session->property_, nullptr);
 
@@ -391,7 +395,7 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow, TestSize.Level1)
     result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     ssm_->GetSceneSession(1);
     result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -420,8 +424,8 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyDialogWithMainWindow02, TestSize.Level1
 
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
-    ssm_->sceneSessionMap_.insert({0, nullptr});
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, nullptr });
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
 
     auto ret = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
@@ -442,21 +446,21 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, TestSize.Level1)
     WindowSceneConfig::ConfigItem nameProp;
     std::string name = "cubic";
     nameProp.SetValue(name);
-    itemCurve.SetProperty({{ "name", nameProp}});
+    itemCurve.SetProperty({ { "name", nameProp } });
 
     // prepare duration
-    std::vector<int> durationVec = {39};
+    std::vector<int> durationVec = { 39 };
     itemDuration.SetValue(durationVec);
 
     // prepare timing
     WindowSceneConfig::ConfigItem timing;
     WindowSceneConfig::ConfigItem timingObj;
-    timingObj.SetValue({{ "curve", itemCurve }, { "duration", itemDuration}});
-    timing.SetValue({{ "timing", timingObj }});
+    timingObj.SetValue({ { "curve", itemCurve }, { "duration", itemDuration } });
+    timing.SetValue({ { "timing", timingObj } });
 
     WindowSceneConfig::ConfigItem timing2(timing);
     // prepare animationConfig
-    animationConfig.SetValue({{ "animationIn", timing }, { "animationOut", timing2 }});
+    animationConfig.SetValue({ { "animationIn", timing }, { "animationOut", timing2 } });
 
     ssm_->ConfigKeyboardAnimation(animationConfig);
     ASSERT_EQ(ssm_->systemConfig_.animationIn_.curveType_, "cubic");
@@ -465,6 +469,7 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, TestSize.Level1)
     uint32_t result = 150;
     KeyboardSceneAnimationConfig animationIn;
     KeyboardSceneAnimationConfig animationOut;
+    ssm_->systemConfig_.animationIn_.curveType_ = "";
     ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
     ASSERT_EQ(animationIn.duration_, result);
 }
@@ -503,7 +508,7 @@ HWTEST_F(SSMgrSpecificWindowTest, UpdateParentSessionForDialog, TestSize.Level1)
     info1.bundleName_ = "test3";
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
     property->SetParentPersistentId(2);
     result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
     EXPECT_EQ(result, WSError::WS_OK);
@@ -526,14 +531,12 @@ HWTEST_F(SSMgrSpecificWindowTest, DestroyAndDisconnectSpecificSession, TestSize.
  * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
  * @tc.type: FUNC
  */
-HWTEST_F(SSMgrSpecificWindowTest,
-    DestroyAndDisconnectSpecificSessionWithDetachCallback,
-    TestSize.Level1)
+HWTEST_F(SSMgrSpecificWindowTest, DestroyAndDisconnectSpecificSessionWithDetachCallback, TestSize.Level1)
 {
     int32_t persistentId = 0;
     WSError result = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

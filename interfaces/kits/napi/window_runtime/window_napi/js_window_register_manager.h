@@ -35,19 +35,24 @@ enum class RegisterListenerType : uint32_t {
     LIFECYCLE_EVENT_CB,
     WINDOW_EVENT_CB,
     KEYBOARD_HEIGHT_CHANGE_CB,
+    KEYBOARD_WILL_SHOW_CB,
+    KEYBOARD_WILL_HIDE_CB,
     KEYBOARD_DID_SHOW_CB,
     KEYBOARD_DID_HIDE_CB,
     TOUCH_OUTSIDE_CB,
     SCREENSHOT_EVENT_CB,
+    SCREENSHOT_APP_EVENT_CB,
     DIALOG_TARGET_TOUCH_CB,
     DIALOG_DEATH_RECIPIENT_CB,
     WINDOW_STATUS_CHANGE_CB,
+    WINDOW_STATUS_DID_CHANGE_CB,
     WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
     WINDOW_VISIBILITY_CHANGE_CB,
     WINDOW_DISPLAYID_CHANGE_CB,
     SYSTEM_DENSITY_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
+    EXTENSION_SECURE_LIMIT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
     WINDOW_WILL_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
@@ -76,6 +81,10 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter);
+    WmErrorCode ProcessKeyboardWillHideRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter);
     WmErrorCode ProcessKeyboardDidShowRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessKeyboardDidHideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
@@ -85,6 +94,8 @@ private:
     WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessScreenshotAppEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
@@ -104,9 +115,13 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowStatusDidChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
@@ -121,7 +136,7 @@ private:
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         napi_env env, napi_value parameter);
-    std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 } // namespace Rosen

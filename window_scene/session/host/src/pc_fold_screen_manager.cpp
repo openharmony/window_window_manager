@@ -154,6 +154,12 @@ float PcFoldScreenManager::GetVpr() const
     return vpr_;
 }
 
+int32_t PcFoldScreenManager::GetVirtualDisplayPosY() const
+{
+    std::shared_lock<std::shared_mutex> lock(rectsMutex_);
+    return defaultDisplayRect_.height_ + foldCreaseRect_.height_;
+}
+
 std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects() const
 {
     std::shared_lock<std::shared_mutex> lock(rectsMutex_);
@@ -186,6 +192,12 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     return midPosY <= (foldCreaseRect.posY_ + foldCreaseRect.height_ / 2) ? // 2: center
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
+}
+
+ScreenSide PcFoldScreenManager::CalculateScreenSide(int32_t posY)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    return posY < foldCreaseRect.posY_ ? ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
 bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)

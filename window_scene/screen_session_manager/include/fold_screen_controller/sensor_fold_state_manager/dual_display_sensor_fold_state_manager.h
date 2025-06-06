@@ -29,6 +29,12 @@ namespace OHOS {
 namespace Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::IApplicationStateObserver;
+enum class ReportDualTentModeStatus : int32_t {
+    NORMAL_EXIT_TENT_MODE = 0,
+    NORMAL_ENTER_TENT_MODE = 1,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE = 2,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL = 3,
+};
 class ApplicationStateObserver : public IApplicationStateObserver {
 public:
     ApplicationStateObserver();
@@ -54,6 +60,10 @@ public:
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void RegisterApplicationStateObserver() override;
+    void HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int hall = -1) override;
+    bool TriggerTentExit(float angle, int hall);
+    void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
+    void ReportTentStatusChange(ReportDualTentModeStatus tentStatus);
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
@@ -61,6 +71,9 @@ private:
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;
+    int tentModeType_ = 0;
+    float currentAngle_ = -1.0F;
+    int32_t currentHall_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

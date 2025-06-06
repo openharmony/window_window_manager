@@ -23,6 +23,7 @@
 #include <screen_manager/screen_types.h>
 #include <shared_mutex>
 #include <ui/rs_display_node.h>
+#include <ui/rs_ui_director.h>
 
 #include "screen_property.h"
 #include "dm_common.h"
@@ -57,6 +58,8 @@ public:
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
+    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
+    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -115,6 +118,8 @@ public:
     void SetScreenCombination(ScreenCombination combination);
     ScreenCombination GetScreenCombination() const;
 
+    void SetBounds(RRect screenBounds);
+    void SetHorizontalRotation();
     Orientation GetOrientation() const;
     void SetOrientation(Orientation orientation);
     Rotation GetRotation() const;
@@ -151,10 +156,8 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
-    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
-        bool IsOrientationNeedChanged) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
 
@@ -191,11 +194,10 @@ public:
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
     void UpdateTouchBoundsAndOffset();
-    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
-        FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
-    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
+    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
         FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
@@ -211,6 +213,7 @@ public:
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
@@ -227,6 +230,7 @@ public:
     bool GetIsRealScreen();
     void SetIsPcUse(bool isPcUse);
     bool GetIsPcUse();
+    void SetIsFakeSession(bool isFakeSession);
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
     bool GetIsCurrentInUse() const;
@@ -239,8 +243,8 @@ public:
     ScreenShape GetScreenShape() const;
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
-    int32_t GetValidHeight() const;
-    int32_t GetValidWidth() const;
+    uint32_t GetValidHeight() const;
+    uint32_t GetValidWidth() const;
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
@@ -256,6 +260,7 @@ public:
     bool isInUse_ { false };
     bool isReal_ { false };
     bool isPcUse_ { false };
+    bool isFakeSession_ { false };
 
     NodeId nodeId_ {};
 
@@ -306,7 +311,11 @@ public:
     void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
     void SetIsEnableRegionRotation(bool isEnableRegionRotation);
     bool GetIsEnableRegionRotation();
+    void SetIsEnableCanvasRotation(bool isEnableCanvasRotation);
+    bool GetIsEnableCanvasRotation();
     void UpdateDisplayNodeRotation(int rotation);
+    void BeforeScreenPropertyChange(FoldStatus foldStatus);
+    void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
 
     DisplayId GetDisplayId();
 
@@ -321,21 +330,33 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
     void SetScreenAvailableStatus(bool isScreenAvailable);
     bool IsScreenAvailable() const;
 
+    void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
+    bool GetIsAvailableAreaNeedNotify() const;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
 private:
     ScreenProperty property_;
+    mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     std::mutex screenChangeListenerListMutex_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
+    mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
-    bool isFakeInUse_ = false;  // is fake session in use
+    bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
     bool isScreenAvailable_ = true;
@@ -359,10 +380,17 @@ private:
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
-    void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
     std::string innerName_ {"UNKOWN"};
     bool isEnableRegionRotation_ = false;
+    bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
+    std::mutex isEnableCanvasRotationMutex_;
+    bool isAvailableAreaNeedNotify_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

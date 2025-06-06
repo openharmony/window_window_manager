@@ -29,6 +29,10 @@ private:
     static void ReportZOrderException(const std::string& errorReason, sptr<SceneSession> session);
     static void ReportFocusException(const std::string& errorReason, int32_t focusedId, int32_t nextId,
         sptr<SceneSession> session);
+    static void CheckCallingSession(sptr<SceneSession>& session);
+    static void CheckSubWindow(sptr<SceneSession>& session);
+    static void CheckShowWhenLocked(sptr<SceneSession>& session, bool& keyGuardFlag);
+    static void CheckWallpaper(sptr<SceneSession>& session);
 };
 } // namespace Rosen
 } // namespace OHOS

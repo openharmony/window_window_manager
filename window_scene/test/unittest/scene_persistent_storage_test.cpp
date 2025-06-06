@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void ScenePersistentStorageTest::SetUpTestCase()
-{
-}
+void ScenePersistentStorageTest::SetUpTestCase() {}
 
-void ScenePersistentStorageTest::TearDownTestCase()
-{
-}
+void ScenePersistentStorageTest::TearDownTestCase() {}
 
-void ScenePersistentStorageTest::SetUp()
-{
-}
+void ScenePersistentStorageTest::SetUp() {}
 
-void ScenePersistentStorageTest::TearDown()
-{
-}
+void ScenePersistentStorageTest::TearDown() {}
 
 namespace {
 /**
@@ -91,6 +83,6 @@ HWTEST_F(ScenePersistentStorageTest, InitDir, TestSize.Level1)
     scenePersistentStorage_.InitDir(dir_);
     ASSERT_FALSE(scenePersistentStorage_.HasKey("maximize_state", ScenePersistentStorageType::MAXIMIZE_STATE));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

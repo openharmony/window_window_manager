@@ -49,6 +49,11 @@ public:
     MOCK_METHOD0(OnScreenshot, void());
 };
 
+class MockScreenshotAppEventListener : public IScreenshotAppEventListener {
+public:
+    MOCK_METHOD1(OnScreenshotAppEvent, void(ScreenshotEventType type));
+};
+
 class MockDialogTargetTouchListener : public IDialogTargetTouchListener {
 public:
     MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
@@ -64,7 +69,8 @@ public:
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    MOCK_METHOD2(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type));
+    MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info));
 };
 
 class MockDisplayMoveListener : public IDisplayMoveListener {
@@ -179,6 +185,27 @@ HWTEST_F(WindowImplTest3, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+
+    sptr<MockScreenshotAppEventListener> listener;
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    listener = sptr<MockScreenshotAppEventListener>::MakeSptr();
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    EXPECT_CALL(*listener, OnScreenshotAppEvent(_)).Times(1);
+    auto ret = window->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->screenshotAppEventListeners_[window->GetWindowId()].clear();
+}
+
+/**
  * @tc.name: NotifyTouchDialogTarget
  * @tc.desc: NotifyTouchDialogTarget test
  * @tc.type: FUNC
@@ -251,7 +278,7 @@ HWTEST_F(WindowImplTest3, NotifyAvoidAreaChange, TestSize.Level1)
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
     listener = sptr<MockAvoidAreaChangedListener>::MakeSptr();
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
-    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _));
+    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _, _));
     sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     window->NotifyAvoidAreaChange(avoidArea, AvoidAreaType::TYPE_CUTOUT);
     window->avoidAreaChangeListeners_[window->GetWindowId()].clear();

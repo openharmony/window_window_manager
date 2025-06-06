@@ -46,7 +46,6 @@ public:
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
-    int GetCurrentTentMode() const;
     FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(int tentType, int32_t hall = -1);
@@ -58,7 +57,6 @@ public:
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
     void SetMainScreenRegion(DMRect& mainScreenRegion);
-    bool GetCameraMode();
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);

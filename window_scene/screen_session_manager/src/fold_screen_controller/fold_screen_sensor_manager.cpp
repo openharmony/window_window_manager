@@ -83,7 +83,7 @@ void FoldScreenSensorManager::RegisterPostureCallback()
         TLOGE(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
         registerPosture_ = true;
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.RegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback success.");
     }
 }
 
@@ -95,7 +95,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         registerPosture_ = false;
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "UnRegisterPostureCallback success.");
     }
 }
 
@@ -122,7 +122,7 @@ void FoldScreenSensorManager::UnRegisterHallCallback()
     int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterHallCallback success.");
+        TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
         registerHall_ = false;
     }
 }

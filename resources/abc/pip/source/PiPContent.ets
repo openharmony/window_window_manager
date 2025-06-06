@@ -115,27 +115,35 @@ struct PiPContent {
   };
 
   aboutToAppear(): void {
-    this.nodeController = pip.getCustomUIController();
-    this.registerUpdateNodeListener();
-    this.xComponent = pip.getTypeNode();
-    if (!this.validateNode(this.xComponent)) {
-      return;
+    try {
+      this.nodeController = pip.getCustomUIController();
+      this.registerUpdateNodeListener();
+      this.xComponent = pip.getTypeNode();
+      if (!this.validateNode(this.xComponent)) {
+        return;
+      }
+      if (this.xComponent === null) {
+        console.error(TAG, `validateNode node is null`);
+        return;
+      }
+      this.useNode = true;
+      this.updatePipNodeType(this.xComponent);
+      pip.setTypeNodeEnabled();
+      this.mXCNodeController = new XCNodeController(this.xComponent);
+      console.info(TAG, 'use Node Controller');
+      this.registerStateChangeListener();
+    } catch (err) {
+      console.log(`aboutToAppear failed`);
     }
-    if (this.xComponent === null) {
-      console.error(TAG, `validateNode node is null`);
-      return;
-    }
-    this.useNode = true;
-    this.updatePipNodeType(this.xComponent);
-    pip.setTypeNodeEnabled();
-    this.mXCNodeController = new XCNodeController(this.xComponent);
-    console.info(TAG, 'use Node Controller');
-    this.registerStateChangeListener();
   }
 
   aboutToDisappear(): void {
-    pip.off('stateChange', this.stateChangeListener);
-    pip.off('nodeUpdate', this.nodeUpdateListener);
+    try {
+      pip.off('stateChange', this.stateChangeListener);
+      pip.off('nodeUpdate', this.nodeUpdateListener);
+    } catch (err) {
+      console.log(`aboutToDisappear failed`);
+    }
   }
 
   build() {
