@@ -3245,7 +3245,9 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         return WMError::WM_ERROR_NULLPTR;
     }
     nlohmann::json decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
-    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJson.dump());
+    auto decorJsonStr =  decorJson.dump();
+    TLOGI(WmsLogTag::WMS_DECOR, "decorJsonStr: %{public}s", decorJsonStr.c_str());
+    uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJsonStr);
     decorButtonStyle_ = decorButtonStyle;
     return WMError::WM_OK;
 }
