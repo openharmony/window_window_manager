@@ -125,6 +125,43 @@ HWTEST_F(WindowTest, Create05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAndVerifyWindowTypeForArkUI
+ * @tc.desc: get and verify WindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetAndVerifyWindowTypeForArkUI, TestSize.Level1)
+{
+    WindowType windowType;
+    auto ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_SCENE_BOARD, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_DESKTOP, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_UI_EXTENSION, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+
+    ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+
+    ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_FLOAT, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, true);
+
+    ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
+        WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, windowType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
  * @tc.name: CreatePiP
  * @tc.desc: Create PiP window with option
  * @tc.type: FUNC
