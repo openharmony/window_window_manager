@@ -2095,6 +2095,30 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsImmersiveLayoutForNapi01
+ * @tc.desc: IsImmersiveLayoutForNapi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayoutForNapi01, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->isIgnoreSafeArea_ = true;
+    window->state_ = WindowState::STATE_CREATED;
+
+    bool isImmersiveLayout = false;
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+    EXPECT_EQ(false, isImmersiveLayout);
+
+    window->isIgnoreSafeArea_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+    EXPECT_EQ(true, isImmersiveLayout);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->IsImmersiveLayoutForNapi(isImmersiveLayout));
+}
+
+/**
  * @tc.name: SetLayoutFullScreen01
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
