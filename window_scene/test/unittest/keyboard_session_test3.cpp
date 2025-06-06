@@ -189,7 +189,7 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
     ASSERT_NE(defaultDisplayInfo, nullptr);
     screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
     screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
-    Rect expectRect = screenWidth > screenHeight ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
+    const Rect& expectRect = screenWidth > screenHeight ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
     keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
     ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
 }
