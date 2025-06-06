@@ -153,6 +153,7 @@ using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(uint32_t windowNum)>;
 using MinimizeByWindowIdFunc = std::function<void(const std::vector<int32_t>& windowIds)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
+using NotifyTransferSessionToTargetScreenFunc = std::function<void(const TransferSessionInfo& info)>;
 using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
@@ -666,6 +667,7 @@ public:
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
     void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
     WSError TerminateSessionNew(
@@ -695,6 +697,8 @@ public:
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
+    void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
+    WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
@@ -799,6 +803,7 @@ private:
      */
     bool isUserAuthPassed_ {false};
     NotifySceneSessionDestructFunc onSceneSessionDestruct_;
+    NotifyTransferSessionToTargetScreenFunc onTransferSessionToTargetScreen_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,

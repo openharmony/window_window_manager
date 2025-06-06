@@ -75,6 +75,8 @@ using NotifySessionExceptionFunc =
     std::function<void(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
+    const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
     bool shouldBackToCaller)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
@@ -169,6 +171,7 @@ public:
     void ResetSessionConnectState() REQUIRES(SCENE_GUARD);
     void ResetIsActive();
     WSError PendingSessionToForeground();
+    WSError PendingSessionToBackground(const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -179,6 +182,7 @@ public:
     void SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func);
     void SetBackPressedListenser(NotifyBackPressedFunc&& func);
     void SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func);
+    void SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func);
     void SetPendingSessionToBackgroundForDelegatorListener(NotifyPendingSessionToBackgroundForDelegatorFunc&& func);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
@@ -799,6 +803,7 @@ protected:
      */
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
+    NotifyPendingSessionToBackgroundFunc pendingSessionToBackgroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;

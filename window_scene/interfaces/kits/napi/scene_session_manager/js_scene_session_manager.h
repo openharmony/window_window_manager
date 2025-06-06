@@ -47,7 +47,8 @@ enum class ListenerFunctionType : uint32_t {
     WATCH_FOCUS_ACTIVE_CHANGE_CB,
     SET_FOREGROUND_WINDOW_NUM_CB,
     MINIMIZE_BY_WINDOW_ID_CB,
-    SCENE_SESSION_DESTRUCT_CB
+    SCENE_SESSION_DESTRUCT_CB,
+    SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB
 };
 
 class JsSceneSessionManager final {
@@ -338,6 +339,8 @@ private:
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
+    void RegisterTransferSessionToTargetScreenCallback();
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
