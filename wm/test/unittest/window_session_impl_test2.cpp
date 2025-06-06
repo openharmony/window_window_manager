@@ -1858,6 +1858,102 @@ HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterScreenshotAppEventListener
+ * @tc.desc: RegisterScreenshotAppEventListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterScreenshotAppEventListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    WMError ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_NE(existsListener, holder.end());
+
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    EXPECT_EQ(holder.size(), 1);
+}
+
+/**
+ * @tc.name: unregisterScreenshotAppEventListener
+ * @tc.desc: unregisterScreenshotAppEventListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, unregisterScreenshotAppEventListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("unregisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    WMError ret = window->UnregisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->UnregisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_EQ(existsListener, holder.end());
+}
+
+/**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent IScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("unregisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->screenshotAppEventListeners_.clear();
+    EXPECT_EQ(0, window->screenshotAppEventListeners_.size());
+
+    sptr<IScreenshotAppEventListener> listeners = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    holder.push_back(listeners);
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    EXPECT_EQ(1, window->screenshotAppEventListeners_.size());
+    auto ret = window->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
  * @tc.name: TouchOutsideListener
  * @tc.desc: TouchOutsideListener
  * @tc.type: FUNC

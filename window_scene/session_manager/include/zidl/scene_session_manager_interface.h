@@ -135,6 +135,7 @@ public:
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
+        TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT,
         TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
         TRANS_ID_SET_PARENT_WINDOW,
@@ -409,6 +410,7 @@ public:
         const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) override { return WMError::WM_OK; }
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override { return WMError::WM_OK; }
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
