@@ -2103,6 +2103,10 @@ HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayout01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
     window->isIgnoreSafeArea_ = true;
     window->state_ = WindowState::STATE_CREATED;
 
