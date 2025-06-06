@@ -184,6 +184,7 @@ public:
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy(uint32_t reason = 0) override;
     virtual void SetShowWithOptions(bool showWithOptions) override;
+    virtual bool IsShowWithOptions() override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,

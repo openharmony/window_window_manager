@@ -1288,6 +1288,13 @@ public:
     virtual void SetShowWithOptions(bool showWithOptions) {}
 
     /**
+     * @brief Get showWithOptions value.
+     *
+     * @return True means the window is shown with options, false means the opposite.
+     */
+    virtual bool IsShowWithOptions() { return false; }
+
+    /**
      * @brief Show window
      *
      * @param reason Reason for window state change.
