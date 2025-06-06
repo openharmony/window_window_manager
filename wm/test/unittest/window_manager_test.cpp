@@ -261,6 +261,19 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent01
+ * @tc.desc: Check NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto& windowManager = WindowManager::GetInstance();
+    WMError ret = windowManager.NotifyScreenshotEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: RegisterCameraFloatWindowChangedListener01
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
@@ -1970,8 +1983,8 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
     // check nullpter
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterRectChangedListener(nullptr));
 
-    sptr<TestWindowDisplayIdChangeListener> listener1 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
-    sptr<TestWindowDisplayIdChangeListener> listener2 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
+    sptr<TestWindowRectChangedListener> listener1 = sptr<TestWindowRectChangedListener>::MakeSptr();
+    sptr<TestWindowRectChangedListener> listener2 = sptr<TestWindowRectChangedListener>::MakeSptr();
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();

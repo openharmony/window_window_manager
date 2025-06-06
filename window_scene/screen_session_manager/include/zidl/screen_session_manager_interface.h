@@ -80,7 +80,7 @@ public:
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
-        bool isUseDma = false, bool isFullScreenCapture = false) { return nullptr; }
+        bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
         DmErrorCode* errorCode = nullptr)
     {
@@ -268,7 +268,7 @@ public:
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) {}
+        ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) {}
     virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}

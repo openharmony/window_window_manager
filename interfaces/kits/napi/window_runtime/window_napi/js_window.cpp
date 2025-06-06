@@ -1062,6 +1062,13 @@ napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
 }
 
+napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
+}
+
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -3631,9 +3638,12 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
                     "OnSetPreferredOrientation failed"));
             return;
         }
+        if (requestedOrientation == Orientation::INVALID) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                    "Invalid param"));
+            return;
+        }
         weakWindow->SetRequestedOrientation(requestedOrientation);
-        weakWindow->NotifyPreferredOrientationChange(requestedOrientation);
-        weakWindow->SetPreferredRequestedOrientation(requestedOrientation);
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
@@ -3816,10 +3826,11 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
+    auto retErr = windowToken_->SetBackgroundColor(color);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, color=%{public}s, retErr=%{public}d",
+        windowToken_->GetWindowId(), color.c_str(), static_cast<int32_t>(retErr));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retErr);
     if (ret == WmErrorCode::WM_OK) {
-        WLOGFI("Window [%{public}u, %{public}s] end",
-               windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         return NapiGetUndefined(env);
     } else {
         return NapiThrowError(env, ret);
@@ -6131,10 +6142,19 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
+    shadowsInfo->radius_ = result;
+    shadowsInfo->hasRadiusValue_ = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
         return NapiThrowError(env, ret);
+    }
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+        return NapiThrowError(env, syncShadowsRet);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -6783,7 +6803,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         }
-        if (!windowToken_->IsPcWindow()) {
+        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
@@ -7688,6 +7708,23 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isEnabled %{public}u set end", windowToken_->GetWindowId(), isEnabled);
     return CreateJsValue(env, isEnabled);
+}
+
+napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    bool isImmersiveLayout = false;
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsImmersiveLayout(isImmersiveLayout));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isImmersiveLayout %{public}u end",
+        windowToken_->GetWindowId(), isImmersiveLayout);
+    return CreateJsValue(env, isImmersiveLayout);
 }
 
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
@@ -8685,6 +8722,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setFollowParentWindowLayoutEnabled", moduleName,
         JsWindow::SetFollowParentWindowLayoutEnabled);
     BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
+    BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
 }
 }  // namespace Rosen
 }  // namespace OHOS

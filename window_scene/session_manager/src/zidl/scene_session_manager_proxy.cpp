@@ -544,6 +544,37 @@ WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t persist
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write screenshot event type failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WSError SceneSessionManagerProxy::UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
 {
     MessageParcel data;
@@ -3057,7 +3088,7 @@ WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, b
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SetImageForRecent(int imgResourceId, ImageFit imageFit, int persistentId)
+WMError SceneSessionManagerProxy::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3066,7 +3097,7 @@ WMError SceneSessionManagerProxy::SetImageForRecent(int imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(imgResourceId)) {
+    if (!data.WriteUint32(imgResourceId)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Write imgResourceId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -3091,48 +3122,6 @@ WMError SceneSessionManagerProxy::SetImageForRecent(int imgResourceId, ImageFit 
     uint32_t ret = 0;
     if (!reply.ReadUint32(ret)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
-WMError SceneSessionManagerProxy::GetHostWindowCompatiblityInfo(const sptr<IRemoteObject>& token,
-    const sptr<CompatibleModeProperty>& property)
-{
-    if (property == nullptr || token == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "input is nullptr");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write interfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteRemoteObject(token)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write token failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_HOST_WINDOW_COMPAT_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<CompatibleModeProperty> compatInfo = reply.ReadParcelable<CompatibleModeProperty>();
-    if (!compatInfo) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Read compatibility info failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    property->CopyFrom(compatInfo);
-    uint32_t ret = 0;
-    if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);

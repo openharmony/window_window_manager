@@ -76,10 +76,10 @@ namespace {
  */
 HWTEST_F(MultiScreenPowerChangeManagerTest, InitMultiScreenPowerChangeMap, TestSize.Level1)
 {
-    multiSPCM_.HandleScreenPowerChangeMap_.clear();
-    ASSERT_TRUE(multiSPCM_.HandleScreenPowerChangeMap_.empty());
+    multiSPCM_.handleScreenPowerChangeMap_.clear();
+    ASSERT_TRUE(multiSPCM_.handleScreenPowerChangeMap_.empty());
     multiSPCM_.InitMultiScreenPowerChangeMap();
-    ASSERT_FALSE(multiSPCM_.HandleScreenPowerChangeMap_.empty());
+    ASSERT_FALSE(multiSPCM_.handleScreenPowerChangeMap_.empty());
     multiSPCM_.InitMultiScreenPowerChangeMap();
 }
 
@@ -195,9 +195,9 @@ HWTEST_F(MultiScreenPowerChangeManagerTest, HandleScreenOffChange, TestSize.Leve
  */
 HWTEST_F(MultiScreenPowerChangeManagerTest, InitRecoveryMultiScreenModeChangeMap, TestSize.Level1)
 {
-    ASSERT_FALSE(multiSPCM_.HandleScreenPowerChangeMap_.empty());
-    multiSPCM_.HandleScreenPowerChangeMap_.clear();
-    ASSERT_TRUE(multiSPCM_.HandleScreenPowerChangeMap_.empty());
+    ASSERT_FALSE(multiSPCM_.handleScreenPowerChangeMap_.empty());
+    multiSPCM_.handleScreenPowerChangeMap_.clear();
+    ASSERT_TRUE(multiSPCM_.handleScreenPowerChangeMap_.empty());
     multiSPCM_.InitRecoveryMultiScreenModeChangeMap();
 }
 
@@ -208,8 +208,8 @@ HWTEST_F(MultiScreenPowerChangeManagerTest, InitRecoveryMultiScreenModeChangeMap
  */
 HWTEST_F(MultiScreenPowerChangeManagerTest, InitMultiScreenModeOffChangeMap, TestSize.Level1)
 {
-    multiSPCM_.HandleScreenPowerChangeMap_.clear();
-    ASSERT_TRUE(multiSPCM_.HandleScreenPowerChangeMap_.empty());
+    multiSPCM_.handleScreenPowerChangeMap_.clear();
+    ASSERT_TRUE(multiSPCM_.handleScreenPowerChangeMap_.empty());
     multiSPCM_.InitMultiScreenModeOffChangeMap();
 }
 

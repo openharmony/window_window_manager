@@ -25,6 +25,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_info.h"
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -34,6 +35,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_window_manager_agent_lite.h"
 #include "session_manager/include/session_manager_agent_controller.h"
+#include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2223,6 +2225,51 @@ HWTEST_F(SceneSessionManagerTest12, RemoveSkipSelfWhenShowOnVirtualScreenList, F
 }
 
 /**
+ * @tc.name: GetRouterStackInfo01
+ * @tc.desc: test function : GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo01, Function | SmallTest | Level1)
+{
+    class TestListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& info) override {}
+    };
+
+    int32_t persistentId = -1;
+    auto listener = sptr<TestListener>::MakeSptr();
+
+    auto result = ssm_->GetRouterStackInfo(persistentId, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    result = ssm_->GetRouterStackInfo(persistentId, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo02
+ * @tc.desc: test function : GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo02, Function | SmallTest | Level1)
+{
+    class TestListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& info) override {}
+    };
+
+    SessionInfo info;
+    info.bundleName_ = "GetRouterStackInfo02";
+    info.abilityName_ = "GetRouterStackInfo02";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    auto listener = sptr<TestListener>::MakeSptr();
+
+    auto result = ssm_->GetRouterStackInfo(sceneSession->GetPersistentId(), listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: GetCallingWindowInfo1
  * @tc.desc: test function : GetCallingWindowInfo
  * @tc.type: FUNC
@@ -2476,8 +2523,96 @@ HWTEST_F(SceneSessionManagerTest12, UpdateRecentMainSessionInfos, Function | Sma
 HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList, Function | SmallTest | Level2)
 {
     std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: UpdateKioskAppList_invalid
+ * @tc.desc: test function : UpdateKioskAppList_invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateKioskAppList_invalid, Function | SmallTest | Level2)
+{
+    const std::vector<std::string> kioskAppList = {};
+    MockAccesstokenKit::MockIsSystemApp(false);
+    auto result = ssm_->UpdateKioskAppList(kioskAppList);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    result = ssm_->UpdateKioskAppList(kioskAppList);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+}
+
+/**
+ * @tc.name: UpdateKioskAppList_valid
+ * @tc.desc: test function : UpdateKioskAppList_valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateKioskAppList_valid, Function | SmallTest | Level2)
+{
+    const std::vector<std::string> kioskAppList = { "demo" };
+    MockAccesstokenKit::MockIsSystemApp(true);
+    auto result = ssm_->UpdateKioskAppList(kioskAppList);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    result = ssm_->UpdateKioskAppList(kioskAppList);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    UpdateKioskAppListFunc func = std::move(ssm_->updateKioskAppListFunc_);
+    ssm_->updateKioskAppListFunc_ = nullptr;
+    result = ssm_->UpdateKioskAppList(kioskAppList);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->updateKioskAppListFunc_ = std::move(func);
+}
+
+/**
+ * @tc.name: EnterKioskMode
+ * @tc.desc: test function : EnterKioskMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, EnterKioskMode, Function | SmallTest | Level2)
+{
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    MockAccesstokenKit::MockIsSystemApp(false);
+    auto result = ssm_->EnterKioskMode(token);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    result = ssm_->EnterKioskMode(token);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    KioskModeChangeFunc func = std::move(ssm_->kioskModeChangeFunc_);
+    ssm_->kioskModeChangeFunc_ = nullptr;
+    result = ssm_->EnterKioskMode(token);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->kioskModeChangeFunc_ = std::move(func);
+}
+
+/**
+ * @tc.name: ExitKioskMode
+ * @tc.desc: test function : ExitKioskMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ExitKioskMode, Function | SmallTest | Level2)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    auto result = ssm_->ExitKioskMode();
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    result = ssm_->ExitKioskMode();
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    KioskModeChangeFunc func = std::move(ssm_->kioskModeChangeFunc_);
+    ssm_->kioskModeChangeFunc_ = nullptr;
+    result = ssm_->ExitKioskMode();
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->kioskModeChangeFunc_ = std::move(func);
 }
 } // namespace
 } // namespace Rosen

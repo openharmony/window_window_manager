@@ -1749,7 +1749,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isFullScreenCapture)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGD(WmsLogTag::DMS, "SCB: enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1776,8 +1776,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         return nullptr;
     }
 
-    if (!data.WriteBool(isFullScreenCapture)) {
-        TLOGE(WmsLogTag::DMS, "isFullScreenCapture fail: data write failed");
+    if (!data.WriteBool(isCaptureFullOfScreen)) {
+        TLOGE(WmsLogTag::DMS, "isCaptureFullOfScreen fail: data write failed");
         return nullptr;
     }
 
@@ -2986,7 +2986,7 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
 }
 
 void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3011,6 +3011,10 @@ void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, 
     }
     if (!data.WriteFloat(rotation)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
+        return;
+    }
+    if (!data.WriteBool(isSwitchUser)) {
+        TLOGE(WmsLogTag::DMS, "Write isSwitchUser failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
@@ -4066,7 +4070,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isFullScreenCapture_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
+        !data.WriteBool(captureOption.isCaptureFullOfScreen_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }

@@ -17,6 +17,7 @@
 
 #include <ability_context_impl.h>
 #include <context_impl.h>
+#include <float_wrapper.h>
 #include <int_wrapper.h>
 #include <transaction/rs_transaction.h>
 #include <want_params_wrapper.h>
@@ -32,6 +33,7 @@
 #include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "ui_extension/provider_data_handler.h"
 #include "window_extension_session_impl.h"
 #include "wm_common.h"
 
@@ -39,6 +41,16 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Accessibility;
 using namespace std;
+
+namespace {
+    std::string logMsg;
+    void WindowExtensionSessionImplLogCallback(const LogType type, const LogLevel level, const unsigned int domain,
+        const char* tag, const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
@@ -170,7 +182,7 @@ HWTEST_F(WindowExtensionSessionImplTest, Destroy01, TestSize.Level0)
     window_->hostSession_ = session;
     ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
-    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     ASSERT_EQ(WMError::WM_OK, window_->Destroy(false, false));
 }
 
@@ -544,7 +556,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterHostWindowRectChangeListener, T
     window->dataHandler_ = nullptr;
     sptr<IWindowRectChangeListener> listener = nullptr;
 
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->RegisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->RegisterHostWindowRectChangeListener(listener));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterHostWindowRectChangeListener(listener));
     listener = sptr<MockWindowRectChangeListener>::MakeSptr();
@@ -576,7 +588,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterHostWindowRectChangeListener,
     ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
     EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
     window->rectChangeUIExtListenerIds_.clear();
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->UnregisterHostWindowRectChangeListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->UnregisterHostWindowRectChangeListener(listener));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     EXPECT_EQ(WMError::WM_OK, window->UnregisterHostWindowRectChangeListener(listener));
 }
@@ -935,6 +947,21 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyKeyEvent05
+ * @tc.desc: NotifyKeyEvent05 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent05, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    bool consumed = false;
+    bool notifyInputMethod = false;
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+}
+
+/**
  * @tc.name: ArkUIFrameworkSupport01
  * @tc.desc: ArkUIFrameworkSupport01 Test, context_ is nullptr
  * @tc.type: FUNC
@@ -1199,6 +1226,28 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig3, TestSize.
     SessionViewportConfig config;
     window_->handler_ = nullptr;
     ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateSessionViewportConfig4
+ * @tc.desc: displayId is changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateSessionViewportConfig4, TestSize.Level1)
+{
+    window_->property_->SetDisplayId(0);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+
+    SessionViewportConfig config;
+    window_->lastDensity_ = 1.0f;
+    window_->lastOrientation_ = 0;
+    config.density_ = 1.0f;
+    config.orientation_ = 0;
+    config.displayId_ = 999;
+    ASSERT_EQ(window_->UpdateSessionViewportConfig(config), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(999, window_->GetDisplayId());
 }
 
 /**
@@ -1729,6 +1778,25 @@ HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio04, TestSize.Level1
 }
 
 /**
+ * @tc.name: GetVirtualPixelRatio_compat
+ * @tc.desc: GetVirtualPixelRatio_compat test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetVirtualPixelRatio_compat, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetVirtualPixelRatio_compat");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    auto value = window->GetVirtualPixelRatio(nullptr);
+    EXPECT_NEAR(value, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows Test
  * @tc.type: FUNC
@@ -2024,29 +2092,43 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ConsumePointerEvent02
+ * @tc.desc: ConsumePointerEvent02 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    window_->ConsumePointerEvent(pointerEvent);
+}
+/**
  * @tc.name: NotifyPointerEvent
  * @tc.desc: NotifyPointerEvent Test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(WindowExtensionSessionImplLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo;
+    window->uiContent_ = nullptr;
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
     ASSERT_NE(0, window->GetPersistentId());
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     EXPECT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    window->NotifyPointerEvent(pointerEvent);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->NotifyPointerEvent(pointerEvent);
 
     bool isHostWindowDelayRaiseEnabled = true;
@@ -2055,11 +2137,10 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
     window->NotifyPointerEvent(pointerEvent);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->NotifyPointerEvent(pointerEvent);
-    isHostWindowDelayRaiseEnabled = false;
-    window->property_->SetWindowDelayRaiseEnabled(isHostWindowDelayRaiseEnabled);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->NotifyPointerEvent(pointerEvent);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    EXPECT_TRUE(logMsg.find("uiContent is null") != std::string::npos);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->NotifyPointerEvent(pointerEvent);
 
     window->inputEventConsumer_ = nullptr;
@@ -2073,36 +2154,33 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
  */
 HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayRaise, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(WindowExtensionSessionImplLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ProcessPointerEventWithHostWindowDelayRaise");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     bool isHitTargetDraggable = false;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
 
+    isHitTargetDraggable = true;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("No need to notify") != std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    isHitTargetDraggable = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("Notify host window to raise") != std::string::npos);
 }
 
 /**
@@ -2142,6 +2220,20 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, TestSize.Level1)
     ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
     usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: PreNotifyKeyEvent02
+ * @tc.desc: PreNotifyKeyEvent02 Test branch: uiExtensionUsage_ == UIExtensionUsage::PREVIEW_EMBEDDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent02, TestSize.Level1)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(nullptr, keyEvent);
+    ASSERT_NE(nullptr, window_);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    ASSERT_FALSE(window_->PreNotifyKeyEvent(keyEvent));
 }
 
 /**
@@ -2220,6 +2312,10 @@ HWTEST_F(WindowExtensionSessionImplTest, CheckHideNonSecureWindowsPermission, Te
     window_->modalUIExtensionMayBeCovered_ = true;
     EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
     EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::PREVIEW_EMBEDDED;
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(true), WMError::WM_OK);
+    EXPECT_EQ(window_->CheckHideNonSecureWindowsPermission(false), WMError::WM_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -2242,6 +2338,12 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyModalUIExtensionMayBeCovered, Tes
     ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
 
     window_->property_->uiExtensionUsage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
+    window_->NotifyModalUIExtensionMayBeCovered(false);
+    ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
+    ASSERT_TRUE(window_->modalUIExtensionSelfLoadContent_);
+
+    window_->property_->uiExtensionUsage_ = UIExtensionUsage::PREVIEW_EMBEDDED;
     window_->extensionWindowFlags_.hideNonSecureWindowsFlag = false;
     window_->NotifyModalUIExtensionMayBeCovered(false);
     ASSERT_TRUE(window_->modalUIExtensionMayBeCovered_);
@@ -2309,6 +2411,161 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, TestSize
     window_->windowExtensionSessionSet_.insert(window_);
     window_->UpdateConfigurationSyncForAll(configuration);
     window_->windowExtensionSessionSet_.erase(window_);
+}
+
+/**
+ * @tc.name: SetCompatInfo
+ * @tc.desc: SetCompatInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, SetCompatInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCompatInfo");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    AAFwk::WantParams configParam;
+    EXPECT_EQ(WMError::WM_DO_NOTHING, window->SetCompatInfo(configParam));
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(WMError::WM_OK, window->SetCompatInfo(configParam));
+
+    window->property_->SetCompatibleModeProperty(nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    configParam.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(true)));
+    float compatScaleX = 0.5f;
+    float compatScaleY = 0.55f;
+    configParam.SetParam(Extension::COMPAT_SCALE_X_FIELD, AAFwk::Float::Box(compatScaleX));
+    configParam.SetParam(Extension::COMPAT_SCALE_Y_FIELD, AAFwk::Float::Box(compatScaleY));
+    EXPECT_EQ(WMError::WM_OK, window->SetCompatInfo(configParam));
+    EXPECT_NEAR(window->compatScaleX_, compatScaleX, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, compatScaleY, 0.00001f);
+}
+
+/**
+ * @tc.name: OnHostWindowCompatInfoChange
+ * @tc.desc: OnHostWindowCompatInfoChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowCompatInfoChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnHostWindowCompatInfoChange");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, false);
+    auto res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_OK, res);
+
+    window->property_->SetCompatibleModeProperty(nullptr);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    want.SetParam(Extension::COMPAT_IS_SIMULATION_SCALE_FIELD, true);
+    float compatScaleX = 0.5f;
+    float compatScaleY = 0.55f;
+    want.SetParam(Extension::COMPAT_SCALE_X_FIELD, compatScaleX);
+    want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, compatScaleY);
+    res = window->OnHostWindowCompatInfoChange(std::move(want), reply);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_NEAR(window->compatScaleX_, compatScaleX, 0.00001f);
+    EXPECT_NEAR(window->compatScaleY_, compatScaleY, 0.00001f);
+}
+
+/**
+ * @tc.name: GetSystemViewportConfig
+ * @tc.desc: GetSystemViewportConfig Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetSystemViewportConfig, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSystemViewportConfig");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetDisplayId(0);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(display, nullptr);
+    ASSERT_NE(display->GetDisplayInfo(), nullptr);
+    auto vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    SessionViewportConfig config;
+    EXPECT_EQ(WMError::WM_OK, window->GetSystemViewportConfig(config));
+    EXPECT_NEAR(config.density_, vpr, 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(WMError::WM_OK, window->GetSystemViewportConfig(config));
+    EXPECT_NEAR(config.density_, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: UpdateExtensionDensity
+ * @tc.desc: UpdateExtensionDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetDisplayId(0);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(display, nullptr);
+    ASSERT_NE(display->GetDisplayInfo(), nullptr);
+    auto vpr = display->GetDisplayInfo()->GetVirtualPixelRatio();
+    SessionViewportConfig config;
+    config.displayId_ = window->property_->GetDisplayId();
+    config.isDensityFollowHost_ = true;
+    config.density_ = 2.0f;
+    window->UpdateExtensionDensity(config);
+    EXPECT_TRUE(window->isDensityFollowHost_);
+    if (window->hostDensityValue_ != std::nullopt) {
+        EXPECT_NEAR(config.density_, window->hostDensityValue_->load(), 0.00001f);
+    }
+    config.isDensityFollowHost_ = false;
+    window->UpdateExtensionDensity(config);
+    EXPECT_FALSE(window->isDensityFollowHost_);
+    EXPECT_NEAR(config.density_, vpr, 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->UpdateExtensionDensity(config);
+    EXPECT_FALSE(window->isDensityFollowHost_);
+    EXPECT_NEAR(config.density_, COMPACT_SIMULATION_SCALE_DPI, 0.00001f);
+}
+
+/**
+ * @tc.name: GetDefaultDensity
+ * @tc.desc: GetDefaultDensity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetDefaultDensity, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDefaultDensity");
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    sptr<DisplayInfo> displayInfo = nullptr;
+    EXPECT_NEAR(1.0f, window->GetDefaultDensity(displayInfo), 0.00001f);
+    auto systemDensity = 2.0;
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(systemDensity);
+    EXPECT_NEAR(systemDensity, window->GetDefaultDensity(displayInfo), 0.00001f);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_NEAR(COMPACT_SIMULATION_SCALE_DPI, window->GetDefaultDensity(displayInfo), 0.00001f);
 }
 
 /**
@@ -2486,13 +2743,9 @@ HWTEST_F(WindowExtensionSessionImplTest, SendExtensionMessageToHost, TestSize.Le
     AAFwk::Want data;
 
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SendExtensionMessageToHost(code, data));
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->SendExtensionMessageToHost(code, data));
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE);
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
-    EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
-    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->SendExtensionMessageToHost(code, data));
 }
 
@@ -2528,31 +2781,11 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
-}
-
-/**
- * @tc.name: GetHostWindowCompatiblityInfo
- * @tc.desc: GetHostWindowCompatiblityInfo Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, window_);
-    auto ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-
-    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
-    window_->abilityToken_ = iRemoteObject;
-    WindowAdapterMocker mocker;
-    EXPECT_CALL(mocker.Mock(), GetHostWindowCompatiblityInfo(_, _))
-        .WillOnce(Return(WMError::WM_DO_NOTHING))
-        .WillOnce(Return(WMError::WM_OK));
-
-    ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-    ret = window_->GetHostWindowCompatiblityInfo();
-    EXPECT_EQ(WMError::WM_OK, ret);
+    window->rectChangeUIExtListenerIds_.clear();
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 
 /**

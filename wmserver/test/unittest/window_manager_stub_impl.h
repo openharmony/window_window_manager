@@ -69,6 +69,10 @@ WMError SetWindowLayoutMode(WindowLayoutMode mode)
 {
     return WMError::WM_OK;
 };
+WMError NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    return WMError::WM_OK;
+};
 WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask = false)
 {

@@ -90,7 +90,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_LOCK_STATE_CHANGE_CB,
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
-    KEYBOARD_VIEW_MODE_CHANGE_CB,
+    KEYBOARD_EFFECT_OPTION_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
@@ -105,6 +105,7 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_SHADOWS_CB,
     SET_SUB_WINDOW_SOURCE_CB,
     ANIMATE_TO_CB,
+    PENDING_SESSION_TO_BACKGROUND_CB,
 };
 
 class SceneSession;
@@ -131,6 +132,7 @@ private:
     void ProcessTerminateSessionRegisterTotal();
     void ProcessSessionExceptionRegister();
     void ProcessPendingSessionToForegroundRegister();
+    void ProcessPendingSessionToBackgroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
     void ProcessSessionUpdateFollowScreenChange();
@@ -147,6 +149,7 @@ private:
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
+    void PendingSessionToBackground(const SessionInfo& info, const BackgroundParams& params);
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
 
@@ -380,7 +383,7 @@ private:
     void ProcessWindowMovingRegister();
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
-    void ProcessKeyboardViewModeChangeRegister();
+    void ProcessKeyboardEffectOptionChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessWindowAnchorInfoChangeRegister();
     void ProcessFollowParentRectRegister();
@@ -462,8 +465,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
-    void OnKeyboardViewModeChange(KeyboardViewMode mode);
+    void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption);
+    void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyWindowAnchorInfoChange(const WindowAnchorInfo& windowAnchorInfo);
     void NotifyFollowParentRect(bool isFollow);

@@ -145,6 +145,10 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent, TestSize.Level1)
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(res, WSError::WS_OK);
 
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
     windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(res, WSError::WS_OK);

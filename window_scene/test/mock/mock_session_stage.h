@@ -45,6 +45,7 @@ public:
     MOCK_METHOD2(UpdateAvoidArea, WSError(const sptr<AvoidArea>& avoidArea, AvoidAreaType type));
     MOCK_METHOD1(DumpSessionElementInfo, void(const std::vector<std::string>& params));
     MOCK_METHOD0(NotifyScreenshot, void(void));
+    MOCK_METHOD1(NotifyScreenshotAppEvent, WSError(ScreenshotEventType type));
     MOCK_METHOD0(NotifyTouchOutside, WSError(void));
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD0(NotifyNonInteractiveStatus, void(void));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
+    MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
 };
 } // namespace Rosen
 } // namespace OHOS

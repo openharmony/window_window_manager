@@ -290,6 +290,7 @@ HWTEST_F(ScreenSessionManagerTest, ScbStatusRecoveryWhenSwitchUser, Function | S
 HWTEST_F(ScreenSessionManagerTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_.clear();
     DisplayId displayId = 0;
     DMRect displayArea = { 0, 0, 1, 1 };
     ScreenId screenId = 0;
@@ -297,6 +298,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenAreaOfDisplayArea, Function | SmallT
     sptr<ScreenSession> screenSession = nullptr;
     auto ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
     ScreenProperty property = ScreenProperty();
     screenSession = new (std::nothrow) ScreenSession(0, property, 0);
     ASSERT_NE(screenSession, nullptr);
@@ -304,6 +306,176 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenAreaOfDisplayArea, Function | SmallT
     ssm_->screenSessionMap_.insert(std::make_pair(0, screenSession));
     ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
     EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+
+    property.SetOffsetX(0);
+    property.SetOffsetY(0);
+    property.SetCreaseRect({100, 100, 100, 100});
+    property.SetBounds({{0, 0, 100, 100}, 0, 0});
+    property.SetPhyBounds({{0, 100, 0, 100}, 0, 0});
+    displayArea = { 0, 0, 0, 0 };
+    screenSession->screenId_ = 0;
+    ret = ssm_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: CalculateRotatedDisplay1
+ * @tc.desc: CalculateRotatedDisplay1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTest | Level3)
+{
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+
+    ASSERT_NE(ssm_, nullptr);
+    DMRect screenRegion = {0, 0, 100, 200};
+    DMRect displayRegion = {0, 0, 200, 100};
+    DMRect displayArea = {20, 10, 30, 40};
+
+    Rotation rotation = Rotation::ROTATION_0;
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    DMRect expectedRect = {0, 0, 200, 100};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {20, 10, 30, 40};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_90;
+    displayRegion = {0, 0, 200, 100};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {10, 150, 40, 30};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_180;
+    displayRegion = {0, 0, 100, 200};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {50, 150, 30, 40};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_270;
+    displayRegion = {0, 0, 200, 100};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {50, 20, 40, 30};
+    EXPECT_EQ(displayArea, expectedRect);
+}
+
+/**
+ * @tc.name: CalculateRotatedDisplay2
+ * @tc.desc: CalculateRotatedDisplay2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+
+    ASSERT_NE(ssm_, nullptr);
+    DMRect screenRegion = {0, 0, 100, 200};
+    DMRect displayRegion = {0, 0, 200, 100};
+    DMRect displayArea = {20, 10, 30, 40};
+
+    Rotation rotation = Rotation::ROTATION_90;
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    DMRect expectedRect = {0, 0, 200, 100};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {20, 10, 30, 40};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_180;
+    displayRegion = {0, 0, 200, 100};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {10, 150, 40, 30};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_270;
+    displayRegion = {0, 0, 100, 200};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {50, 150, 30, 40};
+    EXPECT_EQ(displayArea, expectedRect);
+
+    rotation = Rotation::ROTATION_0;
+    displayRegion = {0, 0, 200, 100};
+    displayArea = {20, 10, 30, 40};
+    ssm_->CalculateRotatedDisplay(rotation, screenRegion, displayRegion, displayArea);
+    expectedRect = {0, 0, 100, 200};
+    EXPECT_EQ(displayRegion, expectedRect);
+    expectedRect = {50, 20, 40, 30};
+    EXPECT_EQ(displayArea, expectedRect);
+}
+
+/**
+ * @tc.name: CalculateScreenArea
+ * @tc.desc: CalculateScreenArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateScreenArea, Function | SmallTest | Level3)
+{
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        ASSERT_NE(ssm_, nullptr);
+        DMRect displayRegion = DMRect::NONE();
+        DMRect displayArea = {10, 20, 30, 40};
+        DMRect screenRegion = DMRect::NONE();
+        DMRect screenArea = DMRect::NONE();
+        ssm_->CalculateScreenArea(displayRegion, displayArea, screenRegion, screenArea);
+        EXPECT_EQ(screenArea, displayArea);
+        return;
+    }
+
+    ASSERT_NE(ssm_, nullptr);
+    DMRect displayRegion = {0, 0, 50, 100};
+    DMRect displayArea = {10, 20, 30, 40};
+    DMRect screenRegion = {0, 0, 50, 100};
+    DMRect screenArea = DMRect::NONE();
+    ssm_->CalculateScreenArea(displayRegion, displayArea, screenRegion, screenArea);
+    EXPECT_EQ(screenArea, displayArea);
+
+    screenRegion = {0, 0, 100, 200};
+    ssm_->CalculateScreenArea(displayRegion, displayArea, screenRegion, screenArea);
+    DMRect expectedRect = {20, 40, 60, 80};
+    EXPECT_EQ(screenArea, expectedRect);
+}
+
+/**
+ * @tc.name: ConvertIntToRotation
+ * @tc.desc: ConvertIntToRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertIntToRotation, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t rotation = 0;
+    Rotation targetRotation = Rotation::ROTATION_0;
+    targetRotation = ssm_->ConvertIntToRotation(rotation);
+    EXPECT_EQ(targetRotation, Rotation::ROTATION_0);
+    rotation = 100;
+    targetRotation = ssm_->ConvertIntToRotation(rotation);
+    EXPECT_EQ(targetRotation, Rotation::ROTATION_0);
+    rotation = 90;
+    targetRotation = ssm_->ConvertIntToRotation(rotation);
+    EXPECT_EQ(targetRotation, Rotation::ROTATION_90);
+    rotation = 180;
+    targetRotation = ssm_->ConvertIntToRotation(rotation);
+    EXPECT_EQ(targetRotation, Rotation::ROTATION_180);
+    rotation = 270;
+    targetRotation = ssm_->ConvertIntToRotation(rotation);
+    EXPECT_EQ(targetRotation, Rotation::ROTATION_270);
 }
 }
 }

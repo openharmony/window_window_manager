@@ -371,10 +371,14 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
+    WSRect newRect;
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
-            func(rect, isGlobal, needFlush);
+            if (newRect.IsEmpty()) {
+                HookStartMoveRect(newRect, rect);
+            }
+            func(newRect, isGlobal, needFlush);
         }
     }
 }
@@ -482,6 +486,15 @@ WSError MainSession::UpdateFlag(const std::string& flag)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+WMError MainSession::GetRouterStackInfo(std::string& routerStackInfo) const
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return sessionStage_->GetRouterStackInfo(routerStackInfo);
 }
 
 void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionState& state)

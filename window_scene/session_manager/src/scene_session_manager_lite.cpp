@@ -112,6 +112,13 @@ WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteOb
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
+WSError SceneSessionManagerLite::PendingSessionToBackground(const sptr<IRemoteObject>& token,
+    const BackgroundParams& params)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().PendingSessionToBackground(token, params);
+}
+
 WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
     bool shouldBackToCaller)
 {
@@ -340,8 +347,34 @@ WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleN
     return SceneSessionManager::GetInstance().CreateNewInstanceKey(bundleName, instanceKey);
 }
 
+WMError SceneSessionManagerLite::GetRouterStackInfo(
+    int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
+{
+    return SceneSessionManager::GetInstance().GetRouterStackInfo(persistentId, listener);
+}
+
 WMError SceneSessionManagerLite::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
     return SceneSessionManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+}
+
+WMError SceneSessionManagerLite::TransferSessionToTargetScreen(const TransferSessionInfo& info)
+{
+    return SceneSessionManager::GetInstance().NotifyTransferSessionToTargetScreen(info);
+}
+
+WMError SceneSessionManagerLite::UpdateKioskAppList(const std::vector<std::string>& kioskAppList)
+{
+    return SceneSessionManager::GetInstance().UpdateKioskAppList(kioskAppList);
+}
+
+WMError SceneSessionManagerLite::EnterKioskMode(const sptr<IRemoteObject>& token)
+{
+    return SceneSessionManager::GetInstance().EnterKioskMode(token);
+}
+
+WMError SceneSessionManagerLite::ExitKioskMode(const sptr<IRemoteObject>& token)
+{
+    return SceneSessionManager::GetInstance().ExitKioskMode();
 }
 } // namespace OHOS::Rosen

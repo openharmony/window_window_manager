@@ -89,6 +89,7 @@ std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appDialogWindowMap_;
 std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> WindowImpl::screenshotListeners_;
+std::map<uint32_t, std::vector<sptr<IScreenshotAppEventListener>>> WindowImpl::screenshotAppEventListeners_;
 std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> WindowImpl::touchOutsideListeners_;
 std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowImpl::dialogTargetTouchListeners_;
 std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> WindowImpl::lifecycleListeners_;
@@ -292,19 +293,20 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl window is null");
             continue;
         }
-        auto context = window->GetContext();
-        if (context == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
-            continue;
-        }
-        if (ignoreWindowCtxSet.count(context) == 0) {
+        if (ignoreWindowCtxSet.count(window->GetContext()) == 0) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfiguration(configuration);
+        } else {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
         }
     }
 }
@@ -1830,7 +1832,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     return ret;
 }
 
-WMError WindowImpl::ShowKeyboard(KeyboardViewMode mode)
+WMError WindowImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
     return Show();
 }
@@ -2610,6 +2612,20 @@ WMError WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>
     return UnregisterListener(screenshotListeners_[GetWindowId()], listener);
 }
 
+WMError WindowImpl::RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start register", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return RegisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
+WMError WindowImpl::UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u start unregister", GetWindowId());
+    std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+    return UnregisterListener(screenshotAppEventListeners_[GetWindowId()], listener);
+}
+
 WMError WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
     WLOGFD("Start register");
@@ -2734,6 +2750,19 @@ EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> Win
         }
     }
     return screenshotListeners;
+}
+
+template <typename T>
+EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> WindowImpl::GetListeners()
+{
+    std::vector<IScreenshotAppEventListenerSptr> screenshotAppEventListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        for (auto &listener : screenshotAppEventListeners_[GetWindowId()]) {
+            screenshotAppEventListeners.push_back(listener);
+        }
+    }
+    return screenshotAppEventListeners;
 }
 
 template <typename T>
@@ -3522,13 +3551,25 @@ bool WindowImpl::IsFocused() const
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        WLOGFD("notify ace winId:%{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfiguration(configuration);
     }
 }
@@ -3537,17 +3578,25 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subWindow, winId: %{public}u", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
             continue;
         }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
@@ -3555,14 +3604,25 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
 void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
         uiContent_->UpdateConfigurationSyncForAll(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
+            GetWindowId(), GetDisplayId());
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, subWinSize=%{public}u, display=%{public}" PRIu64,
+        GetWindowId(), static_cast<uint32_t>(subWindowMap_.size()), GetDisplayId());
     if (subWindowMap_.count(GetWindowId()) == 0) {
-        TLOGI(WmsLogTag::WMS_IMMS, "no subWindow, winId: %{public}d", GetWindowId());
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "impl sub window is null");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+            subWindow->GetWindowId(), subWindow->GetDisplayId());
         subWindow->UpdateConfigurationSync(configuration);
     }
 }
@@ -3570,8 +3630,11 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     std::shared_lock<std::shared_mutex> lock(windowMapMutex_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl map size: %{public}u", static_cast<uint32_t>(windowMap_.size()));
     for (const auto& winPair : windowMap_) {
         if (auto window = winPair.second.second) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "impl win=%{public}u, display=%{public}" PRIu64,
+                window->GetWindowId(), window->GetDisplayId());
             window->UpdateConfigurationSync(configuration);
         }
     }
@@ -3854,6 +3917,17 @@ void WindowImpl::NotifyScreenshot()
             screenshotListener->OnScreenshot();
         }
     }
+}
+
+WMError WindowImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    auto screenshotAppEventListeners = GetListeners<IScreenshotAppEventListener>();
+    for (auto& screenshotAppEventListener : screenshotAppEventListeners) {
+        if (screenshotAppEventListener != nullptr) {
+            screenshotAppEventListener->OnScreenshotAppEvent(type);
+        }
+    }
+    return WMError::WM_OK;
 }
 
 void WindowImpl::NotifyTouchOutside()
