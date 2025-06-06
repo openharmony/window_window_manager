@@ -17,6 +17,7 @@
 #include <parameter.h>
 #include <parameters.h>
 
+#include "display_manager_agent_default.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
 #include "fold_screen_state_internel.h"
@@ -241,6 +242,92 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | Small
     int32_t rotation = 0;
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     ASSERT_NE(cutoutInfo, nullptr);
+}
+
+
+/**
+ * @tc.name: DestroyExtendVirtualScreen001
+ * @tc.desc: DestroyExtendVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DestroyExtendVirtualScreen001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(virtualScreenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::VIRTUAL);
+    ssm_->DestroyExtendVirtualScreen();
+    screenSession->SetIsExtendVirtual(true);
+    ssm_->DestroyExtendVirtualScreen();
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: CreateExtendVirtualScreen001
+ * @tc.desc: CreateExtendVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateExtendVirtualScreen001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    sptr<ScreenSession> virtualScreenSession = ssm_->GetScreenSession(virtualScreenId);
+    virtualScreenSession->SetScreenType(ScreenType::REAL);
+    ssm_->CreateExtendVirtualScreen(virtualScreenSession->GetRSScreenId());
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: IsPhysicalExtendScreenInUse001
+ * @tc.desc: CreateExtendVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsPhysicalExtendScreenInUse001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    sptr<ScreenSession> virtualScreenSession = ssm_->GetScreenSession(virtualScreenId);
+    ASSERT_NE(virtualScreenSession, nullptr);
+
+    virtualScreenSession->SetScreenType(ScreenType::VIRTUAL);
+    DMError ret = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(), 100);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+
+    VirtualScreenOption physicalOption;
+    physicalOption.name_ = "createPhysicalOption";
+    auto physicalScreenId = ssm_->CreateVirtualScreen(physicalOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> physicalScreenSession = ssm_->GetScreenSession(physicalScreenId);
+    ASSERT_NE(physicalScreenSession, nullptr);
+
+    physicalScreenSession->SetScreenType(ScreenType::REAL);
+    physicalScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    DMError ret1 = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
+        physicalScreenSession->GetRSScreenId());
+    EXPECT_EQ(ret1, DMError::DM_OK);
+
+    physicalScreenSession->SetScreenType(ScreenType::VIRTUAL);
+    DMError ret2 = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
+        physicalScreenSession->GetRSScreenId());
+    EXPECT_EQ(ret2, DMError::DM_ERROR_UNKNOWN);
+
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+    ssm_->DestroyVirtualScreen(physicalScreenId);
 }
 
 /**
