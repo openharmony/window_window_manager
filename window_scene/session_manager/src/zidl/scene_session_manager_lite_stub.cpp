@@ -153,6 +153,10 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleCreateNewInstanceKey(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REMOVE_INSTANCE_KEY):
             return HandleRemoveInstanceKey(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN):
+            return HandleTransferSessionToTargetScreen(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND):
+            return HandlePendingSessionToBackground(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -209,6 +213,30 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
     }
     WSError errCode = PendingSessionToForeground(token);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandlePendingSessionToBackground(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    BackgroundParams params;
+    if (!data.ReadBool(params.shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+    } else {
+        params.wantParams = *wantParams;
+    }
+    WSError errCode = PendingSessionToBackground(token, params);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -1195,6 +1223,29 @@ int SceneSessionManagerLiteStub::HandleRemoveInstanceKey(MessageParcel& data, Me
         TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleTransferSessionToTargetScreen(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TransferSessionInfo info;
+    if (!data.ReadInt32(info.persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(info.toScreenId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read toScreenId failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+    } else {
+        info.wantParams = *wantParams;
+    }
+    WMError ret = TransferSessionToTargetScreen(info);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
