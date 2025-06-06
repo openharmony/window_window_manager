@@ -340,12 +340,12 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
 void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, const sptr<ScreenSession>& screenSession)
 {
     if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, ScreenSession is null", GetPersistentId());
         return;
     }
     auto surfaceNode = GetSurfaceNodeForMoveDrag();
     if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
         return;
     }
     DisplayId displayId = screenSession->GetDisplayId();
