@@ -1606,15 +1606,15 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     return ParseZLevelParam(env, jsObject, windowOption);
 }
 
-WmErrorCode ParseShowWithOptions(napi_env env, napi_value showWithOptions, bool& focusOnShow)
+WmErrorCode ParseShowWithOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow)
 {
     napi_value focusOnShowValue = nullptr;
     napi_get_named_property(env, showWindowOptions, "focusOnShow", &focusOnShowValue);
-    if (GetType(env, focusOnShowValue) == napi_undefined) {
-        focusOnShow = true;
-        return WmErrorCode::WM_OK;
-    }
     if (focusOnShowValue != nullptr) {
+        if (GetType(env, focusOnShowValue) == napi_undefined) {
+            focusOnShow = true;
+            return WmErrorCode::WM_OK;
+        }
         if (GetType(env, focusOnShowValue) != napi_boolean || !ConvertFromJsValue(env, focusOnShowValue, focusOnShow)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "failed to convert focusOnShow to boolean");
             return WmErrorCode::WM_ERROR_ILLEGAL_PARAM;

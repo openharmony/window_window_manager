@@ -1289,7 +1289,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_object) ? argv[0] : nullptr);
     bool focusOnShow = true;
     bool isShowWithOptions = false;
-    if (showWithOptions != nullptr) {
+    if (showWindowOptions != nullptr) {
         isShowWithOptions = true;
         WmErrorCode parseRet = ParseShowWindowOptions(env, showWindowOptions, focusOnShow);
         if (parseRet != WmErrorCode::WM_OK) {
@@ -1314,10 +1314,10 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         }
         if (isShowWithOptions && (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
             WindowHelper::IsDialogWindow(weakWindow->GetType()))) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-                TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
-                return;
-            }
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
+            return;
+        }
         weakWindow->SetShowWithOptions(isShowWithOptions);
         WMError ret = weakWindow->Show(0, false, focusOnShow);
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
