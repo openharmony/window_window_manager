@@ -155,6 +155,9 @@ const std::string SCREEN_UNKNOWN = "unknown";
 
 const int32_t SCREEN_SCAN_TYPE = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
 constexpr int32_t SCAN_TYPE_VERTICAL = 1;
+constexpr uint32_t ROTATION_MOD = 4;
+// F state offset
+constexpr uint32_t FULL_STATUS_OFFSET_X = 1136;
 
 #ifdef WM_MULTI_SCREEN_ENABLE
 const ScreenId SCREEN_ID_OUTER_ONLY = 0;
@@ -238,6 +241,26 @@ ScreenRotation ScreenSessionManager::ConvertOffsetToCorrectRotation(int32_t phyO
             break;
     }
     return offsetRotation;
+}
+
+Rotation ScreenSessionManager::ConvertIntToRotation(int32_t rotation)
+{
+    Rotation targetRotation = Rotation::ROTATION_0;
+    switch (rotation) {
+        case 90:
+            targetRotation = Rotation::ROTATION_90;
+            break;
+        case 180:
+            targetRotation = Rotation::ROTATION_180;
+            break;
+        case 270:
+            targetRotation = Rotation::ROTATION_270;
+            break;
+        default:
+            targetRotation = Rotation::ROTATION_0;
+            break;
+    }
+    return targetRotation;
 }
 
 void ScreenSessionManager::HandleFoldScreenPowerInit()
@@ -4848,11 +4871,6 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
     for (ScreenId screenId : allMirrorScreenIds) {
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
-#ifdef FOLD_ABILITY_ENABLE
-    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
-    }
-#endif
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
         allMirrorScreenIds, mainScreenRegion, screenGroupId);
     if (makeResult != DMError::DM_OK) {
@@ -4874,6 +4892,13 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
     ScreenId& screenGroupId)
 {
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DMRect mainScreenRegion = DMRect::NONE();
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId);
+    }
+#endif
     return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
 }
 
@@ -4894,6 +4919,11 @@ DMError ScreenSessionManager::MakeMirrorForRecord(ScreenId mainScreenId, std::ve
         SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(mainScreenId)) {
         DMRect mainScreenRect = SuperFoldPolicy::GetInstance().GetRecordRect(mainScreenId);
         return DoMakeMirror(realScreenId, mirrorScreenIds, mainScreenRect, screenGroupId);
+    }
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DMRect mainScreenRegion = DMRect::NONE();
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId);
     }
 #endif
     return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
@@ -9955,6 +9985,19 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
             displayAreaFixed.posY_ += screenRegion.height_ - displayRegion.height_;
         }
         displayRegion.height_ = screenRegion.height_;
+    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && GetFoldDisplayMode() == FoldDisplayMode::FULL) {
+        switch (displayInfo->GetRotation()) {
+        case Rotation::ROTATION_0:
+            displayRegion.posX_ = FULL_STATUS_OFFSET_X;
+            displayAreaFixed.posX_ += FULL_STATUS_OFFSET_X;
+            break;
+        case Rotation::ROTATION_90:
+            displayRegion.posY_ = FULL_STATUS_OFFSET_X;
+            displayAreaFixed.posY_ += FULL_STATUS_OFFSET_X;
+            break;
+        default:
+            break;
+        }
     }
     CalculateRotatedDisplay(displayInfo->GetRotation(), screenRegion, displayRegion, displayAreaFixed);
     CalculateScreenArea(displayRegion, displayAreaFixed, screenRegion, screenArea);
@@ -9966,9 +10009,20 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion,
     DMRect& displayRegion, DMRect& displayArea)
 {
+    std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+    int32_t phyOffset = 0;
+    if (phyOffsets.size() > 1 &&
+        (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || GetFoldStatus() != FoldStatus::FOLDED)) {
+        phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[1]));
+    } else {
+        phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
+    }
+    Rotation phyOffsetRotation = ConvertIntToRotation(phyOffset);
+    uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)) %
+        ROTATION_MOD;
     DMRect displayRegionCopy = displayRegion;
     DMRect displayAreaCopy = displayArea;
-    switch (rotation) {
+    switch (static_cast<Rotation>(correctedRotation)) {
         case Rotation::ROTATION_90:
             displayRegion.width_ = displayRegionCopy.height_;
             displayRegion.height_ = displayRegionCopy.width_;
@@ -10003,6 +10057,10 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
 void ScreenSessionManager::CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea,
     const DMRect& screenRegion, DMRect& screenArea)
 {
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+       screenArea = displayArea;
+       return;
+    }
     if (displayRegion == screenRegion) {
         screenArea = displayArea;
         return;
