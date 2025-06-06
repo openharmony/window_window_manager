@@ -4218,6 +4218,46 @@ int32_t WindowSceneSessionImpl::GetParentMainWindowId(int32_t windowId)
     return mainWindowId;
 }
 
+WMError WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+    WindowType parentWindowType, WindowType& windowType)
+{
+    auto window = WindowSceneSessionImpl::Find(windowName);
+    if (window != nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "WindowName(%{public}s) already exists.", windowName.c_str());
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "parentWindowId:%{public}d, parentWindowType:%{public}d", parentId, parentWindowType);
+    if (parentWindowType == WindowType::WINDOW_TYPE_SCENE_BOARD ||
+        parentWindowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    } else if (WindowHelper::IsUIExtensionWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (WindowHelper::IsSystemSubWindow(parentWindowType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "parent is system sub window, id: %{public}d, type: %{public}d",
+            parentId, parentWindowType);
+        return WMError::WM_ERROR_INVALID_TYPE;
+    } else if (WindowHelper::IsSystemWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
+    } else {
+        auto parentWindow = WindowSceneSessionImpl::GetWindowWithId(parentId);
+        if (parentWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_SUB, "parentWindow is null, windowId:%{public}d", parentId);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (parentWindowType != parentWindow->GetType()) {
+            TLOGE(WmsLogTag::WMS_SUB, "parentWindow does match type");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        if (parentWindow->GetProperty()->GetSubWindowLevel() >= 1 &&
+            !parentWindow->IsPcOrFreeMultiWindowCapabilityEnabled()) {
+            TLOGE(WmsLogTag::WMS_SUB, "device not support");
+            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
     enableDefaultAnimation_= needDefaultAnimation;
