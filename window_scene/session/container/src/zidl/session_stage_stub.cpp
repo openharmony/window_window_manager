@@ -122,6 +122,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateAvoidArea(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT):
             return HandleNotifyScreenshot(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT):
+            return HandleNotifyScreenshotAppEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO):
             return HandleDumpSessionElementInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE):
@@ -478,6 +480,18 @@ int SessionStageStub::HandleNotifyScreenshot(MessageParcel& data, MessageParcel&
 {
     WLOGFD("Notify Screen shot!");
     NotifyScreenshot();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called");
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!data.ReadInt32(screenshotEventType)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenshotEventType failed");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
     return ERR_NONE;
 }
 

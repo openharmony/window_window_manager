@@ -3972,7 +3972,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
     std::ostringstream oss;
     std::string changeType = TransferPropertyChangeTypeToString(screenPropertyChangeType);
@@ -3988,7 +3988,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"", screenId);
         return;
     }
-    UpdateScreenRotationPropertyForRs(screenSession, screenPropertyChangeType, bounds, rotation);
+    UpdateScreenRotationPropertyForRs(screenSession, screenPropertyChangeType, bounds, rotation, isSwitchUser);
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
@@ -4005,7 +4005,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
 }
 
 void ScreenSessionManager::UpdateScreenRotationPropertyForRs(sptr<ScreenSession>& screenSession,
-    ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation)
+    ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation, bool isSwitchUser)
 {
     DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
     if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
@@ -4029,7 +4029,9 @@ void ScreenSessionManager::UpdateScreenRotationPropertyForRs(sptr<ScreenSession>
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
             NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
         }
-        screenSession->UpdateDisplayNodeRotation(rotation);
+        if(!isSwitchUser) {
+            screenSession->UpdateDisplayNodeRotation(rotation);
+        }
         return;
     }
 }
@@ -4481,7 +4483,7 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
 }
 
 ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
-                                                   const sptr<IRemoteObject>& displayManagerAgent)
+                                                   const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity)
 {
     if (!Permission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
         !Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
@@ -4526,6 +4528,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+        screenSession->SetSecurity(isSecurity);
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));

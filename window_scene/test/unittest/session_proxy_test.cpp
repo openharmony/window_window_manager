@@ -1459,6 +1459,44 @@ HWTEST_F(SessionProxyTest, UpdateRotationChangeRegistered, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateScreenshotAppEventRegistered
+ * @tc.desc: UpdateScreenshotAppEventRegistered test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sProxy->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: GetTargetOrientationConfigInfo
  * @tc.desc: GetTargetOrientationConfigInfo test
  * @tc.type: FUNC
@@ -1591,6 +1629,53 @@ HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
     ASSERT_NE(sProxy, nullptr);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate
+ * @tc.desc: StartMovingWithCoordinate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, StartMovingWithCoordinate, TestSize.Level2)
+{
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+ 
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+ 
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+ 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    res = sProxy->StartMovingWithCoordinate(-1, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, -1, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, -1, 0, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, -1, 0);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

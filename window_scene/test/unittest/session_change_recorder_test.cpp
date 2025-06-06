@@ -125,8 +125,8 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
         .logTag_ = WmsLogTag::WMS_MAIN,
     };
 
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo1);
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo2);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo1);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo2);
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_END, changeInfo3);
 
     params.push_back("all");
@@ -136,7 +136,7 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
     dumpInfo.clear();
     EXPECT_TRUE(result2);
 
-    params.push_back("0");
+    params.push_back("1");
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result3 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
         (dumpInfo.find("125") == std::string::npos);

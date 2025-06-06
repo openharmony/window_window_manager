@@ -671,6 +671,7 @@ struct WindowAnimationInfo {
     WSRect endRect { 0, 0, 0, 0 };
     bool animated { false };
     uint32_t callingId { 0 };
+    bool isGravityChanged { false };
 };
 
 struct WindowShadowConfig {
@@ -800,6 +801,17 @@ struct SessionEventParam {
     uint32_t dragResizeType = 0;
 };
 
+struct BackgroundParams {
+    bool shouldBackToCaller = true;
+    AAFwk::WantParams wantParams {};
+};
+
+struct TransferSessionInfo {
+    int32_t persistentId = -1;
+    int32_t toScreenId = -1;
+    AAFwk::WantParams wantParams {};
+};
+
 /**
  * @brief Enumerates session gravity.
  */
@@ -874,6 +886,7 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
+    KEYBOARD_OCCUPIED_AREA = 1 << 9,
 };
 
 enum class SessionPropertyFlag {
