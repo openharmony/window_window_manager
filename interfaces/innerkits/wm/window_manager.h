@@ -53,11 +53,6 @@ struct WindowSnapshotDataPack {
     WMError result = WMError::WM_OK;
 };
 
-struct NavDestinationNameDataPack {
-    std::string topNavDestName;
-    WMError result = WMError::WM_OK;
-};
-
 /**
  * @class IWMSConnectionChangedListener
  *
