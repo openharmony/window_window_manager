@@ -846,6 +846,8 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     float rotation, RRect bounds, ScreenId screenId)
 {
     currentstate_ = GetSuperFoldStatus();
+    screenSession->SetPointerActiveWidth(0);
+    screenSession->SetPointerActiveHeight(0);
     screenSession->UpdateToInputManager(bounds, static_cast<int>(rotation), static_cast<int>(rotation),
         FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
@@ -867,6 +869,13 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
     } else {
         screenSession->SetValidWidth(property.GetValidWidth());
     }
+    TLOGI(WmsLogTag::DMS, "get property by screenId=%{public}" PRIu64 ", "
+        "bounds width=%{public}f, bounds height=%{public}f, "
+        "pointerActiveWidth=%{public}u, pointerActiveHeight=%{public}u, "
+        "validWidth=%{public}d, validHeight=%{public}d",
+        screenId, bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+        screenSession->GetPointerActiveWidth(), screenSession->GetPointerActiveHeight(),
+        screenSession->GetValidWidth(), screenSession->GetValidHeight());
 }
 
 void ScreenSessionManagerClient::NotifyClientScreenConnect(sptr<ScreenSession>& screenSession)
