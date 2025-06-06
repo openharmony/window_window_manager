@@ -581,6 +581,26 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest24, TestSize.Level1)
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
+
+/**
+ * @tc.name: OnRemoteRequest25
+ * @tc.desc: test TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest25, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteInt32(static_cast<int32_t>(ScreenshotEventType::SCROLL_SHOT_START));
+
+    int32_t code = static_cast<int32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
+}
 }
 }
 }

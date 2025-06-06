@@ -37,7 +37,7 @@ public:
     ~Impl();
 
     static inline SingletonDelegator<ScreenManager> delegator;
-    ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option, bool isSecurity = true);
     sptr<Screen> GetScreen(ScreenId screenId);
     sptr<ScreenGroup> GetScreenGroup(ScreenId screenId);
     DMError GetAllScreens(std::vector<sptr<Screen>>& screens);
@@ -592,19 +592,19 @@ DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screen
     return DMError::DM_OK;
 }
 
-ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
+ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option, bool isSecurity)
 {
-    return pImpl_->CreateVirtualScreen(option);
+    return pImpl_->CreateVirtualScreen(option, isSecurity);
 }
 
-ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
+ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option, bool isSecurity)
 {
     //  After the process creating the virtual screen is killed, DMS needs to delete the virtual screen
     std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
     if (virtualScreenAgent_ == nullptr) {
         virtualScreenAgent_ = new DisplayManagerAgentDefault();
     }
-    return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option, virtualScreenAgent_);
+    return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option, virtualScreenAgent_, isSecurity);
 }
 
 DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)

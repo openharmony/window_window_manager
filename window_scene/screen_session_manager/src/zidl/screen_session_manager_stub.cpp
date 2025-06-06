@@ -231,7 +231,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .missionIds_ = missionIds,
                 .virtualScreenType_ = virtualScreenType
             };
-            ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
+            bool isSecurity = data.ReadBool();
+            ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent, isSecurity);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
             break;
         }
@@ -870,7 +871,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             auto rotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
+            bool isSwitchUser = data.ReadBool();
+            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType, isSwitchUser);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {

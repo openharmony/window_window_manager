@@ -3369,7 +3369,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModes(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes, bool grayOutMaximizeButton)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
@@ -3386,7 +3386,39 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    if (grayOutMaximizeButton) {
+        size_t size = supportedWindowModes.size();
+        if (size == 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
+            return WMError::WM_ERROR_ILLEGAL_PARAM;
+        }
+        if (std::find(supportedWindowModes.begin(), supportedWindowModes.end(),
+            AppExecFwk::SupportWindowMode::FULLSCREEN) != supportedWindowModes.end()) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Supports full screen cannot be grayed out");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        GrayOutMaximizeButton(true);
+    } else if (grayOutMaximizeButton_) {
+        GrayOutMaximizeButton(false);
+    }
+
     return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::GrayOutMaximizeButton(bool isGrayOut)
+{
+    if (grayOutMaximizeButton_ == isGrayOut) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Duplicate settings are gray out: %{public}d", isGrayOut);
+        return WMError::WM_DO_NOTHING;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "uicontent is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    grayOutMaximizeButton_ = isGrayOut;
+    uiContent->OnContainerModalEvent(WINDOW_GRAY_OUT_MAXIMIZE_EVENT, isGrayOut ? "true" : "false");
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
@@ -3596,9 +3628,10 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
         int32_t lastDisplayX = pointerItem.GetDisplayX();
         int32_t lastDisplayY = pointerItem.GetDisplayY();
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
-            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
-        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
+        int32_t lastDisplayId = lastPointerEvent_->GetTargetDisplayId();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offset:[%{public}d,%{public}d] lastEvent:[%{public}d,%{public}d]"
+            " lastDisplayId:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY, lastDisplayId);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY, lastDisplayId);
     } else {
         errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
@@ -5744,6 +5777,15 @@ bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
         return false;
     }
     return enableImmersiveMode_;
+}
+
+WMError WindowSceneSessionImpl::IsImmersiveLayout(bool& isImmersiveLayout) const
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    isImmersiveLayout = isIgnoreSafeArea_;
+    return WMError::WM_OK;
 }
 
 template <typename K, typename V>

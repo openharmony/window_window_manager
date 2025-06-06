@@ -48,6 +48,7 @@ private:
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply);

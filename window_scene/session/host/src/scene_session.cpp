@@ -993,9 +993,10 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
 }
 
 WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY)
+    int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId)
 {
-    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY, where = __func__] {
+    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY,
+        displayId, where = __func__] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
             TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: session or moveDragController is null", where);
@@ -1005,16 +1006,25 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
             TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: Repeat operation, window is moving", where);
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offsetX:%{public}d offsetY:%{public}d pointerPosX:%{public}d"
-            " pointerPosY:%{public}d", where, offsetX, offsetY, pointerPosX, pointerPosY);
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offset:[%{public}d,%{public}d] pointer:[%{public}d,%{public}d]"
+            " displayId:%{public}" PRIu64, where, offsetX, offsetY, pointerPosX, pointerPosY, displayId);
+        int32_t pointerY = pointerPosY;
+        if (displayId == VIRTUAL_DISPLAY_ID) {
+            pointerY += PcFoldScreenManager::GetInstance().GetVirtualDisplayPosY();
+            TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: virtual display pointerY:%{public}d", where, pointerY);
+        }
         WSRect winRect = {
             pointerPosX - offsetX,
-            pointerPosY - offsetY,
+            pointerY - offsetY,
             session->winRect_.width_,
             session->winRect_.height_
         };
-        session->moveDragController_->HandleStartMovingWithCoordinate(offsetX,
-            offsetY, pointerPosX, pointerPosY, winRect);
+        session->InitializeCrossMoveDrag();
+        session->moveDragController_->InitMoveDragProperty();
+        MoveDragController::MoveCoordinateProperty property = { offsetX, offsetY, pointerPosX,
+            pointerY, displayId, winRect };
+        session->moveDragController_->HandleStartMovingWithCoordinate(property);
+        session->moveDragController_->SetSpecifyMoveStartDisplay(displayId);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
     }, __func__);
@@ -1513,12 +1523,11 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
             return false;
         }
     }
-    if (IsSystemKeyboard() && PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
-        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-            PcFoldScreenManager::GetInstance().GetDisplayRects();
-        screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
-            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
+    if (IsSystemKeyboard() && DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
+        auto defaultDisplay = DisplayManager::GetInstance().GetDefaultDisplay();
+        screenHeight = defaultDisplay != nullptr ?
+            static_cast<uint32_t>(defaultDisplay->GetPhysicalHeight()) : screenHeight;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, display is half-fold", GetPersistentId());
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -1535,12 +1544,9 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
         TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is null, get screenWidthAndHeight failed");
         return false;
     }
-    if (IsSystemKeyboard() && PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
-        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-            PcFoldScreenManager::GetInstance().GetDisplayRects();
-        screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
-            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
+    if (IsSystemKeyboard() && DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
+        screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetPhysicalHeight());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, display is half-fold", GetPersistentId());
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -7005,6 +7011,11 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
+void SceneSession::SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func)
+{
+    updateScreenshotAppEventRegisteredFunc_ = std::move(func);
+}
+
 void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func)
 {
     notifyVisibleChangeFunc_ = func;
@@ -7433,8 +7444,33 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (!((NotifyServerToUpdateRect(uiParam, reason) || IsDirtyWindow()) && PipelineNeedNotifyClientToUpdateRect())) {
         return false;
     }
+    ProcessCallingSessionRectDirty();
     NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;
+}
+
+void SceneSession::ProcessCallingSessionRectDirty()
+{
+    // Recalculate keyboard occupied area info when calling session rect is dirty
+    if (specificCallback_->onGetSceneSessionVectorByType_ &&
+        (reason_ < SizeChangeReason::DRAG || reason_ > SizeChangeReason::DRAG_END) &&
+        reason_ != SizeChangeReason::DRAG_MOVE) {
+        const auto& keyboardSessionVec = specificCallback_->onGetSceneSessionVectorByType_(
+            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+        for (const auto& keyboardSession : keyboardSessionVec) {
+            if (!keyboardSession) {
+                continue;
+            }
+            if (!keyboardSession->IsSystemKeyboard() &&
+                static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == GetPersistentId()) {
+                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, false);
+                break;
+            }
+        }
+    } else {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Session rect dirty, id: %{public}d, reason: %{public}d",
+            GetPersistentId(), reason_);
+    }
 }
 
 bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason)
@@ -8528,6 +8564,24 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
         session->sessionStage_->SetCurrentRotation(currentRotation);
         }, __func__);
     return WSError::WS_OK;
+}
+
+WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister)
+{
+    PostTask([weakThis = wptr(this), persistentId, isRegister, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d session is null", where, persistentId);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s win %{public}d isRegister %{public}uu",
+            where, persistentId, isRegister);
+        if (session->updateScreenshotAppEventRegisteredFunc_) {
+            session->updateScreenshotAppEventRegisteredFunc_(persistentId, isRegister);
+        }
+        }, __func__);
+
+    return WMError::WM_OK;
 }
 
 WMError SceneSession::NotifyDisableDelegatorChange()

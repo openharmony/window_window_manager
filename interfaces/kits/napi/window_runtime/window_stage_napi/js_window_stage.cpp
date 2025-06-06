@@ -46,6 +46,7 @@ namespace {
 const int CONTENT_STORAGE_ARG = 2;
 const uint32_t MIN_RESOURCE_ID = 0x1000000;
 const uint32_t MAX_RESOURCE_ID = 0xffffffff;
+constexpr size_t ARG_COUNT_ONE = 1;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
@@ -966,7 +967,7 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) { // 1: maximum params num
+    if (!(argc == ARG_COUNT_ONE || argc == ARG_COUNT_TWO)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
@@ -985,12 +986,19 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
 
+    bool grayOutMaximizeButton = false;
+    if (argc == ARG_COUNT_TWO && !ConvertFromJsValue(env, argv[INDEX_ONE], grayOutMaximizeButton)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert grayOutMaximizeButton parameter");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM));
+        return NapiGetUndefined(env);
+    }
+
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakWindow = wptr(window), supportedWindowModes = std::move(supportedWindowModes), where,
-        env, task = napiAsyncTask] {
+    auto asyncTask = [weakWindow = wptr(window), supportedWindowModes = std::move(supportedWindowModes),
+        grayOutMaximizeButton, where, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
@@ -998,7 +1006,8 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportedWindowModes(supportedWindowModes));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportedWindowModes(supportedWindowModes,
+            grayOutMaximizeButton));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
                 "set window support modes failed!", window->GetWindowId(),

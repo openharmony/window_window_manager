@@ -601,6 +601,30 @@ HWTEST_F(WindowStubTest, OnRemoteRequest26, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest_TRANS_ID_NOTIFY_SCREEN_SHOT
+ * @tc.desc: test TRANS_ID_NOTIFY_SCREEN_SHOT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowStubTest, OnRemoteRequest_TRANS_ID_NOTIFY_SCREEN_SHOT, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+
+    uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
+    int res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(0);
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
+    res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+}
+
+/**
  * @tc.name: OnRemoteRequest27
  * @tc.desc: test TRANS_ID_NOTIFY_DESTROY success
  * @tc.type: FUNC

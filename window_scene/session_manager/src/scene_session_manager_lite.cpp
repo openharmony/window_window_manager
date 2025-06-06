@@ -112,6 +112,13 @@ WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteOb
     return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
 }
 
+WSError SceneSessionManagerLite::PendingSessionToBackground(const sptr<IRemoteObject>& token,
+    const BackgroundParams& params)
+{
+    WLOGFD("in");
+    return SceneSessionManager::GetInstance().PendingSessionToBackground(token, params);
+}
+
 WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
     bool shouldBackToCaller)
 {
@@ -343,5 +350,10 @@ WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleN
 WMError SceneSessionManagerLite::RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey)
 {
     return SceneSessionManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+}
+
+WMError SceneSessionManagerLite::TransferSessionToTargetScreen(const TransferSessionInfo& info)
+{
+    return SceneSessionManager::GetInstance().NotifyTransferSessionToTargetScreen(info);
 }
 } // namespace OHOS::Rosen

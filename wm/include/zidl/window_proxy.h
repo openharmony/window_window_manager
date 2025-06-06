@@ -46,6 +46,7 @@ public:
     sptr<WindowProperty> GetWindowProperty() override;
     WMError NotifyTouchOutside() override;
     WMError NotifyScreenshot() override;
+    WMError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     WMError DumpInfo(const std::vector<std::string>& params) override;
     WMError NotifyDestroy(void) override;
     WMError NotifyForeground(void) override;
