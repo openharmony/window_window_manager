@@ -1278,6 +1278,34 @@ HWTEST_F(WindowTest, UnregisterScreenshotListener, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterScreenshotAppEventListener
+ * @tc.desc: RegisterScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterScreenshotAppEventListener, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    auto ret = window->RegisterScreenshotAppEventListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterScreenshotAppEventListener
+ * @tc.desc: UnregisterScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterScreenshotAppEventListener, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    auto ret = window->UnregisterScreenshotAppEventListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: RegisterDialogTargetTouchListener
  * @tc.desc: get
  * @tc.type: FUNC

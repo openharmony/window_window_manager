@@ -261,6 +261,19 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent01
+ * @tc.desc: Check NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto& windowManager = WindowManager::GetInstance();
+    WMError ret = windowManager.NotifyScreenshotEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: RegisterCameraFloatWindowChangedListener01
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC

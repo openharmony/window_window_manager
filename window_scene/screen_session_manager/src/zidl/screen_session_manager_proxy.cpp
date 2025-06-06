@@ -1077,7 +1077,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
 }
 
 ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
-                                                        const sptr<IRemoteObject>& displayManagerAgent)
+                                                        const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity)
 {
     TLOGI(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1110,6 +1110,7 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         res = res &&
             data.WriteRemoteObject(displayManagerAgent);
     }
+    res = res && data.WriteBool(isSecurity);
     if (!res) {
         TLOGE(WmsLogTag::DMS, "SCB: ScreenSessionManagerProxy::Write data failed");
         return SCREEN_ID_INVALID;
@@ -2985,7 +2986,7 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
 }
 
 void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3010,6 +3011,10 @@ void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, 
     }
     if (!data.WriteFloat(rotation)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
+        return;
+    }
+    if (!data.WriteBool(isSwitchUser)) {
+        TLOGE(WmsLogTag::DMS, "Write isSwitchUser failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {

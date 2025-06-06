@@ -131,6 +131,7 @@ private:
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply);
     int HandleAnimateTo(MessageParcel& data, MessageParcel& reply);
 

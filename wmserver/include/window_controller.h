@@ -61,6 +61,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent);
     void NotifySystemBarTints();

@@ -153,6 +153,7 @@ using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 using SetForegroundWindowNumFunc = std::function<void(uint32_t windowNum)>;
 using MinimizeByWindowIdFunc = std::function<void(const std::vector<int32_t>& windowIds)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
+using NotifyTransferSessionToTargetScreenFunc = std::function<void(const TransferSessionInfo& info)>;
 using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
@@ -570,6 +571,8 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
+    WMError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener);
 
     /*
      * Multi Window
@@ -664,6 +667,7 @@ public:
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
     void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
     WSError TerminateSessionNew(
@@ -693,6 +697,8 @@ public:
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
     void RegisterMinimizeByWindowIdCallback(MinimizeByWindowIdFunc&& func);
     void RegisterSceneSessionDestructCallback(NotifySceneSessionDestructFunc&& func);
+    void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
+    WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
@@ -783,6 +789,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
+    std::string GetFloatWidth(const int width, float value);
 
     /*
      * Window Pipeline
@@ -796,6 +803,7 @@ private:
      */
     bool isUserAuthPassed_ {false};
     NotifySceneSessionDestructFunc onSceneSessionDestruct_;
+    NotifyTransferSessionToTargetScreenFunc onTransferSessionToTargetScreen_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -1435,6 +1443,7 @@ private:
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
+    std::unordered_set<int32_t> screenshotAppEventListenerSessionSet_;
     void NotifyWindowPropertyChange(ScreenId screenId);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;

@@ -192,6 +192,11 @@ public:
      */
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+    
+    /*
+     * Window Property
+     */
+    virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

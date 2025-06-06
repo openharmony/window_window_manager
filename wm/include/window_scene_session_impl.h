@@ -188,7 +188,8 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
-    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false) override;
     WmErrorCode StartMoveWindow() override;
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
@@ -212,6 +213,7 @@ public:
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+    WMError IsImmersiveLayout(bool& isImmersiveLayout) const override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
@@ -497,6 +499,11 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
+
+    /*
+     * Window Decor
+     */
+    WMError GrayOutMaximizeButton(bool isGrayOut);
 };
 } // namespace Rosen
 } // namespace OHOS
