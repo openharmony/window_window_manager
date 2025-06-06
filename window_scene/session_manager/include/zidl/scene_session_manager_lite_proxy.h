@@ -105,6 +105,9 @@ public:
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
     WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override;
 
+    WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
+    WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

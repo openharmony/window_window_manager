@@ -157,6 +157,8 @@ using NotifyTransferSessionToTargetScreenFunc = std::function<void(const Transfe
 using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
+using UpdateKioskAppListFunc = std::function<void(const std::vector<std::string>& kioskAppList)>;
+using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -706,6 +708,11 @@ public:
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
+    WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token);
+    WMError ExitKioskMode();
+    void RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func);
+    void RegisterKioskModeChangeCallback(KioskModeChangeFunc&& func);
 
     /*
      * Window Pattern
@@ -1488,6 +1495,11 @@ private:
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
     std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
     std::vector<RecentSessionInfo> recentMainSessionInfoList_;
+    UpdateKioskAppListFunc updateKioskAppListFunc_;
+    KioskModeChangeFunc kioskModeChangeFunc_;
+    std::vector<std::string> kioskAppListCache_;
+    bool isKioskMode_ = false;
+    int32_t kioskAppPersistentId_ = INVALID_SESSION_ID;
 
     /*
      * Window Pattern
