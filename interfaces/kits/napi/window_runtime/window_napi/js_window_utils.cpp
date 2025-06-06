@@ -1610,6 +1610,10 @@ WmErrorCode ParseShowWithOptions(napi_env env, napi_value showWithOptions, bool&
 {
     napi_value focusOnShowValue = nullptr;
     napi_get_named_property(env, showWindowOptions, "focusOnShow", &focusOnShowValue);
+    if (GetType(env, focusOnShowValue) == napi_undefined) {
+        focusOnShow = true;
+        return WmErrorCode::WM_OK;
+    }
     if (focusOnShowValue != nullptr) {
         if (GetType(env, focusOnShowValue) != napi_boolean || !ConvertFromJsValue(env, focusOnShowValue, focusOnShow)) {
             TLOGE(WmsLogTag::WMS_FOCUS, "failed to convert focusOnShow to boolean");
