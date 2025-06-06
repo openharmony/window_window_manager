@@ -117,6 +117,10 @@ public:
 
     void SetZOrder(uint32_t zOrder) { zOrder_ = zOrder; }
 
+    int32_t GetCallingPid() const { return callingPid_; }
+
+    void SetCallingPid(int32_t callingPid) { callingPid_ = callingPid; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
@@ -130,6 +134,7 @@ public:
     int32_t appIndex_ { 0 };
     bool isSystem_ = false;
     uint32_t zOrder_ { 0 };
+    int32_t callingPid_ { -1 };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H
