@@ -34,16 +34,16 @@ public:
 
     static ani_status AniWindowManagerInit(ani_env* env);
     static ani_object WindowStageCreate(ani_env* env, ani_long scene);
-    static ani_object GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
-    static ani_object FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName);
+    static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
+    static ani_ref FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName);
     static void MinimizeAll(ani_env* env, ani_long nativeObj, ani_double displayId);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_double sourceWindowId, ani_double targetWindowId);
 private:
-    ani_object OnGetLastWindow(ani_env* env, ani_object context);
-    ani_object OnFindWindow(ani_env* env, ani_string windowName);
+    ani_ref OnGetLastWindow(ani_env* env, ani_object context);
+    ani_ref OnFindWindow(ani_env* env, ani_string windowName);
     void OnMinimizeAll(ani_env* env, ani_double displayId);
     void OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
