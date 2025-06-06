@@ -95,6 +95,9 @@ public:
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override;
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
+    WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
+    WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
 };
 } // namespace OHOS::Rosen
 
