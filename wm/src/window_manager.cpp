@@ -1873,7 +1873,7 @@ WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType type)
 WMError WindowManager::SetStartWindowBackgroundColor(
     const std::string& moduleName, const std::string& abilityName, uint32_t color)
 {
-    int32_t uid = getuid();
+    int32_t uid = static_cast<int32_t>(getuid());
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetStartWindowBackgroundColor(
         moduleName, abilityName, color, uid);
     if (ret != WMError::WM_OK) {
