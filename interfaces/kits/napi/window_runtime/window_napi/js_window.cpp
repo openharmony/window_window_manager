@@ -7723,8 +7723,8 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isImmersiveLayout %{public}u end",
-        windowToken_->GetWindowId(), isEnabled);
-    return CreateJsValue(env, isEnabled);
+        windowToken_->GetWindowId(), isImmersiveLayout);
+    return CreateJsValue(env, isImmersiveLayout);
 }
 
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
