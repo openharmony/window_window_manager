@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
-#include "mock_message_parcel.h"
+#include "mock/mock_message_parcel.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
