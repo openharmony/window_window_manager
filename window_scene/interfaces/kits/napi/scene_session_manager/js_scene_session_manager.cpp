@@ -1673,7 +1673,7 @@ static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityI
     napi_set_named_property(env, objValue, "preferMultiWindowOrientation",
         CreateJsValue(env, abilityInfo.preferMultiWindowOrientation));
     napi_set_named_property(env, objValue, "isForceRotate",
-        CreateJsValue(env, abilityInfo.applicationInfo.isForceRotate_));
+        CreateJsValue(env, abilityInfo.applicationInfo.isForceRotate));
     return objValue;
 }
 
