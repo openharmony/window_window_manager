@@ -48,9 +48,7 @@ namespace {
 HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    if (!windowAdapterLite_) {
-        return;
-    }
+    ASSERT_NE(windowAdapterLite_, nullptr);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
 
     std::set<sptr<IWindowManagerAgent>> iWindowManagerAgent = { nullptr };
@@ -70,17 +68,13 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, TestSize.Level1)
 HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent01, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
-    if (!windowAdapterLite_) {
-        return;
-    }
+    ASSERT_NE(windowAdapterLite_, nullptr);
     windowAdapterLite_->ReregisterWindowManagerLiteAgent();
     windowAdapterLite_->OnUserSwitch();
     windowAdapterLite_->ClearWindowAdapter();
 
     sptr<WMSDeathRecipient> wmSDeathRecipient = new (std::nothrow) WMSDeathRecipient();
-    if (!wmSDeathRecipient) {
-        return;
-    }
+    ASSERT_NE(wmSDeathRecipient, nullptr);
     wptr<IRemoteObject> wptrDeath;
     wmSDeathRecipient->OnRemoteDied(wptrDeath);
 
