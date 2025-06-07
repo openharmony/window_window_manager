@@ -5538,6 +5538,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             TLOGD(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
         if (IsWindowDelayRaiseEnabled()) {
+            if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+                TLOGI(WmsLogTag::WMS_EVENT, "Delay,id:%{public}d", pointerEvent->GetId());
+            }
             pointerEvent->MarkProcessed();
             return;
         }
@@ -5673,6 +5676,9 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
         isFiltered = mouseEventFilter_(*pointerEvent.get());
     }
     if (isFiltered) {
+        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            TLOGI(WmsLogTag::WMS_EVENT, "Filter,id:%{public}d", pointerEvent->GetId());
+        }
         pointerEvent->MarkProcessed();
     }
     TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "event consumed:%{public}d", isFiltered);
