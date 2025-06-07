@@ -895,7 +895,7 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
 }
 
-AreaType WindowSceneSessionImpl::GetDragType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+AreaType WindowSceneSessionImpl::GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const MMI::PointerEvent::PointerItem& pointerItem)
 {
     AreaType dragType = AreaType::UNDEFINED;
@@ -929,7 +929,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
     }
     WindowType windowType = property_->GetWindowType();
-    AreaType dragType = GetDragType(pointerEvent, pointerItem);
+    AreaType dragType = GetDragAreaByDownEvent(pointerEvent, pointerItem);
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
     bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !IsWindowDraggable();
@@ -1074,7 +1074,7 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN;
     AreaType dragType = AreaType::UNDEFINED;
     if (isPointDown) {
-        dragType = GetDragType(pointerEvent, pointerItem);
+        dragType = GetDragAreaByDownEvent(pointerEvent, pointerItem);
     }
     if (!IsWindowDelayRaiseEnabled() || dragType != AreaType::UNDEFINED) {
         ConsumePointerEventInner(pointerEvent, pointerItem, false);

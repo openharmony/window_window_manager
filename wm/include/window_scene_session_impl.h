@@ -458,7 +458,7 @@ private:
     bool CheckCanMoveWindowType();
     bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
-    AreaType GetDragType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
 
     /*
