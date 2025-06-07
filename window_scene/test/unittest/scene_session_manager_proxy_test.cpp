@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
-#include "mock/mock_message_parcel.h"
+#include "mock_message_parcel.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
@@ -406,15 +406,15 @@ HWTEST_F(sceneSessionManagerProxyTest, GetTopNavDestinationName, TestSize.Level1
     sptr<SceneSessionManagerProxy> ssmProxyTmp = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     EXPECT_NE(ssmProxy, nullptr);
     res = ssmProxyTmp->GetTopNavDestinationName(windowId, topNavDestName);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }
 

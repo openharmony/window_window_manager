@@ -417,7 +417,6 @@ HWTEST_F(SceneSessionManagerTest6, GetTopNavDestinationName, TestSize.Level1)
     EXPECT_EQ(ssm_->GetTopNavDestinationName(2, topNavDestName), WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_CALL(*(sceneSession->sessionStage_), GetTopNavDestinationInfo(_)).WillOnce(Return(WSError::WS_OK));
     EXPECT_EQ(ssm_->GetTopNavDestinationName(2, topNavDestName), WMError::WM_OK);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_ = oldSceneSessionMap;

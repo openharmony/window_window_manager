@@ -431,16 +431,16 @@ HWTEST_F(SessionStageProxyTest, GetTopNavDestinationName, TestSize.Level1)
 
     sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
     res = sessionStage->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 
     MockMessageParcel::SetReadUint32ErrorFlag(true);
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     res = sessionStage_->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     res = sessionStage_->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
 }
 

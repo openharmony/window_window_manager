@@ -444,16 +444,16 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level
     EXPECT_EQ(topNavDestName, "");
 
     windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_CALL(*(windowSceneSession->uiContent_), GetTopNavDestinationInfo(_, _)).WillOnce(Return(""));
+    Ace::UIContentMocker* uiContent = reinterpret_cast<Ace::UIContentMocker*>(windowSceneSession->uiContent_.get());
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return(""));
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_OK);
     EXPECT_EQ(topNavDestName, "");
 
-    EXPECT_CALL(*(windowSceneSession->uiContent_), GetTopNavDestinationInfo(_, _)).WillOnce(Return("{"));
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{"));
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_DO_NOTHING);
     EXPECT_EQ(topNavDestName, "");
 
-    EXPECT_CALL(*(windowSceneSession->uiContent_),
-        GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_OK);
     EXPECT_EQ(topNavDestName, "test");
 }

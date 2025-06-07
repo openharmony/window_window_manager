@@ -18,6 +18,7 @@
 #include <message_parcel.h>
 
 #include "iremote_object_mocker.h"
+#include "mock_message_parcel.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
@@ -1388,7 +1389,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetTopNavDestinationName, TestSize.L
     MessageOption option;
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
 
-    uint32_t code = static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
     ASSERT_TRUE((stub_ != nullptr));
     int32_t windowId = 8888888;
     data.WriteInt32(windowId);
