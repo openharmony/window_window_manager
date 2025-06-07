@@ -22,7 +22,7 @@ namespace OHOS::Rosen {
 class MockAccesstokenKit {
 public:
     static void MockIsSystemApp(const bool isSystemApp);
-    static void MockIsSACalling(Security::AccessToken::ATokenTypeEnum mockRet);
+    static void MockIsSACalling(const bool mockGetTokenTypeFlagRet);
 };
 } // namespace OHOS::Rosen
 #endif // WINDOW_MANAGER_MOCK_ACCESSTOKEN_KIT_H
