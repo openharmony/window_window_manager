@@ -746,7 +746,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
     std::string windowName = sceneSession->GetWindowNameAllType();
     auto startsWith = [](const std::string& str, const std::string& prefix) {
-        return str.size() >= prefix.size() && 
+        return str.size() >= prefix.size() &&
             std::equal(prefix.begin(), prefix.end(), str.begin());
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {

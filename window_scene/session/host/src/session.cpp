@@ -1961,7 +1961,7 @@ void Session::SetUpdateSessionIconListener(const NofitySessionIconUpdatedFunc& f
 
 WSError Session::Clear(bool needStartCaller, bool isForceClean)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u, isForceClean:%{public}u", 
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, needStartCaller:%{public}u, isForceClean:%{public}u",
         GetPersistentId(), needStartCaller, isForceClean);
     auto task = [weakThis = wptr(this), needStartCaller, isForceClean]() {
         auto session = weakThis.promote();

@@ -1976,7 +1976,7 @@ napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo)
     if (!shadowsInfo.hasRadiusValue_ && !shadowsInfo.hasColorValue_ && !shadowsInfo.hasOffsetXValue_ &&
         !shadowsInfo.hasOffsetYValue_) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Obeject is undefined!");
-        return NapiGetUndefined(env);   
+        return NapiGetUndefined(env);
     }
     return objValue;
 }

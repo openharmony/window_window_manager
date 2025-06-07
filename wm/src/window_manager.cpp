@@ -397,7 +397,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(
         windowDisplayIdChangeListeners = windowDisplayIdChangeListeners_;
     }
     for (auto &listener : windowDisplayIdChangeListeners) {
-        if (listener != nullptr) { 
+        if (listener != nullptr) {
             auto interestWindowIds = listener->GetInterestWindowIds();
             if (!interestWindowIds.empty()) {
                 for (const auto& item : windowInfoList) {
