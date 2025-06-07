@@ -86,6 +86,7 @@ struct SCBAbilityInfo {
     uint32_t sdkVersion_;
     std::string codePath_;
     bool isAbilityHook_;
+    bool isForceRotate_;
 };
 
 struct SCBApplicationInfo {
