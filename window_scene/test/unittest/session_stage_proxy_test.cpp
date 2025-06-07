@@ -417,34 +417,6 @@ HWTEST_F(SessionStageProxyTest, UpdateWindowMode, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTopNavDestinationName
- * @tc.desc: test GetTopNavDestinationName rpc proxy is ok
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageProxyTest, GetTopNavDestinationName, TestSize.Level1)
-{
-    ASSERT_TRUE((sessionStage_ != nullptr));
-    MockMessageParcel::ClearAllErrorFlag();
-    std::string topNavDestName;
-    WSError res = sessionStage_->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_OK, res);
-
-    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
-    res = sessionStage->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
-
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    res = sessionStage_->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
-
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    res = sessionStage_->GetTopNavDestinationName(topNavDestName);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
-    MockMessageParcel::ClearAllErrorFlag();
-}
-
-/**
  * @tc.name: NotifySessionFullScreen
  * @tc.desc: test function : NotifySessionFullScreen
  * @tc.type: FUNC

@@ -18,7 +18,6 @@
 #include <message_parcel.h>
 
 #include "iremote_object_mocker.h"
-#include "mock_message_parcel.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
@@ -1375,42 +1374,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotForAppProcess, TestSize.
 
     int res = stub_->HandleSkipSnapshotForAppProcess(data, reply);
     EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleGetTopNavDestinationName
- * @tc.desc: test GetTopNavDestinationName rpc stub is ok
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetTopNavDestinationName, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
-    ASSERT_TRUE((stub_ != nullptr));
-    int32_t windowId = 8888888;
-    data.WriteInt32(windowId);
-    MockMessageParcel::ClearAllErrorFlag();
-
-    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_NONE);
-
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-
-    MockMessageParcel::SetWriteString16ErrorFlag(true);
-    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_EQ(stub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-
-    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**

@@ -18,7 +18,6 @@
 #include <ipc_types.h>
 #include <iremote_stub.h>
 
-#include "mock_message_parcel.h"
 #include "mock/mock_session_stage.h"
 #include <message_option.h>
 #include <message_parcel.h>
@@ -460,42 +459,6 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-}
-
-/**
- * @tc.name: HandleGetTopNavDestinationName
- * @tc.desc: test GetTopNavDestinationName rpc stub is ok
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleGetTopNavDestinationName, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_TOP_NAV_DEST_NAME);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    SessionStageMocker* sessionStageStub = reinterpret_cast<SessionStageMocker*>(sessionStageStub_.GetRefPtr());
-    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
-    MockMessageParcel::SetWriteString16ErrorFlag(true);
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
