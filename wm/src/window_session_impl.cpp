@@ -145,7 +145,8 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
-std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::secureLimitChangeListeners_;
+std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
+    WindowSessionImpl::secureLimitChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, sptr<IPreferredOrientationChangeListener>> WindowSessionImpl::preferredOrientationChangeListener_;
@@ -1437,7 +1438,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() cons
 sptr<WindowSessionProperty> WindowSessionImpl::GetPropertyByContext() const
 {
     if (!WindowHelper::IsSubWindow(GetType())) {
-       return property_;
+        return property_;
     }
     if (property_->GetIsUIExtensionAbilityProcess()) {
         auto extensionWindow = FindExtensionWindowWithContext();
@@ -1973,7 +1974,8 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
         parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
     }
     bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
-    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, parallelType: %{public}d, "
+    TLOGI(WmsLogTag::DEFAULT,
+        "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, parallelType: %{public}d, "
         "isRouter: %{public}u", GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
@@ -3387,14 +3389,16 @@ EnableIfSame<T, IExtensionSecureLimitChangeListener,
     return secureLimitChangeListeners;
 }
 
-WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
     return RegisterListener(secureLimitChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
@@ -3901,7 +3905,8 @@ void WindowSessionImpl::ClearUselessListeners(std::unordered_map<int32_t, T>& li
 }
 
 template<typename T>
-EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowStatusChangeListener,
+    std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
     for (auto& listener : windowStatusChangeListeners_[GetPersistentId()]) {
@@ -3911,7 +3916,8 @@ EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChang
 }
 
 template<typename T>
-EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowStatusDidChangeListener,
+    std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusDidChangeListener>> windowStatusDidChangeListeners;
     for (auto& listener : windowStatusDidChangeListeners_[GetPersistentId()]) {

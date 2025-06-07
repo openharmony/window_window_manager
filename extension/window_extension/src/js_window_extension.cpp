@@ -139,7 +139,8 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.",
+        moduleName.c_str(), srcPath.c_str());
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
 
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
@@ -340,7 +341,8 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
             return;
         }
         OnWindowCreated();
-        TLOGI(WmsLogTag::WMS_UIEXT, "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }

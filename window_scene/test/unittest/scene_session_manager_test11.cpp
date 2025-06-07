@@ -991,7 +991,6 @@ HWTEST_F(SceneSessionManagerTest11, AnimateTo01, Function | SmallTest | Level1)
     usleep(SLEEP_TIME);
     ASSERT_EQ(curve, WindowAnimationCurve::INTERPOLATION_SPRING);
     ASSERT_EQ(targetScale, animationProperty.targetScale);
-
 }
 } // namespace
 } // namespace Rosen

@@ -678,7 +678,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             rsTransaction = session->GetRSTransaction();
         }
 
-        // The callingId may change in WindowManager. Use scb's callingId to properly handle callingWindow raise/restore.
+        // The callingId may change in WindowManager.
+        // Use scb's callingId to properly handle callingWindow raise/restore.
         bool isLayoutFinished = true;
         sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
         if (callingSession != nullptr) {
@@ -868,8 +869,6 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
             continue;
         }
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-
-
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "ScreenSession is null");
             continue;
