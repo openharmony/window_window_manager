@@ -143,7 +143,7 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
-using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifyStartPiPFailedFunc = std::function<void(DisplayId displayId)>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
@@ -1263,7 +1263,7 @@ private:
      * PiP Window
      */
     uint64_t pipWindowSurfaceId_ = 0;
-    bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
+    bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
