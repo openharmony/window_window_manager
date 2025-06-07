@@ -443,12 +443,11 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_DO_NOTHING);
     EXPECT_EQ(topNavDestName, "");
 
-    windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Ace::UIContentMocker* uiContent = reinterpret_cast<Ace::UIContentMocker*>(windowSceneSession->uiContent_.get());
-    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return(""));
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_OK);
     EXPECT_EQ(topNavDestName, "");
 
+    Ace::UIContentMocker* uiContent = reinterpret_cast<Ace::UIContentMocker*>(windowSceneSession->uiContent_.get());
     EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{"));
     EXPECT_EQ(windowSceneSession->GetTopNavDestinationName(topNavDestName), WSError::WS_DO_NOTHING);
     EXPECT_EQ(topNavDestName, "");
