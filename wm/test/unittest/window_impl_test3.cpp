@@ -537,6 +537,8 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, TestSize.Level1)
     window->subWindowMap_.clear();
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     window->UpdateConfiguration(configuration);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->UpdateConfiguration(configuration);
 
     window->subWindowMap_[window->GetWindowId()].push_back(nullptr);
     window->UpdateConfiguration(configuration);
@@ -567,12 +569,12 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForSpecified, TestSize.Level1)
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     window->subWindowMap_.clear();
     std::shared_ptr<AppExecFwk::Configuration> configuration;
-    window->UpdateConfiguration(configuration, resourceManager);
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->UpdateConfiguration(configuration, resourceManager);
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
 
     window->subWindowMap_[window->GetWindowId()].push_back(nullptr);
-    window->UpdateConfiguration(configuration);
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
 
     option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -940,14 +942,15 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll02, TestSize.Level1)
     window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
-    sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
     option->SetWindowName("UpdateConfigurationForAll02");
-    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    uint32_t mainWinId = 0;
-    uint32_t windowId = 1;
+    sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(subWindowOption);
+    uint32_t windowId = 1001;
     string winName = "test";
     subWindow = nullptr;
-    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, window)));
+    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, subWindow)));
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+
+    subWindow = sptr<WindowImpl>::MakeSptr(subWindowOption);
     window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
 
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
