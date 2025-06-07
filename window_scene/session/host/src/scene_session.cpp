@@ -4030,6 +4030,10 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     }
     const auto startDisplayId = moveDragController_->GetMoveDragStartDisplayId();
     auto startScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(startDisplayId);
+    if (startScreenSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "startScreenSession is null, startDisplayId: %{public}" PRIu64, startDisplayId);
+        return;
+    }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
         AutoRSTransaction trans(GetRSUIContext());
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
@@ -4047,7 +4051,8 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
             // Not main to extend or extend to main or extend to extend, no need to add cross parent child
             if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations");
+                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations,
+                    DisplayId: %{public}"  PRIu64, displayId);
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
@@ -4071,7 +4076,8 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
             // Not main to extend or extend to main or extend to extend, no need to add cross parent child
             if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations");
+                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations,
+                    DisplayId: %{public}"  PRIu64, displayId);
                 continue;
             }
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
