@@ -265,7 +265,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio03, Function | SmallT
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(false);
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    ASSERT_EQ(cutoutInfo, nullptr);
+    EXPECT_EQ(cutoutInfo, nullptr);
 }
  
 /**
@@ -280,7 +280,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio04, Function | SmallT
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(true);
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    ASSERT_NE(cutoutInfo, nullptr);
+    EXPECT_NE(cutoutInfo, nullptr);
 }
  
 /**
@@ -295,7 +295,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio05, Function | SmallT
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    ASSERT_NE(cutoutInfo, nullptr);
+    EXPECT_NE(cutoutInfo, nullptr);
 }
  
 /**
@@ -329,7 +329,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr02, Function | SmallTest | Le
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -346,7 +346,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr03, Function | SmallTest | Le
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -376,7 +376,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser02, Fu
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -391,7 +391,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser03, Fu
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -421,7 +421,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish02, Function | 
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->NotifyExtendScreenCreateFinish();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -436,7 +436,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish03, Function | 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->NotifyExtendScreenCreateFinish();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -466,7 +466,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish02, Function |
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->NotifyExtendScreenDestroyFinish();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -481,7 +481,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish03, Function |
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
     ssm_->NotifyExtendScreenDestroyFinish();
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
  
 /**
@@ -513,7 +513,7 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked02, Function | Sm
     MockAccesstokenKit::MockIsSystemApp(true);
     bool isLocked = true;
     ssm_->SetFoldStatusExpandAndLocked(isLocked);
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocke03, Function | Sma
     MockAccesstokenKit::MockIsSystemApp(true);
     bool isLocked = true;
     ssm_->SetFoldStatusExpandAndLocked(isLocked);
-    EXPECT_FALSE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
 
 /**

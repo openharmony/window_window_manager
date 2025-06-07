@@ -6458,7 +6458,7 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
 
 sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return nullptr;
     }
@@ -7251,7 +7251,7 @@ void ScreenSessionManager::SetIsFoldStatusLocked(bool isFoldStatusLocked)
 
 void ScreenSessionManager::SetFoldStatusExpandAndLocked(bool isLocked)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
@@ -7710,7 +7710,7 @@ void ScreenSessionManager::SwitchUser()
 
 void ScreenSessionManager::SetDefaultMultiScreenModeWhenSwitchUser()
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
@@ -9641,7 +9641,7 @@ bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
 
 void ScreenSessionManager::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
@@ -9827,7 +9827,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
 
 void ScreenSessionManager::NotifyExtendScreenCreateFinish()
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
@@ -9923,7 +9923,7 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
 
 void ScreenSessionManager::NotifyExtendScreenDestroyFinish()
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
