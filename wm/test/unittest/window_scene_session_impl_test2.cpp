@@ -428,6 +428,36 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateWindowMode02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName01
+ * @tc.desc: test GetTopNavDestinationName whether get the top nav destination name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetTopNavDestinationName01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->uiContent_ = nullptr;
+    std::string topNavDestName;
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    Ace::UIContentMocker* uiContent = reinterpret_cast<Ace::UIContentMocker*>(windowSceneSession->uiContent_.get());
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{"));
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "test");
+}
+
+/**
  * @tc.name: RemoveWindowFlag01
  * @tc.desc: RemoveWindowFlag
  * @tc.type: FUNC

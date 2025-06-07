@@ -8002,6 +8002,15 @@ WSError SceneSession::SetWindowShadows(const ShadowsInfo& shadowsInfo)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::GetTopNavDestinationName(std::string& topNavDestName)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session stage is null: win=%{public}d", GetWindowId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->GetTopNavDestinationName(topNavDestName);
+}
+
 void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
     GetSessionProperty()->SetSubWindowLevel(subWindowLevel);
