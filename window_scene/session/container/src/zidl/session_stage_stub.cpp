@@ -132,6 +132,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifySecureLimitChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE):
             return HandleUpdateWindowMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_TOP_NAV_DEST_NAME):
+            return HandleGetTopNavDestinationName(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
             return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
@@ -532,6 +534,30 @@ int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel&
     WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
     WSError errCode = UpdateWindowMode(mode);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply)
+{
+    std::string topNavDestName;
+    WSError errCode = GetTopNavDestinationName(topNavDestName);
+    if (errCode != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get stage failed, errCode=%{public}d", static_cast<int32_t>(errCode));
+        return ERR_INVALID_DATA;
+    }
+    uint32_t size = static_cast<uint32_t>(topNavDestName.length());
+    if (!reply.WriteUint32(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write the size of stage top page name failed, size=%{public}u", size);
+        return ERR_INVALID_DATA;
+    }
+    if (size > 0 && !reply.WriteRawData(topNavDestName.c_str(), size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write stage top page name failed, name=%{public}s", topNavDestName.c_str());
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write stage error code failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

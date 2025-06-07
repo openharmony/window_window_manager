@@ -12702,6 +12702,31 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
     }, __func__);
 }
 
+WMError SceneSessionManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto session = GetSceneSession(windowId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no session with id: %{public}d", windowId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!session->IsSessionForeground()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid operation: win=%{public}d, stat: %{public}u",
+            session->GetWindowId(), static_cast<uint32_t>(session->GetSessionState()));
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    auto wsErrCode = session->GetTopNavDestinationName(topNavDestName);
+    if (wsErrCode != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get failed: win=%{public}d, errCode=%{public}d",
+            session->GetWindowId(), static_cast<int32_t>(wsErrCode));
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    return WMError::WM_OK;
+}
+
 bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const
 {
     if (session == nullptr) {
