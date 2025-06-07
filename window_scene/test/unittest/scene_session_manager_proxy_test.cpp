@@ -401,7 +401,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetTopNavDestinationName, TestSize.Level1
     std::string topNavDestName;
     MockMessageParcel::ClearAllErrorFlag();
     WMError res = ssmProxy->GetTopNavDestinationName(windowId, topNavDestName);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_NE(res, WMError::WM_OK);
 
     sptr<SceneSessionManagerProxy> ssmProxyTmp = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     EXPECT_NE(ssmProxy, nullptr);

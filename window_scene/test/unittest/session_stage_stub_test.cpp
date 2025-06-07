@@ -475,22 +475,23 @@ HWTEST_F(SessionStageStubTest, HandleGetTopNavDestinationName, TestSize.Level1)
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_TOP_NAV_DEST_NAME);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
-    EXPECT_CALL(*(sessionStageStub_), GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
+    SessionStageMocker* sessionStageStub = reinterpret_cast<SessionStageMocker*>(sessionStageStub_.get());
+    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
     MockMessageParcel::ClearAllErrorFlag();
-    EXPECT_CALL(*(sessionStageStub_), GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
     EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
-    EXPECT_CALL(*(sessionStageStub_), GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
-    EXPECT_CALL(*(sessionStageStub_), GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
     MockMessageParcel::SetWriteString16ErrorFlag(true);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
-    EXPECT_CALL(*(sessionStageStub_), GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*sessionStageStub, GetTopNavDestinationName(_)).WillOnce(Return(WSError::WS_OK));
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
