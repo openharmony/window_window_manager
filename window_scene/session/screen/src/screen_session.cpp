@@ -475,6 +475,16 @@ bool ScreenSession::GetIsCurrentInUse() const
     return isInUse_;
 }
 
+void ScreenSession::SetIsExtendVirtual(bool isExtendVirtual)
+{
+    isExtendVirtual_ = isExtendVirtual;
+}
+
+bool ScreenSession::GetIsExtendVirtual() const
+{
+    return isExtendVirtual_;
+}
+
 void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
 {
     isFakeInUse_ = isFakeInUse;
