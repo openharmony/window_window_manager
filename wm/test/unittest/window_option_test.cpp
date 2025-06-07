@@ -98,10 +98,10 @@ HWTEST_F(WindowOptionTest, WindowMode01, TestSize.Level1)
  */
 HWTEST_F(WindowOptionTest, WindowMode02, TestSize.Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
-    WindowMode defaultMode = option->GetWindowMode();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     option->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    ASSERT_EQ(defaultMode, option->GetWindowMode());
+    ASSERT_NE(WindowMode::WINDOW_MODE_UNDEFINED, option->GetWindowMode());
 }
 
 /**
@@ -389,16 +389,16 @@ HWTEST_F(WindowOptionTest, CallingWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowSessionType
- * @tc.desc: SetWindowSessionType fun
+ * @tc.name: SetAndGetWindowSessionType
+ * @tc.desc: SetAndGetWindowSessionType fun
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, SetWindowSessionType, TestSize.Level1)
+HWTEST_F(WindowOptionTest, SetAndGetWindowSessionType, TestSize.Level1)
 {
-    sptr<WindowOption> option = new WindowOption();
-    auto ret = true;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowSessionType(WindowSessionType::SCENE_SESSION);
-    ASSERT_EQ(true, ret);
+    option->GetWindowSessionType();
+    ASSERT_EQ(WindowSessionType::SCENE_SESSION, option->GetWindowSessionType());
 }
 
 /**
