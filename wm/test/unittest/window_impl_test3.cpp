@@ -544,7 +544,7 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, TestSize.Level1)
     window->UpdateConfiguration(configuration);
 
     option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("subwindow");
     sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(subWindow, nullptr);
@@ -577,10 +577,11 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForSpecified, TestSize.Level1)
     window->UpdateConfigurationForSpecified(configuration, resourceManager);
 
     option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("subwindow");
     sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(subWindow, nullptr);
+    subWindow->property_->SetWindowId(8);
     window->subWindowMap_[window->GetWindowId()].push_back(subWindow);
     window->UpdateConfigurationForSpecified(configuration, resourceManager);
     window->subWindowMap_.clear();
@@ -942,7 +943,7 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll02, TestSize.Level1)
     window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateConfigurationForAll02");
+    subWindowOption->SetWindowName("UpdateConfigurationForAll02");
     sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(subWindowOption);
     uint32_t windowId = 1001;
     string winName = "test";
@@ -956,7 +957,7 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll02, TestSize.Level1)
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
     ignoreWindowContexts.push_back(abilityContext);
-    Window->context_ = abilityContext;
+    window->context_ = abilityContext;
     window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
     WindowImpl::windowMap_.erase(winName);
 }
