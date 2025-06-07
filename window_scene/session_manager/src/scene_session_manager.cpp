@@ -9115,6 +9115,7 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
                 scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
                 scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+                scbAbilityInfo.isForceRotate_ = bundleInfo.applicationInfo.isForceRotate;
                 return WSError::WS_OK;
             }
         }
@@ -9208,6 +9209,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         scbAbilityInfo.sdkVersion_ = bundleInfo.targetVersion % 100; // %100 to get the real version
         scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
         GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+        scbAbilityInfo.isForceRotate_ = bundleInfo.applicationInfo.isForceRotate;
         scbAbilityInfos.push_back(scbAbilityInfo);
     }
 }
