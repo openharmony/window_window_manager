@@ -318,7 +318,7 @@ private:
     /*
      * PiP Window
      */
-    void OnStartPiPFailed();
+    void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
 
     /*

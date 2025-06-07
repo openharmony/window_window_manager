@@ -3670,7 +3670,7 @@ void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
     }
 }
 
-bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo)
+bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, session] : sceneSessionMap_) {
@@ -3678,7 +3678,7 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
             pipTemplateInfo.priority < session->GetPiPTemplateInfo().priority &&
             session->IsSessionForeground()) {
             if (startPiPFailedFunc_) {
-                startPiPFailedFunc_();
+                startPiPFailedFunc_(displayId);
             }
             TLOGE(WmsLogTag::WMS_PIP, "create pip window failed, reason: low priority.");
             return false;
@@ -3698,7 +3698,7 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
         TLOGI(WmsLogTag::WMS_PIP, "pip rect is invalid.");
         return false;
     }
-    if (!CheckPiPPriority(property->GetPiPTemplateInfo())) {
+    if (!CheckPiPPriority(property->GetPiPTemplateInfo(), property->GetDisplayId())) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window by priority");
         return false;
     }
