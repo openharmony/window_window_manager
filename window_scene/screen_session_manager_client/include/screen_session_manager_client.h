@@ -117,6 +117,7 @@ public:
     void NotifyExtendScreenCreateFinish();
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
+    void SetPrimaryDisplaySystemDpi(float dpi);
 
     /*
      * RS Client Multi Instance

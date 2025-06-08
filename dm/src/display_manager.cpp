@@ -2474,6 +2474,15 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     return dstScreenshot;
 }
 
+float DisplayManager::GetPrimaryDisplaySystemDpi()
+{
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+    if (displayInfo == nullptr) {
+        return 1.0f;
+    }
+    return displayInfo->GetDensityInCurResolution();
+}
+
 sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
 {
     return pImpl_->GetCutoutInfoWithRotation(rotation);

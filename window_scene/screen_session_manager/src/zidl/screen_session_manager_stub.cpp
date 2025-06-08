@@ -1188,6 +1188,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetScreenAreaOfDisplayArea(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI: {
+            ProcSetPrimaryDisplaySystemDpi(data, reply);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1347,5 +1351,12 @@ void ScreenSessionManagerStub::ProcGetScreenAreaOfDisplayArea(MessageParcel& dat
     static_cast<void>(reply.WriteInt32(screenArea.posY_));
     static_cast<void>(reply.WriteUint32(screenArea.width_));
     static_cast<void>(reply.WriteUint32(screenArea.height_));
+}
+
+void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& data, MessageParcel& reply)
+{
+    float dpi = data.ReadFloat();
+    DMError ret = SetPrimaryDisplaySystemDpi(dpi);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen

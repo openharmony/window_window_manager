@@ -10191,4 +10191,17 @@ void ScreenSessionManager::CalculateScreenArea(const DMRect& displayRegion, cons
     screenArea.width_ = static_cast<int32_t>(ratioWidth * screenRegion.width_);
     screenArea.height_ = static_cast<int32_t>(ratioHeight * screenRegion.height_);
 }
+
+DMError ScreenSessionManager::SetPrimaryDisplaySystemDpi(float virtualPixelRatio)
+{
+    if (sptr<DisplayInfo> displayInfo = GetPrimaryDisplayInfo()) {
+        ScreenId screenId = displayInfo->GetScreenId();
+        if (sptr<ScreenSession> screenSession = GetScreenSession(screenId)) {
+            TLOGI(WmsLogTag::DMS, "displayId: %{public}" PRIu64 " densityInCurResolution: %{public}f",
+                displayInfo->GetDisplayId(), screenSession->GetDensityInCurResolution());
+            screenSession->SetDensityInCurResolution(virtualPixelRatio);
+        }
+    }
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen
