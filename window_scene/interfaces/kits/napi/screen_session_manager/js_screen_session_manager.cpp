@@ -25,7 +25,6 @@
 #include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
-#include "root_scene.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
@@ -131,8 +130,10 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyExtendScreenDestroyFinish);
     BindNativeFunction(env, exportObj, "notifyScreenMaskAppear", moduleName,
         JsScreenSessionManager::NotifyScreenMaskAppear);
-    BindNativeFunction(env, exportObj, "setSystemDpi", moduleName,
-        JsScreenSessionManager::SetSystemDpi);
+    BindNativeFunction(env, exportObj, "setPrimaryDisplaySystemDpi", moduleName,
+        JsScreenSessionManager::SetPrimaryDisplaySystemDpi);
+    BindNativeFunction(env, exportObj, "getPrimaryDisplaySystemDpi", moduleName,
+        JsScreenSessionManager::GetPrimaryDisplaySystemDpi);
     return NapiGetUndefined(env);
 }
 
@@ -341,11 +342,18 @@ napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_cal
     return (me != nullptr) ? me->OnNotifyScreenMaskAppear(env, info) : nullptr;
 }
 
-napi_value JsScreenSessionManager::SetSystemDpi(napi_env env, napi_callback_info info)
+napi_value JsScreenSessionManager::SetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]SetSystemDpi");
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetPrimaryDisplaySystemDpi");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetSystemDpi(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetPrimaryDisplaySystemDpi(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetPrimaryDisplaySystemDpi");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -1115,47 +1123,41 @@ napi_value JsScreenSessionManager::OnNotifyScreenMaskAppear(napi_env env, const 
     return NapiGetUndefined(env);
 }
 
-napi_value JsScreenSessionManager::OnSetSystemDpi(napi_env env, napi_callback_info info)
+napi_value JsScreenSessionManager::OnSetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "[NAPI]OnSetSystemDpi.");
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnSetPrimaryDisplaySystemDpi.");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 2) {
+    if (argc != 1) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int64_t screenId;
     double dpi;
-    if (!ConvertFromJsNumber(env, argv[0], screenId)) {
+    if (!ConvertFromJsNumber(env, argv[0], dpi)) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraStatus");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (!ConvertFromJsNumber(env, argv[1], dpi)) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraStatus");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (RootScene::staticRootScene_) {
-        sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(static_cast<ScreenId>(screenId));
-        if (screenSession) {
-            auto screenBounds = screenSession->GetScreenProperty().GetBounds();
-            Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
-                screenBounds.rect_.width_, screenBounds.rect_.height_ };
-            RootScene::staticRootScene_->SetDisplayDensity(dpi);
-            RootScene::staticRootScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UPDATE_DPI_SYNC);
-            TLOGI(WmsLogTag::DMS, "change density to %{public}f", dpi);
-        } else {
-            TLOGI(WmsLogTag::DMS, "change density failed, null screen session");
-        }
-    } else {
-        TLOGI(WmsLogTag::DMS, "change density failed, null root scene");
-    }
+    float floatDpi = static_cast<double>(dpi / BASELINE_DENSITY);
+    ScreenSessionManagerClient::GetInstance().SetPrimaryDisplaySystemDpi(floatDpi);
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetPrimaryDisplaySystemDpi");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= 1) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    float primaryDisplaySystemDpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
+    return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
 }
 } // namespace OHOS::Rosen

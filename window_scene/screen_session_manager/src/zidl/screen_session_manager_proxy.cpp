@@ -4302,4 +4302,31 @@ DMError ScreenSessionManagerProxy::GetScreenAreaOfDisplayArea(DisplayId displayI
     screenArea = { posX, posY, width, height };
     return ret;
 }
+
+DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_OK;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_OK;
+    }
+    if (!data.WriteFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "write dpi failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_OK;
+    }
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen
