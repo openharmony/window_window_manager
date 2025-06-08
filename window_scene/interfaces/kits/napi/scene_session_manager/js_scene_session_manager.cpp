@@ -552,15 +552,16 @@ void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
     taskScheduler_->PostMainThreadTask(task, where);
 }
 
-void JsSceneSessionManager::OnStartPiPFailed()
+void JsSceneSessionManager::OnStartPiPFailed(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
-    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
+    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_, displayId] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
             return;
         }
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
@@ -764,9 +765,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 
 void JsSceneSessionManager::ProcessStartPiPFailedRegister()
 {
-    SceneSessionManager::GetInstance().SetStartPiPFailedListener([this] {
+    SceneSessionManager::GetInstance().SetStartPiPFailedListener([this](DisplayId displayId) {
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
-        this->OnStartPiPFailed();
+        this->OnStartPiPFailed(displayId);
     });
 }
 
