@@ -6932,6 +6932,17 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen02, TestSize.Level1)
     EXPECT_NE(nullptr, screenSession);
     ssm_->NotifyCreatedScreen(screenSession);
 }
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level3)
+{
+    DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
