@@ -1146,8 +1146,12 @@ void ScreenSession::SetHorizontalRotation()
     property_.SetScreenComponentRotation(HORIZONTAL);
     property_.SetPhysicalRotation(HORIZONTAL);
     currentSensorRotation_ = HORIZONTAL;
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
-    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    if (displayNode_ != nullptr) {
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    } else {
+        TLOGW(WmsLogTag::DMS, "displayNode is null, no need to set displayNode.");
+    }
 }
 
 Orientation ScreenSession::GetOrientation() const
