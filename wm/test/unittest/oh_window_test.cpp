@@ -142,7 +142,7 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
 {
     int32_t windowId = 1;
     int32_t windowX = 0;
-    int32_t windowY = 0
+    int32_t windowY = 0;
     auto ret = OH_WindowManager_InjectTouchEvent(windowId, nullptr, windowX, windowY);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
     Input_TouchEvent touchEvent;
