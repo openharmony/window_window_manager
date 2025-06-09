@@ -59,10 +59,8 @@ void DisplayManagerAgentProxyTest::SetUp()
 
     sptr<IRemoteObject> impl;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(sptr<IRemoteObjectMocker>::MakeSptr(), nullptr);
         impl = sptr<IRemoteObjectMocker>::MakeSptr();
     } else {
-        ASSERT_NE(sptr<IRemoteObjectMocker>::MakeSptr(), nullptr);
         impl = sptr<IRemoteObjectMocker>::MakeSptr();
     }
 
