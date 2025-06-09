@@ -2102,7 +2102,7 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid brightness value: %{public}f", brightness);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (!WindowHelper::IsAppWindow(GetType())) {
+    if (!(WindowHelper::IsAppWindow(GetType()) || GetType() == WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "non app window does not support set brightness, type: %{public}u", GetType());
         return WMError::WM_ERROR_INVALID_TYPE;
     }
