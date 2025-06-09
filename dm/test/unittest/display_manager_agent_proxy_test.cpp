@@ -445,12 +445,12 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange01, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = nullptr;
-    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+    
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenChange(screenInfo, event);
@@ -464,7 +464,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = nullptr;
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -483,7 +482,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = nullptr;
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -734,11 +732,11 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnDisplayChange03
- * @tc.desc: OnDisplayChange03
+ * @tc.name: OnDisplayChange04
+ * @tc.desc: OnDisplayChange04
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
 {
     
     logMsg.clear();
