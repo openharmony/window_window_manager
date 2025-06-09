@@ -248,10 +248,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
-        // mark keyboard session as dirty if params change
-        if (session->IsSessionForeground() && sessionProperty->GetKeyboardLayoutParams() != params) {
-            session->MarkOccupiedAreaAsDirty();
-        }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
@@ -265,8 +261,18 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
+        bool isLayoutFinished = true;
         if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
-            session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, true, false);
+            // If the vsync period terminates, immediately notify all registered listeners.
+            if (session->keyboardCallback_ != nullptr &&
+                session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
+                    isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
+            }
+            if (isLayoutFinished) {
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d",
+                    session->GetCallingSessionId());
+                session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, true, false);
+            }
         }
         // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
@@ -693,7 +699,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             rsTransaction = session->GetRSTransaction();
         }
 
-        // The callingId may change in WindowManager. Use scb's callingId to properly handle callingWindow raise/restore.
+        // The callingId may change in WindowManager.
+        // Use scb's callingId to properly handle callingWindow raise/restore.
         sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
         if (callingSession != nullptr) {
             callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
@@ -709,8 +716,6 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, false, true, true);
-            } else {
-                session->MarkOccupiedAreaAsDirty();
             }
             if (session->IsSessionForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
                 !animationInfo.isGravityChanged) {
@@ -751,21 +756,6 @@ std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
         rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext());
     }
     return rsTransaction;
-}
-
-void KeyboardSession::MarkOccupiedAreaAsDirty()
-{
-    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
-}
-
-void KeyboardSession::ResetOccupiedAreaDirtyFlags()
-{
-    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA);
-}
-
-uint32_t KeyboardSession::GetOccupiedAreaDirtyFlags()
-{
-    return dirtyFlags_;
 }
 
 std::string KeyboardSession::GetSessionScreenName()
