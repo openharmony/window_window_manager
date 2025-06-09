@@ -341,7 +341,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect02, TestSize.Level1)
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
     
     MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenConnect(screenInfo);
     EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
