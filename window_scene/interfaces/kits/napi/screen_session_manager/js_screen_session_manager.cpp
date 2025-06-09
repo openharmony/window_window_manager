@@ -344,14 +344,14 @@ napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_cal
 
 napi_value JsScreenSessionManager::SetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]SetPrimaryDisplaySystemDpi");
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetPrimaryDisplaySystemDpi(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]GetPrimaryDisplaySystemDpi");
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
 }
@@ -1125,9 +1125,9 @@ napi_value JsScreenSessionManager::OnNotifyScreenMaskAppear(napi_env env, const 
 
 napi_value JsScreenSessionManager::OnSetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "[NAPI]OnSetPrimaryDisplaySystemDpi.");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -1149,14 +1149,7 @@ napi_value JsScreenSessionManager::OnSetPrimaryDisplaySystemDpi(napi_env env, na
 
 napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetPrimaryDisplaySystemDpi");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= 1) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
-        return NapiGetUndefined(env);
-    }
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
     float primaryDisplaySystemDpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
     return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
 }
