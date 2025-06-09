@@ -12048,6 +12048,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         std::vector<uint32_t> startingAppZOrderList;
         processingFlushUIParams_.store(true);
         auto keyboardSession = GetKeyboardSession(screenId, false);
+        bool keyboardRectChanged = false;
+        bool callingSessionRectChanged = false;
+        uint32_t callingId = (keyboardSession != nullptr) ? keyboardSession->GetCallingSessionId() : 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -12064,18 +12067,25 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                         startingAppZOrderList.push_back(iter->second.zOrder_);
                         sceneSession->SetStartingBeforeVisible(false);
                     }
+                    if (keyboardSession != nullptr) {
+                        if(keyboardSession->GetPersistentId() == sceneSession->GetPersistentId() &&
+                            (!keyboardSession->IsVisibleForeground() ||
+                            (!iter->second.rect_.IsInvalid() && keyboardSession->GetSessionRect() != iter->second.rect_)
+                        )) {
+                            keyboardRectChanged = true;
+                        } else if (callingId == static_cast<uint32_t>(sceneSession->GetPersistentId()) &&
+                            (!iter->second.rect_.IsInvalid() && sceneSession->GetSessionRect() != iter->second.rect_)) {
+                            callingSessionRectChanged = true;
+                        }
+                    }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
                 } else {
                     sessionMapDirty_ |= sceneSession->UpdateUIParam();
                 }
             }
-        }
-        if (keyboardSession != nullptr && 
-            (keyboardSession->GetOccupiedAreaDirtyFlags() &
-            static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA)) !=
-            static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
-            keyboardSession->ProcessKeyboardOccupiedAreaInfo(keyboardSession->GetCallingSessionId(), false, false, true);
-            keyboardSession->ResetOccupiedAreaDirtyFlags();
+            if (keyboardRectChanged || callingSessionRectChanged) {
+                keyboardSession->ProcessKeyboardOccupiedAreaInfo(callingId, true, false, true);
+            }
         }
         processingFlushUIParams_.store(false);
 
