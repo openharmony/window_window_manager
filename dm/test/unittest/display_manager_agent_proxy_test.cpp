@@ -23,6 +23,7 @@
 #include "display_manager_adapter.h"
 #include "display_manager_proxy.h"
 #include "scene_board_judgement.h"
+#include "window_scene.h"
 #include "zidl/display_manager_agent_proxy.h"
 #include "../../../window_scene/test/mock/mock_message_parcel.h"
 
