@@ -4308,7 +4308,7 @@ DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::DMS, "remote is null");
-        return DMError::DM_OK;
+        return DMError::DM_ERROR_IPC_FAILED;
     }
 
     MessageParcel reply;
@@ -4316,7 +4316,7 @@ DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return DMError::DM_OK;
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteFloat(dpi)) {
         TLOGE(WmsLogTag::DMS, "write dpi failed");
@@ -4325,7 +4325,7 @@ DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
-        return DMError::DM_OK;
+        return DMError::DM_ERROR_IPC_FAILED;
     }
     return DMError::DM_OK;
 }
