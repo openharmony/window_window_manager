@@ -2189,8 +2189,8 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     std::string routerStack = "stackInfo:{}";
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
-              WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(window->NapiSetUIContent("info", (napi_env)nullptr, (napi_value)nullptr, BackupAndRestoreType::NONE,
+        nullptr, nullptr), WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

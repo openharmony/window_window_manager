@@ -1810,6 +1810,14 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
 }
 
+WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage,
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability, 1u);
+}
+
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -1844,13 +1852,53 @@ void WindowSessionImpl::DestroyExistUIContent()
     }
 }
 
-WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+std::unique_ptr<Ace::UIContent> WindowSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(GetContext().get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+Ace::UIContentErrorCode WindowSessionImpl::UIContentInitByName(Ace::UIContent* uiContent,
+    const std::string& contentInfo, void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->InitializeByName(this, contentInfo, (napi_value)storage);
+    }
+}
+
+template<typename T>
+Ace::UIContentErrorCode WindowSessionImpl::UIContentInit(Ace::UIContent* uiContent, T contentInfo,
+    void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->Initialize(this, contentInfo, (napi_value)storage);
+    }
+}
+
+Ace::UIContentErrorCode WindowSessionImpl::UIContentRestore(Ace::UIContent* uiContent, const std::string& contentInfo,
+    void* storage, Ace::ContentInfoType infoType, int isAni)
+{
+    if (isAni) {
+        return uiContent->Restore(this, contentInfo, (ani_object)storage, infoType);
+    } else {
+        return uiContent->Restore(this, contentInfo, (napi_value)storage, infoType);
+    }
+}
+
+WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* env, void* storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-    OHOS::Ace::UIContentErrorCode& aceRet)
+    OHOS::Ace::UIContentErrorCode& aceRet, int isAni)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
-        Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
+    std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1865,8 +1913,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             } else {
                 auto routerStack = GetRestoredRouterStack();
                 auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
-                if (!routerStack.empty() &&
-                    uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, storage, type,
+                    isAni) == Ace::UIContentErrorCode::NO_ERRORS) {
                     TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                     break;
                 }
@@ -1876,24 +1924,23 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
                 uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
                 intentParam_ = "";
             }
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
-            aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_SHARED:
             TLOGI(WmsLogTag::WMS_LIFE, "By shared, restoreNavDestinationInfo, id:%{public}d", GetPersistentId());
             uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             navDestinationInfo_ = "";
             break;
         case WindowSetUIContentType::BY_ABC:
-            auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage, contentInfo);
+            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, isAni);
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -2024,8 +2071,9 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    int isAni)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, state:%{public}u, persistentId: %{public}d",
         contentInfo.c_str(), state_, GetPersistentId());
@@ -2036,7 +2084,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet);
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
+        isAni);
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
