@@ -720,7 +720,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
  * @tc.desc: test WS_OK
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest5, NotifyScreenshotEvent, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
