@@ -84,6 +84,5 @@ ohos_shared_library("scenesessionmanagerani_kit") {
 group("scene_session_manager_ani") {
   deps = [
     ":scenesessionmanagerani_kit",
-    "scene_session_manager_ani:scene_session_manager_etc",
   ]
 }
