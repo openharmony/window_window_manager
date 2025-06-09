@@ -1269,11 +1269,11 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
 }
 
 /**
- * @tc.name: UpdateBrightness
+ * @tc.name: UpdateBrightness01
  * @tc.desc: SceneSesionManager update brightness
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, UpdateBrightness01, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -1281,6 +1281,26 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Leve
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     result01 = ssm_->UpdateBrightness(persistentId);
+    EXPECT_EQ(result01, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateBrightness02
+ * @tc.desc: WINDOW_TYPE_WALLET_SWIPE_CARD
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 10086;
+    SessionInfo info;
+    info.abilityName_ = "UpdateBrightness";
+    info.bundleName_ = "UpdateBrightness";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD);
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, session));
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto  result01 = ssm_->UpdateBrightness(persistentId);
     EXPECT_EQ(result01, WSError::WS_OK);
 }
 
