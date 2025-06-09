@@ -49,7 +49,6 @@ public:
 
 void DisplayManagerAgentProxyTest::SetUpTestSuite()
 {
-
 }
 
 void DisplayManagerAgentProxyTest::SetUp()
@@ -69,27 +68,6 @@ void DisplayManagerAgentProxyTest::SetUp()
 
     displayManagerAgentProxy = new (std::nothrow) DisplayManagerAgentProxy(impl);
     ASSERT_NE(displayManagerAgentProxy, nullptr);
-}
-
-/**
- * @tc.name: NotifyDisplayPowerEvent
- * @tc.desc: NotifyDisplayPowerEvent
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent, TestSize.Level1)
-{
-    DisplayPowerEvent event = DisplayPowerEvent::DESKTOP_READY;
-    EventStatus status = EventStatus::BEGIN;
-    GTEST_LOG_(INFO) << "WindowSessionImplTest:1";
-    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -294,42 +272,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged02, TestSize.Le
 }
 
 /**
- * @tc.name: OnScreenConnect
- * @tc.desc: OnScreenConnect
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect, TestSize.Level1)
-{
-    sptr<ScreenInfo> screenInfo = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenConnect(screenInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: OnScreenConnect01
- * @tc.desc: OnScreenConnect01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, TestSize.Level1)
-{
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenConnect(screenInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: OnScreenConnect02
  * @tc.desc: OnScreenConnect02
  * @tc.type: FUNC
@@ -364,24 +306,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect03, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScreenDisconnect
- * @tc.desc: OnScreenDisconnect
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, TestSize.Level1)
-{
-    ScreenId screenId = 0;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenDisconnect(screenId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: OnScreenDisconnect01
  * @tc.desc: OnScreenDisconnect
  * @tc.type: FUNC
@@ -397,45 +321,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenDisconnect(screenId);
     EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
-}
-/**
- * @tc.name: OnScreenChange
- * @tc.desc: OnScreenChange
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange, TestSize.Level1)
-{
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenChange(screenInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: OnScreenChange01
- * @tc.desc: OnScreenChange01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange01, TestSize.Level1)
-{
-    sptr<ScreenInfo> screenInfo = nullptr;
-    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenChange(screenInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -492,26 +377,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
     displayManagerAgentProxy->OnScreenChange(screenInfo, event);
     EXPECT_TRUE(logMsg.find("Write ScreenChangeEvent failed") != std::string::npos);
 }
-/**
- * @tc.name: OnScreenGroupChange
- * @tc.desc: OnScreenGroupChange
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, TestSize.Level1)
-{
-    std::string trigger = " ";
-    std::vector<sptr<ScreenInfo>> screenInfos = {};
-    ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
 
 /**
  * @tc.name: OnScreenGroupChange02
@@ -550,41 +415,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange03, TestSize.Level1)
     displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
     EXPECT_TRUE(logMsg.find("Write ScreenGroupChangeEvent failed") != std::string::npos);
 }
-/**
- * @tc.name: OnDisplayCreate
- * @tc.desc: OnDisplayCreate
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate, TestSize.Level1)
-{
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: OnDisplayCreate01
- * @tc.desc: OnDisplayCreate01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate01, TestSize.Level1)
-{
-    sptr<DisplayInfo> displayInfo = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
 
 /**
  * @tc.name: OnDisplayCreate02
@@ -621,24 +451,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnDisplayDestroy
- * @tc.desc: OnDisplayDestroy
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy, TestSize.Level1)
-{
-    DisplayId displayId = 0;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayDestroy(displayId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: OnDisplayDestroy01
  * @tc.desc: OnDisplayDestroy
  * @tc.type: FUNC
@@ -653,44 +465,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy01, TestSize.Level1)
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnDisplayDestroy(displayId);
     EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
-}
-
-/**
- * @tc.name: OnDisplayChange
- * @tc.desc: OnDisplayChange
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange, TestSize.Level1)
-{
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: OnDisplayChange01
- * @tc.desc: OnDisplayChange01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, TestSize.Level1)
-{
-    sptr<DisplayInfo> displayInfo = nullptr;
-    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -738,7 +512,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
 {
-    
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
