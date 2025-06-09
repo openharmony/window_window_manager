@@ -1189,7 +1189,7 @@ HWTEST_F(WindowSessionImplTest5, NapiSetUIContent01, Function | SmallTest | Leve
     std::string navInfo = "testInfo";
     window->SetNavDestinationInfo(navInfo);
 
-    window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+    window->NapiSetUIContent("info", (napi_env)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
     EXPECT_EQ(window->navDestinationInfo_, "");
 }
 } // namespace

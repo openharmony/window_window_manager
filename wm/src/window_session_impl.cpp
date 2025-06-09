@@ -1936,7 +1936,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
         case WindowSetUIContentType::BY_SHARED:
             TLOGI(WmsLogTag::WMS_LIFE, "By shared, restoreNavDestinationInfo, id:%{public}d", GetPersistentId());
             uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             navDestinationInfo_ = "";
             break;
         case WindowSetUIContentType::BY_ABC:
