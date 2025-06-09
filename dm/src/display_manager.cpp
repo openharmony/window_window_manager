@@ -34,6 +34,7 @@ const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }
@@ -2478,7 +2479,7 @@ float DisplayManager::GetPrimaryDisplaySystemDpi()
 {
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
     if (displayInfo == nullptr) {
-        return 1.0f;
+        return INVALID_DEFAULT_DENSITY;
     }
     return displayInfo->GetDensityInCurResolution();
 }
