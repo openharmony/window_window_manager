@@ -165,33 +165,14 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged01, TestSize.Le
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.Level1)
 {
-    sptr<DisplayChangeInfo> display_change_info = new DisplayChangeInfo();
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: NotifyDisplayChangeInfoChanged01
- * @tc.desc: NotifyDisplayChangeInfoChanged01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged01, TestSize.Level1)
-{
-    sptr<DisplayChangeInfo> display_change_info = new DisplayChangeInfo();
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayChangeInfo> display_change_info = Sptr<DisplayChangeInfo>::MakeSptr();
+   
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);   
 }
 
 /**
@@ -528,7 +509,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot01, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
        
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -545,7 +526,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot02, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
        
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
