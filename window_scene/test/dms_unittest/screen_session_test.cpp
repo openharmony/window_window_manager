@@ -4206,6 +4206,43 @@ HWTEST_F(ScreenSessionTest, SetSecurity02, TestSize.Level1)
     session->SetSecurity(false);
     EXPECT_EQ(session->isSecurity_, false);
 }
+
+/**
+ * @tc.name: SetHorizontalRotation01
+ * @tc.desc: SetHorizontalRotation01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation01, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+
+    session->displayNode_ = nullptr;
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_TRUE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetHorizontalRotation02
+ * @tc.desc: SetHorizontalRotation02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    EXPECT_NE(nullptr, displayNode);
+
+    session->SetDisplayNode(displayNode);
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_FALSE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
