@@ -4001,6 +4001,11 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
 void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
     float phyRotation, ScreenPropertyChangeType screenPropertyChangeType)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
     if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
         TLOGI(WmsLogTag::DMS, "ROTATION_END");
         return;
