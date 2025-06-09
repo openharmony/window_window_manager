@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <iremote_broker.h>
+#include <iremote_object_mocker>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
@@ -22,11 +23,20 @@
 #include "display_manager_adapter.h"
 #include "display_manager_proxy.h"
 #include "scene_board_judgement.h"
-#include "window_scene.h"
 #include "zidl/display_manager_agent_proxy.h"
+#include "../../../window_scene/test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS::Rosen {
 class DisplayManagerAgentProxyTest : public testing::Test {
@@ -38,7 +48,7 @@ public:
 
 void DisplayManagerAgentProxyTest::SetUpTestSuite()
 {
-    ASSERT_TRUE(SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy());
+
 }
 
 void DisplayManagerAgentProxyTest::SetUp()
@@ -49,11 +59,11 @@ void DisplayManagerAgentProxyTest::SetUp()
 
     sptr<IRemoteObject> impl;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+        ASSERT_NE(sptr<IRemoteObject>::MakeSptr(), nullptr);
+        impl = sptr<IRemoteObject>::MakeSptr();
     } else {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        ASSERT_NE(sptr<IRemoteObject>::MakeSptr(), nullptr);
+        impl = sptr<IRemoteObject>::MakeSptr();
     }
 
     displayManagerAgentProxy = new (std::nothrow) DisplayManagerAgentProxy(impl);
@@ -79,6 +89,42 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent, TestSize.Level1)
     };
     func();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifyDisplayPowerEvent02
+ * @tc.desc: NotifyDisplayPowerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayPowerEvent event = DisplayPowerEvent::DESKTOP_READY;
+    EventStatus status = EventStatus::BEGIN;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyDisplayPowerEvent03
+ * @tc.desc: NotifyDisplayPowerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayPowerEvent event = DisplayPowerEvent::DESKTOP_READY;
+    EventStatus status = EventStatus::BEGIN;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
+    EXPECT_TRUE(logMsg.find("Write event failed") != std::string::npos);
 }
 
 /**
