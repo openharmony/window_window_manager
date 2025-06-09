@@ -1640,6 +1640,19 @@ HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
+{
+    int32_t windowId = 888;
+    std::string topNavDestName;
+    auto ret = WindowManager::GetInstance().GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName), ret);
+}
+
+/**
  * @tc.name: ShiftAppWindowPointerEvent
  * @tc.desc: check ShiftAppWindowPointerEvent
  * @tc.type: FUNC

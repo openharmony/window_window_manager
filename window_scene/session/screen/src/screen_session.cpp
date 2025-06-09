@@ -42,10 +42,10 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
-const int32_t DURATION_0 = 0;
-const int32_t DURATION_1000 = 1000;
-const int32_t BRIGHTNESS_FACTOR_0 = 0;
-const int32_t BRIGHTNESS_FACTOR_1 = 1;
+const int DURATION_0MS = 0;
+const int DURATION_1000MS = 1000;
+const float BRIGHTNESS_FACTOR_0 = 0;
+const float BRIGHTNESS_FACTOR_1 = 1;
 const float FULL_STATUS_WIDTH = 2048;
 const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
@@ -473,6 +473,16 @@ void ScreenSession::SetIsCurrentInUse(bool isInUse)
 bool ScreenSession::GetIsCurrentInUse() const
 {
     return isInUse_;
+}
+
+void ScreenSession::SetIsExtendVirtual(bool isExtendVirtual)
+{
+    isExtendVirtual_ = isExtendVirtual;
+}
+
+bool ScreenSession::GetIsExtendVirtual() const
+{
+    return isExtendVirtual_;
 }
 
 void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
@@ -2063,13 +2073,14 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode_ is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
+    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
-    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0 : DURATION_1000);
+    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0MS : DURATION_1000MS);
     // Increase animation when HDR luminance changes abruptly
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     displayNode_->SetHDRBrightnessFactor(isForceCloseHdr ? BRIGHTNESS_FACTOR_0 : BRIGHTNESS_FACTOR_1);

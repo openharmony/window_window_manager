@@ -38,6 +38,7 @@ struct VirtualScreenOption {
     bool isForShot_ {true};
     std::vector<uint64_t> missionIds_ {};
     VirtualScreenType virtualScreenType_ {VirtualScreenType::UNKNOWN};
+    bool isSecurity_ {true};
 };
 
 class Screen : public RefBase {

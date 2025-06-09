@@ -93,8 +93,12 @@ public:
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override;
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;
+    WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener) override;
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override;
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
+    WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
+    WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
 };
 } // namespace OHOS::Rosen
 

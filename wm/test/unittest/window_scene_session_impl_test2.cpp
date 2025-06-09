@@ -428,6 +428,36 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateWindowMode02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName01
+ * @tc.desc: test GetTopNavDestinationName whether get the top nav destination name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetTopNavDestinationName01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSession->uiContent_ = nullptr;
+    std::string topNavDestName;
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    Ace::UIContentMocker* uiContent = reinterpret_cast<Ace::UIContentMocker*>(windowSceneSession->uiContent_.get());
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{"));
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "test");
+}
+
+/**
  * @tc.name: RemoveWindowFlag01
  * @tc.desc: RemoveWindowFlag
  * @tc.type: FUNC
@@ -557,12 +587,48 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfiguration01, TestSize.Level1)
     option->SetWindowName("UpdateConfiguration01");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int ret = 0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowSceneSession->UpdateConfiguration(configuration);
-    windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
+    ASSERT_NE(windowSceneSession->uiContent_, nullptr);
     windowSceneSession->UpdateConfiguration(configuration);
-    ASSERT_EQ(ret, 0);
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("subWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+    ASSERT_NE(subSession, nullptr);
+    subSession->property_->SetPersistentId(8);
+    windowSceneSession->subWindowSessionMap_.clear();
+    windowSceneSession->subWindowSessionMap_[windowSceneSession->GetPersistentId()].push_back(subSession);
+    windowSceneSession->UpdateConfiguration(configuration);
+    windowSceneSession->subWindowSessionMap_.clear();
+}
+
+/**
+ * @tc.name: UpdateConfigurationSync
+ * @tc.desc: Test UpdateConfigurationSync can update new configuration of window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationSync, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateConfigurationSync01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    windowSceneSession->UpdateConfigurationSync(configuration);
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
+    windowSceneSession->UpdateConfigurationSync(configuration);
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("subWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+    ASSERT_NE(subSession, nullptr);
+    subSession->property_->SetPersistentId(8);
+    windowSceneSession->subWindowSessionMap_.clear();
+    windowSceneSession->subWindowSessionMap_[windowSceneSession->GetPersistentId()].push_back(subSession);
+    windowSceneSession->UpdateConfigurationSync(configuration);
+    windowSceneSession->subWindowSessionMap_.clear();
 }
 
 /**
@@ -576,30 +642,22 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationForSpecified, TestSize.
     option->SetWindowName("UpdateConfiguration01");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int ret = 0;
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    windowSceneSession->uiContent_ = nullptr;
     windowSceneSession->UpdateConfigurationForSpecified(configuration, resourceManager);
-    windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    windowSceneSession->uiContent_ = std::make_shared<Ace::UIContentMocker>();
     windowSceneSession->UpdateConfigurationForSpecified(configuration, resourceManager);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: UpdateConfigurationForAll01
- * @tc.desc: UpdateConfigurationForAll
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationForAll01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateConfigurationForAll01");
-    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int ret = 0;
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
-    windowSceneSession->UpdateConfigurationForAll(configuration);
-    ASSERT_EQ(ret, 0);
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("subWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+    ASSERT_NE(subSession, nullptr);
+    subSession->property_->SetPersistentId(8);
+    windowSceneSession->subWindowSessionMap_.clear();
+    windowSceneSession->subWindowSessionMap_[windowSceneSession->GetPersistentId()].push_back(subSession);
+    windowSceneSession->UpdateConfigurationForSpecified(configuration, resourceManager);
+    windowSceneSession->subWindowSessionMap_.clear();
 }
 
 /**

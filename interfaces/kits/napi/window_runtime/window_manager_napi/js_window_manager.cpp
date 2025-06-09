@@ -179,6 +179,13 @@ napi_value JsWindowManager::GetGlobalWindowMode(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnGetGlobalWindowMode(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetTopNavDestinationName(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1380,6 +1387,48 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    int32_t windowId = 0;
+    if (!ConvertFromJsValue(env, argv[0], windowId) || windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    std::string topNavDestName;
+    WMError retErrCode = WMError::WM_OK;
+    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
+        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
+            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+    };
+    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (retErrCode != WMError::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
+                    where, static_cast<int32_t>(retErrCode), windowId);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                return;
+            }
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
+                where, topNavDestName.c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, topNavDestName));
+        };
+    napi_value result = nullptr;
+    auto asyncTask = CreateAsyncTask(env, nullptr,
+        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopNavDestinationName", env, std::move(asyncTask));
+    return result;
+}
+
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1658,6 +1707,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
+    BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName,
+        JsWindowManager::GetTopNavDestinationName);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,

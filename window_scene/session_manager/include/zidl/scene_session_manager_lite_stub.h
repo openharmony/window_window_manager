@@ -87,8 +87,12 @@ private:
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
     int HandleCreateNewInstanceKey(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveInstanceKey(MessageParcel& data, MessageParcel& reply);
     int HandleTransferSessionToTargetScreen(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateKioskAppList(MessageParcel& data, MessageParcel& reply);
+    int HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply);
+    int HandleExitKioskMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
