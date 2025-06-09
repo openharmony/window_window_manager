@@ -93,5 +93,6 @@ ohos_shared_library("windowstageani_kit") {
 group("window_stage_ani_pack") {
   deps = [
     ":windowstageani_kit",
+    "window_stage_ani:window_stage_etc",
   ]
 }
