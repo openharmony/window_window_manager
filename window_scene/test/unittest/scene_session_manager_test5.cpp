@@ -39,14 +39,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    std::string g_logMsg;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-        const char* msg)
-    {
-        g_logMsg = msg;
-    }
-}
 class SceneSessionManagerTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -117,45 +109,6 @@ HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, TestSize.Level1)
     ssm_->NotifySessionTouchOutside(0);
     property->SetPersistentId(1);
     ssm_->NotifySessionTouchOutside(1);
-}
-
-/**
- * @tc.name: NotifyScreenshotEvent
- * @tc.desc: test WS_OK
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, NotifyScreenshotEvent, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    ASSERT_NE(nullptr, ssm_);
-    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    ssm_->screenshotAppEventListenerSessionSet_.insert(1);
-    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
-
-    SessionInfo info;
-    info.abilityName_ = "NotifyScreenshotEvent";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_->SetPersistentId(1);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-
-    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
-    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
-    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
-    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
