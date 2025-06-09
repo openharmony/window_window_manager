@@ -181,11 +181,11 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Le
 }
 
 /**
- * @tc.name: NotifyAccessibilityWindowInfo
+ * @tc.name: NotifyAccessibilityWindowInfo01
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo01, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -336,11 +336,11 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize
 }
 
 /**
- * @tc.name: NotifyWaterMarkFlagChangedResult
+ * @tc.name: NotifyWaterMarkFlagChangedResult01
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult01, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -496,11 +496,11 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize
 }
 
 /**
- * @tc.name: NotifyWindowPidVisibilityChanged
+ * @tc.name: NotifyWindowPidVisibilityChanged01
  * @tc.desc: test NotifyWindowPidVisibilityChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged01, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
