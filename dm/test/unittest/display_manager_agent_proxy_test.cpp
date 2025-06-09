@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <iremote_broker.h>
-#include <iremote_object_mocker>
+#include <iremote_object_mocker.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
@@ -60,11 +60,11 @@ void DisplayManagerAgentProxyTest::SetUp()
 
     sptr<IRemoteObject> impl;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(sptr<IRemoteObject>::MakeSptr(), nullptr);
-        impl = sptr<IRemoteObject>::MakeSptr();
+        ASSERT_NE(sptr<IRemoteObjectMocker>::MakeSptr(), nullptr);
+        impl = sptr<IRemoteObjectMocker>::MakeSptr();
     } else {
-        ASSERT_NE(sptr<IRemoteObject>::MakeSptr(), nullptr);
-        impl = sptr<IRemoteObject>::MakeSptr();
+        ASSERT_NE(sptr<IRemoteObjectMocker>::MakeSptr(), nullptr);
+        impl = sptr<IRemoteObjectMocker>::MakeSptr();
     }
 
     displayManagerAgentProxy = new (std::nothrow) DisplayManagerAgentProxy(impl);
@@ -330,6 +330,40 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScreenConnect02
+ * @tc.desc: OnScreenConnect02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnScreenConnect(screenInfo);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenConnect03
+ * @tc.desc: OnScreenConnect03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenConnect(screenInfo);
+    EXPECT_TRUE(logMsg.find("Write ScreenInfo failed") != std::string::npos);
+}
+
+/**
  * @tc.name: OnScreenDisconnect
  * @tc.desc: OnScreenDisconnect
  * @tc.type: FUNC
@@ -347,6 +381,23 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, TestSize.Level1)
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: OnScreenDisconnect01
+ * @tc.desc: OnScreenDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenDisconnect(screenId);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 /**
  * @tc.name: OnScreenChange
  * @tc.desc: OnScreenChange
@@ -388,6 +439,62 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScreenChange02
+ * @tc.desc: OnScreenChange02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
+{
+    sptr<ScreenInfo> screenInfo = nullptr;
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenChange03
+ * @tc.desc: OnScreenChange03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
+{
+    sptr<ScreenInfo> screenInfo = nullptr;
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(logMsg.find("Write screenInfo failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenChange04
+ * @tc.desc: OnScreenChange04
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
+{
+    sptr<ScreenInfo> screenInfo = nullptr;
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(logMsg.find("Write ScreenChangeEvent failed") != std::string::npos);
+}
+/**
  * @tc.name: OnScreenGroupChange
  * @tc.desc: OnScreenGroupChange
  * @tc.type: FUNC
@@ -408,6 +515,43 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, TestSize.Level1)
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: OnScreenGroupChange02
+ * @tc.desc: OnScreenGroupChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::string trigger = " ";
+    std::vector<sptr<ScreenInfo>> screenInfos = {};
+    ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenGroupChange03
+ * @tc.desc: OnScreenGroupChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::string trigger = " ";
+    std::vector<sptr<ScreenInfo>> screenInfos = {};
+    ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
+    EXPECT_TRUE(logMsg.find("Write ScreenGroupChangeEvent failed") != std::string::npos);
+}
 /**
  * @tc.name: OnDisplayCreate
  * @tc.desc: OnDisplayCreate
@@ -445,6 +589,40 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnDisplayCreate02
+ * @tc.desc: OnDisplayCreate02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate02, TestSize.Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnDisplayCreate03
+ * @tc.desc: OnDisplayCreate03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+    EXPECT_TRUE(logMsg.find("Write DisplayInfo failed") != std::string::npos);
+}
+
+/**
  * @tc.name: OnDisplayDestroy
  * @tc.desc: OnDisplayDestroy
  * @tc.type: FUNC
@@ -460,6 +638,23 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy, TestSize.Level1)
     };
     func();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: OnDisplayDestroy01
+ * @tc.desc: OnDisplayDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 0;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayDestroy(displayId);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -500,6 +695,62 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, TestSize.Level1)
     ASSERT_EQ(resultValue, 1);
 }
 
+/**
+ * @tc.name: OnDisplayChange02
+ * @tc.desc: OnDisplayChange02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange02, TestSize.Level1)
+{
+    
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnDisplayChange03
+ * @tc.desc: OnDisplayChange03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
+{
+    
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(logMsg.find("Write DisplayInfo failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnDisplayChange03
+ * @tc.desc: OnDisplayChange03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
+{
+    
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(logMsg.find("Write DisplayChangeEvent failed") != std::string::npos);
+}
 /**
  * @tc.name: OnScreenshot
  * @tc.desc: OnScreenshot
