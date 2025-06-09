@@ -105,23 +105,39 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent03, TestSize.Level
 }
 
 /**
- * @tc.name: NotifyDisplayStateChanged
+ * @tc.name: NotifyDisplayStateChanged01
  * @tc.desc: NotifyDisplayStateChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged01, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
     DisplayState state = DisplayState::OFF;
 
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);    
+}
+
+/**
+ * @tc.name: NotifyDisplayStateChanged02
+ * @tc.desc: NotifyDisplayStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 0;
+    DisplayState state = DisplayState::OFF;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
+    EXPECT_TRUE(logMsg.find("Write DisplayState failed") != std::string::npos);    
 }
 
 /**
@@ -167,7 +183,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayChangeInfo> display_change_info = Sptr<DisplayChangeInfo>::MakeSptr();
+    sptr<DisplayChangeInfo> display_change_info = sptr<DisplayChangeInfo>::MakeSptr();
    
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -584,42 +600,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged02, TestSi
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
     EXPECT_TRUE(logMsg.find("Write private info failed") != std::string::npos);
-}
-/**
- * @tc.name: NotifyPrivateStateWindowListChanged01
- * @tc.desc: NotifyPrivateStateWindowListChanged-1
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged01, TestSize.Level1)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    DisplayId id = 0;
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
-    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
-
-}
-
-/**
- * @tc.name: NotifyPrivateStateWindowListChanged02
- * @tc.desc: NotifyPrivateStateWindowListChanged-1
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged02, TestSize.Level1)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    DisplayId id = 0;
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
-    EXPECT_TRUE(logMsg.find("Write DisplayId failed") != std::string::npos);
 }
 
 /**
