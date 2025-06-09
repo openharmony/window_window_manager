@@ -46,16 +46,23 @@ private:
 
 sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
-
-bool TraverseFuncTest(const sptr<SceneSession>& session)
+bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
 {
+    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
+    if (cutoutInfo == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
+        return false;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
+        return false;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        rect = { cutoutArea.posX_, cutoutArea.posY_, cutoutArea.width_, cutoutArea.height_ };
+    }
     return true;
 }
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerTest10::SetUpTestCase()
 {
