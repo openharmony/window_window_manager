@@ -735,6 +735,7 @@ public:
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+    bool IsSyncLoadStartingWindow();
 
     /*
      * Window Animation
@@ -1509,6 +1510,8 @@ private:
      * Window Pattern
      */
     std::atomic<bool> delayRemoveSnapshot_ = false;
+    void InitWindowPattern();
+    void InitStartingWindow();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
@@ -1529,6 +1532,7 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    bool syncLoadStartingWindow_ = false;
 };
 } // namespace OHOS::Rosen
 
