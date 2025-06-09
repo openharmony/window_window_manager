@@ -846,6 +846,7 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
             TLOGE(WmsLogTag::DMS, "physicalScreenSession is nullptr");
             return;
         }
+        AdaptSuperHorizonalBoot(physicalScreenSession, screenId);
     }
     OnFoldScreenChange(screenSession);
     if (screenEvent == ScreenEvent::CONNECTED) {
