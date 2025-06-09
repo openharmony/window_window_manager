@@ -73,7 +73,7 @@ public:
     virtual DisplayState GetDisplayState(DisplayId displayId) override;
     virtual bool TryToCancelScreenOff() override;
     ScreenId CreateVirtualScreen(VirtualScreenOption option,
-        const sptr<IRemoteObject>& displayManagerAgent, bool isSecurity) override;
+        const sptr<IRemoteObject>& displayManagerAgent) override;
 
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 

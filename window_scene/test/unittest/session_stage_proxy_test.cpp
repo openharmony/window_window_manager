@@ -458,6 +458,7 @@ HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Lev
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**

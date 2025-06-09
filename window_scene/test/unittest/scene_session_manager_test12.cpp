@@ -25,6 +25,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_info.h"
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -34,6 +35,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_window_manager_agent_lite.h"
 #include "session_manager/include/session_manager_agent_controller.h"
+#include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;

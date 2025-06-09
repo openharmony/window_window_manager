@@ -117,8 +117,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyScreenshot(DisplayId displayId);
-    ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent,
-        bool isSecurity = true) override;
+    ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent) override;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
@@ -526,6 +525,7 @@ private:
     void HandleMainScreenDisconnect(sptr<ScreenSession>& screenSession);
     void ResetInternalScreenSession(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
+    Rotation ConvertIntToRotation(int32_t rotation);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
         sptr<ScreenSession>& secondarySession, const std::string& operateMode);
@@ -564,6 +564,12 @@ private:
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
+    void DestroyExtendVirtualScreen();
+    DMError IsPhysicalExtendScreenInUse(ScreenId mainScreenId, ScreenId secondaryScreenId);
+    void CreateExtendVirtualScreen(ScreenId screenId);
+    void SetMultiScreenModeInner(ScreenId mainScreenId, ScreenId secondaryScreenId,
+        MultiScreenMode screenMode);
+
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
     void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,
         sptr<ScreenSession> secondaryScreenSession = nullptr);

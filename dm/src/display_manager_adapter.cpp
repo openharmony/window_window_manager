@@ -342,7 +342,7 @@ DMError ScreenManagerAdapter::GetSupportedColorSpaces(ScreenId screenId, std::ve
 }
 
 ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
-    const sptr<IDisplayManagerAgent>& displayManagerAgent, bool isSecurity)
+    const sptr<IDisplayManagerAgent>& displayManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
 
@@ -353,8 +353,7 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
 
     TLOGI(WmsLogTag::DMS, "enter!");
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject(),
-            isSecurity);
+        return screenSessionManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject());
     }
 
     ErrCode errCode;

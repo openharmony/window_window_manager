@@ -212,7 +212,7 @@ public:
      * @param option Indicates the options of the virtual screen.
      * @return Screen id.
      */
-    ScreenId CreateVirtualScreen(VirtualScreenOption option, bool isSecurity = true);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option);
 
     /**
      * @brief Destroy virtual screen.
