@@ -243,10 +243,10 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowPropertyChange01, TestSi
     uint32_t propertyDirtyFlags = 0;
     std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
 
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
     SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
 }
 
