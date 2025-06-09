@@ -1708,10 +1708,10 @@ HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function 
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     observedInfo = WindowInfoKey::DISPLAY_ID;
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     observedInfo = WindowInfoKey::WINDOW_RECT;
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     observedInfo = WindowInfoKey::BUNDLE_NAME;
