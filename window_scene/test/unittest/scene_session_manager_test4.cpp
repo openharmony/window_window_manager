@@ -71,10 +71,6 @@ bool SceneSessionManagerTest4::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 void SceneSessionManagerTest4::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
