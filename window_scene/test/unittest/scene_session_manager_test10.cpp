@@ -46,17 +46,6 @@ private:
 
 sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
-
-bool TraverseFuncTest(const sptr<SceneSession>& session)
-{
-    return true;
-}
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
 {
     auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
