@@ -10196,11 +10196,13 @@ DMError ScreenSessionManager::SetPrimaryDisplaySystemDpi(float virtualPixelRatio
 {
     sptr<DisplayInfo> displayInfo = GetPrimaryDisplayInfo();
     if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is null.");
         return DMError::DM_ERROR_NULLPTR;
     }
     ScreenId screenId = displayInfo->GetScreenId();
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null.");
         return DMError::DM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::DMS, "displayId: %{public}" PRIu64 " densityInCurResolution: %{public}f",
