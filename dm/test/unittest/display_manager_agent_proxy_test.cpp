@@ -388,11 +388,11 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
 {
-    ScreenId screenId = 0;
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    
+    ScreenId screenId = 0;
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenDisconnect(screenId);
@@ -464,11 +464,11 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
 {
-    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     displayManagerAgentProxy->OnScreenChange(screenInfo, event);
@@ -482,11 +482,11 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
 {
-    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = new ScreenInfo();
-    
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     displayManagerAgentProxy->OnScreenChange(screenInfo, event);
@@ -610,10 +610,10 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate02, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     displayManagerAgentProxy->OnDisplayCreate(displayInfo);
