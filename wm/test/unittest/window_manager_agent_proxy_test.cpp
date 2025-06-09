@@ -59,7 +59,7 @@ void WindowManagerAgentProxyTest::SetUp()
     sptr<IRemoteObject> impl;
     impl = sptr<IRemoteObjectMocker>::MakeSptr();
 
-    windowManagerAgentProxy = sptr<IRemoteObjectMocker>::MakeSptr(impl);
+    windowManagerAgentProxy = sptr<WindowManagerAgentProxy>::MakeSptr(impl);
     ASSERT_NE(windowManagerAgentProxy, nullptr);
 }
 
