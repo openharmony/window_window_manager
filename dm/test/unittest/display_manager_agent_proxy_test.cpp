@@ -64,7 +64,7 @@ void DisplayManagerAgentProxyTest::SetUp()
         impl = sptr<IRemoteObjectMocker>::MakeSptr();
     }
 
-    displayManagerAgentProxy = new (std::nothrow) DisplayManagerAgentProxy(impl);
+    displayManagerAgentProxy = sptr<DisplayManagerAgentProxy>::MakeSptr(impl);
     ASSERT_NE(displayManagerAgentProxy, nullptr);
 }
 
@@ -278,7 +278,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect02, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -295,7 +295,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect03, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
@@ -312,7 +312,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenId screenId = 0;
 
     MockMessageParcel::ClearAllErrorFlag();
@@ -331,7 +331,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
     
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
 
     MockMessageParcel::ClearAllErrorFlag();
@@ -349,7 +349,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
 
     MockMessageParcel::ClearAllErrorFlag();
@@ -367,7 +367,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
 
     MockMessageParcel::ClearAllErrorFlag();
@@ -421,10 +421,9 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange03, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate02, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnDisplayCreate(displayInfo);
@@ -440,7 +439,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
@@ -475,7 +474,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange02, TestSize.Level1)
     
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
@@ -494,7 +493,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
     
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
@@ -512,7 +511,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
