@@ -39,6 +39,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+
 class SceneSessionManagerTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
