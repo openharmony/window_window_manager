@@ -423,7 +423,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate02, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnDisplayCreate(displayInfo);
@@ -439,7 +439,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
@@ -474,7 +474,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange02, TestSize.Level1)
     
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
@@ -493,7 +493,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
     
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
@@ -511,7 +511,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
 {
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    sptr<DisplayInfo> screenInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
     
     MockMessageParcel::ClearAllErrorFlag();
@@ -539,20 +539,36 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, TestSize.Level1)
 
 /**
  * @tc.name: OnScreenshot01
- * @tc.desc: OnScreenshot01
+ * @tc.desc: OnScreenshot
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot01, TestSize.Level1)
 {
-    sptr<ScreenshotInfo> snapshotInfo = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenshot(snapshotInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+       
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenshot02
+ * @tc.desc: OnScreenshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+       
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+    EXPECT_TRUE(logMsg.find("Write ScreenshotInfo failed") != std::string::npos);
 }
 
 /**
