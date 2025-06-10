@@ -130,6 +130,10 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyExtendScreenDestroyFinish);
     BindNativeFunction(env, exportObj, "notifyScreenMaskAppear", moduleName,
         JsScreenSessionManager::NotifyScreenMaskAppear);
+    BindNativeFunction(env, exportObj, "setPrimaryDisplaySystemDpi", moduleName,
+        JsScreenSessionManager::SetPrimaryDisplaySystemDpi);
+    BindNativeFunction(env, exportObj, "getPrimaryDisplaySystemDpi", moduleName,
+        JsScreenSessionManager::GetPrimaryDisplaySystemDpi);
     return NapiGetUndefined(env);
 }
 
@@ -336,6 +340,20 @@ napi_value JsScreenSessionManager::NotifyScreenMaskAppear(napi_env env, napi_cal
     TLOGD(WmsLogTag::DMS, "[NAPI]Notify mask appear.");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyScreenMaskAppear(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetPrimaryDisplaySystemDpi(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -1103,5 +1121,36 @@ napi_value JsScreenSessionManager::OnNotifyScreenMaskAppear(napi_env env, const 
 {
     ScreenSessionManagerClient::GetInstance().NotifyScreenMaskAppear();
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnSetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    double dpi;
+    if (!ConvertFromJsNumber(env, argv[0], dpi)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraStatus");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    float floatDpi = static_cast<float>(dpi / BASELINE_DENSITY);
+    ScreenSessionManagerClient::GetInstance().SetPrimaryDisplaySystemDpi(floatDpi);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    float primaryDisplaySystemDpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
+    return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
 }
 } // namespace OHOS::Rosen
