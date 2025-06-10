@@ -1135,14 +1135,15 @@ napi_value JsScreenSessionManager::OnSetPrimaryDisplaySystemDpi(napi_env env, na
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    float dpi;
+    double dpi;
     if (!ConvertFromJsNumber(env, argv[0], dpi)) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraStatus");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenSessionManagerClient::GetInstance().SetPrimaryDisplaySystemDpi(dpi / BASELINE_DENSITY);
+    float floatDpi = static_cast<float>(dpi / BASELINE_DENSITY);
+    ScreenSessionManagerClient::GetInstance().SetPrimaryDisplaySystemDpi(floatDpi);
     return NapiGetUndefined(env);
 }
 

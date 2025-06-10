@@ -866,7 +866,7 @@ public:
      *
      * @return primary display system dpi.
      */
-    float GetPrimaryDisplaySystemDpi();
+    float GetPrimaryDisplaySystemDpi() const;
 
 private:
     DisplayManager();
