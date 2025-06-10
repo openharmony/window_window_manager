@@ -2475,7 +2475,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     return dstScreenshot;
 }
 
-float DisplayManager::GetPrimaryDisplaySystemDpi()
+float DisplayManager::GetPrimaryDisplaySystemDpi() const
 {
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
     if (displayInfo == nullptr) {
