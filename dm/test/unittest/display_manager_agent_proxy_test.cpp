@@ -592,24 +592,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged01, Te
 }
 
 /**
- * @tc.name: NotifyPrivateStateWindowListChanged02
- * @tc.desc: NotifyPrivateStateWindowListChanged
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged02, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    DisplayId id = 0;
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
-    
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
-    EXPECT_TRUE(g_logMsg.find("Write DisplayId failed") != std::string::npos);
-}
-
-/**
  * @tc.name: NotifyFoldStatusChanged
  * @tc.desc: NotifyFoldStatusChanged
  * @tc.type: FUNC

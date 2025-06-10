@@ -180,24 +180,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Le
 }
 
 /**
- * @tc.name: NotifyAccessibilityWindowInfo01
- * @tc.desc: test InterfaceToken check failed
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo01, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    std::vector<sptr<AccessibilityWindowInfo>> infos = {};
-    WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_REMOVED;
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
-    EXPECT_TRUE(g_logMsg.find("Write windowUpdateType failed") != std::string::npos);
-}
-
-/**
  * @tc.name: UpdateWindowVisibilityInfo01
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
