@@ -57,7 +57,11 @@ private:
     int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+<<<<<<< HEAD
     int HandleNotifyPausedStatus(MessageParcel& data, MessageParcel& reply);
+=======
+    int HandleNotifyLifecyclePausedStatus(MessageParcel& data, MessageParcel& reply);
+>>>>>>> 0d98e08812 (0610-修改差异)
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply);
