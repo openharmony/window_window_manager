@@ -2268,27 +2268,13 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
         TLOGE(WmsLogTag::WMS_ANIMATION, "window type is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
+
+    if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "display is null");
-        return WMError::WM_ERROR_INVALID_DISPLAY;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "display info is null");
-        return WMError::WM_ERROR_INVALID_DISPLAY;
-    }
-    Rect screenRect = {displayInfo->GetX(), displayInfo->GetY(), displayInfo->GetWidth(), displayInfo->GetHeight()};
-    if (!frameRect.IsInsideOf(screenRect)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s", screenRect.ToString().c_str());
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    surfaceNode_->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
-    return WMError::WM_OK;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->SetFrameRectForParticalZoomIn(frameRect));
 }
 
 WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targetOrientation,

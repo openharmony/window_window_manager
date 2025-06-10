@@ -166,6 +166,25 @@ public:
         }
         return type;
     }
+
+    static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
+    {
+        float rotation = 0.f;
+        switch (sensorOrientation) {
+            case DisplayOrientation::LANDSCAPE:
+                rotation = 90.f; // degree 90
+                break;
+            case DisplayOrientation::PORTRAIT_INVERTED:
+                rotation = 180.f; // degree 180
+                break;
+            case DisplayOrientation::LANDSCAPE_INVERTED:
+                rotation = 270.f; // degree 270
+                break;
+            default:
+                break;
+        }
+        return rotation;
+    }
 };
 } // Rosen
 } // OHOS
