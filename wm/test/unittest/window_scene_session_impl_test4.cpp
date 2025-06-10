@@ -152,7 +152,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     pointerEvent->AddPointerItem(pointerItem);
 
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
-    ASSERT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    EXPECT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
 
     windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
@@ -162,7 +162,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     pointerItem.SetWindowY(1);
     windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
-    ASSERT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    EXPECT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
