@@ -31,8 +31,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace
-{
+namespace {
     std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
