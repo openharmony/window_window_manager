@@ -1069,7 +1069,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas2, TestSize.Level1)
 {
     std::vector<MMI::Rect> empty(0);
     manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
-    ASSERT_EQ(empty.size(), 0);
+    EXPECT_EQ(empty.size(), 0);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
     sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
