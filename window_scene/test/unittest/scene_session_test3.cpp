@@ -37,6 +37,16 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -1078,6 +1088,36 @@ HWTEST_F(SceneSessionTest3, UpdateSubWindowLevel, TestSize.Level1)
     EXPECT_NE(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
     sceneSession->UpdateSubWindowLevel(subWindowLevel);
     EXPECT_EQ(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: UpdateLifecyclePausedInner
+ * @tc.desc: UpdateLifecyclePausedInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateLifecyclePausedInner, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "UpdateLifecyclePausedInner";
+    info.bundleName_ = "UpdateLifecyclePausedInner";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") == std::string::npos);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    session->sessionStage_ = mockSessionStage;
+    session->state_ = SessionState::STATE_ACTIVE;
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") != std::string::npos);
+    session->state_ = SessionState::STATE_FOREGROUND;
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") != std::string::npos);
+    session->state_ = SessionState::STATE_BACKGROUND;
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") != std::string::npos);
 }
 
 /**
