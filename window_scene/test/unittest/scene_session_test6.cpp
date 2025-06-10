@@ -301,6 +301,32 @@ HWTEST_F(SceneSessionTest6, SetFollowParentWindowLayoutEnabled03, Function | Sma
     int32_t height = session->GetStatusBarHeight();
     EXPECT_EQ(height, avoidArea.topRect_.height_);
 }
+
+/**
+ * @tc.name: RegisterUpdateAppUseControlCallback Test
+ * @tc.desc: RegisterUpdateAppUseControlCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
+{
+    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+    SceneSession::ControlInfo controlInfo = {
+        .isNeedControl = true,
+        .isControlRecentOnly = true
+    };
+    SessionInfo info;
+    info.bundleName_ = "app";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+ 
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
+        allAppUseMap = sceneSession->GetAllAppUseControlMap();
+    std::string key = "app#0";
+    allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
