@@ -385,7 +385,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Test
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
-    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);   
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -421,7 +421,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
-    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);    
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -439,7 +439,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus01, TestSize.Level
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
-    EXPECT_TRUE(g_logMsg.find("Write accessTokenId failed") != std::string::npos);    
+    EXPECT_TRUE(g_logMsg.find("Write accessTokenId failed") != std::string::npos);
 }
 
 /**
@@ -457,7 +457,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus02, TestSize.Level
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
-    EXPECT_TRUE(g_logMsg.find("Write isShowing status failed") != std::string::npos);    
+    EXPECT_TRUE(g_logMsg.find("Write isShowing status failed") != std::string::npos);
 }
 
 /**
@@ -525,7 +525,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);   
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
@@ -543,8 +543,8 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange01, TestSize.Lev
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);   
-    EXPECT_TRUE(g_logMsg.find("Write propertyDirtyFlags failed") != std::string::npos);    
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    EXPECT_TRUE(g_logMsg.find("Write propertyDirtyFlags failed") != std::string::npos);
 }
 
 } // namespace

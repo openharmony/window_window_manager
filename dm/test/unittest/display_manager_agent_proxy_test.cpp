@@ -119,7 +119,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged01, TestSize.Lev
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
-    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);    
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -186,7 +186,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);   
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -588,7 +588,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged01, Te
     
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);  
+    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
@@ -606,7 +606,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged02, Te
     
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);  
+    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
     EXPECT_TRUE(g_logMsg.find("Write DisplayId failed") != std::string::npos);
 }
 
