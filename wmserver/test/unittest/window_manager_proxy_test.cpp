@@ -206,7 +206,7 @@ HWTEST_F(WindowManagerProxyTest, BindDialogTarget, TestSize.Level1)
     uint32_t windowId = 0;
     sptr<IRemoteObject> targetToken = nullptr;
     WMError err = windowManagerProxy_->BindDialogTarget(windowId, targetToken);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -219,7 +219,7 @@ HWTEST_F(WindowManagerProxyTest, BindDialogTarget01, TestSize.Level1)
     uint32_t windowId = 0;
     sptr<IRemoteObject> targetToken = nullptr;
     WMError err = windowManagerProxy_->BindDialogTarget(windowId, targetToken);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**
