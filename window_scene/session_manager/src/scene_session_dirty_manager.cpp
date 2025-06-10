@@ -206,11 +206,14 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     bool isAppMainWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     const auto& singleHandData = GetSingleHandData(sceneSession);
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
-    if (singleHandData.mode != SingleHandMode::MIDDLE &&
-        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        isAppMainWindow = false;
-    }
-    if ((isAppPipWindow || isAppMainWindow) && !isMidScene) {
+    bool isSystemOrSubWindow = (WindowHelper::IsSystemWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsSubWindow(sceneSession->GetWindowType()));
+    bool isDragAccessibleWindow = windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        sceneSession->IsDragAccessible();
+    bool isSingleHandAffectedWindow = singleHandData.mode != SingleHandMode::MIDDLE &&
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN;
+    if ((isAppPipWindow || isAppMainWindow || (isSystemOrSubWindow && isDragAccessibleWindow)) &&
+        !isMidScene && !isSingleHandAffectedWindow) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
