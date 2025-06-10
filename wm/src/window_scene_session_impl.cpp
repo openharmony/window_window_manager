@@ -921,13 +921,6 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     const MMI::PointerEvent::PointerItem& pointerItem, float vpr)
 {
     bool needNotifyEvent = true;
-    int32_t titleBarHeight = 0;
-    WMError ret = GetDecorHeight(titleBarHeight);
-    if (ret != WMError::WM_OK || titleBarHeight <= 0) {
-        titleBarHeight = static_cast<int32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
-    } else {
-        titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
-    }
     WindowType windowType = property_->GetWindowType();
     AreaType dragType = GetDragAreaByDownEvent(pointerEvent, pointerItem);
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
