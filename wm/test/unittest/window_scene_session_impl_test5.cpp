@@ -1954,7 +1954,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent01, TestSize.Level2)
 
     windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 0.0f);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
-    ASSERT_EQ(dragType, AreaType::UNDEFINED);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
 }
 
 /**
@@ -1979,7 +1979,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent02, TestSize.Level2)
     pointerItem.SetWindowY(1);
     windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
-    ASSERT_EQ(dragType, AreaType::LEFT_TOP);
+    EXPECT_EQ(dragType, AreaType::LEFT_TOP);
 }
 
 /**
@@ -2006,7 +2006,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent03, TestSize.Level2)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     windowSceneSessionImpl->property_->SetDragEnabled(true);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
-    ASSERT_EQ(dragType, AreaType::LEFT_TOP);
+    EXPECT_EQ(dragType, AreaType::LEFT_TOP);
 }
 
 /**
@@ -2028,7 +2028,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
-    ASSERT_EQ(dragType, AreaType::UNDEFINED);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
 }
 }
 } // namespace Rosen
