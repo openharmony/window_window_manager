@@ -118,7 +118,7 @@ HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     auto err = WindowAdapterLite.ListWindowInfo(windowInfoOption, infos);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
 }
 } // namespace
 } // namespace Rosen
