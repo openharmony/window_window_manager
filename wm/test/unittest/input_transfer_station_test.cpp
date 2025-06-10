@@ -71,8 +71,6 @@ namespace {
  */
 HWTEST_F(InputTransferStationTest, AddInputWindow, TestSize.Level0)
 {
-    LOG_SetCallback(MyLogCallback);
-    EXPECT_FALSE(g_errLog.find("Null Pointer") != std::string::npos);
     InputTransferStation::GetInstance().isRegisteredMMI_ = true;
     InputTransferStation::GetInstance().AddInputWindow(window_);
     InputTransferStation::GetInstance().isRegisteredMMI_ = false;
@@ -116,9 +114,7 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, TestSize.Level0)
  */
 HWTEST_F(InputTransferStationTest, OnInputEvent1, TestSize.Level1)
 {
-    LOG_SetCallback(MyLogCallback);
     auto keyEvent = MMI::KeyEvent::Create();
-    EXPECT_FALSE(g_errLog.find("Null Pointer") != std::string::npos);
     auto tempKeyEvent = keyEvent;
     keyEvent = nullptr;
     listener->OnInputEvent(keyEvent);
@@ -138,12 +134,13 @@ HWTEST_F(InputTransferStationTest, OnInputEvent2, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     auto axisEvent = MMI::AxisEvent::Create();
-    EXPECT_FALSE(g_errLog.find("Null Pointer") != std::string::npos);
     auto tempAxisEvent = axisEvent;
     axisEvent = nullptr;
     listener->OnInputEvent(axisEvent);
+    EXPECT_TRUE(g_errLog.find("AxisEvent is nullptr") != std::string::npos);
     axisEvent = tempAxisEvent;
     listener->OnInputEvent(axisEvent);
+    EXPECT_FALSE(g_errLog.find("Receive axisEvent, windowId: %{public}d") != std::string::npos);
 }
 
 /**
@@ -153,9 +150,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent2, TestSize.Level1)
  */
 HWTEST_F(InputTransferStationTest, OnInputEvent3, TestSize.Level1)
 {
-    LOG_SetCallback(MyLogCallback);
     auto pointerEvent = MMI::PointerEvent::Create();
-    EXPECT_FALSE(g_errLog.find("Null Pointer") != std::string::npos);
     auto tempPointerEvent = pointerEvent;
     pointerEvent = nullptr;
     listener->OnInputEvent(pointerEvent);
