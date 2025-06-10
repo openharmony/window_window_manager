@@ -48,6 +48,7 @@ ohos_unittest("ws_session_proxy_animation_test") {
   deps = [ ws_unittest_common ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest",
