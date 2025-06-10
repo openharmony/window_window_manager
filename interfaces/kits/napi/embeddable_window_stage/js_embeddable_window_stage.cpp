@@ -128,7 +128,7 @@ napi_value JsEmbeddableWindowStage::OnGetSubWindow(napi_env env, napi_callback_i
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetSubWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -147,7 +147,7 @@ napi_value JsEmbeddableWindowStage::OnCreateSubWindow(napi_env env, napi_callbac
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnCreateSubWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -177,7 +177,7 @@ napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_
                     "Get main window failed."));
             }
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetMainWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -352,7 +352,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
         }
         LoadContentTask(contentStorage, contextUrl, window, env, *task, parentToken, isLoadedByName);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnLoadContent") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -423,7 +423,7 @@ napi_value JsEmbeddableWindowStage::OnCreateSubWindowWithOptions(napi_env env, n
         TLOGNI(WmsLogTag::WMS_SUB, "%{public}s Create sub window %{public}s end",
             where, windowName.c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnCreateSubWindowWithOptions") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
