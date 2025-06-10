@@ -90,7 +90,8 @@ enum class JsSessionType : uint32_t {
     TYPE_MUTISCREEN_COLLABORATION,
     TYPE_DYNAMIC = 41,
     TYPE_MAGNIFICATION = 42,
-    TYPE_MAGNIFICATION_MENU = 43
+    TYPE_MAGNIFICATION_MENU = 43,
+    TYPE_SELECTION = 44,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -137,6 +138,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DYNAMIC,                  JsSessionType::TYPE_DYNAMIC                 },
     { WindowType::WINDOW_TYPE_MAGNIFICATION,            JsSessionType::TYPE_MAGNIFICATION           },
     { WindowType::WINDOW_TYPE_MAGNIFICATION_MENU,       JsSessionType::TYPE_MAGNIFICATION_MENU      },
+    { WindowType::WINDOW_TYPE_SELECTION,                JsSessionType::TYPE_SELECTION               },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -183,6 +185,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                 },
     { JsSessionType::TYPE_MAGNIFICATION,            WindowType::WINDOW_TYPE_MAGNIFICATION           },
     { JsSessionType::TYPE_MAGNIFICATION_MENU,       WindowType::WINDOW_TYPE_MAGNIFICATION_MENU      },
+    { JsSessionType::TYPE_SELECTION,                WindowType::WINDOW_TYPE_SELECTION               },
 };
 
 enum class ThrowSlipMode;

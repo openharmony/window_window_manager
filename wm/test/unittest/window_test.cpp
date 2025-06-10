@@ -149,8 +149,13 @@ HWTEST_F(WindowTest, GetAndVerifyWindowTypeForArkUI, TestSize.Level1)
 
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, windowType);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, true);
+    }
+    
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_FLOAT, windowType);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -158,7 +163,12 @@ HWTEST_F(WindowTest, GetAndVerifyWindowTypeForArkUI, TestSize.Level1)
 
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, windowType);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+    }
 }
 
 /**
