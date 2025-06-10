@@ -451,7 +451,7 @@ void SceneSessionManager::InitWindowPattern()
     InitStartingWindow();
 }
 
-void SceneSessionManager::InitWindowPattern()
+void SceneSessionManager::InitStartingWindow()
 {
     syncLoadStartingWindow_ = system::GetBoolParameter(STARTING_WINDOW_SYNC_PARAMETER, false);
     TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow:%{public}d", syncLoadStartingWindow_);
