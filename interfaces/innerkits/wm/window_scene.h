@@ -140,13 +140,6 @@ public:
     WMError GoPause();
 
     /**
-     * Window enter interactive state.
-     *
-     * @return the error code of window
-     */
-    WMError GoInteractive();
-
-    /**
      * Window handle new want.
      *
      * @param want ability want.

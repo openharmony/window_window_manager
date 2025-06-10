@@ -36,9 +36,6 @@
 using namespace testing;
 using namespace testing::ext;
 
-using namespace testing;
-using namespace testing::ext;
-
 namespace {
     std::string logMsg;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
@@ -1129,22 +1126,22 @@ HWTEST_F(WindowSessionImplTest, RegisterListener04, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest, RegisterListener05, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener05 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("RegisterListener05");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowOption> listenerOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, listenerOption);
+    listenerOption->SetWindowName("RegisterListener05");
+    sptr<WindowSessionImpl> listenerwindow = sptr<WindowSessionImpl>::MakeSptr(listenerOption);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    window->hostSession_ = session;
-    ASSERT_NE(nullptr, window->property_);
-    window->property_->SetPersistentId(1);
-    sptr<IWindowWillCloseListener> listener = nullptr;
-    WMError res = window->RegisterWindowStageLifeCycleListener(listener);
+    EXPECT_EQ(WMError::WM_OK, listenerwindow->Create(nullptr, session));
+    listenerwindow->hostSession_ = session;
+    ASSERT_NE(nullptr, listenerwindow->property_);
+    listenerwindow->property_->SetPersistentId(1);
+    sptr<IWindowStageLifecycle> listener = nullptr;
+    WMError res = listenerwindow->RegisterWindowStageLifeCycleListener(listener);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowStageLifeCycleListener(listener);
+    res = listenerwindow->UnregisterWindowStageLifeCycleListener(listener);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+    EXPECT_EQ(WMError::WM_OK, listenerwindow->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener05 end";
 }
 
@@ -1291,10 +1288,10 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus start";
     sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("NotifyLifecyclePausedStatus");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_SHOWN;
     window->NotifyLifecyclePausedStatus();
@@ -1304,7 +1301,7 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
+    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_SHOWN;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
@@ -1324,14 +1321,14 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleForeground, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleForeground start";
-    sptr<WindowOption> foreOption = new WindowOption();
-    ASSERT_NE(foreOption, nullptr);
+    sptr<WindowOption> foreOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, foreOption);
     foreOption->SetWindowName("NotifyAfterLifecycleForeground");
-    sptr<WindowSessionImpl> foreWindow = new (std::nothrow) WindowSessionImpl(foreOption);
-    ASSERT_NE(foreWindow, nullptr);
+    sptr<WindowSessionImpl> foreWindow = sptr<WindowSessionImpl>::MakeSptr(foreOption);
+    ASSERT_NE(nullptr, foreWindow);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(session, nullptr);
+    ASSERT_NE(nullptr, session);
     EXPECT_CALL(WMError::WM_OK, foreWindow->Create(nullptr, session));
     window->NotifyAfterLifecycleForeground(true, true);
     window->NotifyAfterLifecycleForeground(false, false);

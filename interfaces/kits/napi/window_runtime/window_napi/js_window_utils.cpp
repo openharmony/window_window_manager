@@ -262,7 +262,7 @@ napi_value OrientationInit(napi_env env)
 
 napi_value WindowStageEventTypeInit(napi_env env)
 {
-    WLOGFD("WindowStageEventTypeInit");
+    TLOGD(WmsLogTag::WMS_LIFE, "WindowStageEventTypeInit");
 
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
