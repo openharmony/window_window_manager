@@ -540,7 +540,7 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     return WMError::WM_OK;
 }
 
-bool WindowExtensionSessionImpl::IsFocused() const
+bool WindowExtensionSessionImpl::IsComponentFocused() const
 {
     if (IsWindowSessionInvalid() || focusState_ == std::nullopt) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Session is invalid");
