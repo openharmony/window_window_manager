@@ -133,6 +133,15 @@ void WebPictureInPictureController::UpdateContentSize(int32_t width, int32_t hei
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
 }
 
+void WebPictureInPictureController::SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY,
+    uint32_t width, uint32_t height)
+{
+    initPositionX_ = positionX;
+    initPositionY_ = positionY;
+    initWidth_ = width;
+    initHeight_ = height;
+}
+
 void WebPictureInPictureController::RestorePictureInPictureWindow()
 {
     StopPictureInPicture(true, StopPipType::NULL_STOP, false);
@@ -147,8 +156,12 @@ void WebPictureInPictureController::UpdateWinRectByComponent()
     pipOption_->GetContentSize(contentWidth, contentHeight);
     windowRect_.width_ = contentWidth;
     windowRect_.height_ = contentHeight;
-    windowRect_.posX_ = 0;
-    windowRect_.posY_ = 0;
+    if (initWidth_ > 0 && initHeight_ > 0) {
+        windowRect_.width_ = initWidth_;
+        windowRect_.height_ = initHeight_;
+    }
+    windowRect_.posX_ = initPositionX_;
+    windowRect_.posY_ = initPositionY_;
     TLOGD(WmsLogTag::WMS_PIP, "position width: %{public}u, height: %{public}u, posX: %{public}d, posY: %{public}d",
         windowRect_.width_, windowRect_.height_, windowRect_.posX_, windowRect_.posY_);
 }

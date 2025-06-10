@@ -191,6 +191,33 @@ WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlT
     }
 }
 
+WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY,
+    uint32_t width, uint32_t height)
+{
+    if (width < 1 || height < 1) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid initial rect");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (auto pipController = sptrWebPipController_) {
+        pipController->SetPipInitialSurfaceRect(positionX, positionY, width, height);
+        return WMError::WM_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+}
+
+WMError WebPictureInPictureControllerInterface::UnsetPipInitialSurfaceRect()
+{
+    if (auto pipController = sptrWebPipController_) {
+        pipController->SetPipInitialSurfaceRect(0, 0, 0, 0);
+        return WMError::WM_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+}
+
 WMError WebPictureInPictureControllerInterface::RegisterStartPipListener(NativePipStartPipCallback callback)
 {
     if (!isPipEnabled_) {
