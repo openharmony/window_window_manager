@@ -1249,7 +1249,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
     uint64_t displayId, NativeDisplayManager_Rect** availableArea)
 {
-    if (availableArea == nullptr) {
+    if (availableArea == nullptr || displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
@@ -1298,7 +1298,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(Nati
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
     uint64_t displayId, NativeDisplayManager_SourceMode* sourceMode)
 {
-    if (sourceMode == nullptr) {
+    if (sourceMode == nullptr || displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input sourceMode null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
@@ -1320,7 +1320,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64_t displayId, int32_t* x, int32_t* y)
 {
-    if (x == nullptr || y == nullptr) {
+    if (x == nullptr || y == nullptr || displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input x or y is null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
