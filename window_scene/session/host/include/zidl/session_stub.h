@@ -159,6 +159,8 @@ private:
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 
     int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetFrameRectForParticalZoomIn(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 
