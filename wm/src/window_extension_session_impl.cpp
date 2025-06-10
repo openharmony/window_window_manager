@@ -1017,6 +1017,9 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed.", GetPersistentId());
         return;
     }
+    if (config.displayId_ != lastDisplayId_) {
+        NotifyDisplayIdChange(config.displayId_);
+    }
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(
         token, config.displayId_, config.density_, static_cast<DisplayOrientation>(config.orientation_));
 }
