@@ -3540,6 +3540,10 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
         info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Occupied area needs to be empty when in floating mode");
     }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
+        ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f, size of avoidAreas: %{public}d",
+        GetPersistentId(), info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_,
+        static_cast<int32_t>(avoidAreas.size()));
     sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction, callingSessionRect, avoidAreas);
 }
 
