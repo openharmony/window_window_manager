@@ -35,46 +35,18 @@ idl_gen_interface("display_manager_interface") {
   log_tag = "IDisplayManager"
   part_name = "window_manager"
   subsystem_name = "window"
-}
-
-ohos_source_set("display_manager_stub") {
-  branch_protector_ret = "pac_ret"
+  target_type = "source_set"
+  configs = [ ":libdms_private_config" ]
+  sequenceable_ext_deps = [
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+  ]
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
   }
-  idl_gen_files = get_target_outputs(":display_manager_interface")
-  sources = filter_include(idl_gen_files, [ "*_stub.cpp" ])
-  configs = [ ":libdms_private_config" ]
-  deps = [ ":display_manager_interface" ]
-  external_deps = [
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-  ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
-ohos_source_set("display_manager_proxy") {
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-  idl_gen_files = get_target_outputs(":display_manager_interface")
-  sources = filter_include(idl_gen_files, [ "*_proxy.cpp" ])
-  configs = [ ":libdms_private_config" ]
-  deps = [ ":display_manager_interface" ]
-  external_deps = [
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-  ]
-  part_name = "window_manager"
-  subsystem_name = "window"
 }
 
 ohos_shared_library("libdms") {
@@ -112,7 +84,7 @@ ohos_shared_library("libdms") {
   public_configs = [ ":libdms_public_config" ]
 
   deps = [
-    ":display_manager_stub",
+    ":display_manager_interface_source_set_stub",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "../utils:libwmutil",
