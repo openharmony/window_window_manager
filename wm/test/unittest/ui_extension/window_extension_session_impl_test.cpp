@@ -173,14 +173,12 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, TestSize.Level1)
  * @tc.desc: normal test, create modal uiextension
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create05, TestSize.Level0)
+HWTEST_F(WindowExtensionSessionImplTest, Create05, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
     ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
@@ -192,14 +190,12 @@ HWTEST_F(WindowExtensionSessionImplTest, Create05, TestSize.Level0)
  * @tc.desc: normal test, create secure uiextension
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, Create06, TestSize.Level0)
+HWTEST_F(WindowExtensionSessionImplTest, Create06, TestSize.Level1)
 {
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
     SessionInfo sessionInfo;
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_NE(nullptr, window_->property_);
     window_->property_->SetPersistentId(1);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
