@@ -895,28 +895,6 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
 }
 
-AreaType WindowSceneSessionImpl::GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const MMI::PointerEvent::PointerItem& pointerItem)
-{
-    AreaType dragType = AreaType::UNDEFINED;
-    float vpr = WindowSessionImpl::GetVirtualPixelRatio();
-    if (MathHelper::NearZero(vpr)) {
-        return dragType;
-    }
-    const auto& sourceType = pointerEvent->GetSourceType();
-    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
-        static_cast<int>(HOTZONE_TOUCH * vpr);
-    int32_t winX = pointerItem.GetWindowX();
-    int32_t winY = pointerItem.GetWindowY();
-    WindowType windowType = property_->GetWindowType();
-    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
-    const auto& rect = SessionHelper::TransferToWSRect(GetRect());
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
-    }
-    return dragType;
-}
-
 bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const MMI::PointerEvent::PointerItem& pointerItem, float vpr)
 {
@@ -946,6 +924,28 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         }
     }
     return needNotifyEvent;
+}
+
+AreaType WindowSceneSessionImpl::GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const MMI::PointerEvent::PointerItem& pointerItem)
+{
+    AreaType dragType = AreaType::UNDEFINED;
+    float vpr = WindowSessionImpl::GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        return dragType;
+    }
+    const auto& sourceType = pointerEvent->GetSourceType();
+    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
+        static_cast<int>(HOTZONE_TOUCH * vpr);
+    int32_t winX = pointerItem.GetWindowX();
+    int32_t winY = pointerItem.GetWindowY();
+    WindowType windowType = property_->GetWindowType();
+    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    const auto& rect = SessionHelper::TransferToWSRect(GetRect());
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    }
+    return dragType;
 }
 
 void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
