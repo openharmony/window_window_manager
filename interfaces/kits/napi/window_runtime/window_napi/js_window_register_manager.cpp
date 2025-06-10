@@ -162,7 +162,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStageLifeCycleEventRegister(sp
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("Window is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStageLifeCycle> thisListener(listener);
@@ -645,7 +645,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
                 return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::WINDOW_STAGE_LIFECYCLE_EVENT_CB:
-                return ProcessWindowStageLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
+                return ProcessWindowStageLifeCycleEventRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             default:
                 TLOGE(WmsLogTag::DEFAULT, "RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
