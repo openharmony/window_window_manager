@@ -44,6 +44,7 @@ const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
 const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
+const std::string SCREENSHOT_APP_EVENT_CB = "screenshotAppEvent";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
@@ -70,6 +71,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IOccupiedAreaChangeListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
+                         public IScreenshotAppEventListener,
                          public IDialogTargetTouchListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
@@ -121,6 +123,7 @@ public:
     void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
+    void OnScreenshotAppEvent(ScreenshotEventType type) override;
     void OnDialogTargetTouch() const override;
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;

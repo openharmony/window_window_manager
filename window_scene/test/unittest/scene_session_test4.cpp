@@ -694,6 +694,55 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleLayoutAvoidAreaUpdate
+ * @tc.desc: HandleLayoutAvoidAreaUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleLayoutAvoidAreaUpdate, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleLayoutAvoidAreaUpdate";
+    info.bundleName_ = "HandleLayoutAvoidAreaUpdate";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    session->isLastFrameLayoutFinishedFunc_ = nullptr;
+    session->isAINavigationBarAvoidAreaValid_ = nullptr;
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+
+    session->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = false;
+        return WSError::WS_ERROR_NULLPTR;
+    };
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+
+    session->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = true;
+        return WSError::WS_OK;
+    };
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM));
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+        return true;
+    };
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+        return false;
+    };
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+
+    session->isAINavigationBarAvoidAreaValid_ = [](const AvoidArea& avoidArea, int32_t sessionBottom) {
+        return false;
+    };
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+}
+
+/**
  * @tc.name: SetWindowFlags1
  * @tc.desc: SetWindowFlags1
  * @tc.type: FUNC
@@ -1603,7 +1652,7 @@ HWTEST_F(SceneSessionTest4, CheckGetSubWindowAvoidAreaAvailable, TestSize.Level1
     systemConfig.freeMultiWindowEnable_ = false;
     systemConfig.freeMultiWindowSupport_ = false;
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    session->SetSessionProperty(property);
+    session->SetSystemConfig(systemConfig);
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     SystemSessionConfig parentSystemConfig;

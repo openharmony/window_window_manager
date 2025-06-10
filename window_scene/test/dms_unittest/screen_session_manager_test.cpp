@@ -1904,14 +1904,20 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, TestSize.Level1
     bounds.rect_.height_ = 2772;
     int rotation = 1;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType, false);
     auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(virtualOption,
         displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, rotation,
-        screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_END;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, true);
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ScreenSessionManager::GetInstance().InitAndGetScreen(2));
     ssm_->DestroyVirtualScreen(screenId);
@@ -4850,8 +4856,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode01, TestSize.Level1)
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     MultiScreenMode screenMode = MultiScreenMode::SCREEN_EXTEND;
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), screenMode);
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
@@ -4872,8 +4881,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode02, TestSize.Level1)
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     MultiScreenMode screenMode = MultiScreenMode::SCREEN_MIRROR;
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), screenMode);
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
@@ -4893,9 +4905,12 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
     uint32_t testNum = 2;
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, static_cast<MultiScreenMode>(testNum));
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), static_cast<MultiScreenMode>(testNum));
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif

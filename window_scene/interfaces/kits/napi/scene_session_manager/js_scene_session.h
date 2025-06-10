@@ -105,6 +105,7 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_SHADOWS_CB,
     SET_SUB_WINDOW_SOURCE_CB,
     ANIMATE_TO_CB,
+    PENDING_SESSION_TO_BACKGROUND_CB,
 };
 
 class SceneSession;
@@ -131,6 +132,7 @@ private:
     void ProcessTerminateSessionRegisterTotal();
     void ProcessSessionExceptionRegister();
     void ProcessPendingSessionToForegroundRegister();
+    void ProcessPendingSessionToBackgroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionLockStateChangeRegister();
     void ProcessSessionUpdateFollowScreenChange();
@@ -147,6 +149,7 @@ private:
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
+    void PendingSessionToBackground(const SessionInfo& info, const BackgroundParams& params);
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
 

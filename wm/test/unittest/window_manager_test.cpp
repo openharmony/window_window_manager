@@ -261,6 +261,19 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent01
+ * @tc.desc: Check NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto& windowManager = WindowManager::GetInstance();
+    WMError ret = windowManager.NotifyScreenshotEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: RegisterCameraFloatWindowChangedListener01
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
@@ -1624,6 +1637,19 @@ HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, TestSize.Level1)
     std::vector<sptr<WindowLayoutInfo>> infos;
     auto ret = WindowManager::GetInstance().GetAllWindowLayoutInfo(displayId, infos);
     ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos), ret);
+}
+
+/**
+ * @tc.name: GetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
+{
+    int32_t windowId = 888;
+    std::string topNavDestName;
+    auto ret = WindowManager::GetInstance().GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName), ret);
 }
 
 /**

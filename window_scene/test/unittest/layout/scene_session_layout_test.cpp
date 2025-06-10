@@ -185,6 +185,34 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateRectInner02
+ * @tc.desc: UpdateRectInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateRectInner02, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRectInner02";
+    info.bundleName_ = "UpdateRectInner02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SessionUIParam uiParam;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    sceneSession->SetForegroundInteractiveStatus(true);
+
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    sceneSession->isSubWinowResizingOrMoving_ = true;
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+    ASSERT_EQ(true, sceneSession->isSubWinowResizingOrMoving_);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
+    ASSERT_EQ(false, sceneSession->isSubWinowResizingOrMoving_);
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -755,16 +783,21 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
     sceneSession->subSession_.emplace_back(subSceneSession);
     subSceneSession->parentSession_ = sceneSession;
 
-    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
-    ASSERT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_MOVE), true);
+    EXPECT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+    EXPECT_EQ(sceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::DRAG_MOVE), true);
 
     sceneSession->moveDragController_->isStartMove_ = true;
     sceneSession->moveDragController_->isStartDrag_ = false;
-    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+    EXPECT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
 
     sceneSession->moveDragController_->isStartMove_ = false;
     sceneSession->moveDragController_->isStartDrag_ = true;
-    ASSERT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+    EXPECT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), false);
+
+    subSceneSession->windowAnchorInfo_.isAnchorEnabled_ = true;
+    sceneSession->moveDragController_->isStartMove_ = true;
+    sceneSession->moveDragController_->isStartDrag_ = false;
+    EXPECT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), true);
 }
 
 /**
@@ -811,6 +844,31 @@ HWTEST_F(SceneSessionLayoutTest, ConvertGlobalRectToRelative, TestSize.Level1)
     sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
     ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
     ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, defaultDisplayId), globalRect);
+}
+
+/**
+ * @tc.name: IsMovable
+ * @tc.desc: Test IsMovable when AnchorEnabled or AnchorDisabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsMovable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable";
+    info.bundleName_ = "IsMovable";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2025, WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+    sceneSession->moveDragController_->isStartMove_ = false;
+    sceneSession->moveDragController_->isStartDrag_ = false;
+    sceneSession->moveDragController_->hasPointDown_ = true;
+    sceneSession->moveDragController_->isMovable_ = true;
+
+    sceneSession->windowAnchorInfo_.isAnchorEnabled_ = true;
+    EXPECT_EQ(false, sceneSession->IsMovable());
+    sceneSession->windowAnchorInfo_.isAnchorEnabled_ = false;
+    EXPECT_EQ(true, sceneSession->IsMovable());
 }
 
 /**

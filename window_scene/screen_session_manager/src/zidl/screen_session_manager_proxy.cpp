@@ -1097,7 +1097,8 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
         data.WriteUInt64Vector(virtualOption.missionIds_) &&
-        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_));
+        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_)) &&
+        data.WriteBool(virtualOption.isSecurity_);
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
@@ -2985,7 +2986,7 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
 }
 
 void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3010,6 +3011,10 @@ void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, 
     }
     if (!data.WriteFloat(rotation)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
+        return;
+    }
+    if (!data.WriteBool(isSwitchUser)) {
+        TLOGE(WmsLogTag::DMS, "Write isSwitchUser failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {

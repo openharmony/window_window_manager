@@ -695,6 +695,21 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.NotifyScreenshotEvent(type);
+    EXPECT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: UpdateScreenLockStatusForApp
  * @tc.desc: WindowAdapter/UpdateScreenLockStatusForApp
  * @tc.type: FUNC

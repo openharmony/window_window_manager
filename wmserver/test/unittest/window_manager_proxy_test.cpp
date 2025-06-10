@@ -407,6 +407,19 @@ HWTEST_F(WindowManagerProxyTest, SetWindowLayoutMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    MessageParcel reply;
+    WMError err = windowManagerProxy_->NotifyScreenshotEvent(type);
+    EXPECT_EQ(err, static_cast<WMError>(reply.ReadInt32()));
+}
+
+/**
  * @tc.name: UpdateProperty
  * @tc.desc: test success
  * @tc.type: FUNC

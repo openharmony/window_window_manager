@@ -92,6 +92,7 @@ private:
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
