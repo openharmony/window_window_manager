@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
-    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId) {
+    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId, DisplayId displayId) {
         sceneSession->SetCollaboratorType(persistentId);
     };
     auto outsideDownEventFun = [sceneSession](int32_t x, int32_t y) {
