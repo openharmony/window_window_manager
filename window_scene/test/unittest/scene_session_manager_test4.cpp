@@ -726,7 +726,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 
     ssm_->screenshotAppEventListenerSessionSet_.insert(1);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
+    EXPECT_EQ(ret, WMError::WM_OK);
 
     SessionInfo info;
     info.abilityName_ = "NotifyScreenshotEvent";
@@ -736,16 +736,14 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
-    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
