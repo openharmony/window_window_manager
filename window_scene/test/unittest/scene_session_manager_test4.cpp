@@ -38,6 +38,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg = msg;
+    }
+}
 class SceneSessionManagerTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -62,10 +70,6 @@ bool SceneSessionManagerTest4::gestureNavigationEnabled_ = true;
 
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerTest4::SetUpTestCase()
 {
@@ -705,6 +709,78 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Test
     int32_t persistentId = 1;
     auto result = ssm_->UpdateSessionWindowVisibilityListener(persistentId, true);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: test WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->screenshotAppEventListenerSessionSet_.insert(1);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
+
+    SessionInfo info;
+    info.abilityName_ = "NotifyScreenshotEvent";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UpdateSessionScreenshotAppEventListener01
+ * @tc.desc: test WM_ERROR_NULLPTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener01, TestSize.Level1)
+{
+    int32_t persistentId = 10086;
+    bool haveListener = true;
+    WMError ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, haveListener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UpdateSessionScreenshotAppEventListener02
+ * @tc.desc: test WS_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateSessionScreenshotAppEventListener02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionScreenshotAppEventListener";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    int32_t persistentId = 1;
+    auto ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    ret = ssm_->UpdateSessionScreenshotAppEventListener(persistentId, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**

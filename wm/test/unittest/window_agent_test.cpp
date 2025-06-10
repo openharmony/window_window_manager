@@ -293,6 +293,21 @@ HWTEST_F(WindowAgentTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAgentTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    WMError err = windowAgent_->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(err, WMError::WM_OK);
+
+    windowAgent_->window_ = nullptr;
+    err = windowAgent_->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(err, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: DumpInfo
  * @tc.desc: DumpInfo
  * @tc.type: FUNC

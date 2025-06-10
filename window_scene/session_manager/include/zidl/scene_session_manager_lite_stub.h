@@ -36,6 +36,7 @@ private:
     int HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply);
     int HandleIsValidSessionIds(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToForeground(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToBackground(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
@@ -86,7 +87,12 @@ private:
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
     int HandleCreateNewInstanceKey(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveInstanceKey(MessageParcel& data, MessageParcel& reply);
+    int HandleTransferSessionToTargetScreen(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateKioskAppList(MessageParcel& data, MessageParcel& reply);
+    int HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply);
+    int HandleExitKioskMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

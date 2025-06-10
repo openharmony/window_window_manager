@@ -108,16 +108,19 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) = 0;
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void NotifyScreenshot() = 0;
+    virtual WSError NotifyScreenshotAppEvent(ScreenshotEventType type) = 0;
     virtual void DumpSessionElementInfo(const std::vector<std::string>& params) = 0;
     virtual WSError NotifyTouchOutside() = 0;
     virtual WSError NotifyWindowVisibility(bool isVisible) = 0;
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
+    virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyNonInteractiveStatus() = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
+    virtual WMError GetRouterStackInfo(std::string& routerStackInfo) = 0;
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
 
     /**

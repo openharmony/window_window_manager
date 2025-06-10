@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,13 @@
 #define SURFACE_DRAW_H
 
 #include <ui/rs_surface_node.h>
-#include "pixel_map.h"
 
-#include "refbase.h"
-#include "wm_common.h"
 #include "draw/canvas.h"
 #include "nocopyable.h"
 #include "pixel_map.h"
+#include "refbase.h"
+#include "wm_common.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,6 +43,8 @@ public:
         std::shared_ptr<Media::PixelMap>& pixelMap, int32_t timeoutMs, float scaleW = 0.5, float scaleH = 0.5);
     static bool DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect screenRect,
         Rect transparentRect);
+    static bool DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        const Rect& rect, const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio);
 
 private:
     static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, const std::string& imagePath);
@@ -55,6 +57,8 @@ private:
     static std::unique_ptr<OHOS::Media::PixelMap> DecodeImageToPixelMap(const std::string& imagePath);
     static bool DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& rect,
         std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color, bool fillWindow = false);
+    static bool DoDrawCustomStartingWindow(const sptr<OHOS::SurfaceBuffer>& buffer, const Rect& rect,
+        const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio);
 };
 } // Rosen
 } // OHOS

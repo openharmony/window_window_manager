@@ -1014,8 +1014,8 @@ HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, TestSize.Level1)
 
     window->SetUIContentByName(url, nullptr, nullptr, nullptr);
     window->SetUIContentByAbc(url, nullptr, nullptr, nullptr);
-    WMError res1 =
-        window->NapiSetUIContent(url, nullptr, nullptr, BackupAndRestoreType::CONTINUATION, nullptr, ability);
+    WMError res1 = window->NapiSetUIContent(url, (napi_env)nullptr, (napi_value)nullptr,
+        BackupAndRestoreType::CONTINUATION, nullptr, ability);
     ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
 }
 

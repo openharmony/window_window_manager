@@ -59,11 +59,13 @@ public:
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_ALPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
+        TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
         TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_GLOBAL_WINDOW_MODE,
+        TRANS_ID_GET_TOP_NAV_DEST_NAME,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_CONFIG,
@@ -113,6 +115,7 @@ public:
     virtual WMError MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
+    virtual WMError NotifyScreenshotEvent(ScreenshotEventType type) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) = 0;
     virtual WMError SetWindowGravity(uint32_t windowId, WindowGravity gravity, uint32_t percent) = 0;
@@ -134,6 +137,8 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError GetTopNavDestinationName(int32_t windowId,
+        std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
