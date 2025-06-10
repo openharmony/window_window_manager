@@ -226,7 +226,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayModeChanged02, TestSize.Leve
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged, TestSize.Level1)
-{    
+{
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
@@ -316,7 +316,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
 {
-    
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();

@@ -356,7 +356,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult01, TestSi
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
-{   
+{
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     VisibleWindowNumInfo info;
@@ -412,7 +412,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult01, Te
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
-{       
+{
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 1;
@@ -448,7 +448,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus01, TestSize.Level
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus02, TestSize.Level1)
-{       
+{
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 1;
