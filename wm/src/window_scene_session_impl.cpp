@@ -659,7 +659,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 bool WindowSceneSessionImpl::IsFullScreenSizeWindow(uint32_t width, uint32_t height)
 {
-    DisplayId displayId = 0;
+    DisplayId displayId = property_->GetDisplayId();
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null");
