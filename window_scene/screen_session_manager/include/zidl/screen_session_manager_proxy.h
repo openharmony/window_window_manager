@@ -228,6 +228,7 @@ public:
     void NotifyScreenMaskAppear() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError SetPrimaryDisplaySystemDpi(float dpi) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
