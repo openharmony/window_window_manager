@@ -38,7 +38,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-namespace{
+namespace
+{
     std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
@@ -614,7 +615,6 @@ HWTEST_F(WindowSessionImplTest, NotifyModeChange, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyModeChange");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    //ASSERT_NE(window, nullptr);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
