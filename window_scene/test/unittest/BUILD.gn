@@ -49,6 +49,7 @@ group("unittest") {
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
+    ":ws_scene_session_manager_kiosk_test",
     ":ws_scene_session_test",
     ":ws_scene_system_ability_listener_test",
     ":ws_session_change_recorder_test",
@@ -526,7 +527,10 @@ ohos_unittest("ws_session_stage_stub_lifecycle_test") {
 ohos_unittest("ws_scene_session_manager_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  include_dirs = [
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/test/mock"
+  ]
 
   sources = [
     "scene_session_manager_test.cpp",
@@ -541,6 +545,7 @@ ohos_unittest("ws_scene_session_manager_test") {
     "scene_session_manager_test7.cpp",
     "scene_session_manager_test8.cpp",
     "scene_session_manager_test9.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
@@ -559,6 +564,27 @@ ohos_unittest("ws_scene_session_manager_test") {
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("ws_scene_session_manager_kiosk_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/test/mock"
+  ]
+
+  sources = [
+    "scene_session_manager_kiosk_test.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp"
+  ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+  external_deps += [
+    "eventhandler:libeventhandler",
   ]
 }
 
