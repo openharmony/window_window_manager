@@ -97,8 +97,7 @@ HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, TestSize.Level1)
 {
     std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    windowAdapterLite_->GetWindowStyleType(windowStyleType);
-    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->GetWindowStyleType(windowStyleType));
 }
 
 /**

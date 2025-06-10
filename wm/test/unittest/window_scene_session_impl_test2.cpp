@@ -553,22 +553,6 @@ HWTEST_F(WindowSceneSessionImplTest2, ParseWindowModeFromMetaData, Function | Sm
 }
 
 /**
- * @tc.name: PreProcessCreate01
- * @tc.desc: PreProcessCreate
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest2, PreProcessCreate01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("PreProcessCreate01");
-    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int ret = 0;
-    windowSceneSession->PreProcessCreate();
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: SetDefaultProperty01
  * @tc.desc: SetDefaultProperty
  * @tc.type: FUNC
@@ -578,10 +562,10 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDefaultProperty01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetDefaultProperty01");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    int ret = 0;
     windowSceneSession->SetDefaultProperty();
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(WindowMode::WINDOW_MODE_FLOATING, windowSceneSession->GetWindowMode());
 }
 
 /**
