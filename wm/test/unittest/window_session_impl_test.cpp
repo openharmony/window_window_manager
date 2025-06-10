@@ -33,9 +33,6 @@
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
-using namespace testing;
-using namespace testing::ext;
-
 namespace {
     std::string logMsg;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
@@ -1136,7 +1133,11 @@ HWTEST_F(WindowSessionImplTest, RegisterListener05, TestSize.Level1)
     listenerwindow->hostSession_ = session;
     ASSERT_NE(nullptr, listenerwindow->property_);
     listenerwindow->property_->SetPersistentId(1);
+<<<<<<< HEAD
     sptr<IWindowStageLifeCycle> listener = nullptr;
+=======
+    sptr<IWindowStageLifecycle> listener = nullptr;
+>>>>>>> 0d98e08812 (0610-修改差异)
     WMError res = listenerwindow->RegisterWindowStageLifeCycleListener(listener);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = listenerwindow->UnregisterWindowStageLifeCycleListener(listener);
@@ -1329,9 +1330,15 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleForeground, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
+<<<<<<< HEAD
     EXPECT_EQ(WMError::WM_OK, foreWindow->Create(nullptr, session));
     foreWindow->NotifyAfterLifecycleForeground(true, true);
     foreWindow->NotifyAfterLifecycleForeground(false, false);
+=======
+    EXPECT_CALL(WMError::WM_OK, foreWindow->Create(nullptr, session));
+    window->NotifyAfterLifecycleForeground(true, true);
+    window->NotifyAfterLifecycleForeground(false, false);
+>>>>>>> 0d98e08812 (0610-修改差异)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, foreWindow->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleForeground end";
 }
