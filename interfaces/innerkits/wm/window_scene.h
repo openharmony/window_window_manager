@@ -126,11 +126,18 @@ public:
     WMError GoDestroyHookWindow();
 
     /**
-     * Window go resume. GoResume will be deleted later.
+     * Window go resume.
      *
      * @return the error code of window
      */
     WMError GoResume();
+
+    /**
+     * Window go pause.
+     *
+     * @return the error code of window
+     */
+    WMError GoPause();
 
     /**
      * Window enter interactive state.

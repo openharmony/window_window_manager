@@ -7678,7 +7678,7 @@ void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
     }
 }
 
-void SceneSession::UpdateNonInteractiveInner()
+void SceneSession::UpdateLifecyclePausedInner()
 {
     if (!sessionStage_) {
         return;
@@ -7686,7 +7686,7 @@ void SceneSession::UpdateNonInteractiveInner()
     const auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
     if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        sessionStage_->NotifyNonInteractiveStatus();
+        sessionStage_->NotifyLifecyclePausedStatus();
     }
 }
 

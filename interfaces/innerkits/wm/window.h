@@ -142,25 +142,13 @@ public:
 
     /**
      * @brief Notify caller that window is resumed.
-     * @deprecated deprecated since app version 20, use AfterInteractive instead.
      */
     virtual void AfterResumed() {}
 
     /**
      * @brief Notify caller that window is paused.
-     * @deprecated deprecated since app version 20, use AfterNonInteractive instead.
      */
     virtual void AfterPaused() {}
-
-    /**
-     * @brief Notify caller that window is interactive.
-     */
-    virtual void AfterInteractive() {}
-
-    /**
-     * @brief Notify caller that window is noninteractive.
-     */
-    virtual void AfterNonInteractive() {}
 
     /**
      * @brief Notify caller that window is destroyed.
@@ -176,6 +164,34 @@ public:
      * @brief Notify caller that window is already background.
      */
     virtual void AfterDidBackground() {}
+};
+
+/**
+ * @class IWindowStageLifeCycle
+ *
+ * @brief IWindowStageLifeCycle is a listener used to notify caller that lifecycle of window.
+ */
+class IWindowStageLifeCycle : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller that window is on the forground.
+     */
+    virtual void AfterLifecycleForeground() {}
+
+    /**
+     * @brief Notify caller that window is on the background.
+     */
+    virtual void AfterLifecycleBackground() {}
+
+    /**
+     * @brief Notify caller that window is resumed.
+     */
+    virtual void AfterLifecycleResumed() {}
+
+    /**
+     * @brief Notify caller that window is paused.
+     */
+    virtual void AfterLifecyclePaused() {}
 };
 
 /**
@@ -1388,9 +1404,14 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
-     * @brief Interactive window
+     * @brief Resume window
      */
-    virtual void Interactive() {}
+    virtual void Resume() {}
+
+    /**
+     * @brief Pause window
+     */
+    virtual void Pause() {}
 
     /**
      * @brief Hide window
@@ -1875,6 +1896,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) { return WMError::WM_OK; }
+
+    /**
+     * @brief Register window lifecycle listener.
+     *
+     * @param listener WindowLifeCycle listener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window lifecycle listener.
+     *
+     * @param listener WindowLifeCycle listener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Register window change listener.

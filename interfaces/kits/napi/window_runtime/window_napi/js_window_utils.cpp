@@ -284,6 +284,26 @@ napi_value WindowStageEventTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowStageLifecycleEventTypeInit(napi_env env)
+{
+    WLOGFD("WindowStageLifecycleEventTypeInit");
+
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
+    napi_set_named_property(env, objValue, "RESUMED", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::RESUMED)));
+    napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::PAUSED)));
+    napi_set_named_property(env, objValue, "HIDDEN", CreateJsValue(env,
+        static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    return objValue;
+}
+
 napi_value WindowAnchorInit(napi_env env)
 {
     WLOGFD("WindowAnchorInit");

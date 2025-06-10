@@ -85,17 +85,17 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
 }
 
 /**
- * @tc.name: HandleNotifyNonInteractiveStatus
- * @tc.desc: test function : HandleNotifyNonInteractiveStatus
+ * @tc.name: HandleNotifyPausedStatus
+ * @tc.desc: test function : HandleNotifyPausedStatus
  * @tc.type: FUNC
  */
- HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyNonInteractiveStatus, TestSize.Level1)
+ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
  {
      MessageParcel data;
      MessageParcel reply;
      data.WriteBool(true);
      ASSERT_TRUE((sessionStageStub_ != nullptr));
-     ASSERT_EQ(0, sessionStageStub_->HandleNotifyNonInteractiveStatus(data, reply));
+     ASSERT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus(data, reply));
  }
 
 /**

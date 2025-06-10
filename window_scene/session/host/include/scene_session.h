@@ -837,7 +837,7 @@ public:
     /*
      * Window LifeCycle
      */
-    void UpdateNonInteractiveInner();
+    void UpdateLifecyclePausedInner();
 
     /**
      * Window Transition Animation For PC

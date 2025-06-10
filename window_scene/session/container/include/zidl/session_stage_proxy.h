@@ -108,7 +108,7 @@ public:
     WSError CloseSpecificScene() override;
 
     // Window LifeCycle
-    void NotifyNonInteractiveStatus() override;
+    void NotifyLifecyclePausedStatus() override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
 
 private:
