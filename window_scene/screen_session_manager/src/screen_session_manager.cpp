@@ -3692,7 +3692,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.SetExtendScreenDpi();
-        that.SetDisplayState(DisplayState::ON);
+        that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
