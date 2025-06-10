@@ -2417,7 +2417,7 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        napi_send_event(env_, task, napi_eprio_immediate);
+        napi_send_event(env_, task, napi_eprio_immediate, traceInfo.c_str());
     }
 }
 

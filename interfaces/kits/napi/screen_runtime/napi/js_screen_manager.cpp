@@ -191,7 +191,7 @@ napi_value OnGetAllScreens(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnGetAllScreens");
     return result;
 }
 
@@ -475,7 +475,7 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
                 CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirror failed."));
         }
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnMakeMirror");
     return result;
 }
 
@@ -527,7 +527,7 @@ napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
                 CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirrorWithRegion failed."));
         }
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnMakeMirrorWithRegion");
     return result;
 }
 
@@ -568,7 +568,7 @@ napi_value OnSetMultiScreenMode(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnSetMultiScreenMode");
     return result;
 }
 
@@ -605,7 +605,7 @@ napi_value OnSetMultiScreenRelativePosition(napi_env env, napi_callback_info inf
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnSetMultiScreenRelativePosition");
     return result;
 }
 
@@ -660,7 +660,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnMakeExpand");
     return result;
 }
 
@@ -713,7 +713,7 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnStopMirror");
     return result;
 }
 
@@ -766,7 +766,7 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnStopExpand");
     return result;
 }
 
@@ -817,7 +817,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnMakeUnique");
     return result;
 }
 
@@ -958,7 +958,7 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnCreateVirtualScreen");
     return result;
 }
 
@@ -1068,7 +1068,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::DMS, "JsScreenManager::OnDestroyVirtualScreen success");
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnDestroyVirtualScreen");
     return result;
 }
 
@@ -1120,7 +1120,7 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnSetVirtualScreenSurface");
     return result;
 }
 
@@ -1172,7 +1172,7 @@ napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnSetScreenPrivacyMaskImage");
     return result;
 }
 
@@ -1204,7 +1204,7 @@ napi_value OnIsScreenRotationLocked(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnIsScreenRotationLocked");
     return result;
 }
 
@@ -1255,18 +1255,18 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnSetScreenRotationLocked");
     return result;
 }
 
 void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
-    std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask)
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask, const std::string& taskName)
 {
     if (!env) {
         TLOGE(WmsLogTag::DMS, "env is null");
         return;
     }
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, taskName.c_str()) != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
