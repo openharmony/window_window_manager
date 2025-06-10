@@ -27,6 +27,7 @@ namespace {
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -1355,7 +1356,11 @@ void ScreenSessionManagerStub::ProcGetScreenAreaOfDisplayArea(MessageParcel& dat
 
 void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& data, MessageParcel& reply)
 {
-    float dpi = data.ReadFloat();
+    float dpi = INVALID_DEFAULT_DENSITY;
+    if (!data.ReadFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "Read dpi failed.");
+        return;
+    }
     DMError ret = SetPrimaryDisplaySystemDpi(dpi);
     reply.WriteInt32(static_cast<int32_t>(ret));
 }
