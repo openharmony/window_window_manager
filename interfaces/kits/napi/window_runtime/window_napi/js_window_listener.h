@@ -180,7 +180,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
-    void WindowStageLifeCycleCallBack(LifeCycleEventType eventType);
+    void WindowStageLifeCycleCallBack(WindowStageLifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_;

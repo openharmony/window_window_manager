@@ -4745,7 +4745,7 @@ void WindowSessionImpl::NotifyAfterPaused()
     CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
 }
 
-void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
+void WindowSessionImpl::NotifyAfterLifecycleForeground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
         std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
@@ -4757,7 +4757,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     }
 }
 
-void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
+void WindowSessionImpl::NotifyAfterLifecycleBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
         std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
