@@ -5486,6 +5486,21 @@ WSError SceneSession::GetWaterfallMode(bool& isWaterfallMode)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d permission denied!", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto parentSession = GetMainSession();
+    if (!parentSession) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d parent session is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    isAcrossMultiDisplay = parentSession->IsFullScreenWaterfallMode();
+    return WMError::WM_OK;
+}
+
 void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() mutable {

@@ -814,6 +814,7 @@ public:
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
+    virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) { return WMError::WM_OK; }
 
     /*
      * Window Pattern

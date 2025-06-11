@@ -3683,6 +3683,9 @@ public:
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(
+        bool& isAcrossMultiDisplay) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief Get the type of window.
      *
