@@ -1694,6 +1694,13 @@ public:
     virtual bool IsFocused() const { return false; }
 
     /**
+     * @brief Check current UIExtensionComponent focus status.
+     *
+     * @return True means UIExtensionComponent is focused, false means UIExtensionComponent is unfocused.
+     */
+    virtual bool IsComponentFocused() const { return false; }
+
+    /**
      * @brief Update surfaceNode after customAnimation.
      *
      * @param isAdd True means add custom animation, false means the opposite.

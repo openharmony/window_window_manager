@@ -1584,7 +1584,7 @@ napi_value JsExtensionWindow::OnIsFocused(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    bool isFocused = windowImpl->IsFocused();
+    bool isFocused = windowImpl->IsComponentFocused();
     TLOGI(WmsLogTag::WMS_FOCUS, "end, window [%{public}u, %{public}s] isFocused=%{public}u",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), isFocused);
     return CreateJsValue(env, isFocused);
