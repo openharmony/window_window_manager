@@ -1608,22 +1608,31 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
 }
 
 /**
- * @tc.name: refreshAllAppUseControlMap
- * @tc.desc: refreshAllAppUseControlMap
+ * @tc.name: RefreshAllAppUseControlMap
+ * @tc.desc: RefreshAllAppUseControlMap
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "app_bundle_name";
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+ 
     appUseControlInfo.isNeedControl_ = true;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
-
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, ssm_->allAppUseControlMap_.size());
+ 
     appUseControlInfo.isNeedControl_ = false;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
+ 
+    appUseControlInfo.isNeedControl_ = false;
+    appUseControlInfo.isControlRecentOnly_ = true;
+    appUseControlInfo.isControlRecentOnly_ = false;
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::PARENT_CONTROL);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
 }
 } // namespace
 } // namespace Rosen
