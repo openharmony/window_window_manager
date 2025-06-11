@@ -2811,11 +2811,16 @@ WMError SessionProxy::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMul
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossMultiDisplay failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     if (!reply.ReadBool(isAcrossMultiDisplay)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossMultiDisplay failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return WMError::WM_OK;
+    return static_cast<WMError>(ret);
 }
 
 WSError SessionProxy::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
