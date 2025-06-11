@@ -1613,8 +1613,10 @@ public:
      * @param radius Shadows of window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set shadow radius of window.
