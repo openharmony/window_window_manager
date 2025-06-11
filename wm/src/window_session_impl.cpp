@@ -1928,8 +1928,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
                 }
             }
             if (!intentParam_.empty()) {
-                TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isColdStart_);
-                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
+                TLOGI(WmsLogTag::WMS_LIFE, "Default SetIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
                 intentParam_ = "";
             }
             aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
@@ -1939,6 +1939,11 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "By name setIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+                intentParam_ = "";
+            }
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_SHARED:
@@ -4476,8 +4481,8 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (!intentParam_.empty()) {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isColdStart_);
-            uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
+            TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+            uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
             intentParam_ = "";
         } else {
             TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
@@ -7403,7 +7408,7 @@ WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     intentParam_ = intentParam;
     loadPageCallback_ = loadPageCallback;
-    isColdStart_ = isColdStart;
+    isIntentColdStart_ = isColdStart;
     return WMError::WM_OK;
 }
 } // namespace Rosen

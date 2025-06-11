@@ -694,6 +694,7 @@ protected:
     std::string intentParam_;
     std::function<void()> loadPageCallback_;
     bool isColdStart_ = true;
+    bool isIntentColdStart_ = true;
     std::string navDestinationInfo_;
 
     /*
