@@ -325,8 +325,8 @@ const SessionInfo& WindowSessionProperty::GetSessionInfo() const
     return sessionInfo_;
 }
 
-std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>
-    WindowSessionProperty::GetTransitionAnimationConfig() const
+
+TransitionAnimationMapType WindowSessionProperty::GetTransitionAnimationConfig() const
 {
     return transitionAnimationConfig_;
 }
