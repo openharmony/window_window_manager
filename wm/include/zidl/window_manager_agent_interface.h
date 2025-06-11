@@ -38,7 +38,6 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
     WINDOW_MANAGER_AGENT_TYPE_PIP,
     WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID,
     WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
     WINDOW_MANAGER_AGENT_TYPE_END,
 };
@@ -63,7 +62,6 @@ public:
         TRANS_ID_NOTIFY_WINDOW_PID_VISIBILITY,
         TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED,
         TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE,
-        TRANS_ID_NOTIFY_WINDOW_DISPLAY_ID,
         TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE,
     };
 
@@ -73,7 +71,6 @@ public:
     virtual void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) = 0;
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
-    virtual void NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId) = 0;
     virtual void UpdateWindowDrawingContentInfo(
         const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingContentInfos) = 0;
     virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
