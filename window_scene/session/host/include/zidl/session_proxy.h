@@ -152,6 +152,7 @@ public:
      * PC Fold Screen
      */
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isWaterfallMode) override;
 
     /*
      * PC Window

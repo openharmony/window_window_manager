@@ -2791,6 +2791,33 @@ WSError SessionProxy::GetWaterfallMode(bool& isWaterfallMode)
     return WSError::WS_OK;
 }
 
+WMError SessionProxy::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "writeInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_MAIN_WINDOW_Full_SCREEN_ACROSS_MULTI_DISPLAY), data,
+        reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(isAcrossMultiDisplay)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossMultiDisplay failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
 WSError SessionProxy::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
 {
     MessageParcel data;

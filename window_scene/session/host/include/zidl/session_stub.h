@@ -130,6 +130,7 @@ private:
 
     // PC Fold Screen
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
+    int HandleIsMainWindowFullScreenAcrossMultiDisplay(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply);

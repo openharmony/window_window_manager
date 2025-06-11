@@ -457,6 +457,7 @@ public:
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
+    virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 
     /**
