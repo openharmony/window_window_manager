@@ -2657,6 +2657,20 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
+bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+    sptr<WindowSessionProperty> property)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ExtractSupportWindowModeFromMetaData(abilityInfo);
+    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
+    const uint32_t noType = 0;
+    if (property && windowModeSupportType != noType) {
+        property->SetWindowModeSupportType(windowModeSupportType);
+        return true;
+    }
+    return false;
+}
+
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
 {
     if (func == nullptr) {
@@ -3944,6 +3958,9 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (false == UpdateWindowModeSupportType(sessionInfo_.abilityInfo, GetSessionProperty())) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "not update WindowModeSupportType");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
         GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
