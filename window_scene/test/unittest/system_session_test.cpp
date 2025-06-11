@@ -799,6 +799,30 @@ HWTEST_F(SystemSessionTest, GetSubWindowZLevel, TestSize.Level1)
     systemSession->property_->zLevel_ = 1;
     EXPECT_EQ(1, systemSession->GetSubWindowZLevel());
 }
+
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(false, systemSession->IsVisibleNotBackground());
+    systemSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    systemSession->SetParentSession(parentSession);
+    EXPECT_EQ(false, systemSession->IsVisibleNotBackground());
+    systemSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    systemSession->isVisible_ = true;
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    parentSession->isVisible_ = true;
+    EXPECT_EQ(true, systemSession->IsVisibleNotBackground());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

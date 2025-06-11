@@ -59,6 +59,18 @@ void SCBSystemSessionTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: check func IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_EQ(false, scbSystemSession_->IsVisibleNotBackground());
+    scbSystemSession_->isVisible_ = true;
+    ASSERT_EQ(true, scbSystemSession_->IsVisibleNotBackground());
+}
+
+/**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC
