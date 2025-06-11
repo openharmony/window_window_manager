@@ -628,8 +628,8 @@ public:
     /*
      * Multi Instance
      */
-    int32_t GetMaxInstanceCount(const std::string& bundleName);
-    int32_t GetInstanceCount(const std::string& bundleName);
+    uint32_t GetMaxInstanceCount(const std::string& bundleName);
+    uint32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void RefreshAppInfo(const std::string& bundleName);
 
