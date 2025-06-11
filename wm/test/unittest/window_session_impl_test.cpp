@@ -1239,7 +1239,7 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Leve
     foreWindow->property_->SetPersistentId(1);
     foreWindow->hostSession_ = session;
     foreWindow->state_ = WindowState::STATE_SHOWN;
-    ASSERT_FALSE(foreWindow->IsWindowSessionInvalid());
+    EXPECT_FALSE(foreWindow->IsWindowSessionInvalid());
     foreWindow->isDidForeground_ = false;
     foreWindow->NotifyForegroundInteractiveStatus(true);
     foreWindow->NotifyForegroundInteractiveStatus(false);
@@ -1269,7 +1269,7 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Le
     foreWindow1->property_->SetPersistentId(1);
     foreWindow1->hostSession_ = session;
     foreWindow1->state_ = WindowState::STATE_SHOWN;
-    ASSERT_FALSE(foreWindow1->IsWindowSessionInvalid());
+    EXPECT_FALSE(foreWindow1->IsWindowSessionInvalid());
     foreWindow1->isDidForeground_ = true;
     foreWindow1->NotifyForegroundInteractiveStatus(true);
     EXPECT_TRUE(logMsg.find("isDidForeground:") == std::string::npos);
@@ -1304,7 +1304,7 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_SHOWN;
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
     window->NotifyLifecyclePausedStatus();
     window->state_ = WindowState::STATE_DESTROYED;
     window->NotifyLifecyclePausedStatus();
@@ -1351,10 +1351,10 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->NotifyAfterLifecycleBackground(true, true);
     window->NotifyAfterLifecycleBackground(false, false);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleBackground end";
 }
 

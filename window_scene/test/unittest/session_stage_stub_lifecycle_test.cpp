@@ -95,7 +95,7 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
      MessageParcel reply;
      data.WriteBool(true);
      ASSERT_TRUE((sessionStageStub_ != nullptr));
-     ASSERT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus(data, reply));
+     EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus(data, reply));
  }
 
 /**
