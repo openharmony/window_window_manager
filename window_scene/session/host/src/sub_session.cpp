@@ -298,6 +298,15 @@ bool SubSession::IsVisibleForeground() const
     return Session::IsVisibleForeground();
 }
 
+bool SubSession::IsVisibleNotBackground() const
+{
+    const auto& mainOrFloatSession = GetMainOrFloatSession();
+    if (mainOrFloatSession) {
+        return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
+}
+
 WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
 {
     PostTask([weakThis = wptr(this), enabled, funcName = __func__] {

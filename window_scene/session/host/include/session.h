@@ -477,6 +477,7 @@ public:
     bool IsSystemSession() const;
     bool IsTerminated() const;
     bool IsSessionForeground() const;
+    bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
     virtual void SetBlank(bool isAddBlank) {};
     virtual bool GetBlank() const { return false; }
@@ -590,6 +591,7 @@ public:
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
+    virtual bool IsVisibleNotBackground() const;
     void SetIsStarting(bool isStarting);
     void SetUIStateDirty(bool dirty);
     void SetMainSessionUIStateDirty(bool dirty);
@@ -896,7 +898,7 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
-    
+
     /*
      * Window Pattern
      */

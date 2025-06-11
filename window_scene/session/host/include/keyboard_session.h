@@ -69,6 +69,7 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
         const WindowAnimationInfo& animationInfo) override;
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
     WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
