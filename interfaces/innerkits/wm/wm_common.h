@@ -2619,7 +2619,7 @@ struct WindowAnimationOption : public Parcelable {
         oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
             std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
         for (auto p: param) {
-            oss << std::fixed << std::setprecision(2) << p << ", ";
+            oss << std::fixed << std::setprecision(2) << p << ", "; // 2 means print float value length
         }
         oss << "]";
         return oss.str();
