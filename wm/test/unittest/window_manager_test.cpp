@@ -1968,8 +1968,8 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
     // check nullpter
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterRectChangedListener(nullptr));
 
-    sptr<TestWindowDisplayIdChangeListener> listener1 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
-    sptr<TestWindowDisplayIdChangeListener> listener2 = sptr<TestWindowDisplayIdChangeListener>::MakeSptr();
+    sptr<TestWindowRectChangedListener> listener1 = sptr<TestWindowRectChangedListener>::MakeSptr();
+    sptr<TestWindowRectChangedListener> listener2 = sptr<TestWindowRectChangedListener>::MakeSptr();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, windowManager.UnregisterRectChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();

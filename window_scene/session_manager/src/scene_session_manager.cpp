@@ -2636,7 +2636,6 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterAcquireRotateAnimationConfigFunc(sceneSession);
     RegisterRequestVsyncFunc(sceneSession);
     RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
-    RegisterDisplayIdChangeNotifyManagerFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -9566,7 +9565,6 @@ WMError SceneSessionManager::RegisterWindowManagerAgent(WindowManagerAgentType t
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY ||
-        type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID ||
         type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY) {
         if (!SessionPermission::IsSACalling()) {
             TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
@@ -11686,8 +11684,6 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     }
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity(isNotSessionRectWithDpiChange);
-    SessionManagerAgentController::GetInstance().NotifyDisplayIdChange(sceneSession->GetWindowId(),
-        sceneSession->GetSessionProperty()->GetDisplayId());
     if (fromScreenId != screenId) {
         sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
@@ -15343,17 +15339,6 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
         if (onSceneSessionDestruct_) {
             onSceneSessionDestruct_(persistentId);
         }
-    });
-}
-
-void SceneSessionManager::RegisterDisplayIdChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
-{
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
-        return;
-    }
-    sceneSession->SetDisplayIdChangeListener([this](uint32_t windowId, DisplayId displayId) {
-        SessionManagerAgentController::GetInstance().NotifyDisplayIdChange(windowId, displayId);
     });
 }
 
