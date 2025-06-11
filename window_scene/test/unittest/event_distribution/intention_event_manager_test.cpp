@@ -79,6 +79,10 @@ HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
     enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(),
                                                                                               eventHandler_);
     EXPECT_EQ(true, enable);
+
+    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(),
+                                                                                              eventHandler_);
+    EXPECT_EQ(true, enable);
 }
 
 /**
