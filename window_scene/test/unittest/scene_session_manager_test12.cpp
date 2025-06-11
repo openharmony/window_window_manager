@@ -547,7 +547,7 @@ HWTEST_F(SceneSessionManagerTest12, SetCreateKeyboardSessionListener, TestSize.L
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
     sessionInfo.screenId_ = SCREEN_ID_INVALID;
-    ssm_->NotifySessionTouchOutside(123);
+    ssm_->NotifySessionTouchOutside(123, 0);
 }
 
 /**

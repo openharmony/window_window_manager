@@ -2933,7 +2933,7 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
         sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
-        specificCallback_->onSessionTouchOutside_(id);
+        specificCallback_->onSessionTouchOutside_(id, GetDisplayId());
     }
 
     // notify outside down event
@@ -2973,7 +2973,7 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
     // notify touch outside
     if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
         sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
-        specificCallback_->onSessionTouchOutside_(GetPersistentId());
+        specificCallback_->onSessionTouchOutside_(GetPersistentId(), GetDisplayId());
     }
 
     // notify outside down event

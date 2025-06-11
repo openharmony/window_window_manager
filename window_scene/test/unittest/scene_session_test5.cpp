@@ -297,7 +297,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEventInner, TestSize.Level1)
     session->specificCallback_->onSessionTouchOutside_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 
-    NotifySessionTouchOutsideCallback func = [](int32_t persistentId) { return; };
+    NotifySessionTouchOutsideCallback func = [](int32_t persistentId, DisplayId displayId) { return; };
     session->specificCallback_->onSessionTouchOutside_ = func;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
     pointerEvent->SetPointerAction(2);
