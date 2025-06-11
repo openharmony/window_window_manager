@@ -1157,7 +1157,7 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
         if (!session->onGetAllAppUseControlMapFunc_) {
-            TLOGNW(WmsLogTag::WMS_LIFE,
+            TLOGNE(WmsLogTag::WMS_LIFE,
                 "id: %{public}d session GetAllAppUseControlMapFunc is null", session->GetPersistentId());
             return;
         }
