@@ -2024,25 +2024,36 @@ void Session::HandlePointDownDialog()
     }
 }
 
-WSError Session::HandleSubWindowClick(int32_t action)
+WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
-        return WSError::WS_ERROR_NULLPTR;
+    const auto& property = GetSessionProperty();
+    bool raiseEnabled = property->GetRaiseEnabled();
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession && !isPointMove) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
     }
-    bool raiseEnabled = property->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
+    TLOGD(WmsLogTag::WMS_EVENT,
+          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
+          GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
+    if (raiseEnabled && isPointDown && !isModal) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession) {
+    } else if (parentSession && !isPointMove) {
         // sub window is forbidden to raise to top after click, but its parent should raise
-        parentSession->NotifyClick();
+        parentSession->NotifyClick(!IsScbCoreEnabled());
     }
     return WSError::WS_OK;
 }
