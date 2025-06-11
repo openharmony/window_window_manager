@@ -179,7 +179,6 @@ public:
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
-
     /*
      * Window Transition Animation For PC
      */
