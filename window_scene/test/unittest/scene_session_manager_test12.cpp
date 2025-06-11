@@ -2002,6 +2002,167 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
     ssm_->UpdateSessionDisplayId(86, 12);
 }
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_Invalid_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_Invalid_Permission, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_Invalid_Param, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    RecentSessionInfo(101);
+    recentSessionInfoList.emplace_back(101);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_OK, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    SessionInfo info;
+    info.bundleName_ = "mockBundleName";
+    info.moduleName_ = "mockModuleName";
+    info.abilityName_ = "mockAbilityName";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->state_ = SessionState::STATE_CONNECT;
+    ssm_->sceneSessionMap_[101] = sceneSession;
+    const std::vector<int32_t> idList = { 101 };
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ssm_->UpdateRecentMainSessionInfos(idList);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(recentSessionInfoList[0].missionId, 101);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_No_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_No_Permission, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->CreateNewInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_Invalid_Param, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->CreateNewInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->CreateNewInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_OK, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->CreateNewInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_No_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_No_Permission, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->RemoveInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_Invalid_Param, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->RemoveInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->RemoveInstanceKey(bundleName, "");
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_OK, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->RemoveInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
