@@ -148,14 +148,6 @@ void SessionManagerAgentController::UpdateWindowVisibilityInfo(
     }
 }
 
-void SessionManagerAgentController::NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId)
-{
-    for (auto& agent : smAgentContainer_.GetAgentsByType(
-        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DISPLAY_ID)) {
-        agent->NotifyDisplayIdChange(windowId, displayId);
-    }
-}
-
 void SessionManagerAgentController::UpdateVisibleWindowNum(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
