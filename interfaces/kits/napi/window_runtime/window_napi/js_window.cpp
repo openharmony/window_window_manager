@@ -1312,7 +1312,8 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
-        if (focusOnShow == false && (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
+        if (focusOnShow == false &&
+            (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
             WindowHelper::IsDialogWindow(weakWindow->GetType()))) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
