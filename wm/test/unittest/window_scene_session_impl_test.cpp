@@ -2463,7 +2463,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetSubWindowSource");
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    auto res = window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
 }
