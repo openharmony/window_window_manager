@@ -523,6 +523,15 @@ public:
 };
 using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
 
+class IAcrossMultiDisplayChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnAcrossMultiDisplayChanged(bool isAcrossMultiDisplay) {}
+};
+using IAcrossMultiDisplayChangeListenerSptr = sptr<IAcrossMultiDisplayChangeListener>;
+
 /**
  * @class IWindowNoInteractionListenerSptr
  *
@@ -2763,6 +2772,24 @@ public:
      */
     virtual WMError UnregisterSystemDensityChangeListener(
         const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossMultiDisplayChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterAcrossMultiDisplayChangeListener(
+        const IAcrossMultiDisplayChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossMultiDisplayChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterAcrossMultiDisplayChangeListener(
+        const IAcrossMultiDisplayChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.

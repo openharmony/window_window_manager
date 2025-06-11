@@ -814,7 +814,9 @@ public:
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
+    WMError UpdateAcrossMultiDisplayChangeRegistered(bool isRegister) override;
     virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) { return WMError::WM_OK; }
+    bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossMultiDisplayChanged_.load(); }
 
     /*
      * Window Pattern
@@ -1337,6 +1339,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
+    std::atomic_bool isRegisterAcrossMultiDisplayChanged_ = false;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

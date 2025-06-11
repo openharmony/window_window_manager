@@ -290,6 +290,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED):
             return HandleUpdateScreenshotAppEventRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED):
+            return HandleUpdateAcrossMultiDisplayChangeRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
@@ -1936,6 +1938,21 @@ int SessionStub::HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     WMError errCode = UpdateScreenshotAppEventRegistered(persistentId, isRegister);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateAcrossMultiDisplayChangeRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = false;
+    if (!data.ReadBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateAcrossMultiDisplayChangeRegistered(persistentId, isRegister);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
         return ERR_INVALID_DATA;

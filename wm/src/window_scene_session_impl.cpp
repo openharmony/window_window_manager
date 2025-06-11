@@ -6382,8 +6382,7 @@ WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossMultiDisplay(bool& i
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d called by invalid window type %{public}u",
-            subWindowId, GetType());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto hostSession = GetHostSession();

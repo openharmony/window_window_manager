@@ -633,6 +633,24 @@ void JsWindowListener::OnSystemDensityChanged(float density)
     }
 }
 
+void JsWindowListener::OnAcrossMultiDisplayChanged(bool isAcrossMultiDisplay)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    auto jsCallback = [self = weakRef_, density, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "This listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, density) };
+        thisListener->CallJsMethod(SYSTEM_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
+    }
+}
+
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
     auto jsCallback = [self = weakRef_, isVisible, eng = env_] {

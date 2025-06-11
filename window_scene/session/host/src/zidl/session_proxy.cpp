@@ -3129,6 +3129,38 @@ WMError SessionProxy::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
     return static_cast<WMError>(ret);
 }
 
+WMError SessionProxy::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write isRegister failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::RequestFocus(bool isFocused)
 {
     MessageParcel data;

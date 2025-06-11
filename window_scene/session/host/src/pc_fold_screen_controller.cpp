@@ -467,6 +467,9 @@ void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
         return;
     }
     sceneSession->sessionStage_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode_);
+
+    // notify subSession client
+    sceneSession->NotifySubSessionAcrossMultiDisplayChange(isFullScreenWaterfallMode_);
 }
 
 int32_t PcFoldScreenController::GetPersistentId() const

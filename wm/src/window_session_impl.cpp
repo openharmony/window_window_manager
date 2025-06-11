@@ -145,6 +145,9 @@ std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
     WindowSessionImpl::systemDensityChangeListeners_;
+std::recursive_mutex WindowSessionImpl::acrossMultiDisplayChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<IAcrossMultiDisplayChangeListenerSptr>>
+    WindowSessionImpl::acrossMultiDisplayChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -3910,6 +3913,13 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
             listener->OnWaterfallModeChange(isWaterfallMode);
         }
     }
+    std::lock_guard<std::recursive_mutex> lock(acrossMultiDisplayChangeListenerMutex_);
+    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossMultiDisplayChangeListener>();
+    for (const auto& listener : acrossMultiDisplayChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnAcrossMultiDisplayChanged(isWaterfallMode);
+        }
+    }
 }
 
 template<typename T>
@@ -4078,6 +4088,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
         ClearUselessListeners(systemDensityChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
+        ClearUselessListeners(acrossMultiDisplayChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -4825,6 +4839,7 @@ EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventList
     return screenshotAppEventListeners_[GetPersistentId()];
 }
 
+
 WSError WindowSessionImpl::NotifyDestroy()
 {
     if (WindowHelper::IsDialogWindow(property_->GetWindowType())) {
@@ -5326,6 +5341,86 @@ WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDe
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
     return UnregisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
+    const IAcrossMultiDisplayChangeListenerSptr& listener)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
+        ret = RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (acrossMultiDisplayChangeListeners_[persistentId].size() == 1) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(persistentId, true);
+    }
+    if (ret != WM_OK) {
+        UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
+    const IAcrossMultiDisplayChangeListenerSptr& listener)
+{
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
+        ret = UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (acrossMultiDisplayChangeListeners_[persistentId].empty()) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(persistentId, false);
+    }
+    if (ret != WM_OK) {
+        RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+    }
+    return ret;
 }
 
 WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
