@@ -2884,24 +2884,26 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsFocused
- * @tc.desc: IsFocused test
+ * @tc.name: IsComponentFocused
+ * @tc.desc: IsComponentFocused test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, IsFocused, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, IsComponentFocused, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsFocused");
+    option->SetWindowName("IsComponentFocused");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    EXPECT_FALSE(window->IsComponentFocused());
+
     SessionInfo sessionInfo;
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    EXPECT_FALSE(window->IsFocused());
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    EXPECT_FALSE(window->IsComponentFocused());
     window->focusState_ = false;
-    EXPECT_FALSE(window->IsFocused());
+    EXPECT_FALSE(window->IsComponentFocused());
     window->focusState_ = true;
-    EXPECT_TRUE(window->IsFocused());
+    EXPECT_TRUE(window->IsComponentFocused());
 }
 
 /**

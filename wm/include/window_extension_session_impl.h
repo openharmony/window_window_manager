@@ -126,7 +126,7 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    bool IsFocused() const override;
+    bool IsComponentFocused() const override;
 
     /*
      * Gesture Back
