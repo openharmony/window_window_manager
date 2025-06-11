@@ -2024,7 +2024,7 @@ void Session::HandlePointDownDialog()
     }
 }
 
-WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
+WSError Session::HandleSubWindowClick(int32_t action)
 {
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
@@ -2042,7 +2042,7 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
-        parentSession->NotifyClick(!IsScbCoreEnabled());
+        parentSession->NotifyClick();
     }
     return WSError::WS_OK;
 }
