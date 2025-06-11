@@ -807,15 +807,6 @@ public:
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     /**
-     * @brief notify display id change.
-     *
-     * @param windowId window id.
-     * @param displayid ID of the display where the window is located.
-     * @return WM_OK means notify success, others means notify failed.
-     */
-    WMError NotifyDisplayIdChange(uint32_t windowId, DisplayId displayId);
-
-    /**
      * @brief Minimize all app window.
      *
      * @param displayId Display id.

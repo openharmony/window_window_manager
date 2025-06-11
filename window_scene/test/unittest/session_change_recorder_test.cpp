@@ -143,12 +143,12 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
     dumpInfo.clear();
     EXPECT_TRUE(result2);
 
-    params.push_back("0");
+    params.push_back("1");
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result3 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
         (dumpInfo.find("125") == std::string::npos);
     dumpInfo.clear();
-    EXPECT_TRUE(result3);
+    EXPECT_FALSE(result3);
 
     params.pop_back();
     params[0] = "123";

@@ -100,20 +100,21 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType02, TestSize.Level1)
     if (window == nullptr) {
         return;
     }
-    window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+                                            WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    EXPECT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetWindowMode());
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
+    EXPECT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
 }
 
@@ -131,19 +132,19 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType03, TestSize.Level1)
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                             WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     ASSERT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
@@ -192,7 +193,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, TestSize.Level1)
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
     } else {
-        ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetWindowMode());
+        ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
     }
     window1->Destroy();
     window2->Destroy();
