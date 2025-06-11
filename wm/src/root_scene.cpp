@@ -560,7 +560,7 @@ void RootScene::RemoveRootScene(DisplayId displayId)
     rootSceneMap_.erase(displayId);
 }
 
-std::shared_ptr<RSUIDirector> RootScene::GetRSUIDirector()
+std::shared_ptr<RSUIDirector> RootScene::GetRSUIDirector() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     sptr<Display> display;
@@ -581,7 +581,7 @@ std::shared_ptr<RSUIDirector> RootScene::GetRSUIDirector()
     return rsUIDirector;
 }
 
-std::shared_ptr<RSUIContext> RootScene::GetRSUIContext()
+std::shared_ptr<RSUIContext> RootScene::GetRSUIContext() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIDirector = GetRSUIDirector();

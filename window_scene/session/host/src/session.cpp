@@ -4311,7 +4311,7 @@ void Session::InitRSUIContext()
           RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",

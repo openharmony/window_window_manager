@@ -144,7 +144,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext();
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;

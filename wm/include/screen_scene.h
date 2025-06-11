@@ -93,8 +93,8 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIDirector> GetRSUIDirector() override;
-    std::shared_ptr<RSUIContext> GetRSUIContext() override;
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     mutable std::mutex mutex_;
