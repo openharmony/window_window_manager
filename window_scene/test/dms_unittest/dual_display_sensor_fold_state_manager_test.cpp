@@ -15,10 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
-#include "screen_session_manager/include/screen_session_manager.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "parameters.h"
+#include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -75,8 +76,9 @@ namespace {
      */
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, DualDisplaySensorFoldStateManager, TestSize.Level1)
     {
-        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
-        ASSERT_EQ(mgr.packageNames_.size(), 0);
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
+        ASSERT_EQ(mgr.packageNames_.size(), 1);
     }
 
     /**
@@ -86,7 +88,8 @@ namespace {
      */
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleAngleChange, TestSize.Level1)
     {
-        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
         float angle = 0.0f;
         int hall = 0;
         sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
@@ -111,31 +114,75 @@ namespace {
     }
 
     /**
+     * @tc.name: HandleHallChangeInner
+     * @tc.desc: HandleHallChangeInner
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleHallChangeInner, TestSize.Level1)
+    {
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
+        float angle = 0.0f;
+        int hall = 1;
+        sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
+        mgr.applicationStateObserver_ = nullptr;
+        mgr.HandleHallChangeInner(angle, hall, foldScreenPolicy);
+        ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
+        ASSERT_TRUE(hall == HALL_THRESHOLD);
+
+        mgr.applicationStateObserver_ = new ApplicationStateObserver();
+        mgr.HandleHallChangeInner(angle, hall, foldScreenPolicy);
+        ASSERT_TRUE(mgr.applicationStateObserver_ != nullptr);
+        ASSERT_TRUE(hall == HALL_THRESHOLD);
+
+        mgr.applicationStateObserver_ = nullptr;
+        hall = 0;
+        mgr.HandleHallChangeInner(angle, hall, foldScreenPolicy);
+        ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
+        ASSERT_FALSE(hall == HALL_THRESHOLD);
+    }
+
+    /**
      * @tc.name: HandleHallChange
      * @tc.desc: HandleHallChange
      * @tc.type: FUNC
      */
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, HandleHallChange, TestSize.Level1)
     {
-        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
+        // test hall = 1
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
         float angle = 0.0f;
         int hall = 1;
         sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
-        mgr.applicationStateObserver_ = nullptr;
-        mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-        ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
-        ASSERT_TRUE(hall == HALL_THRESHOLD);
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
 
-        mgr.applicationStateObserver_ = new ApplicationStateObserver();
-        mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-        ASSERT_TRUE(mgr.applicationStateObserver_ != nullptr);
-        ASSERT_TRUE(hall == HALL_THRESHOLD);
-
-        mgr.applicationStateObserver_ = nullptr;
+        // test angle < 170
+        angle = 168.0f;
         hall = 0;
-        mgr.HandleHallChange(angle, hall, foldScreenPolicy);
-        ASSERT_FALSE(mgr.applicationStateObserver_ != nullptr);
-        ASSERT_FALSE(hall == HALL_THRESHOLD);
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
+
+        // test hall = 0 angle > 170 and angle not change
+        angle = 178.0f;
+        hall = 0;
+        FoldScreenSensorManager::GetInstance().SetGlobalAngle(angle);
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
+
+        // test hall = 0 angle < 170 and angle not change
+        angle = 158.0f;
+        hall = 0;
+        FoldScreenSensorManager::GetInstance().SetGlobalAngle(angle);
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
+
+        // test hall = 0 angle < 170 and angle changed
+        angle = 168.0f;
+        hall = 0;
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
+
+        // test hall = 0 angle > 170 and angle changed
+        angle = 178.0f;
+        hall = 0;
+        ASSERT_NO_FATAL_FAILURE({mgr.HandleHallChange(angle, hall, foldScreenPolicy);});
     }
 
     /**
@@ -145,7 +192,8 @@ namespace {
      */
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, GetNextFoldState, TestSize.Level1)
     {
-        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
         float angle = 200.0f;
         int hall = 1;
         FoldStatus ret = mgr.GetNextFoldState(angle, hall);
@@ -180,7 +228,8 @@ namespace {
      */
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, RegisterApplicationStateObserver, TestSize.Level1)
     {
-        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager();
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
         mgr.RegisterApplicationStateObserver();
         ASSERT_NE(mgr.applicationStateObserver_, nullptr);
     }
