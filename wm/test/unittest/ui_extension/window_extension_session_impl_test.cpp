@@ -1333,8 +1333,15 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, TestSize.Leve
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
+    sptr<IRemoteObject> contextToken = sptr<IRemoteObjectMocker>::MakeSptr();
+    abilityContext->SetToken(contextToken);
     window_->context_ = abilityContext;
+    EXPECT_NE(nullptr, window_->context_->GetToken());
     SessionViewportConfig config;
+    config.displayId_ = 999;
+    window_->lastDisplayId_ = 0;
+    window_->NotifyDisplayInfoChange(config);
+    window_->lastDisplayId_ = 999;
     window_->NotifyDisplayInfoChange(config);
 }
 
