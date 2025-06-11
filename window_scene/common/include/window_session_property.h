@@ -33,6 +33,7 @@ class WindowSessionProperty;
 class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
+using TransitionAnimationMapType = std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -114,7 +115,7 @@ public:
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
-    std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> GetTransitionAnimationConfig() const;
+    TransitionAnimationMapType GetTransitionAnimationConfig() const;
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
