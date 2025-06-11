@@ -940,7 +940,7 @@ HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->RegisterWindowStageLifeCycleListener(listener));
+    EXPECT_EQ(WMError::WM_OK, window->RegisterWindowStageLifeCycleListener(listener));
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
