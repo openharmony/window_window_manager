@@ -264,8 +264,8 @@ public:
     WMError UnRegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
-    WMError RegisterWindowStageLifecycleListener(const IWindowStageLifeCycle& listener) override;
-    WMError UnregisterWindowStageLifecycleListener(const IWindowStageLifeCycle& listener) override;
+    WMError RegisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
+    WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) override;

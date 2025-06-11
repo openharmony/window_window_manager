@@ -522,7 +522,7 @@ HWTEST_F(WindowSceneTest, GoPause, TestSize.Level1)
     sptr<WindowOption> optionTest = new WindowOption();
     EXPECT_CALL(mocker->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
     DisplayId displayId = 0;
-    sptr<IWindowStageLifeCycle> listener = nullptr;
+    sptr<IWindowLifeCycle> listener = nullptr;
     ASSERT_EQ(WMError::WM_OK, winScene->Init(displayId, abilityContext_, listener));
     ASSERT_EQ(WMError::WM_OK, winScene->GoPause());
 }
