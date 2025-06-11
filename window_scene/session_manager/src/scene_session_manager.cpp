@@ -461,7 +461,7 @@ bool SceneSessionManager::IsSyncLoadStartingWindow()
 {
     return syncLoadStartingWindow_;
 }
- 
+
 void SceneSessionManager::RegisterFlushWindowInfoCallback()
 {
     SceneInputManager::GetInstance().
@@ -1598,7 +1598,7 @@ sptr<SceneSession> SceneSessionManager::GetMainSessionByPersistentId(int32_t per
     auto it = sceneSessionMap_.find(persistentId);
     if (it != sceneSessionMap_.end() && it->second && SessionHelper::IsMainWindow(it->second->GetWindowType())) {
         return it->second;
-    }  
+    }
     return nullptr;
 }
 
@@ -6412,7 +6412,7 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         std::vector<std::string> resetParams;
         resetParams.assign(params.begin() + 1, params.end());
         SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
@@ -7088,7 +7088,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             return false;
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
-            session->IsVisible() && IsParentSessionVisible(session)) {
+            session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
             nextFocusableSession = session;
             return true;
         }
@@ -12113,7 +12113,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
             }
         }
-        if (keyboardSession != nullptr && 
+        if (keyboardSession != nullptr &&
             (keyboardSession->GetOccupiedAreaDirtyFlags() &
             static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA)) !=
             static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
@@ -14926,7 +14926,7 @@ bool SceneSessionManager::GetPersistentImageFit(int32_t persistentId, int32_t& i
     auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
         ScenePersistentStorageType::MAXIMIZE_STATE);
     if (persistentImageFit) {
-        ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId), 
+        ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId),
             imageFit, ScenePersistentStorageType::MAXIMIZE_STATE);
         return true;
     }
@@ -15854,7 +15854,7 @@ WMError SceneSessionManager::EnterKioskMode(const sptr<IRemoteObject>& token)
         if (kioskModeChangeFunc_ != nullptr) {
             kioskModeChangeFunc_(true, session->GetPersistentId());
             return WMError::WM_OK;
-        } 
+        }
         isKioskMode_ = true;
         kioskAppPersistentId_ = session->GetPersistentId();
         return WMError::WM_OK;
