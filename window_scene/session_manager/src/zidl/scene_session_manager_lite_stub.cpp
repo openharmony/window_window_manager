@@ -95,6 +95,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnregisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID):
             return HandleCheckWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TEST_WINDOW):
+            return HandleTestWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK):
             return HandleCheckUIExtensionCreation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LIST_WINDOW_INFO):
@@ -574,7 +576,7 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
 
 int SceneSessionManagerLiteStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t windowId = INVALID_WINDOW_ID;
     int32_t choice = 0;
     if (!data.ReadInt32(windowId)) {
@@ -585,8 +587,8 @@ int SceneSessionManagerLiteStub::HandleTestWindow(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = TestWindow(windowId, choice);
-    if (errCode != WSError::WS_OK) {
+    WMError errCode = TestWindow(windowId, choice);
+    if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to TestWindow, windowId:%{public}d, choice:%{public}d", windowId, choice);
         return ERR_INVALID_DATA;
     }

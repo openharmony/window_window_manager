@@ -1451,16 +1451,6 @@ WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     return ret;
 }
 
-WMError TestWindow(int32_t windowId, int32_t choice) const
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, choice: %{public}d", windowId, choice);
-    WMError ret = SingletonContainer::Get<WindowAdapter>().TestWindow(windowId, choice);
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "failed");
-    }
-    return ret;
-}
-
 WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
