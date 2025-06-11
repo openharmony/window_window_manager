@@ -1774,8 +1774,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onWindowInputPidChangeCallback_ = [this](int32_t windowId, bool startMoving) {
         this->NotifyMMIWindowPidChange(windowId, startMoving);
     };
-    specificCb->onSessionTouchOutside_ = [this](int32_t persistentId) {
-        this->NotifySessionTouchOutside(persistentId);
+    specificCb->onSessionTouchOutside_ = [this](int32_t persistentId, DisplayId displayId) {
+        this->NotifySessionTouchOutside(persistentId, displayId);
     };
     specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
         return this->GetAINavigationBarArea(displayId);
@@ -4416,9 +4416,30 @@ void SceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     }
 }
 
-void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
+WSError SceneSessionManager::GetDisplayGroupIdFromSceneSession(const sptr<SceneSession>& session,
+    DisplayId& displayGroupId) const
 {
-    auto task = [this, persistentId]() {
+    if (session == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    displayGroupId = GetDisplayGroupId(session->GetDisplayId());
+    return WSError::WS_OK;
+}
+
+bool SceneSessionManager::IsSameDisplayGroupId(const sptr<SceneSession>& session,
+    const DisplayId touchDisplayGroupId) const
+{
+    DisplayId displayGroupId = 0;
+    if (GetDisplayGroupIdFromSceneSession(session, displayGroupId) != WSError::WS_OK) {
+        TLOGD(WmsLogTag::WMS_EVENT, "session is null");
+        return false;
+    }
+    return displayGroupId == touchDisplayGroupId;
+}
+
+void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId, DisplayId displayId)
+{
+    auto task = [this, persistentId, displayId]() {
         int32_t callingSessionId = INVALID_WINDOW_ID;
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession != nullptr && sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -4426,6 +4447,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             TLOGND(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
                 persistentId, callingSessionId);
         }
+        DisplayId touchDisplayGroupId = GetDisplayGroupId(displayId);
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
@@ -4434,6 +4456,9 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
             if (!(sceneSession->IsVisible() ||
                   sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
                   sceneSession->GetSessionState() == SessionState::STATE_ACTIVE)) {
+                continue;
+            }
+            if (!IsSameDisplayGroupId(sceneSession, touchDisplayGroupId)) {
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();

@@ -103,9 +103,9 @@ HWTEST_F(SceneSessionManagerTest5, NotifySessionTouchOutside01, TestSize.Level1)
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    ssm_->NotifySessionTouchOutside(0);
+    ssm_->NotifySessionTouchOutside(0, 0);
     property->SetPersistentId(1);
-    ssm_->NotifySessionTouchOutside(1);
+    ssm_->NotifySessionTouchOutside(1, 0);
 }
 
 /**

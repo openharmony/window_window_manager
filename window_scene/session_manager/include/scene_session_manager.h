@@ -387,7 +387,9 @@ public:
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
     void OnOutsideDownEvent(int32_t x, int32_t y);
-    void NotifySessionTouchOutside(int32_t persistentId);
+    WSError GetDisplayGroupIdFromSceneSession(const sptr<SceneSession>& session, DisplayId& displayGroupId) const;
+    bool IsSameDisplayGroupId(const sptr<SceneSession>& session, const DisplayId touchDisplayGroupId) const;
+    void NotifySessionTouchOutside(int32_t persistentId, DisplayId displayId);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetUnreliableWindowInfo(int32_t windowId,
