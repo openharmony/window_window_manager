@@ -982,16 +982,6 @@ HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAppUseControlMap
- * @tc.desc: GetAllAppUseControlMap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level3)
-{
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
-}
-
-/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC
@@ -1010,7 +1000,7 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
  
     std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMap;
     sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMap]() ->
-        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap});
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap;});
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
 
     std::string key = "app#0";
