@@ -31,7 +31,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
 };
-const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
+const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP{
     // white register list for window
     {WINDOW_SIZE_CHANGE_CB, RegisterListenerType::WINDOW_SIZE_CHANGE_CB},
     {SYSTEM_AVOID_AREA_CHANGE_CB, RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB},
@@ -54,6 +54,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
+    {MAIN_WINDOW_FULL_SCREEN_ACROSS_MULTI_DISPLAY_CHANGE_CB,
+     RegisterListenerType::MAIN_WINDOW_FULL_SCREEN_ACROSS_MULTI_DISPLAY_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
@@ -345,6 +347,23 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(const sp
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(listener));
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessAcrossMultiDisplayChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAcrossMultiDisplayChangeListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAcrossMultiDisplayChangeListener(listener));
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -580,6 +599,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
                 return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::ACROSS_MULTI_DISPLAY_CHANGE_CB):
+                return ProcessAcrossMultiDisplayChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
