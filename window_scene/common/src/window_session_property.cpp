@@ -325,7 +325,6 @@ const SessionInfo& WindowSessionProperty::GetSessionInfo() const
     return sessionInfo_;
 }
 
-
 TransitionAnimationMapType WindowSessionProperty::GetTransitionAnimationConfig() const
 {
     return transitionAnimationConfig_;
