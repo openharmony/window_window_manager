@@ -140,7 +140,8 @@ bool CheckAvailableAreaChangeHasRegistered(const sptr<AvailableAreaChangeListene
 {
     std::unique_lock<std::shared_mutex> lock(availableAreaChangeMutex);
     for (const auto& iter : availableAreaChangeListenerMap) {
-        if (iter.second->GetAvailableAreaChangeInnerFunc() == availableAreaChangeListener->GetAvailableAreaChangeInnerFunc()) {
+        if (iter.second->GetAvailableAreaChangeInnerFunc() ==
+            availableAreaChangeListener->GetAvailableAreaChangeInnerFunc()) {
             return true;
         }
     }
@@ -1249,8 +1250,13 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
     uint64_t displayId, NativeDisplayManager_Rect** availableArea)
 {
-    if (availableArea == nullptr || displayId < 0) {
+    if (availableArea == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
@@ -1258,7 +1264,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
         TLOGE(WmsLogTag::DMS, "[DMNDK] display is  null, id %{public}" PRIu64" ", displayId);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
-    NativeDisplayManager_Rect* availableAreaInfo = 
+    NativeDisplayManager_Rect* availableAreaInfo =
         static_cast<NativeDisplayManager_Rect*>(malloc(sizeof(NativeDisplayManager_Rect)));
     if (availableAreaInfo == NULL) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memory failed.");
@@ -1277,7 +1283,8 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
     DMRect displayAvailableArea = DMRect::NONE();
     display->GetAvailableArea(displayAvailableArea);
     TLOGI(WmsLogTag::DMS, "[DMNDK] posX_=%{public}d posY_=%{public}d width_=%{public}d height_=%{public}d",
-        displayAvailableArea.posX_, displayAvailableArea.posY_, displayAvailableArea.width_, displayAvailableArea.height_);
+        displayAvailableArea.posX_, displayAvailableArea.posY_,
+        displayAvailableArea.width_, displayAvailableArea.height_);
     OH_SetDisplayRect(displayAvailableArea, availableAreaInfo);
     *availableArea = availableAreaInfo;
     return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
@@ -1298,8 +1305,13 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(Nati
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
     uint64_t displayId, NativeDisplayManager_SourceMode* sourceMode)
 {
-    if (sourceMode == nullptr || displayId < 0) {
+    if (sourceMode == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input sourceMode null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
@@ -1320,8 +1332,13 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64_t displayId, int32_t* x, int32_t* y)
 {
-    if (x == nullptr || y == nullptr || displayId < 0) {
+    if (x == nullptr || y == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input x or y is null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
