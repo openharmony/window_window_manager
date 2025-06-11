@@ -2032,26 +2032,15 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     const auto& property = GetSessionProperty();
-    bool raiseEnabled = property->GetRaiseEnabled();
-    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
-    if (isExecuteDelayRaise) {
-        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-            RaiseToAppTopForPointDown();
-        }
-        if (!raiseEnabled && parentSession && !isPointMove) {
-            parentSession->NotifyClick(!IsScbCoreEnabled());
-        }
-        return WSError::WS_OK;
-    }
+    bool raiseEnabled = property->GetRaiseEnabled() &&
+        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
     TLOGD(WmsLogTag::WMS_EVENT,
-          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
-          GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
-    if (raiseEnabled && isPointDown && !isModal) {
+          "id: %{public}d, raiseEnabled: %{public}d, isModal: %{public}d",
+          GetPersistentId(), raiseEnabled, isModal);
+    if (raiseEnabled && !isModal) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession && !isPointMove) {
+    } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
