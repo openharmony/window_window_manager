@@ -547,7 +547,7 @@ int SessionStageStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = TestWindow(windowId, choice);
+    WMError errCode = TestWindow(windowId, choice);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

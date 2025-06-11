@@ -769,6 +769,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
 
 WMError SceneSessionManagerLiteProxy::TestWindow(int32_t windowId, int32_t choice)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -795,6 +796,7 @@ WMError SceneSessionManagerLiteProxy::TestWindow(int32_t windowId, int32_t choic
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    return WMError:WM_OK;
 }
 
 void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)

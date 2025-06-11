@@ -858,12 +858,12 @@ WMError SessionStageProxy::TestWindow(int32_t windowId, int32_t choice)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(static_cast<int32_t>(windowId))) {
+    if (!data.WriteInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(static_cast<int32_t>(choice))) {
+    if (!data.WriteInt32(choice)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write choice failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
