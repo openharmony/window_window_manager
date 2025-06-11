@@ -32,8 +32,10 @@
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "screen_setting_helper.h"
 
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_scene_config.h"
 #include "singleton.h"
@@ -67,9 +69,14 @@ constexpr float HALL_ZERO_INVALID_POSTURE = 170.0F;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 110.0F;
 constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
+constexpr uint32_t FULL_WAIT_TIMES = 300;
+std::atomic<bool> g_isWaitting = false;
+std::mutex foldStatusChangeMutex_;
+std::condition_variable angleChange_;
 } // namespace
 
-DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
+DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager(
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler) : screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
     if (stringListConfig.count("hallSwitchApp") != 0) {
@@ -106,15 +113,72 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     if (hall == HALL_FOLDED_THRESHOLD) {
         angle = ANGLE_MIN_VAL;
     }
+
+    if (g_isWaitting) {
+        angleChange_.notify_all();
+        TLOGI(WmsLogTag::DMS, "report angle when waitting, angle: %{public}f, hall: %{public}d.", angle, hall);
+    }
+
     FoldStatus nextState = GetNextFoldState(angle, hall);
     if (nextState != GetCurrentState()) {
         TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d.", angle, hall);
     }
+
     UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
 
 void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    if (hall == HALL_THRESHOLD || angle < HALL_ZERO_INVALID_POSTURE) {
+        if (g_isWaitting) {
+            angleChange_.notify_all();
+        }
+        HandleHallChangeInner(angle, hall, foldScreenPolicy);
+        return;
+    }
+
+    TLOGI(WmsLogTag::DMS, "prepare go into timer, angle: %{public}f, hall: %{public}d.", angle, hall);
+    auto taskDualChangeFoldStatus = [this, angle, hall, foldScreenPolicy] {
+        std::unique_lock<std::mutex> lock(foldStatusChangeMutex_);
+        g_isWaitting = true;
+        if (angleChange_.wait_for(lock, std::chrono::milliseconds(FULL_WAIT_TIMES)) == std::cv_status::timeout) {
+            uint16_t currentHall = FoldScreenSensorManager::GetInstance().GetGlobalHall();
+            float currentAngle = FoldScreenSensorManager::GetInstance().GetGlobalAngle();
+            TLOGI(WmsLogTag::DMS, "currentAngle: %{public}f, currentHall: %{public}d.", currentAngle, currentHall);
+            if (currentHall == HALL_THRESHOLD) {
+                HandleHallChangeInner(angle, hall, foldScreenPolicy);
+                g_isWaitting = false;
+                return;
+            }
+
+            // no new angle upload, continue the process
+            if (FoldScreenStateInternel::FloatEqualAbs(currentAngle, angle)) {
+                TLOGI(WmsLogTag::DMS,
+                    "angle: %{public}f, hall: %{public}d. no continuous angle uploads, continue to change foldstatus.",
+                    currentAngle, currentHall);
+
+                FoldScreenSensorManager::GetInstance().SetGlobalAngle(ANGLE_MIN_VAL);
+                HandleHallChangeInner(ANGLE_MIN_VAL, hall, foldScreenPolicy);
+                g_isWaitting = false;
+                return;
+            }
+
+            if (currentAngle < HALL_ZERO_INVALID_POSTURE) {
+                HandleAngleChange(currentAngle, currentHall, foldScreenPolicy);
+                g_isWaitting = false;
+                return;
+            }
+        }
+
+        TLOGI(WmsLogTag::DMS, "taskDualChangeFoldStatus was notified and not change foldStatus by hall.");
+        g_isWaitting = false;
+    };
+    screenPowerTaskScheduler_->PostAsyncTask(taskDualChangeFoldStatus, __func__);
+}
+
+void DualDisplaySensorFoldStateManager::HandleHallChangeInner(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     TLOGI(WmsLogTag::DMS, "HandleHallChange angle: %{public}f, hall: %{public}d.", angle, hall);
