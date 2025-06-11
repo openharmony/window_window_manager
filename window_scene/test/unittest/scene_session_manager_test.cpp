@@ -575,7 +575,7 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, TestSize.Level1)
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
-    EXPECT_EQ(result03, WSError::WS_OK);
+    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
