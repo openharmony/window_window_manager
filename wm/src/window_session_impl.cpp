@@ -6112,12 +6112,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingWindowRect,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-            ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, callingWindowRect: %{public}s",
-            rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
-            info->rect_.height_, callingWindowRect.ToString().c_str());
-    }
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
         return;
@@ -6131,6 +6125,12 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
+        }
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
+                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
+                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;

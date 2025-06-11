@@ -1085,12 +1085,25 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
     const std::shared_ptr<RSTransaction>& rsTransaction,
     const Rect& callingSessionRect, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
-            info->textFieldPositionY_, info->rect_.height_);
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
-    occupiedAreaInfo_ = info;
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    auto task = [weak = wptr(this), info, rsTransaction, callingSessionRect, avoidAreas]() {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
+            return;
+        }
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY: %{public}f, KeyBoardHeight: %{public}d",
+                info->textFieldPositionY_, info->rect_.height_);
+        }
+        window->occupiedAreaInfo_ = info;
+        window->UpdateViewportConfig(
+            window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    };
+    handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_NotifyOccupiedAreaChangeInfo");
 }
 
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(
