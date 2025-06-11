@@ -6171,7 +6171,7 @@ std::string SceneSessionManager::GetFloatWidth(const int width, float value)
     std::ostringstream oss;
     oss << value;
     std::string strValue = oss.str();
-    return (strValue.size() > width) ? strValue.substr(0, width) : strValue;
+    return (strValue.size() > static_cast<size_t>(width)) ? strValue.substr(0, width) : strValue;
 }
 
 void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
