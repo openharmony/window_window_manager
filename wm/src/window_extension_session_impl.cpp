@@ -1089,11 +1089,11 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
     auto task = [weak = wptr(this), info, rsTransaction, callingSessionRect, avoidAreas]() {
         auto window = weak.promote();
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
             return;
         }
         if (info != nullptr) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY: %{public}f, KeyBoardHeight: %{public}d",
                 info->textFieldPositionY_, info->rect_.height_);
         }
         window->occupiedAreaInfo_ = info;

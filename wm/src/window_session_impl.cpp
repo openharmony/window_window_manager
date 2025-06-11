@@ -6127,7 +6127,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
             rsTransaction->Begin();
         }
         if (info != nullptr) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
                 ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
                 "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
                 info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
