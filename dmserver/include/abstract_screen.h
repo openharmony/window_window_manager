@@ -78,7 +78,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext();
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
     const ScreenId dmsId_;
     const ScreenId rsId_;

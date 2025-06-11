@@ -916,7 +916,7 @@ public:
      * @return std::shared_ptr<RSUIDirector> Shared pointer to the RSUIDirector instance,
      *         or nullptr if RS client multi-instance is disabled.
      */
-    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() { return nullptr; }
+    virtual std::shared_ptr<RSUIDirector> GetRSUIDirector() const { return nullptr; }
 
     /**
      * @brief Get the associated RSUIContext instance
@@ -924,7 +924,7 @@ public:
      * @return std::shared_ptr<RSUIContext> Shared pointer to the RSUIContext instance,
      *         or nullptr if RS client multi-instance is disabled.
      */
-    virtual std::shared_ptr<RSUIContext> GetRSUIContext() { return nullptr; }
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext() const { return nullptr; }
 
     /**
      * @brief Get ability context

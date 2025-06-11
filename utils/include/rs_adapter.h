@@ -51,7 +51,7 @@ public:
     explicit RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
     virtual ~RSTransactionAdapter() = default;
 
-    std::shared_ptr<RSUIContext> GetRSUIContext();
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
     virtual void Begin();
     virtual void Commit(uint64_t timestamp = 0);
     void FlushImplicitTransaction(uint64_t timestamp = 0, const std::string& abilityName = "");
@@ -102,7 +102,7 @@ public:
     explicit RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode);
     virtual ~RSSyncTransactionAdapter() = default;
 
-    std::shared_ptr<RSUIContext> GetRSUIContext();
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
     std::shared_ptr<RSTransaction> GetRSTransaction();
     virtual void OpenSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
     virtual void CloseSyncTransaction(const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);

@@ -47,13 +47,13 @@ RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIContext>& r
     }
 }
 
-RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode)
-    : RSTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
+RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode) :
+    RSTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
 
-RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector)
-    : RSTransactionAdapter(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr) {}
+RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector) :
+    RSTransactionAdapter(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr) {}
 
-std::shared_ptr<RSUIContext> RSTransactionAdapter::GetRSUIContext()
+std::shared_ptr<RSUIContext> RSTransactionAdapter::GetRSUIContext() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     return rsUIContext_;
@@ -206,8 +206,8 @@ AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSUIContext>& rsUICon
     }
 }
 
-AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable)
-    : AutoRSTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, enable)
+AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable) :
+    AutoRSTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, enable)
 {
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
 }
@@ -246,8 +246,8 @@ RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSUICon
     }
 }
 
-RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode)
-    : RSSyncTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
+RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode) :
+    RSSyncTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
 
 template<typename ReturnType, typename Func>
 ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const char* caller)
@@ -274,7 +274,7 @@ ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const ch
     }
 }
 
-std::shared_ptr<RSUIContext> RSSyncTransactionAdapter::GetRSUIContext()
+std::shared_ptr<RSUIContext> RSSyncTransactionAdapter::GetRSUIContext() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str());
@@ -410,8 +410,8 @@ AutoRSSyncTransaction::AutoRSSyncTransaction(
 AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSNode>& rsNode,
     bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler)
-    : AutoRSSyncTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, needFlushImplicitTransaction, handler)
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) :
+    AutoRSSyncTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, needFlushImplicitTransaction, handler)
 {
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
 }
@@ -419,8 +419,8 @@ AutoRSSyncTransaction::AutoRSSyncTransaction(
 AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSSyncTransactionAdapter>& rsSyncTransAdapter,
     bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler)
-    : rsSyncTransAdapter_(rsSyncTransAdapter), handler_(handler)
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) :
+    rsSyncTransAdapter_(rsSyncTransAdapter), handler_(handler)
 {
     if (rsSyncTransAdapter_) {
         if (needFlushImplicitTransaction) {
