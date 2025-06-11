@@ -2046,6 +2046,80 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TerminateSessionByPersistentIdWhenNoPermission
+ * @tc.desc: test function : TerminateSessionByPersistentIdWhenNoPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TerminateSessionByPersistentIdWhenNoPermission, Function | SmallTest | Level3)
+{
+    const int32_t persistentId = 1;
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+ 
+    MockAccesstokenKit::MockIsSystemApp(false);
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSACalling(true);
+ 
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: PendingSessionToBackgroundByPersistentId
+ * @tc.desc: test function : PendingSessionToBackgroundByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackgroundByPersistentId, Function | SmallTest | Level3)
+{
+    const int32_t persistentId = 1;
+    bool shouldBackToCaller = true;
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+ 
+    MockAccesstokenKit::MockIsSystemApp(false);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSystemApp(true);
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+ 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+ 
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+ 
+    SessionInfo targetInfo;
+    targetInfo.persistentId_ = persistentId;
+    targetInfo.windowType_ = 1000;
+    sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, targetSceneSession });
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+ 
+    targetInfo.windowType_ = 1;
+    targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, targetSceneSession });
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetRecentMainSessionInfoList_Invalid_Permission
  * @tc.desc: test function : UpdateSessionDisplayId
  * @tc.type: FUNC
