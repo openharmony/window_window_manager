@@ -334,7 +334,7 @@ HWTEST_F(WindowSessionLifecycleTest, Disconnect01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, TestSize.Level1)
 {
-    NotifyTerminateSessionFuncNew callback = 
+    NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     bool needStartCaller = false;
     bool isFromBroker = false;
@@ -424,6 +424,45 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, TestSize.Level1)
     ASSERT_EQ(false, session_->IsSessionForeground());
     session_->state_ = SessionState::STATE_CONNECT;
     ASSERT_EQ(false, session_->IsSessionForeground());
+}
+
+/**
+ * @tc.name: IsSessionNotBackground
+ * @tc.desc: IsSessionNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsSessionNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    ASSERT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_CONNECT;
+    ASSERT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_INACTIVE;
+    ASSERT_EQ(false, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    ASSERT_EQ(false, session_->IsSessionNotBackground());
+}
+
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: IsVisibleNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isVisible_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    ASSERT_EQ(false, session_->IsVisibleNotBackground());
+    session_->isVisible_ = true;
+    ASSERT_EQ(true, session_->IsVisibleNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    ASSERT_EQ(false, session_->IsVisibleNotBackground());
 }
 
 /**
