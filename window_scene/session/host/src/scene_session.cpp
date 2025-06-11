@@ -5498,6 +5498,7 @@ WMError SceneSession::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMul
         return WMError::WM_ERROR_NULLPTR;
     }
     isAcrossMultiDisplay = parentSession->IsFullScreenWaterfallMode();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d isAcrossMultiDisplay: %{public}u", isAcrossMultiDisplay);
     return WMError::WM_OK;
 }
 
