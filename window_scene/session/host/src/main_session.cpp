@@ -561,7 +561,7 @@ void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionSt
         default: {
             info.sessionState = RecentSessionState::END;
             break;
-        } 
+        }
     }
 }
 } // namespace OHOS::Rosen
