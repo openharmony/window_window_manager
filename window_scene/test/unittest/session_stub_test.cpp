@@ -1483,9 +1483,11 @@ HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level
     MessageParcel reply;
     Accessibility::AccessibilityEventInfo info;
     Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    auto result = session_->HandleSetSubWindowSource(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteParcelable(&infoParcel);
     data.WriteUint32(1);
-    auto result = session_->HandleSetSubWindowSource(data, reply);
+    result = session_->HandleSetSubWindowSource(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }
 

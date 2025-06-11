@@ -1568,10 +1568,22 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
  */
 HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
 {
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(1);
+    res = sProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(0);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
 }
