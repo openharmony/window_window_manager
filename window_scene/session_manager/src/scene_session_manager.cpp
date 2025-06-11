@@ -14686,21 +14686,21 @@ WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& 
     return taskScheduler_->PostSyncTask(task, where);
 }
 
-int32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
+uint32_t SceneSessionManager::GetMaxInstanceCount(const std::string& bundleName)
 {
     if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         return MultiInstanceManager::GetInstance().GetMaxInstanceCount(bundleName);
     } else {
-        return 0;
+        return 0u;
     }
 }
 
-int32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
+uint32_t SceneSessionManager::GetInstanceCount(const std::string& bundleName)
 {
     if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         return MultiInstanceManager::GetInstance().GetInstanceCount(bundleName);
     } else {
-        return 0;
+        return 0u;
     }
 }
 
