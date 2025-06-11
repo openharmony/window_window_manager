@@ -78,6 +78,16 @@ IntentionEventManager::InputEventListener::~InputEventListener()
 {
 }
 
+bool IntentionEventManager::GetAddMonitor()
+{
+    return isAddMonitor_;
+}
+
+void IntentionEventManager::SetAddMonitor(bool isAddMonitor)
+{
+    isAddMonitor_ = isAddMonitor;
+}
+
 bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
@@ -120,8 +130,13 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
             sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
     };
-    auto ret = MMI::InputManager::GetInstance()->AddMonitor(callback);
-    TLOGI(WmsLogTag::WMS_EVENT, "set monitor ret : %{public}d", ret);
+    if (!GetAddMonitor()) {
+        auto ret = MMI::InputManager::GetInstance()->AddMonitor(callback);
+        TLOGI(WmsLogTag::WMS_EVENT, "set monitor ret : %{public}d", ret);
+        if (ret != MMI::ERROR_EXCEED_MAX_COUNT && ret != MMI::INVALID_HANDLER_ID) {
+            SetAddMonitor(true);
+        }
+    }
 
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
