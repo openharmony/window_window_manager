@@ -423,6 +423,12 @@ public:
     bool NeedCheckContextTransparent() const;
 
     /*
+     * Window Layout
+     */
+    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+        sptr<WindowSessionProperty> property);
+
+    /*
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);

@@ -30,6 +30,7 @@
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
+#include "ability_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -255,6 +256,24 @@ HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
     ASSERT_EQ(true, session->IsDragStart());
     session->SetDragStart(false);
     ASSERT_EQ(false, session->IsDragStart());
+}
+
+/**
+ * @tc.name: UpdateWindowModeSupportType01
+ * @tc.desc: UpdateWindowModeSupportType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, UpdateWindowModeSupportType01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowModeSupportType01";
+    info.bundleName_ = "UpdateWindowModeSupportType01";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    EXPECT_EQ(session->UpdateWindowModeSupportType(nullptr, nullptr), false);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_EQ(session->UpdateWindowModeSupportType(abilityInfo, nullptr), false);
 }
 } // namespace
 } // namespace Rosen
