@@ -2730,7 +2730,7 @@ struct ShadowsInfo : public Parcelable {
     bool hasOffsetYValue_ = false;
 
     ShadowsInfo() {}
-    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue,
         bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
         offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
         hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}
