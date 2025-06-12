@@ -827,7 +827,8 @@ WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, i
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID),
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID),
         data, reply, option);
     if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);
