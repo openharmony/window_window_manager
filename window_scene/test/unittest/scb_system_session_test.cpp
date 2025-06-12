@@ -65,6 +65,7 @@ namespace {
  */
 HWTEST_F(SCBSystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
 {
+    ASSERT_NE(scbSystemSession_, nullptr);
     EXPECT_EQ(false, scbSystemSession_->IsVisibleNotBackground());
     scbSystemSession_->isVisible_ = true;
     EXPECT_EQ(true, scbSystemSession_->IsVisibleNotBackground());

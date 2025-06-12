@@ -433,7 +433,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, TestSize.Level1)
  */
 HWTEST_F(WindowSessionLifecycleTest, IsSessionNotBackground, TestSize.Level1)
 {
-    EXPECT_NE(session_, nullptr);
+    ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
     EXPECT_EQ(true, session_->IsSessionNotBackground());
     session_->state_ = SessionState::STATE_CONNECT;
@@ -455,7 +455,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionNotBackground, TestSize.Level1)
  */
 HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground, TestSize.Level1)
 {
-    EXPECT_NE(session_, nullptr);
+    ASSERT_NE(session_, nullptr);
     session_->isVisible_ = false;
     session_->state_ = SessionState::STATE_ACTIVE;
     EXPECT_EQ(false, session_->IsVisibleNotBackground());
