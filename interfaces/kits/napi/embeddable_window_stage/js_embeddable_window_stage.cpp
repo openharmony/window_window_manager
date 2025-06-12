@@ -460,7 +460,7 @@ napi_value JsEmbeddableWindowStage::OnUnsupportAsyncCall(napi_env env, napi_call
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnUnsupportAsyncCall") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
     }

@@ -1677,7 +1677,7 @@ napi_value JsExtensionWindow::OnUnsupportAsyncCall(napi_env env, napi_callback_i
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnUnsupportAsyncCall") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
     }
@@ -1703,7 +1703,7 @@ napi_value JsExtensionWindow::OnInvalidAsyncCall(napi_env env, napi_callback_inf
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnInvalidAsyncCall") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
     }
