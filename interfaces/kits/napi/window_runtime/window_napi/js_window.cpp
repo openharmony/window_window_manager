@@ -8215,7 +8215,7 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, na
     bool isAcrossMultiDisplay = false;
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    auto execute = [weakToken = wptr<Window>(windowToken_), isAcrossMultiDisplay, errCodePtr, where] {
+    auto execute = [weakToken = wptr<Window>(windowToken_), &isAcrossMultiDisplay, errCodePtr, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
@@ -8224,10 +8224,10 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, na
         }
         *errCodePtr =
             WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay));
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossMultiDisplay: %{public}u,
-            result: %{public}d", where, window->GetWindowId(), isAcrossMultiDisplay, *errCodePtr);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossMultiDisplay: %{public}u, "
+            "result: %{public}d", where, window->GetWindowId(), isAcrossMultiDisplay, *errCodePtr);
     };
-    auto complete = [isAcrossMultiDisplay, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [&isAcrossMultiDisplay, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
             auto objValue = CreateJsValue(env, isAcrossMultiDisplay);
             if (objValue != nullptr) {
@@ -8759,6 +8759,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "isMainWindowFullScreenAcrossMultiDisplay", moduleName,
+        JsWindow::IsMainWindowFullScreenAcrossMultiDisplay);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "isSystemAvoidAreaEnabled", moduleName, JsWindow::IsSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "setExclusivelyHighlighted", moduleName, JsWindow::SetExclusivelyHighlighted);

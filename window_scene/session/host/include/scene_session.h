@@ -815,7 +815,7 @@ public:
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
     WMError UpdateAcrossMultiDisplayChangeRegistered(bool isRegister) override;
-    virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) { return WMError::WM_OK; }
+    WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) override;
     bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossMultiDisplayChanged_.load(); }
     WMError NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
     WMError NotifyFollowedParentWindowAcrossMultiDisplayChange(bool isAcrossMultiDisplay);

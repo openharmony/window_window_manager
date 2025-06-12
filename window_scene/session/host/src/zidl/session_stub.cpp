@@ -254,8 +254,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_Full_SCREEN_ACROSS_MULTI_DISPLAY):
-            return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FUll_SCREEN_ACROSS_MULTI_DISPLAY):
+            return HandleIsMainWindowFullScreenAcrossMultiDisplay(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
@@ -1952,7 +1952,7 @@ int SessionStub::HandleUpdateAcrossMultiDisplayChangeRegistered(MessageParcel& d
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateAcrossMultiDisplayChangeRegistered(persistentId, isRegister);
+    WMError errCode = UpdateAcrossMultiDisplayChangeRegistered(isRegister);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
         return ERR_INVALID_DATA;

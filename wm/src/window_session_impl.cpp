@@ -5388,7 +5388,7 @@ WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
     if (isUpdate && hostSession != nullptr) {
         ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(true);
     }
-    if (ret != WM_OK) {
+    if (ret != WMError::WM_OK) {
         std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
         UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
     }
@@ -5431,7 +5431,7 @@ WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
     if (isUpdate && hostSession != nullptr) {
         ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(false);
     }
-    if (ret != WM_OK) {
+    if (ret != WMError::WM_OK) {
         std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
         RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
     }

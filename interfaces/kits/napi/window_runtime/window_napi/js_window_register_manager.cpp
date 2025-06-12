@@ -54,8 +54,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
-    {MAIN_WINDOW_FULL_SCREEN_ACROSS_MULTI_DISPLAY_CHANGE_CB,
-     RegisterListenerType::MAIN_WINDOW_FULL_SCREEN_ACROSS_MULTI_DISPLAY_CHANGE_CB},
+    {ACROSS_MULTI_DISPLAY_CHANGE_CB, RegisterListenerType::ACROSS_MULTI_DISPLAY_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
@@ -80,6 +79,7 @@ const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_C
 JsWindowRegisterManager::JsWindowRegisterManager()
 {
 }
+
 
 JsWindowRegisterManager::~JsWindowRegisterManager()
 {
