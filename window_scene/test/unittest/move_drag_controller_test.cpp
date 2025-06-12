@@ -1335,14 +1335,30 @@ HWTEST_F(MoveDragControllerTest, CalcUnifiedTranslate, TestSize.Level1)
     pointerItem.SetDisplayY(30);
     pointerEvent->AddPointerItem(pointerItem);
     std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTranslate(pointerEvent);
-    ASSERT_EQ(0, res.first);
-    ASSERT_EQ(0, res.second);
+    EXPECT_EQ(0, res.first);
+    EXPECT_EQ(0, res.second);
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     res = moveDragController->CalcUnifiedTranslate(pointerEvent);
-    ASSERT_EQ(1, res.first);
-    ASSERT_EQ(1, res.second);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
+
+    moveDragController->moveDragProperty_.scaleX_ = 0.0001f;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
+
+    moveDragController->moveDragProperty_.scaleX_ = 0.5f;
+    moveDragController->moveDragProperty_.scaleY_ = 0.5f;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(2, res.first);
+    EXPECT_EQ(2, res.second);
+
+    moveDragController->isAdaptToProportionalScale_ = true;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
