@@ -256,7 +256,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
         override { return WMError::WM_OK; }
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
-        bool shouldBackToCaller = true) override
+        bool shouldBackToCaller) override
     {
         return WSError::WS_OK;
     }
