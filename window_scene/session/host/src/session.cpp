@@ -4337,15 +4337,6 @@ void Session::DeletePersistentImageFit()
     }
 }
 
-void Session::InitRSUIContext()
-{
-    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
-    
-    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
-          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
-}
-
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
