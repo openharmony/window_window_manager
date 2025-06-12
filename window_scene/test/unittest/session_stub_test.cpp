@@ -1601,6 +1601,37 @@ HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption04, Function | SmallTe
     auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleSetFrameRectForPartialZoomIn
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetFrameRectForPartialZoomIn, Function | SmallTest | Level2)
+{
+    EXPECT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+    
+    bool res = data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+
+    res = data.WriteInt32(0) && data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+
+    res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteInt32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+    
+    res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteUint32(0) && data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

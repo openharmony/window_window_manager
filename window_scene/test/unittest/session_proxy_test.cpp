@@ -1707,6 +1707,61 @@ HWTEST_F(SessionProxyTest, StartMovingWithCoordinate, TestSize.Level2)
     res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
     EXPECT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn
+ * @tc.desc: SetFrameRectForPartialZoomIn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetFrameRectForPartialZoomIn, Function | SmallTest | Level2)
+{
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+
+    Rect frameRect;
+    WSError res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn01
+ * @tc.desc: SetFrameRectForPartialZoomIn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetFrameRectForPartialZoomIn01, Function | SmallTest | Level2)
+{
+    Rect frameRect;
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSError res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

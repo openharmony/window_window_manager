@@ -162,7 +162,7 @@ private:
 
     int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
 
-    int HandleSetFrameRectForParticalZoomIn(MessageParcel& data, MessageParcel& reply);
+    int HandleSetFrameRectForPartialZoomIn(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 
