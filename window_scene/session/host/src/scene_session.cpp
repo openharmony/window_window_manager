@@ -5520,7 +5520,11 @@ WMError SceneSession::NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMult
         }
         subSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
     }
+    return WMError::WM_OK;
+}
 
+WMError SceneSession::NotifyFollowedParentWindowAcrossMultiDisplayChange(bool isAcrossMultiDisplay)
+{
     // notify systemSession client
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
     {

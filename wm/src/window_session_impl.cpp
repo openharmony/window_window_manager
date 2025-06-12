@@ -3788,6 +3788,15 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
+        if (acrossMultiDisplayChangeListeners_.find(persistentId) != acrossMultiDisplayChangeListeners_.end() &&
+            !acrossMultiDisplayChangeListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+            }
+        }
+    }
 }
 
 template<typename T>
@@ -5377,9 +5386,10 @@ WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
     }
     auto hostSession = GetHostSession();
     if (isUpdate && hostSession != nullptr) {
-        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(persistentId, true);
+        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(true);
     }
     if (ret != WM_OK) {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
         UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
     }
     return ret;
@@ -5393,6 +5403,10 @@ WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
@@ -5415,9 +5429,10 @@ WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
     }
     auto hostSession = GetHostSession();
     if (isUpdate && hostSession != nullptr) {
-        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(persistentId, false);
+        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(false);
     }
     if (ret != WM_OK) {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
         RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
     }
     return ret;
@@ -5516,6 +5531,12 @@ EnableIfSame<T, ISystemDensityChangeListener,
     std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return systemDensityChangeListeners_[GetPersistentId()];
+}
+
+template<typename T>
+EnableIfSame<T, IAcrossMultiDisplayChangeListener, std::vector<IAcrossMultiDisplayChangeListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return acrossMultiDisplayChangeListeners_[GetPersistentId()];
 }
 
 template<typename T>
