@@ -53,24 +53,29 @@ namespace {
 HWTEST_F(SessionChangeRecorderTest, RecordSceneSessionChange, TestSize.Level1)
 {
     SceneSessionChangeInfo changeInfo;
-    auto result1 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo);
+    auto result1 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(
+        RecordType::RECORD_TYPE_BEGIN, changeInfo);
     EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_PARAM);
 
     changeInfo.logTag_ = WmsLogTag::END;
-    auto result2 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo);
+    auto result2 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(
+        RecordType::RECORD_TYPE_BEGIN, changeInfo);
     EXPECT_EQ(result2, WSError::WS_ERROR_INVALID_PARAM);
 
     changeInfo.logTag_ = WmsLogTag::WMS_MAIN;
-    auto result3 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo);
+    auto result3 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(
+        RecordType::RECORD_TYPE_BEGIN, changeInfo);
     EXPECT_EQ(result3, WSError::WS_ERROR_INVALID_PARAM);
 
     changeInfo.changeInfo_ = "Record Scene Session Change Test1";
-    auto result4 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo);
+    auto result4 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(
+        RecordType::RECORD_TYPE_BEGIN, changeInfo);
     EXPECT_EQ(result4, WSError::WS_OK);
 
     changeInfo.changeInfo_ = "Record Scene Session Change Test2";
     changeInfo.time_ = "04-28 12:27:00.791";
-    auto result5 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo);
+    auto result5 = SessionChangeRecorder::GetInstance().RecordSceneSessionChange(
+        RecordType::RECORD_TYPE_BEGIN, changeInfo);
     EXPECT_EQ(result5, WSError::WS_OK);
 }
 
@@ -81,13 +86,16 @@ HWTEST_F(SessionChangeRecorderTest, RecordSceneSessionChange, TestSize.Level1)
  */
 HWTEST_F(SessionChangeRecorderTest, SetRecordSize, TestSize.Level1)
 {
-    auto result1 = SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, 0);
+    auto result1 = SessionChangeRecorder::GetInstance().SetRecordSize(
+        RecordType::RECORD_TYPE_BEGIN, 0);
     EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_PARAM);
 
-    auto result2 = SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE+1);
+    auto result2 = SessionChangeRecorder::GetInstance().SetRecordSize(
+        RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE+1);
     EXPECT_EQ(result2, WSError::WS_ERROR_INVALID_PARAM);
 
-    auto result3 = SessionChangeRecorder::GetInstance().SetRecordSize(RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE);
+    auto result3 = SessionChangeRecorder::GetInstance().SetRecordSize(
+        RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE);
     EXPECT_EQ(result3, WSError::WS_OK);
 }
 
@@ -125,8 +133,8 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
         .logTag_ = WmsLogTag::WMS_MAIN,
     };
 
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo1);
-    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_BEGIN, changeInfo2);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo1);
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::SESSION_STATE_RECORD, changeInfo2);
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::RECORD_TYPE_END, changeInfo3);
 
     params.push_back("all");
@@ -136,7 +144,7 @@ HWTEST_F(SessionChangeRecorderTest, GetSceneSessionNeedDumpInfo, TestSize.Level1
     dumpInfo.clear();
     EXPECT_TRUE(result2);
 
-    params.push_back("0");
+    params.push_back("1");
     SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(params, dumpInfo);
     auto result3 = (dumpInfo.find("123") != std::string::npos) && (dumpInfo.find("124") != std::string::npos) &&
         (dumpInfo.find("125") == std::string::npos);

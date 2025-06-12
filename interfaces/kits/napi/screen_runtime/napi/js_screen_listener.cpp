@@ -136,7 +136,7 @@ void JsScreenListener::OnConnect(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnConnect");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -169,7 +169,7 @@ void JsScreenListener::OnDisconnect(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnDisconnect");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -202,7 +202,7 @@ void JsScreenListener::OnChange(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }

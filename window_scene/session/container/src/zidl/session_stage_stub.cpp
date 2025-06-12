@@ -122,6 +122,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateAvoidArea(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT):
             return HandleNotifyScreenshot(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT):
+            return HandleNotifyScreenshotAppEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_DUMP_SESSSION_ELEMENT_INFO):
             return HandleDumpSessionElementInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TOUCH_OUTSIDE):
@@ -130,6 +132,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifySecureLimitChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_MODE_CHANGE):
             return HandleUpdateWindowMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_TOP_NAV_DEST_NAME):
+            return HandleGetTopNavDestinationName(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
             return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
@@ -220,6 +224,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyNonInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
+            return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID):
             return HandleUpdateWindowLayoutById(data, reply);
         default:
@@ -481,6 +487,18 @@ int SessionStageStub::HandleNotifyScreenshot(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called");
+    int32_t screenshotEventType = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!data.ReadInt32(screenshotEventType)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenshotEventType failed");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyScreenshotAppEvent(static_cast<ScreenshotEventType>(screenshotEventType));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleDumpSessionElementInfo!");
@@ -521,6 +539,30 @@ int SessionStageStub::HandleUpdateWindowMode(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply)
+{
+    std::string topNavDestName;
+    WSError errCode = GetTopNavDestinationName(topNavDestName);
+    if (errCode != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get stage failed, errCode=%{public}d", static_cast<int32_t>(errCode));
+        return ERR_INVALID_DATA;
+    }
+    uint32_t size = static_cast<uint32_t>(topNavDestName.length());
+    if (!reply.WriteUint32(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write the size of stage top page name failed, size=%{public}u", size);
+        return ERR_INVALID_DATA;
+    }
+    if (size > 0 && !reply.WriteRawData(topNavDestName.c_str(), size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write stage top page name failed, name=%{public}s", topNavDestName.c_str());
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write stage error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -538,16 +580,16 @@ int SessionStageStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageP
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t windowId = 0;
-    int32_t choice = 0;
+    int32_t updateMode = 0;
     if (!data.ReadInt32(windowId)) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadInt32(choice)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
+    if (!data.ReadInt32(updateMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateWindowLayoutById(windowId, choice);
+    WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1093,6 +1135,19 @@ int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data
 
     std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
     NotifyKeyboardAnimationWillBegin(*keyboardAnimationInfo, transaction);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply)
+{
+    std::string routerStackInfo;
+    WMError errCode = GetRouterStackInfo(routerStackInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteString(routerStackInfo)) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

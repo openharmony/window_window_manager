@@ -48,7 +48,7 @@ public:
     virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {}
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
-        const sptr<IRemoteObject>& displayManagerAgent) { return -1; }
+        const sptr<IRemoteObject>& displayManagerAgent) { return SCREEN_ID_INVALID; }
     virtual DMError DestroyVirtualScreen(ScreenId screenId) { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
     {
@@ -227,6 +227,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) { return DMError::DM_OK; }
     virtual void DumpAllScreensInfo(std::string& dumpInfo) {}
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
+    virtual DMError SetPrimaryDisplaySystemDpi(float dpi) { return DMError::DM_OK; }
     // Fold Screen
     virtual void SetFoldDisplayMode(const FoldDisplayMode displayMode) {}
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
@@ -268,7 +269,7 @@ public:
     virtual ScreenProperty GetScreenProperty(ScreenId screenId) { return ScreenProperty(); }
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) {}
+        ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) {}
     virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}

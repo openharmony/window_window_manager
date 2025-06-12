@@ -592,6 +592,38 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateScreenshotAppEventRegistered
+ * @tc.desc: UpdateScreenshotAppEventRegistered01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateScreenshotAppEventRegistered01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto ret = sceneSession->UpdateScreenshotAppEventRegistered(0, true);
+    EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetNotifyScreenshotAppEventRegisteredFunc
+ * @tc.desc: SetNotifyScreenshotAppEventRegisteredFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetNotifyScreenshotAppEventRegisteredFunc01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetNotifyScreenshotAppEventRegisteredFunc([](int32_t persistentId, bool isRegister) {});
+    EXPECT_NE(sceneSession->updateScreenshotAppEventRegisteredFunc_, nullptr);
+}
+
+/**
  * @tc.name: IsFloatingWindowAppType01
  * @tc.desc: IsFloatingWindowAppType true
  * @tc.type: FUNC

@@ -629,9 +629,22 @@ HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
  */
 HWTEST_F(WindowSceneTest, SetNavDestinationInfo01, TestSize.Level1)
 {
-    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    std::string navInfo = "testInfo";
+    auto ret = scene_->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 
-    EXPECT_EQ(WMError::WM_OK, scene->SetNavDestinationInfo("testNavInfo"));
+/**
+ * @tc.name: SetNavDestinationInfo02
+ * @tc.desc: SetNavDestinationInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo02, TestSize.Level1)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::string navInfo = "testInfo";
+    auto ret = scene->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 } // namespace
 } // namespace Rosen

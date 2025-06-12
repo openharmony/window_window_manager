@@ -483,28 +483,32 @@ WindowManager::~WindowManager()
 WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
+    // only system applications or services with a userId of 0 are allowed to communicate
+    // with multiple WMS-Servers and are permitted to listen for WMS connection status.
     if (clientUserId != SYSTEM_USERID) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "Not u0 user, permission denied");
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "Permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Register failed: listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Start registration");
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (pImpl_->wmsConnectionChangedListener_) {
-            TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsConnectionChangedListener is already registered, do nothing");
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Listener already registered, skipping");
             return WMError::WM_OK;
         }
         pImpl_->wmsConnectionChangedListener_ = listener;
     }
-    auto ret = SingletonContainer::Get<WindowAdapter>().RegisterWMSConnectionChangedListener(
+    auto ret = WindowAdapter::GetInstance().RegisterWMSConnectionChangedListener(
         [this](int32_t userId, int32_t screenId, bool isConnected) {
             this->OnWMSConnectionChanged(userId, screenId, isConnected);
         });
     if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Register failed: error = %{public}d", static_cast<int32_t>(ret));
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         pImpl_->wmsConnectionChangedListener_ = nullptr;
     }
     return ret;
@@ -1465,6 +1469,11 @@ WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return SingletonContainer::Get<WindowAdapter>().GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const
+{
+    return SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
@@ -1857,10 +1866,19 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
+WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().NotifyScreenshotEvent(type);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::SetStartWindowBackgroundColor(
     const std::string& moduleName, const std::string& abilityName, uint32_t color)
 {
-    int32_t uid = getuid();
+    int32_t uid = static_cast<int32_t>(getuid());
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetStartWindowBackgroundColor(
         moduleName, abilityName, color, uid);
     if (ret != WMError::WM_OK) {

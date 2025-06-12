@@ -185,6 +185,11 @@ public:
         }
         return strs.str();
     }
+
+    inline static bool FloatEqualAbs(float a, float b, float epsilon = 1e-6f)
+    {
+        return std::fabs(a-b) < epsilon;
+    }
 };
 } // Rosen
 } // OHOS
