@@ -803,8 +803,8 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density, isNeedSync));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, isNeedSync=%{public}d, 
-        result=%{public}u", window->GetWindowId(), window->GetWindowName().c_str(), density, isNeedSync, ret);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, isNeedSync=%{public}d, "
+        "result=%{public}u", window->GetWindowId(), window->GetWindowName().c_str(), density, isNeedSync, ret);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
