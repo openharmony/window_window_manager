@@ -802,7 +802,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, TestSize.Leve
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     int32_t fingerId = 0;
     WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId(),
-        fingerId);
+                                                      fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
     result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
