@@ -3308,7 +3308,7 @@ WSError SessionProxy::SetSubWindowSource(SubWindowSource source)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+WSError SessionProxy::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     TLOGD(WmsLogTag::WMS_ANIMATION, "in");
     MessageParcel data;
@@ -3329,7 +3329,7 @@ WSError SessionProxy::SetFrameRectForParticalZoomIn(const Rect& frameRect)
         TLOGE(WmsLogTag::WMS_ANIMATION, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTICAL_ZOOMIN),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

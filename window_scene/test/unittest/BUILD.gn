@@ -77,6 +77,7 @@ group("unittest") {
     ":ws_ssmgr_specific_window_test",
     ":ws_sub_session_lifecycle_test",
     ":ws_sub_session_test",
+    ":ws_session_helper_test",
     ":ws_system_session_lifecycle_test",
     ":ws_system_session_test",
     ":ws_task_scheduler_test",
@@ -189,6 +190,16 @@ ohos_unittest("ws_system_session_test") {
   module_out_path = module_out_path
 
   sources = [ "system_session_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("ws_session_helper_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_helper_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
