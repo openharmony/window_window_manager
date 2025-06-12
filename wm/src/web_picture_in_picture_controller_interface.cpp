@@ -194,7 +194,7 @@ WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlT
 WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY,
     uint32_t width, uint32_t height)
 {
-    if (width < 1 || height < 1) {
+    if (width <= 0 || height <= 0) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid initial rect");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
