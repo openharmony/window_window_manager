@@ -868,6 +868,14 @@ void SceneSession::SetParentRect()
     }
 }
 
+WSRect SceneSession::GetGlobalOrWinRect()
+{
+    if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        return winRect_;
+    }
+    return GetSessionGlobalRect();
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -896,7 +904,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->HookStartMoveRect(currRect, session->GetSessionRect());
                 session->pcFoldScreenController_->RecordStartMoveRect(currRect, session->IsFullScreenMovable());
             }
-            WSRect rect = session->winRect_;
+            WSRect rect = session->GetGlobalOrWinRect();
             if (session->IsFullScreenMovable()) {
                 session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
@@ -906,6 +914,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
                 session->SetParentRect();
+                session->moveDragController_->SetScale(session->GetScaleX(), session->GetScaleY());
                 session->moveDragController_->SetStartMoveFlag(true);
                 // use window rect when fullscreen or compatible mode
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, proportionalScale);
@@ -3060,7 +3069,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
         if ((isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag) &&
-            moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
+            moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());

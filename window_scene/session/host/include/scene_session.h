@@ -1200,6 +1200,7 @@ private:
     virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
+    WSRect GetGlobalOrWinRect();
 
     /*
      * Window Decor

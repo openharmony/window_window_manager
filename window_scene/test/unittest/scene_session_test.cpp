@@ -1919,6 +1919,39 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
 }
+
+/**
+ * @tc.name: GetGlobalOrWinRect
+ * @tc.desc: GetGlobalOrWinRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetGlobalOrWinRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->globalRect_ = {2, 2, 1, 1};
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(1, rect.posX_);
+    EXPECT_EQ(1, rect.posY_);
+
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(1, rect.posX_);
+    EXPECT_EQ(1, rect.posY_);
+
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = false;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = false;
+    rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(2, rect.posX_);
+    EXPECT_EQ(2, rect.posY_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
