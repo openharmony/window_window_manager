@@ -1435,7 +1435,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
-        NotifyAfterLifecycleForeground(true, false);
         NotifyAfterDidForeground(reason);
         return WMError::WM_OK;
     }
@@ -1462,7 +1461,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
-        NotifyAfterLifecycleForeground(true, false);
         NotifyAfterDidForeground(reason);
         RefreshNoInteractionTimeoutMonitor();
         return WMError::WM_OK;
@@ -1519,7 +1517,6 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
-        NotifyAfterLifecycleForeground(true, true);
         NotifyAfterDidForeground(reason);
         NotifyFreeMultiWindowModeResume();
         RefreshNoInteractionTimeoutMonitor();
@@ -1589,7 +1586,6 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
         NotifyAfterBackground(true, false);
-        NotifyAfterLifecycleBackground(true, false);
         NotifyAfterDidBackground(reason);
         return WMError::WM_OK;
     }
@@ -1703,11 +1699,9 @@ void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
     if (WindowHelper::IsSubWindow(type)) {
         if (state_ == WindowState::STATE_SHOWN) {
             NotifyAfterBackground();
-            NotifyAfterLifecycleBackground();
         }
     } else {
         NotifyAfterBackground();
-        NotifyAfterLifecycleBackground();
     }
 }
 
@@ -5429,7 +5423,6 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         if (state_ == WindowState::STATE_HIDDEN && requestState_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_SHOWN;
             NotifyAfterForeground();
-            NotifyAfterLifecycleForeground();
         }
     } else {
         if (state_ == WindowState::STATE_HIDDEN) {
@@ -5438,7 +5431,6 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         if (state_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_HIDDEN;
             NotifyAfterBackground();
-            NotifyAfterLifecycleBackground();
         }
     }
     TLOGI(WmsLogTag::WMS_DIALOG, "success [name:%{public}s, id:%{public}d, type:%{public}u],"

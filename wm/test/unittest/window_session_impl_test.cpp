@@ -1327,8 +1327,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleForeground, TestSize.Level1)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     EXPECT_EQ(WMError::WM_OK, foreWindow->Create(nullptr, session));
-    foreWindow->NotifyAfterLifecycleForeground(true, true);
-    foreWindow->NotifyAfterLifecycleForeground(false, false);
+    foreWindow->NotifyAfterLifecycleForeground();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, foreWindow->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleForeground end";
 }
@@ -1349,8 +1348,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
     EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    window->NotifyAfterLifecycleBackground(true, true);
-    window->NotifyAfterLifecycleBackground(false, false);
+    window->NotifyAfterLifecycleBackground();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleBackground end";
 }
