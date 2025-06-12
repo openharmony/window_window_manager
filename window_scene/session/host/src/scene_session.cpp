@@ -93,6 +93,8 @@ std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
+std::unordered_map<std::string,
+    std::unordered_map<ControlAppType, SceneSession::ControlInfo>> SceneSession::allAppUseControlMap_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -997,7 +999,15 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        for (const auto& [type, info] : session->appUseControlMap_) {
+        std::string key =
+            session->GetSessionInfo().bundleName_ + "#" + std::to_string(session->GetSessionInfo().appIndex_);
+        if (allAppUseControlMap_.find(key) == allAppUseControlMap_.end()) {
+            return;
+        }
+        for (const auto& [type, info] : allAppUseControlMap_[key]) {
+            TLOGNI(WmsLogTag::WMS_LIFE,
+                "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
+                key.c_str(), info.isNeedControl, info.isControlRecentOnly);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
         }
     }, __func__);
@@ -6294,8 +6304,7 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 int32_t SceneSession::GetStatusBarHeight()
 {
     int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
-        GetSessionProperty() == nullptr) {
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
         return height;
     }
@@ -7282,5 +7291,10 @@ void SceneSession::SetIsAncoForFloatingWindow(bool isAncoForFloatingWindow)
 bool SceneSession::GetIsAncoForFloatingWindow() const
 {
     return isAncoForFloatingWindow_;
+}
+
+std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>& SceneSession::GetAllAppUseControlMap()
+{
+    return allAppUseControlMap_;
 }
 } // namespace OHOS::Rosen

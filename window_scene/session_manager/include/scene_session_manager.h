@@ -419,6 +419,7 @@ public:
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
+    uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
@@ -646,6 +647,7 @@ public:
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
+    void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
 
     /*
      * Window Pattern
