@@ -8719,7 +8719,7 @@ WMError SceneSession::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
             }
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, isRegister: %{public}d",
                 where, session->GetPersistentId(), isRegister);
-            isRegisterAcrossMultiDisplayChanged_.store(isRegister);
+            session->isRegisterAcrossMultiDisplayChanged_.store(isRegister);
         }, __func__);
 
     return WMError::WM_OK;

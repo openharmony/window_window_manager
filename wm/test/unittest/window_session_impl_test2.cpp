@@ -1946,7 +1946,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterAcrossMultiDisplayChangeListener01, Tes
     EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError ret = window->RegisterAcrossMultiDisplayChangeListener(listener);
+    ret = window->RegisterAcrossMultiDisplayChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
@@ -1984,7 +1984,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterAcrossMultiDisplayChangeListener01, T
 
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IAcrossMultiDisplayChangeListener> listener = nullptr;
-    WMError ret = window->UnregisterAcrossMultiDisplayChangeListener01(listener);
+    WMError ret = window->UnregisterAcrossMultiDisplayChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
@@ -1992,13 +1992,13 @@ HWTEST_F(WindowSessionImplTest2, UnregisterAcrossMultiDisplayChangeListener01, T
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ret = window->UnregisterAcrossMultiDisplayChangeListener01(listener);
+    ret = window->UnregisterAcrossMultiDisplayChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IAcrossMultiDisplayChangeListener>::MakeSptr();
     std::vector<sptr<IAcrossMultiDisplayChangeListener>> holder;
     window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()] = holder;
-    ret = window->UnregisterAcrossMultiDisplayChangeListener01(listener);
+    ret = window->UnregisterAcrossMultiDisplayChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     holder = window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()];

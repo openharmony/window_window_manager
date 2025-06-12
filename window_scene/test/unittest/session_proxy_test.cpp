@@ -1520,8 +1520,8 @@ HWTEST_F(SessionProxyTest, UpdateAcrossMultiDisplayChangeRegistered, Function | 
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    res = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
-    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
@@ -1559,8 +1559,8 @@ HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossMultiDisplay, Function | 
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    res = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
-    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
