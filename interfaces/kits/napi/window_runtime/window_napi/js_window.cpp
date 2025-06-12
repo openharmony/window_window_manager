@@ -6715,6 +6715,11 @@ static NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDr
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
+        if (WindowHelper::IsInputWindow(window->GetType())) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
         TLOGNI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set enable drag end",
             window->GetWindowId(), window->GetWindowName().c_str());
@@ -6749,15 +6754,6 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-
-    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
     bool enableDrag = false;
