@@ -1103,6 +1103,50 @@ HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | S
 }
 
 /**
+ * @tc.name: HandleUpdateAcrossMultiDisplayChangeRegistered
+ * @tc.desc: sessionStub HandleUpdateAcrossMultiDisplayChangeRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAcrossMultiDisplayChangeRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleUpdateAcrossMultiDisplayChangeRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE); 
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleIsMainWindowFullScreenAcrossMultiDisplay
+ * @tc.desc: sessionStub HandleIsMainWindowFullScreenAcrossMultiDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossMultiDisplay, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleIsMainWindowFullScreenAcrossMultiDisplay(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FUll_SCREEN_ACROSS_MULTI_DISPLAY);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardWillShowRegistered
  * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
  * @tc.type: FUNC

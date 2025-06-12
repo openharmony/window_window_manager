@@ -5492,6 +5492,11 @@ WMError SceneSession::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMul
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d permission denied!", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
+    if (!WindowHelper::IsAppWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u",
+            GetPersistentId(), GetWindowType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     auto parentSession = GetSceneSessionById(GetMainSessionId());
     if (!parentSession) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d parent session is null", GetPersistentId());
@@ -8700,6 +8705,11 @@ WMError SceneSession::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d permission denied!", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!WindowHelper::IsAppWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u",
+            GetPersistentId(), GetWindowType());
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     PostTask([weakThis = wptr(this), isRegister, where = __func__] {
             auto session = weakThis.promote();
