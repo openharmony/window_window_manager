@@ -3905,8 +3905,7 @@ void WindowSessionImpl::ClearUselessListeners(std::unordered_map<int32_t, T>& li
 }
 
 template<typename T>
-EnableIfSame<T, IWindowStatusChangeListener,
-    std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
     for (auto& listener : windowStatusChangeListeners_[GetPersistentId()]) {
@@ -3916,8 +3915,7 @@ EnableIfSame<T, IWindowStatusChangeListener,
 }
 
 template<typename T>
-EnableIfSame<T, IWindowStatusDidChangeListener,
-    std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusDidChangeListener>> windowStatusDidChangeListeners;
     for (auto& listener : windowStatusDidChangeListeners_[GetPersistentId()]) {
