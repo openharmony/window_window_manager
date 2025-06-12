@@ -15,6 +15,7 @@
 
 #include "root_scene_session.h"
 #include <gtest/gtest.h>
+#include "scene_session_manager.h"
 #include "session_info.h"
 
 using namespace testing;
@@ -28,7 +29,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static sptr<SceneSessionManager> ssm_;
 };
+
+sptr<SceneSessionManager> RootSceneSessionTest::ssm_ = nullptr;
 
 void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
 {
@@ -36,10 +40,12 @@ void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntim
 
 void RootSceneSessionTest::SetUpTestCase()
 {
+    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void RootSceneSessionTest::TearDownTestCase()
 {
+    ssm_ = nullptr;
 }
 
 void RootSceneSessionTest::SetUp()
@@ -181,7 +187,6 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 
-
 /**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
@@ -219,4 +224,4 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
 }
 }
 }
-} // namespace OHOS
+}
