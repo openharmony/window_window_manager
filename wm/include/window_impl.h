@@ -121,6 +121,7 @@ public:
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
+    static WMError GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
