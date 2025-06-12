@@ -339,6 +339,15 @@ bool SystemSession::IsVisibleForeground() const
     return Session::IsVisibleForeground();
 }
 
+bool SystemSession::IsVisibleNotBackground() const
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
+}
+
 WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
 {
     return PostSyncTask([weakThis = wptr(this), isEnabled]() {
