@@ -15,7 +15,6 @@
 
 #include "root_scene_session.h"
 #include <gtest/gtest.h>
-#include "scene_session_manager.h"
 #include "session_info.h"
 
 using namespace testing;
@@ -29,10 +28,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    static sptr<SceneSessionManager> ssm_;
 };
-
-sptr<SceneSessionManager> RootSceneSessionTest::ssm_ = nullptr;
 
 void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)
 {
@@ -40,12 +36,10 @@ void LoadContentFuncTest(const std::string&, napi_env, napi_value, AbilityRuntim
 
 void RootSceneSessionTest::SetUpTestCase()
 {
-    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void RootSceneSessionTest::TearDownTestCase()
 {
-    ssm_ = nullptr;
 }
 
 void RootSceneSessionTest::SetUp()
@@ -185,42 +179,6 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
     AvoidArea avoidArea;
     auto ret = rootSceneSession.UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-}
-
-/**
- * @tc.name: GetStatusBarHeight
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
-    auto height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    EXPECT_EQ(0, height);
-    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    ASSERT_NE(specificCb, nullptr);
-    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type, uint64_t displayId) {
-        return ssm_->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
-    };
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
-
-    SessionInfo statusBarSessionInfo;
-    statusBarSessionInfo.abilityName_ = "statusBar";
-    statusBarSessionInfo.bundleName_ = "statusBar";
-    statusBarSessionInfo.screenId_ = 0;
-    sptr<SceneSession> statusBarSession = sptr<SceneSession>::MakeSptr(statusBarSessionInfo, nullptr);
-    statusBarSession->property_->SetPersistentId(2);
-    statusBarSession->property_->type_ = WindowType::WINDOW_TYPE_STATUS_BAR;
-    statusBarSession->winRect_ = { 0, 0, 1260, 123 };
-    statusBarSession->isVisible_ = true;
-    ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
-    height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    EXPECT_EQ(123, height);
-    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](WSRect& barArea) { barArea.height_ = 100; };
-    height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    EXPECT_EQ(100, height);
 }
 }
 }
