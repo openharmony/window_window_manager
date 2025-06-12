@@ -613,23 +613,6 @@ HWTEST_F(KeyboardSessionTest, ChangeKeyboardEffectOption, TestSize.Level1)
     auto lastOption = keyboardSession->property_->GetKeyboardEffectOption();
     ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::DARK_IMMERSIVE_MODE);
 }
-
-/**
- * @tc.name: IsVisibleNotBackground
- * @tc.desc: test IsVisibleNotBackground
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, IsVisibleNotBackground, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "IsVisibleNotBackground";
-    info.bundleName_ = "IsVisibleNotBackground";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    keyboardSession->isVisible_ = false;
-    ASSERT_EQ(false, keyboardSession->IsVisibleNotBackground());
-    keyboardSession->isVisible_ = true;
-    ASSERT_EQ(true, keyboardSession->IsVisibleNotBackground());
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
