@@ -904,14 +904,41 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated02, TestSize
 
 /**
  * @tc.name: CloseSpecificScene
- * @tc.desc: test function : CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene 1
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene01, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
-    sessionStage_->CloseSpecificScene();
-    EXPECT_NE(nullptr, sessionStage_);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+
+    auto res = sProxy->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    remoteMocker->SetRequestResult(1);
+    res = sProxy->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    remoteMocker->SetRequestResult(0);
+    res = sProxy->CloseSpecificScene();
+    remoteMocker->SetRequestResult(0);
+    EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene 2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene02, Function | SmallTest | Level1)
+{
+    sptr<SessionStageProxy> sessionStage2_ = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    auto res = sessionStage2_->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 } // namespace
 } // namespace Rosen
