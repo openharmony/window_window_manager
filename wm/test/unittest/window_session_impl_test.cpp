@@ -1224,7 +1224,6 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Leve
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus start";
-    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NotifyForegroundInteractiveStatus");
