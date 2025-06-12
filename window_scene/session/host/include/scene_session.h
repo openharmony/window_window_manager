@@ -817,6 +817,8 @@ public:
     WMError UpdateAcrossMultiDisplayChangeRegistered(bool isRegister) override;
     virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) { return WMError::WM_OK; }
     bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossMultiDisplayChanged_.load(); }
+    WMError NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
+    WMError NotifyFollowedParentWindowAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
 
     /*
      * Window Pattern
