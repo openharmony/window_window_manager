@@ -3908,7 +3908,7 @@ WMError WindowSessionImpl::NotifyAcrossMultiDisplayChange(bool isAcrossMultiDisp
     const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossMultiDisplayChangeListener>();
     for (const auto& listener : acrossMultiDisplayChangeListeners) {
         if (listener != nullptr) {
-            listener->OnAcrossMultiDisplayChanged(isWaterfallMode);
+            listener->OnAcrossMultiDisplayChanged(isAcrossMultiDisplay);
         }
     }
     return WMError::WM_OK;

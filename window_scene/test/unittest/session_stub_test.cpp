@@ -1117,7 +1117,7 @@ HWTEST_F(SessionStubTest, HandleUpdateAcrossMultiDisplayChangeRegistered, Functi
     sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
     ASSERT_NE(nullptr, sessionStub);
     auto result = sessionStub->HandleUpdateAcrossMultiDisplayChangeRegistered(data, reply);
-    EXPECT_EQ(result, ERR_NONE); 
+    EXPECT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED);
