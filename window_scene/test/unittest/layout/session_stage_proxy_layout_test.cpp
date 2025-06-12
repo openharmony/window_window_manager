@@ -58,6 +58,19 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, TestSize.
     ASSERT_TRUE((sessionStage_ != nullptr));
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySingleHandTransformChange end";
 }
+
+/**
+ * @tc.name: UpdateWindowLayoutById01
+ * @tc.desc: test function : UpdateWindowLayoutById
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, UpdateWindowLayoutById01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateWindowLayoutById01 start";
+    sessionStage_->UpdateWindowLayoutById(0, 1);
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateWindowLayoutById01 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

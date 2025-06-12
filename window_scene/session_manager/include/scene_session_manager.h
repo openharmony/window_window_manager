@@ -565,7 +565,8 @@ public:
     void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
-
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    
     /*
      * Window Property
      */
