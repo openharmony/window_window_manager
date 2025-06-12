@@ -213,6 +213,7 @@ public:
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
@@ -373,6 +374,7 @@ private:
     float currentValidSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    std::vector<uint32_t> supportedRefreshRate_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     std::string serialNumber_;
     std::pair<ScreenId, DMRect> mirrorScreenRegion_ = std::make_pair(INVALID_SCREEN_ID, DMRect::NONE());
