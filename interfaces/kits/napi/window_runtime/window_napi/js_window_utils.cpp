@@ -286,7 +286,7 @@ napi_value WindowStageEventTypeInit(napi_env env)
 
 napi_value WindowStageLifecycleEventTypeInit(napi_env env)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "WindowStageLifecycleEventTypeInit");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
 
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
 
@@ -294,13 +294,13 @@ napi_value WindowStageLifecycleEventTypeInit(napi_env env)
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
-        static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
+        static_cast<int32_t>(WindowStageLifeCycleEventType::FOREGROUND)));
     napi_set_named_property(env, objValue, "RESUMED", CreateJsValue(env,
-        static_cast<int32_t>(LifeCycleEventType::RESUMED)));
+        static_cast<int32_t>(WindowStageLifeCycleEventType::RESUMED)));
     napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
-        static_cast<int32_t>(LifeCycleEventType::PAUSED)));
+        static_cast<int32_t>(WindowStageLifeCycleEventType::PAUSED)));
     napi_set_named_property(env, objValue, "HIDDEN", CreateJsValue(env,
-        static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+        static_cast<int32_t>(WindowStageLifeCycleEventType::BACKGROUND)));
     return objValue;
 }
 

@@ -520,8 +520,8 @@ public:
      * Window LifeCycle
      */
     void NotifyLifecyclePausedStatus() override;
-    void NotifyAfterLifecycleForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
-    void NotifyAfterLifecycleBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterLifecycleForeground();
+    void NotifyAfterLifecycleBackground();
     void NotifyAfterLifecycleResumed();
     void NotifyAfterLifecyclePaused();
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;

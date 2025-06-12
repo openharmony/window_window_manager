@@ -35,6 +35,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class SessionStageStubLifecycleTest : public testing::Test {
@@ -91,12 +100,12 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
  */
  HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
  {
-     MessageParcel data;
-     MessageParcel reply;
-     data.WriteBool(true);
-     ASSERT_TRUE((sessionStageStub_ != nullptr));
-     EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus(data, reply));
- }
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus(data, reply));
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+}
 
 /**
  * @tc.name: NotifySessionForeground
