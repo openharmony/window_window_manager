@@ -614,7 +614,6 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         } else {
             GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
-        windowInfo.groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
@@ -749,7 +748,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
     std::string windowName = sceneSession->GetWindowNameAllType();
     auto startsWith = [](const std::string& str, const std::string& prefix) {
-        return str.size() >= prefix.size() && 
+        return str.size() >= prefix.size() &&
             std::equal(prefix.begin(), prefix.end(), str.begin());
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
@@ -768,6 +767,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
+        .groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(displayId),
         .zOrder = zOrder,
         .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
