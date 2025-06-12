@@ -562,6 +562,7 @@ public:
     void RegisterAnimateToCallback(NotifyAnimateToFunc&& callback);
     WMError AnimateTo(const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+    WSError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
 
     /*
      * Window Visibility
@@ -1145,6 +1146,10 @@ private:
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     void NotifyExtensionSecureLimitChange(bool isLimit);
+
+    // window animation
+    Rect RecalculateFrameRect(const Rect& frameRect, uint32_t rotation, uint32_t displayWidth, uint32_t displayHeight);
+    int32_t GetRotatePolicy();
 
     /*
      * PiP Window

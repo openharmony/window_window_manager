@@ -138,6 +138,9 @@ enum class SessionInterfaceCode {
 
     // Window source
     TRANS_ID_SET_SUBWINDOW_SOURCE,
+
+    // window animation
+    TRANS_ID_SET_FRAMERECT_FOR_PARTICAL_ZOOMIN,
 };
 } // namespace Rosen
 } // namespace OHOS

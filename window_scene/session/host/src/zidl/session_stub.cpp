@@ -296,6 +296,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowShadows(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
             return HandleSetSubWindowSource(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTICAL_ZOOMIN):
+            return HandleSetFrameRectForParticalZoomIn(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1959,6 +1961,26 @@ int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& re
     WSError errCode = SetSubWindowSource(source);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetFrameRectForParticalZoomIn(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read frame rect failed");
+        return ERR_INVALID_DATA;
+    }
+    Rect frameRect = { posX, posY, width, height };
+    WSError ret = SetFrameRectForParticalZoomIn(frameRect);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write ret failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

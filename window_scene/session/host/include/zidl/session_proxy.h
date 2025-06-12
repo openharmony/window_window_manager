@@ -195,6 +195,11 @@ public:
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WMError NotifyDisableDelegatorChange() override;
+
+    /**
+     * window animation
+     */
+    WSError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
