@@ -894,6 +894,11 @@ bool Session::IsSessionForeground() const
     return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
 
+bool Session::IsSessionNotBackground() const
+{
+    return state_ >= SessionState::STATE_DISCONNECT && state_ <= SessionState::STATE_ACTIVE;
+}
+
 WSRectF Session::UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area)
 {
     const float innerBorder = INNER_BORDER_VP * vpr_;
@@ -4084,6 +4089,11 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
 bool Session::IsVisibleForeground() const
 {
     return isVisible_ && IsSessionForeground();
+}
+
+bool Session::IsVisibleNotBackground() const
+{
+    return isVisible_ && IsSessionNotBackground();
 }
 
 void Session::SetIsStarting(bool isStarting)
