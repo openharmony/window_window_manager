@@ -103,8 +103,6 @@ std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
-std::unordered_map<std::string,
-    std::unordered_map<ControlAppType, SceneSession::ControlInfo>> SceneSession::allAppUseControlMap_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -1158,12 +1156,18 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        std::string key =
-            session->GetSessionInfo().bundleName_ + "#" + std::to_string(session->GetSessionInfo().appIndex_);
-        if (allAppUseControlMap_.find(key) == allAppUseControlMap_.end()) {
+        if (!session->onGetAllAppUseControlMapFunc_) {
+            TLOGNE(WmsLogTag::WMS_LIFE,
+                "id: %{public}d session GetAllAppUseControlMapFunc is null", session->GetPersistentId());
             return;
         }
-        for (const auto& [type, info] : allAppUseControlMap_[key]) {
+        auto& allAppUseControlMap = session->onGetAllAppUseControlMapFunc_();
+        std::string key = SessionUtils::GetAppLockKey(session->GetSessionInfo().bundleName_,
+            session->GetSessionInfo().appIndex_);
+        if (allAppUseControlMap.find(key) == allAppUseControlMap.end()) {
+            return;
+        }
+        for (const auto& [type, info] : allAppUseControlMap[key]) {
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
                 key.c_str(), info.isNeedControl, info.isControlRecentOnly);
@@ -8941,6 +8945,11 @@ WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty
     return WMError::WM_OK;
 }
 
+void SceneSession::SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& func)
+{
+    onGetAllAppUseControlMapFunc_ = std::move(func);
+}
+
 /**
  * Get the rotate policy of a screen :
  * const.window.device.rotate_policy defines the rotate policy of unfoldable phone and pad, and:
@@ -9063,11 +9072,5 @@ WSError SceneSession::SetFrameRectForParticalZoomIn(const Rect& frameRect)
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
-}
-
-std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-    SceneSession::GetAllAppUseControlMap()
-{
-    return allAppUseControlMap_;
 }
 } // namespace OHOS::Rosen

@@ -2282,6 +2282,10 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             [this](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
             return this->RequestVsyncByRootSceneWhenModeChange(vsyncCallback);
         });
+        sceneSession->SetGetAllAppUseControlMapFunc([this]() ->
+            std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {
+            return allAppUseControlMap_;
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -3421,8 +3425,12 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
     } else {
-        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit,
-            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+        ffrtQueueHelper_->SubmitTask([sceneSessionInfo, persistentId, isUserRequestedExit, where = __func__] {
+            auto ret = AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo,
+                isUserRequestedExit, static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s close ability ret:%{public}d, persistentId:%{public}d",
+                where, static_cast<int32_t>(ret), persistentId);
+        });
     }
     sceneSession->SetIsUserRequestedExit(isUserRequestedExit);
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
@@ -10374,12 +10382,12 @@ WSError SceneSessionManager::NotifyAppUseControlList(
 
         std::vector<sptr<SceneSession>> mainSessions;
         for (const auto& appUseControlInfo : controlList) {
-            refreshAllAppUseControlMap(appUseControlInfo, type);
+            RefreshAllAppUseControlMap(appUseControlInfo, type);
             GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
             if (mainSessions.empty()) {
                 continue;
             }
-            SceneSession::ControlInfo controlInfo = {
+            ControlInfo controlInfo = {
                 .isNeedControl = appUseControlInfo.isNeedControl_,
                 .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
             };
@@ -10392,24 +10400,22 @@ WSError SceneSessionManager::NotifyAppUseControlList(
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
+void SceneSessionManager::RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
 {
-    SceneSession::ControlInfo controlInfo = {
+    ControlInfo controlInfo = {
         .isNeedControl = appUseControlInfo.isNeedControl_,
         .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
     };
-    std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-        allAppUseControlMap = SceneSession::GetAllAppUseControlMap();
+    std::string key = SessionUtils::GetAppLockKey(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_);
     if (!controlInfo.isNeedControl && !controlInfo.isControlRecentOnly) {
-        if (allAppUseControlMap.find(key) != allAppUseControlMap.end()) {
-            allAppUseControlMap[key].erase(type);
-            if (allAppUseControlMap[key].empty()){
-                allAppUseControlMap.erase(key);
+        if (allAppUseControlMap_.find(key) != allAppUseControlMap_.end()) {
+            allAppUseControlMap_[key].erase(type);
+            if (allAppUseControlMap_[key].empty()){
+                allAppUseControlMap_.erase(key);
             }
         }
     } else {
-        allAppUseControlMap[key][type] = controlInfo;
+        allAppUseControlMap_[key][type] = controlInfo;
     }
 }
 
@@ -14390,7 +14396,7 @@ WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has no permission granted.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!SessionPermission::IsSystemAppCall()) {
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is not system app.");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
@@ -14406,6 +14412,33 @@ WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId
     sceneSession->Clear(true);
     TLOGI(WmsLogTag::WMS_LIFE, "Terminate success, id:%{public}d.", persistentId);
     return WMError::WM_OK;
+}
+
+WSError SceneSessionManager::PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+    bool shouldBackToCaller)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    uint32_t callerToken = IPCSkeleton::GetCallingTokenID();
+    if (!SessionPermission::VerifyPermissionByCallerToken(callerToken,
+            PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, no manage misson permission");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    return taskScheduler_->PostSyncTask([this, persistentId, shouldBackToCaller] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        return sceneSession->PendingSessionToBackgroundForDelegator(shouldBackToCaller);
+    }, __func__);
 }
 
 void SceneSessionManager::SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc)

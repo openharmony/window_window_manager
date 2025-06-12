@@ -259,6 +259,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
         override { return WMError::WM_OK; }
+    WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+        bool shouldBackToCaller) override
+    {
+        return WSError::WS_OK;
+    }
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override
     {
         return WMError::WM_OK;
@@ -1122,6 +1127,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Fu
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionToBackgroundByPersistentId
+ * @tc.desc: test function : HandlePendingSessionToBackgroundByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundByPersistentId, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+    
+    data.WriteInt32(1);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+ 
+    MessageParcel data2;
+    data2.WriteInt32(1);
+    data2.WriteBool(true);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data2, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
