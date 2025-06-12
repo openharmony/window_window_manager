@@ -12074,7 +12074,7 @@ WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t up
                 windowId, updateMode);
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
-        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
         return sceneSession->UpdateWindowLayoutById(windowId, updateMode);
     };
     return taskScheduler_->PostSyncTask(task,
