@@ -1094,6 +1094,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener04, TestSize.Level1)
     res = window->UnRegisterWindowWillCloseListeners(listener14);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    IAcrossMultiDisplayChangeListenerSptr listener15 = nullptr;
+    res = window->RegisterAcrossMultiDisplayChangeListener(listener15);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterAcrossMultiDisplayChangeListener(listener15);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 end";
 }
@@ -2183,6 +2189,25 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
     auto ret = window->RegisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     window->NotifyWaterfallModeChange(true);
+}
+
+/**
+ * @tc.name: NotifyAcrossMultiDisplayChange
+ * @tc.desc: NotifyAcrossMultiDisplayChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyAcrossMultiDisplayChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("waterfall");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<IAcrossMultiDisplayChangeListener> listener = sptr<IAcrossMultiDisplayChangeListener>::MakeSptr();
+    window->RegisterAcrossMultiDisplayChangeListener(listener);
+    window->acrossMultiDisplayChangeListeners_[1].push_back(nullptr);
+    auto ret = window->NotifyAcrossMultiDisplayChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

@@ -3902,6 +3902,18 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
     return listeners;
 }
 
+WMError WindowSessionImpl::NotifyAcrossMultiDisplayChange(bool isAcrossMultiDisplay)
+{
+    std::lock_guard<std::recursive_mutex> lock(acrossMultiDisplayChangeListenerMutex_);
+    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossMultiDisplayChangeListener>();
+    for (const auto& listener : acrossMultiDisplayChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnAcrossMultiDisplayChanged(isWaterfallMode);
+        }
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d, stat: %{public}u",
@@ -3909,6 +3921,7 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
     if (state_ != WindowState::STATE_SHOWN) {
         return;
     }
+    NotifyAcrossMultiDisplayChange(isWaterfallMode);
     AAFwk::Want want;
     want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
     if (auto uiContent = GetUIContentSharedPtr()) {
@@ -3920,13 +3933,6 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
     for (const auto& listener : waterfallModeChangeListeners) {
         if (listener != nullptr) {
             listener->OnWaterfallModeChange(isWaterfallMode);
-        }
-    }
-    std::lock_guard<std::recursive_mutex> lock(acrossMultiDisplayChangeListenerMutex_);
-    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossMultiDisplayChangeListener>();
-    for (const auto& listener : acrossMultiDisplayChangeListeners) {
-        if (listener != nullptr) {
-            listener->OnAcrossMultiDisplayChanged(isWaterfallMode);
         }
     }
 }
@@ -5361,10 +5367,6 @@ WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
     if (listener == nullptr) {
@@ -5403,10 +5405,6 @@ WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
-        return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto persistentId = GetPersistentId();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);

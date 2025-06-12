@@ -24,6 +24,7 @@
 #include "session/host/include/system_session.h"
 #include "session/host/include/main_session.h"
 #include "wm_common.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
 #include <pointer_event.h>
@@ -621,6 +622,70 @@ HWTEST_F(SceneSessionTest, SetNotifyScreenshotAppEventRegisteredFunc01, TestSize
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetNotifyScreenshotAppEventRegisteredFunc([](int32_t persistentId, bool isRegister) {});
     EXPECT_NE(sceneSession->updateScreenshotAppEventRegisteredFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAcrossMultiDisplayChangeRegistered
+ * @tc.desc: UpdateAcrossMultiDisplayChangeRegistered01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateAcrossMultiDisplayChangeRegistered01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    auto ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    EXPECT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+
+    ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsMainWindowFullScreenAcrossMultiDisplay
+ * @tc.desc: IsMainWindowFullScreenAcrossMultiDisplay01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossMultiDisplay01, TestSize.Level0)
+{
+    bool isAcrossMultiDisplay = false;
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    auto ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+
+    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_NE(ret, WMError::WM_OK);
+
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->property_->SetPersistentId(12);
+    sceneSession->SetParentSession(parentSession);
+    ASSERT_NE(sceneSession->GetParentSession(), nullptr);
+    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_NE(ret, WMError::WM_OK);
+
+    parentSession = nullptr;
+    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**

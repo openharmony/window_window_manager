@@ -6381,10 +6381,6 @@ WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossMultiDisplay(bool& i
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid window: %{public}d type %{public}u", GetPersistentId(), GetType());
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
