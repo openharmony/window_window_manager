@@ -14,7 +14,6 @@
  */
 
 #include "picture_in_picture_controller.h"
-
 #include "picture_in_picture_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
@@ -193,6 +192,7 @@ void PictureInPictureController::SetUIContent() const
     }
     window_->SetUIContentByAbc(PIP_CONTENT_PATH, env_, storage, nullptr);
 }
+
 void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height)
 {
     if (width <= 0 || height <= 0) {
