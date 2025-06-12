@@ -318,6 +318,10 @@ static void ParseMetadataConfiguration(napi_env env, napi_value objValue, const 
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.isMaximize=%{public}s", item.value.c_str());
             bool isMaximize = (item.value == "true");
             napi_set_named_property(env, objValue, "isMaximize", CreateJsValue(env, isMaximize));
+        } else if (item.name == "ohos.ability.window.isRightAngle") {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.isRightAngle=%{public}s", item.value.c_str());
+            bool isRightAngle = (item.value == "true");
+            napi_set_named_property(env, objValue, "isRightAngle", CreateJsValue(env, isRightAngle));
         }
     }
 }
