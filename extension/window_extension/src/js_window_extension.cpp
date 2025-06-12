@@ -342,7 +342,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
         }
         OnWindowCreated();
         TLOGI(WmsLogTag::WMS_UIEXT,
-            "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+            "ability context onWindowReady rect x=%{public}d y=%{public}d w=%{public}d h=%{public}d ",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
