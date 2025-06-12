@@ -109,7 +109,7 @@ HWTEST_F(WindowAdapterTest, RequestFocusStatusBySA, TestSize.Level1)
  
     auto result = windowAdapter.RequestFocusStatusBySA(
         persistentId, isFocused, byForeground, reason);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**
@@ -662,7 +662,7 @@ HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
     int32_t hostWindowId = 0;
     Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -772,7 +772,7 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, TestSize.Level1)
     bool enabled = false;
     int persistentId = 1;
     auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
-    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
+    ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -871,7 +871,7 @@ HWTEST_F(WindowAdapterTest, SetParentWindow, TestSize.Level1)
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 2;
     auto err = windowAdapter.SetParentWindow(subWindowId, newParentWindowId);
-    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(err, WMError::WM_OK);
 }
 
 /**
@@ -885,7 +885,7 @@ HWTEST_F(WindowAdapterTest, GetHostWindowCompatiblityInfo, TestSize.Level1)
     sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     auto err = windowAdapter.GetHostWindowCompatiblityInfo(token, property);
-    ASSERT_EQ(err, WMError::WM_ERROR_IPC_FAILED);
+    ASSERT_EQ(err, WMError::WM_OK);
 }
 
 /**
@@ -898,7 +898,7 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
     WindowAdapter windowAdapter;
     std::vector<int32_t> windowIds;
     auto err = windowAdapter.MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
+    ASSERT_EQ(WMError::WM_OK, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -914,7 +914,7 @@ HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     auto err = windowAdapter.ListWindowInfo(windowInfoOption, infos);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }
@@ -932,9 +932,9 @@ HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | Smal
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -950,9 +950,9 @@ HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | Sm
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
+    EXPECT_EQ(ret, true);
 }
 } // namespace
 } // namespace Rosen

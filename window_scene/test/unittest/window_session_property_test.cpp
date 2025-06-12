@@ -1115,10 +1115,10 @@ HWTEST_F(WindowSessionPropertyTest, SetWindowShadowEnabled, TestSize.Level1)
     ASSERT_NE(nullptr, property);
     bool isEnabled = true;
     property->SetWindowShadowEnabled(isEnabled);
-    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+    EXPECT_EQ(isEnabled, property->GetWindowShadowEnabled());
     isEnabled = false;
     property->SetWindowShadowEnabled(isEnabled);
-    EXPECT_NE(isEnabled, property->GetWindowShadowEnabled());
+    EXPECT_EQ(isEnabled, property->GetWindowShadowEnabled());
 }
 
 /**
