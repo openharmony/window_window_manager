@@ -2282,8 +2282,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             [this](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
             return this->RequestVsyncByRootSceneWhenModeChange(vsyncCallback);
         });
-        sceneSession->SetGetAllAppUseControlMapFunc(
-            [this]() -> std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {
+        sceneSession->SetGetAllAppUseControlMapFunc([this]() {
             return allAppUseControlMap_;
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -14403,20 +14402,20 @@ WSError SceneSessionManager::PendingSessionToBackgroundByPersistentId(const int3
     }
     uint32_t callerToken = IPCSkeleton::GetCallingTokenID();
     if (!SessionPermission::VerifyPermissionByCallerToken(callerToken,
-        PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+            PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Permission denied, no manage misson permission");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", persistentId);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
-        return WSError::WS_ERROR_INVALID_WINDOW;
-    }
-    return taskScheduler_->PostSyncTask([this, &sceneSession, shouldBackToCaller] {
+    return taskScheduler_->PostSyncTask([this, persistentId, shouldBackToCaller] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Session id:%{public}d is not found.", persistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            TLOGE(WmsLogTag::WMS_MAIN, "Session id:%{public}d is not mainWindow.", persistentId);
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
         return sceneSession->PendingSessionToBackgroundForDelegator(shouldBackToCaller);
     }, __func__);
 }

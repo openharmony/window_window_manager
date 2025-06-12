@@ -287,7 +287,7 @@ public:
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
      */
     virtual WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
-        bool shouldBackToCaller = true) = 0;
+        bool shouldBackToCaller = true) { return WSError::WS_OK; };
 
     /**
      * @brief Create a new instanceKey of a specific bundle
