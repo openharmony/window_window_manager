@@ -2917,6 +2917,7 @@ WMError WindowSessionImpl::EnableDrag(bool enableDrag)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetDragEnabled(enableDrag);
+    hasSetEnableDrag_.store(true);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WMError errorCode = hostSession->SetSystemWindowEnableDrag(enableDrag);

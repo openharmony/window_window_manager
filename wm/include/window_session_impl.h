@@ -706,6 +706,7 @@ protected:
     template <typename T>
     EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
     void NotifyWindowStatusDidChange(WindowMode mode);
+    std::atomic_bool hasSetEnableDrag_ = false;
 
     /*
      * Window Immersive
