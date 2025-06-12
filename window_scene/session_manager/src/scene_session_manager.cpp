@@ -137,7 +137,7 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
-constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
+constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -9452,7 +9452,6 @@ WSError SceneSessionManager::NotifyAppUseControlList(
 
         std::vector<sptr<SceneSession>> mainSessions;
         for (const auto& appUseControlInfo : controlList) {
-            RefreshAllAppUseControlMap(appUseControlInfo, type);
             GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
             if (mainSessions.empty()) {
                 continue;
@@ -9468,27 +9467,6 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         }
     }, __func__);
     return WSError::WS_OK;
-}
-
-void SceneSessionManager::RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
-{
-    SceneSession::ControlInfo controlInfo = {
-        .isNeedControl = appUseControlInfo.isNeedControl_,
-        .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
-    };
-    std::string key = appUseControlInfo.bundleName_ + "#" + std::to_string(appUseControlInfo.appIndex_);
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-        allAppUseControlMap = SceneSession::GetAllAppUseControlMap();
-    if (!controlInfo.isNeedControl && !controlInfo.isControlRecentOnly) {
-        if (allAppUseControlMap.find(key) != allAppUseControlMap.end()) {
-            allAppUseControlMap[key].erase(type);
-            if (allAppUseControlMap[key].empty()){
-                allAppUseControlMap.erase(key);
-            }
-        }
-    } else {
-        allAppUseControlMap[key][type] = controlInfo;
-    }
 }
 
 void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)
