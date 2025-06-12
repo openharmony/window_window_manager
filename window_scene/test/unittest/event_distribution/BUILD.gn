@@ -117,7 +117,6 @@ ohos_unittest("ws_intention_event_manager_test") {
   ]
 
   external_deps = [
-    "ability_runtime:app_manager",
     "ability_runtime:mission_info",
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
