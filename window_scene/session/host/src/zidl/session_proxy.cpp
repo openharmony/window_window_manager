@@ -3245,4 +3245,38 @@ WSError SessionProxy::SetSubWindowSource(SubWindowSource source)
     }
     return static_cast<WSError>(ret);
 }
+
+WSError SessionProxy::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!(data.WriteInt32(frameRect.posX_) && data.WriteInt32(frameRect.posY_) &&
+          data.WriteUint32(frameRect.width_) && data.WriteUint32(frameRect.height_))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write frame rect failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTICAL_ZOOMIN),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
 } // namespace OHOS::Rosen
