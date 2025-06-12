@@ -847,7 +847,7 @@ WSError SessionStageProxy::NotifyLayoutFinishAfterWindowModeChange(WindowMode mo
     return WSError::WS_OK;
 }
 
-WMError SessionStageProxy::TestWindow(int32_t windowId, int32_t choice)
+WMError SessionStageProxy::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -874,7 +874,7 @@ WMError SessionStageProxy::TestWindow(int32_t windowId, int32_t choice)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t requestCode =
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TEST_WINDOW);
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID);
     if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

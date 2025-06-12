@@ -767,7 +767,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::TestWindow(int32_t windowId, int32_t choice)
+WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -790,7 +790,7 @@ WMError SceneSessionManagerLiteProxy::TestWindow(int32_t windowId, int32_t choic
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TEST_WINDOW),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID),
         data, reply, option);
     if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);

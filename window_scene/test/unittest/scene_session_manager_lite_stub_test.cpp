@@ -140,7 +140,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    WMError TestWindow(int32_t windowId, int32_t choice) override
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override
     {
         return WMError::WM_OK;
     }

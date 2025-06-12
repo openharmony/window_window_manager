@@ -95,13 +95,13 @@ public:
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
         TRANS_ID_REMOVE_INSTANCE_KEY,
-        TRANS_ID_TEST_WINDOW,
+        TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID,
     };
 
     /*
      * Window Layout
      */
-    virtual WMError TestWindow(int32_t windowId, int32_t choice) = 0;
+    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) = 0;
 
     /*
      * Window Lifecycle

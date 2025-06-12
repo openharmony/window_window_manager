@@ -4123,7 +4123,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
 }
 
 /** @note @Window.Layout */
-WMError SceneSession::TestWindow(int32_t windowId, int32_t choice)
+WMError SceneSession::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     if (sessionStage_ == nullptr) {
@@ -4131,7 +4131,7 @@ WMError SceneSession::TestWindow(int32_t windowId, int32_t choice)
         return WMError::WM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "%windowId: %{public}d, choice: %{public}d", windowId, choice);
-    return sessionStage_->TestWindow(windowId, choice);
+    return sessionStage_->UpdateWindowLayoutById(windowId, choice);
 }
 
 /** @note @window.drag */

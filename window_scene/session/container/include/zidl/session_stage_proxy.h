@@ -56,7 +56,7 @@ public:
     WSError NotifyWindowVisibility(bool isVisible) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
-    WMError TestWindow(int32_t windowId, int32_t choice) override;
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;

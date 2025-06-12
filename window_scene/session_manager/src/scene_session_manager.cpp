@@ -1941,7 +1941,7 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
-WMError SceneSessionManager::TestWindow(int32_t windowId, int32_t choice)
+WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
@@ -1955,10 +1955,10 @@ WMError SceneSessionManager::TestWindow(int32_t windowId, int32_t choice)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, choice: %{public}d", where , windowId, choice);
-        return sceneSession->TestWindow(windowId, choice);
+        return sceneSession->UpdateWindowLayoutById(windowId, choice);
     };
     return taskScheduler_->PostSyncTask(task,
-        "TestWindow windowId: " + std::to_string(windowId) + " choice: " + std::to_string(choice));
+        "UpdateWindowLayoutById windowId: " + std::to_string(windowId) + " choice: " + std::to_string(choice));
 }
 
 WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& windowLimits)
