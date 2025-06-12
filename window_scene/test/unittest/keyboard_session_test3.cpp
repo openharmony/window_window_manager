@@ -100,9 +100,9 @@ HWTEST_F(KeyboardSessionTest3, IsVisibleNotBackground, TestSize.Level1)
     info.bundleName_ = "IsVisibleNotBackground";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     keyboardSession->isVisible_ = false;
-    ASSERT_EQ(false, keyboardSession->IsVisibleNotBackground());
+    EXPECT_EQ(false, keyboardSession->IsVisibleNotBackground());
     keyboardSession->isVisible_ = true;
-    ASSERT_EQ(true, keyboardSession->IsVisibleNotBackground());
+    EXPECT_EQ(true, keyboardSession->IsVisibleNotBackground());
 }
 
 /**
