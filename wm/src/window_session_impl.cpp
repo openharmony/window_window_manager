@@ -1568,8 +1568,8 @@ bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
-    if (IsWindowSessionInvalid()) {
+    TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d, state: %{public}d", interactive, state_);
+    if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
     if (IsNotifyInteractiveDuplicative(interactive)) {

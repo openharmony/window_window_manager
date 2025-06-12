@@ -104,6 +104,7 @@ enum class LifeCycleEventType : uint32_t {
     RESUMED,
     PAUSED,
     DESTROYED,
+};
 
 enum class WindowStageLifeCycleEventType : uint32_t {
     FOREGROUND = 1,
