@@ -8759,6 +8759,10 @@ WMError SceneSession::NotifyFollowedParentWindowAcrossMultiDisplayChange(bool is
         if (!subSession || !subSession->GetIsFollowParentLayout()) {
             continue;
         }
+        if (subSession->sessionStage_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "%{public}d: sessionStage is null", subSession->GetPersistentId());
+            continue;
+        }
         subSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
     }
     return WMError::WM_OK;
