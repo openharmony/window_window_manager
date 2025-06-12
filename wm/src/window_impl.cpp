@@ -1533,6 +1533,22 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     return ret;
 }
 
+WMError WindowImpl::GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType)
+{
+    if (parentWindowType == WindowType::WINDOW_TYPE_SCENE_BOARD ||
+        parentWindowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    } else if (WindowHelper::IsUIExtensionWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (WindowHelper::IsSystemWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
+    } else {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "parentWindowType:%{public}d, windowType:%{public}d", parentWindowType, windowType);
+    return WMError::WM_OK;
+}
+
 bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (uiContent_ != nullptr) {

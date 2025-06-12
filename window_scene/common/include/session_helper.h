@@ -119,9 +119,10 @@ public:
         return usage == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
     }
 
-    static inline bool IsMagnificationWindow(WindowType type)
+    static inline bool IsNeedSACalling(WindowType type)
     {
-        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU ||
+            type == WindowType::WINDOW_TYPE_SELECTION;
     }
 
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
