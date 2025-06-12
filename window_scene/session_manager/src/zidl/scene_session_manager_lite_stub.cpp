@@ -1220,7 +1220,8 @@ int SceneSessionManagerLiteStub::HandleGetRouterStackInfo(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data,
+    MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     int32_t persistentId;
