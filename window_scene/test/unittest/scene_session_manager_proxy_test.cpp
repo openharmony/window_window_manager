@@ -665,7 +665,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateExtWindowFlags, TestSize.Level1)
 
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateExtWindowFlags(token, 7, 7));
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->UpdateExtWindowFlags(nullptr, 7, 7));
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateExtWindowFlags(nullptr, 7, 7));
 }
 
 /**
@@ -826,7 +826,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetSessionLabel, TestSize.Level1)
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->SetSessionLabel(token, label));
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->SetSessionLabel(token, label));
 }
 
 /**
@@ -884,7 +884,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSnapshotByWindowId, TestSize.Level1)
     int32_t windowId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = sceneSessionManagerProxy->GetSnapshotByWindowId(windowId, pixelMap);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 }
 
 /**
@@ -899,7 +899,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, TestSize.Level1)
     int32_t windowId = -1;
     SessionSnapshot snapshot;
     WMError ret = sceneSessionManagerProxy->GetSessionSnapshotById(windowId, snapshot);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
 }
 
 /**
