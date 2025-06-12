@@ -625,7 +625,8 @@ int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& dat
     }
     WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, updateMode:%{public}d", windowId, updateMode);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, updateMode:%{public}d",
+            windowId, updateMode);
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
