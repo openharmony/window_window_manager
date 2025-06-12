@@ -2080,8 +2080,8 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
-    std::string name { "UNKNOW" };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    std::string name { "UNKNOWN" };
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_EQ(name, session->GetName());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";
 }
@@ -3225,7 +3225,7 @@ HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    ASSERT_EQ(nullptr, screenSession);
+    ASSERT_NE(nullptr, screenSession);
     screenSession->SetIsEnableRegionRotation(true);
     screenSession->EnableMirrorScreenRegion();
     EXPECT_EQ(screenSession->GetIsEnableRegionRotation(), true);
