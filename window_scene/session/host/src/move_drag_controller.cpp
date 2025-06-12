@@ -695,7 +695,7 @@ void MoveDragController::SetScale(float scaleX, float scaleY)
 void MoveDragController::SetParentRect(const Rect& parentRect)
 {
     parentRect_ = parentRect;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s",parentRect_.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s", parentRect_.ToString().c_str());
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
