@@ -80,7 +80,6 @@ JsWindowRegisterManager::JsWindowRegisterManager()
 {
 }
 
-
 JsWindowRegisterManager::~JsWindowRegisterManager()
 {
 }
