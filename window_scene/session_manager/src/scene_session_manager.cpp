@@ -2282,7 +2282,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             [this](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
             return this->RequestVsyncByRootSceneWhenModeChange(vsyncCallback);
         });
-        sceneSession->SetGetAllAppUseControlMapFunc([this]() {
+        sceneSession->SetGetAllAppUseControlMapFunc([this]() ->
+            std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {
             return allAppUseControlMap_;
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
