@@ -381,7 +381,6 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStageListener(RegisterListene
                 static_cast<uint32_t>(registerListenerType));
             return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType registerListenerType,
