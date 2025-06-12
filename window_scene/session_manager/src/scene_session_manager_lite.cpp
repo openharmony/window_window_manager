@@ -347,6 +347,13 @@ WSError SceneSessionManagerLite::GetRecentMainSessionInfoList(std::vector<Recent
     return SceneSessionManager::GetInstance().GetRecentMainSessionInfoList(recentSessionInfoList);
 }
 
+WSError SceneSessionManagerLite::PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+    bool shouldBackToCaller)
+{
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundByPersistentId(persistentId,
+        shouldBackToCaller);
+}
+
 WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
 {
     return SceneSessionManager::GetInstance().CreateNewInstanceKey(bundleName, instanceKey);
