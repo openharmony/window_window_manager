@@ -39,10 +39,12 @@ public:
     static napi_value Off(napi_env env, napi_callback_info info);
     static napi_value LoadContent(napi_env env, napi_callback_info info);
     static napi_value LoadContentByName(napi_env env, napi_callback_info info);
-    static napi_value CreateSubWindow(napi_env env, napi_callback_info info);
-    static napi_value GetSubWindow(napi_env env, napi_callback_info info);
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetUIContent(napi_env env, napi_callback_info info);
+    static napi_value EmptyAsyncCall(napi_env env, napi_callback_info info);
+    static napi_value EmptySyncCall(napi_env env, napi_callback_info info);
+    static napi_value UnsupportAsyncCall(napi_env env, napi_callback_info info);
+    static napi_value UnsupportSyncCall(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnGetMainWindow(napi_env env, napi_callback_info info);
@@ -50,10 +52,10 @@ private:
     napi_value OnEvent(napi_env env, napi_callback_info info);
     napi_value OffEvent(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
-    napi_value OnCreateSubWindow(napi_env env, napi_callback_info info);
-    napi_value OnGetSubWindow(napi_env env, napi_callback_info info);
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetUIContent(napi_env env, napi_callback_info info);
+    napi_value OnEmptyAsyncCall(napi_env env, napi_callback_info info);
+    napi_value OnUnsupportAsyncCall(napi_env env, napi_callback_info info);
 
     sptr<Window> windowExtensionSessionImpl_;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
