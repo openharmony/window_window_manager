@@ -291,7 +291,6 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
-    std::unique_lock<std::mutex> lock(superStatusMutex_);
     return curState_.load();
 }
 
