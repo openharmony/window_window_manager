@@ -8933,8 +8933,6 @@ WMError SceneSession::AnimateTo(const WindowAnimationProperty& animationProperty
     return WMError::WM_OK;
 }
 
-std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-    SceneSession::GetAllAppUseControlMap()
 void SceneSession::SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& func)
 {
     onGetAllAppUseControlMapFunc_ = std::move(func);
