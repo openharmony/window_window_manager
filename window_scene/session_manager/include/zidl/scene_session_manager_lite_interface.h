@@ -103,7 +103,13 @@ public:
         TRANS_ID_UPDATE_KIOSK_APP_LIST,
         TRANS_ID_ENTER_KIOSK_MODE,
         TRANS_ID_EXIT_KIOSK_MODE,
+        TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID,
     };
+
+    /*
+     * Window Layout
+     */
+    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
 
     /*
      * Window Lifecycle

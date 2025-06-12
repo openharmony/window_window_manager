@@ -165,6 +165,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleEnterKioskMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_EXIT_KIOSK_MODE):
             return HandleExitKioskMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID):
+            return HandleUpdateWindowLayoutById(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -603,6 +605,32 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     }
     if (!reply.WriteInt32(pid)) {
         WLOGE("Failed to WriteInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t windowId = INVALID_WINDOW_ID;
+    int32_t updateMode = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(updateMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, updateMode:%{public}d",
+            windowId, updateMode);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, errCode:%{public}d", errCode);
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
