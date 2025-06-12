@@ -190,9 +190,9 @@ WMError SceneSessionManagerLite::CheckWindowId(int32_t windowId, int32_t& pid)
     return SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
 }
 
-WMError SceneSessionManagerLite::TestWindow(int32_t windowId, int32_t choice)
+WMError SceneSessionManagerLite::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
-    return SceneSessionManager::GetInstance().TestWindow(windowId, choice);
+    return SceneSessionManager::GetInstance().UpdateWindowLayoutById(windowId, choice);
 }
 
 WMError SceneSessionManagerLite::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,

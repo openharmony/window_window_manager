@@ -95,8 +95,6 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnregisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID):
             return HandleCheckWindowId(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TEST_WINDOW):
-            return HandleTestWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK):
             return HandleCheckUIExtensionCreation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LIST_WINDOW_INFO):
@@ -155,6 +153,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleCreateNewInstanceKey(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REMOVE_INSTANCE_KEY):
             return HandleRemoveInstanceKey(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID):
+            return HandleUpdateWindowLayoutById(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -574,7 +574,7 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t windowId = INVALID_WINDOW_ID;
@@ -587,13 +587,13 @@ int SceneSessionManagerLiteStub::HandleTestWindow(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = TestWindow(windowId, choice);
+    WMError errCode = UpdateWindowLayoutById(windowId, choice);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to TestWindow, windowId:%{public}d, choice:%{public}d", windowId, choice);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, choice:%{public}d", windowId, choice);
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to TestWindow, errCode:%{public}d", errCode);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, errCode:%{public}d", errCode);
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

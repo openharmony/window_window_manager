@@ -1110,16 +1110,16 @@ HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestWindow01
- * @tc.desc: test function : TestWindow
+ * @tc.name: UpdateWindowLayoutById01
+ * @tc.desc: test function : UpdateWindowLayoutById
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, TestWindow01, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, UpdateWindowLayoutById01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->TestWindow(data, reply));
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->UpdateWindowLayoutById(data, reply));
 }
 } // namespace
 } // namespace Rosen

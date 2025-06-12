@@ -2291,7 +2291,7 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::TestWindow(int32_t windowId, int32_t choice)
+WMError WindowSceneSessionImpl::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "%windowId: %{public}d, choice: %{public}d", windowId, choice);
     switch (choice) {

@@ -132,8 +132,6 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateWindowMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
             return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TEST_WINDOW):
-            return HandleTestWindow(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
             return HandleNotifyForegroundInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE):
@@ -222,6 +220,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyNonInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID):
+            return HandleUpdateWindowLayoutById(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -534,7 +534,7 @@ int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParce
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t windowId = 0;
@@ -547,7 +547,7 @@ int SessionStageStub::HandleTestWindow(MessageParcel& data, MessageParcel& reply
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read choice");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = TestWindow(windowId, choice);
+    WMError errCode = UpdateWindowLayoutById(windowId, choice);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

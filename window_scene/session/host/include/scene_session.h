@@ -1167,7 +1167,7 @@ private:
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
-    WMError TestWindow(int32_t windowId, int32_t choice);
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId);
     virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
