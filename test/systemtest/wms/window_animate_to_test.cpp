@@ -34,8 +34,8 @@ class WindowAnimateToTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
 void WindowAnimateToTest::SetUpTestCase() {}
