@@ -692,7 +692,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
