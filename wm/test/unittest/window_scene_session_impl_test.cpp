@@ -735,6 +735,9 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor02, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor03, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DisableAppWindowDecor03");
     sptr<WindowSceneSessionImpl> windowSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
