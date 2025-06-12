@@ -192,9 +192,9 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     ASSERT_NE(nullptr, ssm_);
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     auto height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    ASSERT_EQ(0, height);
+    EXPECT_EQ(0, height);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
+    ASSERT_NE(specificCb, nullptr);
     specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type, uint64_t displayId) {
         return ssm_->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
     };
@@ -212,10 +212,10 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     statusBarSession->isVisible_ = true;
     ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
     height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    ASSERT_EQ(123, height);
+    EXPECT_EQ(123, height);
     ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](WSRect& barArea) { barArea.height_ = 100; };
     height = ssm_->rootSceneSession_->GetStatusBarHeight();
-    ASSERT_EQ(100, height);
+    EXPECT_EQ(100, height);
 }
 }
 }
