@@ -593,7 +593,7 @@ public:
     /**
      * @brief Notify caller when subwindow closed.
      *
-     * @param terminateCloseProcess Whather need to terminate the subwindow close process.
+     * @param terminateCloseProcess Whether need to terminate the subwindow close process.
      */
     virtual void OnSubWindowClose(bool& terminateCloseProcess) {}
 };
