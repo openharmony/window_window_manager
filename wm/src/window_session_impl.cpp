@@ -149,7 +149,8 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
-std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::secureLimitChangeListeners_;
+std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
+    WindowSessionImpl::secureLimitChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, sptr<IPreferredOrientationChangeListener>> WindowSessionImpl::preferredOrientationChangeListener_;
@@ -3531,14 +3532,16 @@ EnableIfSame<T, IExtensionSecureLimitChangeListener,
     return secureLimitChangeListeners;
 }
 
-WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
     return RegisterListener(secureLimitChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
