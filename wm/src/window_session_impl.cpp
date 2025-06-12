@@ -2067,8 +2067,9 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
         parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
     }
     bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
-    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, parallelType: %{public}d, "
-        "isRouter: %{public}u", GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
+    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
+        "parallelType: %{public}d, isRouter: %{public}u",
+        GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
