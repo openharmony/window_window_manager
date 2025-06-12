@@ -72,6 +72,16 @@ uint32_t* CreateHdrFormatsObject(std::vector<uint32_t>& hdrFormats)
     return hdrFormatsPtr;
 }
 
+uint32_t* CreateSupportedRefreshRateObject(std::vector<uint32_t>& supportedRefreshRate)
+{
+    uint32_t* supportedRefreshRatePtr = static_cast<uint32_t*>(malloc(supportedRefreshRate.size() * sizeof(uint32_t)));
+    if (!supportedRefreshRatePtr) {
+        return nullptr;
+    }
+    std::copy(supportedRefreshRate.begin(), supportedRefreshRate.end(), supportedRefreshRatePtr);
+    return supportedRefreshRatePtr;
+}
+
 CRect* CreateCBoundingRects(std::vector<DMRect>& bound)
 {
     int32_t number = static_cast<int32_t>(bound.size());
@@ -345,6 +355,26 @@ RetStruct DisplayImpl::GetHdrFormats()
         result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
     }
     result.len = static_cast<int64_t>(hdrFormats.size());
+    return result;
+}
+
+RetStruct DisplayImpl::GetSupportedRefreshRate()
+{
+    auto info = display_->GetDisplayInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[GetSupportedRefreshRate] Failed to get display info");
+        return {};
+    }
+    auto supportedRefreshRate = info->GetSupportedRefreshRate();
+    RetStruct result = {
+        .code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr
+    };
+    result.data = CreateSupportedRefreshRateObject(supportedRefreshRate);
+    result.code = static_cast<int32_t>(DmErrorCode::DM_OK);
+    if (result.data == nullptr) {
+        result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
+    }
+    result.len = static_cast<int64_t>(supportedRefreshRate.size());
     return result;
 }
 
