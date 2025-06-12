@@ -323,7 +323,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     float density = 0.4f;
     bool isNeedSync = false;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density, isNeedSync));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density, isNeedSync));
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -333,16 +333,17 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density, isNeedSync));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density, isNeedSync));
 
     density = 1.5f;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density, isNeedSync));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density, isNeedSync));
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
-    ASSERT_EQ(density, window->customDensity_);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
+    EXPECT_EQ(density, window->customDensity_);
+    bool isNeedSync = true;
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
 }
 
 /**
