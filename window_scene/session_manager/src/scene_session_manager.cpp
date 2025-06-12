@@ -1960,26 +1960,6 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
-WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
-{
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-    auto task = [this, windowId, updateMode, where = __func__] {
-        auto sceneSession = GetSceneSession(windowId);
-        if (sceneSession == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr, windowId: %{public}d, updateMode: %{public}d",
-                windowId, updateMode);
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
-        return sceneSession->UpdateWindowLayoutById(windowId, updateMode);
-    };
-    return taskScheduler_->PostSyncTask(task,
-        "UpdateWindowLayoutById windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
-}
-
 WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& windowLimits)
 {
     if (!systemConfig_.IsPcWindow()) {
@@ -12079,6 +12059,26 @@ void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
         return;
     }
     requestVsyncByRootSceneWhenModeChangeFunc_ = std::move(func);
+}
+
+WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto task = [this, windowId, updateMode, where = __func__] {
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr, windowId: %{public}d, updateMode: %{public}d",
+                windowId, updateMode);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
+        return sceneSession->UpdateWindowLayoutById(windowId, updateMode);
+    };
+    return taskScheduler_->PostSyncTask(task,
+        "UpdateWindowLayoutById windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
 }
 
 WSError SceneSessionManager::RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback)

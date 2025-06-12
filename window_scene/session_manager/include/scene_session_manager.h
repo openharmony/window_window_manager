@@ -565,7 +565,8 @@ public:
     void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
-
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    
     /*
      * Window Property
      */
@@ -1370,7 +1371,6 @@ private:
     RequestVsyncByRootSceneWhenModeChangeFunc requestVsyncByRootSceneWhenModeChangeFunc_;
     WSError HasRootSceneRequestedVsync(bool& hasRootSceneRequestedVsync);
     WSError RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback);
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
 
     /*
      * Window Snapshot

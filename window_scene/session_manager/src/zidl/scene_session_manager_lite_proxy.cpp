@@ -833,7 +833,7 @@ WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, i
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return WMError:WM_OK;
+    return WMError::WM_OK;
 }
 
 void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)

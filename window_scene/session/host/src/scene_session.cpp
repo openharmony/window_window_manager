@@ -4179,18 +4179,6 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
     }, __func__);
 }
 
-/** @note @Window.Layout */
-WMError SceneSession::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%windowId: %{public}d, updateMode: %{public}d", windowId, updateMode);
-    return sessionStage_->UpdateWindowLayoutById(windowId, updateMode);
-}
-
 /** @note @window.drag */
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
@@ -6796,6 +6784,18 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+/** @note @Window.Layout */
+WMError SceneSession::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", windowId, updateMode);
+    return sessionStage_->UpdateWindowLayoutById(windowId, updateMode);
 }
 
 void SceneSession::SetForceHideState(ForceHideState forceHideState)
