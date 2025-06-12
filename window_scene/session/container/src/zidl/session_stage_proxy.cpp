@@ -873,9 +873,9 @@ WMError SessionStageProxy::TestWindow(int32_t windowId, int32_t choice)
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    uint32_t messageCode =
+    uint32_t requestCode =
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TEST_WINDOW);
-    if (remote->SendRequest(messageCode, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

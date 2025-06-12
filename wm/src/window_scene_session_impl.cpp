@@ -2293,20 +2293,16 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
 
 WMError WindowSceneSessionImpl::TestWindow(int32_t windowId, int32_t choice)
 {
-    switch (choice)
-    {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%windowId: %{public}d, choice: %{public}d", windowId, choice);
+    switch (choice) {
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN):
             return Maximize();
-            break;
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING):
             return Recover();
-            break;
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY):
             return SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-            break;
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_SECONDARY):
             return SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-            break;
         default:
             break;
     }

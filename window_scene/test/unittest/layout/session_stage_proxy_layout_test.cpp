@@ -67,7 +67,7 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, TestSize.
 HWTEST_F(SessionStageProxyLayoutTest, TestWindow01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: TestWindow01 start";
-    sessionStage_->TestWindow(0,1);
+    sessionStage_->TestWindow(0, 1);
     ASSERT_TRUE((sessionStage_ != nullptr));
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: TestWindow01 end";
 }
