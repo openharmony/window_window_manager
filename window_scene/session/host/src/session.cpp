@@ -4337,7 +4337,7 @@ void Session::DeletePersistentImageFit()
     }
 }
 
-std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
