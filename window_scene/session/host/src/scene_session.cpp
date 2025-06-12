@@ -6303,27 +6303,36 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
 
 int32_t SceneSession::GetStatusBarHeight()
 {
-    int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "specificCallback_ or session property is null");
+    return PostSyncTask([weakThis = wptr(this), where = __func__]() -> int32_t {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
+            return 0;
+        }
+        int32_t height = 0;
+        if (session->specificCallback_ == nullptr ||
+            session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s specificCallback_ or session property is null", where);
+            return height;
+        }
+        const auto& statusBarVector = session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+            WindowType::WINDOW_TYPE_STATUS_BAR, session->GetSessionProperty()->GetDisplayId());
+        for (auto& statusBar : statusBarVector) {
+            if (statusBar == nullptr) {
+                continue;
+            }
+            WSRect statusBarRect = statusBar->GetSessionRect();
+            if (session->onGetStatusBarAvoidHeightFunc_) {
+                session->onGetStatusBarAvoidHeightFunc_(statusBarRect);
+                TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d status bar height %{public}d",
+                    where, session->GetPersistentId(), statusBarRect.height_);
+            }
+            height = statusBarRect.height_;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d height %{public}d",
+            where, session->GetPersistentId(), height);
         return height;
-    }
-    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
-        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
-    for (auto& statusBar : statusBarVector) {
-        if (statusBar == nullptr) {
-            continue;
-        }
-        WSRect statusBarRect = statusBar->GetSessionRect();
-        if (onGetStatusBarAvoidHeightFunc_) {
-            onGetStatusBarAvoidHeightFunc_(statusBarRect);
-            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
-                GetPersistentId(), statusBarRect.height_);
-        }
-        height = statusBarRect.height_;
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", GetPersistentId(), height);
-    return height;
+    }, __func__);
 }
 
 int32_t SceneSession::GetDockHeight()
