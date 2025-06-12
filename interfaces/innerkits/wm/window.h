@@ -3132,7 +3132,7 @@ public:
      * @param density the custom density of window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetCustomDensity(float density, bool isNeedSync) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get custom density of window.

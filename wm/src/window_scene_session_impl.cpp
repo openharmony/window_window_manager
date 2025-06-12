@@ -6318,7 +6318,7 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     }
 }
 
-WMError WindowSceneSessionImpl::SetCustomDensity(float density)
+WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool isNeedSync)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);
     if (IsWindowSessionInvalid()) {
@@ -6339,8 +6339,21 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density)
     }
     isDefaultDensityEnabled_ = false;
     customDensity_ = density;
-    UpdateDensity();
-
+    
+    if (isNeedSync) {
+        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+        for (const auto& winPair : windowSessionMap_) {
+            auto window = winPair.second.second;
+            if (window == nullptr) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+                continue;
+            }
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+            window->UpdateDensity();
+        }
+    } else {
+        UpdateDensity();
+    }
     return WMError::WM_OK;
 }
 
