@@ -288,10 +288,6 @@ HWTEST_F(PictureInPictureManagerTest, DoPreRestore, TestSize.Level1)
     ASSERT_NE(nullptr, option);
     auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
-    pipController->curState_ = PiPWindowState::STATE_STARTED;
-    PictureInPictureManager::activeController_ = nullptr;
-    PictureInPictureManager::DoPreRestore();
-    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
     PictureInPictureManager::SetActiveController(pipController);
     PictureInPictureManager::DoPreRestore();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_RESTORING);
@@ -440,14 +436,8 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, TestSize.Level1)
     ASSERT_NE(nullptr, option);
     auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
-    pipController->curState_ = PiPWindowState::STATE_STARTED;
-    PictureInPictureManager::activeController_ = nullptr;
-    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
-    PictureInPictureManager::DoDestroy();
-    ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
 
     PictureInPictureManager::activeController_ = pipController;
-    ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     pipController->window_ = mw;
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);

@@ -387,6 +387,28 @@ HWTEST_F(SessionStageStubTest, HandleNotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleNotifyScreenshotAppEvent
+ * @tc.desc: test function : HandleNotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(22, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(1);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleDumpSessionElementInfo
  * @tc.desc: test function : HandleDumpSessionElementInfo
  * @tc.type: FUNC

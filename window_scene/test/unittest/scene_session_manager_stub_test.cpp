@@ -1360,6 +1360,48 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowManagerAgent, TestSi
 }
 
 /**
+ * @tc.name: HandleRegisterWindowManagerAgent01
+ * @tc.desc: test HandleRegisterWindowManagerAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    data.WriteUint32(interestInfo);
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    int res = stub_->HandleRegisterWindowPropertyChangeAgent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUnregisterWindowPropertyChangeAgent01
+ * @tc.desc: test HandleUnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    WindowInfoKey windowInfoKey = WindowInfoKey::DISPLAY_ID;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteInt32(static_cast<int32_t>(windowInfoKey));
+    data.WriteUint32(interestInfo);
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+
+    int res = stub_->HandleUnregisterWindowPropertyChangeAgent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSkipSnapshotForAppProcess
  * @tc.desc: test HandleSkipSnapshotForAppProcess
  * @tc.type: FUNC
@@ -2035,6 +2077,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestS
     data.WriteInt32(100);
     res = stub_->HandleSetStartWindowBackgroundColor(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyScreenshotEvent
+ * @tc.desc: test HandleNotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(2);
+    res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

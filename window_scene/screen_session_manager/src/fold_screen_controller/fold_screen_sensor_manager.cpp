@@ -228,6 +228,21 @@ bool FoldScreenSensorManager::GetSensorRegisterStatus()
 {
     return registerHall_ || registerPosture_;
 }
+
+float FoldScreenSensorManager::GetGlobalAngle() const
+{
+    return globalAngle;
+}
+
+void FoldScreenSensorManager::SetGlobalAngle(float angle)
+{
+    globalAngle = angle;
+}
+
+uint16_t FoldScreenSensorManager::GetGlobalHall() const
+{
+    return globalHall;
+}
 } // Rosen
 } // OHOS
 #endif

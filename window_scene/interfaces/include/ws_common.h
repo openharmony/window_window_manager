@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 #include <iremote_broker.h>
 #include <want.h>
+#include "pixel_map.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -671,6 +672,7 @@ struct WindowAnimationInfo {
     WSRect endRect { 0, 0, 0, 0 };
     bool animated { false };
     uint32_t callingId { 0 };
+    bool isGravityChanged { false };
 };
 
 struct WindowShadowConfig {
@@ -718,6 +720,15 @@ struct StartingWindowInfo {
     std::string brandingPath_;
     std::string backgroundImagePath_;
     std::string backgroundImageFit_;
+};
+
+struct StartingWindowPageDrawInfo {
+    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    uint32_t bgColor = 0;
+    std::string startWindowBackgroundImageFit = "";
 };
 
 struct StartingWindowAnimationConfig {
@@ -800,6 +811,17 @@ struct SessionEventParam {
     uint32_t dragResizeType = 0;
 };
 
+struct BackgroundParams {
+    bool shouldBackToCaller = true;
+    AAFwk::WantParams wantParams {};
+};
+
+struct TransferSessionInfo {
+    int32_t persistentId = -1;
+    int32_t toScreenId = -1;
+    AAFwk::WantParams wantParams {};
+};
+
 /**
  * @brief Enumerates session gravity.
  */
@@ -874,6 +896,7 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
+    KEYBOARD_OCCUPIED_AREA = 1 << 9,
 };
 
 enum class SessionPropertyFlag {

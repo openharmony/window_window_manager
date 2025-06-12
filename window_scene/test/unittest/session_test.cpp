@@ -219,12 +219,15 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId02, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
+    session_->SetPropertyDirtyFlags(0);
     session_->clientDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), 0);
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
@@ -1243,6 +1246,24 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, TestSize.Level1)
     session_->NotifyScreenshot();
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+/**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    session_->sessionStage_ = nullptr;
+    auto ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    session_->sessionStage_ = mockSessionStage_;
+    ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

@@ -276,12 +276,12 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     int32_t persistentId = 1;
     int32_t ret = 0;
     auto testFunc = [&ret] {
-        ret = 1;
+        ret += 1;
         return WMError::WM_DO_NOTHING;
     };
 
     auto testFunc2 = [&ret] {
-        ret = 2;
+        ret += 1;
         return WMError::WM_OK;
     };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
@@ -674,8 +674,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    windowAdapter.GetWindowStyleType(windowStyleType);
-    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowStyleType(windowStyleType));
 }
 
 /**
@@ -692,6 +691,21 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
     windowAdapter.SetProcessWatermark(pid, watermarkName, isEnabled);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.NotifyScreenshotEvent(type);
+    EXPECT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
 }
 
 /**

@@ -35,7 +35,7 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
 {
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::DOUBLE_DISPLAY_DEVICE);
-        sensorFoldStateManager_ = new DualDisplaySensorFoldStateManager();
+        sensorFoldStateManager_ = new DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
         TLOGI(WmsLogTag::DMS, "fold polocy: DOUBLE_DISPLAY_DEVICE");
     } else if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);

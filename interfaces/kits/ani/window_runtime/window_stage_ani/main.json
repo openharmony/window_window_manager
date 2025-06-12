@@ -1,0 +1,2760 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./ets",
+    "paths": {
+      "std": [
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+      ],
+      "escompat": [
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+      ],
+      "@internal.full.canvaspattern": [
+        "../../../../../../../../../interface/sdk-js/api/@internal/full/canvaspattern"
+      ],
+      "@internal.full.global": [
+        "../../../../../../../../../interface/sdk-js/api/@internal/full/global"
+      ],
+      "@internal.full.index": [
+        "../../../../../../../../../interface/sdk-js/api/@internal/full/index"
+      ],
+      "@internal.full.lifecycle": [
+        "../../../../../../../../../interface/sdk-js/api/@internal/full/lifecycle"
+      ],
+      "@ohos.ability.ability": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.ability"
+      ],
+      "@ohos.ability.dataUriUtils": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.dataUriUtils"
+      ],
+      "@ohos.ability.errorCode": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.errorCode"
+      ],
+      "@ohos.ability.featureAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.featureAbility"
+      ],
+      "@ohos.ability.particleAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.particleAbility"
+      ],
+      "@ohos.ability.screenLockFileManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.screenLockFileManager"
+      ],
+      "@ohos.ability.wantConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ability.wantConstant"
+      ],
+      "@ohos.abilityAccessCtrl": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.abilityAccessCtrl"
+      ],
+      "@ohos.accessibility.config": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.accessibility.config"
+      ],
+      "@ohos.accessibility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.accessibility"
+      ],
+      "@ohos.accessibility.GesturePath": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.accessibility.GesturePath"
+      ],
+      "@ohos.accessibility.GesturePoint": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.accessibility.GesturePoint"
+      ],
+      "@ohos.account.appAccount": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.account.appAccount"
+      ],
+      "@ohos.account.distributedAccount": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.account.distributedAccount"
+      ],
+      "@ohos.account.osAccount": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.account.osAccount"
+      ],
+      "@ohos.advertising.AdComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.advertising.AdComponent"
+      ],
+      "@ohos.advertising.AdsServiceExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.advertising.AdsServiceExtensionAbility"
+      ],
+      "@ohos.advertising.AutoAdComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.advertising.AutoAdComponent"
+      ],
+      "@ohos.advertising": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.advertising"
+      ],
+      "@ohos.ai.intelligentVoice": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ai.intelligentVoice"
+      ],
+      "@ohos.ai.mindSporeLite": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.ai.mindSporeLite"
+      ],
+      "@ohos.animation.windowAnimationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.animation.windowAnimationManager"
+      ],
+      "@ohos.animator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.animator"
+      ],
+      "@ohos.app.ability.Ability": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.Ability"
+      ],
+      "@ohos.app.ability.AbilityConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.AbilityConstant"
+      ],
+      "@ohos.app.ability.abilityDelegatorRegistry": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.abilityDelegatorRegistry"
+      ],
+      "@ohos.app.ability.AbilityLifecycleCallback": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.AbilityLifecycleCallback"
+      ],
+      "@ohos.app.ability.abilityManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.abilityManager"
+      ],
+      "@ohos.app.ability.AbilityStage": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.AbilityStage"
+      ],
+      "@ohos.app.ability.ActionExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ActionExtensionAbility"
+      ],
+      "@ohos.app.ability.application": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.application"
+      ],
+      "@ohos.app.ability.ApplicationStateChangeCallback": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ApplicationStateChangeCallback"
+      ],
+      "@ohos.app.ability.appManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.appManager"
+      ],
+      "@ohos.app.ability.appRecovery": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.appRecovery"
+      ],
+      "@ohos.app.ability.AtomicServiceOptions": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.AtomicServiceOptions"
+      ],
+      "@ohos.app.ability.AutoFillExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.AutoFillExtensionAbility"
+      ],
+      "@ohos.app.ability.autoFillManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.autoFillManager"
+      ],
+      "@ohos.app.ability.autoStartupManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.autoStartupManager"
+      ],
+      "@ohos.app.ability.ChildProcess": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ChildProcess"
+      ],
+      "@ohos.app.ability.ChildProcessArgs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ChildProcessArgs"
+      ],
+      "@ohos.app.ability.childProcessManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.childProcessManager"
+      ],
+      "@ohos.app.ability.ChildProcessOptions": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ChildProcessOptions"
+      ],
+      "@ohos.app.ability.common": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.common"
+      ],
+      "@ohos.app.ability.Configuration": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.Configuration"
+      ],
+      "@ohos.app.ability.ConfigurationConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ConfigurationConstant"
+      ],
+      "@ohos.app.ability.contextConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.contextConstant"
+      ],
+      "@ohos.app.ability.dataUriUtils": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.dataUriUtils"
+      ],
+      "@ohos.app.ability.dialogRequest": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.dialogRequest"
+      ],
+      "@ohos.app.ability.dialogSession": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.dialogSession"
+      ],
+      "@ohos.app.ability.DriverExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.DriverExtensionAbility"
+      ],
+      "@ohos.app.ability.EmbeddableUIAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.EmbeddableUIAbility"
+      ],
+      "@ohos.app.ability.EmbeddedUIExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.EmbeddedUIExtensionAbility"
+      ],
+      "@ohos.app.ability.EnvironmentCallback": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.EnvironmentCallback"
+      ],
+      "@ohos.app.ability.errorManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.errorManager"
+      ],
+      "@ohos.app.ability.ExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ExtensionAbility"
+      ],
+      "@ohos.app.ability.FenceExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.FenceExtensionAbility"
+      ],
+      "@ohos.app.ability.FenceExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.FenceExtensionContext"
+      ],
+      "@ohos.app.ability.insightIntent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.insightIntent"
+      ],
+      "@ohos.app.ability.InsightIntentContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.InsightIntentContext"
+      ],
+      "@ohos.app.ability.insightIntentDriver": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.insightIntentDriver"
+      ],
+      "@ohos.app.ability.InsightIntentExecutor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.InsightIntentExecutor"
+      ],
+      "@ohos.app.ability.MediaControlExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.MediaControlExtensionAbility"
+      ],
+      "@ohos.app.ability.missionManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.missionManager"
+      ],
+      "@ohos.app.ability.OpenLinkOptions": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.OpenLinkOptions"
+      ],
+      "@ohos.app.ability.PhotoEditorExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.PhotoEditorExtensionAbility"
+      ],
+      "@ohos.app.ability.PrintExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.PrintExtensionAbility"
+      ],
+      "@ohos.app.ability.quickFixManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.quickFixManager"
+      ],
+      "@ohos.app.ability.sendableContextManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.sendableContextManager"
+      ],
+      "@ohos.app.ability.ServiceExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ServiceExtensionAbility"
+      ],
+      "@ohos.app.ability.ShareExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.ShareExtensionAbility"
+      ],
+      "@ohos.app.ability.StartOptions": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.StartOptions"
+      ],
+      "@ohos.app.ability.UIAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.UIAbility"
+      ],
+      "@ohos.app.ability.UIExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.UIExtensionAbility"
+      ],
+      "@ohos.app.ability.UIExtensionContentSession": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.UIExtensionContentSession"
+      ],
+      "@ohos.app.ability.UIServiceExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.UIServiceExtensionAbility"
+      ],
+      "@ohos.app.ability.UserAuthExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.UserAuthExtensionAbility"
+      ],
+      "@ohos.app.ability.VpnExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.VpnExtensionAbility"
+      ],
+      "@ohos.app.ability.Want": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.Want"
+      ],
+      "@ohos.app.ability.wantAgent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.wantAgent"
+      ],
+      "@ohos.app.ability.wantConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.ability.wantConstant"
+      ],
+      "@ohos.app.appstartup.StartupConfig": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.appstartup.StartupConfig"
+      ],
+      "@ohos.app.appstartup.StartupConfigEntry": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.appstartup.StartupConfigEntry"
+      ],
+      "@ohos.app.appstartup.StartupListener": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.appstartup.StartupListener"
+      ],
+      "@ohos.app.appstartup.startupManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.appstartup.startupManager"
+      ],
+      "@ohos.app.appstartup.StartupTask": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.appstartup.StartupTask"
+      ],
+      "@ohos.app.businessAbilityRouter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.businessAbilityRouter"
+      ],
+      "@ohos.app.form.formAgent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formAgent"
+      ],
+      "@ohos.app.form.formBindingData": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formBindingData"
+      ],
+      "@ohos.app.form.FormExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.FormExtensionAbility"
+      ],
+      "@ohos.app.form.formHost": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formHost"
+      ],
+      "@ohos.app.form.formInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formInfo"
+      ],
+      "@ohos.app.form.formObserver": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formObserver"
+      ],
+      "@ohos.app.form.formProvider": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.app.form.formProvider"
+      ],
+      "@ohos.application.abilityDelegatorRegistry": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.abilityDelegatorRegistry"
+      ],
+      "@ohos.application.abilityManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.abilityManager"
+      ],
+      "@ohos.application.AccessibilityExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.AccessibilityExtensionAbility"
+      ],
+      "@ohos.application.appManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.appManager"
+      ],
+      "@ohos.application.BackupExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.BackupExtensionAbility"
+      ],
+      "@ohos.application.Configuration": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.Configuration"
+      ],
+      "@ohos.application.ConfigurationConstant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.ConfigurationConstant"
+      ],
+      "@ohos.application.DataShareExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.DataShareExtensionAbility"
+      ],
+      "@ohos.application.formBindingData": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.formBindingData"
+      ],
+      "@ohos.application.formError": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.formError"
+      ],
+      "@ohos.application.formHost": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.formHost"
+      ],
+      "@ohos.application.formInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.formInfo"
+      ],
+      "@ohos.application.formProvider": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.formProvider"
+      ],
+      "@ohos.application.missionManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.missionManager"
+      ],
+      "@ohos.application.StaticSubscriberExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.StaticSubscriberExtensionAbility"
+      ],
+      "@ohos.application.StaticSubscriberExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.StaticSubscriberExtensionContext"
+      ],
+      "@ohos.application.testRunner": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.testRunner"
+      ],
+      "@ohos.application.uriPermissionManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.uriPermissionManager"
+      ],
+      "@ohos.application.Want": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.Want"
+      ],
+      "@ohos.application.WindowExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.application.WindowExtensionAbility"
+      ],
+      "@ohos.arkui.advanced.Chip": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.Chip"
+      ],
+      "@ohos.arkui.advanced.ChipGroup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ChipGroup"
+      ],
+      "@ohos.arkui.advanced.ComposeListItem": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ComposeListItem"
+      ],
+      "@ohos.arkui.advanced.ComposeTitleBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ComposeTitleBar"
+      ],
+      "@ohos.arkui.advanced.Counter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.Counter"
+      ],
+      "@ohos.arkui.advanced.Dialog": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.Dialog"
+      ],
+      "@ohos.arkui.advanced.DownloadFileButton": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.DownloadFileButton"
+      ],
+      "@ohos.arkui.advanced.EditableTitleBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.EditableTitleBar"
+      ],
+      "@ohos.arkui.advanced.ExceptionPrompt": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ExceptionPrompt"
+      ],
+      "@ohos.arkui.advanced.Filter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.Filter"
+      ],
+      "@ohos.arkui.advanced.FoldSplitContainer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.FoldSplitContainer"
+      ],
+      "@ohos.arkui.advanced.FormMenu": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.FormMenu"
+      ],
+      "@ohos.arkui.advanced.FullScreenLaunchComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.FullScreenLaunchComponent"
+      ],
+      "@ohos.arkui.advanced.GridObjectSortComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.GridObjectSortComponent"
+      ],
+      "@ohos.arkui.advanced.InnerFullScreenLaunchComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.InnerFullScreenLaunchComponent"
+      ],
+      "@ohos.arkui.advanced.Popup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.Popup"
+      ],
+      "@ohos.arkui.advanced.ProgressButton": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ProgressButton"
+      ],
+      "@ohos.arkui.advanced.SegmentButton": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SegmentButton"
+      ],
+      "@ohos.arkui.advanced.SelectionMenu": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SelectionMenu"
+      ],
+      "@ohos.arkui.advanced.SelectTitleBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SelectTitleBar"
+      ],
+      "@ohos.arkui.advanced.SplitLayout": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SplitLayout"
+      ],
+      "@ohos.arkui.advanced.SubHeader": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SubHeader"
+      ],
+      "@ohos.arkui.advanced.SwipeRefresher": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.SwipeRefresher"
+      ],
+      "@ohos.arkui.advanced.TabTitleBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.TabTitleBar"
+      ],
+      "@ohos.arkui.advanced.ToolBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.ToolBar"
+      ],
+      "@ohos.arkui.advanced.TreeView": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.advanced.TreeView"
+      ],
+      "@ohos.arkui.component.AbilityComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.AbilityComponent"
+      ],
+      "@ohos.arkui.component.ActionSheet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ActionSheet"
+      ],
+      "@ohos.arkui.component.AlertDialog": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.AlertDialog"
+      ],
+      "@ohos.arkui.component.AlphabetIndexer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.AlphabetIndexer"
+      ],
+      "@ohos.arkui.component.Animator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Animator"
+      ],
+      "@ohos.arkui.component.Badge": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Badge"
+      ],
+      "@ohos.arkui.component.Blank": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Blank"
+      ],
+      "@ohos.arkui.component.Button": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Button"
+      ],
+      "@ohos.arkui.component.Calendar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Calendar"
+      ],
+      "@ohos.arkui.component.CalendarPicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.CalendarPicker"
+      ],
+      "@ohos.arkui.component.Canvas": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Canvas"
+      ],
+      "@ohos.arkui.component.Checkbox": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Checkbox"
+      ],
+      "@ohos.arkui.component.CheckboxGroup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.CheckboxGroup"
+      ],
+      "@ohos.arkui.component.Circle": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Circle"
+      ],
+      "@ohos.arkui.component.Column": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Column"
+      ],
+      "@ohos.arkui.component.ColumnSplit": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ColumnSplit"
+      ],
+      "@ohos.arkui.component.Common": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Common"
+      ],
+      "@ohos.arkui.component.CommonTsEtsApi": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.CommonTsEtsApi"
+      ],
+      "@ohos.arkui.component.Component3d": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Component3d"
+      ],
+      "@ohos.arkui.component.ContainerSpan": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ContainerSpan"
+      ],
+      "@ohos.arkui.component.ContentSlot": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ContentSlot"
+      ],
+      "@ohos.arkui.component.ContextMenu": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ContextMenu"
+      ],
+      "@ohos.arkui.component.Counter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Counter"
+      ],
+      "@ohos.arkui.component.CustomDialogController": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.CustomDialogController"
+      ],
+      "@ohos.arkui.component.DataPanel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.DataPanel"
+      ],
+      "@ohos.arkui.component.DatePicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.DatePicker"
+      ],
+      "@ohos.arkui.component.Divider": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Divider"
+      ],
+      "@ohos.arkui.component.EffectComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.EffectComponent"
+      ],
+      "@ohos.arkui.component.Ellipse": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Ellipse"
+      ],
+      "@ohos.arkui.component.EmbeddedComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.EmbeddedComponent"
+      ],
+      "@ohos.arkui.component.Enums": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Enums"
+      ],
+      "@ohos.arkui.component.Flex": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Flex"
+      ],
+      "@ohos.arkui.component.FlowItem": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.FlowItem"
+      ],
+      "@ohos.arkui.component.Focus": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Focus"
+      ],
+      "@ohos.arkui.component.FolderStack": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.FolderStack"
+      ],
+      "@ohos.arkui.component.ForEach": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ForEach"
+      ],
+      "@ohos.arkui.component.FormComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.FormComponent"
+      ],
+      "@ohos.arkui.component.FormLink": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.FormLink"
+      ],
+      "@ohos.arkui.component.Gauge": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Gauge"
+      ],
+      "@ohos.arkui.component.Gesture": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Gesture"
+      ],
+      "@ohos.arkui.component.Grid": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Grid"
+      ],
+      "@ohos.arkui.component.GridCol": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.GridCol"
+      ],
+      "@ohos.arkui.component.GridContainer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.GridContainer"
+      ],
+      "@ohos.arkui.component.GridItem": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.GridItem"
+      ],
+      "@ohos.arkui.component.GridRow": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.GridRow"
+      ],
+      "@ohos.arkui.component.Hyperlink": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Hyperlink"
+      ],
+      "@ohos.arkui.component.Image": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Image"
+      ],
+      "@ohos.arkui.component.ImageAnimator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ImageAnimator"
+      ],
+      "@ohos.arkui.component.ImageCommon": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ImageCommon"
+      ],
+      "@ohos.arkui.component.ImageSpan": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ImageSpan"
+      ],
+      "@ohos.arkui.component.IndicatorComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.IndicatorComponent"
+      ],
+      "@ohos.arkui.component.Inspector": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Inspector"
+      ],
+      "@ohos.arkui.component.IsolatedComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.IsolatedComponent"
+      ],
+      "@ohos.arkui.component.LazyForEach": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.LazyForEach"
+      ],
+      "@ohos.arkui.component.Line": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Line"
+      ],
+      "@ohos.arkui.component.Linearindicator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Linearindicator"
+      ],
+      "@ohos.arkui.component.List": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.List"
+      ],
+      "@ohos.arkui.component.ListItem": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ListItem"
+      ],
+      "@ohos.arkui.component.ListItemGroup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ListItemGroup"
+      ],
+      "@ohos.arkui.component.LoadingProgress": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.LoadingProgress"
+      ],
+      "@ohos.arkui.component.Marquee": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Marquee"
+      ],
+      "@ohos.arkui.component.Matrix2d": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Matrix2d"
+      ],
+      "@ohos.arkui.component.MediaCachedImage": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.MediaCachedImage"
+      ],
+      "@ohos.arkui.component.Menu": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Menu"
+      ],
+      "@ohos.arkui.component.MenuItem": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.MenuItem"
+      ],
+      "@ohos.arkui.component.MenuItemGroup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.MenuItemGroup"
+      ],
+      "@ohos.arkui.component.NavDestination": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.NavDestination"
+      ],
+      "@ohos.arkui.component.Navigation": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Navigation"
+      ],
+      "@ohos.arkui.component.Navigator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Navigator"
+      ],
+      "@ohos.arkui.component.NavRouter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.NavRouter"
+      ],
+      "@ohos.arkui.component.NodeContainer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.NodeContainer"
+      ],
+      "@ohos.arkui.component.PageTransition": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.PageTransition"
+      ],
+      "@ohos.arkui.component.Panel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Panel"
+      ],
+      "@ohos.arkui.component.Path": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Path"
+      ],
+      "@ohos.arkui.component.Progress": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Progress"
+      ],
+      "@ohos.arkui.component.QRCode": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.QRCode"
+      ],
+      "@ohos.arkui.component.Radio": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Radio"
+      ],
+      "@ohos.arkui.component.Rating": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Rating"
+      ],
+      "@ohos.arkui.component.Rect": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Rect"
+      ],
+      "@ohos.arkui.component.Refresh": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Refresh"
+      ],
+      "@ohos.arkui.component.RelativeContainer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.RelativeContainer"
+      ],
+      "@ohos.arkui.component.RichEditor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.RichEditor"
+      ],
+      "@ohos.arkui.component.RichText": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.RichText"
+      ],
+      "@ohos.arkui.component.Row": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Row"
+      ],
+      "@ohos.arkui.component.Scroll": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Scroll"
+      ],
+      "@ohos.arkui.component.ScrollBar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.ScrollBar"
+      ],
+      "@ohos.arkui.component.Search": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Search"
+      ],
+      "@ohos.arkui.component.Select": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Select"
+      ],
+      "@ohos.arkui.component.Shape": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Shape"
+      ],
+      "@ohos.arkui.component.Sidebar": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Sidebar"
+      ],
+      "@ohos.arkui.component.Slider": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Slider"
+      ],
+      "@ohos.arkui.component.Span": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Span"
+      ],
+      "@ohos.arkui.component.Stack": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Stack"
+      ],
+      "@ohos.arkui.component.StateManagement": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.StateManagement"
+      ],
+      "@ohos.arkui.component.StyledString": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.StyledString"
+      ],
+      "@ohos.arkui.component.Swiper": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Swiper"
+      ],
+      "@ohos.arkui.component.SymbolGlyph": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.SymbolGlyph"
+      ],
+      "@ohos.arkui.component.SymbolSpan": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.SymbolSpan"
+      ],
+      "@ohos.arkui.component.TabContent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TabContent"
+      ],
+      "@ohos.arkui.component.Tabs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Tabs"
+      ],
+      "@ohos.arkui.component.Text": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Text"
+      ],
+      "@ohos.arkui.component.TextArea": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextArea"
+      ],
+      "@ohos.arkui.component.TextClock": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextClock"
+      ],
+      "@ohos.arkui.component.TextCommon": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextCommon"
+      ],
+      "@ohos.arkui.component.TextInput": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextInput"
+      ],
+      "@ohos.arkui.component.TextPicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextPicker"
+      ],
+      "@ohos.arkui.component.TextTimer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TextTimer"
+      ],
+      "@ohos.arkui.component.TimePicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.TimePicker"
+      ],
+      "@ohos.arkui.component.Toggle": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Toggle"
+      ],
+      "@ohos.arkui.component.Units": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Units"
+      ],
+      "@ohos.arkui.component.Video": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.Video"
+      ],
+      "@ohos.arkui.component.WaterFlow": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.WaterFlow"
+      ],
+      "@ohos.arkui.component.WithTheme": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.WithTheme"
+      ],
+      "@ohos.arkui.component.XComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.component.XComponent"
+      ],
+      "@ohos.arkui.componentSnapshot": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.componentSnapshot"
+      ],
+      "@ohos.arkui.componentUtils": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.componentUtils"
+      ],
+      "@ohos.arkui.dragController": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.dragController"
+      ],
+      "@ohos.arkui.drawableDescriptor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.drawableDescriptor"
+      ],
+      "@ohos.arkui.inspector": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.inspector"
+      ],
+      "@ohos.arkui.modifier": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.modifier"
+      ],
+      "@ohos.arkui.node": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.node"
+      ],
+      "@ohos.arkui.observer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.observer"
+      ],
+      "@ohos.arkui.performanceMonitor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.performanceMonitor"
+      ],
+      "@ohos.arkui.Prefetcher": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.Prefetcher"
+      ],
+      "@ohos.arkui.shape": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.shape"
+      ],
+      "@ohos.arkui.StateManagement": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.StateManagement"
+      ],
+      "@ohos.arkui.StateManagement.runtime": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.StateManagement.runtime"
+      ],
+      "@ohos.arkui.theme": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.theme"
+      ],
+      "@ohos.arkui.UIContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.UIContext"
+      ],
+      "@ohos.arkui.uiExtension": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.arkui.uiExtension"
+      ],
+      "@ohos.atomicservice.AtomicServiceNavigation": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.atomicservice.AtomicServiceNavigation"
+      ],
+      "@ohos.atomicservice.AtomicServiceTabs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.atomicservice.AtomicServiceTabs"
+      ],
+      "@ohos.atomicservice.AtomicServiceWeb": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.atomicservice.AtomicServiceWeb"
+      ],
+      "@ohos.atomicservice.InterstitialDialogAction": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.atomicservice.InterstitialDialogAction"
+      ],
+      "@ohos.atomicservice.NavPushPathHelper": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.atomicservice.NavPushPathHelper"
+      ],
+      "@ohos.backgroundTaskManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.backgroundTaskManager"
+      ],
+      "@ohos.base": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.base"
+      ],
+      "@ohos.batteryInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.batteryInfo"
+      ],
+      "@ohos.batteryStatistics": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.batteryStatistics"
+      ],
+      "@ohos.bluetooth.a2dp": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.a2dp"
+      ],
+      "@ohos.bluetooth.access": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.access"
+      ],
+      "@ohos.bluetooth.baseProfile": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.baseProfile"
+      ],
+      "@ohos.bluetooth.ble": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.ble"
+      ],
+      "@ohos.bluetooth.connection": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.connection"
+      ],
+      "@ohos.bluetooth.constant": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.constant"
+      ],
+      "@ohos.bluetooth": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth"
+      ],
+      "@ohos.bluetooth.hfp": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.hfp"
+      ],
+      "@ohos.bluetooth.hid": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.hid"
+      ],
+      "@ohos.bluetooth.map": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.map"
+      ],
+      "@ohos.bluetooth.pan": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.pan"
+      ],
+      "@ohos.bluetooth.pbap": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.pbap"
+      ],
+      "@ohos.bluetooth.socket": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.socket"
+      ],
+      "@ohos.bluetooth.wearDetection": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetooth.wearDetection"
+      ],
+      "@ohos.bluetoothManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bluetoothManager"
+      ],
+      "@ohos.brightness": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.brightness"
+      ],
+      "@ohos.buffer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.buffer"
+      ],
+      "@ohos.bundle.appControl": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.appControl"
+      ],
+      "@ohos.bundle.appDomainVerify": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.appDomainVerify"
+      ],
+      "@ohos.bundle.bundleManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.bundleManager"
+      ],
+      "@ohos.bundle.bundleMonitor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.bundleMonitor"
+      ],
+      "@ohos.bundle.bundleResourceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.bundleResourceManager"
+      ],
+      "@ohos.bundle": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle"
+      ],
+      "@ohos.bundle.defaultAppManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.defaultAppManager"
+      ],
+      "@ohos.bundle.distributedBundleManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.distributedBundleManager"
+      ],
+      "@ohos.bundle.freeInstall": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.freeInstall"
+      ],
+      "@ohos.bundle.innerBundleManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.innerBundleManager"
+      ],
+      "@ohos.bundle.installer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.installer"
+      ],
+      "@ohos.bundle.launcherBundleManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.launcherBundleManager"
+      ],
+      "@ohos.bundle.overlay": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.overlay"
+      ],
+      "@ohos.bundle.shortcutManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundle.shortcutManager"
+      ],
+      "@ohos.bundleState": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bundleState"
+      ],
+      "@ohos.bytrace": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.bytrace"
+      ],
+      "@ohos.calendarManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.calendarManager"
+      ],
+      "@ohos.charger": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.charger"
+      ],
+      "@ohos.commonEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.commonEvent"
+      ],
+      "@ohos.commonEventManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.commonEventManager"
+      ],
+      "@ohos.configPolicy": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.configPolicy"
+      ],
+      "@ohos.connectedTag": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.connectedTag"
+      ],
+      "@ohos.contact": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.contact"
+      ],
+      "@ohos.continuation.continuationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.continuation.continuationManager"
+      ],
+      "@ohos.convertxml": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.convertxml"
+      ],
+      "@ohos.cooperate": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.cooperate"
+      ],
+      "@ohos.curves": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.curves"
+      ],
+      "@ohos.customization.customConfig": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.customization.customConfig"
+      ],
+      "@ohos.data.cloudData": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.cloudData"
+      ],
+      "@ohos.data.cloudExtension": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.cloudExtension"
+      ],
+      "@ohos.data.commonType": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.commonType"
+      ],
+      "@ohos.data.dataAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.dataAbility"
+      ],
+      "@ohos.data.dataShare": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.dataShare"
+      ],
+      "@ohos.data.dataSharePredicates": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.dataSharePredicates"
+      ],
+      "@ohos.data.DataShareResultSet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.DataShareResultSet"
+      ],
+      "@ohos.data.distributedData": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.distributedData"
+      ],
+      "@ohos.data.distributedDataObject": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.distributedDataObject"
+      ],
+      "@ohos.data.distributedKVStore": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.distributedKVStore"
+      ],
+      "@ohos.data.preferences": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.preferences"
+      ],
+      "@ohos.data.rdb": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.rdb"
+      ],
+      "@ohos.data.relationalStore": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.relationalStore"
+      ],
+      "@ohos.data.sendablePreferences": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.sendablePreferences"
+      ],
+      "@ohos.data.sendableRelationalStore": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.sendableRelationalStore"
+      ],
+      "@ohos.data.storage": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.storage"
+      ],
+      "@ohos.data.unifiedDataChannel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.unifiedDataChannel"
+      ],
+      "@ohos.data.uniformDataStruct": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.uniformDataStruct"
+      ],
+      "@ohos.data.uniformTypeDescriptor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.uniformTypeDescriptor"
+      ],
+      "@ohos.data.ValuesBucket": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.data.ValuesBucket"
+      ],
+      "@ohos.deviceAttest": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.deviceAttest"
+      ],
+      "@ohos.deviceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.deviceInfo"
+      ],
+      "@ohos.deviceStatus.dragInteraction": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.deviceStatus.dragInteraction"
+      ],
+      "@ohos.display": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.display"
+      ],
+      "@ohos.distributedBundle": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.distributedBundle"
+      ],
+      "@ohos.distributedDeviceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.distributedDeviceManager"
+      ],
+      "@ohos.distributedHardware.deviceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.distributedHardware.deviceManager"
+      ],
+      "@ohos.distributedHardware.hardwareManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.distributedHardware.hardwareManager"
+      ],
+      "@ohos.distributedMissionManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.distributedMissionManager"
+      ],
+      "@ohos.dlpPermission": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.dlpPermission"
+      ],
+      "@ohos.document": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.document"
+      ],
+      "@ohos.driver.deviceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.driver.deviceManager"
+      ],
+      "@ohos.effectKit": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.effectKit"
+      ],
+      "@ohos.enterprise.accountManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.accountManager"
+      ],
+      "@ohos.enterprise.adminManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.adminManager"
+      ],
+      "@ohos.enterprise.applicationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.applicationManager"
+      ],
+      "@ohos.enterprise.bluetoothManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.bluetoothManager"
+      ],
+      "@ohos.enterprise.browser": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.browser"
+      ],
+      "@ohos.enterprise.bundleManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.bundleManager"
+      ],
+      "@ohos.enterprise.dateTimeManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.dateTimeManager"
+      ],
+      "@ohos.enterprise.deviceControl": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.deviceControl"
+      ],
+      "@ohos.enterprise.deviceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.deviceInfo"
+      ],
+      "@ohos.enterprise.deviceSettings": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.deviceSettings"
+      ],
+      "@ohos.enterprise.EnterpriseAdminExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.EnterpriseAdminExtensionAbility"
+      ],
+      "@ohos.enterprise.locationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.locationManager"
+      ],
+      "@ohos.enterprise.networkManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.networkManager"
+      ],
+      "@ohos.enterprise.restrictions": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.restrictions"
+      ],
+      "@ohos.enterprise.securityManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.securityManager"
+      ],
+      "@ohos.enterprise.systemManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.systemManager"
+      ],
+      "@ohos.enterprise.usbManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.usbManager"
+      ],
+      "@ohos.enterprise.wifiManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.enterprise.wifiManager"
+      ],
+      "@ohos.events.emitter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.events.emitter"
+      ],
+      "@ohos.faultLogger": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.faultLogger"
+      ],
+      "@ohos.file.AlbumPickerComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.AlbumPickerComponent"
+      ],
+      "@ohos.file.backup": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.backup"
+      ],
+      "@ohos.file.BackupExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.BackupExtensionContext"
+      ],
+      "@ohos.file.cloudSync": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.cloudSync"
+      ],
+      "@ohos.file.cloudSyncManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.cloudSyncManager"
+      ],
+      "@ohos.file.environment": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.environment"
+      ],
+      "@ohos.file.fileAccess": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.fileAccess"
+      ],
+      "@ohos.file.fileExtensionInfo": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.fileExtensionInfo"
+      ],
+      "@ohos.file.fileuri": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.fileuri"
+      ],
+      "@ohos.file.fs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.fs"
+      ],
+      "@ohos.file.hash": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.hash"
+      ],
+      "@ohos.file.photoAccessHelper": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.photoAccessHelper"
+      ],
+      "@ohos.file.PhotoPickerComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.PhotoPickerComponent"
+      ],
+      "@ohos.file.picker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.picker"
+      ],
+      "@ohos.file.recent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.recent"
+      ],
+      "@ohos.file.RecentPhotoComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.RecentPhotoComponent"
+      ],
+      "@ohos.file.securityLabel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.securityLabel"
+      ],
+      "@ohos.file.sendablePhotoAccessHelper": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.sendablePhotoAccessHelper"
+      ],
+      "@ohos.file.statvfs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.statvfs"
+      ],
+      "@ohos.file.storageStatistics": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.storageStatistics"
+      ],
+      "@ohos.file.trash": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.trash"
+      ],
+      "@ohos.file.volumeManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.file.volumeManager"
+      ],
+      "@ohos.fileio": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.fileio"
+      ],
+      "@ohos.filemanagement.userFileManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.filemanagement.userFileManager"
+      ],
+      "@ohos.fileshare": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.fileshare"
+      ],
+      "@ohos.font": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.font"
+      ],
+      "@ohos.geolocation": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.geolocation"
+      ],
+      "@ohos.geoLocationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.geoLocationManager"
+      ],
+      "@ohos.graphics.colorSpaceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.colorSpaceManager"
+      ],
+      "@ohos.graphics.common2D": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.common2D"
+      ],
+      "@ohos.graphics.displaySync": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.displaySync"
+      ],
+      "@ohos.graphics.drawing": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.drawing"
+      ],
+      "@ohos.graphics.hdrCapability": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.hdrCapability"
+      ],
+      "@ohos.graphics.scene": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.scene"
+      ],
+      "@ohos.graphics.sendableColorSpaceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.sendableColorSpaceManager"
+      ],
+      "@ohos.graphics.text": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.text"
+      ],
+      "@ohos.graphics.uiEffect": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.graphics.uiEffect"
+      ],
+      "@ohos.hiAppEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiAppEvent"
+      ],
+      "@ohos.hichecker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hichecker"
+      ],
+      "@ohos.hidebug": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hidebug"
+      ],
+      "@ohos.hilog": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hilog"
+      ],
+      "@ohos.hiSysEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiSysEvent"
+      ],
+      "@ohos.hiTraceChain": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiTraceChain"
+      ],
+      "@ohos.hiTraceMeter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiTraceMeter"
+      ],
+      "@ohos.hiviewdfx.hiAppEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiviewdfx.hiAppEvent"
+      ],
+      "@ohos.hiviewdfx.jsLeakWatcher": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.hiviewdfx.jsLeakWatcher"
+      ],
+      "@ohos.i18n": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.i18n"
+      ],
+      "@ohos.identifier.oaid": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.identifier.oaid"
+      ],
+      "@ohos.inputMethod": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.inputMethod"
+      ],
+      "@ohos.inputMethod.Panel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.inputMethod.Panel"
+      ],
+      "@ohos.inputMethodEngine": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.inputMethodEngine"
+      ],
+      "@ohos.InputMethodExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.InputMethodExtensionAbility"
+      ],
+      "@ohos.InputMethodExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.InputMethodExtensionContext"
+      ],
+      "@ohos.inputMethodList": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.inputMethodList"
+      ],
+      "@ohos.InputMethodSubtype": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.InputMethodSubtype"
+      ],
+      "@ohos.intl": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.intl"
+      ],
+      "@ohos.logLibrary": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.logLibrary"
+      ],
+      "@ohos.matrix4": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.matrix4"
+      ],
+      "@ohos.measure": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.measure"
+      ],
+      "@ohos.mediaquery": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.mediaquery"
+      ],
+      "@ohos.multimedia.audio": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.audio"
+      ],
+      "@ohos.multimedia.audioHaptic": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.audioHaptic"
+      ],
+      "@ohos.multimedia.avCastPicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.avCastPicker"
+      ],
+      "@ohos.multimedia.avCastPickerParam": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.avCastPickerParam"
+      ],
+      "@ohos.multimedia.avsession": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.avsession"
+      ],
+      "@ohos.multimedia.avVolumePanel": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.avVolumePanel"
+      ],
+      "@ohos.multimedia.camera": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.camera"
+      ],
+      "@ohos.multimedia.cameraPicker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.cameraPicker"
+      ],
+      "@ohos.multimedia.drm": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.drm"
+      ],
+      "@ohos.multimedia.image": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.image"
+      ],
+      "@ohos.multimedia.media": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.media"
+      ],
+      "@ohos.multimedia.movingphotoview": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.movingphotoview"
+      ],
+      "@ohos.multimedia.sendableImage": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.sendableImage"
+      ],
+      "@ohos.multimedia.systemSoundManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimedia.systemSoundManager"
+      ],
+      "@ohos.multimodalInput.gestureEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.gestureEvent"
+      ],
+      "@ohos.multimodalInput.infraredEmitter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.infraredEmitter"
+      ],
+      "@ohos.multimodalInput.inputConsumer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputConsumer"
+      ],
+      "@ohos.multimodalInput.inputDevice": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputDevice"
+      ],
+      "@ohos.multimodalInput.inputDeviceCooperate": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputDeviceCooperate"
+      ],
+      "@ohos.multimodalInput.inputEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputEvent"
+      ],
+      "@ohos.multimodalInput.inputEventClient": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputEventClient"
+      ],
+      "@ohos.multimodalInput.inputMonitor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.inputMonitor"
+      ],
+      "@ohos.multimodalInput.intentionCode": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.intentionCode"
+      ],
+      "@ohos.multimodalInput.keyCode": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.keyCode"
+      ],
+      "@ohos.multimodalInput.keyEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.keyEvent"
+      ],
+      "@ohos.multimodalInput.mouseEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.mouseEvent"
+      ],
+      "@ohos.multimodalInput.pointer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.pointer"
+      ],
+      "@ohos.multimodalInput.shortKey": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.shortKey"
+      ],
+      "@ohos.multimodalInput.touchEvent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.multimodalInput.touchEvent"
+      ],
+      "@ohos.net.connection": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.connection"
+      ],
+      "@ohos.net.ethernet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.ethernet"
+      ],
+      "@ohos.net.http": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.http"
+      ],
+      "@ohos.net.mdns": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.mdns"
+      ],
+      "@ohos.net.netFirewall": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.netFirewall"
+      ],
+      "@ohos.net.networkSecurity": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.networkSecurity"
+      ],
+      "@ohos.net.policy": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.policy"
+      ],
+      "@ohos.net.sharing": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.sharing"
+      ],
+      "@ohos.net.socket": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.socket"
+      ],
+      "@ohos.net.statistics": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.statistics"
+      ],
+      "@ohos.net.vpn": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.vpn"
+      ],
+      "@ohos.net.vpnExtension": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.vpnExtension"
+      ],
+      "@ohos.net.webSocket": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.net.webSocket"
+      ],
+      "@ohos.nfc.cardEmulation": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.nfc.cardEmulation"
+      ],
+      "@ohos.nfc.controller": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.nfc.controller"
+      ],
+      "@ohos.nfc.tag": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.nfc.tag"
+      ],
+      "@ohos.notification": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.notification"
+      ],
+      "@ohos.notificationManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.notificationManager"
+      ],
+      "@ohos.notificationSubscribe": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.notificationSubscribe"
+      ],
+      "@ohos.pasteboard": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.pasteboard"
+      ],
+      "@ohos.PiPWindow": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.PiPWindow"
+      ],
+      "@ohos.pluginComponent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.pluginComponent"
+      ],
+      "@ohos.power": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.power"
+      ],
+      "@ohos.print": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.print"
+      ],
+      "@ohos.privacyManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.privacyManager"
+      ],
+      "@ohos.prompt": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.prompt"
+      ],
+      "@ohos.promptAction": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.promptAction"
+      ],
+      "@ohos.reminderAgent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.reminderAgent"
+      ],
+      "@ohos.reminderAgentManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.reminderAgentManager"
+      ],
+      "@ohos.request": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.request"
+      ],
+      "@ohos.resourceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceManager"
+      ],
+      "@ohos.resourceschedule.backgroundTaskManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceschedule.backgroundTaskManager"
+      ],
+      "@ohos.resourceschedule.deviceStandby": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceschedule.deviceStandby"
+      ],
+      "@ohos.resourceschedule.systemload": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceschedule.systemload"
+      ],
+      "@ohos.resourceschedule.usageStatistics": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceschedule.usageStatistics"
+      ],
+      "@ohos.resourceschedule.workScheduler": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.resourceschedule.workScheduler"
+      ],
+      "@ohos.router": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.router"
+      ],
+      "@ohos.rpc": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.rpc"
+      ],
+      "@ohos.runningLock": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.runningLock"
+      ],
+      "@ohos.screen": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.screen"
+      ],
+      "@ohos.screenLock": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.screenLock"
+      ],
+      "@ohos.screenshot": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.screenshot"
+      ],
+      "@ohos.secureElement": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.secureElement"
+      ],
+      "@ohos.security.asset": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.asset"
+      ],
+      "@ohos.security.cert": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.cert"
+      ],
+      "@ohos.security.certManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.certManager"
+      ],
+      "@ohos.security.certManagerDialog": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.certManagerDialog"
+      ],
+      "@ohos.security.cryptoFramework": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.cryptoFramework"
+      ],
+      "@ohos.security.huks": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.huks"
+      ],
+      "@ohos.security.securityGuard": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.security.securityGuard"
+      ],
+      "@ohos.sendableResourceManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.sendableResourceManager"
+      ],
+      "@ohos.sensor": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.sensor"
+      ],
+      "@ohos.settings": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.settings"
+      ],
+      "@ohos.statfs": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.statfs"
+      ],
+      "@ohos.stationary": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.stationary"
+      ],
+      "@ohos.systemCapability": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemCapability"
+      ],
+      "@ohos.systemDateTime": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemDateTime"
+      ],
+      "@ohos.systemparameter": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemparameter"
+      ],
+      "@ohos.systemParameterEnhance": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemParameterEnhance"
+      ],
+      "@ohos.systemTime": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemTime"
+      ],
+      "@ohos.systemTimer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.systemTimer"
+      ],
+      "@ohos.telephony.call": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.call"
+      ],
+      "@ohos.telephony.data": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.data"
+      ],
+      "@ohos.telephony.observer": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.observer"
+      ],
+      "@ohos.telephony.radio": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.radio"
+      ],
+      "@ohos.telephony.sim": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.sim"
+      ],
+      "@ohos.telephony.sms": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.sms"
+      ],
+      "@ohos.telephony.vcard": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.telephony.vcard"
+      ],
+      "@ohos.thermal": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.thermal"
+      ],
+      "@ohos.uiAppearance": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.uiAppearance"
+      ],
+      "@ohos.uiExtensionHost": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.uiExtensionHost"
+      ],
+      "@ohos.UiTest": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.UiTest"
+      ],
+      "@ohos.update": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.update"
+      ],
+      "@ohos.uri": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.uri"
+      ],
+      "@ohos.url": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.url"
+      ],
+      "@ohos.usb": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.usb"
+      ],
+      "@ohos.usbManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.usbManager"
+      ],
+      "@ohos.userIAM.faceAuth": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.userIAM.faceAuth"
+      ],
+      "@ohos.userIAM.userAuth": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.userIAM.userAuth"
+      ],
+      "@ohos.userIAM.userAuthIcon": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.userIAM.userAuthIcon"
+      ],
+      "@ohos.util.ArrayList": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.ArrayList"
+      ],
+      "@ohos.util": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util"
+      ],
+      "@ohos.util.Deque": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.Deque"
+      ],
+      "@ohos.util.HashMap": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.HashMap"
+      ],
+      "@ohos.util.HashSet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.HashSet"
+      ],
+      "@ohos.util.json": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.json"
+      ],
+      "@ohos.util.LightWeightMap": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.LightWeightMap"
+      ],
+      "@ohos.util.LightWeightSet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.LightWeightSet"
+      ],
+      "@ohos.util.LinkedList": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.LinkedList"
+      ],
+      "@ohos.util.List": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.List"
+      ],
+      "@ohos.util.PlainArray": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.PlainArray"
+      ],
+      "@ohos.util.Queue": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.Queue"
+      ],
+      "@ohos.util.Stack": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.Stack"
+      ],
+      "@ohos.util.stream": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.stream"
+      ],
+      "@ohos.util.TreeMap": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.TreeMap"
+      ],
+      "@ohos.util.TreeSet": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.TreeSet"
+      ],
+      "@ohos.util.Vector": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.util.Vector"
+      ],
+      "@ohos.vibrator": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.vibrator"
+      ],
+      "@ohos.wallpaper": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wallpaper"
+      ],
+      "@ohos.WallpaperExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.WallpaperExtensionAbility"
+      ],
+      "@ohos.wantAgent": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wantAgent"
+      ],
+      "@ohos.web.netErrorList": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.web.netErrorList"
+      ],
+      "@ohos.web.webview": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.web.webview"
+      ],
+      "@ohos.wifi": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wifi"
+      ],
+      "@ohos.wifiext": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wifiext"
+      ],
+      "@ohos.wifiManager": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wifiManager"
+      ],
+      "@ohos.wifiManagerExt": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.wifiManagerExt"
+      ],
+      "@ohos.window": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.window"
+      ],
+      "@ohos.worker": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.worker"
+      ],
+      "@ohos.WorkSchedulerExtensionAbility": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.WorkSchedulerExtensionAbility"
+      ],
+      "@ohos.xml": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.xml"
+      ],
+      "@ohos.zlib": [
+        "../../../../../../../../../interface/sdk-js/api/@ohos.zlib"
+      ],
+      "@system.app": [
+        "../../../../../../../../../interface/sdk-js/api/@system.app"
+      ],
+      "@system.battery": [
+        "../../../../../../../../../interface/sdk-js/api/@system.battery"
+      ],
+      "@system.bluetooth": [
+        "../../../../../../../../../interface/sdk-js/api/@system.bluetooth"
+      ],
+      "@system.brightness": [
+        "../../../../../../../../../interface/sdk-js/api/@system.brightness"
+      ],
+      "@system.cipher": [
+        "../../../../../../../../../interface/sdk-js/api/@system.cipher"
+      ],
+      "@system.configuration": [
+        "../../../../../../../../../interface/sdk-js/api/@system.configuration"
+      ],
+      "@system.device": [
+        "../../../../../../../../../interface/sdk-js/api/@system.device"
+      ],
+      "@system.fetch": [
+        "../../../../../../../../../interface/sdk-js/api/@system.fetch"
+      ],
+      "@system.file": [
+        "../../../../../../../../../interface/sdk-js/api/@system.file"
+      ],
+      "@system.geolocation": [
+        "../../../../../../../../../interface/sdk-js/api/@system.geolocation"
+      ],
+      "@system.mediaquery": [
+        "../../../../../../../../../interface/sdk-js/api/@system.mediaquery"
+      ],
+      "@system.network": [
+        "../../../../../../../../../interface/sdk-js/api/@system.network"
+      ],
+      "@system.notification": [
+        "../../../../../../../../../interface/sdk-js/api/@system.notification"
+      ],
+      "@system.package": [
+        "../../../../../../../../../interface/sdk-js/api/@system.package"
+      ],
+      "@system.prompt": [
+        "../../../../../../../../../interface/sdk-js/api/@system.prompt"
+      ],
+      "@system.request": [
+        "../../../../../../../../../interface/sdk-js/api/@system.request"
+      ],
+      "@system.router": [
+        "../../../../../../../../../interface/sdk-js/api/@system.router"
+      ],
+      "@system.sensor": [
+        "../../../../../../../../../interface/sdk-js/api/@system.sensor"
+      ],
+      "@system.storage": [
+        "../../../../../../../../../interface/sdk-js/api/@system.storage"
+      ],
+      "@system.vibrator": [
+        "../../../../../../../../../interface/sdk-js/api/@system.vibrator"
+      ],
+      "ability.abilityResult": [
+        "../../../../../../../../../interface/sdk-js/api/ability/abilityResult"
+      ],
+      "ability.connectOptions": [
+        "../../../../../../../../../interface/sdk-js/api/ability/connectOptions"
+      ],
+      "ability.dataAbilityHelper": [
+        "../../../../../../../../../interface/sdk-js/api/ability/dataAbilityHelper"
+      ],
+      "ability.dataAbilityOperation": [
+        "../../../../../../../../../interface/sdk-js/api/ability/dataAbilityOperation"
+      ],
+      "ability.dataAbilityResult": [
+        "../../../../../../../../../interface/sdk-js/api/ability/dataAbilityResult"
+      ],
+      "ability.startAbilityParameter": [
+        "../../../../../../../../../interface/sdk-js/api/ability/startAbilityParameter"
+      ],
+      "ability.want": [
+        "../../../../../../../../../interface/sdk-js/api/ability/want"
+      ],
+      "advertising.advertisement": [
+        "../../../../../../../../../interface/sdk-js/api/advertising/advertisement"
+      ],
+      "app.appVersionInfo": [
+        "../../../../../../../../../interface/sdk-js/api/app/appVersionInfo"
+      ],
+      "app.context": [
+        "../../../../../../../../../interface/sdk-js/api/app/context"
+      ],
+      "app.processInfo": [
+        "../../../../../../../../../interface/sdk-js/api/app/processInfo"
+      ],
+      "application/AbilityDelegator": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityDelegator"
+      ],
+      "application/abilityDelegatorArgs": [
+        "../../../../../../../../../interface/sdk-js/api/application/abilityDelegatorArgs"
+      ],
+      "application/AbilityFirstFrameStateData": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityFirstFrameStateData"
+      ],
+      "application/AbilityFirstFrameStateObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityFirstFrameStateObserver"
+      ],
+      "application/AbilityForegroundStateObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityForegroundStateObserver"
+      ],
+      "application/AbilityMonitor": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityMonitor"
+      ],
+      "application/AbilityRunningInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityRunningInfo"
+      ],
+      "application/AbilityStageContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityStageContext"
+      ],
+      "application/AbilityStageMonitor": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityStageMonitor"
+      ],
+      "application/AbilityStartCallback": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityStartCallback"
+      ],
+      "application/AbilityStateData": [
+        "../../../../../../../../../interface/sdk-js/api/application/AbilityStateData"
+      ],
+      "application/AccessibilityExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/AccessibilityExtensionContext"
+      ],
+      "application/AppForegroundStateObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/AppForegroundStateObserver"
+      ],
+      "application/ApplicationContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/ApplicationContext"
+      ],
+      "application/ApplicationStateObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/ApplicationStateObserver"
+      ],
+      "application/AppStateData": [
+        "../../../../../../../../../interface/sdk-js/api/application/AppStateData"
+      ],
+      "application/AutoFillExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoFillExtensionContext"
+      ],
+      "application/AutoFillPopupConfig": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoFillPopupConfig"
+      ],
+      "application/AutoFillRect": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoFillRect"
+      ],
+      "application/AutoFillRequest": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoFillRequest"
+      ],
+      "application/AutoFillType": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoFillType"
+      ],
+      "application/AutoStartupCallback": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoStartupCallback"
+      ],
+      "application/AutoStartupInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/AutoStartupInfo"
+      ],
+      "application/BaseContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/BaseContext"
+      ],
+      "application/BusinessAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/BusinessAbilityInfo"
+      ],
+      "application/Context": [
+        "../../../../../../../../../interface/sdk-js/api/application/Context"
+      ],
+      "application/ContinuableInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/ContinuableInfo"
+      ],
+      "application/ContinueCallback": [
+        "../../../../../../../../../interface/sdk-js/api/application/ContinueCallback"
+      ],
+      "application/ContinueDeviceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/ContinueDeviceInfo"
+      ],
+      "application/ContinueMissionInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/ContinueMissionInfo"
+      ],
+      "application/CustomData": [
+        "../../../../../../../../../interface/sdk-js/api/application/CustomData"
+      ],
+      "application/DriverExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/DriverExtensionContext"
+      ],
+      "application/EmbeddableUIAbilityContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/EmbeddableUIAbilityContext"
+      ],
+      "application/ErrorObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/ErrorObserver"
+      ],
+      "application/EventHub": [
+        "../../../../../../../../../interface/sdk-js/api/application/EventHub"
+      ],
+      "application/ExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/ExtensionContext"
+      ],
+      "application/ExtensionRunningInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/ExtensionRunningInfo"
+      ],
+      "application/FormExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/FormExtensionContext"
+      ],
+      "application/LoopObserver": [
+        "../../../../../../../../../interface/sdk-js/api/application/LoopObserver"
+      ],
+      "application/MediaControlExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/MediaControlExtensionContext"
+      ],
+      "application/MissionCallbacks": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionCallbacks"
+      ],
+      "application/MissionDeviceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionDeviceInfo"
+      ],
+      "application/MissionInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionInfo"
+      ],
+      "application/MissionListener": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionListener"
+      ],
+      "application/MissionParameter": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionParameter"
+      ],
+      "application/MissionSnapshot": [
+        "../../../../../../../../../interface/sdk-js/api/application/MissionSnapshot"
+      ],
+      "application/MultiAppMode": [
+        "../../../../../../../../../interface/sdk-js/api/application/MultiAppMode"
+      ],
+      "application/PageNodeInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/PageNodeInfo"
+      ],
+      "application/PhotoEditorExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/PhotoEditorExtensionContext"
+      ],
+      "application/ProcessData": [
+        "../../../../../../../../../interface/sdk-js/api/application/ProcessData"
+      ],
+      "application/ProcessInformation": [
+        "../../../../../../../../../interface/sdk-js/api/application/ProcessInformation"
+      ],
+      "application/ProcessRunningInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/ProcessRunningInfo"
+      ],
+      "application/RunningAppClone": [
+        "../../../../../../../../../interface/sdk-js/api/application/RunningAppClone"
+      ],
+      "application/RunningMultiAppInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/RunningMultiAppInfo"
+      ],
+      "application/RunningMultiInstanceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/application/RunningMultiInstanceInfo"
+      ],
+      "application/SendableContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/SendableContext"
+      ],
+      "application/ServiceExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/ServiceExtensionContext"
+      ],
+      "application/shellCmdResult": [
+        "../../../../../../../../../interface/sdk-js/api/application/shellCmdResult"
+      ],
+      "application/UIAbilityContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIAbilityContext"
+      ],
+      "application/UIExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIExtensionContext"
+      ],
+      "application/UIServiceExtensionConnectCallback": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIServiceExtensionConnectCallback"
+      ],
+      "application/UIServiceExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIServiceExtensionContext"
+      ],
+      "application/UIServiceHostProxy": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIServiceHostProxy"
+      ],
+      "application/UIServiceProxy": [
+        "../../../../../../../../../interface/sdk-js/api/application/UIServiceProxy"
+      ],
+      "application/ViewData": [
+        "../../../../../../../../../interface/sdk-js/api/application/ViewData"
+      ],
+      "application/VpnExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/VpnExtensionContext"
+      ],
+      "application/WindowExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/WindowExtensionContext"
+      ],
+      "application/WorkSchedulerExtensionContext": [
+        "../../../../../../../../../interface/sdk-js/api/application/WorkSchedulerExtensionContext"
+      ],
+      "AlphabetIndexerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/AlphabetIndexerModifier"
+      ],
+      "AttributeUpdater": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/AttributeUpdater"
+      ],
+      "BlankModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/BlankModifier"
+      ],
+      "BuilderNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/BuilderNode"
+      ],
+      "ButtonModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ButtonModifier"
+      ],
+      "CalendarPickerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/CalendarPickerModifier"
+      ],
+      "CheckboxGroupModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/CheckboxGroupModifier"
+      ],
+      "CheckboxModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/CheckboxModifier"
+      ],
+      "ColumnModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ColumnModifier"
+      ],
+      "ColumnSplitModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ColumnSplitModifier"
+      ],
+      "CommonModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/CommonModifier"
+      ],
+      "ComponentContent": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ComponentContent"
+      ],
+      "ContainerSpanModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ContainerSpanModifier"
+      ],
+      "Content": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/Content"
+      ],
+      "CounterModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/CounterModifier"
+      ],
+      "DataPanelModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/DataPanelModifier"
+      ],
+      "DatePickerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/DatePickerModifier"
+      ],
+      "DividerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/DividerModifier"
+      ],
+      "FormComponentModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/FormComponentModifier"
+      ],
+      "FrameNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/FrameNode"
+      ],
+      "GaugeModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/GaugeModifier"
+      ],
+      "Graphics": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/Graphics"
+      ],
+      "GridColModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/GridColModifier"
+      ],
+      "GridItemModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/GridItemModifier"
+      ],
+      "GridModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/GridModifier"
+      ],
+      "GridRowModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/GridRowModifier"
+      ],
+      "HyperlinkModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/HyperlinkModifier"
+      ],
+      "ImageAnimatorModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ImageAnimatorModifier"
+      ],
+      "ImageModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ImageModifier"
+      ],
+      "ImageSpanModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ImageSpanModifier"
+      ],
+      "LineModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/LineModifier"
+      ],
+      "ListItemGroupModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ListItemGroupModifier"
+      ],
+      "ListItemModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ListItemModifier"
+      ],
+      "ListModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ListModifier"
+      ],
+      "LoadingProgressModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/LoadingProgressModifier"
+      ],
+      "MarqueeModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/MarqueeModifier"
+      ],
+      "MenuItemModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/MenuItemModifier"
+      ],
+      "MenuModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/MenuModifier"
+      ],
+      "NavDestinationModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NavDestinationModifier"
+      ],
+      "NavigationModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NavigationModifier"
+      ],
+      "NavigatorModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NavigatorModifier"
+      ],
+      "NavRouterModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NavRouterModifier"
+      ],
+      "NodeContent": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NodeContent"
+      ],
+      "NodeController": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/NodeController"
+      ],
+      "PanelModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/PanelModifier"
+      ],
+      "ParticleModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ParticleModifier"
+      ],
+      "PathModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/PathModifier"
+      ],
+      "PatternLockModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/PatternLockModifier"
+      ],
+      "PolygonModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/PolygonModifier"
+      ],
+      "PolylineModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/PolylineModifier"
+      ],
+      "ProgressModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ProgressModifier"
+      ],
+      "QRCodeModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/QRCodeModifier"
+      ],
+      "RadioModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RadioModifier"
+      ],
+      "RatingModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RatingModifier"
+      ],
+      "RectModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RectModifier"
+      ],
+      "RefreshModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RefreshModifier"
+      ],
+      "RenderNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RenderNode"
+      ],
+      "RichEditorModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RichEditorModifier"
+      ],
+      "RowModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RowModifier"
+      ],
+      "RowSplitModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/RowSplitModifier"
+      ],
+      "@koalaui.arkts-arkui.Button": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.Button"
+      ],
+      "@koalaui.arkts-arkui.Column": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.Column"
+      ],
+      "@koalaui.arkts-arkui.Common": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.Common"
+      ],
+      "@koalaui.arkts-arkui.StructBase": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.StructBase"
+      ],
+      "@koalaui.arkts-arkui.Text": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.Text"
+      ],
+      "@koalaui.arkts-arkui.UserView": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.arkts-arkui.UserView"
+      ],
+      "@koalaui.runtime.annotations": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.annotations"
+      ],
+      "@koalaui.runtime.common": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.common"
+      ],
+      "@koalaui.runtime.internals": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.internals"
+      ],
+      "@koalaui.runtime.memo.bind": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.bind"
+      ],
+      "@koalaui.runtime.memo.changeListener": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.changeListener"
+      ],
+      "@koalaui.runtime.memo.contextLocal": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.contextLocal"
+      ],
+      "@koalaui.runtime.memo.entry": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.entry"
+      ],
+      "@koalaui.runtime.memo.node": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.node"
+      ],
+      "@koalaui.runtime.memo.remember": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.remember"
+      ],
+      "@koalaui.runtime.memo.repeat": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.repeat"
+      ],
+      "@koalaui.runtime.memo.testing": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.memo.testing"
+      ],
+      "@koalaui.runtime.states.Disposable": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.states.Disposable"
+      ],
+      "@koalaui.runtime.states.GlobalStateManager": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.states.GlobalStateManager"
+      ],
+      "@koalaui.runtime.states.State": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.states.State"
+      ],
+      "@koalaui.runtime.tree.IncrementalNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.tree.IncrementalNode"
+      ],
+      "@koalaui.runtime.tree.PrimeNumbers": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.tree.PrimeNumbers"
+      ],
+      "@koalaui.runtime.tree.ReadonlyTreeNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.tree.ReadonlyTreeNode"
+      ],
+      "@koalaui.runtime.tree.TreeNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.tree.TreeNode"
+      ],
+      "@koalaui.runtime.tree.TreePath": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/runtime-api/@koalaui.runtime.tree.TreePath"
+      ],
+      "ScrollModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ScrollModifier"
+      ],
+      "SearchModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SearchModifier"
+      ],
+      "SelectModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SelectModifier"
+      ],
+      "ShapeModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ShapeModifier"
+      ],
+      "SideBarContainerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SideBarContainerModifier"
+      ],
+      "SliderModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SliderModifier"
+      ],
+      "SpanModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SpanModifier"
+      ],
+      "StackModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/StackModifier"
+      ],
+      "StepperItemModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/StepperItemModifier"
+      ],
+      "SwiperModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SwiperModifier"
+      ],
+      "SymbolGlyphModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SymbolGlyphModifier"
+      ],
+      "SymbolSpanModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/SymbolSpanModifier"
+      ],
+      "TabsModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TabsModifier"
+      ],
+      "TextAreaModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextAreaModifier"
+      ],
+      "TextClockModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextClockModifier"
+      ],
+      "TextInputModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextInputModifier"
+      ],
+      "TextModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextModifier"
+      ],
+      "TextPickerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextPickerModifier"
+      ],
+      "TextTimerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TextTimerModifier"
+      ],
+      "TimePickerModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/TimePickerModifier"
+      ],
+      "ToggleModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/ToggleModifier"
+      ],
+      "VideoModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/VideoModifier"
+      ],
+      "WaterFlowModifier": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/WaterFlowModifier"
+      ],
+      "XComponentNode": [
+        "../../../../../../../../../interface/sdk-js/api/arkui/XComponentNode"
+      ],
+      "bundle.abilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/abilityInfo"
+      ],
+      "bundle.applicationInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/applicationInfo"
+      ],
+      "bundle.bundleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/bundleInfo"
+      ],
+      "bundle.bundleInstaller": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/bundleInstaller"
+      ],
+      "bundle.bundleStatusCallback": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/bundleStatusCallback"
+      ],
+      "bundle.customizeData": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/customizeData"
+      ],
+      "bundle.elementName": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/elementName"
+      ],
+      "bundle.hapModuleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/hapModuleInfo"
+      ],
+      "bundle.launcherAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/launcherAbilityInfo"
+      ],
+      "bundle.moduleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/moduleInfo"
+      ],
+      "bundle.PermissionDef": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/PermissionDef"
+      ],
+      "bundle.remoteAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/remoteAbilityInfo"
+      ],
+      "bundle.shortcutInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundle/shortcutInfo"
+      ],
+      "bundleManager.AbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/AbilityInfo"
+      ],
+      "bundleManager.ApplicationInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/ApplicationInfo"
+      ],
+      "bundleManager.AppProvisionInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/AppProvisionInfo"
+      ],
+      "bundleManager.BundleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/BundleInfo"
+      ],
+      "bundleManager.BundlePackInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/BundlePackInfo"
+      ],
+      "bundleManager.BundleResourceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/BundleResourceInfo"
+      ],
+      "bundleManager.DispatchInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/DispatchInfo"
+      ],
+      "bundleManager.ElementName": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/ElementName"
+      ],
+      "bundleManager.ExtensionAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/ExtensionAbilityInfo"
+      ],
+      "bundleManager.HapModuleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/HapModuleInfo"
+      ],
+      "bundleManager.LauncherAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/LauncherAbilityInfo"
+      ],
+      "bundleManager.LauncherAbilityResourceInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/LauncherAbilityResourceInfo"
+      ],
+      "bundleManager.Metadata": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/Metadata"
+      ],
+      "bundleManager.OverlayModuleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/OverlayModuleInfo"
+      ],
+      "bundleManager.PermissionDef": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/PermissionDef"
+      ],
+      "bundleManager.RecoverableApplicationInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/RecoverableApplicationInfo"
+      ],
+      "bundleManager.RemoteAbilityInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/RemoteAbilityInfo"
+      ],
+      "bundleManager.SharedBundleInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/SharedBundleInfo"
+      ],
+      "bundleManager.ShortcutInfo": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/ShortcutInfo"
+      ],
+      "bundleManager.Skill": [
+        "../../../../../../../../../interface/sdk-js/api/bundleManager/Skill"
+      ],
+      "commonEvent.commonEventData": [
+        "../../../../../../../../../interface/sdk-js/api/commonEvent/commonEventData"
+      ],
+      "commonEvent.commonEventPublishData": [
+        "../../../../../../../../../interface/sdk-js/api/commonEvent/commonEventPublishData"
+      ],
+      "commonEvent.commonEventSubscribeInfo": [
+        "../../../../../../../../../interface/sdk-js/api/commonEvent/commonEventSubscribeInfo"
+      ],
+      "commonEvent.commonEventSubscriber": [
+        "../../../../../../../../../interface/sdk-js/api/commonEvent/commonEventSubscriber"
+      ],
+      "continuation.continuationExtraParams": [
+        "../../../../../../../../../interface/sdk-js/api/continuation/continuationExtraParams"
+      ],
+      "continuation.continuationResult": [
+        "../../../../../../../../../interface/sdk-js/api/continuation/continuationResult"
+      ],
+      "data.rdb.resultSet": [
+        "../../../../../../../../../interface/sdk-js/api/data/rdb/resultSet"
+      ],
+      "device-define.default.json": [
+        ""
+      ],
+      "device-define.liteWearable.json": [
+        ""
+      ],
+      "device-define.tablet.json": [
+        ""
+      ],
+      "device-define.wearable.json": [
+        ""
+      ],
+      "global.rawFileDescriptor": [
+        "../../../../../../../../../interface/sdk-js/api/global/rawFileDescriptor"
+      ],
+      "global.resource": [
+        "../../../../../../../../../interface/sdk-js/api/global/resource"
+      ],
+      "global.sendableResource": [
+        "../../../../../../../../../interface/sdk-js/api/global/sendableResource"
+      ],
+      "graphics3d.Scene": [
+        "../../../../../../../../../interface/sdk-js/api/graphics3d/Scene"
+      ],
+      "graphics3d.SceneNodes": [
+        "../../../../../../../../../interface/sdk-js/api/graphics3d/SceneNodes"
+      ],
+      "graphics3d.ScenePostProcessSettings": [
+        "../../../../../../../../../interface/sdk-js/api/graphics3d/ScenePostProcessSettings"
+      ],
+      "graphics3d.SceneResources": [
+        "../../../../../../../../../interface/sdk-js/api/graphics3d/SceneResources"
+      ],
+      "graphics3d.SceneTypes": [
+        "../../../../../../../../../interface/sdk-js/api/graphics3d/SceneTypes"
+      ],
+      "multimedia.ringtonePlayer": [
+        "../../../../../../../../../interface/sdk-js/api/multimedia/ringtonePlayer"
+      ],
+      "multimedia.soundPool": [
+        "../../../../../../../../../interface/sdk-js/api/multimedia/soundPool"
+      ],
+      "multimedia.systemTonePlayer": [
+        "../../../../../../../../../interface/sdk-js/api/multimedia/systemTonePlayer"
+      ],
+      "notification.notificationActionButton": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationActionButton"
+      ],
+      "notification.NotificationCommonDef": [
+        "../../../../../../../../../interface/sdk-js/api/notification/NotificationCommonDef"
+      ],
+      "notification.notificationContent": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationContent"
+      ],
+      "notification.notificationFlags": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationFlags"
+      ],
+      "notification.notificationRequest": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationRequest"
+      ],
+      "notification.notificationSlot": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationSlot"
+      ],
+      "notification.notificationSorting": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationSorting"
+      ],
+      "notification.notificationSortingMap": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationSortingMap"
+      ],
+      "notification.notificationSubscribeInfo": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationSubscribeInfo"
+      ],
+      "notification.notificationSubscriber": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationSubscriber"
+      ],
+      "notification.notificationTemplate": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationTemplate"
+      ],
+      "notification.notificationUserInput": [
+        "../../../../../../../../../interface/sdk-js/api/notification/notificationUserInput"
+      ],
+      "permissions": [
+        "../../../../../../../../../interface/sdk-js/api/permissions"
+      ],
+      "security.PermissionRequestResult": [
+        "../../../../../../../../../interface/sdk-js/api/security/PermissionRequestResult"
+      ],
+      "tag.nfctech": [
+        "../../../../../../../../../interface/sdk-js/api/tag/nfctech"
+      ],
+      "tag.tagSession": [
+        "../../../../../../../../../interface/sdk-js/api/tag/tagSession"
+      ],
+      "wantAgent.triggerInfo": [
+        "../../../../../../../../../interface/sdk-js/api/wantAgent/triggerInfo"
+      ],
+      "wantAgent.wantAgentInfo": [
+        "../../../../../../../../../interface/sdk-js/api/wantAgent/wantAgentInfo"
+      ],
+      "@arkts.collections": [
+        "../../../../../../../../../interface/sdk-js/arkts/@arkts.collections"
+      ],
+      "@arkts.lang": [
+        "../../../../../../../../../interface/sdk-js/arkts/@arkts.lang"
+      ],
+      "@arkts.math.Decimal": [
+        "../../../../../../../../../interface/sdk-js/arkts/@arkts.math.Decimal"
+      ],
+      "@arkts.utils": [
+        "../../../../../../../../../interface/sdk-js/arkts/@arkts.utils"
+      ],
+      "@kit.AbilityKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AbilityKit"
+      ],
+      "@kit.AccessibilityKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AccessibilityKit"
+      ],
+      "@kit.AdsKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AdsKit"
+      ],
+      "@kit.ArkData": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkData"
+      ],
+      "@kit.ArkGraphics2D": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkGraphics2D"
+      ],
+      "@kit.ArkGraphics3D": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkGraphics3D"
+      ],
+      "@kit.ArkTS": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkTS"
+      ],
+      "@kit.ArkUI": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkUI"
+      ],
+      "@kit.ArkWeb": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ArkWeb"
+      ],
+      "@kit.AssetStoreKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AssetStoreKit"
+      ],
+      "@kit.AudioKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AudioKit"
+      ],
+      "@kit.AVSessionKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.AVSessionKit"
+      ],
+      "@kit.BackgroundTasksKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.BackgroundTasksKit"
+      ],
+      "@kit.BasicServicesKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.BasicServicesKit"
+      ],
+      "@kit.CalendarKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.CalendarKit"
+      ],
+      "@kit.CameraKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.CameraKit"
+      ],
+      "@kit.ConnectivityKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ConnectivityKit"
+      ],
+      "@kit.ContactsKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ContactsKit"
+      ],
+      "@kit.CoreFileKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.CoreFileKit"
+      ],
+      "@kit.CryptoArchitectureKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.CryptoArchitectureKit"
+      ],
+      "@kit.DataLossPreventionKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DataLossPreventionKit"
+      ],
+      "@kit.DataProtectionKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DataProtectionKit"
+      ],
+      "@kit.DeviceCertificateKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DeviceCertificateKit"
+      ],
+      "@kit.DistributedServiceKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DistributedServiceKit"
+      ],
+      "@kit.DriverDevelopmentKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DriverDevelopmentKit"
+      ],
+      "@kit.DrmKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.DrmKit"
+      ],
+      "@kit.FormKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.FormKit"
+      ],
+      "@kit.ImageKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.ImageKit"
+      ],
+      "@kit.IMEKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.IMEKit"
+      ],
+      "@kit.InputKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.InputKit"
+      ],
+      "@kit.IPCKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.IPCKit"
+      ],
+      "@kit.LocalizationKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.LocalizationKit"
+      ],
+      "@kit.LocationKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.LocationKit"
+      ],
+      "@kit.MDMKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.MDMKit"
+      ],
+      "@kit.MediaKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.MediaKit"
+      ],
+      "@kit.MediaLibraryKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.MediaLibraryKit"
+      ],
+      "@kit.MindSporeLiteKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.MindSporeLiteKit"
+      ],
+      "@kit.MultimodalAwarenessKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.MultimodalAwarenessKit"
+      ],
+      "@kit.network": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.network"
+      ],
+      "@kit.NetworkKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.NetworkKit"
+      ],
+      "@kit.NotificationKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.NotificationKit"
+      ],
+      "@kit.PerformanceAnalysisKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.PerformanceAnalysisKit"
+      ],
+      "@kit.SecurityGuardKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.SecurityGuardKit"
+      ],
+      "@kit.SensorServiceKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.SensorServiceKit"
+      ],
+      "@kit.TelephonyKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.TelephonyKit"
+      ],
+      "@kit.TestKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.TestKit"
+      ],
+      "@kit.UniversalKeystoreKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.UniversalKeystoreKit"
+      ],
+      "@kit.UserAuthenticationKit": [
+        "../../../../../../../../../interface/sdk-js/kits/@kit.UserAuthenticationKit"
+      ]
+    },
+    "outDir": "./cache/window",
+    "package": "@ohos"
+  },
+  "files": [
+    "./ets/window.ets"
+  ]
+}
