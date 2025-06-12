@@ -2989,9 +2989,6 @@ bool ScreenSessionManager::SetScreenPowerById(ScreenId screenId, ScreenPowerStat
 bool ScreenSessionManager::SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowerState state)
 {
     std::lock_guard<std::mutex> lock(screenPowerMutex_);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        return SetScreenPowerByIdDefault(screenId, state);
-    }
     switch (state) {
         case ScreenPowerState::POWER_ON: {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
@@ -10012,9 +10009,9 @@ void ScreenSessionManager::NotifyCreatedScreen(sptr<ScreenSession> screenSession
     ScreenProperty property = screenSession->GetScreenProperty();
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGW(WmsLogTag::DMS, "super fold device, change by rotation.");
-        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
+        screenSession->PropertyChange(property, ScreenPropertyChangeReason::ROTATION);
     } else {
-        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+        screenSession->PropertyChange(property, ScreenPropertyChangeReason::UNDEFINED);
     }
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
