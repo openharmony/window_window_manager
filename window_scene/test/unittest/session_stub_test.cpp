@@ -1119,7 +1119,7 @@ HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegistered, Function |
     auto result = sessionStub->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED);
     EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
 }
@@ -1141,7 +1141,7 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function |
     auto result = sessionStub->HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS);
     EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
 }
