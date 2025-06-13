@@ -2370,7 +2370,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Leve
     window_->RegisterKeyboardWillShowListener(listener);
     sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     window_->RegisterKeyboardWillHideListener(listener1);
-  
+    
     KeyboardAnimationInfo animationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);
