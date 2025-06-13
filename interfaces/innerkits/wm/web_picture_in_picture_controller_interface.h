@@ -34,6 +34,8 @@ public:
     WMError UpdateContentSize(int32_t width, int32_t height);
     WMError UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
     WMError setPiPControlEnabled(PiPControlType controlType, bool enabled);
+    WMError SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY, uint32_t width, uint32_t height);
+    WMError UnsetPipInitialSurfaceRect();
     WMError RegisterStartPipListener(NativePipStartPipCallback);
     WMError RegisterLifeCycleListener(NativePipLifeCycleCallback);
     WMError RegisterControlEventListener(NativePipControlEventCallback);

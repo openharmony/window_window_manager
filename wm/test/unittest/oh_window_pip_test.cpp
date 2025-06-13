@@ -547,6 +547,40 @@ HWTEST_F(OHWindowPipTest, OH_PictureInPicture_UnregisterAllResizeListeners, Test
     EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
     OH_PictureInPicture_DeletePip(pipControllerId_);
 }
+
+/**
+ * @tc.name: OH_PictureInPicture_SetPipInitialSurfaceRect
+ * @tc.desc: OH_PictureInPicture_SetPipInitialSurfaceRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowPipTest, OH_PictureInPicture_SetPipInitialSurfaceRect, TestSize.Level1)
+{
+    uint32_t pipControllerId_ = 0;
+    auto ret = OH_PictureInPicture_CreatePip(pipConfig, &pipControllerId_);
+    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    ret = OH_PictureInPicture_SetPipInitialSurfaceRect(pipControllerId_ + 1, 10, 10, 100, 100);
+    EXPECT_EQ(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM, ret);
+    ret = OH_PictureInPicture_SetPipInitialSurfaceRect(pipControllerId_, 10, 10, 100, 100);
+    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    OH_PictureInPicture_DeletePip(pipControllerId_);
+}
+
+/**
+ * @tc.name: OH_PictureInPicture_UnsetPipInitialSurfaceRect
+ * @tc.desc: OH_PictureInPicture_UnsetPipInitialSurfaceRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowPipTest, OH_PictureInPicture_UnsetPipInitialSurfaceRect, TestSize.Level1)
+{
+    uint32_t pipControllerId_ = 0;
+    auto ret = OH_PictureInPicture_CreatePip(pipConfig, &pipControllerId_);
+    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    ret = OH_PictureInPicture_UnsetPipInitialSurfaceRect(pipControllerId_ + 1);
+    EXPECT_EQ(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM, ret);
+    ret = OH_PictureInPicture_UnsetPipInitialSurfaceRect(pipControllerId_);
+    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    OH_PictureInPicture_DeletePip(pipControllerId_);
+}
 }
 }
 }
