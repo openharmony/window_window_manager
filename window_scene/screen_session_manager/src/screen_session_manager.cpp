@@ -2794,7 +2794,7 @@ void ScreenSessionManager::SetSupportedRefreshRate(sptr<ScreenSession>& session)
         return;
     }
     std::set<uint32_t> uniqueRefreshRates;
-    for (const RSScreenModeInfo& rsScreenModeInfo : allmodes) {
+    for (const RSScreenModeInfo& rsScreenModeInfo : allModes) {
         uniqueRefreshRates.insert(rsScreenModeInfo.GetScreenRefreshRate());
     }
     std::vector<uint32_t> supportedRefreshRate(uniqueRefreshRates.begin(), uniqueRefreshRates.end());

@@ -1240,6 +1240,29 @@ HWTEST_F(ScreenSessionTest, SetColorSpaces, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSupportedRefreshRate
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSupportedRefreshRate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    std::vector<uint32_t> supportedRefreshRate = { 0, 0, 0, 0 };
+    std::vector<uint32_t> supportedRefreshRate_cmp = { 0, 0, 0, 0 };
+    screenSession->SetSupportedRefreshRate(std::move(supportedRefreshRate));
+    EXPECT_EQ(screenSession->supportedRefreshRate_, supportedRefreshRate_cmp);
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate end";
+}
+
+/**
  * @tc.name: SetDisplayNodeScreenId
  * @tc.desc: normal function
  * @tc.type: FUNC
