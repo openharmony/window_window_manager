@@ -168,7 +168,6 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
-    BindNativeFunction(env, objValue, "getStatusBarProperty", moduleName, JsExtensionWindow::GetStatusBarProperty);
     BindNativeFunction(env, objValue, "isWindowShowing", moduleName, JsExtensionWindow::IsWindowShowing);
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
@@ -543,17 +542,6 @@ napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_ca
 napi_value JsExtensionWindow::IsWindowShowing(napi_env env, napi_callback_info info)
 {
     return CreateJsValue(env, true);
-}
-
-napi_value JsExtensionWindow::GetStatusBarProperty(napi_env env, napi_callback_info info)
-{
-    auto window = sptr<Window>::MakeSptr();
-    auto objValue = GetStatusBarPropertyObject(env, window);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-    }
-    return objValue;
 }
 
 napi_valuetype GetType(napi_env env, napi_value value)
