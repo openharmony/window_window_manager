@@ -30,13 +30,16 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-    std::string logMsg;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-        const char* msg)
-    {
-        logMsg = msg;
-    }
+std::string logMsg;
+void MyLogCallback(const LogType type,
+                   const LogLevel level,
+                   const unsigned int domain,
+                   const char* tag,
+                   const char* msg)
+{
+    logMsg = msg;
 }
+} // namespace
 
 namespace OHOS {
 namespace Rosen {
@@ -277,25 +280,33 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
     window->property_->SetPersistentId(id);
     window->RecoverSessionListener();
 
+    std::vector<sptr<IAcrossDisplaysChangeListener>> iAcrossDisplaysChangeListener;
     std::vector<sptr<IAvoidAreaChangedListener>> iAvoidAreaChangedListeners;
     std::vector<sptr<ITouchOutsideListener>> iTouchOutsideListeners;
     window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->acrossDisplaysChangeListeners_.insert({ id, iAcrossDisplaysChangeListener });
     window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
 
     window->avoidAreaChangeListeners_.clear();
+    window->acrossDisplaysChangeListeners_.clear();
     window->touchOutsideListeners_.clear();
     sptr<MockAvoidAreaChangedListener> changedListener = sptr<MockAvoidAreaChangedListener>::MakeSptr();
     sptr<MockTouchOutsideListener> touchOutsideListener = sptr<MockTouchOutsideListener>::MakeSptr();
+    sptr<MockAcrossDisplaysChangeListener> changedListener2 = sptr<MockAcrossDisplaysChangeListener>::MakeSptr();
     iAvoidAreaChangedListeners.insert(iAvoidAreaChangedListeners.begin(), changedListener);
+    iAcrossDisplaysChangeListener.insert(iAcrossDisplaysChangeListener.begin(), changedListener2);
     iTouchOutsideListeners.insert(iTouchOutsideListeners.begin(), touchOutsideListener);
     window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->acrossDisplaysChangeListeners_.insert({ id, iAcrossDisplaysChangeListener });
     window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
                 !window->avoidAreaChangeListeners_[id].empty());
     ASSERT_TRUE(window->touchOutsideListeners_.find(id) != window->touchOutsideListeners_.end() &&
                 !window->touchOutsideListeners_[id].empty());
+    ASSERT_TRUE(window->acrossDisplaysChangeListeners_.find(id) != window->acrossDisplaysChangeListeners_.end() &&
+                !window->acrossDisplaysChangeListeners_[id].empty());
     window->Destroy();
 }
 
@@ -785,7 +796,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange02, TestSize.Level1)
     auto listeners = GetListenerList<IWindowStatusChangeListener, MockWindowStatusChangeListener>();
     EXPECT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
-    window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
+    window->windowStatusChangeListeners_.insert({ window->GetPersistentId(), listeners });
 
     WindowMode mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     window->state_ = WindowState::STATE_SHOWN;
@@ -1253,7 +1264,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener =  nullptr;
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
     auto ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
@@ -1981,10 +1992,15 @@ HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestS
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnRegisterAcrossDisplaysChangeListener01");
-
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     sptr<IAcrossDisplaysChangeListener> listener = nullptr;
     WMError ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
@@ -2318,7 +2334,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     auto status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
- 
+
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_OK);
@@ -2337,7 +2353,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Le
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     auto status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_OK);
- 
+
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }
 
@@ -2357,7 +2373,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Leve
     window_->RegisterKeyboardWillShowListener(listener);
     sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     window_->RegisterKeyboardWillHideListener(listener1);
-    
+
     KeyboardAnimationInfo animationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);

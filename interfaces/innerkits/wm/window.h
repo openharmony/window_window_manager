@@ -528,7 +528,7 @@ public:
     /**
      * @brief Notify caller when system density changed.
      */
-    virtual void OnAcrossDisplaysChanged(bool isAcrossMultiDisplay) {}
+    virtual void OnAcrossDisplaysChanged(bool isAcrossDisplays) {}
 };
 using IAcrossDisplaysChangeListenerSptr = sptr<IAcrossDisplaysChangeListener>;
 
@@ -3713,11 +3713,11 @@ public:
     /**
      * @brief Determine whether the window spans multiple screens and displays in full screen mode.
      *
-     * @param isAcrossMultiDisplay the value true means to span multiple screens, and false means the opposite.
+     * @param isAcrossDisplays the value true means to span multiple screens, and false means the opposite.
      * @return WM_OK means success, others means failed.
      */
     virtual WMError IsMainWindowFullScreenAcrossDisplays(
-        bool& isAcrossMultiDisplay) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        bool& isAcrossDisplays) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the type of window.

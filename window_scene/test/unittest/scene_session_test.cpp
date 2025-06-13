@@ -651,24 +651,24 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
  */
 HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossDisplays01, TestSize.Level0)
 {
-    bool isAcrossMultiDisplay = false;
+    bool isAcrossDisplays = false;
     SessionInfo info;
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
-    auto ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    auto ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_NE(ret, WMError::WM_OK);
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     parentSession->property_->SetPersistentId(12);
     sceneSession->SetParentSession(parentSession);
-    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
 
     sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -677,7 +677,7 @@ HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossDisplays01, TestSize.Leve
     auto task = [&parentSession](int32_t persistentId) { return parentSession; };
     callBack->onGetSceneSessionByIdCallback_ = task;
 
-    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
 }
 

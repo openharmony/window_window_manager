@@ -55,7 +55,7 @@ public:
 
 class MockAcrossDisplaysChangeListener : public IAcrossDisplaysChangeListener {
 public:
-    MOCK_METHOD1(OnAvoidAreaChanged, void(bool isAcrossMultiDisplay));
+    MOCK_METHOD1(OnAvoidAreaChanged, void(bool isAcrossDisplays));
 };
 
 class MockTouchOutsideListener : public ITouchOutsideListener {

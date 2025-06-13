@@ -718,7 +718,8 @@ protected:
     bool supportEnterWaterfallMode_ { false };
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic_bool isValidWaterfallMode_ { false };
-    WMError NotifyAcrossDisplaysChange(bool isAcrossMultiDisplay);
+    bool isAcrossDisplays_ = false;
+    WMError NotifyAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifyWaterfallModeChange(bool isWaterfallMode);
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 

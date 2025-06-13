@@ -2198,9 +2198,14 @@ HWTEST_F(WindowSessionImplTest, NotifyAcrossDisplaysChange, TestSize.Level1)
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_SHOWN;
     sptr<IAcrossDisplaysChangeListener> listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
+    window->acrossDisplaysChangeListeners_[1].push_back(listener);
     window->RegisterAcrossDisplaysChangeListener(listener);
-    window->acrossDisplaysChangeListeners_[1].push_back(nullptr);
     auto ret = window->NotifyAcrossDisplaysChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->NotifyAcrossDisplaysChange(true);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    window->acrossDisplaysChangeListeners_[1].push_back(nullptr);
+    ret = window->NotifyAcrossDisplaysChange(false);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

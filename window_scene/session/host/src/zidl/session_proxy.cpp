@@ -2791,7 +2791,7 @@ WSError SessionProxy::GetWaterfallMode(bool& isWaterfallMode)
     return WSError::WS_OK;
 }
 
-WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay)
+WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2805,9 +2805,8 @@ WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDi
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS), data,
-        reply, option) != ERR_NONE) {
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS);
+    if (remote->SendRequest(code, data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -2816,8 +2815,8 @@ WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDi
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!reply.ReadBool(isAcrossMultiDisplay)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossMultiDisplay failed");
+    if (!reply.ReadBool(isAcrossDisplays)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossDisplays failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
