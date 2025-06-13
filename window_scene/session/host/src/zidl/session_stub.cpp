@@ -1788,10 +1788,11 @@ int SessionStub::HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data,
     bool isAcrossMultiDisplay = false;
     WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write ret fail.");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteBool(isAcrossMultiDisplay)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write isAcrossMultiDisplay fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
