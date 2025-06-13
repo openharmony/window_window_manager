@@ -402,7 +402,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetCustomDensity());
 }
 
@@ -423,7 +423,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetMainWindowCustomDensity01, TestSize.Lev
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetMainWindowCustomDensity());
 }
 
