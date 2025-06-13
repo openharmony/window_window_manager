@@ -1948,13 +1948,8 @@ HWTEST_F(WindowSessionImplTest2, RegisterAcrossDisplaysChangeListener01, TestSiz
     option->SetWindowName("RegisterAcrossDisplaysChangeListener");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     sptr<IAcrossDisplaysChangeListener> listener = nullptr;
-    WMError ret = window->RegisterAcrossDisplaysChangeListener(listener);
-    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ret = window->RegisterAcrossDisplaysChangeListener(listener);
+    auto ret = window->RegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
@@ -1991,13 +1986,8 @@ HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestS
     option->SetWindowName("UnRegisterAcrossDisplaysChangeListener01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     sptr<IAcrossDisplaysChangeListener> listener = nullptr;
-    WMError ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
-    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    auto ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);

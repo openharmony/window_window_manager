@@ -5561,7 +5561,7 @@ void SceneSession::NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& s
 {
     if (sceneSession->sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "%{public}d: sessionStage is null", sceneSession->GetPersistentId());
-        continue;
+        return;
     }
     sceneSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossDisplays);
     sceneSession->SetFullScreenWaterfallMode(isAcrossDisplays);
@@ -8777,15 +8777,15 @@ WMError SceneSession::UpdateAcrossDisplaysChangeRegistered(bool isRegister)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     PostTask([weakThis = wptr(this), isRegister, where = __func__] {
-            auto session = weakThis.promote();
-            if (!session) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
-                return;
-            }
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, isRegister: %{public}d",
-                where, session->GetPersistentId(), isRegister);
-            session->isRegisterAcrossDisplaysChanged_.store(isRegister);
-    }, __func__);
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, isRegister: %{public}d",
+            where, session->GetPersistentId(), isRegister);
+        session->isRegisterAcrossDisplaysChanged_.store(isRegister);
+        }, __func__);
 
     return WMError::WM_OK;
 }
