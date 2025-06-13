@@ -854,6 +854,33 @@ HWTEST_F(WindowSessionTest, SetFocusable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Snapshot
+ * @tc.desc: Snapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Snapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 1999;
+    std::string bundleName = "test";
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ASSERT_NE(session_->scenePersistence_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_ = nullptr;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+}
+
+/**
  * @tc.name: GetSnapshot
  * @tc.desc: GetSnapshot Test
  * @tc.type: FUNC
