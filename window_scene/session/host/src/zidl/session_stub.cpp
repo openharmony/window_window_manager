@@ -1785,14 +1785,14 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data, MessageParcel& reply)
 {
-    bool isAcrossMultiDisplay = false;
-    WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    bool isAcrossDisplays = false;
+    WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write ret fail.");
         return ERR_INVALID_DATA;
     }
-    if (!reply.WriteBool(isAcrossMultiDisplay)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write isAcrossMultiDisplay fail.");
+    if (!reply.WriteBool(isAcrossDisplays)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write isAcrossDisplays fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

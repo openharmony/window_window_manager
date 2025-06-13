@@ -135,7 +135,7 @@ public:
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
     void OnSystemDensityChanged(float density) override;
-    void OnAcrossDisplaysChanged(bool isAcrossMultiDisplay) override;
+    void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowStatusDidChange(WindowStatus status) override;

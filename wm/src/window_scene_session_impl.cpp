@@ -6100,6 +6100,7 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
         isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
+    NotifyAcrossDisplaysChange(isWaterfallMode);
     if (isValidWaterfallMode_.load() && isFullScreenWaterfallMode_.load() == isWaterfallMode) {
         return WSError::WS_DO_NOTHING;
     }
@@ -6373,7 +6374,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay)
+WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays)
 {
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -6383,7 +6384,7 @@ WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcr
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    return hostSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
 }
 
 bool WindowSceneSessionImpl::IsFullScreenEnable() const

@@ -458,13 +458,13 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    bool isAcrossMultiDisplay = false;
-    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    bool isAcrossDisplays = false;
+    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
     window->hostSession_ = nullptr;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     window->property_->SetPersistentId(1);
@@ -474,7 +474,7 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
-    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

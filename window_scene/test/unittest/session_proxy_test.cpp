@@ -1541,30 +1541,30 @@ HWTEST_F(SessionProxyTest, UpdateAcrossDisplaysChangeRegistered, Function | Smal
  */
 HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
 {
-    bool isAcrossMultiDisplay = false;
+    bool isAcrossDisplays = false;
     MockMessageParcel::ClearAllErrorFlag();
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(sProxy, nullptr);
-    auto ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    auto ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(sProxy, nullptr);
-    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
-    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }

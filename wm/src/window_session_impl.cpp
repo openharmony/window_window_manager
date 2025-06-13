@@ -3902,15 +3902,21 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
     return listeners;
 }
 
-WMError WindowSessionImpl::NotifyAcrossDisplaysChange(bool isAcrossMultiDisplay)
+WMError WindowSessionImpl::NotifyAcrossDisplaysChange(bool isAcrossDisplays)
 {
+    static bool isFirstNotify = true;
+    if (!isFirstNotify && isAcrossDisplays_ == isAcrossDisplays) {
+        return WMError::WM_DO_NOTHING;
+    }
     std::lock_guard<std::recursive_mutex> lock(acrossDisplaysChangeListenerMutex_);
     const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossDisplaysChangeListener>();
     for (const auto& listener : acrossMultiDisplayChangeListeners) {
         if (listener != nullptr) {
-            listener->OnAcrossDisplaysChanged(isAcrossMultiDisplay);
+            listener->OnAcrossDisplaysChanged(isAcrossDisplays);
         }
     }
+    isFirstNotify = false;
+    isAcrossDisplays_ = isAcrossDisplays;
     return WMError::WM_OK;
 }
 
@@ -3921,7 +3927,6 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
     if (state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    NotifyAcrossDisplaysChange(isWaterfallMode);
     AAFwk::Want want;
     want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
     if (auto uiContent = GetUIContentSharedPtr()) {

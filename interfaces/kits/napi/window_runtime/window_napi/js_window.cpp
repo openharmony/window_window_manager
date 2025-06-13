@@ -8212,10 +8212,10 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_c
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    bool isAcrossMultiDisplay = false;
+    bool isAcrossDisplays = false;
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    auto execute = [weakToken = wptr<Window>(windowToken_), &isAcrossMultiDisplay, errCodePtr, where] {
+    auto execute = [weakToken = wptr<Window>(windowToken_), &isAcrossDisplays, errCodePtr, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
@@ -8223,13 +8223,13 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_c
             return;
         }
         *errCodePtr =
-            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay));
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossMultiDisplay: %{public}u, "
-            "result: %{public}d", where, window->GetWindowId(), isAcrossMultiDisplay, *errCodePtr);
+            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossDisplays: %{public}u, "
+            "result: %{public}d", where, window->GetWindowId(), isAcrossDisplays, *errCodePtr);
     };
-    auto complete = [&isAcrossMultiDisplay, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [&isAcrossDisplays, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
-            auto objValue = CreateJsValue(env, isAcrossMultiDisplay);
+            auto objValue = CreateJsValue(env, isAcrossDisplays);
             if (objValue != nullptr) {
                 task.Resolve(env, objValue);
             } else {

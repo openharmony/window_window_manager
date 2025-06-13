@@ -815,10 +815,11 @@ public:
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
     WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
-    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
     bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossDisplaysChanged_.load(); }
-    WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossMultiDisplay);
-    WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossMultiDisplay);
+    WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
+    WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
+    void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
 
     /*
      * Window Pattern
