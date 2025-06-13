@@ -91,7 +91,7 @@ HWTEST_F(SessionChangeRecorderTest, SetRecordSize, TestSize.Level1)
     EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_PARAM);
 
     auto result2 = SessionChangeRecorder::GetInstance().SetRecordSize(
-        RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE+1);
+        RecordType::RECORD_TYPE_BEGIN, MAX_RECORD_TYPE_SIZE + 1);
     EXPECT_EQ(result2, WSError::WS_ERROR_INVALID_PARAM);
 
     auto result3 = SessionChangeRecorder::GetInstance().SetRecordSize(
