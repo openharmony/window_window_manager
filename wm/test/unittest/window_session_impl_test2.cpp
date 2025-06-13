@@ -2331,7 +2331,7 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     auto status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-
+ 
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_OK);
@@ -2370,7 +2370,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Leve
     window_->RegisterKeyboardWillShowListener(listener);
     sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     window_->RegisterKeyboardWillHideListener(listener1);
- 
+  
     KeyboardAnimationInfo animationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);
