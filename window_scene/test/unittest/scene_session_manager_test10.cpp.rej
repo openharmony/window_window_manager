@@ -1,0 +1,13 @@
+diff a/window_scene/test/unittest/scene_session_manager_test10.cpp b/window_scene/test/unittest/scene_session_manager_test10.cpp	(rejected hunks)
+@@ -1085,6 +1086,11 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
+     info.bundleName_ = "test";
+     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+     ASSERT_NE(nullptr, sceneSession);
++    sptr<RootSceneSession> rootSceneSession = sptr<RootSceneSession>::MakeSptr();
++    ASSERT_NE(nullptr, rootSceneSession);
++    sceneSession->property_->SetPersistentId(1);
++    rootSceneSession->property_->SetPersistentId(2);
++    ssm_->rootSceneSession_ = rootSceneSession;
+ 
+     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+     bool isVisible;

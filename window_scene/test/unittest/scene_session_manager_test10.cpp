@@ -19,6 +19,7 @@
 #include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
+#include "session/host/include/root_scene_session.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -1097,6 +1098,11 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sptr<RootSceneSession> rootSceneSession = sptr<RootSceneSession>::MakeSptr();
+    ASSERT_NE(nullptr, rootSceneSession);
+    sceneSession->property_->SetPersistentId(1);
+    rootSceneSession->property_->SetPersistentId(2);
+    ssm_->rootSceneSession_ = rootSceneSession;
 
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     bool isVisible;
