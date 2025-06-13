@@ -342,7 +342,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
     EXPECT_EQ(density, window->customDensity_);
-    bool isNeedSync = true;
+    isNeedSync = true;
     EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, isNeedSync));
 }
 
