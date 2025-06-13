@@ -636,7 +636,7 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
-    ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
+    auto ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -658,7 +658,7 @@ HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossDisplays01, TestSize.Leve
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
-    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
+    auto ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
