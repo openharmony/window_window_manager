@@ -1514,19 +1514,18 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, TestSize.Level1)
  * @tc.desc: InitSessionPropertyWhenConnect test
  * @tc.type: FUNC
  */
- HWTEST_F(WindowSessionTest, InitSessionPropertyWhenConnect, TestSize.Level1)
- {
+HWTEST_F(WindowSessionTest, InitSessionPropertyWhenConnect, TestSize.Level1)
+{
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->isSystemCalling_ = false;
     session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     session_->InitSessionPropertyWhenConnect(property);
     ASSERT_EQ(true, property->dragEnabled_);
-
     session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     session_->InitSessionPropertyWhenConnect(property);
     ASSERT_EQ(false, property->dragEnabled_);
- }
+}
 
 /**
  * @tc.name: SetTouchHotAreas
