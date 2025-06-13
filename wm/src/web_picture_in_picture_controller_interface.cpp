@@ -26,6 +26,7 @@ using namespace Ace;
 namespace {
     constexpr uint32_t MAX_CONTROL_GROUP_NUM = 3;
     std::shared_mutex cbSetMutex_;
+    std::shared_mutex initRectMutex_;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
@@ -199,6 +200,7 @@ WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto pipController = sptrWebPipController_) {
+        std::unique_lock<std::shared_mutex> lock(initRectMutex_);
         pipController->SetPipInitialSurfaceRect(positionX, positionY, width, height);
         return WMError::WM_OK;
     } else {
@@ -210,6 +212,7 @@ WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t
 WMError WebPictureInPictureControllerInterface::UnsetPipInitialSurfaceRect()
 {
     if (auto pipController = sptrWebPipController_) {
+        std::unique_lock<std::shared_mutex> lock(initRectMutex_);
         pipController->SetPipInitialSurfaceRect(0, 0, 0, 0);
         return WMError::WM_OK;
     } else {
