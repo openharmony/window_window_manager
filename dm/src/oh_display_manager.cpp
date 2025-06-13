@@ -1358,6 +1358,6 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
     } else {
         TLOGE(WmsLogTag::DMS, "[DMNDK] just main and extend has x, y.");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
 }
