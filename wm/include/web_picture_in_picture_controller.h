@@ -38,6 +38,7 @@ public:
     ~WebPictureInPictureController() = default;
     WMError StartPictureInPicture(StartPipType startType) override;
     void UpdateContentSize(int32_t width, int32_t height) override;
+    void SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY, uint32_t width, uint32_t height) override;
     void RestorePictureInPictureWindow() override;
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController) override;
     uint8_t GetWebRequestId() override;
@@ -51,6 +52,10 @@ protected:
 private:
     wptr<WebPictureInPictureController> weakRef_ = nullptr;
     uint8_t webRequestId_ = 0;
+    int32_t initPositionX_ = 0;
+    int32_t initPositionY_ = 0;
+    uint32_t initWidth_ = 0;
+    uint32_t initHeight_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
