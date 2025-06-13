@@ -938,9 +938,9 @@ private:
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::mutex systemDensityChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
-    static std::recursive_mutex acrossMultiDisplayChangeListenerMutex_;
+    static std::recursive_mutex acrossDisplaysChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
-        acrossMultiDisplayChangeListeners_;
+        acrossDisplaysChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
