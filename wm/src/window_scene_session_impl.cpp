@@ -6331,7 +6331,7 @@ WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 WSError WindowSceneSessionImpl::CloseSpecificScene()
 {
     if (!property_->IsDecorEnable()) {
-        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable.", 
+        TLOGW(WmsLogTag::WMS_SUB, "specific scene can not close id: %{public}d, decor is not enable.",
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_OPERATION;
     }

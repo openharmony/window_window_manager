@@ -1825,7 +1825,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn03, Function 
 
     EXPECT_NE(nullptr, window->surfaceNode_);
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    // default displayId is -1 
+    // default displayId is -1
     EXPECT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, window->SetFrameRectForParticalZoomIn(frameRect));
 }
 

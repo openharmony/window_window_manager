@@ -570,7 +570,8 @@ public:
 /**
  * @class IExtensionSecureLimitChangeListener
  *
- * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and its change when limit changed.
+ * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and
+ * its change when limit changed.
  */
 class IExtensionSecureLimitChangeListener : virtual public RefBase {
 public:
@@ -592,7 +593,7 @@ public:
     /**
      * @brief Notify caller when subwindow closed.
      *
-     * @param terminateCloseProcess Whather need to terminate the subwindow close process.
+     * @param terminateCloseProcess Whether need to terminate the subwindow close process.
      */
     virtual void OnSubWindowClose(bool& terminateCloseProcess) {}
 };
@@ -1580,8 +1581,10 @@ public:
      * @param radius Shadows of window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set shadow radius of window.
@@ -3415,7 +3418,8 @@ public:
      * @param listener IExtensionSecureLimitChangeListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    virtual WMError RegisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3426,7 +3430,8 @@ public:
      * @param listener IExtensionSecureLimitChangeListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    virtual WMError UnregisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4066,7 +4071,7 @@ public:
      */
     virtual WMError UseImplicitAnimation(bool useImplicit) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
-    /** 
+    /**
     * @brief Set intent param to arkui.
      *
      * @param intentParam intent param from ams.

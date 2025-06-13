@@ -932,7 +932,7 @@ HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | Smal
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
@@ -950,7 +950,7 @@ HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | Sm
     uint32_t interestInfo = 0;
     sptr<IWindowManagerAgent> windowManagerAgent;
     auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
 }
