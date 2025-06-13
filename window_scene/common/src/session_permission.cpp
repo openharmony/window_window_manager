@@ -23,7 +23,9 @@
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
+#ifdef IMF_ENABLE
 #include <input_method_controller.h>
+#endif // IMF_ENABLE
 #include <singleton.h>
 #include <singleton_container.h>
 #include <pwd.h>
@@ -186,6 +188,7 @@ bool SessionPermission::IsStartByHdcd()
 
 bool SessionPermission::IsStartedByInputMethod()
 {
+#ifdef IMF_ENABLE
     auto imc = MiscServices::InputMethodController::GetInstance();
     if (!imc) {
         TLOGE(WmsLogTag::DEFAULT, "InputMethodController is nullptr");
@@ -193,6 +196,9 @@ bool SessionPermission::IsStartedByInputMethod()
     }
     int pid = IPCSkeleton::GetCallingPid();
     return imc->IsCurrentImeByPid(pid);
+#else
+    return false;
+#endif // IMF_ENABLE
 }
 
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
