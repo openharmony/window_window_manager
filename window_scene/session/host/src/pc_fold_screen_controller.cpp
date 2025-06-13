@@ -411,6 +411,11 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
     }, __func__);
 }
 
+void PcFoldScreenController::SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
+}
+
 void PcFoldScreenController::RegisterFullScreenWaterfallModeChangeCallback(
     std::function<void(bool isWaterfallMode)>&& func)
 {

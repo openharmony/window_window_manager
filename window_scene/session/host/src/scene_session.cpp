@@ -5480,6 +5480,15 @@ bool SceneSession::IsFullScreenWaterfallMode()
     return pcFoldScreenController_->IsFullScreenWaterfallMode();
 }
 
+void SceneSession::SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    if (pcFoldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d pcFoldScreenController is null", GetPersistentId());
+        return false;
+    }
+    return pcFoldScreenController_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode);
+}
+
 WSError SceneSession::GetWaterfallMode(bool& isWaterfallMode)
 {
     isWaterfallMode = IsFullScreenWaterfallMode();
