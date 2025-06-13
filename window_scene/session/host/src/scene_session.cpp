@@ -5484,7 +5484,7 @@ void SceneSession::SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
 {
     if (pcFoldScreenController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d pcFoldScreenController is null", GetPersistentId());
-        return false;
+        return;
     }
     return pcFoldScreenController_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode);
 }
