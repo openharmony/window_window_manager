@@ -36,7 +36,7 @@ namespace {
     {
         logMsg = msg;
     }
-} // namespace
+}
 
 namespace OHOS {
 namespace Rosen {
