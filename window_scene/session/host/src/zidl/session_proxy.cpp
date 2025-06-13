@@ -2791,7 +2791,7 @@ WSError SessionProxy::GetWaterfallMode(bool& isWaterfallMode)
     return WSError::WS_OK;
 }
 
-WMError SessionProxy::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay)
+WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3129,7 +3129,7 @@ WMError SessionProxy::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
     return static_cast<WMError>(ret);
 }
 
-WMError SessionProxy::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
+WMError SessionProxy::UpdateAcrossDisplaysChangeRegistered(bool isRegister)
 {
     MessageParcel data;
     MessageParcel reply;

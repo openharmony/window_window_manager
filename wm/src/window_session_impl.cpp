@@ -146,7 +146,7 @@ std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
     WindowSessionImpl::systemDensityChangeListeners_;
 std::recursive_mutex WindowSessionImpl::acrossMultiDisplayChangeListenerMutex_;
-std::unordered_map<int32_t, std::vector<IAcrossMultiDisplayChangeListenerSptr>>
+std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
     WindowSessionImpl::acrossMultiDisplayChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
@@ -3793,7 +3793,7 @@ void WindowSessionImpl::RecoverSessionListener()
         if (acrossMultiDisplayChangeListeners_.find(persistentId) != acrossMultiDisplayChangeListeners_.end() &&
             !acrossMultiDisplayChangeListeners_[persistentId].empty()) {
             if (auto hostSession = GetHostSession()) {
-                hostSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+                hostSession->UpdateAcrossDisplaysChangeRegistered(true);
             }
         }
     }
@@ -3902,13 +3902,13 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
     return listeners;
 }
 
-WMError WindowSessionImpl::NotifyAcrossMultiDisplayChange(bool isAcrossMultiDisplay)
+WMError WindowSessionImpl::NotifyAcrossDisplaysChange(bool isAcrossMultiDisplay)
 {
     std::lock_guard<std::recursive_mutex> lock(acrossMultiDisplayChangeListenerMutex_);
-    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossMultiDisplayChangeListener>();
+    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossDisplaysChangeListener>();
     for (const auto& listener : acrossMultiDisplayChangeListeners) {
         if (listener != nullptr) {
-            listener->OnAcrossMultiDisplayChanged(isAcrossMultiDisplay);
+            listener->OnAcrossDisplaysChanged(isAcrossMultiDisplay);
         }
     }
     return WMError::WM_OK;
@@ -3921,7 +3921,7 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
     if (state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    NotifyAcrossMultiDisplayChange(isWaterfallMode);
+    NotifyAcrossDisplaysChange(isWaterfallMode);
     AAFwk::Want want;
     want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
     if (auto uiContent = GetUIContentSharedPtr()) {
@@ -5358,8 +5358,8 @@ WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDe
     return UnregisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
-    const IAcrossMultiDisplayChangeListenerSptr& listener)
+WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
+    const IAcrossDisplaysChangeListenerSptr& listener)
 {
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -5388,7 +5388,7 @@ WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
     }
     auto hostSession = GetHostSession();
     if (isUpdate && hostSession != nullptr) {
-        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+        ret = hostSession->UpdateAcrossDisplaysChangeRegistered(true);
     }
     if (ret != WMError::WM_OK) {
         std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
@@ -5397,8 +5397,8 @@ WMError WindowSessionImpl::RegisterAcrossMultiDisplayChangeListener(
     return ret;
 }
 
-WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
-    const IAcrossMultiDisplayChangeListenerSptr& listener)
+WMError WindowSessionImpl::UnRegisterAcrossDisplaysChangeListener(
+    const IAcrossDisplaysChangeListenerSptr& listener)
 {
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -5427,7 +5427,7 @@ WMError WindowSessionImpl::UnregisterAcrossMultiDisplayChangeListener(
     }
     auto hostSession = GetHostSession();
     if (isUpdate && hostSession != nullptr) {
-        ret = hostSession->UpdateAcrossMultiDisplayChangeRegistered(false);
+        ret = hostSession->UpdateAcrossDisplaysChangeRegistered(false);
     }
     if (ret != WMError::WM_OK) {
         std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
@@ -5532,7 +5532,7 @@ EnableIfSame<T, ISystemDensityChangeListener,
 }
 
 template<typename T>
-EnableIfSame<T, IAcrossMultiDisplayChangeListener, std::vector<IAcrossMultiDisplayChangeListenerSptr>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return acrossMultiDisplayChangeListeners_[GetPersistentId()];
 }

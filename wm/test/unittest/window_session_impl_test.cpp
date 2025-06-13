@@ -1094,10 +1094,10 @@ HWTEST_F(WindowSessionImplTest, RegisterListener04, TestSize.Level1)
     res = window->UnRegisterWindowWillCloseListeners(listener14);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    IAcrossMultiDisplayChangeListenerSptr listener15 = nullptr;
-    res = window->RegisterAcrossMultiDisplayChangeListener(listener15);
+    IAcrossDisplaysChangeListenerSptr listener15 = nullptr;
+    res = window->RegisterAcrossDisplaysChangeListener(listener15);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterAcrossMultiDisplayChangeListener(listener15);
+    res = window->UnRegisterAcrossDisplaysChangeListener(listener15);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
@@ -2192,21 +2192,21 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyAcrossMultiDisplayChange
- * @tc.desc: NotifyAcrossMultiDisplayChange Test
+ * @tc.name: NotifyAcrossDisplaysChange
+ * @tc.desc: NotifyAcrossDisplaysChange Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, NotifyAcrossMultiDisplayChange, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, NotifyAcrossDisplaysChange, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("waterfall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_SHOWN;
-    sptr<IAcrossMultiDisplayChangeListener> listener = sptr<IAcrossMultiDisplayChangeListener>::MakeSptr();
-    window->RegisterAcrossMultiDisplayChangeListener(listener);
+    sptr<IAcrossDisplaysChangeListener> listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
+    window->RegisterAcrossDisplaysChangeListener(listener);
     window->acrossMultiDisplayChangeListeners_[1].push_back(nullptr);
-    auto ret = window->NotifyAcrossMultiDisplayChange(true);
+    auto ret = window->NotifyAcrossDisplaysChange(true);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

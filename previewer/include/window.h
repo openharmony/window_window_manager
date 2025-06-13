@@ -381,7 +381,7 @@ public:
     virtual bool GetWindowShadowEnabled() const { return true; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError IsMainWindowFullScreenAcrossMultiDisplay(
+    virtual WMError IsMainWindowFullScreenAcrossDisplays(
         bool& isAcrossMultiDisplay) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetVirtualPixelRatio() { return 1.0f; }
     virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);

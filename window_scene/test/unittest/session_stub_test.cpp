@@ -1103,11 +1103,11 @@ HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | S
 }
 
 /**
- * @tc.name: HandleUpdateAcrossMultiDisplayChangeRegistered
- * @tc.desc: sessionStub HandleUpdateAcrossMultiDisplayChangeRegistered
+ * @tc.name: HandleUpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: sessionStub HandleUpdateAcrossDisplaysChangeRegistered
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleUpdateAcrossMultiDisplayChangeRegistered, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegistered, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1116,7 +1116,7 @@ HWTEST_F(SessionStubTest, HandleUpdateAcrossMultiDisplayChangeRegistered, Functi
     data.WriteBool(false);
     sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
     ASSERT_NE(nullptr, sessionStub);
-    auto result = sessionStub->HandleUpdateAcrossMultiDisplayChangeRegistered(data, reply);
+    auto result = sessionStub->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
@@ -1125,11 +1125,11 @@ HWTEST_F(SessionStubTest, HandleUpdateAcrossMultiDisplayChangeRegistered, Functi
 }
 
 /**
- * @tc.name: HandleIsMainWindowFullScreenAcrossMultiDisplay
- * @tc.desc: sessionStub HandleIsMainWindowFullScreenAcrossMultiDisplay
+ * @tc.name: HandleIsMainWindowFullScreenAcrossDisplays
+ * @tc.desc: sessionStub HandleIsMainWindowFullScreenAcrossDisplays
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossMultiDisplay, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1138,7 +1138,7 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossMultiDisplay, Functi
     data.WriteBool(false);
     sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
     ASSERT_NE(nullptr, sessionStub);
-    auto result = sessionStub->HandleIsMainWindowFullScreenAcrossMultiDisplay(data, reply);
+    auto result = sessionStub->HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());

@@ -625,11 +625,11 @@ HWTEST_F(SceneSessionTest, SetNotifyScreenshotAppEventRegisteredFunc01, TestSize
 }
 
 /**
- * @tc.name: UpdateAcrossMultiDisplayChangeRegistered
- * @tc.desc: UpdateAcrossMultiDisplayChangeRegistered01
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, UpdateAcrossMultiDisplayChangeRegistered01, TestSize.Level0)
+HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Level0)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -638,24 +638,24 @@ HWTEST_F(SceneSessionTest, UpdateAcrossMultiDisplayChangeRegistered01, TestSize.
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
     MockAccesstokenKit::MockIsSystemApp(false);
-    auto ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    auto ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
     MockAccesstokenKit::MockIsSystemApp(true);
 
-    ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = sceneSession->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_OK);
 }
 
 /**
- * @tc.name: IsMainWindowFullScreenAcrossMultiDisplay
- * @tc.desc: IsMainWindowFullScreenAcrossMultiDisplay01
+ * @tc.name: IsMainWindowFullScreenAcrossDisplays
+ * @tc.desc: IsMainWindowFullScreenAcrossDisplays01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossMultiDisplay01, TestSize.Level0)
+HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossDisplays01, TestSize.Level0)
 {
     bool isAcrossMultiDisplay = false;
     SessionInfo info;
@@ -665,26 +665,26 @@ HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossMultiDisplay01, TestSize.
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
     MockAccesstokenKit::MockIsSystemApp(false);
-    auto ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    auto ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
     MockAccesstokenKit::MockIsSystemApp(true);
 
-    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_OK);
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     parentSession->property_->SetPersistentId(12);
     sceneSession->SetParentSession(parentSession);
     ASSERT_NE(sceneSession->GetParentSession(), nullptr);
-    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_OK);
 
     parentSession = nullptr;
-    ret = sceneSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
 }
 

@@ -50,7 +50,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_VISIBILITY_CHANGE_CB,
     WINDOW_DISPLAYID_CHANGE_CB,
     SYSTEM_DENSITY_CHANGE_CB,
-    ACROSS_MULTI_DISPLAY_CHANGE_CB,
+    ACROSS_DISPLAYS_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     EXTENSION_SECURE_LIMIT_CHANGE_CB,
@@ -112,7 +112,7 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    WmErrorCode ProcessAcrossMultiDisplayChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+    WmErrorCode ProcessAcrossDisplaysChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
