@@ -12866,7 +12866,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 static_cast<uint32_t>(hostGlobalDisplayRect.height_) };
             windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, hostGlobalRect=%{public}s, globalDisplayRect=%{public}s",
-                static_cast<int32_t>(sceneSession->GetPersistentId()), hostGlobalDisplayRect.ToString().c_str(),
+                static_cast<int32_t>(session->GetPersistentId()), hostGlobalDisplayRect.ToString().c_str(),
                 globalDisplayRect.ToString().c_str());
             infos.emplace_back(windowVisibilityInfo);
         }
