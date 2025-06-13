@@ -334,7 +334,7 @@ HWTEST_F(WindowSessionLifecycleTest, Disconnect01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, TestSize.Level1)
 {
-    NotifyTerminateSessionFuncNew callback = 
+    NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     bool needStartCaller = false;
     bool isFromBroker = false;

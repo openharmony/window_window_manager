@@ -308,7 +308,7 @@ WMError WebPictureInPictureControllerInterface::RegisterLifeCycleListener(Native
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-     WMError ret = WMError::WM_OK;
+    WMError ret = WMError::WM_OK;
     if (sptrWebPipController_ == nullptr) {
         ret = CreateWebPipController();
     }
@@ -349,7 +349,7 @@ WMError WebPictureInPictureControllerInterface::RegisterControlEventListener(Nat
         TLOGE(WmsLogTag::WMS_PIP, "callback is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-     WMError ret = WMError::WM_OK;
+    WMError ret = WMError::WM_OK;
     if (sptrWebPipController_ == nullptr) {
         ret = CreateWebPipController();
     }

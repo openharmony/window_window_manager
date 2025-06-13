@@ -262,7 +262,7 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
     if (sceneSessionChangeNeedDumpMap_[recordType].size() > maxRecordTypeSize) {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         uint32_t diff = sceneSessionChangeNeedDumpMap_[recordType].size() - maxRecordTypeSize;
-        while (diff > 0) { 
+        while (diff > 0) {
             sceneSessionChangeNeedDumpMap_[recordType].pop();
             diff--;
         }
