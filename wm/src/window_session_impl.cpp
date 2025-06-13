@@ -5366,9 +5366,6 @@ WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDe
 WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
     const IAcrossDisplaysChangeListenerSptr& listener)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -5405,9 +5402,6 @@ WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
 WMError WindowSessionImpl::UnRegisterAcrossDisplaysChangeListener(
     const IAcrossDisplaysChangeListenerSptr& listener)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }

@@ -6376,9 +6376,6 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
 
 WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }

@@ -457,14 +457,9 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     bool isAcrossDisplays = false;
-    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-
     window->hostSession_ = nullptr;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     window->property_->SetPersistentId(1);
