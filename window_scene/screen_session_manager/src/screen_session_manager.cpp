@@ -2793,12 +2793,11 @@ void ScreenSessionManager::SetSupportedRefreshRate(sptr<ScreenSession>& session)
         TLOGE(WmsLogTag::DMS, "allModes.size() == 0, screenId=%{public}" PRIu64"", session->rsId_);
         return;
     }
-    std::vector<uint32_t> supportedRefreshRate(allModes.size());
     std::set<uint32_t> uniqueRefreshRates;
     for (const RSScreenModeInfo& rsScreenModeInfo : allmodes) {
         uniqueRefreshRates.insert(rsScreenModeInfo.GetScreenRefreshRate());
     }
-    supportedRefreshRate.assign(uniqueRefreshRates.begin(), uniqueRefreshRates.end());
+    std::vector<uint32_t> supportedRefreshRate(uniqueRefreshRates.begin(), uniqueRefreshRates.end());
     session->SetSupportedRefreshRate(std::move(supportedRefreshRate));
 }
 

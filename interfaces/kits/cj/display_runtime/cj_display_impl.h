@@ -43,7 +43,6 @@ public:
     float GetYDPI();
     RetStruct GetColorSpaces();
     RetStruct GetHdrFormats();
-    RetStruct GetSupportedRefreshRate();
     uint32_t GetAvailableWidth();
     uint32_t GetAvailableHeight();
     RetStruct GetCutoutInfo();
