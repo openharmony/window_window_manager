@@ -6373,7 +6373,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay)
+WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay)
 {
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -6383,7 +6383,7 @@ WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossMultiDisplay(bool& i
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    return hostSession->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
 }
 
 bool WindowSceneSessionImpl::IsFullScreenEnable() const

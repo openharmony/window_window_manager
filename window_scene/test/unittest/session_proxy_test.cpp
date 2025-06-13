@@ -1497,74 +1497,74 @@ HWTEST_F(SessionProxyTest, UpdateScreenshotAppEventRegistered, Function | SmallT
 }
 
 /**
- * @tc.name: UpdateAcrossMultiDisplayChangeRegistered
- * @tc.desc: UpdateAcrossMultiDisplayChangeRegistered test
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, UpdateAcrossMultiDisplayChangeRegistered, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, UpdateAcrossDisplaysChangeRegistered, Function | SmallTest | Level2)
 {
     MockMessageParcel::ClearAllErrorFlag();
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(sProxy, nullptr);
-    auto ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    auto ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(sProxy, nullptr);
-    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
-    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ret = sProxy->UpdateAcrossMultiDisplayChangeRegistered(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
- * @tc.name: UpdateAcrossMultiDisplayChangeRegistered
- * @tc.desc: UpdateAcrossMultiDisplayChangeRegistered test
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossMultiDisplay, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
 {
     bool isAcrossMultiDisplay = false;
     MockMessageParcel::ClearAllErrorFlag();
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(sProxy, nullptr);
-    auto ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    auto ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(sProxy, nullptr);
-    ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     MockMessageParcel::SetReadInt32ErrorFlag(true);
-    ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ret = sProxy->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }

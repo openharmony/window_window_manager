@@ -119,7 +119,7 @@ public:
     static napi_value StartMoving(napi_env env, napi_callback_info info);
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
-    static napi_value IsMainWindowFullScreenAcrossMultiDisplay(napi_env env, napi_callback_info info);
+    static napi_value IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
@@ -294,7 +294,7 @@ private:
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
-    napi_value OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, napi_callback_info info);
+    napi_value OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info);
     napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnIsWindowHighlighted(napi_env env, napi_callback_info info);
 

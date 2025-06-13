@@ -81,7 +81,7 @@ public:
         WSPropertyChangeAction action));
     MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
     MOCK_METHOD1(GetWaterfallMode, WSError(bool& isWaterfallMode));
-    MOCK_METHOD1(IsMainWindowFullScreenAcrossMultiDisplay, WMError(bool& isAcrossMultiDisplay));
+    MOCK_METHOD1(IsMainWindowFullScreenAcrossDisplays, WMError(bool& isAcrossMultiDisplay));
 };
 } // namespace Rosen
 } // namespace OHOS

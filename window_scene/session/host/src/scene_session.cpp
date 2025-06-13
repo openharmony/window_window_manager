@@ -5486,7 +5486,7 @@ WSError SceneSession::GetWaterfallMode(bool& isWaterfallMode)
     return WSError::WS_OK;
 }
 
-WMError SceneSession::IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay)
+WMError SceneSession::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d permission denied!", GetPersistentId());
@@ -8700,7 +8700,7 @@ WMError SceneSession::UpdateScreenshotAppEventRegistered(int32_t persistentId, b
     return WMError::WM_OK;
 }
 
-WMError SceneSession::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
+WMError SceneSession::UpdateAcrossDisplaysChangeRegistered(bool isRegister)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d permission denied!", GetPersistentId());
@@ -8719,27 +8719,27 @@ WMError SceneSession::UpdateAcrossMultiDisplayChangeRegistered(bool isRegister)
             }
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}d, isRegister: %{public}d",
                 where, session->GetPersistentId(), isRegister);
-            session->isRegisterAcrossMultiDisplayChanged_.store(isRegister);
+            session->isRegisterAcrossDisplaysChanged_.store(isRegister);
         }, __func__);
 
     return WMError::WM_OK;
 }
 
-WMError SceneSession::NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMultiDisplay)
+WMError SceneSession::NotifySubSessionAcrossDisplaysChange(bool isAcrossMultiDisplay)
 {
     std::vector<sptr<SceneSession>> subSessionVec = GetSubSession();
     for (const auto& subSession : subSessionVec) {
         if (subSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "subsession: %{public}d is null");
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "subsession is null");
             continue;
         }
-        subSession->NotifySubSessionAcrossMultiDisplayChange(isAcrossMultiDisplay);
+        subSession->NotifySubSessionAcrossDisplaysChange(isAcrossMultiDisplay);
         if (!subSession->GetIsRegisterAcrossMultiDisplayChanged()) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "subsession: %{public}d not register", subSession->GetPersistentId());
             continue;
         }
         if (subSession->sessionStage_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage is null, id: %{public}d", subSession->GetPersistentId());
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "%{public}d: sessionStage is null", subSession->GetPersistentId());
             continue;
         }
         subSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
@@ -8747,7 +8747,7 @@ WMError SceneSession::NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMult
     return WMError::WM_OK;
 }
 
-WMError SceneSession::NotifyFollowedParentWindowAcrossMultiDisplayChange(bool isAcrossMultiDisplay)
+WMError SceneSession::NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossMultiDisplay)
 {
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
     {

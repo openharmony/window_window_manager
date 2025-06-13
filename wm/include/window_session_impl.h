@@ -258,8 +258,8 @@ public:
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
     WMError UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
-    WMError RegisterAcrossMultiDisplayChangeListener(const IAcrossMultiDisplayChangeListenerSptr& listener) override;
-    WMError UnregisterAcrossMultiDisplayChangeListener(const IAcrossMultiDisplayChangeListenerSptr& listener) override;
+    WMError RegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
+    WMError UnRegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
@@ -718,7 +718,7 @@ protected:
     bool supportEnterWaterfallMode_ { false };
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic_bool isValidWaterfallMode_ { false };
-    WMError NotifyAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
+    WMError NotifyAcrossDisplaysChange(bool isAcrossMultiDisplay);
     void NotifyWaterfallModeChange(bool isWaterfallMode);
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 
@@ -796,7 +796,7 @@ private:
     template<typename T>
     EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IAcrossMultiDisplayChangeListener, std::vector<IAcrossMultiDisplayChangeListenerSptr>> GetListeners();
+    EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
@@ -939,7 +939,7 @@ private:
     static std::mutex systemDensityChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::recursive_mutex acrossMultiDisplayChangeListenerMutex_;
-    static std::unordered_map<int32_t, std::vector<IAcrossMultiDisplayChangeListenerSptr>>
+    static std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
         acrossMultiDisplayChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;

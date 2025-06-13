@@ -255,7 +255,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FUll_SCREEN_ACROSS_MULTI_DISPLAY):
-            return HandleIsMainWindowFullScreenAcrossMultiDisplay(data, reply);
+            return HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
@@ -291,7 +291,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED):
             return HandleUpdateScreenshotAppEventRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED):
-            return HandleUpdateAcrossMultiDisplayChangeRegistered(data, reply);
+            return HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
@@ -1783,10 +1783,10 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
-int SessionStub::HandleIsMainWindowFullScreenAcrossMultiDisplay(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data, MessageParcel& reply)
 {
     bool isAcrossMultiDisplay = false;
-    WMError ret = IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay);
+    WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
@@ -1945,14 +1945,14 @@ int SessionStub::HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleUpdateAcrossMultiDisplayChangeRegistered(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply)
 {
     bool isRegister = false;
     if (!data.ReadBool(isRegister)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateAcrossMultiDisplayChangeRegistered(isRegister);
+    WMError errCode = UpdateAcrossDisplaysChangeRegistered(isRegister);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
         return ERR_INVALID_DATA;

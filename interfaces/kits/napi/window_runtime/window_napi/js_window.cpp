@@ -1146,11 +1146,11 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
-napi_value JsWindow::IsMainWindowFullScreenAcrossMultiDisplay(napi_env env, napi_callback_info info)
+napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnIsMainWindowFullScreenAcrossMultiDisplay(env, info) : nullptr;
+    return (me != nullptr) ? me->OnIsMainWindowFullScreenAcrossDisplays(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
@@ -8206,7 +8206,7 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
 }
 
-napi_value JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
@@ -8223,7 +8223,7 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, na
             return;
         }
         *errCodePtr =
-            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossMultiDisplay(isAcrossMultiDisplay));
+            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossDisplays(isAcrossMultiDisplay));
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossMultiDisplay: %{public}u, "
             "result: %{public}d", where, window->GetWindowId(), isAcrossMultiDisplay, *errCodePtr);
     };
@@ -8241,7 +8241,7 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay(napi_env env, na
         }
     };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnIsMainWindowFullScreenAcrossMultiDisplay",
+    NapiAsyncTask::Schedule("JsWindow::OnIsMainWindowFullScreenAcrossDisplays",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -8759,8 +8759,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
-    BindNativeFunction(env, object, "isMainWindowFullScreenAcrossMultiDisplay", moduleName,
-        JsWindow::IsMainWindowFullScreenAcrossMultiDisplay);
+    BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
+        JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "isSystemAvoidAreaEnabled", moduleName, JsWindow::IsSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "setExclusivelyHighlighted", moduleName, JsWindow::SetExclusivelyHighlighted);

@@ -147,13 +147,13 @@ public:
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WSError GetCrossAxisState(CrossAxisState& state) override;
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
-    WMError UpdateAcrossMultiDisplayChangeRegistered(bool isRegister) override;
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
 
     /*
      * PC Fold Screen
      */
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
-    WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isWaterfallMode) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isWaterfallMode) override;
 
     /*
      * PC Window

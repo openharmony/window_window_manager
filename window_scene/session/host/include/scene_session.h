@@ -814,11 +814,11 @@ public:
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
-    WMError UpdateAcrossMultiDisplayChangeRegistered(bool isRegister) override;
-    WMError IsMainWindowFullScreenAcrossMultiDisplay(bool& isAcrossMultiDisplay) override;
-    bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossMultiDisplayChanged_.load(); }
-    WMError NotifySubSessionAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
-    WMError NotifyFollowedParentWindowAcrossMultiDisplayChange(bool isAcrossMultiDisplay);
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDisplay) override;
+    bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossDisplaysChanged_.load(); }
+    WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossMultiDisplay);
+    WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossMultiDisplay);
 
     /*
      * Window Pattern
@@ -1341,7 +1341,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
-    std::atomic_bool isRegisterAcrossMultiDisplayChanged_ = false;
+    std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

@@ -633,7 +633,7 @@ void JsWindowListener::OnSystemDensityChanged(float density)
     }
 }
 
-void JsWindowListener::OnAcrossMultiDisplayChanged(bool isAcrossMultiDisplay)
+void JsWindowListener::OnAcrossDisplaysChanged(bool isAcrossMultiDisplay)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     const char* const where = __func__;
@@ -645,7 +645,7 @@ void JsWindowListener::OnAcrossMultiDisplayChanged(bool isAcrossMultiDisplay)
         }
         HandleScope handleScope(env);
         napi_value argv[] = { CreateJsValue(env, isAcrossMultiDisplay) };
-        thisListener->CallJsMethod(ACROSS_MULTI_DISPLAY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        thisListener->CallJsMethod(ACROSS_DISPLAYS_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
