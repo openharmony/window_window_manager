@@ -2813,7 +2813,7 @@ WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDi
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isAcrossMultiDisplay failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!reply.ReadBool(isAcrossMultiDisplay)) {

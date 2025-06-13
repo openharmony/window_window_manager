@@ -982,7 +982,7 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, TestSize.Lev
  * @tc.desc: test function : SetFullScreenWaterfallMode
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, TestSize.Level1)
+HWTEST_F(PcFoldScreenControllerTest, SetFullScreenWaterfallMode, TestSize.Level1)
 {
     controller_->SetFullScreenWaterfallMode(true);
     EXPECT_TRUE(controller_->IsFullScreenWaterfallMode());
