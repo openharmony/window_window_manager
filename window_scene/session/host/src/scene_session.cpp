@@ -27,6 +27,7 @@
 #endif // IMF_ENABLE
 #include <ipc_skeleton.h>
 #include <pointer_event.h>
+#include <key_event.h>
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
