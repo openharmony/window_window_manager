@@ -145,9 +145,9 @@ std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
     WindowSessionImpl::systemDensityChangeListeners_;
-std::recursive_mutex WindowSessionImpl::acrossMultiDisplayChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::acrossDisplaysChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
-    WindowSessionImpl::acrossMultiDisplayChangeListeners_;
+    WindowSessionImpl::acrossDisplaysChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -3789,9 +3789,9 @@ void WindowSessionImpl::RecoverSessionListener()
         }
     }
     {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        if (acrossMultiDisplayChangeListeners_.find(persistentId) != acrossMultiDisplayChangeListeners_.end() &&
-            !acrossMultiDisplayChangeListeners_[persistentId].empty()) {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        if (acrossDisplaysChangeListeners_.find(persistentId) != acrossDisplaysChangeListeners_.end() &&
+            !acrossDisplaysChangeListeners_[persistentId].empty()) {
             if (auto hostSession = GetHostSession()) {
                 hostSession->UpdateAcrossDisplaysChangeRegistered(true);
             }
@@ -3904,7 +3904,7 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
 
 WMError WindowSessionImpl::NotifyAcrossDisplaysChange(bool isAcrossMultiDisplay)
 {
-    std::lock_guard<std::recursive_mutex> lock(acrossMultiDisplayChangeListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lock(acrossDisplaysChangeListenerMutex_);
     const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossDisplaysChangeListener>();
     for (const auto& listener : acrossMultiDisplayChangeListeners) {
         if (listener != nullptr) {
@@ -4105,8 +4105,8 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(systemDensityChangeListeners_, persistentId);
     }
     {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        ClearUselessListeners(acrossMultiDisplayChangeListeners_, persistentId);
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ClearUselessListeners(acrossDisplaysChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -5377,12 +5377,12 @@ WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
     WMError ret = WMError::WM_OK;
     bool isUpdate = false;
     {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        ret = RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ret = RegisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        if (acrossMultiDisplayChangeListeners_[persistentId].size() == 1) {
+        if (acrossDisplaysChangeListeners_[persistentId].size() == 1) {
             isUpdate = true;
         }
     }
@@ -5391,8 +5391,8 @@ WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
         ret = hostSession->UpdateAcrossDisplaysChangeRegistered(true);
     }
     if (ret != WMError::WM_OK) {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        UnregisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
     }
     return ret;
 }
@@ -5416,12 +5416,12 @@ WMError WindowSessionImpl::UnRegisterAcrossDisplaysChangeListener(
     WMError ret = WMError::WM_OK;
     bool isUpdate = false;
     {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        ret = UnregisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ret = UnregisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        if (acrossMultiDisplayChangeListeners_[persistentId].empty()) {
+        if (acrossDisplaysChangeListeners_[persistentId].empty()) {
             isUpdate = true;
         }
     }
@@ -5430,8 +5430,8 @@ WMError WindowSessionImpl::UnRegisterAcrossDisplaysChangeListener(
         ret = hostSession->UpdateAcrossDisplaysChangeRegistered(false);
     }
     if (ret != WMError::WM_OK) {
-        std::lock_guard<std::recursive_mutex> lockListener(acrossMultiDisplayChangeListenerMutex_);
-        RegisterListener(acrossMultiDisplayChangeListeners_[persistentId], listener);
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        RegisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
     }
     return ret;
 }
@@ -5534,7 +5534,7 @@ EnableIfSame<T, ISystemDensityChangeListener,
 template<typename T>
 EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
-    return acrossMultiDisplayChangeListeners_[GetPersistentId()];
+    return acrossDisplaysChangeListeners_[GetPersistentId()];
 }
 
 template<typename T>

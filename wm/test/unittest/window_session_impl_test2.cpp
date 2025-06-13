@@ -1959,16 +1959,16 @@ HWTEST_F(WindowSessionImplTest2, RegisterAcrossDisplaysChangeListener01, TestSiz
 
     listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
     std::vector<sptr<IAcrossDisplaysChangeListener>> holder;
-    window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()] = holder;
+    window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()] = holder;
     ret = window->RegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
-    holder = window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()];
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
     EXPECT_NE(existsListener, holder.end());
 
     ret = window->RegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
-    holder = window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()];
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
     EXPECT_EQ(holder.size(), 1);
 }
 
@@ -1997,11 +1997,11 @@ HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestS
 
     listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
     std::vector<sptr<IAcrossDisplaysChangeListener>> holder;
-    window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()] = holder;
+    window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()] = holder;
     ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
 
-    holder = window->acrossMultiDisplayChangeListeners_[window->property_->GetPersistentId()];
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
     EXPECT_EQ(existsListener, holder.end());
 }
