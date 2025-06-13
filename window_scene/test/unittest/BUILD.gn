@@ -801,6 +801,7 @@ ohos_unittest("ws_scene_session_test") {
     "ability_base:session_info",
     "ability_runtime:app_context",
     "eventhandler:libeventhandler",
+    "preferences:native_preferences",
   ]
 }
 
