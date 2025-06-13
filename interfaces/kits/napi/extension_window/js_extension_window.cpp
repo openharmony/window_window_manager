@@ -162,6 +162,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::IsWindowSupportWideGamut);
     BindNativeFunction(env, objValue, "getGlobalRect", moduleName, JsExtensionWindow::GetGlobalScaledRect);
 
+    //return default value
     BindNativeFunction(env, objValue, "getTitleButtonRect", moduleName, JsExtensionWindow::GetTitleButtonRect);
     BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
@@ -530,7 +531,7 @@ napi_value JsExtensionWindow::GetWindowDensityInfo(napi_env env, napi_callback_i
 
 napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    auto window = sptr<Window>MakeSptr();
+    auto window = sptr<Window>::MakeSptr();
     auto objValue = CreateJsSystemBarPropertiesObject(env, window);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
@@ -546,7 +547,7 @@ napi_value JsExtensionWindow::IsWindowShowing(napi_env env, napi_callback_info i
 
 napi_value JsExtensionWindow::GetStatusBarProperty(napi_env env, napi_callback_info info)
 {
-    auto window = sptr<Window>MakeSptr();
+    auto window = sptr<Window>::MakeSptr();
     auto objValue = GetStatusBarPropertyObject(env, window);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
