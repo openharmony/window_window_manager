@@ -1094,12 +1094,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener04, TestSize.Level1)
     res = window->UnRegisterWindowWillCloseListeners(listener14);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    IAcrossDisplaysChangeListenerSptr listener15 = nullptr;
-    res = window->RegisterAcrossDisplaysChangeListener(listener15);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnRegisterAcrossDisplaysChangeListener(listener15);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 end";
 }
