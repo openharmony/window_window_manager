@@ -963,6 +963,7 @@ protected:
      * PC Fold Screen
      */
     bool IsFullScreenWaterfallMode();
+    void SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic<uint32_t> throwSlipToFullScreenAnimCount_ = 0;
