@@ -42,10 +42,10 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
-const int32_t DURATION_0 = 0;
-const int32_t DURATION_1000 = 1000;
-const int32_t BRIGHTNESS_FACTOR_0 = 0;
-const int32_t BRIGHTNESS_FACTOR_1 = 1;
+const int DURATION_0MS = 0;
+const int DURATION_1000MS = 1000;
+const float BRIGHTNESS_FACTOR_0 = 0;
+const float BRIGHTNESS_FACTOR_1 = 1;
 const float FULL_STATUS_WIDTH = 2048;
 const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
@@ -473,6 +473,16 @@ void ScreenSession::SetIsCurrentInUse(bool isInUse)
 bool ScreenSession::GetIsCurrentInUse() const
 {
     return isInUse_;
+}
+
+void ScreenSession::SetIsExtendVirtual(bool isExtendVirtual)
+{
+    isExtendVirtual_ = isExtendVirtual;
+}
+
+bool ScreenSession::GetIsExtendVirtual() const
+{
+    return isExtendVirtual_;
 }
 
 void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
@@ -946,6 +956,11 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
+void ScreenSession::SetSecurity(bool isSecurity)
+{
+    isSecurity_ = isSecurity;
+}
+
 void ScreenSession::UpdateTouchBoundsAndOffset()
 {
     property_.SetPhysicalTouchBounds();
@@ -1131,8 +1146,12 @@ void ScreenSession::SetHorizontalRotation()
     property_.SetScreenComponentRotation(HORIZONTAL);
     property_.SetPhysicalRotation(HORIZONTAL);
     currentSensorRotation_ = HORIZONTAL;
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
-    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    if (displayNode_ != nullptr) {
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    } else {
+        TLOGW(WmsLogTag::DMS, "displayNode is null, no need to set displayNode.");
+    }
 }
 
 Orientation ScreenSession::GetOrientation() const
@@ -1767,8 +1786,8 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
     auto ret = RSInterfaces::GetInstance().GetScreenType(rsId_, screenType);
     if (ret == StatusCode::SUCCESS && screenType == RSScreenType::VIRTUAL_TYPE_SCREEN) {
-        displayNode_->SetSecurityDisplay(true);
-        TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success");
+        displayNode_->SetSecurityDisplay(isSecurity_);
+        TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success, isSecurity:%{public}d", isSecurity_);
     }
     // If setDisplayOffset is not valid for SetFrame/SetBounds
     TLOGI(WmsLogTag::DMS, "InitRSDisplayNode screenId:%{public}" PRIu64" width:%{public}u height:%{public}u",
@@ -2058,13 +2077,14 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode_ is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
+    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
-    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0 : DURATION_1000);
+    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0MS : DURATION_1000MS);
     // Increase animation when HDR luminance changes abruptly
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     displayNode_->SetHDRBrightnessFactor(isForceCloseHdr ? BRIGHTNESS_FACTOR_0 : BRIGHTNESS_FACTOR_1);

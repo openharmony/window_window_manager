@@ -139,7 +139,8 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.",
+        moduleName.c_str(), srcPath.c_str());
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
 
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
@@ -249,7 +250,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         napi_value argv[] = { napiWant };
         CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnConnect") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 
@@ -340,7 +341,8 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
             return;
         }
         OnWindowCreated();
-        TLOGI(WmsLogTag::WMS_UIEXT, "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
@@ -366,7 +368,7 @@ void JsWindowExtension::OnWindowCreated() const
         napi_value argv[] = { value };
         CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnWindowCreated") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 }

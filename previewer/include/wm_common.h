@@ -124,6 +124,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_DYNAMIC,
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
+    WINDOW_TYPE_SELECTION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -1632,17 +1633,17 @@ enum DefaultSpecificZIndex {
  * @brief window shadows info
  */
 struct ShadowsInfo : public Parcelable {
-    float radius_;
+    float radius_ = 0.0f;
     std::string color_;
-    float offsetX_;
-    float offsetY_;
+    float offsetX_ = 0.0f;
+    float offsetY_ = 0.0f;
     bool hasRadiusValue_ = false;
     bool hasColorValue_ = false;
     bool hasOffsetXValue_ = false;
     bool hasOffsetYValue_ = false;
 
     ShadowsInfo() {}
-    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue,
         bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
         offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
         hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}
@@ -1748,6 +1749,40 @@ struct ShadowsInfo : public Parcelable {
 enum class SubWindowSource : uint32_t {
     SUB_WINDOW_SOURCE_UNKNOWN = 0,
     SUB_WINDOW_SOURCE_ARKUI = 1,
+};
+
+/**
+ * @brief Screenshot event type.
+ */
+enum class ScreenshotEventType : int32_t {
+    START = 0,
+
+    /**
+     * System screenshot.
+     */
+    SYSTEM_SCREENSHOT = START,
+
+    /**
+     * System screenshot abort.
+     */
+    SYSTEM_SCREENSHOT_ABORT = 1,
+
+    /**
+     * Scroll shot start.
+     */
+    SCROLL_SHOT_START = 2,
+
+    /**
+     * Scroll shot end.
+     */
+    SCROLL_SHOT_END = 3,
+
+    /**
+     * Scroll shot abort.
+     */
+    SCROLL_SHOT_ABORT = 4,
+
+    END,
 };
 }
 }

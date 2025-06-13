@@ -91,6 +91,9 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             }
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL && session->GetKeyboardSession()) {
+            session->GetKeyboardSession()->MarkOccupiedAreaAsDirty();
+        }
         return ret;
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
@@ -231,6 +234,11 @@ void SCBSystemSession::SetSkipEventOnCastPlus(bool isSkip)
 }
 
 bool SCBSystemSession::IsVisibleForeground() const
+{
+    return isVisible_;
+}
+
+bool SCBSystemSession::IsVisibleNotBackground() const
 {
     return isVisible_;
 }

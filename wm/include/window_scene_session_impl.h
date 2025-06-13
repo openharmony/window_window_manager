@@ -59,6 +59,7 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
 
     /*
      * Window Hierarchy
@@ -86,6 +87,8 @@ public:
     static sptr<WindowSessionImpl> GetMainWindowWithId(uint32_t mainWinId);
     // only main window, sub window, dialog window can use
     static int32_t GetParentMainWindowId(int32_t windowId);
+    static WMError GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+        WindowType parentWindowType, WindowType& windowType);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
@@ -129,6 +132,7 @@ public:
     WMError SetAlpha(float alpha) override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
@@ -188,7 +192,8 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
-    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false) override;
     WmErrorCode StartMoveWindow() override;
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
@@ -212,6 +217,7 @@ public:
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+    WMError IsImmersiveLayout(bool& isImmersiveLayout) const override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
@@ -387,6 +393,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
 
     /*
      * PC Window Layout
@@ -497,6 +504,11 @@ private:
      * Window Transition Animation For PC
      */
     std::mutex transitionAnimationConfigMutex_;
+
+    /*
+     * Window Decor
+     */
+    WMError GrayOutMaximizeButton(bool isGrayOut);
 };
 } // namespace Rosen
 } // namespace OHOS

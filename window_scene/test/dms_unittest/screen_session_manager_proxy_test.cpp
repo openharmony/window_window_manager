@@ -1777,5 +1777,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | S
                 screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
     }
 }
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level1)
+{
+    DisplayId displayId = 0;
+    DMRect displayArea = DMRect::NONE();
+    ScreenId screenId = 0;
+    DMRect screenArea = DMRect::NONE();
+    float dpi = 2.2f;
+    auto ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
 }
 }

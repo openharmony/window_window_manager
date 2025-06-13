@@ -36,22 +36,6 @@
 
 namespace OHOS {
 namespace Rosen {
-#define CHECK_NAPI_RETCODE(errCode, code, call)                                           \
-    do {                                                                                  \
-        napi_status retCode = (call);                                                     \
-        if (retCode != napi_ok) {                                                         \
-            WLOGFE("napi call failed, return %{public}d", static_cast<int32_t>(retCode)); \
-            errCode = code;                                                               \
-        }                                                                                 \
-    } while (0)
-
-#define CHECK_NAPI_ENV_RETURN_IF_NULL(env)               \
-    do {                                                 \
-        if ((env) == nullptr) {                          \
-            TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
-            return nullptr;                              \
-        }                                                \
-    } while (0)
 
 #define CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue) \
     do {                                                       \
@@ -61,7 +45,6 @@ namespace Rosen {
             return nullptr;                                    \
         }                                                      \
     } while (0)
-
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);

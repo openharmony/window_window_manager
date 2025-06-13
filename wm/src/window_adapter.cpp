@@ -170,7 +170,7 @@ WMError WindowAdapter::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInf
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    auto wmsProxy = GetWindowManagerServiceProxy(); 
+    auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
 
     {
@@ -262,6 +262,14 @@ WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetGlobalWindowMode(displayId, globalWinMode);
+}
+
+WMError WindowAdapter::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetTopNavDestinationName(windowId, topNavDestName);
 }
 
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
@@ -1123,6 +1131,14 @@ WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId, fingerId);
+}
+
+WMError WindowAdapter::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifyScreenshotEvent(type);
 }
 
 WMError WindowAdapter::SetStartWindowBackgroundColor(

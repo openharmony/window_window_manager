@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -365,6 +365,148 @@ HWTEST_F(SurfaceDrawTest, DrawImageRect01, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_NE(pixelMap, nullptr);
     SurfaceDraw::DrawImageRect(surfaceNode, rect, pixelMap, color, false);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawCustomStartingWindow
+ * @tc.desc: SurfaceDraw::DrawCustomStartingWindow test failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow01, TestSize.Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawCustomStartingWindow test fail");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(nullptr, rect, info, 1.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, nullptr, 1.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, -1.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 0.0f), false);
+    rect.width_ = 0;
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), false);
+    rect.height_ = 0;
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), false);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawCustomStartingWindow
+ * @tc.desc: SurfaceDraw::DrawCustomStartingWindow color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow02, TestSize.Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawCustomStartingWindow test success");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode,
+        rect, info, std::numeric_limits<float>::max()), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode,
+        rect, info, std::numeric_limits<float>::min()), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawCustomStartingWindow
+ * @tc.desc: SurfaceDraw::DrawCustomStartingWindow resource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow03, TestSize.Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawCustomStartingWindow test success");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    info->appIconPixelMap = pixelMap;
+    info->brandingPixelMap = pixelMap;
+    info->illustrationPixelMap = pixelMap;
+
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, std::numeric_limits<float>::max()), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, std::numeric_limits<float>::min()), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawCustomStartingWindow
+ * @tc.desc: SurfaceDraw::DrawCustomStartingWindow resource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow04, TestSize.Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawCustomStartingWindow test success");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    info->illustrationPixelMap = pixelMap;
+    info->brandingPixelMap = pixelMap;
+    rect.height_ = 200; // height of rect
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawBackgroundImage01
+ * @tc.desc: SurfaceDraw::DoDrawBackgroundImage01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawBackgroundImage01, TestSize.Level1)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    ASSERT_NE(pixelMap, nullptr);
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    info->bgImagePixelMap = pixelMap;
+    sptr<Window> window = CreateTestWindow("DrawCustomResource");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto surfaceNode = window->GetSurfaceNode();
+    auto buffer = SurfaceDraw::GetSurfaceBuffer(SurfaceDraw::GetLayer(surfaceNode), rect.width_, rect.height_);
+    float ratio = 1.0f;
+
+    info->startWindowBackgroundImageFit = "";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "Cover";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "Contain";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "Fill";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "Auto";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "ScaleDown";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "xxxxx";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    info->startWindowBackgroundImageFit = "None";
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
     window->Destroy();
 }
 } // namespace

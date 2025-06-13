@@ -1337,6 +1337,20 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
     return PostSyncTask(task, "SetWindowLayoutMode");
 }
 
+WMError WindowManagerService::NotifyScreenshotEvent(ScreenshotEventType type)
+{
+    if (!Permission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify screen shot event type permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "event: %{public}d", type);
+    auto task = [this, type]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:NotifyScreenshotEvent");
+        return windowController_->NotifyScreenshotEvent(type);
+    };
+    return PostSyncTask(task, "SetWindowLayoutMode");
+}
+
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask)
 {

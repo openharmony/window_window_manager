@@ -86,7 +86,7 @@ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCod
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnPipListenerCallback");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }
@@ -103,7 +103,7 @@ void JsPiPWindowListener::OnActionEvent(const std::string& actionEvent, int32_t 
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnActionEvent");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }
@@ -128,7 +128,7 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnControlEvent");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }
@@ -155,7 +155,7 @@ void JsPiPWindowListener::OnPipSizeChange(const PiPWindowSize& size)
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnPipSizeChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }
@@ -174,7 +174,7 @@ void JsPiPWindowListener::OnPipTypeNodeChange(const napi_ref nodeRef)
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, 1);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnPipTypeNodeChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
         }

@@ -261,6 +261,19 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent01
+ * @tc.desc: Check NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyScreenshotEvent01, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto& windowManager = WindowManager::GetInstance();
+    WMError ret = windowManager.NotifyScreenshotEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: RegisterCameraFloatWindowChangedListener01
  * @tc.desc: check RegisterCameraFloatWindowChangedListener
  * @tc.type: FUNC
@@ -1627,6 +1640,19 @@ HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
+{
+    int32_t windowId = 888;
+    std::string topNavDestName;
+    auto ret = WindowManager::GetInstance().GetTopNavDestinationName(windowId, topNavDestName);
+    EXPECT_EQ(SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName), ret);
+}
+
+/**
  * @tc.name: ShiftAppWindowPointerEvent
  * @tc.desc: check ShiftAppWindowPointerEvent
  * @tc.type: FUNC
@@ -1708,7 +1734,10 @@ HWTEST_F(WindowManagerTest, ProcessRegisterWindowInfoChangeCallback01, Function 
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     observedInfo = WindowInfoKey::DISPLAY_ID;
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    observedInfo = WindowInfoKey::WINDOW_RECT;
+    ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
     ret = WindowManager::GetInstance().ProcessRegisterWindowInfoChangeCallback(observedInfo, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     observedInfo = WindowInfoKey::BUNDLE_NAME;
@@ -1730,6 +1759,9 @@ HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Functio
     observedInfo = WindowInfoKey::DISPLAY_ID;
     ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
     EXPECT_EQ(WMError::WM_OK, ret);
+    observedInfo = WindowInfoKey::WINDOW_RECT;
+    ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     observedInfo = WindowInfoKey::BUNDLE_NAME;
@@ -1749,12 +1781,18 @@ HWTEST_F(WindowManagerTest, RegisterWindowInfoChangeCallback01, Function | Small
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
     auto ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
-    ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo1, listener);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    listener->SetInterestWindowIds({1, 2, 3});
+    interestInfoSizeOld = listener->GetInterestInfo().size();
+    ret = WindowManager::GetInstance().RegisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
 }
 
 /**
@@ -1769,12 +1807,18 @@ HWTEST_F(WindowManagerTest, UnregisterWindowInfoChangeCallback01, Function | Sma
     std::unordered_set<WindowInfoKey> observedInfo;
     observedInfo.insert(WindowInfoKey::VISIBILITY_STATE);
     auto ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
     std::unordered_set<WindowInfoKey> observedInfo1;
     observedInfo1.insert(WindowInfoKey::BUNDLE_NAME);
     ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo1, listener);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    listener->SetInterestWindowIds({1, 2, 3});
+    interestInfoSizeOld = listener->GetInterestInfo().size();
+    ret = WindowManager::GetInstance().UnregisterWindowInfoChangeCallback(observedInfo, listener);
+    EXPECT_EQ(interestInfoSizeOld + 1, listener->GetInterestInfo().size());
 }
 
 /**

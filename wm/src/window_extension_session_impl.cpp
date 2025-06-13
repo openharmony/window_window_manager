@@ -41,6 +41,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "session_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -69,7 +70,7 @@ constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
@@ -139,7 +140,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
 
     auto usage = property_->GetUIExtensionUsage();
-    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage)) {
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
 
@@ -265,7 +266,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
 
     auto usage = property_->GetUIExtensionUsage();
-    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage)) {
         InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     }
 
@@ -539,7 +540,7 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     return WMError::WM_OK;
 }
 
-bool WindowExtensionSessionImpl::IsFocused() const
+bool WindowExtensionSessionImpl::IsComponentFocused() const
 {
     if (IsWindowSessionInvalid() || focusState_ == std::nullopt) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Session is invalid");
@@ -625,6 +626,10 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         WLOGFE("keyEvent is nullptr");
         return;
     }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", keyEvent->GetId());
+        return;
+    }
 
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
@@ -680,10 +685,34 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
+std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env,
+    int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 1);
+}
+ 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, token, ability);
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 0);
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
+{
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, isAni);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
@@ -693,27 +722,22 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
     return SetUIContentInner(contentName, env, storage, token, ability, true);
 }
 
-WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, int isAni)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
     }
     {
-        std::unique_ptr<Ace::UIContent> uiContent;
-        if (ability != nullptr) {
-            uiContent = Ace::UIContent::Create(ability);
-        } else {
-            uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-        }
+        std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
         auto usage = property_->GetUIExtensionUsage();
-        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        if (SessionHelper::IsSecureUIExtension(usage)) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         } else if (usage == UIExtensionUsage::EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
@@ -722,9 +746,17 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
-            uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                uiContent->InitializeByName(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         } else {
-            uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());
+            } else {
+                uiContent->Initialize(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         }
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
@@ -985,6 +1017,9 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed.", GetPersistentId());
         return;
     }
+    if (config.displayId_ != lastDisplayId_) {
+        NotifyDisplayIdChange(config.displayId_);
+    }
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(
         token, config.displayId_, config.density_, static_cast<DisplayOrientation>(config.orientation_));
 }
@@ -1050,12 +1085,25 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
     const std::shared_ptr<RSTransaction>& rsTransaction,
     const Rect& callingSessionRect, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
-            info->textFieldPositionY_, info->rect_.height_);
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
-    occupiedAreaInfo_ = info;
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    auto task = [weak = wptr(this), info, rsTransaction, callingSessionRect, avoidAreas]() {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
+            return;
+        }
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY: %{public}f, KeyBoardHeight: %{public}d",
+                info->textFieldPositionY_, info->rect_.height_);
+        }
+        window->occupiedAreaInfo_ = info;
+        window->UpdateViewportConfig(
+            window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    };
+    handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_NotifyOccupiedAreaChangeInfo");
 }
 
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(
@@ -1186,7 +1234,7 @@ float WindowExtensionSessionImpl::GetDefaultDensity(const sptr<DisplayInfo>& dis
 WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool shouldHide)
 {
     if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
+         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) && !shouldHide) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS")) {
             extensionWindowFlags_.hideNonSecureWindowsFlag = true;
             TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied in %{public}s UIExtension.",
@@ -1463,6 +1511,10 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
         TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
         return;
     }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", pointerEvent->GetId());
+        return;
+    }
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
@@ -1562,6 +1614,10 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
         TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
         return false;
     }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", keyEvent->GetId());
+        return false;
+    }
     RefreshNoInteractionTimeoutMonitor();
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         if (focusState_ == std::nullopt) {
@@ -1611,7 +1667,7 @@ WindowType WindowExtensionSessionImpl::GetParentWindowType() const
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
 {
     if (property_->GetUIExtensionUsage() != UIExtensionUsage::MODAL &&
-        property_->GetUIExtensionUsage() != UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        !SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
         return;
     }
 

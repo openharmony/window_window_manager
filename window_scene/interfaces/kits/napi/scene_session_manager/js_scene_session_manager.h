@@ -47,7 +47,10 @@ enum class ListenerFunctionType : uint32_t {
     WATCH_FOCUS_ACTIVE_CHANGE_CB,
     SET_FOREGROUND_WINDOW_NUM_CB,
     MINIMIZE_BY_WINDOW_ID_CB,
-    SCENE_SESSION_DESTRUCT_CB
+    SCENE_SESSION_DESTRUCT_CB,
+    SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,
+    UPDATE_KIOSK_APP_LIST_CB,
+    KIOSK_MODE_CHANGE_CB
 };
 
 class JsSceneSessionManager final {
@@ -299,6 +302,10 @@ private:
     void OnSetForegroundWindowNum(uint32_t windowNum);
     void RegisterMinimizeByWindowIdCallback();
     void OnMinimizeByWindowId(const std::vector<int32_t>& windowIds);
+    void OnUpdateKioskAppListCallback(const std::vector<std::string>& kioskAppList);
+    void RegisterUpdateKioskAppListCallback();
+    void OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId);
+    void RegisterKioskModeChangeCallback();
 
     /*
      * Window Recover
@@ -311,7 +318,7 @@ private:
     /*
      * PiP Window
      */
-    void OnStartPiPFailed();
+    void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
 
     /*
@@ -338,6 +345,8 @@ private:
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
+    void RegisterTransferSessionToTargetScreenCallback();
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;

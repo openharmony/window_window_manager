@@ -105,7 +105,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
-    } else if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    } else if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
@@ -144,7 +144,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnRectChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
@@ -187,7 +187,7 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnAvoidAreaChanged") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
 }
@@ -209,7 +209,7 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
         napi_value argv[] = { CreateJsValue(eng, info->rect_.height_) };
         thisListener->CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
 }
