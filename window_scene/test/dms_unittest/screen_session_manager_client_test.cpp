@@ -1655,5 +1655,30 @@ HWTEST_F(ScreenSessionManagerClientTest, OnBeforeScreenPropertyChanged, TestSize
     client->OnBeforeScreenPropertyChanged(foldStatus);
     EXPECT_NE(client, nullptr);
 }
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrimaryDisplaySystemDpi, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(50, 50, "SetPrimaryDisplaySystemDpi", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession);
+    float dpi = 2.125f;
+    screenSession->SetDensityInCurResolution(dpi);
+    screenSession->SetIsExtend(false);
+    client->screenSessionMap_[0] = screenSession;
+    EXPECT_EQ(screenSession->GetDensityInCurResolution(), 2.125f);
+    dpi = 2.2f;
+    client->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi(), 2.2f);
+}
 } // namespace Rosen
 } // namespace OHOS

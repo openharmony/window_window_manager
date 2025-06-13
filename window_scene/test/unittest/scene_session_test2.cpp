@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
-    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId) {
+    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId, DisplayId displayId) {
         sceneSession->SetCollaboratorType(persistentId);
     };
     auto outsideDownEventFun = [sceneSession](int32_t x, int32_t y) {
@@ -1574,30 +1574,6 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, TestSize.Level1)
     sceneSession->SetSessionProperty(property);
     auto result = sceneSession->GetSubWindowModalType();
     ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);
-}
-
-/**
- * @tc.name: CheckGetAvoidAreaAvailable
- * @tc.desc: CheckGetAvoidAreaAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CheckGetAvoidAreaAvailable";
-    info.bundleName_ = "CheckGetAvoidAreaAvailable";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
 }
 
 /**

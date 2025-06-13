@@ -87,6 +87,8 @@ public:
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
+    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -206,6 +208,7 @@ public:
     WMError RequestFocus() const override;
     WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
+    WSError GetTopNavDestinationName(std::string& topNavDestName) override { return WSError::WS_OK; }
     WSError HandleBackEvent() override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
     bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -266,6 +269,8 @@ public:
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    WMError RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
+    WMError UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
     void GetExtensionConfig(AAFwk::WantParams& want) const override;
@@ -380,8 +385,10 @@ public:
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
-    WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener) override;
-    WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener) override;   
+    WMError RegisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener) override;
+    WMError UnregisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -414,7 +421,7 @@ public:
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
-
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override { return WMError::WM_OK; }
     /*
      * Free Multi Window
      */
@@ -448,6 +455,7 @@ public:
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
 
@@ -508,8 +516,10 @@ public:
      * Window LifeCycle
      */
     void NotifyAfterInteractive();
+    WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     void NotifyAfterNonInteractive();
     void NotifyNonInteractiveStatus() override;
+    void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
 
 protected:
     WMError Connect();
@@ -673,6 +683,7 @@ protected:
     std::string intentParam_;
     std::function<void()> loadPageCallback_;
     bool isColdStart_ = true;
+    std::string navDestinationInfo_;
 
     /*
      * Window Layout
@@ -695,6 +706,7 @@ protected:
     template <typename T>
     EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
     void NotifyWindowStatusDidChange(WindowMode mode);
+    std::atomic_bool hasSetEnableDrag_ = false;
 
     /*
      * Window Immersive
@@ -743,6 +755,11 @@ protected:
      */
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo_ = nullptr;
 
+    /*
+     * Window Decor
+     */
+    bool grayOutMaximizeButton_ = false;
+    
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -771,6 +788,8 @@ private:
     template<typename T>
     EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> GetListeners();
+    template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
@@ -790,7 +809,8 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IExtensionSecureLimitChangeListener, std::vector<sptr<IExtensionSecureLimitChangeListener>>> GetListeners();
+    EnableIfSame<T, IExtensionSecureLimitChangeListener, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
+        GetListeners();
     template<typename T>
     EnableIfSame<T, IPreferredOrientationChangeListener, sptr<IPreferredOrientationChangeListener>> GetListeners();
     template<typename T>
@@ -822,14 +842,21 @@ private:
     EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowWillCloseListener, std::vector<sptr<IWindowWillCloseListener>>> GetListeners();
-
-    WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, int isAni);
+    Ace::UIContentErrorCode UIContentRestore(Ace::UIContent*, const std::string& contentInfo, void* storage,
+        Ace::ContentInfoType infoType, int isAni);
+    WMError InitUIContent(const std::string& contentInfo, void* env, void* storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-        OHOS::Ace::UIContentErrorCode& aceRet);
-    void RegisterUIContenCallback();
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
+        OHOS::Ace::UIContentErrorCode& aceRet, int isAni = 0);
+    void UpdateConfigWhenSetUIContent();
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+        int isAni = 0);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
+    void RegisterUIContenCallback();
     inline void DestroyExistUIContent();
     std::string GetRestoredRouterStack();
 
@@ -911,6 +938,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> keyboardDidShowListeners_;
     static std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> keyboardDidHideListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
+    static std::recursive_mutex screenshotAppEventListenerMutex_;
+    static std::unordered_map<int32_t, std::vector<IScreenshotAppEventListenerSptr>> screenshotAppEventListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
     static std::mutex displayIdChangeListenerMutex_;
@@ -975,7 +1004,7 @@ private:
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
     static std::mutex mainWindowCloseListenersMutex_;
     static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
-    static std::mutex windowWillCloseListenersMutex_;
+    static std::recursive_mutex windowWillCloseListenersMutex_;
     static std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> windowWillCloseListeners_;
 
     /*

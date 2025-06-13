@@ -39,6 +39,12 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
+std::string logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const char *msg)
+{
+    logMsg = msg;
+}
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -1904,14 +1910,20 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, TestSize.Level1
     bounds.rect_.height_ = 2772;
     int rotation = 1;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, 1, screenPropertyChangeType, false);
     auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(virtualOption,
         displayManagerAgent->AsObject());
     if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
     }
-    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(1, bounds, rotation,
-        screenPropertyChangeType);
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_END;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, false);
+    screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY;
+    ScreenSessionManager::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
+        screenPropertyChangeType, true);
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession();
     ASSERT_NE(screenSession, ScreenSessionManager::GetInstance().InitAndGetScreen(2));
     ssm_->DestroyVirtualScreen(screenId);
@@ -4850,8 +4862,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode01, TestSize.Level1)
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     MultiScreenMode screenMode = MultiScreenMode::SCREEN_EXTEND;
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), screenMode);
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
@@ -4872,8 +4887,11 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode02, TestSize.Level1)
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     MultiScreenMode screenMode = MultiScreenMode::SCREEN_MIRROR;
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, screenMode);
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), screenMode);
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
@@ -4893,9 +4911,12 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, TestSize.Level1)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetScreenType(ScreenType::REAL);
 
     uint32_t testNum = 2;
-    auto ret = ssm_->SetMultiScreenMode(0, screenId, static_cast<MultiScreenMode>(testNum));
+    auto ret = ssm_->SetMultiScreenMode(0, screenSession->GetRSScreenId(), static_cast<MultiScreenMode>(testNum));
     ASSERT_EQ(ret, DMError::DM_OK);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
@@ -6895,27 +6916,38 @@ HWTEST_F(ScreenSessionManagerTest, ResetInternalScreenSession02, TestSize.Level1
 /**
  * @tc.name: NotifyCreatedScreen
  * @tc.desc: NotifyCreatedScreen test
- * @tc.type: session null
+ * @tc.type: NotifyCreatedScreen test
  */
-HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen01, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen, TestSize.Level1)
 {
+    logMsg.clear();
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
     ASSERT_NE(ssm_, nullptr);
-    sptr<ScreenSession> screenSession = nullptr;
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1001;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, ScreenProperty(), 0);
+    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    }
     ssm_->NotifyCreatedScreen(screenSession);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_TRUE(logMsg.find("super fold device, change by rotation.") == std::string::npos);
+    } else {
+        EXPECT_FALSE(logMsg.find("super fold device, change by rotation.") == std::string::npos);
+    }
 }
 
 /**
- * @tc.name: NotifyCreatedScreen
- * @tc.desc: NotifyCreatedScreen test
- * @tc.type: session not null
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_, nullptr);
-    ScreenId id = 1001;
-    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    EXPECT_NE(nullptr, screenSession);
-    ssm_->NotifyCreatedScreen(screenSession);
+    DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
+    EXPECT_EQ(DMError::DM_OK, ret);
 }
 }
 } // namespace Rosen

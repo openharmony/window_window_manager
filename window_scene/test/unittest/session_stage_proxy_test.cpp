@@ -365,6 +365,33 @@ HWTEST_F(SessionStageProxyTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: test function : NotifyScreenshotAppEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(sessionStage_, nullptr);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    MockMessageParcel::ClearAllErrorFlag();
+    auto ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ret = sessionStage->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sessionStage_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: NotifyTouchOutside
  * @tc.desc: test function : NotifyTouchOutside
  * @tc.type: FUNC
@@ -431,6 +458,7 @@ HWTEST_F(SessionStageProxyTest, NotifyExtensionSecureLimitChange02, TestSize.Lev
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto res = sessionStage_->NotifyExtensionSecureLimitChange(isLimit);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -876,14 +904,41 @@ HWTEST_F(SessionStageProxyTest, NotifyAppForceLandscapeConfigUpdated02, TestSize
 
 /**
  * @tc.name: CloseSpecificScene
- * @tc.desc: test function : CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene 1
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageProxyTest, CloseSpecificScene, Function | SmallTest | Level1)
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene01, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
-    sessionStage_->CloseSpecificScene();
-    EXPECT_NE(nullptr, sessionStage_);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+
+    auto res = sProxy->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    remoteMocker->SetRequestResult(1);
+    res = sProxy->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    remoteMocker->SetRequestResult(0);
+    res = sProxy->CloseSpecificScene();
+    remoteMocker->SetRequestResult(0);
+    EXPECT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: CloseSpecificScene
+ * @tc.desc: test function : CloseSpecificScene 2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, CloseSpecificScene02, Function | SmallTest | Level1)
+{
+    sptr<SessionStageProxy> sessionStage2_ = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    auto res = sessionStage2_->CloseSpecificScene();
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 } // namespace
 } // namespace Rosen

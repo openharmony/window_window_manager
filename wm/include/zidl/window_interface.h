@@ -44,6 +44,7 @@ public:
         TRANS_ID_GET_WINDOW_PROPERTY,
         TRANS_ID_NOTIFY_OUTSIDE_PRESSED,
         TRANS_ID_NOTIFY_SCREEN_SHOT,
+        TRANS_ID_NOTIFY_SCREEN_SHOT_APP_EVENT,
         TRANS_ID_DUMP_INFO,
         TRANS_ID_NOTIFY_DESTROY,
         TRANS_ID_NOTIFY_FOREGROUND,
@@ -52,6 +53,7 @@ public:
         TRANS_ID_UPDATE_ZOOM_TRANSFORM,
         TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
         TRANS_ID_CONSUME_KEY_EVENT,
+        TRANS_ID_GET_ROUTER_STACK_INFO,
         TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS,
         TRANS_ID_NOTIFY_MMI_SERVICE_ONLINE,
     };
@@ -71,6 +73,7 @@ public:
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
     virtual WMError NotifyTouchOutside() = 0;
     virtual WMError NotifyScreenshot() = 0;
+    virtual WMError NotifyScreenshotAppEvent(ScreenshotEventType type) = 0;
     virtual WMError DumpInfo(const std::vector<std::string>& params) = 0;
     virtual WMError NotifyDestroy(void) = 0;
     virtual WMError NotifyForeground(void) = 0;

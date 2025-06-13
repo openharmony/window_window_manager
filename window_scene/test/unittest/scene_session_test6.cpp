@@ -684,6 +684,16 @@ HWTEST_F(SceneSessionTest6, GetFollowScreenChange01, TestSize.Level1)
     sceneSession->SetFollowScreenChange(isFollowScreenChange);
     bool res = sceneSession->GetFollowScreenChange();
     EXPECT_EQ(res, isFollowScreenChange);
+
+    isFollowScreenChange = false;
+    sceneSession->SetFollowScreenChange(isFollowScreenChange);
+    res = sceneSession->GetFollowScreenChange();
+    EXPECT_EQ(res, isFollowScreenChange);
+
+    isFollowScreenChange = true;
+    sceneSession->SetFollowScreenChange(isFollowScreenChange);
+    res = sceneSession->GetFollowScreenChange();
+    EXPECT_EQ(res, isFollowScreenChange);
 }
 
 /**
@@ -926,6 +936,9 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     // test set SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN
@@ -969,23 +982,13 @@ HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAppUseControlMap
- * @tc.desc: GetAllAppUseControlMap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level3)
-{
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
-}
-
-/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
 {
-    SceneSession::ControlInfo controlInfo = {
+    ControlInfo controlInfo = {
         .isNeedControl = true,
         .isControlRecentOnly = true
     };
@@ -993,12 +996,65 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     info.bundleName_ = "app";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-        allAppUseMap = sceneSession->GetAllAppUseControlMap();
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+ 
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMap;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMap]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+
     std::string key = "app#0";
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromServer
+ * @tc.desc: GetScreenWidthAndHeightFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
+    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(nullptr, screenWidth, screenHeight), true);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+
+    property->SetDisplayId(DISPLAY_ID_INVALID);
+    EXPECT_EQ(property->GetDisplayId(), DISPLAY_ID_INVALID);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+
+    sceneSession->SetIsSystemKeyboard(true);
+    EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
+}
+
+/**
+ * @tc.name: GetScreenWidthAndHeightFromClient
+ * @tc.desc: GetScreenWidthAndHeightFromClient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromClient, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetScreenWidthAndHeightFromClient";
+    info.abilityName_ = "GetScreenWidthAndHeightFromClient";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
+
+    sceneSession->SetIsSystemKeyboard(true);
+    EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
+    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
 }
 } // namespace
 } // namespace Rosen

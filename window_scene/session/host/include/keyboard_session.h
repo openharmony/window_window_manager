@@ -69,6 +69,7 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
         const WindowAnimationInfo& animationInfo) override;
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
     WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
@@ -117,6 +118,9 @@ private:
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
+    void MarkOccupiedAreaAsDirty() override;
+    void ResetOccupiedAreaDirtyFlags() override;
+    uint32_t GetOccupiedAreaDirtyFlags() override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

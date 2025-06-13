@@ -92,6 +92,7 @@ private:
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
@@ -158,6 +159,8 @@ private:
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 
     int HandleSetSubWindowSource(MessageParcel& data, MessageParcel& reply);
+
+    int HandleSetFrameRectForParticalZoomIn(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

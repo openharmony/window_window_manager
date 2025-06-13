@@ -33,9 +33,12 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
     bool IsNeedCrossDisplayRendering() const override;
     void HandleCrossMoveToSurfaceNode(WSRect& globalRect) override;
     std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect& newRect);
+    void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+        const sptr<ScreenSession>& screenSession) override;
 
     void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
     WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
@@ -78,6 +81,7 @@ private:
     /*
      * Window Layout
      */
+    std::atomic<int32_t> cloneNodeCountDuringCross_ = 0;
     void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) override;
     void RemoveSurfaceNodeFromScreen() override;
 };

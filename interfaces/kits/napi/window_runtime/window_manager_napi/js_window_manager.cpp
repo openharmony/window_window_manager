@@ -179,6 +179,13 @@ napi_value JsWindowManager::GetGlobalWindowMode(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnGetGlobalWindowMode(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetTopNavDestinationName(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -201,6 +208,12 @@ napi_value JsWindowManager::ShiftAppWindowTouchEvent(napi_env env, napi_callback
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnShiftAppWindowTouchEvent(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenshotEvent(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -481,7 +494,7 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
             return CreateSubWindowTask(parentId, windowName, winType, env, *task);
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnCreate") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -612,7 +625,7 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
             return CreateNewSubWindowTask(windowOption, env, *task);
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnCreateWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -712,7 +725,7 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
             }
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnFindWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -803,7 +816,7 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnMinimizeAll failed"));
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMinimizeAll") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -829,7 +842,8 @@ napi_value JsWindowManager::OnToggleShownStateForAllAppWindows(napi_env env, nap
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnToggleShownStateForAllAppWindows failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "OnToggleShownStateForAllAppWindows");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "failed to send event"));
     }
@@ -1077,7 +1091,7 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowLayoutMode") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "failed to send event"));
     }
@@ -1121,7 +1135,7 @@ napi_value JsWindowManager::OnSetGestureNavigationEnabled(napi_env env, napi_cal
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetGestureNavigationEnabled failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetGestureNavigationEnabled") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -1179,7 +1193,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         task->Resolve(env, NapiGetUndefined(env));
         WLOGD("OnSetWaterMarkImage success");
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkImage") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -1226,7 +1240,7 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ShiftAppWindowFocus failed"));
             }
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShiftAppWindowFocus") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
     }
     return result;
@@ -1277,7 +1291,7 @@ napi_value JsWindowManager::OnSetStartWindowBackgroundColor(napi_env env, napi_c
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "setStartWindowBackground failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetStartWindowBackgroundColor") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
     }
@@ -1317,7 +1331,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllWindowLayoutInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1366,11 +1380,53 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode), "failed"));
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetGlobalWindowMode") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send event failed, displayId: %{public}" PRIu64, displayId);
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
     }
+    return result;
+}
+
+napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    int32_t windowId = 0;
+    if (!ConvertFromJsValue(env, argv[0], windowId) || windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    std::string topNavDestName;
+    WMError retErrCode = WMError::WM_OK;
+    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
+        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
+            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+    };
+    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (retErrCode != WMError::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
+                    where, static_cast<int32_t>(retErrCode), windowId);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                return;
+            }
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
+                where, topNavDestName.c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, topNavDestName));
+        };
+    napi_value result = nullptr;
+    auto asyncTask = CreateAsyncTask(env, nullptr,
+        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopNavDestinationName", env, std::move(asyncTask));
     return result;
 }
 
@@ -1407,7 +1463,7 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetVisibleWindowInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -1460,7 +1516,7 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "getWindowsByCoordinate failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetWindowsByCoordinate") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1501,7 +1557,8 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowPointerEvent failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowPointerEvent");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1551,10 +1608,51 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowTouchEvent failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowTouchEvent");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY), "send event failed"));
     }
+    return result;
+}
+
+napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t type = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!ConvertFromJsValue(env, argv[0], type) ||
+        type < static_cast<int32_t>(ScreenshotEventType::START) ||
+        type >= static_cast<int32_t>(ScreenshotEventType::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(type);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [errCodePtr, screenshotEventType, where] {
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d, result: %{public}d",
+            where, screenshotEventType, *errCodePtr);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnNotifyScreenshotEvent",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -1572,6 +1670,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowType", WindowTypeInit(env));
     napi_set_named_property(env, exportObj, "AvoidAreaType", AvoidAreaTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
+    napi_set_named_property(env, exportObj, "ScreenshotEventType", ScreenshotEventTypeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnchor", WindowAnchorInit(env));
@@ -1611,6 +1710,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
+    BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName,
+        JsWindowManager::GetTopNavDestinationName);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
@@ -1619,6 +1720,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetStartWindowBackgroundColor);
     BindNativeFunction(env, exportObj, "shiftAppWindowTouchEvent", moduleName,
         JsWindowManager::ShiftAppWindowTouchEvent);
+    BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName,
+        JsWindowManager::NotifyScreenshotEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

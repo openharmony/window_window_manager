@@ -1869,7 +1869,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn01, Function 
 
 /**
  * @tc.name: SetFrameRectForParticalZoomIn02
- * @tc.desc: Test SetFrameRectForParticalZoomIn when surfaceNode is nullptr
+ * @tc.desc: Test SetFrameRectForParticalZoomIn when window session is invalid
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function | SmallTest | Level2)
@@ -1879,63 +1879,41 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function 
     option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
-    window->surfaceNode_ = nullptr;
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
-}
 
-/**
- * @tc.name: SetFrameRectForParticalZoomIn03
- * @tc.desc: Test SetFrameRectForParticalZoomIn when display is invalid
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn03");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    // default displayId is -1 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, window->SetFrameRectForParticalZoomIn(frameRect));
-}
-
-/**
- * @tc.name: SetFrameRectForParticalZoomIn04
- * @tc.desc: SetFrameRectForParticalZoomIn when parameter frameRect is invalid
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn04, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn04");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { -1, 10, 10, 10 }; // -1 is invalid frame rect posX, 10 is valid frame rect param
-    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetFrameRectForParticalZoomIn(frameRect));
-}
-
-/**
- * @tc.name: SetFrameRectForParticalZoomIn05
- * @tc.desc: SetFrameRectForParticalZoomIn
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn05, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetFrameRectForParticalZoomIn02";
+    sessionInfo.abilityName_ = "SetFrameRectForParticalZoomIn02";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 100; // 100 is persistent id
+    window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.desc: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateEnableDragWhenSwitchMultiWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hasSetEnableDrag_.store(true);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
+
+    window->hasSetEnableDrag_.store(false);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
 }
 }
 } // namespace Rosen

@@ -75,6 +75,8 @@ using NotifySessionExceptionFunc =
     std::function<void(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
+using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
+    const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
     bool shouldBackToCaller)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
@@ -169,6 +171,7 @@ public:
     void ResetSessionConnectState() REQUIRES(SCENE_GUARD);
     void ResetIsActive();
     WSError PendingSessionToForeground();
+    WSError PendingSessionToBackground(const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
@@ -179,6 +182,7 @@ public:
     void SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func);
     void SetBackPressedListenser(NotifyBackPressedFunc&& func);
     void SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func);
+    void SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func);
     void SetPendingSessionToBackgroundForDelegatorListener(NotifyPendingSessionToBackgroundForDelegatorFunc&& func);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
@@ -475,6 +479,7 @@ public:
     bool IsSystemSession() const;
     bool IsTerminated() const;
     bool IsSessionForeground() const;
+    bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
     virtual void SetBlank(bool isAddBlank) {};
     virtual bool GetBlank() const { return false; }
@@ -588,6 +593,7 @@ public:
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
+    virtual bool IsVisibleNotBackground() const;
     void SetIsStarting(bool isStarting);
     void SetUIStateDirty(bool dirty);
     void SetMainSessionUIStateDirty(bool dirty);
@@ -674,6 +680,7 @@ public:
     uint32_t GetPropertyDirtyFlags() const { return propertyDirtyFlags_; };
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
+    WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
 
     /*
      * Window Pattern
@@ -800,6 +807,7 @@ protected:
      */
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
+    NotifyPendingSessionToBackgroundFunc pendingSessionToBackgroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyBackPressedFunc backPressedFunc_;
     NotifyTerminateSessionFunc terminateSessionFunc_;
@@ -893,7 +901,7 @@ protected:
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
-    
+
     /*
      * Window Pattern
      */

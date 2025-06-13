@@ -118,7 +118,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         }
         task->Resolve(env, NapiGetUndefined(env));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnStartPictureInPicture") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
@@ -152,7 +152,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
         }
         task->Resolve(env, NapiGetUndefined(env));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnStopPictureInPicture") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
@@ -236,7 +236,7 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         }
         task->Resolve(env, NapiGetUndefined(env));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnUpdateContentNode") != napi_status::napi_ok) {
         napi_delete_reference(env, typeNodeRef);
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
@@ -392,7 +392,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
         }
         task->Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetPiPWindowInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }

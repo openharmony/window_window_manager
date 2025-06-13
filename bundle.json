@@ -85,6 +85,7 @@
           "cJSON",
           "bounds_checking_function",
           "device_status",
+          "runtime_core",
           "zlib"
         ],
         "third_party": [
@@ -99,6 +100,8 @@
             "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
+            "//foundation/window/window_manager/interfaces/kits/ani:ani_packages",
+            "//foundation/window/window_manager/window_scene/interfaces/kits/ani:window_scene_ani_packages",
             "//foundation/window/window_manager/interfaces/kits/cj:ffi_packages",
             "//foundation/window/window_manager/resources:window_resources",
             "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages"
@@ -380,6 +383,33 @@
                 "js_embeddable_window_stage.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/napi/embeddable_window_stage"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage:embeddablewindowstageani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/embeddable_window_stage_ani"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/window_runtime:windowstageani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager:scenesessionmanagerani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager/scene_session_manager_ani"
             }
           },
           {

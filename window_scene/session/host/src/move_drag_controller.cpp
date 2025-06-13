@@ -93,10 +93,14 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
             hasPointDown_, isStartDrag_);
+        ClearSpecifyMoveStartDisplay();
         return;
     }
     NotifyWindowInputPidChange(flag);
     isStartMove_ = flag;
+    if (!isStartMove_) {
+        ClearSpecifyMoveStartDisplay();
+    }
     ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_MOVE_WINDOW, flag);
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
@@ -195,6 +199,23 @@ WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
             moveDragProperty_.targetRect_.height_};
 }
 
+WSRect MoveDragController::GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
+    if (!screenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null, return relative coordinates.");
+        return rect;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
+    return { rect.posX_ + currentDisplayOffsetX - originalDisplayOffsetX_,
+             rect.posY_ + currentDisplayOffsetY - originalDisplayOffsetY_,
+             rect.width_,
+             rect.height_ };
+}
+
 void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
@@ -219,7 +240,8 @@ void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragCon
 /** @note @window.drag */
 void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, 1.0f, 1.0f, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {
+        -1, -1, -1, -1, -1, -1, moveDragProperty_.scaleX_, moveDragProperty_.scaleY_, {0, 0, 0, 0}, {0, 0, 0, 0}};
 }
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
@@ -267,6 +289,7 @@ void MoveDragController::ResetCrossMoveDragProperty()
     originalDisplayOffsetY_ = 0;
     moveDragIsInterrupted_ = false;
     parentRect_ = {0, 0, 0, 0};
+    ClearSpecifyMoveStartDisplay();
 }
 
 void MoveDragController::SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
@@ -673,7 +696,7 @@ void MoveDragController::SetScale(float scaleX, float scaleY)
 void MoveDragController::SetParentRect(const Rect& parentRect)
 {
     parentRect_ = parentRect;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s",parentRect_.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s", parentRect_.ToString().c_str());
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
@@ -695,6 +718,9 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
         (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
+    if (isAdaptToProportionalScale_) {
+        return std::make_pair(tranX, tranY);
+    }
     if (MathHelper::NearZero(moveDragProperty_.scaleX_) || MathHelper::NearZero(moveDragProperty_.scaleY_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
         return std::make_pair(tranX, tranY);
@@ -1005,8 +1031,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     if (aspectRatio_ <= NEAR_ZERO) {
         CalcFreeformTranslateLimits(type_);
     }
-    moveDragProperty_.originalRect_.posX_ = pointerItem.GetDisplayX() - pointerItem.GetWindowX() - parentRect_.posX_;
-    moveDragProperty_.originalRect_.posY_ = pointerItem.GetDisplayY() - pointerItem.GetWindowY() - parentRect_.posY_;
+    moveDragProperty_.originalRect_.posX_ = (originalRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_;
+    moveDragProperty_.originalRect_.posY_ = (originalRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_;
     mainMoveAxis_ = AxisType::UNDEFINED;
     isStartDrag_ = true;
     NotifyWindowInputPidChange(isStartDrag_);
@@ -1413,18 +1439,37 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     return WSError::WS_OK;
 }
 
-void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-    int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect)
+void MoveDragController::SetSpecifyMoveStartDisplay(DisplayId displayId)
 {
-    moveTempProperty_.lastDownPointerPosX_ = pointerPosX;
-    moveTempProperty_.lastDownPointerPosY_ = pointerPosY;
-    moveTempProperty_.lastMovePointerPosX_ = pointerPosX;
-    moveTempProperty_.lastMovePointerPosY_ = pointerPosY;
-    moveTempProperty_.lastDownPointerWindowX_ = offsetX;
-    moveTempProperty_.lastDownPointerWindowY_ = offsetY;
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
+    std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
+    specifyMoveStartDisplayId_ = displayId;
+    isSpecifyMoveStart_ = true;
+}
 
-    moveDragProperty_.targetRect_ = winRect;
-    ProcessSessionRectChange(SizeChangeReason::DRAG_END);
+void MoveDragController::ClearSpecifyMoveStartDisplay()
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
+    std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
+    specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
+    isSpecifyMoveStart_ = false;
+}
+
+void MoveDragController::HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property)
+{
+    moveTempProperty_.lastDownPointerPosX_ = property.pointerPosX;
+    moveTempProperty_.lastDownPointerPosY_ = property.pointerPosY;
+    moveTempProperty_.lastMovePointerPosX_ = property.pointerPosX;
+    moveTempProperty_.lastMovePointerPosY_ = property.pointerPosY;
+    moveTempProperty_.lastDownPointerWindowX_ = property.pointerWindowX;
+    moveTempProperty_.lastDownPointerWindowY_ = property.pointerWindowY;
+
+    WSRect targetRect = GetTargetDisplayRectRelatedToStartDisplay(property.winRect, property.displayId);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "displayId:%{public}" PRIu64 " targetRect: %{public}s",
+        property.displayId, targetRect.ToString().c_str());
+    moveDragProperty_.targetRect_ = targetRect;
+    moveDragEndDisplayId_ = property.displayId;
+    ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
 /** @note @window.drag */
@@ -1435,8 +1480,8 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     }
 
     WSRect originalRect = {
-        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_,
-        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_ - parentRect_.posY_,
+        (windowRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_,
+        (windowRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_,
         windowRect.width_,
         windowRect.height_
     };
@@ -1460,9 +1505,25 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.width_,
         originalRect.height_
     };
+    bool isSpecifyMoveStart = false;
+    {
+        std::lock_guard<std::mutex> lock(specifyMoveStartMutex_);
+        isSpecifyMoveStart = isSpecifyMoveStart_;
+    }
+    if (isSpecifyMoveStart) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "specify start display:%{public}" PRIu64, specifyMoveStartDisplayId_);
+        moveDragProperty_.originalRect_.posX_ = moveTempProperty_.lastDownPointerPosX_ -
+            moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_;
+        moveDragProperty_.originalRect_.posY_ = moveTempProperty_.lastDownPointerPosY_ -
+            moveTempProperty_.lastDownPointerWindowY_ - parentRect_.posY_;
+        targetRect.posX_ = moveDragProperty_.originalRect_.posX_ + offsetX;
+        targetRect.posY_ = moveDragProperty_.originalRect_.posY_ + offsetY;
+        targetRect = GetTargetDisplayRectRelatedToStartDisplay(targetRect, specifyMoveStartDisplayId_);
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     moveDragProperty_.targetRect_ = targetRect;
+    isAdaptToProportionalScale_ = useWindowRect;
     ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 

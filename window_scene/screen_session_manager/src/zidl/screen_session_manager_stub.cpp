@@ -27,6 +27,7 @@ namespace {
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -212,6 +213,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             std::vector<uint64_t> missionIds;
             data.ReadUInt64Vector(&missionIds);
             VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
+            bool isSecurity = data.ReadBool();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -229,7 +231,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .flags_ = flags,
                 .isForShot_ = isForShot,
                 .missionIds_ = missionIds,
-                .virtualScreenType_ = virtualScreenType
+                .virtualScreenType_ = virtualScreenType,
+                .isSecurity_ = isSecurity
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -870,7 +873,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             auto rotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
+            bool isSwitchUser = data.ReadBool();
+            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType, isSwitchUser);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {
@@ -1185,6 +1189,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetScreenAreaOfDisplayArea(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI: {
+            ProcSetPrimaryDisplaySystemDpi(data, reply);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1344,5 +1352,16 @@ void ScreenSessionManagerStub::ProcGetScreenAreaOfDisplayArea(MessageParcel& dat
     static_cast<void>(reply.WriteInt32(screenArea.posY_));
     static_cast<void>(reply.WriteUint32(screenArea.width_));
     static_cast<void>(reply.WriteUint32(screenArea.height_));
+}
+
+void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& data, MessageParcel& reply)
+{
+    float dpi = INVALID_DEFAULT_DENSITY;
+    if (!data.ReadFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "Read dpi failed.");
+        return;
+    }
+    DMError ret = SetPrimaryDisplaySystemDpi(dpi);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen

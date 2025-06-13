@@ -1976,7 +1976,7 @@ napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo)
     if (!shadowsInfo.hasRadiusValue_ && !shadowsInfo.hasColorValue_ && !shadowsInfo.hasOffsetXValue_ &&
         !shadowsInfo.hasOffsetYValue_) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Obeject is undefined!");
-        return NapiGetUndefined(env);   
+        return NapiGetUndefined(env);
     }
     return objValue;
 }
@@ -2258,6 +2258,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
+    SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
     return objValue;
 }
 
@@ -2417,7 +2418,7 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        napi_send_event(env_, task, napi_eprio_immediate);
+        napi_send_event(env_, task, napi_eprio_immediate, traceInfo.c_str());
     }
 }
 

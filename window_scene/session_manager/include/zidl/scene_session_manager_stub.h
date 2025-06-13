@@ -55,6 +55,7 @@ private:
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
@@ -98,6 +99,7 @@ private:
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
@@ -131,6 +133,7 @@ private:
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshotEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetStartWindowBackgroundColor(MessageParcel& data, MessageParcel& reply);
     int HandleAnimateTo(MessageParcel& data, MessageParcel& reply);
 
