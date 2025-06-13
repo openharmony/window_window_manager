@@ -254,7 +254,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FUll_SCREEN_ACROSS_MULTI_DISPLAY):
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS):
             return HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
@@ -290,7 +290,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED):
             return HandleUpdateScreenshotAppEventRegistered(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED):
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED):
             return HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);

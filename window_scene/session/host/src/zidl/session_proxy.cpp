@@ -2806,7 +2806,7 @@ WMError SessionProxy::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossMultiDi
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FUll_SCREEN_ACROSS_MULTI_DISPLAY), data,
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS), data,
         reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -3148,7 +3148,7 @@ WMError SessionProxy::UpdateAcrossDisplaysChangeRegistered(bool isRegister)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_MULTI_DISPLAY_REGISTERED),
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
