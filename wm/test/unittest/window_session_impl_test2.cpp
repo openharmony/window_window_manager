@@ -30,15 +30,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-std::string logMsg;
-void MyLogCallback(const LogType type,
-                   const LogLevel level,
-                   const unsigned int domain,
-                   const char* tag,
-                   const char* msg)
-{
-    logMsg = msg;
-}
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
 } // namespace
 
 namespace OHOS {
@@ -796,7 +793,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowStatusChange02, TestSize.Level1)
     auto listeners = GetListenerList<IWindowStatusChangeListener, MockWindowStatusChangeListener>();
     EXPECT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
-    window->windowStatusChangeListeners_.insert({ window->GetPersistentId(), listeners });
+    window->windowStatusChangeListeners_.insert({window->GetPersistentId(), listeners});
 
     WindowMode mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     window->state_ = WindowState::STATE_SHOWN;
@@ -1264,7 +1261,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterWindowTitleButtonRectChangeListener, 
 {
     auto window = GetTestWindowImpl("UnregisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window, nullptr);
-    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
+    sptr<IWindowTitleButtonRectChangedListener> listener =  nullptr;
     auto ret = window->UnregisterWindowTitleButtonRectChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
@@ -2353,7 +2350,7 @@ HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Le
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
     auto status = window_->RegisterKeyboardWillHideListener(listener);
     EXPECT_EQ(status, WMError::WM_OK);
-
+ 
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }
 
@@ -2373,7 +2370,7 @@ HWTEST_F(WindowSessionImplTest2, NotifyKeyboardAnimationWillBegin, TestSize.Leve
     window_->RegisterKeyboardWillShowListener(listener);
     sptr<IKeyboardWillHideListener> listener1 = sptr<MockIKeyboardWillHideListener>::MakeSptr();
     window_->RegisterKeyboardWillHideListener(listener1);
-
+ 
     KeyboardAnimationInfo animationInfo;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     window_->NotifyKeyboardAnimationWillBegin(animationInfo, nullptr);
