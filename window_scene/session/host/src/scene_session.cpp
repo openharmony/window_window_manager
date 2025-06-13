@@ -8752,6 +8752,7 @@ WMError SceneSession::NotifySubSessionAcrossDisplaysChange(bool isAcrossMultiDis
             continue;
         }
         subSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
+        subSession->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
     }
     return WMError::WM_OK;
 }
@@ -8773,6 +8774,7 @@ WMError SceneSession::NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcro
             continue;
         }
         subSession->sessionStage_->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
+        subSession->SetFullScreenWaterfallMode(isAcrossMultiDisplay);
     }
     return WMError::WM_OK;
 }
