@@ -1276,7 +1276,7 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Le
  */
 HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
 {
-    logMsg.clear();
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus start";
     sptr<WindowOption> option = new WindowOption();
@@ -1299,7 +1299,7 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
     window->NotifyLifecyclePausedStatus();
     window->state_ = WindowState::STATE_DESTROYED;
     window->NotifyLifecyclePausedStatus();
-    EXPECT_TRUE(logMsg.find("isDidForeground:") == std::string::npos);
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus end";
