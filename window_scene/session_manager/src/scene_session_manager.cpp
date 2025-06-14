@@ -12558,7 +12558,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::ListWindowInfo (%{public}u) "
-        "(%{public}u) (%{public}" PRIu64") (%{public}d)",
+        "(%{public}u) (%{public}" PRIu64 ") (%{public}d)",
         static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
         static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
         windowInfoOption.displayId, windowInfoOption.windowId);
