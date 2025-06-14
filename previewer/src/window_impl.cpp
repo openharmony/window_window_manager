@@ -546,8 +546,22 @@ WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
     return WMError::WM_OK;
 }
 
+void WindowImpl::SetShowWithOptions(bool showWithOptions)
+{
+    showWithOptions_ = showWithOptions;
+}
+
+bool WindowImpl::IsShowWithOptions() const
+{
+    return showWithOptions_;
+}
+
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
+    if (IsShowWithOptions()) {
+        SetShowWithOptions(false);
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     return WMError::WM_OK;
 }
 
