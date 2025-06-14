@@ -18,10 +18,21 @@
 
 #include "display_manager_adapter.h"
 #include "scene_board_judgement.h"
+#include "iremote_object_mocker.h"
 #include "window_manager_agent_proxy.h"
+#include "../../../window_scene/test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class WindowManagerAgentProxyTest : public testing::Test {
@@ -329,16 +340,15 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t propertyDirtyFlags = 0;
     std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen
