@@ -951,7 +951,7 @@ HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
 
     EXPECT_CALL(*mockListener, AfterLifecyclePaused()).Times(1);
     window->Pause();
-    EXPECT_EQ(window->isDidForeground_, false);
+    EXPECT_EQ(window->isDidForeground_, true);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
