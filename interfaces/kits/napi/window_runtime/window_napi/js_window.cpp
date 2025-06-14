@@ -1299,8 +1299,19 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = (argc == 0) ? nullptr :
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
+    napi_value showWindowOptions = (argc == 0) ? nullptr :
+        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_object) ? argv[0] : nullptr);
+    bool focusOnShow = true;
+    bool isShowWithOptions = false;
+    if (showWindowOptions != nullptr) {
+        isShowWithOptions = true;
+        WmErrorCode parseRet = ParseShowWindowOptions(env, showWindowOptions, focusOnShow);
+        if (parseRet != WmErrorCode::WM_OK) {
+            return NapiThrowError(env, parseRet);
+        }
+    }
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken, env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken, env, task = napiAsyncTask, focusOnShow, isShowWithOptions] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
@@ -1315,7 +1326,15 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
-        WMError ret = weakWindow->Show(0, false, true);
+        if (focusOnShow == false &&
+            (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
+             WindowHelper::IsDialogWindow(weakWindow->GetType()))) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
+            return;
+        }
+        weakWindow->SetShowWithOptions(isShowWithOptions);
+        WMError ret = weakWindow->Show(0, false, focusOnShow);
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
