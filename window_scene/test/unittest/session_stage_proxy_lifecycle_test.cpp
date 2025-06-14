@@ -126,9 +126,10 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyLifecyclePausedStatus, TestSize.L
     sessionStage_->NotifyLifecyclePausedStatus();
     EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 
-    sessionStage_->NotifyLifecyclePausedStatus();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") == std::string::npos);
+    sessionStage_->NotifyLifecyclePausedStatus();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**

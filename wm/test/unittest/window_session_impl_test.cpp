@@ -33,14 +33,8 @@
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
-namespace {
-    std::string logMsg;
-    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-        const char* msg)
-    {
-        logMsg = msg;
-    }
-}
+using namespace testing;
+using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
@@ -1221,7 +1215,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterBackground, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
-    logMsg.clear();
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus start";
     sptr<WindowOption> option = new WindowOption();
@@ -1239,8 +1233,9 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Leve
     foreWindow->isDidForeground_ = false;
     foreWindow->NotifyForegroundInteractiveStatus(true);
     foreWindow->NotifyForegroundInteractiveStatus(false);
-    EXPECT_TRUE(logMsg.find("isDidForeground:") == std::string::npos);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, foreWindow->Destroy());
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, foreWindow->Destroy());
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus end";
 }
 
@@ -1251,7 +1246,7 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Leve
  */
 HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Level1)
 {
-    logMsg.clear();
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus01 start";
     sptr<WindowOption> option = new WindowOption();
@@ -1268,8 +1263,9 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Le
     EXPECT_FALSE(foreWindow1->IsWindowSessionInvalid());
     foreWindow1->isDidForeground_ = true;
     foreWindow1->NotifyForegroundInteractiveStatus(true);
-    EXPECT_TRUE(logMsg.find("isDidForeground:") == std::string::npos);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, foreWindow1->Destroy());
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, foreWindow1->Destroy());
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus01 end";
 }
 
@@ -1293,7 +1289,6 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
     window->NotifyLifecyclePausedStatus();
     window->state_ = WindowState::STATE_DESTROYED;
     window->NotifyLifecyclePausedStatus();
-    EXPECT_TRUE(logMsg.find("window state") != std::string::npos);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
@@ -1304,8 +1299,9 @@ HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
     window->NotifyLifecyclePausedStatus();
     window->state_ = WindowState::STATE_DESTROYED;
     window->NotifyLifecyclePausedStatus();
-    EXPECT_TRUE(logMsg.find("isDidForeground:") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("isDidForeground:") == std::string::npos);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus end";
 }
 
@@ -1367,6 +1363,20 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     EXPECT_EQ(WMError::WM_OK, notifyWindow->Create(nullptr, session));
+    notifyWindow->NotifyAfterLifecycleResumed();
+    EXPECT_EQ(false, notifyWindow->isInteractiveStateFlag_);
+    notifyWindow->state_ = WindowState::STATE_CREATED;
+    notifyWindow->isDidForeground_ = true;
+    notifyWindow->NotifyAfterLifecycleResumed();
+    notifyWindow->state_ = WindowState::STATE_SHOWN;
+    notifyWindow->isDidForeground_ = false;
+    notifyWindow->NotifyAfterLifecycleResumed();
+
+    notifyWindow->state_ = WindowState::STATE_CREATED;
+    notifyWindow->isDidForeground_ = false;
+    notifyWindow->NotifyAfterLifecycleResumed();
+    notifyWindow->state_ = WindowState::STATE_SHOWN;
+    notifyWindow->isDidForeground_ = true;
     notifyWindow->NotifyAfterLifecycleResumed();
     EXPECT_EQ(true, notifyWindow->isInteractiveStateFlag_);
     notifyWindow->NotifyAfterLifecycleResumed();

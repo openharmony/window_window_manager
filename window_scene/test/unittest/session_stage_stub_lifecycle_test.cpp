@@ -105,6 +105,7 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus());
     EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
