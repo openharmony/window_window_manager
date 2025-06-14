@@ -698,6 +698,22 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
     return result;
 }
 
+static napi_value CreateJsSupportedRefreshRateArray(napi_env env, const std::vector<uint32_t>& supportedRefreshRate)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, supportedRefreshRate.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create supported Refresh Rate array");
+        return NapiGetUndefined(env);
+    }
+    uint32_t index = 0;
+    for (const auto refreshRate : supportedRefreshRate) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, refreshRate));
+    }
+    return arrayValue;
+}
+
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
@@ -817,6 +833,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
         napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
     }
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
+    napi_set_named_property(env, objValue, "supportedRefreshRate", CreateJsSupportedRefreshRateArray(
+        env, info->GetSupportedRefreshRate()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

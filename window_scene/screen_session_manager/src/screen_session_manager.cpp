@@ -2719,6 +2719,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     screenEventTracker_.RecordEvent("create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
+    SetSupportedRefreshRate(session);
     RegisterRefreshRateChangeListener();
     TLOGW(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
@@ -2782,6 +2783,22 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
         });
         session->SetColorSpaces(std::move(colorSpace));
     }
+}
+
+void ScreenSessionManager::SetSupportedRefreshRate(sptr<ScreenSession>& session)
+{
+    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(
+        screenIdManager_.ConvertToRsScreenId(session->screenId_));
+    if (allModes.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "allModes.size() == 0, screenId=%{public}" PRIu64"", session->rsId_);
+        return;
+    }
+    std::set<uint32_t> uniqueRefreshRates;
+    for (const RSScreenModeInfo& rsScreenModeInfo : allModes) {
+        uniqueRefreshRates.insert(rsScreenModeInfo.GetScreenRefreshRate());
+    }
+    std::vector<uint32_t> supportedRefreshRate(uniqueRefreshRates.begin(), uniqueRefreshRates.end());
+    session->SetSupportedRefreshRate(std::move(supportedRefreshRate));
 }
 
 ScreenId ScreenSessionManager::GetDefaultScreenId()
