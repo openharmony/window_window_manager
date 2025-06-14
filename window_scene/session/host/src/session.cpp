@@ -2031,14 +2031,14 @@ WSError Session::HandleSubWindowClick(int32_t action)
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "property is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
+    const auto& property = GetSessionProperty();
     bool raiseEnabled = property->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
+    TLOGD(WmsLogTag::WMS_EVENT,
+          "id: %{public}d, raiseEnabled: %{public}d, isModal: %{public}d",
+          GetPersistentId(), raiseEnabled, isModal);
+    if (raiseEnabled && !isModal) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
