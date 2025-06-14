@@ -5329,13 +5329,6 @@ napi_value JsWindow::Snapshot(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSnapshot(env, info) : nullptr;
 }
 
-napi_value JsWindow::SnapshotSync(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSnapshotSync(env, info) : nullptr;
-}
-
 napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
@@ -5435,28 +5428,6 @@ napi_value JsWindow::OnSnapshot(napi_env env, napi_callback_info info)
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
     return result;
-}
-
-napi_value JsWindow::OnSnapshotSync(napi_env env, napi_callback_info info)
-{
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Snapshot(pixelMap));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u snapshot end, result: %{public}d",
-        windowToken_->GetWindowId(), ret);
-    if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
-    }
-    auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
-    if (nativePixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u get nativePixelMap is null",
-            windowToken_->GetWindowId());
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    return nativePixelMap;
 }
 
 napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
@@ -8552,7 +8523,6 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "translate", moduleName, JsWindow::Translate);
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
-    BindNativeFunction(env, object, "snapshotSync", moduleName, JsWindow::SnapshotSync);
     BindNativeFunction(env, object, "snapshotIgnorePrivacy", moduleName, JsWindow::SnapshotIgnorePrivacy);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
     BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
