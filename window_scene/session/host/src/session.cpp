@@ -110,8 +110,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
-
-    InitRSUIContext();
 }
 
 Session::~Session()
@@ -2536,7 +2534,13 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
+    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
+    if (isPersistentImageFit && GetSnapshot()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
+        pixelMap = GetSnapshot();
+    }
     if (pixelMap != nullptr) {
         TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
@@ -4349,23 +4353,20 @@ void Session::DeletePersistentImageFit()
     }
 }
 
-void Session::InitRSUIContext()
-{
-    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
-    // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
-    // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
-    // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
-    // as ArkUI knows the host window for this type of window.
-    rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(GetScreenId());
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Set RSUIContext: %{public}s, Session [id: %{public}d]",
-          RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
-}
-
-std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller) const
+std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, Session [id: %{public}d]",
-          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId());
+    auto screenId = GetScreenId();
+    if (screenIdOfRSUIContext_ != screenId) {
+        // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
+        // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
+        // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
+        // as ArkUI knows the host window for this type of window.
+        rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
+        screenIdOfRSUIContext_ = screenId;
+    }
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
+          caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
 }
 } // namespace OHOS::Rosen

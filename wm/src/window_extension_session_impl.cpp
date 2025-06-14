@@ -47,7 +47,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
+#ifdef IMF_ENABLE
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+#endif // IMF_ENABLE
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 

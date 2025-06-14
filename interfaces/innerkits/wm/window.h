@@ -530,6 +530,15 @@ public:
 };
 using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
 
+class IAcrossDisplaysChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnAcrossDisplaysChanged(bool isAcrossDisplays) {}
+};
+using IAcrossDisplaysChangeListenerSptr = sptr<IAcrossDisplaysChangeListener>;
+
 /**
  * @class IWindowNoInteractionListenerSptr
  *
@@ -2788,6 +2797,24 @@ public:
         const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossDisplaysChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterAcrossDisplaysChangeListener(
+        const IAcrossDisplaysChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossDisplaysChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterAcrossDisplaysChangeListener(
+        const IAcrossDisplaysChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -3707,6 +3734,15 @@ public:
      */
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Determine whether the window spans multiple screens and displays in full screen mode.
+     *
+     * @param isAcrossDisplays the value true means to span multiple screens, and false means the opposite.
+     * @return WM_OK means success, others means failed.
+     */
+    virtual WMError IsMainWindowFullScreenAcrossDisplays(
+        bool& isAcrossDisplays) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the type of window.

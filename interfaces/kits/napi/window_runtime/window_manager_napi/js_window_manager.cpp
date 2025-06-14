@@ -1670,6 +1670,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowType", WindowTypeInit(env));
     napi_set_named_property(env, exportObj, "AvoidAreaType", AvoidAreaTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
+    napi_set_named_property(env, exportObj, "GlobalWindowMode", GlobalWindowModeInit(env));
     napi_set_named_property(env, exportObj, "ScreenshotEventType", ScreenshotEventTypeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));

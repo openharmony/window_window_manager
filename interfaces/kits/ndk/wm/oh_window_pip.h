@@ -371,6 +371,35 @@ int32_t OH_PictureInPicture_SetPipControlEnabled(uint32_t controllerId, PictureI
     bool enabled);
 
 /**
+ * @brief Set picture-in-picture initial surface rect.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @param positionX The X position of the first frame when start the picture-in-picture.
+ * @param positionY The Y position of the first frame when start the picture-in-picture.
+ * @param width The width of the first frame when start the picture-in-picture.
+ * @param height The height of the first frame when start the picture-in-picture.
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_SetPipInitialSurfaceRect(uint32_t controllerId, int32_t positionX, int32_t positionY,
+    uint32_t width, uint32_t height);
+
+/**
+ * @brief Unset picture-in-picture initial surface rect.
+ *
+ * @param controllerId The picture-in-picture controller ID
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_PIP_INTERNAL_ERROR} pip internal error.
+ * @since 20
+ */
+int32_t OH_PictureInPicture_UnsetPipInitialSurfaceRect(uint32_t controllerId);
+
+/**
  * @brief Register picture-in-picture controller start callback.
  *
  * @param controllerId The picture-in-picture controller ID
