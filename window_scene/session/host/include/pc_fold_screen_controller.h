@@ -53,6 +53,7 @@ public:
 
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     bool IsFullScreenWaterfallMode() const { return isFullScreenWaterfallMode_; }
+    void SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     void UpdateRect();
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
