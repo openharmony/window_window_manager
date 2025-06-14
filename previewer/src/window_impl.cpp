@@ -551,7 +551,7 @@ void WindowImpl::SetShowWithOptions(bool showWithOptions)
     showWithOptions_ = showWithOptions;
 }
 
-bool WindowImpl::IsShowWithOptions()
+bool WindowImpl::IsShowWithOptions() const
 {
     return showWithOptions_;
 }
