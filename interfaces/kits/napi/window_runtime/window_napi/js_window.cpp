@@ -1146,6 +1146,13 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
+napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsMainWindowFullScreenAcrossDisplays(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -8199,6 +8206,46 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
 }
 
+napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    bool isAcrossDisplays = false;
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), &isAcrossDisplays, errCodePtr, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr =
+            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossDisplays: %{public}u, "
+            "result: %{public}d", where, window->GetWindowId(), isAcrossDisplays, *errCodePtr);
+    };
+    auto complete = [&isAcrossDisplays, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            auto objValue = CreateJsValue(env, isAcrossDisplays);
+            if (objValue != nullptr) {
+                task.Resolve(env, objValue);
+            } else {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s convert to js value failed", where);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            }
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnIsMainWindowFullScreenAcrossDisplays",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -8713,6 +8760,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
+        JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "isSystemAvoidAreaEnabled", moduleName, JsWindow::IsSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "setExclusivelyHighlighted", moduleName, JsWindow::SetExclusivelyHighlighted);

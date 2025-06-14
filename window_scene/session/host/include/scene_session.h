@@ -819,6 +819,12 @@ public:
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
+    bool GetIsRegisterAcrossMultiDisplayChanged() const { return isRegisterAcrossDisplaysChanged_.load(); }
+    WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
+    WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
+    void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
 
     /*
      * Window Pattern
@@ -963,6 +969,7 @@ protected:
      * PC Fold Screen
      */
     bool IsFullScreenWaterfallMode();
+    void SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic<uint32_t> throwSlipToFullScreenAnimCount_ = 0;
@@ -1346,6 +1353,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
+    std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

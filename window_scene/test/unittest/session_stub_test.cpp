@@ -1104,6 +1104,50 @@ HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | S
 }
 
 /**
+ * @tc.name: HandleUpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: sessionStub HandleUpdateAcrossDisplaysChangeRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleIsMainWindowFullScreenAcrossDisplays
+ * @tc.desc: sessionStub HandleIsMainWindowFullScreenAcrossDisplays
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardWillShowRegistered
  * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
  * @tc.type: FUNC
