@@ -158,6 +158,24 @@ napi_value WindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value GlobalWindowModeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "FULLSCREEN", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FULLSCREEN)));
+    napi_set_named_property(env, objValue, "SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::SPLIT)));
+    napi_set_named_property(env, objValue, "FLOAT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FLOAT)));
+    napi_set_named_property(env, objValue, "PIP", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::PIP)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);

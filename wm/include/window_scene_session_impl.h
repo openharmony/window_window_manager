@@ -258,6 +258,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
     WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*

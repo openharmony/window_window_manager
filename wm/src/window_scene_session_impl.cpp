@@ -1528,6 +1528,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetWindowMode());
+    NotifyWindowStatusDidChange(GetWindowMode());
     NotifyDisplayInfoChange(displayInfo);
     return ret;
 }
@@ -1644,6 +1645,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     }
     NotifyWindowStatusChange(GetWindowMode());
+    NotifyWindowStatusDidChange(GetWindowMode());
     escKeyEventTriggered_ = false;
     TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
         property_->GetPersistentId(), type);
@@ -6125,6 +6127,7 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
         isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
+    NotifyAcrossDisplaysChange(isWaterfallMode);
     if (isValidWaterfallMode_.load() && isFullScreenWaterfallMode_.load() == isWaterfallMode) {
         return WSError::WS_DO_NOTHING;
     }
@@ -6396,6 +6399,16 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
 }
 
 bool WindowSceneSessionImpl::IsFullScreenEnable() const

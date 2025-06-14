@@ -380,6 +380,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
     displayInfo->SetOriginRotation(property_.GetScreenRotation());
+    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
     return displayInfo;
 }
 
@@ -428,6 +429,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
     displayInfo->SetPivotY(property_.GetPivotY());
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
+    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
     return displayInfo;
 }
 
@@ -2071,6 +2073,11 @@ void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
 void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 {
     colorSpaces_ = std::move(colorSpaces);
+}
+
+void ScreenSession::SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate)
+{
+    supportedRefreshRate_ = std::move(supportedRefreshRate);
 }
 
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)

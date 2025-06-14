@@ -696,7 +696,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "") const;
+    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -1077,7 +1077,7 @@ private:
     /*
      * RS Client Multi Instance
      */
-    void InitRSUIContext();
+    uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
 };
 } // namespace OHOS::Rosen

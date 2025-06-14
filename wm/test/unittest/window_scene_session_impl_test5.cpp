@@ -449,6 +449,31 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsMainWindowFullScreenAcrossDisplays01
+ * @tc.desc: IsMainWindowFullScreenAcrossDisplays
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    bool isAcrossDisplays = false;
+    window->hostSession_ = nullptr;
+    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: SwitchFreeMultiWindow01
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC

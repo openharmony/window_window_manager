@@ -93,6 +93,7 @@ private:
     int HandleNotifyFollowParentMultiScreenPolicy(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRotationChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
@@ -130,6 +131,7 @@ private:
 
     // PC Fold Screen
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
+    int HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply);
