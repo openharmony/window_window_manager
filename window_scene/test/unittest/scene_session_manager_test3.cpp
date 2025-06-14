@@ -1819,11 +1819,11 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
 {
-    EXPECT_NE(ssm_, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     auto ssm = ssm_;
     SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetDisplayId(DEFAULT_DISPLAY_ID);
@@ -1841,9 +1841,9 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
     auto sessionTouchOutsideFun = [ssm](int32_t persistentId, DisplayId displayId) {
         ssm->NotifySessionTouchOutside(persistentId, 20);
     };
-    auto outsideDownEventFun = [sceneSession](int32_t x, int32_t y) {
+    auto outsideDownEventFun = [sceneSession02](int32_t x, int32_t y) {
         int z = x + y;
-        sceneSession->SetCollaboratorType(z);
+        sceneSession02->SetCollaboratorType(z);
     };
     sceneSession02->specificCallback_->onSessionTouchOutside_ = sessionTouchOutsideFun;
     sceneSession02->specificCallback_->onOutsideDownEvent_ = outsideDownEventFun;
@@ -1862,9 +1862,9 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
     EXPECT_EQ(false, ssm->IsSameDisplayGroupId(sceneSession02, 20));
     EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession->GetDisplayId()));
     EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession02->GetDisplayId()));
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession02->ProcessPointDownSession(3, 4));
-    ssm->sceneSessionMap_.etase(1);
-    ssm->sceneSessionMap_.etase(2);
+    EXPECT_EQ(WSError::WS_OK, sceneSession02->ProcessPointDownSession(3, 4));
+    ssm->sceneSessionMap_.erase(1);
+    ssm->sceneSessionMap_.erase(2);
 }
 } // namespace
 } // namespace Rosen
