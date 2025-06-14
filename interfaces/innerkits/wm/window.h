@@ -1292,7 +1292,7 @@ public:
      *
      * @return True means the window is shown with options, false means the opposite.
      */
-    virtual bool IsShowWithOptions() { return false; }
+    virtual bool IsShowWithOptions() const { return false; }
 
     /**
      * @brief Show window
