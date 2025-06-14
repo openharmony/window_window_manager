@@ -1550,9 +1550,8 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground01, TestSize.Leve
 HWTEST_F(SceneSessionManagerTest12, ConfigSupportFollowRelativePositionToParent01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    bool ret = true;
     ssm_->ConfigSupportFollowRelativePositionToParent();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ssm_->systemConfig_.supportFollowRelativePositionToParent_, false);
 }
 
 /**
