@@ -6318,7 +6318,7 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     }
 }
 
-WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool isNeedSync)
+WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubWindow)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);
     if (IsWindowSessionInvalid()) {
@@ -6340,7 +6340,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool isNeedSync)
     isDefaultDensityEnabled_ = false;
     customDensity_ = density;
     
-    if (isNeedSync) {
+    if (applyToSubWindow) {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         for (const auto& winPair : windowSessionMap_) {
             auto window = winPair.second.second;
