@@ -783,9 +783,9 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    bool isNeedSync = false;
+    bool applyToSubWindow = false;
     if (argc == 2) {
-        if (!ConvertFromJsValue(env, argv[1], isNeedSync)) {
+        if (!ConvertFromJsValue(env, argv[1], applyToSubWindow)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to boolean");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
@@ -802,9 +802,10 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density, isNeedSync));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, isNeedSync=%{public}d, "
-        "result=%{public}u", window->GetWindowId(), window->GetWindowName().c_str(), density, isNeedSync, ret);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density, applyToSubWindow));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, "
+        "applyToSubWindow=%{public}d, result=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, applyToSubWindow, ret);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
