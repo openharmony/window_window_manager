@@ -942,6 +942,8 @@ private:
     void UpdateNormalSessionAvoidArea(int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate);
+    // tanhong
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
@@ -1427,6 +1429,9 @@ private:
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
     int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
     std::unordered_map<DisplayId, bool> statusBarConstantlyShowMap_;
+    // tanhong
+    std::mutex lastSystemBarPropertyMapMutex_;
+    std::unordered_map<WindowType, SystemBarProperty> lastSystemBarPropertyMap_;
 
     struct SessionInfoList {
         int32_t uid_;
