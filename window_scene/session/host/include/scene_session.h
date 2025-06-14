@@ -137,6 +137,9 @@ using NotifyFollowScreenChangeFunc = std::function<void(bool isFollowScreenChang
 using NotifyUseImplicitAnimationChangeFunc = std::function<void(bool useImplicit)>;
 using NotifySetWindowShadowsFunc = std::function<void(const ShadowsInfo& shadowsInfo)>;
 using NotifyWindowShadowEnableChangeFunc = std::function<void(bool windowShadowEnabled)>;
+// tanhong
+using NotifyWindowSystemBarPropertyChangeFunc = std::function<void(WindowType type,
+    const SystemBarProperty& systemBarProperty)>;
 using NotifySetSubWindowSourceFunc = std::function<void(SubWindowSource source)>;
 using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& animationProperty,
     const WindowAnimationOption& animationOption)>;
@@ -182,6 +185,8 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
+        // tanhong
+        NotifyWindowSystemBarPropertyChangeFunc onNotifyWindowSystemBarPropertyChange_;
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;

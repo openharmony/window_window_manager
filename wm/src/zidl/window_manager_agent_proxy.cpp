@@ -155,6 +155,47 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
     }
 }
 
+// tanhong
+void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        return;
+    }
+    if (!data.WriteBool(systemBarProperty.enable_)) {
+        return;
+    }
+    if (!data.WriteUint32(systemBarProperty.backgroundColor_)) {
+        return;
+    }
+    if (!data.WriteUint32(systemBarProperty.contentColor_)) {
+        return;
+    }
+    if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE), data, reply, option) != ERR_NONE) {
+        TLOGI(WmsLogTag::WMS_IMMS, "sendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)
 {

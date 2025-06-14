@@ -49,6 +49,17 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE: { // tanhong
+            uint32_t type = data.ReadUint32();
+            bool enable = data.ReadBool();
+            uint32_t backgroundColor = data.ReadUint32();
+            uint32_t contentColor = data.ReadUint32();
+            bool enableAnimation = data.ReadBool();
+            SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
+            SystemBarProperty systemBarProperty = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
+            NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
             uint8_t typeId = 0;
             if (!data.ReadUint8(typeId) ||

@@ -256,6 +256,51 @@ private:
     std::unordered_set<int32_t> interestWindowIds_;
 };
 
+class IWindowInfoChangedListener : virtual public RefBase {
+public:
+    IWindowInfoChangedListener() = default;
+
+    virtual ~IWindowInfoChangedListener() = default;
+
+    /**
+     * @brief Notify caller when window Info changed.
+     *
+     * @param windowInfoList
+     */
+    virtual void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
+
+    void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
+    const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
+    void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+    void SetInterestWindowIds(const std::unordered_set<int32_t>& interestWindowIds)
+        { interestWindowIds_ = interestWindowIds; }
+    const std::unordered_set<int32_t>& GetInterestWindowIds() const { return interestWindowIds_; }
+    void AddInterestWindowId(int32_t interestWindowId) { interestWindowIds_.insert(interestWindowId); }
+    void RemoveInterestWindowId(int32_t interestWindowId) { interestWindowIds_.erase(interestWindowId); }
+
+private:
+    std::unordered_set<WindowInfoKey> interestInfo_;
+    std::unordered_set<int32_t> interestWindowIds_;
+};
+
+// tanhong
+/*
+ * @class IWindowSystemBarPropertyChangedListener
+ *
+ * @brief Observe the property change of System Bar.
+ */
+class IWindowSystemBarPropertyChangedListener : virtual public RefBase {
+    public:
+        /**
+         * @brief Notify caller when System Bar property changed.
+         *
+         * @param type Type of System Bar
+         * @param systemBarProperty Property of System Bar
+         */
+        virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
+};
+
 /**
  * @class AccessibilityWindowInfo
  *
@@ -783,6 +828,33 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
+
+    // tanhong
+    /*
+     * @brief Register window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Unregister window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Notify window System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
 
     /**
      * @brief notify display information change.
