@@ -26,6 +26,11 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include <ipc_skeleton.h>
+#if defined(MODIFIER_NG)
+#include <modifier_ng/appearance/rs_behind_window_filter_modifier.h>
+#else
+#include <modifier/rs_property_modifier.h>
+#endif
 #include <pointer_event.h>
 #include <key_event.h>
 #include <transaction/rs_sync_transaction_controller.h>
@@ -8337,6 +8342,14 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
             Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
     }
 
+#if defined(MODIFIER_NG)
+    auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
+    rsNode->AddModifier(modifier);
+#else
     std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius =
         std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(blurRadiusValue_);
     rsNode->AddModifier(radius);
@@ -8349,6 +8362,7 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
     std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
         std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(blurMaskColorValue_);
     rsNode->AddModifier(modifier);
+#endif
 }
 
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
