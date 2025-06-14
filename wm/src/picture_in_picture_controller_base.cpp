@@ -209,9 +209,9 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
         curState_ = PiPWindowState::STATE_STOPPED;
         for (auto& listener : pipLifeCycleListeners_) {
             if (listener == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
-            continue;
-        }
+                TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
+                continue;
+            }
             listener->OnPictureInPictureStop();
             listener->OnPictureInPictureStop(controllerId_);
         }
