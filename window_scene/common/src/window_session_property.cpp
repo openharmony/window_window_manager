@@ -310,6 +310,11 @@ void WindowSessionProperty::SetDisplayId(DisplayId displayId)
     displayId_ = displayId;
 }
 
+void WindowSessionProperty::SetDefaultDisplayIdEnabled(bool enabled)
+{
+    isDefaultDisplayIdEnabled_ = enabled;
+}
+
 void WindowSessionProperty::SetFloatingWindowAppType(bool isAppType)
 {
     isFloatingWindowAppType_ = isAppType;
@@ -451,6 +456,11 @@ bool WindowSessionProperty::GetSystemCalling() const
 DisplayId WindowSessionProperty::GetDisplayId() const
 {
     return displayId_;
+}
+
+bool WindowSessionProperty::GetDefaultDisplayIdEnabled() const
+{
+    return isDefaultDisplayIdEnabled_;
 }
 
 void WindowSessionProperty::SetParentId(int32_t parentId)
@@ -1241,7 +1251,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) && parcel.WriteBool(viewKeepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) && parcel.WriteBool(windowShadowEnabled_) &&
-        parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
+        parcel.WriteUint64(displayId_) && parcel.WriteBool(isDefaultDisplayIdEnabled_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
         MarshallingTransitionAnimationMap(parcel) &&
         parcel.WriteInt32(parentPersistentId_) &&
@@ -1311,6 +1321,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetSnapshotSkip(parcel.ReadBool());
     property->SetWindowShadowEnabled(parcel.ReadBool());
     property->SetDisplayId(parcel.ReadUint64());
+    property->SetDefaultDisplayIdEnabled(parcel.ReadBool());
     property->SetPersistentId(parcel.ReadInt32());
     if (!UnmarshallingSessionInfo(parcel, property)) {
         delete property;
@@ -1421,6 +1432,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isSnapshotSkip_ = property->isSnapshotSkip_;
     brightness_ = property->brightness_;
     displayId_ = property->displayId_;
+    isDefaultDisplayIdEnabled_ = property->isDefaultDisplayIdEnabled_;
     parentId_ = property->parentId_;
     flags_ = property->flags_;
     persistentId_ = property->persistentId_;

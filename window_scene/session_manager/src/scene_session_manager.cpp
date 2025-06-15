@@ -15323,12 +15323,14 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     auto initClientDisplayId = DEFAULT_DISPLAY_ID;
     //  SubWindow
     if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId:%{public}" PRIu64 ", parentClientDisplayId:%{public}" PRIu64,
-            property->GetDisplayId(), parentSession->GetClientDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId:%{public}" PRIu64 ", parentClientDisplayId:%{public}" PRIu64
+            ", DefaultDisplayIdEnabled: %{public}u" property->GetDisplayId(), 
+            parentSession->GetClientDisplayId(), property->GetDefaultDisplayIdEnabled());
+        initClientDisplayId =
+            property->GetDefaultDisplayIdEnabled() ? parentSession->GetClientDisplayId() : property->GetDisplayId();
         if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
             property->SetDisplayId(DEFAULT_DISPLAY_ID);
         }
-        initClientDisplayId = parentSession->GetClientDisplayId();
     }
     // SystemWindow
     if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
