@@ -156,6 +156,7 @@ public:
     void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
+    DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) override;
 
     bool IsFoldable() override;
     bool IsCaptured() override;

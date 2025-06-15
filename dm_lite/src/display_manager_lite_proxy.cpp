@@ -933,6 +933,46 @@ DMError DisplayManagerLiteProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>
 #endif
 }
 
+DMError DisplayManagerLiteProxy::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+
+    bool res = MarshallingHelper::UnmarshallingVectorObj<ScreenId>(reply, screenIds,
+        [](Parcel& parcel, ScreenId& screenId) {
+            uint64_t value;
+            bool res = parcel.ReadUint64(value);
+            screenId = static_cast<ScreenId>(value);
+            return res;
+        }
+    );
+    if (!res) {
+        TLOGW(WmsLogTag::DMS, "fail to read SystemBarRegionTints");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return ret;
+}
+
 DMError DisplayManagerLiteProxy::SetSystemKeyboardStatus(bool isTpKeyboardOn)
 {
 #ifdef SCENE_BOARD_ENABLED

@@ -188,6 +188,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS: {
+            std::vector<ScreenId> screenIds;
+            DMError ret  = GetPhysicalScreenIds(screenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            bool res = MarshallingHelper::MarshallingVectorObj<ScreenId>(reply, screenIds,
+                [](Parcel& parcel, const ScreenId& screenId) {
+                    return parcel.WriteUint64(static_cast<uint64_t>(screenId));
+                }
+            );
+            if (!res) {
+                TLOGE(WmsLogTag::DMS, "fail to marshalling screenIds in stub.");
+                break;
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenColorGamut> colorGamuts;
