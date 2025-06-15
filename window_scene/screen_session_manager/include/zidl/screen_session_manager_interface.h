@@ -240,6 +240,7 @@ public:
     virtual void SetFoldStatusExpandAndLocked(bool locked) {}
 
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+    virtual DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
 
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
