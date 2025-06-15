@@ -313,6 +313,27 @@ HWTEST_F(WindowSceneSessionImplTest5, MoveWindowToGlobal01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestDefaultDisplayId
+ * @tc.desc: test function: SetDefaultDisplayIdIfNee
+ * @tc.desc: test function: SetDefaultDisplayIdEnabled
+ * @tc.desc: test function: GetDefaultDisplayIdEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestDefaultDisplayId, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetDisplayId(DISPLAY_ID_INVALID);
+    window->SetDefaultDisplayIdIfNeed();
+    auto ret = window->property_->GetDefaultDisplayIdEnabled();
+    EXPECT_EQ(true, ret);
+
+    window->property_->SetDefaultDisplayIdEnabled(false);
+    ret = window->property_->GetDefaultDisplayIdEnabled();
+    EXPECT_EQ(false, ret);
+}
+
+/**
  * @tc.name: SetCustomDensity01
  * @tc.desc: SetCustomDensity
  * @tc.type: FUNC
