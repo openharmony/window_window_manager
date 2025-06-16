@@ -193,7 +193,6 @@ public:
         return type;
     }
 
-
     static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
     {
         float rotation = 0.f;
