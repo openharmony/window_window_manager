@@ -310,8 +310,6 @@ public:
     WSRect GetSessionGlobalRect() const;
     WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    WSRect GetGlobalDisplayRect() const { return globalDisplayRect_; }
-    void SetGlobalDisplayRect(const WSRect& rect) { globalDisplayRect_ = rect; }
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
@@ -839,7 +837,6 @@ protected:
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_;     // rect of root view
     WSRect globalRect_;     // globalRect include translate
-    WSRect globalDisplayRect_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;

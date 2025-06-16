@@ -1254,7 +1254,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
-        parcel.WriteUint32(requestRect_.height_) &&
+        parcel.WriteUint32(requestRect_.height_) && parcel.WriteInt32(globalDisplayRect_.posX_) &&
+        parcel.WriteInt32(globalDisplayRect_.posY_) && parcel.WriteUint32(globalDisplayRect_.width_) &&
+        parcel.WriteUint32(globalDisplayRect_.height_) &&
         parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
         parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
         parcel.WriteFloat(rectAnimationConfig_.y2) &&
@@ -1318,6 +1320,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetRequestRect(reqRect);
+    Rect globalDisplayRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    property->SetGlobalDisplayRect(globalDisplayRect);
     RectAnimationConfig rectAnimationConfig = { parcel.ReadUint32(), parcel.ReadFloat(),
         parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetRectAnimationConfig(rectAnimationConfig);

@@ -12860,14 +12860,10 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
             windowVisibilityInfo->SetZOrder(session->GetZOrder());
-            WSRect hostGlobalDisplayRect = session->GetGlobalDisplayRect();
-            Rect globalDisplayRect = { hostGlobalDisplayRect.posX_, hostGlobalDisplayRect.posY_,
-                static_cast<uint32_t>(hostGlobalDisplayRect.width_),
-                static_cast<uint32_t>(hostGlobalDisplayRect.height_) };
+            Rect globalDisplayRect = session->GetSessionProperty()->GetGlobalDisplayRect();
             windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, hostGlobalRect=%{public}s, globalDisplayRect=%{public}s",
-                static_cast<int32_t>(session->GetPersistentId()), hostGlobalDisplayRect.ToString().c_str(),
-                globalDisplayRect.ToString().c_str());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, globalDisplayRect=%{public}s",
+                static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
