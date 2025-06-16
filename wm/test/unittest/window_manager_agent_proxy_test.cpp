@@ -459,6 +459,26 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
+// tanhong
+/**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: test NotifyWindowSystemBarPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    SystemBarProperty systemBarProperty;
+    windowManagerAgentProxy->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
 /**
  * @tc.name: NotifyWindowPidVisibilityChanged
  * @tc.desc: test NotifyWindowPidVisibilityChanged
