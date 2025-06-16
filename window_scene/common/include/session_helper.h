@@ -168,48 +168,30 @@ public:
         return type;
     }
 
-    static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
-        int32_t sourceType, int outside, float vpr, const WSRect& rect)
+    static AreaType GetDragAreaType(int32_t pointWinX, int32_t pointWinY, int outside, const WSRect& rect)
     {
-        int32_t insideCorner = WINDOW_FRAME_CORNER_WIDTH * vpr;
-        int32_t insideEdge = WINDOW_FRAME_WIDTH * vpr;
         int32_t leftOut = -outside;
-        int32_t leftIn = insideEdge;
-        int32_t leftCorner = insideCorner;
-        int32_t rightCorner = rect.width_ - insideCorner;
-        int32_t rightIn = rect.width_ - insideEdge;
         int32_t rightOut = rect.width_ + outside;
         int32_t topOut = -outside;
-        int32_t topIn = insideEdge;
-        int32_t topCorner = insideCorner;
-        int32_t bottomCorner = rect.height_ - insideCorner;
-        int32_t bottomIn = rect.height_ - insideEdge;
         int32_t bottomOut = rect.height_ + outside;
 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
 
         AreaType type;
-        if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
+        if (isInRange(leftOut, rightOut / 2, pointWinX) && isInRange(topOut, bottomOut / 2, pointWinY)) {
             type = AreaType::LEFT_TOP;
-        } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(topOut, topCorner, pointWinY)) {
+        } else if (isInRange(rightOut / 2, rightOut, pointWinX) && isInRange(topOut, bottomOut / 2, pointWinY)) {
             type = AreaType::RIGHT_TOP;
-        } else if (isInRange(rightCorner, rightOut, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
+        } else if (isInRange(rightOut / 2, rightOut, pointWinX) && isInRange(bottomOut / 2, bottomOut, pointWinY)) {
             type = AreaType::RIGHT_BOTTOM;
-        } else if (isInRange(leftOut, leftCorner, pointWinX) && isInRange(bottomCorner, bottomOut, pointWinY)) {
+        } else if (isInRange(leftOut, rightOut / 2, pointWinX) && isInRange(bottomOut / 2, bottomOut, pointWinY)) {
             type = AreaType::LEFT_BOTTOM;
-        } else if (isInRange(leftOut, leftIn, pointWinX)) {
-            type = AreaType::LEFT;
-        } else if (isInRange(topOut, topIn, pointWinY)) {
-            type = AreaType::TOP;
-        } else if (isInRange(rightIn, rightOut, pointWinX)) {
-            type = AreaType::RIGHT;
-        } else if (isInRange(bottomIn, bottomOut, pointWinY)) {
-            type = AreaType::BOTTOM;
         } else {
             type = AreaType::UNDEFINED;
         }
         return type;
     }
+
 
     static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
     {

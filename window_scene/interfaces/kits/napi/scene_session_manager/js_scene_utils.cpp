@@ -1201,6 +1201,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
         {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
         {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"isAdaptToDragScale", &CompatibleModeProperty::SetIsAdaptToDragScale},
         {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
@@ -1801,6 +1802,8 @@ napi_value CreateJsSessionDragResizeType(napi_env env)
         static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME)));
     napi_set_named_property(env, objValue, "RESIZE_WHEN_DRAG_END", CreateJsValue(env,
         static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_SCALE", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_SCALE)));
     return objValue;
 }
 
@@ -1854,6 +1857,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
+    napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
     return objValue;
 }
 

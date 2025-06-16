@@ -101,6 +101,7 @@ public:
     AreaType GetAreaType() const { return type_; };
     void SetScale(float scalex, float scaley);
     void SetParentRect(const Rect& parentRect);
+    Gravity GetGravity();
 
     /*
      * Cross Display Move Drag
@@ -297,6 +298,7 @@ private:
     int32_t maxTranX_ = INT32_MAX;
     int32_t maxTranY_ = INT32_MAX;
     AreaType type_ = AreaType::UNDEFINED;
+    AreaType dragAreaType_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
     MoveDragProperty moveDragProperty_;

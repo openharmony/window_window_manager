@@ -514,6 +514,16 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.targetRect_.ToString().c_str(), trans.first, trans.second);
 }
 
+Gravity MoveDragController::GetGravity()
+{
+    auto iter = GRAVITY_MAP.find(dragAreaType_);
+    if (iter != GRAVITY_MAP.end()) {
+        Gravity dragGravity = iter->second;
+        return dragGravity;
+    }
+    return Gravity::TOP_LEFT;
+}
+
 /** @note @window.drag */
 bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
@@ -1015,6 +1025,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     }
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
+        moveDragProperty_.originalRect_);
+    dragAreaType_ = SessionHelper::GetDragAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside,
         moveDragProperty_.originalRect_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
         "rect:%{public}s, type:%{public}d", pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside, vpr_,
