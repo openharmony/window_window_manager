@@ -450,7 +450,7 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
      * window dimensions obtained for keyboard avoidance will be incorrect. To prevent the app's intended dimensions
      * from being overridden, avoidance is deliberately skipped.
      */
-    if (callingSession->isSubWinowResizingOrMoving_ && WindowHelper::IsSubWindow(callingSession->GetWindowType())) {
+    if (callingSession->isSubWindowResizingOrMoving_ && WindowHelper::IsSubWindow(callingSession->GetWindowType())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "subWindow is resizing or moving");
         return false;
     }

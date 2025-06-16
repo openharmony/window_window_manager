@@ -2049,11 +2049,13 @@ bool WindowSessionProperty::IsSystemKeyboard() const
 
 void WindowSessionProperty::SetKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
+    std::lock_guard<std::mutex> lock(keyboardMutex_);
     keyboardEffectOption_ = effectOption;
 }
 
 KeyboardEffectOption WindowSessionProperty::GetKeyboardEffectOption() const
 {
+    std::lock_guard<std::mutex> lock(keyboardMutex_);
     return keyboardEffectOption_;
 }
 
