@@ -74,6 +74,9 @@ group("unittest") {
       ":ws_super_fold_sensor_manager_test",
       ":ws_super_fold_state_manager_test",
     ]
+    if (window_manager_use_sceneboard) {
+    deps += [ ":ws_fold_screen_state_machine_test" ]
+    }
   }
 
   if (window_manager_feature_multi_screen) {
@@ -82,7 +85,6 @@ group("unittest") {
       ":ws_multi_screen_manager_test",
       ":ws_multi_screen_mode_change_manager_test",
       ":ws_multi_screen_power_change_manager_test",
-      ":ws_fold_screen_state_machine_test",
     ]
   }
 }
