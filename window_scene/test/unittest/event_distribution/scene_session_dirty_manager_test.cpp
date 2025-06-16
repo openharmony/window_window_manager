@@ -929,6 +929,97 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalTransform_CompatMode
+ * @tc.desc: CalTransform_CompatMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransform_CompatMode, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransform_CompatMode";
+    sessionInfo.moduleName_ = "CalTransform_CompatMode";
+    sessionInfo.isRotable_ = true;
+    SingleHandData testSingleHandData;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+
+    session->SetScale(1.0f, 1.0f, 0.5f, 0.5f);
+    Vector2f scale(session->GetScaleX(), session->GetScaleY());
+    Vector2f translate = session->GetSessionGlobalPosition(false);
+    Matrix3f transform;
+    Matrix3f testTransform = Matrix3f::IDENTITY;
+
+    manager_->CalTransform(session, transform, testSingleHandData, false);
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f).Inverse());
+    manager_->CalTransform(session, transform, testSingleHandData, true);
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f).Inverse());
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+
+    manager_->CalTransform(session, transform, testSingleHandData, true);
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f).Inverse());
+    compatibleModeProperty->SetIsAdaptToImmersive(false);
+    manager_->CalTransform(session, transform, testSingleHandData, true);
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f).Inverse());
+
+    session->SetScale(0.5f, 0.5f, 0.5f, 0.5f);
+    scale[0] = session->GetScaleX();
+    scale[1] = session->GetScaleY();
+
+    manager_->CalTransform(session, transform, testSingleHandData, true);
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f).Inverse());
+
+    ExtensionWindowEventInfo extensionInfo;
+    extensionInfo.persistentId = 12345;
+    extensionInfo.pid = 1234;
+    extensionInfo.windowRect = { 0, 120, 1260, 2600 };
+    session->AddNormalModalUIExtension(extensionInfo);
+    session->isScbCoreEnabled_ = true;
+    session->SetSessionGlobalRect({ 0, 0, 1260, 2720 });
+    translate = session->GetSessionGlobalPosition(true);
+    Vector2f translateOffset(0, 60);
+
+    manager_->CalTransform(session, transform, testSingleHandData, true);
+    testTransform = Matrix3f::IDENTITY;
+    EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f)
+        .Inverse().Translate(translateOffset));
+}
+
+/**
+ * @tc.name: UpdateModalExtensionInCompatStatus
+ * @tc.desc: UpdateModalExtensionInCompatStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateModalExtensionInCompatStatus, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "UpdateModalExtensionInCompatStatus";
+    sessionInfo.moduleName_ = "UpdateModalExtensionInCompatStatus";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+
+    Matrix3f transform;
+    EXPECT_FALSE(manager_->UpdateModalExtensionInCompatStatus(nullptr, transform));
+    EXPECT_FALSE(manager_->UpdateModalExtensionInCompatStatus(session, transform));
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->SetScale(0.5f, 0.5f, 0.5f, 0.5f);
+    EXPECT_FALSE(manager_->UpdateModalExtensionInCompatStatus(session, transform));
+
+    ExtensionWindowEventInfo extensionInfo;
+    extensionInfo.persistentId = 12345;
+    extensionInfo.pid = 1234;
+    extensionInfo.windowRect = { 0, 120, 1260, 2600 };
+    session->AddNormalModalUIExtension(extensionInfo);
+
+    EXPECT_TRUE(manager_->UpdateModalExtensionInCompatStatus(session, transform));
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    EXPECT_TRUE(manager_->UpdateModalExtensionInCompatStatus(session, transform));
+}
+
+/**
  * @tc.name: UpdateHotAreas
  * @tc.desc: UpdateHotAreas
  * @tc.type: FUNC

@@ -3575,6 +3575,15 @@ bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
     return false;
 }
 
+bool SceneSession::IsInCompatScaleStatus() const
+{
+    auto property = GetSessionProperty();
+    if (property->IsAdaptToProportionalScale() || property->IsAdaptToSimulationScale()) {
+        return !NearEqual(GetScaleX(), COMPACT_NORMAL_SCALE) || !NearEqual(GetScaleY(), COMPACT_NORMAL_SCALE);
+    }
+    return false;
+}
+
 /**
  * throw slip to full screen
  */
