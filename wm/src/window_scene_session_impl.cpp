@@ -6333,13 +6333,12 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, must be app main window", GetWindowId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (MathHelper::NearZero(customDensity_ - density)) {
+    if (MathHelper::NearZero(customDensity_ - density) && !applyToSubWindow) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
     isDefaultDensityEnabled_ = false;
     customDensity_ = density;
-    
     if (applyToSubWindow) {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         for (const auto& winPair : windowSessionMap_) {
