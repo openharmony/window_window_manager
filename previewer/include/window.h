@@ -377,7 +377,8 @@ public:
     virtual void SetDensity(float density) = 0;
     virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetDefaultDensityEnabled() { return false; }
-    virtual WMError SetCustomDensity(float density, bool applyToSubWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetCustomDensity(
+        float density, bool applyToSubWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetWindowShadowEnabled() const { return true; }
