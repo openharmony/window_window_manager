@@ -148,7 +148,7 @@ HWTEST_F(CompatibleModePropertyTest, IsAdaptToBackButton, TestSize.Level1)
 */
 HWTEST_F(CompatibleModePropertyTest, SetIsAdaptToDragScale, TestSize.Level1)
 {
-    sptr property = sptr::MakeSptr();
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
     property->SetIsAdaptToDragScale(true);
     EXPECT_EQ(property->IsAdaptToDragScale(), true);
     property->SetIsAdaptToDragScale(false);
