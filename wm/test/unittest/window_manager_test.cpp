@@ -2036,6 +2036,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1
     sptr<TestWindowSystemBarPropertyChangedListener> listener =
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
+    EXPECT_EQ(1, windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.size());
     WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
         WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
