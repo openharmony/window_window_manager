@@ -44,6 +44,7 @@ public:
     MOCK_METHOD1(GetCutoutInfo, sptr<CutoutInfo>(DisplayId displayId));
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
+    MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {
