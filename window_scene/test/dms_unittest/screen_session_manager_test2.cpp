@@ -853,6 +853,26 @@ HWTEST_F(ScreenSessionManagerTest, ConvertIntToRotation, Function | SmallTest | 
     targetRotation = ssm_->ConvertIntToRotation(rotation);
     EXPECT_EQ(targetRotation, Rotation::ROTATION_270);
 }
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<ScreenId> screenIds;
+    auto ret = ssm_->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
+
+    ScreenId screenId = 11;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    std::vector<ScreenId> screenIds1;
+    auto ret1 = ssm_->GetPhysicalScreenIds(screenIds1);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
 }
 }
 }

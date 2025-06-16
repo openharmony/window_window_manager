@@ -3288,6 +3288,24 @@ HWTEST_F(ScreenSessionManagerStubTest, ProcSetPrimaryDisplaySystemDpi, Function 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: normal function, GetPhysicalScreenIds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, GetPhysicalScreenIds, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::vector<ScreenId> screenIds;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }

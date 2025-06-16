@@ -157,6 +157,7 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
+    DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) override;
     DMError IsScreenRotationLocked(bool& isLocked) override;
     DMError SetScreenRotationLocked(bool isLocked) override;
     DMError SetScreenRotationLockedFromJs(bool isLocked) override;
