@@ -403,6 +403,7 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow);
     bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy);
     napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);

@@ -1324,6 +1324,20 @@ public:
     virtual WMError Destroy(uint32_t reason = 0) { return WMError::WM_OK; }
 
     /**
+     * @brief Set a flag to distinguish whether the window is shown with options.
+     *
+     * @param showWithOptions Options that define the behavior of a window while it is showing.
+     */
+    virtual void SetShowWithOptions(bool showWithOptions) {}
+
+    /**
+     * @brief Get showWithOptions value.
+     *
+     * @return True means the window is shown with options, false means the opposite.
+     */
+    virtual bool IsShowWithOptions() const { return false; }
+
+    /**
      * @brief Show window
      *
      * @param reason Reason for window state change.
