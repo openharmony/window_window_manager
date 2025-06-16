@@ -32,7 +32,7 @@
 #include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
-#include "ui_extension/provider_data_handler.h"
+#include "window_extension_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
