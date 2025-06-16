@@ -31,15 +31,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Rosen {
-    std::string logMsg;
-void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-    const char *msg)
-    {
-        logMsg = msg;
-    }
-}
-
-namespace OHOS::Rosen {
 class ScreenSessionManagerProxyTest : public testing::Test {
 public:
     static void SetUpTestSuite();
