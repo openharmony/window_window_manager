@@ -12557,13 +12557,13 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::ListWindowInfo (%u) "
+    const char* const where = __func__;
+    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos, where] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::ListWindowInfo (%u) "
         "(%u) (%" PRIu64 ") (%d)",
         static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
         static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
         windowInfoOption.displayId, windowInfoOption.windowId);
-    const char* const where = __func__;
-    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos, where] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
