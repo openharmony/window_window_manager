@@ -482,6 +482,23 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Unmarshalling
+ * @tc.desc: test whether unmarshalling property is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Unmarshalling, TestSize.Level1)
+{
+    std::string winName = "test";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowName(winName);
+    Parcel parcel = Parcel();
+    windowSessionProperty.Marshalling(parcel);
+    sptr<WindowSessionProperty> property2 = property.Unmarshalling(parcel);
+    EXPECT_NE(property2, nullptr);
+    EXPECT_EQ(property2->GetWindowName(), winName);
+}
+
+/**
  * @tc.name: UnMarshallingSystemBarMap
  * @tc.desc: UnMarshallingSystemBarMap test
  * @tc.type: FUNC
