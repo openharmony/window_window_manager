@@ -1639,7 +1639,7 @@ WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
         pImpl_->windowSystemBarPropertyChangeAgent_);
     if (ret != WMError::WM_OK) {
-        WLOGFW("RegisterWindowManagerAgent failed!");
+        TLOGE(WmsLogTag::WMS_IMMS, "RegisterWindowManagerAgent failed.");
         pImpl_->windowSystemBarPropertyChangeAgent_ = nullptr;
     } else {
         auto iter = std::find(pImpl_->windowSystemBarPropertyChangedListeners_.begin(),
@@ -1670,7 +1670,7 @@ WMError WindowManager::UnregisterWindowSystemBarPropertyChangedListener(
     }
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowSystemBarPropertyChangedListeners_.empty() &&
-        pImpl_->windowSystemBarPropertyChangedListeners_ != nullptr) {
+        pImpl_->windowSystemBarPropertyChangeAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
             pImpl_->windowSystemBarPropertyChangeAgent_);
@@ -1690,9 +1690,9 @@ void WindowManager::Impl::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "tanhong debug enable %{public}d.", systemBarProperty.enable_);
-    sptr<IWindowSystemBarPropertyChangedListener> windowSystemBarPropertyChangedListeners;
+    std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners;
     {
-        std::lock_guard<std::shared_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         windowSystemBarPropertyChangedListeners = windowSystemBarPropertyChangedListeners_;
     }
     for (auto &listener : windowSystemBarPropertyChangedListeners) {

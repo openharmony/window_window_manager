@@ -876,6 +876,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
     SystemBarProperty statusBarProperty;
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
         WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
     ASSERT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, statusBarProperty),
         WSError::WS_OK);

@@ -55,10 +55,9 @@ public:
 
 // tanhong
 class TestWindowSystemBarPropertyChangedListener : public IWindowSystemBarPropertyChangedListener {
-    public:
-        void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override {};
-    };
-}
+public:
+    void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override {};
+};
 
 class TestWindowUpdateListener : public IWindowUpdateListener {
 public:
@@ -2017,7 +2016,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSystemBarPropertyChangedListener, Fu
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener));
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
     windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
 }
@@ -2032,11 +2031,13 @@ HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1
     auto& windowManager = WindowManager::GetInstance();
     auto oldListeners = windowManager.pImpl_->windowSystemBarPropertyChangedListeners_;
     SystemBarProperty systemBarProperty;
-    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
     sptr<TestWindowSystemBarPropertyChangedListener> listener =
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
-    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
 }
 
