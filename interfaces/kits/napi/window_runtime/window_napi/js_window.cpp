@@ -2411,8 +2411,7 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
-    WLOGI("Window [%{public}u, %{public}s] get properties end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "End, wid: %{public}u", windowToken_->GetWindowId());
     if (objValue != nullptr) {
         return objValue;
     } else {
@@ -8216,7 +8215,7 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
     auto objValue = ConvertWindowDensityInfoToJsValue(env, densityInfo);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win [%{public}u, %{public}s] get density: %{public}s",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win [%{public}u, %{public}s] get density: %{public}s",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), densityInfo.ToString().c_str());
         return objValue;
     } else {

@@ -4493,7 +4493,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     }
     bool lastPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "privacy mode does not change, isPrivacy:%{public}d", isPrivacy);
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "mode is same as: %{public}d", isPrivacy);
         return;
     }
     property->SetPrivacyMode(isPrivacy);

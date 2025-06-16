@@ -12585,6 +12585,11 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
     }
     const char* const where = __func__;
     return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos, where] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::ListWindowInfo (%u) "
+            "(%u) (%" PRIu64 ") (%d)",
+            static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+            static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+            windowInfoOption.displayId, windowInfoOption.windowId);
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
