@@ -370,6 +370,11 @@ public:
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
 
     /*
+     * Compatible Mode
+     */
+    bool IsInCompatScaleStatus() const;
+
+    /*
      * PC Window
      */
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
