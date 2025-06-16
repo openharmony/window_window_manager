@@ -162,7 +162,7 @@ HWTEST_F(CompatibleModePropertyTest, SetIsAdaptToDragScale, TestSize.Level1)
 */
 HWTEST_F(CompatibleModePropertyTest, IsAdaptToDragScale, TestSize.Level1)
 {
-    sptr property = sptr::MakeSptr();
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
     EXPECT_EQ(property->IsAdaptToDragScale(), false);
     property->SetIsAdaptToDragScale(true);
     EXPECT_EQ(property->IsAdaptToDragScale(), true);

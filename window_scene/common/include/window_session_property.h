@@ -291,6 +291,7 @@ public:
     bool IsAdaptToEventMapping() const;
     bool IsAdaptToProportionalScale() const;
     bool IsAdaptToBackButton() const;
+    bool IsAdaptToDragScale() const;
     bool IsDragResizeDisabled() const;
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
