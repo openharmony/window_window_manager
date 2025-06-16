@@ -370,6 +370,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED     },
     {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
     {WMError::WM_ERROR_TIMEOUT,                        WmErrorCode::WM_ERROR_TIMEOUT                  },
+    {WMError::WM_ERROR_ILLEGAL_PARAM,                  WmErrorCode::WM_ERROR_ILLEGAL_PARAM            },
 };
 
 /**
