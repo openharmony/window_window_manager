@@ -1498,6 +1498,12 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, TestS
 
     property->SetDisplayId(999);
     displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(999, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+
+    property->SetDisplayId(999);
+    property->SetIsFollowParentWindowDisplayId(true);
+    displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
     EXPECT_EQ(0, displayId);
     EXPECT_EQ(0, property->GetDisplayId());
 }
