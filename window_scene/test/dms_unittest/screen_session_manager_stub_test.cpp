@@ -3302,7 +3302,6 @@ HWTEST_F(ScreenSessionManagerStubTest, GetPhysicalScreenIds, Function | SmallTes
     std::vector<ScreenId> screenIds;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteFloat(2.2f);
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
