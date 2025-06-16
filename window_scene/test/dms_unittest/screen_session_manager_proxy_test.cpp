@@ -16,11 +16,13 @@
 #include <common/rs_rect.h>
 #include <gtest/gtest.h>
 #include <iremote_broker.h>
+#include <iremote_object_mocker.h>
 #include <transaction/rs_marshalling_helper.h>
 
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
 #include "fold_screen_state_internel.h"
+#include "mock_message_parcel.h"
 #include "scene_board_judgement.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -39,7 +41,6 @@ public:
 
 void ScreenSessionManagerProxyTest::SetUpTestSuite()
 {
-    ASSERT_TRUE(SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy());
 }
 
 void ScreenSessionManagerProxyTest::SetUp()
@@ -48,17 +49,8 @@ void ScreenSessionManagerProxyTest::SetUp()
         return;
     }
 
-    sptr<IRemoteObject> impl;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
-    } else {
-        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_, nullptr);
-        impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    }
-
-    screenSessionManagerProxy = new (std::nothrow) ScreenSessionManagerProxy(impl);
-    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    sptr<IRemoteObject> impl = sptr<IRemoteObjectMocker>::MakeSptr();
+    screenSessionManagerProxy = sptr<ScreenSessionManagerProxy>::MakeSptr(impl);
 }
 
 namespace {
@@ -200,17 +192,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, TestS
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, TestSize.Level1)
 {
-    std::vector<DisplayPhysicalResolution> allSize {};
-    std::function<void()> func = [&]()
-    {
-        allSize = screenSessionManagerProxy->GetAllDisplayPhysicalResolution();
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(!allSize.empty());
-    } else {
-        ASSERT_FALSE(!allSize.empty());
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto allSize = screenSessionManagerProxy->GetAllDisplayPhysicalResolution();
+    ASSERT_TRUE(!allSize.empty());
 }
 
 /**
@@ -220,18 +204,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, TestSiz
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, TestSize.Level1)
 {
-    sptr<DisplayInfo> expectation = nullptr;
-    sptr<DisplayInfo> res = nullptr;
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetDefaultDisplayInfo();
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDefaultDisplayInfo();
+    ASSERT_EQ(res, nullptr);
 }
 
 /**
@@ -665,12 +640,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, TestSize.
 HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason {0};
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpBegin(reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->WakeUpBegin(reason));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->WakeUpBegin(reason));
 }
 
 /**
@@ -680,12 +651,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, TestSize.Level1)
 {
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpEnd());
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->WakeUpEnd());
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->WakeUpEnd());
 }
 
 /**
@@ -696,12 +663,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, TestSize.Level1)
 {
     PowerStateChangeReason reason {0};
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendBegin(reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SuspendBegin(reason));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->SuspendBegin(reason));
 }
 
 /**
@@ -711,12 +674,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, TestSize.Level1)
 {
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendEnd());
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SuspendEnd());
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->SuspendEnd());
 }
 
 /**
@@ -730,12 +689,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, TestSize.Level1)
     ScreenId id = 1001;
     PowerStateChangeReason reason {1};
 
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
 }
 
 /**
@@ -746,9 +701,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, SetDisplayState, TestSize.Level1)
 {
     DisplayState state {1};
-    screenSessionManagerProxy->SetDisplayState(state);
-    int resultValue = 0;
-    ASSERT_EQ(resultValue, 0);
+    MockMessageParcel::ClearAllErrorFlag();
+    auto ret = screenSessionManagerProxy->SetDisplayState(state);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -761,12 +716,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, TestSize.Level1
     ScreenPowerState state {0};
     ScreenId id = 1001;
     PowerStateChangeReason reason {1};
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
 }
 
 /**
@@ -778,12 +729,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
 {
     ScreenPowerState state {0};
     PowerStateChangeReason reason {1};
-    bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(false, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
 }
 
 /**
@@ -794,11 +741,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, TestSize.Level1)
 {
     DisplayId displayId {0};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
-    } else {
-        EXPECT_EQ(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
 }
 
 /**
@@ -1068,19 +1012,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenFromGroup, TestSize.L
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, TestSize.Level1)
 {
     std::shared_ptr<Media::PixelMap> expectation = nullptr;
-    std::shared_ptr<Media::PixelMap> res = nullptr;
     DisplayId displayId {0};
     DmErrorCode* errorCode = nullptr;
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false, false);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false, false);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -1091,18 +1027,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
 {
     sptr<DisplayInfo> expectation = nullptr;
-    sptr<DisplayInfo> res = nullptr;
     DisplayId displayId {0};
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetDisplayInfoById(displayId);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDisplayInfoById(displayId);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -1113,18 +1041,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, TestSize.Level1)
 {
     sptr<DisplayInfo> expectation = nullptr;
-    sptr<DisplayInfo> res = nullptr;
     ScreenId screenId {0};
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetDisplayInfoByScreen(screenId);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDisplayInfoByScreen(screenId);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -1152,18 +1072,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayIds, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, TestSize.Level1)
 {
     sptr<ScreenInfo> expectation = nullptr;
-    sptr<ScreenInfo> res = nullptr;
     ScreenId Id {0};
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetScreenInfoById(Id);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetScreenInfoById(Id);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -1351,18 +1263,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 {
     sptr<CutoutInfo> expectation = nullptr;
-    sptr<CutoutInfo> res = nullptr;
     DisplayId displayId = 0;
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetCutoutInfo(displayId);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetCutoutInfo(displayId);
+    ASSERT_EQ(res, expectation);
 }
 
 /**
@@ -1419,12 +1323,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, TestSize.Level1)
 {
     std::string dumpInfo;
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(dumpInfo, "");
-    } else {
-        EXPECT_EQ(dumpInfo, "");
-    }
+    EXPECT_EQ(dumpInfo, "");
 }
 
 /**
@@ -1436,12 +1337,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, TestSize.Level1)
 {
     ScreenId id = 1001;
     std::string dumpInfo;
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(dumpInfo, "");
-    } else {
-        EXPECT_EQ(dumpInfo, "");
-    }
+    EXPECT_EQ(dumpInfo, "");
 }
 
 /**
@@ -1553,11 +1451,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-    ASSERT_NE(screenSessionManagerProxy, nullptr);
-    screenSessionManagerProxy->GetSuperRotation();
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FLOAT_EQ(screenSessionManagerProxy->GetSuperRotation(), 0);
 }
 
 /**
@@ -1641,16 +1536,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest
 {
     int32_t uid = 0;
     DMHookInfo hookInfo;
-    hookInfo.height_ = 1344;
-    hookInfo.width_ = 2772;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
-    };
-    func();
-
-    EXPECT_EQ(hookInfo.height_, 1344);
-    EXPECT_EQ(hookInfo.width_, 2772);
+    MockMessageParcel::ClearAllErrorFlag();
+    screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
+    EXPECT_EQ(hookInfo.height_, 0);
+    EXPECT_EQ(hookInfo.width_, 0);
 }
 
 /**
