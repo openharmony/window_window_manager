@@ -308,6 +308,7 @@ public:
     bool IsSystemKeyboard() const;
     void SetKeyboardEffectOption(const KeyboardEffectOption& effectOption);
     KeyboardEffectOption GetKeyboardEffectOption() const;
+    mutable std::mutex keyboardMutex_;
 
     /*
      * Window focus
