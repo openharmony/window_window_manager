@@ -503,12 +503,12 @@ public:
     virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; }
 
     /**
-     * @brief Set the frameRect in a partical zoom-in scene.
+     * @brief Set the frameRect in a partial zoom-in scene.
      *
-     * @param frameRect The original rect of frameBuffer before partical zoom-in.
+     * @param frameRect The original rect of frameBuffer before partial zoom-in.
      * @return WSError::WS_OK means set success, otherwise failed.
      */
-    virtual WSError SetFrameRectForParticalZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
+    virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 
