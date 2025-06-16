@@ -2706,7 +2706,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardViewMode());
+            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {

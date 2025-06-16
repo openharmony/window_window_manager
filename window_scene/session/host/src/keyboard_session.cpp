@@ -93,12 +93,12 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
-        session->GetSessionProperty()->SetKeyboardViewMode(property->GetKeyboardViewMode());
+        session->GetSessionProperty()->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
         session->UseFocusIdIfCallingSessionIdInvalid();
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
-            "Show keyboard session, id: %{public}d, calling id: %{public}d, viewMode: %{public}u",
+            "Show keyboard session, id: %{public}d, calling id: %{public}d, effectOption: %{public}s",
             session->GetPersistentId(), session->GetCallingSessionId(),
-            static_cast<uint32_t>(property->GetKeyboardViewMode()));
+            property->GetKeyboardEffectOption().ToString().c_str());
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
         return session->SceneSession::Foreground(property);
     }, "Show");
@@ -801,18 +801,20 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     TLOGI(WmsLogTag::WMS_KEYBOARD, "IsLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
 
-WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
+WSError KeyboardSession::ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
-    PostTask([weakThis = wptr(this), mode]() {
+    PostTask([weakThis = wptr(this), effectOption]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Session is null, change keyboard view mode failed");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Session is null, change keyboard effect option failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->GetSessionProperty()->SetKeyboardViewMode(mode);
-        if (session->changeKeyboardViewModeFunc_) {
-            session->changeKeyboardViewModeFunc_(mode);
+        session->GetSessionProperty()->SetKeyboardEffectOption(effectOption);
+        if (session->changeKeyboardEffectOptionFunc_) {
+            session->changeKeyboardEffectOptionFunc_(effectOption);
+            return WSError::WS_OK;
         }
+        TLOGNE(WmsLogTag::WMS_KEYBOARD, "Can not found changeKeyboardEffectOptionFunc_");
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -940,15 +942,17 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
     }
 }
 
-void KeyboardSession::SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func)
+void KeyboardSession::SetKeyboardEffectOptionChangeListener(const NotifyKeyboarEffectOptionChangeFunc& func)
 {
     PostTask([weakThis = wptr(this), func, where = __func__] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or keyboardViewModeChangeFunc is null", where);
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or NotifyKeyboarEffectOptionChangeFunc is null",
+                where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->changeKeyboardViewModeFunc_ = func;
+        session->changeKeyboardEffectOptionFunc_ = func;
+        TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s Register changeKeyboardEffectOptionFunc_ success", where);
         return WSError::WS_OK;
     }, __func__);
 }

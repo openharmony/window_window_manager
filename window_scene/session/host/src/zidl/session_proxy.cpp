@@ -2039,7 +2039,7 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
+WSError SessionProxy::ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2048,7 +2048,7 @@ WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
         TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+    if (!data.WriteParcelable(&effectOption)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard layout params write failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

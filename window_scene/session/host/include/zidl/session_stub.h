@@ -131,7 +131,7 @@ private:
     int HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
-    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardWillShowRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardWillHideRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);

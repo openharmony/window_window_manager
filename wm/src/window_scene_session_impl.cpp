@@ -1532,15 +1532,25 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     return ret;
 }
 
-WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
+WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
-    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
-            static_cast<uint32_t>(mode));
-        mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with effect option: %{public}s", effectOption.ToString().c_str());
+    if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
+            static_cast<uint32_t>(effectOption.viewMode_));
+        effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
     }
-    property_->SetKeyboardViewMode(mode);
+    if (effectOption.flowLightMode_ >= KeyboardFlowLightMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid flow light mode: %{public}u. Use default mode",
+            static_cast<uint32_t>(effectOption.flowLightMode_));
+        effectOption.flowLightMode_ = KeyboardFlowLightMode::NONE;
+    }
+    if (effectOption.gradientMode_ >= KeyboardGradientMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid gradient mode: %{public}u. Use default mode",
+            static_cast<uint32_t>(effectOption.gradientMode_));
+        effectOption.gradientMode_ = KeyboardGradientMode::NONE;
+    }
+    property_->SetKeyboardEffectOption(effectOption);
     return Show();
 }
 
@@ -4808,31 +4818,38 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
+WMError WindowSceneSessionImpl::ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
-        static_cast<uint32_t>(mode));
-    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard effect option to %{public}s",
+        effectOption.ToString().c_str());
+    if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
+        effectOption.flowLightMode_ >= KeyboardFlowLightMode::END ||
+        effectOption.gradientMode_ >= KeyboardGradientMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view or effect mode! effectOption: %{public}s",
+            effectOption.ToString().c_str());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (mode == property_->GetKeyboardViewMode()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
+
+    auto lastOption = property_->GetKeyboardEffectOption();
+    if (effectOption == lastOption) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "EffectOption is same. last option: %{public}s", lastOption.ToString().c_str());
         return WMError::WM_DO_NOTHING;
     }
+
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
     if (state_ != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    property_->SetKeyboardViewMode(mode);
+    property_->SetKeyboardEffectOption(effectOption);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
+    return static_cast<WMError>(hostSession->ChangeKeyboardEffectOption(effectOption));
 }
 
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)

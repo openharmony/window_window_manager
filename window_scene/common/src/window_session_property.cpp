@@ -1264,7 +1264,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
-        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteParcelable(&keyboardEffectOption_) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
         parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_) &&
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
@@ -1357,7 +1357,13 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
     property->SetBackgroundAlpha(parcel.ReadUint8());
-    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    sptr<KeyboardEffectOption> keyboardEffectOption = parcel.ReadParcelable<KeyboardEffectOption>();
+    if (keyboardEffectOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to read keyboardEffectOption");
+        delete property;
+        return nullptr;
+    }
+    property->SetKeyboardEffectOption(*keyboardEffectOption);
     property->SetWindowCornerRadius(parcel.ReadFloat());
     property->SetExclusivelyHighlighted(parcel.ReadBool());
     property->SetIsAtomicService(parcel.ReadBool());
@@ -1456,7 +1462,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
     backgroundAlpha_ = property->backgroundAlpha_;
-    keyboardViewMode_ = property->keyboardViewMode_;
+    keyboardEffectOption_ = property->keyboardEffectOption_;
     isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
     cornerRadius_ = property->cornerRadius_;
     isAtomicService_ = property->isAtomicService_;
@@ -2016,14 +2022,14 @@ bool WindowSessionProperty::IsSystemKeyboard() const
     return isSystemKeyboard_;
 }
 
-void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+void WindowSessionProperty::SetKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
-    keyboardViewMode_ = mode;
+    keyboardEffectOption_ = effectOption;
 }
 
-KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+KeyboardEffectOption WindowSessionProperty::GetKeyboardEffectOption() const
 {
-    return keyboardViewMode_;
+    return keyboardEffectOption_;
 }
 
 uint8_t WindowSessionProperty::GetBackgroundAlpha() const
