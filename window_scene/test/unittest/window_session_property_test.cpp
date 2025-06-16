@@ -953,6 +953,21 @@ HWTEST_F(WindowSessionPropertyTest, EditSessionInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGlobalDisplayRect
+ * @tc.desc: test whether get the value that set before
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetGlobalDisplayRect, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    Rect rect = { 10, 10, 20, 20 };
+    property->SetGlobalDisplayRect(rect);
+    auto result = property->GetGlobalDisplayRect();
+    EXPECT_EQ(result, rect);
+}
+
+/**
  * @tc.name: GetWindowRect
  * @tc.desc: GetWindowRect
  * @tc.type: FUNC
