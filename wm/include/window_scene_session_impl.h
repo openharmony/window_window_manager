@@ -256,7 +256,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     float GetCustomDensity() const override;
-    WMError SetCustomDensity(float density) override;
+    WMError SetCustomDensity(float density, bool applyToSubWindow) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
     WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
     WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;

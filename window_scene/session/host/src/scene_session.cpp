@@ -7930,7 +7930,7 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
             return;
         }
         TLOGNI(WmsLogTag::WMS_PIPELINE,
-            "%{public}s: change isNeedSync from %{public}d to %{public}d, id:%{public}d",
+            "%{public}s: change applyToSubWindow from %{public}d to %{public}d, id:%{public}d",
             where, session->isNeedSyncSessionRect_, needSync, session->GetPersistentId());
         session->isNeedSyncSessionRect_ = needSync;
     }, __func__);

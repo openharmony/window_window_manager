@@ -343,7 +343,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     float density = 0.4f;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density));
+    bool applyToSubWindow = false;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density, applyToSubWindow));
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -353,16 +354,17 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density, applyToSubWindow));
 
     density = 1.5f;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density, applyToSubWindow));
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
-    ASSERT_EQ(density, window->customDensity_);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+    EXPECT_EQ(density, window->customDensity_);
+    applyToSubWindow = true;
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
 }
 
 /**
@@ -421,7 +423,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetCustomDensity());
 }
 
@@ -442,7 +444,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetMainWindowCustomDensity01, TestSize.Lev
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetMainWindowCustomDensity());
 }
 
