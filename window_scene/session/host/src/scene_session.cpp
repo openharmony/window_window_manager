@@ -26,6 +26,11 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include <ipc_skeleton.h>
+#if defined(MODIFIER_NG)
+#include <modifier_ng/appearance/rs_behind_window_filter_modifier.h>
+#else
+#include <modifier/rs_property_modifier.h>
+#endif
 #include <pointer_event.h>
 #include <key_event.h>
 #include <transaction/rs_sync_transaction_controller.h>
@@ -86,7 +91,6 @@ constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
-const uint32_t CIRCULAR_ANGLE = 360;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -8337,6 +8341,14 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
             Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
     }
 
+#if defined(MODIFIER_NG)
+    auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
+    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
+    rsNode->AddModifier(modifier);
+#else
     std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius =
         std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(blurRadiusValue_);
     rsNode->AddModifier(radius);
@@ -8349,6 +8361,7 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
     std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
         std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(blurMaskColorValue_);
     rsNode->AddModifier(modifier);
+#endif
 }
 
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
@@ -9101,7 +9114,8 @@ int32_t SceneSession::GetRotatePolicy()
         return (foldStatus == FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND || foldStatus == FoldStatus::EXPAND) ?
             std::atoi(foldableRotatePolicyArr[1].c_str()) : std::atoi(foldableRotatePolicyArr[0].c_str());
     }
-    return ROTATE_POLICY_WINDOW;
+    // If the size of foldableRotatePolicyArr is 1 return foldableRotatePolicyArr[0]
+    return foldableRotatePolicyArr.size() == 1 ? std::atoi(foldableRotatePolicyArr[0].c_str()) : ROTATE_POLICY_WINDOW;
 }
 
 /**
@@ -9143,56 +9157,60 @@ Rect SceneSession::RecalculateFrameRect(const Rect& frameRect, uint32_t rotation
     return newRect;
 }
 
-WSError SceneSession::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "permission denied.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-
     PostTask([weakThis = wptr(this), frameRect] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        auto surfaceNode = session->GetSurfaceNode();
-        if (surfaceNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
-            return WSError::WS_ERROR_INVALID_WINDOW;
-        }
-        auto currentScreenSession =
-            ScreenSessionManagerClient::GetInstance().GetScreenSessionById(session->GetDisplayId());
-        if (currentScreenSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_ANIMATION, "screen session is null");
-            return WSError::WS_ERROR_INVALID_DISPLAY;
-        }
-        const ScreenProperty& screenProperty = currentScreenSession->GetScreenProperty();
-        uint32_t screenWidth = screenProperty.GetBounds().rect_.width_;
-        uint32_t screenHeight = screenProperty.GetBounds().rect_.height_;
-        Rect screenRect = {
-            screenProperty.GetBounds().rect_.left_,
-            screenProperty.GetBounds().rect_.top_,
-            screenWidth,
-            screenHeight
-        };
-        if (!frameRect.IsInsideOf(screenRect)) {
-            TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s",
-                  screenRect.ToString().c_str());
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-        float deviceRotation = SessionHelper::ConvertDisplayOrientationToFloat(screenProperty.GetDeviceOrientation());
-        float screenComponentRotation = screenProperty.GetScreenComponentRotation();
-        uint32_t rotation = static_cast<uint32_t>(deviceRotation + screenComponentRotation) % 360; // degree 360
         int32_t rotatePolicy = session->GetRotatePolicy();
-        TLOGI(WmsLogTag::WMS_ANIMATION, "rotate policy: %{public}d, device rotation: %{publid}f, "
-            "screen component rotation: %{public}f", rotatePolicy, deviceRotation, screenComponentRotation);
-        rotation = rotatePolicy != ROTATE_POLICY_SCREEN ? rotation :
-            static_cast<uint32_t>(screenComponentRotation) % 360; // degree 360
-        Rect newRect = session->RecalculateFrameRect(frameRect, rotation, screenWidth, screenHeight);
-        surfaceNode->SetRegionToBeMagnified({ newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ });
-        return WSError::WS_OK;
+        return session->SetFrameRectForPartialZoomInInner(frameRect, rotatePolicy);
     }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect, int rotatePolicy)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    auto currentScreenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
+    if (currentScreenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    const ScreenProperty& screenProperty = currentScreenSession->GetScreenProperty();
+    uint32_t screenWidth = screenProperty.GetBounds().rect_.width_;
+    uint32_t screenHeight = screenProperty.GetBounds().rect_.height_;
+    Rect screenRect = {
+        screenProperty.GetBounds().rect_.left_,
+        screenProperty.GetBounds().rect_.top_,
+        screenWidth,
+        screenHeight
+    };
+    if (!frameRect.IsInsideOf(screenRect)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s",
+              screenRect.ToString().c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    float deviceRotation = SessionHelper::ConvertDisplayOrientationToFloat(screenProperty.GetDeviceOrientation());
+    float screenComponentRotation = screenProperty.GetScreenComponentRotation();
+    uint32_t rotation = static_cast<uint32_t>(deviceRotation + screenComponentRotation) % 360; // degree 360
+    TLOGI(WmsLogTag::WMS_ANIMATION, "rotate policy: %{public}d, device rotation: %{public}f, "
+        "screen component rotation: %{public}f", rotatePolicy, deviceRotation, screenComponentRotation);
+    rotation = rotatePolicy != ROTATE_POLICY_SCREEN ? rotation :
+        static_cast<uint32_t>(screenComponentRotation) % 360; // degree 360
+    Rect newRect = RecalculateFrameRect(frameRect, rotation, screenWidth, screenHeight);
+    surfaceNode->SetRegionToBeMagnified({ newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ });
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

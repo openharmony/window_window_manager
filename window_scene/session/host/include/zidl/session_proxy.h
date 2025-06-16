@@ -201,7 +201,7 @@ public:
     /**
      * window animation
      */
-    WSError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
+    WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

@@ -2277,7 +2277,7 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return static_cast<WMError>(hostSession->SetFrameRectForParticalZoomIn(frameRect));
+    return static_cast<WMError>(hostSession->SetFrameRectForPartialZoomIn(frameRect));
 }
 
 WMError WindowSceneSessionImpl::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)

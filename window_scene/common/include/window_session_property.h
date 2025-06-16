@@ -70,6 +70,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetBrightness(float brightness);
     void SetDisplayId(uint64_t displayId);
+    void SetIsFollowParentWindowDisplayId(bool enabled);
     void SetWindowType(WindowType type);
     void SetParentId(int32_t parentId);
     void SetPersistentId(int32_t persistentId);
@@ -145,6 +146,7 @@ public:
     int32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
     uint64_t GetDisplayId() const;
+    bool IsFollowParentWindowDisplayId() const;
     int32_t GetPersistentId() const;
     int32_t GetParentPersistentId() const;
     uint32_t GetAccessTokenId() const;
@@ -420,6 +422,7 @@ private:
     bool isFollowScreenChange_ { false };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint64_t displayId_ = 0;
+    bool isFollowParentWindowDisplayId_ = false;
     int32_t parentId_ = INVALID_SESSION_ID; // parentId of sceneSession, which is low 32 bite of parentPersistentId_
     uint32_t flags_ = 0;
     int32_t persistentId_ = INVALID_SESSION_ID;
