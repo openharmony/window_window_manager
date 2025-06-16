@@ -32,6 +32,7 @@
 #include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "ui_extension/provider_data_handler.h"
 #include "window_extension_session_impl.h"
 #include "wm_common.h"
 
@@ -39,6 +40,16 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Accessibility;
 using namespace std;
+
+namespace {
+    std::string logMsg;
+    void WindowExtensionSessionImplLogCallback(const LogType type, const LogLevel level, const unsigned int domain,
+        const char* tag, const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
@@ -2073,36 +2084,40 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyPointerEvent, TestSize.Level1)
  */
 HWTEST_F(WindowExtensionSessionImplTest, ProcessPointerEventWithHostWindowDelayRaise, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(WindowExtensionSessionImplLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ProcessPointerEventWithHostWindowDelayRaise");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     bool isHitTargetDraggable = false;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("pointerEvent is nullptr") != std::string::npos);
+    logMsg.clear();
 
     pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
 
+    isHitTargetDraggable = true;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     window->dataHandler_ = nullptr;
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("No need to notify") != std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("dataHandler_ is nullptr") != std::string::npos);
+    logMsg.clear();
+    window->dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("Send raise message to host window failed") != std::string::npos);
+    logMsg.clear();
     window->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
     window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    isHitTargetDraggable = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_UP);
-    window->ProcessPointerEventWithHostWindowDelayRaise(pointerEvent, isHitTargetDraggable);
+    EXPECT_TRUE(logMsg.find("Notify host window to raise") != std::string::npos);
 }
 
 /**
