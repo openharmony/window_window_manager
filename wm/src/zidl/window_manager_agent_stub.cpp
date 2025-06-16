@@ -56,8 +56,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             uint32_t contentColor = data.ReadUint32();
             bool enableAnimation = data.ReadBool();
             SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
-            SystemBarProperty systemBarProperty = { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
-            NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+            SystemBarProperty systemBarProperty =
+                { enable, backgroundColor, contentColor, enableAnimation, settingFlag };
+            NotifyWindowSystemBarPropertyChange(static_cast<WindowType>(type)///
+            , systemBarProperty);
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {

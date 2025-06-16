@@ -469,8 +469,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowSystemBarPropertyChange, TestS
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     SystemBarProperty systemBarProperty;
