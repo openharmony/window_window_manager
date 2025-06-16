@@ -165,6 +165,30 @@ public:
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;
+
+    /**
+     * @brief Get the window rectangle in global coordinates.
+     *
+     * @return The rectangle (position and size) of the window in global coordinates.
+     */
+    virtual Rect GetGlobalDisplayRect() const { return { 0, 0, 0, 0 }; }
+
+    /**
+     * @brief Convert a position from client (window-relative) coordinates to global coordinates.
+     *
+     * @param position The position relative to the window.
+     * @return The corresponding position in global coordinates.
+     */
+    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+
+    /**
+     * @brief Convert a position from global coordinates to client (window-relative) coordinates.
+     *
+     * @param position The position in global coordinates.
+     * @return The corresponding position relative to the window.
+     */
+    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetWindowMode() const = 0;
     virtual float GetAlpha() const = 0;
@@ -217,6 +241,20 @@ public:
         MoveConfiguration moveConfiguration = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
         MoveConfiguration moveConfiguration) { return WMError::WM_OK; }
+
+    /**
+     * @brief Move the window to the specified position in global coordinates.
+     *
+     * @param x The target X-coordinate in global coordinates.
+     * @param y The target Y-coordinate in global coordinates.
+     * @param moveConfiguration Optional move configuration parameters.
+     * @return WMError WM_OK if the move operation succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {})
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) = 0;
     virtual WMError ResizeAsync(uint32_t width, uint32_t height,

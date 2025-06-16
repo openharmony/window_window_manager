@@ -707,6 +707,23 @@ struct Rect {
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
+ * @struct Position
+ *
+ * @brief Represent a two-dimensional position in a specific coordinate system.
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
+    }
+};
+
+/**
  * @struct SystemBarProperty
  *
  * @brief Property of system bar.
