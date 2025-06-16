@@ -6091,11 +6091,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u, enable %{public}u", GetWindowId(), enable);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u, enable %{public}u", GetWindowId(), enable);
     gestureBackEnabled_ = enable;
     AAFwk::Want want;
     want.SetParam(Extension::GESTURE_BACK_ENABLED, enable);
