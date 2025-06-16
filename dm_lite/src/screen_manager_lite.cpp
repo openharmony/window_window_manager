@@ -409,19 +409,13 @@ ScreenPowerState ScreenManagerLite::GetScreenPower()
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower();
 }
 
-DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds)
+DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
 {
-    std::vector<sptr<ScreenInfo>> screenInfos;
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(screenInfos);
+    TLOGI(WmsLogTag::DMS, "enter");
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
     if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "failed");
         return ret;
-    }
-
-    for (const auto& screenInfo : screenInfos) {
-        auto id = screenInfo->GetScreenId();
-        if (screenInfo->GetType() == ScreenType::REAL && id != SCREEN_ID_INVALID) {
-            screenIds.push_back(id);
-        }
     }
     return DMError::DM_OK;
 }

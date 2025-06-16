@@ -3834,6 +3834,31 @@ std::vector<ScreenId> ScreenSessionManager::GetAllScreenIds()
     return res;
 }
 
+DMError ScreenSessionManager::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& iter : screenSessionMap_) {
+        auto screenSession = iter.second;
+        auto screenId = iter.first;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screensession is nullptr, screenId: %{public}" PRIu64, screenId);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL
+            && screenId != SCREEN_ID_INVALID) {
+            screenIds.emplace_back(screenId);
+        }
+    }
+    return DMError::DM_OK;
+}
+
 DisplayState ScreenSessionManager::GetDisplayState(DisplayId displayId)
 {
     return sessionDisplayPowerController_->GetDisplayState(displayId);

@@ -88,6 +88,7 @@ public:
     /*
      * used by powermgr
      */
+    virtual DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds);
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
