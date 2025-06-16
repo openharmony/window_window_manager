@@ -174,17 +174,18 @@ public:
         int32_t rightOut = rect.width_ + outside;
         int32_t topOut = -outside;
         int32_t bottomOut = rect.height_ + outside;
+        int32_t half = 2;
 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
 
         AreaType type;
-        if (isInRange(leftOut, rightOut / 2, pointWinX) && isInRange(topOut, bottomOut / 2, pointWinY)) {
+        if (isInRange(leftOut, rightOut / half, pointWinX) && isInRange(topOut, bottomOut / half, pointWinY)) {
             type = AreaType::LEFT_TOP;
-        } else if (isInRange(rightOut / 2, rightOut, pointWinX) && isInRange(topOut, bottomOut / 2, pointWinY)) {
+        } else if (isInRange(rightOut / half, rightOut, pointWinX) && isInRange(topOut, bottomOut / half, pointWinY)) {
             type = AreaType::RIGHT_TOP;
-        } else if (isInRange(rightOut / 2, rightOut, pointWinX) && isInRange(bottomOut / 2, bottomOut, pointWinY)) {
+        } else if (isInRange(rightOut / half, rightOut, pointWinX) && isInRange(bottomOut / half, bottomOut, pointWinY)) {
             type = AreaType::RIGHT_BOTTOM;
-        } else if (isInRange(leftOut, rightOut / 2, pointWinX) && isInRange(bottomOut / 2, bottomOut, pointWinY)) {
+        } else if (isInRange(leftOut, rightOut / half, pointWinX) && isInRange(bottomOut / half, bottomOut, pointWinY)) {
             type = AreaType::LEFT_BOTTOM;
         } else {
             type = AreaType::UNDEFINED;

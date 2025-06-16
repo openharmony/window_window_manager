@@ -3263,7 +3263,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
-    if(IsDragResizeScale(reason)) {
+    if (IsDragResizeScale(reason)) {
         TLOGNE(WmsLogTag::WMS_COMPAT, "compatiblemode drag scale no need notify rect change");
         return;
     }
@@ -3884,7 +3884,7 @@ void SceneSession::HandleMoveDragEvent(SizeChangeReason reason)
                 TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s: session is null", where);
                 return;
             }
-            if(session->IsCompatibleModeDirtyDragScaleWindow()) {
+            if (session->IsCompatibleModeDirtyDragScaleWindow()) {
                 session->OnSessionEvent(SessionEvent::EVENT_DRAG);
                 session->ResetCompatibleModeDragScaleFlags();
             }
