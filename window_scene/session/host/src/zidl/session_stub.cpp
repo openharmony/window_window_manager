@@ -245,7 +245,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
             return HandleSetSessionLabelAndIcon(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
-            return HandleChangeKeyboardViewMode(data, reply);
+            return HandleChangeKeyboardEffectOption(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS):
             return HandleSetWindowCornerRadius(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
@@ -1564,18 +1564,21 @@ int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t mode = 0;
-    if (!data.ReadUint32(mode)) {
+    sptr<KeyboardEffectOption> effectOption = data.ReadStrongParcelable<KeyboardEffectOption>();
+    if (effectOption == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
         return ERR_INVALID_DATA;
     }
-    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+    if (effectOption->viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
+        effectOption->flowLightMode_ >= KeyboardFlowLightMode::END ||
+        effectOption->gradientMode_ >= KeyboardGradientMode::END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{publc}s",
+            effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    WSError ret = ChangeKeyboardEffectOption(*effectOption);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

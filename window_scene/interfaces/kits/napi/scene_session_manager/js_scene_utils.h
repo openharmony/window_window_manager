@@ -235,6 +235,8 @@ napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
+napi_value KeyboardFlowlightModeInit(napi_env env);
+napi_value KeyboardGradientModeInit(napi_env env);
 napi_value WindowTransitionTypeInit(napi_env env);
 napi_value WindowAnimationCurveInit(napi_env env);
 napi_value CreateResultMapToJsValue(napi_env env,
@@ -250,6 +252,7 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
 napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
     const WindowAnimationProperty& animationProperty);
+napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);

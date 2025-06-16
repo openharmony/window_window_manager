@@ -3674,21 +3674,21 @@ public:
     /**
      * @brief Show keyboard window
      *
-     * @param mode Keyboard will show with special mode.
+     * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief Change keyboard view mode
+     * @brief Change keyboard effect with option
      *
-     * @param mode Keyboard will update to the special mode.
-     * @return WM_OK means view mode update success, others means failed.
+     * @param effectOption Keyboard will update to the special effect option.
+     * @return WM_OK means effect update success, others means failed.
      */
-    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    virtual WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }

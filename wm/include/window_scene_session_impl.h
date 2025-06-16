@@ -29,7 +29,7 @@ public:
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
         bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
     WMError DestroyHookWindow();
@@ -110,7 +110,7 @@ public:
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
-    WMError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
