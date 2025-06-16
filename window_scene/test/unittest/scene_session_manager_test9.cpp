@@ -1495,13 +1495,14 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, TestS
     auto displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
     EXPECT_EQ(0, displayId);
     EXPECT_EQ(0, property->GetDisplayId());
-    
-    property->SetDefaultDisplayIdEnabled(true);
+
+    property->SetDisplayId(999);
     displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
-    EXPECT_EQ(0, displayId);
+    EXPECT_EQ(999, displayId);
     EXPECT_EQ(0, property->GetDisplayId());
 
     property->SetDisplayId(999);
+    property->SetDefaultDisplayIdEnabled(true);
     displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
     EXPECT_EQ(0, displayId);
     EXPECT_EQ(0, property->GetDisplayId());
