@@ -78,8 +78,8 @@ class WindowStage {
     return this.windowStage_.setDefaultDensityEnabled(enabled);
   }
 
-  setCustomDensity(density) {
-    return this.windowStage_.setCustomDensity(density);
+  setCustomDensity(density, applyToSubWindow) {
+    return this.windowStage_.setCustomDensity(density, applyToSubWindow);
   }
 
   removeStartingWindow() {
