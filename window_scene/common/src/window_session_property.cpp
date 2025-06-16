@@ -2145,6 +2145,11 @@ bool WindowSessionProperty::IsAdaptToBackButton() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToBackButton();
 }
 
+bool WindowSessionProperty::IsAdaptToDragScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToDragScale();
+}
+
 bool WindowSessionProperty::IsDragResizeDisabled() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsDragResizeDisabled();
@@ -2218,6 +2223,16 @@ void CompatibleModeProperty::SetIsAdaptToBackButton(bool isAdaptToBackButton)
 bool CompatibleModeProperty::IsAdaptToBackButton() const
 {
     return isAdaptToBackButton_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToDragScale(bool isAdaptToDragScale)
+{
+    isAdaptToDragScale_ = isAdaptToDragScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToDragScale() const
+{
+    return isAdaptToDragScale_;
 }
 
 void CompatibleModeProperty::SetDisableDragResize(bool disableDragResize)
@@ -2296,6 +2311,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAdaptToEventMapping_) &&
         parcel.WriteBool(isAdaptToProportionalScale_) &&
         parcel.WriteBool(isAdaptToBackButton_) &&
+        parcel.WriteBool(isAdaptToDragScale_) &&
         parcel.WriteBool(disableDragResize_) &&
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
@@ -2315,6 +2331,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isAdaptToEventMapping_ = parcel.ReadBool();
     property->isAdaptToProportionalScale_ = parcel.ReadBool();
     property->isAdaptToBackButton_ = parcel.ReadBool();
+    property->isAdaptToDragScale_ = parcel.ReadBool();
     property->disableDragResize_ = parcel.ReadBool();
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();

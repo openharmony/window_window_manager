@@ -944,14 +944,24 @@ void SceneSession::HandleSessionDragEvent(SessionEvent event)
         (event == SessionEvent::EVENT_DRAG || event == SessionEvent::EVENT_DRAG_START)) {
         WSRect rect = moveDragController_->GetTargetRect(
             MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+        auto property = GetSessionProperty();
         if (event == SessionEvent::EVENT_DRAG_START && moveDragController_->GetStartDragFlag()) {
-            dragResizeType = GetAppDragResizeType();
+            if (property->IsAdaptToDragScale()) {
+                dragResizeType = DragResizeType::RESIZE_SCALE;
+            } else {
+                dragResizeType = GetAppDragResizeType();
+            }
             SetDragResizeTypeDuringDrag(dragResizeType);
         } else if (event == SessionEvent::EVENT_DRAG) {
-            dragResizeType = GetDragResizeTypeDuringDrag();
+            if (property->IsAdaptToDragScale()) {
+                dragResizeType = DragResizeType::RESIZE_SCALE;
+            } else {
+                dragResizeType = GetDragResizeTypeDuringDrag();
+            }
         }
+        Gravity gravity = moveDragController_->GetGravity();
         SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
-            static_cast<uint32_t>(dragResizeType)});
+            static_cast<uint32_t>(dragResizeType), static_cast<uint32_t>(gravity)});
     } else if (event == SessionEvent::EVENT_END_MOVE) {
         SetDragResizeTypeDuringDrag(dragResizeType);
     }
@@ -3253,6 +3263,10 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
+    if(IsDragResizeScale(reason)) {
+        TLOGNE(WmsLogTag::WMS_COMPAT, "compatiblemode drag scale no need notify rect change");
+        return;
+    }
     PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -3842,12 +3856,12 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
     bool isReasonMatched = reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END;
-    bool isResizeWhenEnd = isReasonMatched && isPcOrPcModeMainWindow &&
-        GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
+    bool isResizeWhenEnd = (isReasonMatched && isPcOrPcModeMainWindow &&
+        GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END) || IsDragResizeScale(reason);
     if (isResizeWhenEnd) {
         UpdateSizeChangeReason(reason);
         if (reason == SizeChangeReason::DRAG) {
-            OnSessionEvent(SessionEvent::EVENT_DRAG);
+            HandleMoveDragEvent(reason);
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
             WSRect relativeRect = moveDragController_->GetTargetRect(
@@ -3857,6 +3871,46 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         }
     }
     return isResizeWhenEnd;
+}
+
+void SceneSession::HandleMoveDragEvent(SizeChangeReason reason)
+{
+    if (IsDragResizeScale(reason)) {
+        compatibleDragScaleFlags_ = true;
+        std::shared_ptr nextVsyncDragCallback = std::make_shared();
+        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = func](int64_t, int64_t) {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s: session is null", where);
+                return;
+            }
+            if(session->IsCompatibleModeDirtyDragScaleWindow()) {
+                session->OnSessionEvent(SessionEvent::EVENT_DRAG);
+                session->ResetCompatibleModeDragScaleFlags();
+            }
+        };
+        if (requestNextVsyncFunc_) {
+            requestNextVsyncFunc_(nextVsyncDragCallback);
+        } else {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "Func is null, could not request vsync");
+        }
+    } else {
+        OnSessionEvent(SessionEvent::EVENT_DRAG);
+    }
+}
+
+bool SceneSession::IsDragResizeScale(SizeChangeReason reason)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "property is null");
+        return false;
+    }
+    bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
+        WindowHelper::IsMainWindow(property->GetWindowType());
+    bool result = (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) &&
+        isPcOrPcModeMainWindow && GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_SCALE;
+    return result;
 }
 
 WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
@@ -6701,6 +6755,16 @@ void SceneSession::ResetDirtyDragFlags()
 {
     dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
     isDragging_ = false;
+}
+
+bool SceneSession::IsCompatibleModeDirtyDragScaleWindow()
+{
+    return compatibleDragScaleFlags_;
+}
+
+void SceneSession::ResetCompatibleModeDragScaleFlags()
+{
+    compatibleDragScaleFlags_ = false;
 }
 
 void SceneSession::NotifyUILostFocus()

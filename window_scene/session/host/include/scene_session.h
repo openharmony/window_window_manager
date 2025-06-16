@@ -752,6 +752,8 @@ public:
     }
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
+    bool IsCompatibleModeDirtyDragScaleWindow();
+    void ResetCompatibleModeDragScaleFlags();
 
     /*
      * Gesture Back
@@ -1036,6 +1038,8 @@ private:
     virtual void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
+    void HandleMoveDragEvent(SizeChangeReason reason);
+    bool IsDragResizeScale(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
