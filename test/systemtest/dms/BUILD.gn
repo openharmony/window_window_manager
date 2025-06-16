@@ -81,6 +81,12 @@ ohos_systemtest("dms_display_manager_test") {
 }
 
 ohos_systemtest("dms_display_power_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   module_out_path = module_out_path
 
   sources = [ "display_power_test.cpp" ]
@@ -101,6 +107,12 @@ ohos_systemtest("dms_display_change_test") {
 }
 
 ohos_systemtest("dms_screenshot_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   module_out_path = module_out_path
 
   sources = [ "screenshot_test.cpp" ]
