@@ -21,11 +21,21 @@
 #include "mock_window.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
+#include "window_manager_hilog.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -1214,6 +1224,8 @@ HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FilterPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -1224,8 +1236,15 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->touchEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetTouchEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
+
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_TRUE(logMsg.find("Filter,id") != std::string::npos);
+    logMsg.clear();
 }
 
 /**
@@ -1240,14 +1259,17 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->mouseEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->mouseEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetMouseEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -1257,6 +1279,8 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -1264,15 +1288,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
     window->NotifyPointerEvent(pointerEvent);
 
     pointerEvent = MMI::PointerEvent::Create();
+
+    window->inputEventConsumer_ = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    SessionInfo info;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(true, window->IsWindowDelayRaiseEnabled());
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") == std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") != std::string::npos);
+    logMsg.clear();
+
+    window->SetWindowDelayRaiseEnabled(false);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("UI content dose not consume") != std::string::npos);
+    logMsg.clear();
+
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     window->NotifyPointerEvent(pointerEvent);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    window->NotifyPointerEvent(pointerEvent);
-
-    window->inputEventConsumer_ = nullptr;
     window->NotifyPointerEvent(pointerEvent);
 }
 
