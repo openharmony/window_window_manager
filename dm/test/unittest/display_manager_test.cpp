@@ -2272,6 +2272,25 @@ HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeIndisplay, TestSiz
 }
 
 /**
+ * @tc.name: ConvertGlobalCoordinateToRelativeNullDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate while display is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNullDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10000, 20000};
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10000);
+    EXPECT_EQ(relativePosition.position.y, 20000);
+}
+
+/**
  * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay
  * @tc.desc: Test convert relative coordinate to global coordinate failed
  * @tc.type: FUNC
