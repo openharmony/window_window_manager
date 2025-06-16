@@ -1607,6 +1607,22 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     ssm_->sceneSessionMap_.clear();
 }
 
+// tanhong
+/**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: SceneSesionManager test NotifyWindowSystemBarPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyWindowSystemBarPropertyChange, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SystemBarProperty systemBarProperty;
+    ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    ASSERT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+    ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    ASSERT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+}
+
 /**
  * @tc.name: RefreshAllAppUseControlMap
  * @tc.desc: RefreshAllAppUseControlMap
