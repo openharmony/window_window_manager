@@ -3402,7 +3402,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         if (std::find(supportedWindowModes.begin(), supportedWindowModes.end(),
             AppExecFwk::SupportWindowMode::FULLSCREEN) != supportedWindowModes.end()) {
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Supports full screen cannot be grayed out");
-            return WMError::WM_ERROR_INVALID_PARAM;
+            return WMError::WM_ERROR_ILLEGAL_PARAM;
         }
         GrayOutMaximizeButton(true);
     } else if (grayOutMaximizeButton_) {
