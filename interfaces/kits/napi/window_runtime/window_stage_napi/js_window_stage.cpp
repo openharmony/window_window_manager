@@ -772,20 +772,20 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1 || argc > 2) {
+    if (argc < ARG_COUNT_ONE || argc > ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     double density = UNDEFINED_DENSITY;
-    if (!ConvertFromJsValue(env, argv[0], density)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], density)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     bool applyToSubWindow = false;
-    if (GetType(env, argv[1]) != napi_undefined && GetType(env, argv[1]) != napi_null) {
-        if (!ConvertFromJsValue(env, argv[1], applyToSubWindow)) {
+    if (GetType(env, argv[INDEX_ONE]) != napi_undefined && GetType(env, argv[INDEX_ONE]) != napi_null) {
+        if (!ConvertFromJsValue(env, argv[INDEX_ONE], applyToSubWindow)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to boolean");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
