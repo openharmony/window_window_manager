@@ -3848,7 +3848,7 @@ DMError ScreenSessionManager::GetPhysicalScreenIds(std::vector<ScreenId>& screen
         auto screenSession = iter.second;
         auto screenId = iter.first;
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screensession is nullptr, screenId: %{public}" PRIu64"", screenId);
+            TLOGE(WmsLogTag::DMS, "screensession is nullptr, screenId: %{public}" PRIu64, screenId);
             continue;
         }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL

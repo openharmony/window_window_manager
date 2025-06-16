@@ -204,7 +204,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
-    ASSERT_NE(ret, DMError::DM_OK);
+    EXPECT_NE(ret, DMError::DM_OK);
 }
 }
 }

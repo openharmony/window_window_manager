@@ -871,6 +871,7 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenIds, Function | SmallTest | 
     ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     std::vector<ScreenId> screenIds1;
     auto ret1 = ssm_->GetPhysicalScreenIds(screenIds1);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 }
 }

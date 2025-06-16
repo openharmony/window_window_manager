@@ -70,7 +70,7 @@ HWTEST_F(ScreenManagerLiteTest, GetPhysicalScreenIds, TestSize.Level1)
 {
     std::vector<ScreenId> screenIds;
     auto ret = sml_.GetPhysicalScreenIds(screenIds);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 }
 } // namespace Rosen
