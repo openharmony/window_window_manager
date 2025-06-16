@@ -10009,6 +10009,7 @@ void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, boo
     const char* const where = __func__;
     auto task = [this, displayId, isVisible] {
         statusBarConstantlyShowMap_[displayId] = isVisible;
+        UpdateRootSceneAvoidArea();
         return WMError::WM_OK;
     };
     taskScheduler_->PostAsyncTask(task, where);
@@ -10063,22 +10064,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
         TLOGD(WmsLogTag::WMS_IMMS, "scene session is nullptr or not visible");
         return;
     }
-    bool isLastFrameLayoutFinished = true;
-    IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
-        persistentId, isLastFrameLayoutFinished);
-    if (isLastFrameLayoutFinished) {
-        auto area = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-        if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, area,
-            sceneSession->GetSessionRect().height_)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by wrong direction",
-                persistentId);
-            return;
-        }
-        sceneSession->UpdateAvoidArea(new AvoidArea(area), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    } else {
-        sceneSession->MarkAvoidAreaAsDirty();
-    }
+    sceneSession->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)

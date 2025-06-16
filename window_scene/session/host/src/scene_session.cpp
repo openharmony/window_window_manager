@@ -397,12 +397,14 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
-        if (session->specificCallback_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->MarkAvoidAreaAsDirty();
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(persistentId);
+        session->MarkAvoidAreaAsDirty();
+        auto subSessions = session->GetSubSession();
+        for (const auto& subSession : subSessions) {
+            if (subSession) {
+                subSession->MarkAvoidAreaAsDirty();
             }
+        }
+        if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
                 persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
@@ -487,12 +489,8 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot) {
             session->SaveSnapshot(true);
         }
+        session->MarkAvoidAreaAsDirty();
         if (session->specificCallback_ != nullptr) {
-            if (Session::IsScbCoreEnabled()) {
-                session->MarkAvoidAreaAsDirty();
-            } else {
-                session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-            }
             session->specificCallback_->onWindowInfoUpdate_(
                 session->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
@@ -1860,6 +1858,11 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
+    return HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM);
+}
+
+WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
+{
     if (isLastFrameLayoutFinishedFunc_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
@@ -1870,10 +1873,38 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
         return ret;
     }
-    if (isLayoutFinished) {
-        UpdateAvoidArea(new AvoidArea(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)), AvoidAreaType::TYPE_SYSTEM);
-    } else {
+    if (!isLayoutFinished) {
         MarkAvoidAreaAsDirty();
+        return WSError::WS_OK;
+    }
+    if (avoidAreaType != AvoidAreaType::TYPE_END) {
+        auto area = GetAvoidAreaByType(avoidAreaType);
+        // code below aims to check if ai bar avoid area reaches window rect's bottom
+        // it should not be removed until unexpected window rect update issues were solved
+        if (avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
+            !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
+            return WSError::WS_OK;
+        }
+        UpdateAvoidArea(new AvoidArea(area), avoidAreaType);
+        return WSError::WS_OK;
+    } else {
+        // avoidAreaType equal to TYPE_END means traversing and updating all avoid area types
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
+            avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
+            auto type = static_cast<AvoidAreaType>(avoidType);
+            auto area = GetAvoidAreaByType(type);
+            // code below aims to check if ai bar avoid area reaches window rect's bottom
+            // it should not be removed until unexpected window rect update issues were solved
+            if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
+                !isAINavigationBarAvoidAreaValid_(area, GetSessionRect().height_)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom "
+                    "of the rect while traversing all avoid area type");
+                continue;
+            }
+            UpdateAvoidArea(new AvoidArea(area), type);
+        }
     }
     return WSError::WS_OK;
 }
@@ -3530,12 +3561,8 @@ void SceneSession::SetFloatingScale(float floatingScale)
         Session::SetFloatingScale(floatingScale);
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-            if (Session::IsScbCoreEnabled()) {
-                MarkAvoidAreaAsDirty();
-            } else {
-                specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-            }
         }
+        MarkAvoidAreaAsDirty();
     }
 }
 
