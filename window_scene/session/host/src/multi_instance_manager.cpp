@@ -91,19 +91,12 @@ bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
 
 uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
-    auto iter = appInfoMap_.find(bundleName);
-    if (iter == appInfoMap_.end()) {
-        AppExecFwk::ApplicationInfo appInfo;
-        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(
-            bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
-            appInfoMap_[bundleName] = appInfo;
-            return appInfo.multiAppMode.maxCount;
-        }
-        TLOGE(WmsLogTag::WMS_LIFE, "App info not found, bundleName:%{public}s", bundleName.c_str());
+    if (!IsMultiInstance(bundleName)) {
         return 0u;
     }
-    if (iter->second.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
+    auto iter = appInfoMap_.find(bundleName);
+    if (iter != appInfoMap_.end()) {
         return iter->second.multiAppMode.maxCount;
     }
     return 0u;
@@ -270,6 +263,12 @@ void MultiInstanceManager::DecreaseInstanceKeyRefCount(const sptr<SceneSession>&
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
+    DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(bundleName, instanceKey);
+}
+
+void MultiInstanceManager::DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(const std::string& bundleName,
+    const std::string& instanceKey)
+{
     const auto bundleInstanceKey = bundleName + instanceKey;
     auto iter = instanceKeyRefCountMap_.find(bundleInstanceKey);
     if (iter == instanceKeyRefCountMap_.end()) {
