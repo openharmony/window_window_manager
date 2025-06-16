@@ -2089,7 +2089,7 @@ DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& s
         }
     );
     if (!res) {
-        TLOGE(WmsLogTag::DMS, "fail to marshalling screenIds in stub.");
+        TLOGE(WmsLogTag::DMS, "fail to unmarshalling screenIds in stub.");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return ret;

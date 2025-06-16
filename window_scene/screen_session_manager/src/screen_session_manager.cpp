@@ -3853,7 +3853,7 @@ DMError ScreenSessionManager::GetPhysicalScreenIds(std::vector<ScreenId>& screen
         }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL
             && screenId != SCREEN_ID_INVALID) {
-                screenIds.emplace_back(screenId);
+            screenIds.emplace_back(screenId);
         }
     }
     return DMError::DM_OK;
