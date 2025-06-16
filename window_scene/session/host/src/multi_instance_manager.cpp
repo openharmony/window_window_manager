@@ -270,6 +270,12 @@ void MultiInstanceManager::DecreaseInstanceKeyRefCount(const sptr<SceneSession>&
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
+    DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(bundleName, instanceKey);
+}
+
+void MultiInstanceManager::DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(const std::string& bundleName,
+    const std::string& instanceKey)
+{
     const auto bundleInstanceKey = bundleName + instanceKey;
     auto iter = instanceKeyRefCountMap_.find(bundleInstanceKey);
     if (iter == instanceKeyRefCountMap_.end()) {

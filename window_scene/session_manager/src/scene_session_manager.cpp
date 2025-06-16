@@ -9529,7 +9529,12 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             want.SetParams(sessionInfo.want->GetParams());
             want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(sessionInfo.screenId_));
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+        if (ret != ERR_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE, "start specified ability by SCB failed.");
+            MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
+                sessionInfo.bundleName_, sessionInfo.appInstanceKey_);
+        }
     };
 
     taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
@@ -15861,7 +15866,7 @@ WMError SceneSessionManager::RemoveInstanceKey(const std::string& bundleName, co
         TLOGE(WmsLogTag::WMS_LIFE, "empty instanceKey");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    MultiInstanceManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+    MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(bundleName, instanceKey);
     TLOGI(WmsLogTag::WMS_LIFE, "remove instanceKey:%{public}s of bundle:%{public}s",
         instanceKey.c_str(), bundleName.c_str());
     return WMError::WM_OK;
