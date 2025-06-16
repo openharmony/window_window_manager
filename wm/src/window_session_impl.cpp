@@ -603,7 +603,7 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        property_->SetDefaultDisplayIdEnabled(true);
+        property_->SetIsFollowParentWindowDisplayId(true);
         TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
