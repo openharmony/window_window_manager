@@ -818,7 +818,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifySessionAINavigationBarChange, Function 
 
     sceneSession->SetScbCoreEnabled(true);
     sceneSession->isVisible_ = true;
-    sceneSession->state_ = Session::STATE_FOREGROUND;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->NotifySessionAINavigationBarChange(persistentId);
     EXPECT_EQ(WSError::WS_OK, ssm_->HandleSecureSessionShouldHide(sceneSession));
 }
