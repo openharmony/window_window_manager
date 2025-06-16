@@ -142,6 +142,33 @@ HWTEST_F(CompatibleModePropertyTest, IsAdaptToBackButton, TestSize.Level1)
 }
 
 /**
+*@tc.name: SetIsAdaptToDragScale
+*@tc.desc: SetIsAdaptToDragScale
+*@tc.type: FUNC
+*/
+HWTEST_F(CompatibleModePropertyTest, SetIsAdaptToDragScale, TestSize.Level1)
+{
+    sptr property = sptr::MakeSptr();
+    property->SetIsAdaptToDragScale(true);
+    EXPECT_EQ(property->IsAdaptToDragScale(), true);
+    property->SetIsAdaptToDragScale(false);
+    EXPECT_EQ(property->IsAdaptToDragScale(), false);
+}
+
+/**
+*@tc.name: IsAdaptToDragScale
+*@tc.desc: IsAdaptToDragScale
+*@tc.type: FUNC
+*/
+HWTEST_F(CompatibleModePropertyTest, IsAdaptToDragScale, TestSize.Level1)
+{
+    sptr property = sptr::MakeSptr();
+    EXPECT_EQ(property->IsAdaptToDragScale(), false);
+    property->SetIsAdaptToDragScale(true);
+    EXPECT_EQ(property->IsAdaptToDragScale(), true);
+}
+
+/**
  * @tc.name: SetDisableDragResize
  * @tc.desc: SetDisableDragResize
  * @tc.type: FUNC
