@@ -35,8 +35,6 @@ const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
-const static int32_t INTEGER_32_MAX = 2147483647;
-const static int32_t INTEGER_32_MIN = -2147483648;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 
@@ -53,7 +51,7 @@ bool IsTargetDisplay(const sptr<DisplayInfo>& displayInfo, const Position& globa
 
 bool IsInt32AddOverflow(int32_t num1, int32_t num2)
 {
-    if ((num2 > 0 && num1 > INTEGER_32_MAX - num2) || (num2 < 0 && num1 < INTEGER_32_MIN - num2)) {
+    if ((num2 > 0 && num1 > INT32_MAX - num2) || (num2 < 0 && num1 < INT32_MIN - num2)) {
         return true;
     }
     return false;
@@ -61,7 +59,7 @@ bool IsInt32AddOverflow(int32_t num1, int32_t num2)
 
 bool IsInt32SubOverflow(int32_t num1, int32_t num2)
 {
-    if ((num2 > 0 && num1 < INTEGER_32_MIN + num2) || (num2 < 0 && num1 > INTEGER_32_MAX + num2)) {
+    if ((num2 > 0 && num1 < INT32_MIN + num2) || (num2 < 0 && num1 > INT32_MAX + num2)) {
         return true;
     }
     return false;
