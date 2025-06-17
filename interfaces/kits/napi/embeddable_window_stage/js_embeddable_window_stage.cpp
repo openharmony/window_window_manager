@@ -28,7 +28,12 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr int CONTENT_STORAGE_ARG = 2;
-const std::vector<std::string> unsupportListener = { "windowStageClose" };
+const std::unordered_set<std::string> g_emptyListener = { "windowStageClose" };
+
+bool IsEmptyListener(const std::string& type)
+{
+    return g_emptyListener.find(type) != g_emptyListener.end();
+}
 } //namespace
 
 JsEmbeddableWindowStage::JsEmbeddableWindowStage(sptr<Rosen::Window> window, sptr<AAFwk::SessionInfo> sessionInfo)
@@ -192,7 +197,7 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    if (std::find(unsupportListener.begin(), unsupportListener.end(), eventString) != unsupportListener.end()) {
+    if (IsEmptyListener(cbType)) {
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
@@ -233,7 +238,7 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
     }
     if (eventString.compare("windowStageEvent") != 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Event %{public}s is invalid", eventString.c_str());
-        if (std::find(unsupportListener.begin(), unsupportListener.end(), eventString) != unsupportListener.end()) {
+        if (IsEmptyListener(cbType)) {
             return NapiGetUndefined(env);
         }
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));

@@ -38,7 +38,7 @@ constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindow"};
-const std::vector<std::string> emptyListener = {
+const std::unordered_set<std::string> g_emptyListener = {
     "windowVisibilityChange",
     "noInteractionDetected",
     "dialogTargetTouch",
@@ -49,13 +49,28 @@ const std::vector<std::string> emptyListener = {
     "rotationChange",
     "touchOutside",
 };
-const std::vector<std::string> unsupportListener = {
+const std::unordered_set<std::string> g_unsupportListener = {
     "windowWillClose",
     "windowHighlightChange",
 };
-const std::vector<std::string> invalidListener = {
+const std::unordered_set<std::string> g_invalidListener = {
     "subWindowClose",
 };
+
+bool IsEmptyListener(const std::string& type)
+{
+    return g_emptyListener.find(type) != g_emptyListener.end();
+}
+
+bool IsUnsupportListener(const std::string& type)
+{
+    return g_unsupportListener.find(type) != g_unsupportListener.end();
+}
+
+bool IsInvalidListener(const std::string& type)
+{
+    return g_invalidListener.find(type) != g_invalidListener.end();
+}
 } // namespace
 
 JsExtensionWindow::JsExtensionWindow(
@@ -931,13 +946,13 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         return OnRegisterRectChangeCallback(env, argc, argv, windowImpl);
     }
     if (atomicService) {
-        if (std::find(invalidListener.begin(), invalidListener.end(), cbType) != invalidListener.end()) {
+        if (IsInvalidListener(cbType)) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         }
-        if (std::find(emptyListener.begin(), emptyListener.end(), cbType) != emptyListener.end()) {
+        if (IsEmptyListener(cbType)) {
             return NapiGetUndefined(env);
         }
-        if (std::find(unsupportListener.begin(), unsupportListener.end(), cbType) != unsupportListener.end()) {
+        if (IsUnsupportListener(cbType)) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
     }
@@ -984,13 +999,13 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
         }
     }
     if (atomicService) {
-        if (std::find(invalidListener.begin(), invalidListener.end(), cbType) != invalidListener.end()) {
+        if (IsInvalidListener(cbType)) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         }
-        if (std::find(emptyListener.begin(), emptyListener.end(), cbType) != emptyListener.end()) {
+        if (IsEmptyListener(cbType)) {
             return NapiGetUndefined(env);
         }
-        if (std::find(unsupportListener.begin(), unsupportListener.end(), cbType) != unsupportListener.end()) {
+        if (IsUnsupportListener(cbType)) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
     }
