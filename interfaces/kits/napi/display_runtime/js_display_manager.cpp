@@ -36,10 +36,6 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
-namespace {
-constexpr int32_t MAX_INTEGER_32 = 2147483647;
-constexpr int32_t MIN_INTEGER_32 = -2147483648;
-}
 class JsDisplayManager {
 public:
 explicit JsDisplayManager(napi_env env) {
@@ -1393,7 +1389,7 @@ DmErrorCode GetPositionFromJs(napi_env env, napi_value positionObject, Position&
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to positionX.");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (positionXTemp < MIN_INTEGER_32 || positionXTemp > MAX_INTEGER_32) {
+    if (positionXTemp < INT32_MIN || positionXTemp > INT32_MAX) {
         TLOGE(WmsLogTag::DMS, "Coordinate x exceeded the range!");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
@@ -1405,7 +1401,7 @@ DmErrorCode GetPositionFromJs(napi_env env, napi_value positionObject, Position&
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to positionY.");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (positionYTemp < MIN_INTEGER_32 || positionYTemp > MAX_INTEGER_32) {
+    if (positionYTemp < INT32_MIN || positionYTemp > INT32_MAX) {
         TLOGE(WmsLogTag::DMS, "Coordinate y exceeded the range!");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
