@@ -36,16 +36,12 @@ group("unittest") {
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_lite_test",
-    ":ws_screen_session_manager_proxy_test",
     ":ws_screen_session_manager_stub_test",
-    ":ws_screen_session_manager_test",
-    ":ws_screen_session_manager_test2",
     ":ws_screen_session_publish_test",
     ":ws_screen_session_test",
     ":ws_screen_setting_helper_test",
     ":ws_screen_snapshot_picker_connection_test",
     ":ws_secondary_display_fold_policy_test",
-    ":ws_secondary_display_sensor_fold_state_manager_test",
     ":ws_secondary_fold_sensor_manager_test",
     ":ws_sensor_fold_state_manager_test",
     ":ws_session_display_power_controller_test",
@@ -54,6 +50,14 @@ group("unittest") {
     ":ws_single_display_fold_policy_test",
     ":ws_single_display_sensor_fold_state_manager_test",
   ]
+  if (window_manager_use_sceneboard) {
+    deps += [
+      ":ws_screen_session_manager_proxy_test",
+      ":ws_screen_session_manager_test",
+      ":ws_screen_session_manager_test2",
+      ":ws_secondary_display_sensor_fold_state_manager_test",
+    ]
+  }
 }
 
 ohos_unittest("ws_setting_observer_test") {

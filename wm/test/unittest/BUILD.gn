@@ -47,11 +47,9 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
     ":wm_window_scene_session_impl_test3",
-    ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_session_impl_test5",
     ":wm_window_scene_test",
     ":wm_window_session_impl_layout_test",
-    ":wm_window_session_impl_test4",
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
   ]
@@ -67,6 +65,8 @@ group("unittest") {
       ":wm_window_session_impl_two_test",
       ":wm_window_stub_test",
       ":wm_window_test",
+      ":wm_window_scene_session_impl_test4",
+      ":wm_window_session_impl_test4",
     ]
   }
 }
