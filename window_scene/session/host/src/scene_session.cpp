@@ -3878,7 +3878,7 @@ void SceneSession::HandleMoveDragEvent(SizeChangeReason reason)
     if (IsDragResizeScale(reason)) {
         compatibleDragScaleFlags_ = true;
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
-        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = func](int64_t, int64_t) {
+        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s: session is null", where);
