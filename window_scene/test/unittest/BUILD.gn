@@ -1426,6 +1426,7 @@ ohos_unittest("ws_session_change_recorder_test") {
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
   ]
 }
 ## Build ws_unittest_common.a }}}
