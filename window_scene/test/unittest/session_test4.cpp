@@ -1061,6 +1061,9 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
     sceneSession->callingPid_ = 123;
+    sceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->isMidScene_ = true;
+    sceneSession->isFocused_ = true;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = true;
     sessionInfo1.abilityName_ = "abilityName1";
@@ -1083,6 +1086,9 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     ASSERT_EQ(windowMetaInfo.abilityName, sceneSession->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo.pid, sceneSession->GetCallingPid());
     ASSERT_EQ(windowMetaInfo.windowType, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(windowMetaInfo.windowMode, WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(windowMetaInfo.isMidScene, true);
+    ASSERT_EQ(windowMetaInfo.isFocused, true);
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1.windowName, sceneSession1->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo1.parentWindowId, sceneSession->GetWindowId());

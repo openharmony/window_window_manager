@@ -4246,6 +4246,9 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.appIndex = GetSessionInfo().appIndex_;
     windowMetaInfo.pid = GetCallingPid();
     windowMetaInfo.windowType = GetWindowType();
+    windowMetaInfo.windowMode = GetWindowMode();
+    windowMetaInfo.isMidScene = GetIsMidScene();
+    windowMetaInfo.isFocused = IsFocused();
     if (auto parentSession = GetParentSession()) {
         windowMetaInfo.parentWindowId = static_cast<uint32_t>(parentSession->GetWindowId());
     }

@@ -1192,6 +1192,9 @@ struct WindowMetaInfo : public Parcelable {
     uint64_t surfaceNodeId = 0;
     uint64_t leashWinSurfaceNodeId = 0;
     bool isPrivacyMode = false;
+    WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    bool isMidScene = false;
+    bool isFocused = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -1199,23 +1202,27 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) &&
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
-               parcel.WriteBool(isPrivacyMode);
+               parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
+        uint32_t windowModeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
             !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadUint32(windowTypeValue) ||
             !parcel.ReadUint32(windowMetaInfo->parentWindowId) || !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
-            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
+        windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
         return windowMetaInfo;
     }
 };
