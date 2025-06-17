@@ -527,11 +527,11 @@ WMError SceneSession::NotifySnapshotUpdate()
 {
     PostTask([weakThis = wptr(this), where = __func__] {
         auto session = weakThis.promote();
-        TLOGNI(WmsLogTag::WMS_PATTERN, "id: %{public}d", session->GetPersistentId());
         if (!session) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
             return;
         }
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d", where, session->GetPersistentId());
         if (WindowHelper::IsMainWindow(session->GetWindowType())) {
             session->SaveSnapshot(true, true, nullptr, true);
         }
