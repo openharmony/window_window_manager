@@ -760,6 +760,19 @@ HWTEST_F(WindowAdapterTest, IsPcWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFreeMultiWindowMode
+ * @tc.desc: WindowAdapter/IsFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    bool isFreeMultiWindow = false;
+    auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: WindowAdapter/IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

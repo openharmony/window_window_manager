@@ -14865,6 +14865,12 @@ WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::IsFreeMultiWindow(bool& isFreeMultiWindow)
+{
+    isFreeMultiWindow = systemConfig_.freeMultiWindowEnable_;
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());

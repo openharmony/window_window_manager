@@ -2515,6 +2515,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleIsFreeMultiWindow
+ * @tc.desc: test HandleIsFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsFreeMultiWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleIsFreeMultiWindow(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleIsPcOrPadFreeMultiWindowMode
  * @tc.desc: test HandleIsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

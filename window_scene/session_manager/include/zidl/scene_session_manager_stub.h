@@ -123,6 +123,7 @@ private:
     int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply);
