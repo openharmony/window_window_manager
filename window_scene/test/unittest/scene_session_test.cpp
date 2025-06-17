@@ -908,6 +908,20 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
                                               const RectAnimationConfig& rectAnimationConfig) { return; };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
+
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = oriProperty;
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = moveDragController;
+    SizeChangeReason reason = { SizeChangeReason::DRAG };
+ 
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->compatibleDragScaleFlags_ = true;
+    sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
 }
 
 /**
