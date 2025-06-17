@@ -25,7 +25,7 @@
 #include "scene_board_judgement.h"
 #include "window_scene.h"
 #include "zidl/display_manager_agent_proxy.h"
-#include "../../../window_scene/test/mock/mock_message_parcel.h"
+#include "test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;

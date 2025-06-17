@@ -21,7 +21,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
 #include "fold_screen_state_internel.h"
-#include "../mock/mock_accesstoken_kit.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
