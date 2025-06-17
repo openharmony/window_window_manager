@@ -33,6 +33,7 @@ test_external_deps = [
   "ability_runtime:session_handler",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
+  "access_token:libaccesstoken_sdk",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
@@ -112,12 +113,13 @@ ohos_unittest("ws_scene_session_manager_extension_test") {
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
     "${window_base_path}/window_scene/test/mock",
-    "${window_base_path}/window_scene/test/unittest/ui_extension"/mock,
+    "${window_base_path}/window_scene/test/unittest/ui_extension/mock",
   ]
 
   sources = [
     "scene_session_manager_extension_test.cpp",
     "mock/mock_session_permission.cpp",
+    "../../mock/mock_ability_manager_client.cpp",
   ]
 
   deps = [ ws_unittest_common ]

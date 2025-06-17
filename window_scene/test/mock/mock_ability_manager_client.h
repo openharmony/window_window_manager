@@ -28,4 +28,4 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif MOCK_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
+#endif // MOCK_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H

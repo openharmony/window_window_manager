@@ -17,8 +17,8 @@
 
 namespace OHOS {
 namespace AAFwk {
-static std::shared_ptr<UIExtensionHostInfo> g_uiExtensionRootHostInfo
-static std::shared_ptr<UIExtensionSessionInfo> g_uiExtensionSessionInfo
+static std::shared_ptr<UIExtensionHostInfo> g_uiExtensionRootHostInfo;
+static std::shared_ptr<UIExtensionSessionInfo> g_uiExtensionSessionInfo;
 
 void MockAbilityManagerClient::ClearAll()
 {
@@ -51,9 +51,9 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
     UIExtensionSessionInfo& sessionInfo, int32_t userId)
 {
     if (g_uiExtensionSessionInfo) {
-        sessionInfo.hostElementName.SetBundleName(g_uiExtensionSessionInfo->.hostElementName.GetBundleName());
+        sessionInfo.hostElementName.SetBundleName(g_uiExtensionSessionInfo->hostElementName.GetBundleName());
     }
     return 0;
 }
-}// namespace AAFwk
-}// namespace OHOS
+} // namespace AAFwk
+} // namespace OHOS
