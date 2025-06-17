@@ -4866,6 +4866,9 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (transactionController) {
         rsTransaction = transactionController->GetRSTransaction();
     }
+    if (WindowHelper::IsSubWindow(GetWindowType())) {
+        isSubWindowResizingOrMoving_ = false;
+    }
     NotifyClientToUpdateRect("WMSPipeline", rsTransaction);
     return true;
 }
