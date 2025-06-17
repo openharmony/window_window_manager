@@ -19,6 +19,7 @@
 
 #include "session/host/include/main_session.h"
 #include "session/host/include/session.h"
+#include "session/host/include/sub_session.h"
 #include "session/screen/include/screen_session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -74,6 +75,7 @@ HWTEST_F(MainSessionLayoutTest, SetSubWindowBoundsDuringCross, TestSize.Level1)
     mainSession->winRect_ = { 50, 50, 500, 500 };
     subSession->winRect_ = { 0, 0, 200, 200 };
 
+    subSession->state_ = SessionState::STATE_FOREGROUND;
     subSession->windowAnchorInfo_.isAnchorEnabled_ = false;
     subSession->reason_ = SizeChangeReason::RESIZE;
     mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
@@ -83,6 +85,11 @@ HWTEST_F(MainSessionLayoutTest, SetSubWindowBoundsDuringCross, TestSize.Level1)
     subSession->reason_ = SizeChangeReason::RESIZE;
     mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
     EXPECT_EQ(subSession->reason_, SizeChangeReason::UNDEFINED);
+
+    subSession->state_ = SessionState::STATE_BACKGROUND;
+    subSession->reason_ = SizeChangeReason::RESIZE;
+    mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
+    EXPECT_EQ(subSession->reason_, SizeChangeReason::RESIZE);
 }
 
 /**
@@ -134,7 +141,7 @@ HWTEST_F(MainSessionLayoutTest, HandleSubSessionSurfaceNodeByWindowAnchor, TestS
     info.moduleName_ = "HandleSubSessionSurfaceNodeByWindowAnchor";
     info.abilityName_ = "HandleSubSessionSurfaceNodeByWindowAnchor";
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
     mainSession->subSession_.emplace_back(nullptr);
     mainSession->subSession_.emplace_back(subSession);
     ScreenSessionConfig config = {
@@ -144,16 +151,23 @@ HWTEST_F(MainSessionLayoutTest, HandleSubSessionSurfaceNodeByWindowAnchor, TestS
     };
     sptr<ScreenSession> screenSession =
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    auto surfaceNode = CreateRSSurfaceNode();
+    ASSERT_NE(nullptr, surfaceNode);
+    subSession->SetSurfaceNode(surfaceNode);
 
+    subSession->state_ = SessionState::STATE_FOREGROUND;
     subSession->windowAnchorInfo_.isAnchorEnabled_ = false;
-    subSession->reason_ = SizeChangeReason::UNDEFINED;
-    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::RESIZE, screenSession);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::UNDEFINED);
+    subSession->cloneNodeCountDuringCross_.store(0);
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, screenSession);
+    EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 0);
 
     subSession->windowAnchorInfo_.isAnchorEnabled_ = true;
-    subSession->reason_ = SizeChangeReason::UNDEFINED;
-    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, screenSession);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::UNDEFINED);
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, screenSession);
+    EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 1);
+
+    subSession->state_ = SessionState::STATE_BACKGROUND;
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_END, screenSession);
+    EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 1);
 }
 } // namespace
 } // namespace Rosen
