@@ -26,6 +26,7 @@ using namespace Ace;
 namespace {
     constexpr uint32_t MAX_CONTROL_GROUP_NUM = 3;
     std::shared_mutex cbSetMutex_;
+    std::shared_mutex initRectMutex_;
     const std::set<PiPControlGroup> VIDEO_PLAY_CONTROLS {
         PiPControlGroup::VIDEO_PREVIOUS_NEXT,
         PiPControlGroup::FAST_FORWARD_BACKWARD,
@@ -184,6 +185,35 @@ WMError WebPictureInPictureControllerInterface::setPiPControlEnabled(PiPControlT
     if (auto pipController = sptrWebPipController_) {
         pipController->UpdatePiPControlStatus(controlType,
             enabled ? PiPControlStatus::ENABLED : PiPControlStatus::DISABLED);
+        return WMError::WM_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+}
+
+WMError WebPictureInPictureControllerInterface::SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY,
+    uint32_t width, uint32_t height)
+{
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid initial rect");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (auto pipController = sptrWebPipController_) {
+        std::unique_lock<std::shared_mutex> lock(initRectMutex_);
+        pipController->SetPipInitialSurfaceRect(positionX, positionY, width, height);
+        return WMError::WM_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+}
+
+WMError WebPictureInPictureControllerInterface::UnsetPipInitialSurfaceRect()
+{
+    if (auto pipController = sptrWebPipController_) {
+        std::unique_lock<std::shared_mutex> lock(initRectMutex_);
+        pipController->SetPipInitialSurfaceRect(0, 0, 0, 0);
         return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");

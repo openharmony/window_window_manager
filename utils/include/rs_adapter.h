@@ -72,8 +72,6 @@ public:
                                          uint64_t timestamp = 0, const std::string& abilityName = "");
 
 private:
-    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
-
     template<typename Func>
     void InvokeTransaction(Func&& func, const char* caller);
 
@@ -95,7 +93,6 @@ public:
     AutoRSTransaction& operator=(AutoRSTransaction&&) = delete;
 
 private:
-    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable);
     std::shared_ptr<RSTransactionAdapter> rsTransAdapter_;
 };
 
@@ -122,8 +119,6 @@ public:
                                      const std::shared_ptr<AppExecFwk::EventHandler>& handler = nullptr);
 
 private:
-    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext);
-
     template<typename ReturnType, typename Func>
     ReturnType InvokeSyncTransaction(Func&& func, const char* caller);
 
@@ -155,8 +150,6 @@ public:
     AutoRSSyncTransaction& operator=(AutoRSSyncTransaction&&) = delete;
 
 private:
-    void InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext,
-                           bool needFlushImplicitTransaction);
     std::shared_ptr<RSSyncTransactionAdapter> rsSyncTransAdapter_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };

@@ -157,6 +157,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_DYNAMIC,
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
+    WINDOW_TYPE_SELECTION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -1025,6 +1026,23 @@ struct Rect {
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
+
+/**
+ * @struct Position
+ *
+ * @brief Represent a two-dimensional position in a specific coordinate system.
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
+    }
+};
 
 /**
  * @struct RectAnimationConfig
@@ -2619,7 +2637,7 @@ struct WindowAnimationOption : public Parcelable {
         oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
             std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
         for (auto p: param) {
-            oss << std::fixed << std::setprecision(2) << p << ", ";
+            oss << std::fixed << std::setprecision(2) << p << ", "; // 2 means print float value length
         }
         oss << "]";
         return oss.str();
@@ -2730,7 +2748,7 @@ struct ShadowsInfo : public Parcelable {
     bool hasOffsetYValue_ = false;
 
     ShadowsInfo() {}
-    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue,
         bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
         offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
         hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}

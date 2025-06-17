@@ -28,6 +28,13 @@
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_object* ani_object;
+#ifdef __cplusplus
+typedef struct __ani_env ani_env;
+#else
+typedef const struct __ani_interaction_api *ani_env;
+#endif
+
 namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
@@ -523,6 +530,15 @@ public:
 };
 using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
 
+class IAcrossDisplaysChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnAcrossDisplaysChanged(bool isAcrossDisplays) {}
+};
+using IAcrossDisplaysChangeListenerSptr = sptr<IAcrossDisplaysChangeListener>;
+
 /**
  * @class IWindowNoInteractionListenerSptr
  *
@@ -582,16 +598,33 @@ public:
 };
 
 /**
+ * @class IRectChangeInGlobalDisplayListener
+ *
+ * @brief Interface for observing window rectangle changes in global coordinates.
+ */
+class IRectChangeInGlobalDisplayListener : virtual public RefBase {
+public:
+    /**
+     * @brief Called when the window rectangle changes in global coordinates.
+     *
+     * @param rect The updated rectangle of the window in global coordinates.
+     * @param reason The reason for the window size or position change.
+     */
+    virtual void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) {}
+};
+
+/**
  * @class IExtensionSecureLimitChangeListener
  *
- * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and its change when limit changed.
+ * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and
+ *        its change when limit changed.
  */
 class IExtensionSecureLimitChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when window nonsecure limit changed.
      *
-     * @param isLimite Whather nonsecure windows is Limite.
+     * @param isLimite Whether nonsecure windows is Limite.
      */
     virtual void OnSecureLimitChange(bool isLimit) {}
 };
@@ -974,6 +1007,29 @@ public:
     virtual Rect GetRequestRect() const { return {}; }
 
     /**
+     * @brief Get the window rectangle in global coordinates.
+     *
+     * @return The rectangle (position and size) of the window in global coordinates.
+     */
+    virtual Rect GetGlobalDisplayRect() const { return { 0, 0, 0, 0 }; }
+
+    /**
+     * @brief Convert a position from client (window-relative) coordinates to global coordinates.
+     *
+     * @param position The position relative to the window.
+     * @return The corresponding position in global coordinates.
+     */
+    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+
+    /**
+     * @brief Convert a position from global coordinates to client (window-relative) coordinates.
+     *
+     * @param position The position in global coordinates.
+     * @return The corresponding position relative to the window.
+     */
+    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+
+    /**
      * @brief Get the window type
      *
      * @return Type of window
@@ -1307,6 +1363,20 @@ public:
     virtual WMError Destroy(uint32_t reason = 0) { return WMError::WM_OK; }
 
     /**
+     * @brief Set a flag to distinguish whether the window is shown with options.
+     *
+     * @param showWithOptions Options that define the behavior of a window while it is showing.
+     */
+    virtual void SetShowWithOptions(bool showWithOptions) {}
+
+    /**
+     * @brief Get showWithOptions value.
+     *
+     * @return True means the window is shown with options, false means the opposite.
+     */
+    virtual bool IsShowWithOptions() const { return false; }
+
+    /**
      * @brief Show window
      *
      * @param reason Reason for window state change.
@@ -1382,6 +1452,19 @@ public:
      */
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
         MoveConfiguration moveConfiguration) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Move the window to the specified position in global coordinates.
+     *
+     * @param x The target X-coordinate in global coordinates.
+     * @param y The target Y-coordinate in global coordinates.
+     * @param moveConfiguration Optional move configuration parameters.
+     * @return WMError WM_OK if the move operation succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {})
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get window global scaled rect.
@@ -1606,8 +1689,10 @@ public:
      * @param radius Shadows of window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SyncShadowsToComponent(const ShadowsInfo& shadowsInfo)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Set shadow radius of window.
@@ -1685,6 +1770,13 @@ public:
      * @return True means window is focused, false means window is unfocused.
      */
     virtual bool IsFocused() const { return false; }
+
+    /**
+     * @brief Check current UIExtensionComponent focus status.
+     *
+     * @return True means UIExtensionComponent is focused, false means UIExtensionComponent is unfocused.
+     */
+    virtual bool IsComponentFocused() const { return false; }
 
     /**
      * @brief Update surfaceNode after customAnimation.
@@ -2018,6 +2110,12 @@ public:
      * @return WMError
      */
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
@@ -2765,6 +2863,24 @@ public:
         const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossDisplaysChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterAcrossDisplaysChangeListener(
+        const IAcrossDisplaysChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window full screen across multi display change listener.
+     *
+     * @param listener IAcrossDisplaysChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterAcrossDisplaysChangeListener(
+        const IAcrossDisplaysChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -3110,7 +3226,8 @@ public:
      * @param density the custom density of window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetCustomDensity(
+        float density, bool applyToSubWindow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get custom density of window.
@@ -3442,6 +3559,29 @@ public:
     }
 
     /**
+     * @brief Register a listener to observe window rectangle changes in global coordinates.
+     *
+     * @param listener The listener to receive rectangle change notifications.
+     * @return WMError WM_OK if registration succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError RegisterRectChangeInGlobalDisplayListener(const sptr<IRectChangeInGlobalDisplayListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister a previously registered rectangle change listener in global coordinates.
+     *
+     * @param listener The listener to be unregistered.
+     * @return WMError WM_OK if unregistration succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError UnregisterRectChangeInGlobalDisplayListener(
+        const sptr<IRectChangeInGlobalDisplayListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief UIExtension register host window rect change listener.
      *
      * @param listener IWindowRectChangeListener.
@@ -3469,7 +3609,8 @@ public:
      * @param listener IExtensionSecureLimitChangeListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    virtual WMError RegisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3480,7 +3621,8 @@ public:
      * @param listener IExtensionSecureLimitChangeListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+    virtual WMError UnregisterExtensionSecureLimitChangeListener(
+        const sptr<IExtensionSecureLimitChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3682,6 +3824,15 @@ public:
      */
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Determine whether the window spans multiple screens and displays in full screen mode.
+     *
+     * @param isAcrossDisplays the value true means to span multiple screens, and false means the opposite.
+     * @return WM_OK means success, others means failed.
+     */
+    virtual WMError IsMainWindowFullScreenAcrossDisplays(
+        bool& isAcrossDisplays) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the type of window.
@@ -4142,7 +4293,7 @@ public:
      */
     virtual void HookCompatibleModeAvoidAreaNotify() {}
 
-     /**
+    /**
      * @brief The comaptible mode app adapt to immersive or not.
      *
      * @return true comptbleMode adapt to immersive, others means not.

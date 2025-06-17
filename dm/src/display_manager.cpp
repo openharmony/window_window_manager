@@ -34,6 +34,7 @@ const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }
@@ -2472,6 +2473,15 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+float DisplayManager::GetPrimaryDisplaySystemDpi() const
+{
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+    if (displayInfo == nullptr) {
+        return INVALID_DEFAULT_DENSITY;
+    }
+    return displayInfo->GetDensityInCurResolution();
 }
 
 sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)

@@ -124,6 +124,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_DYNAMIC,
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
+    WINDOW_TYPE_SELECTION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -704,6 +705,23 @@ struct Rect {
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
+
+/**
+ * @struct Position
+ *
+ * @brief Represent a two-dimensional position in a specific coordinate system.
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
+    }
+};
 
 /**
  * @struct SystemBarProperty
@@ -1642,7 +1660,7 @@ struct ShadowsInfo : public Parcelable {
     bool hasOffsetYValue_ = false;
 
     ShadowsInfo() {}
-    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue, 
+    ShadowsInfo(float radius, std::string color, float offsetX, float offsetY, bool hasRadiusValue,
         bool hasColorValue, bool hasOffsetXValue, bool hasOffsetYValue) : radius_(radius), color_(color),
         offsetX_(offsetX), offsetY_(offsetY), hasRadiusValue_(hasRadiusValue), hasColorValue_(hasColorValue),
         hasOffsetXValue_(hasOffsetXValue), hasOffsetYValue_(hasOffsetYValue) {}

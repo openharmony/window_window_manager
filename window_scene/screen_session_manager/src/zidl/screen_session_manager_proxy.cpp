@@ -2056,6 +2056,45 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    bool res = MarshallingHelper::UnmarshallingVectorObj<ScreenId>(reply, screenIds,
+        [](Parcel& parcel, ScreenId& screenId) {
+            uint64_t value;
+            bool res = parcel.ReadUint64(value);
+            screenId = static_cast<ScreenId>(value);
+            return res;
+        }
+    );
+    if (!res) {
+        TLOGE(WmsLogTag::DMS, "fail to unmarshalling screenIds in stub.");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return ret;
+}
+
 DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -4301,5 +4340,32 @@ DMError ScreenSessionManagerProxy::GetScreenAreaOfDisplayArea(DisplayId displayI
     uint32_t height = reply.ReadUint32();
     screenArea = { posX, posY, width, height };
     return ret;
+}
+
+DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "write dpi failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

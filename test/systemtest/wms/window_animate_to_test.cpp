@@ -37,8 +37,8 @@ class WindowAnimateToTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
 void WindowAnimateToTest::SetUpTestCase() {}
@@ -109,6 +109,29 @@ HWTEST_F(WindowAnimateToTest, AnimateTo02, TestSize.Level1)
     animationProperty.targetScale = 0.5f;
     ASSERT_EQ(WMError::WM_DO_NOTHING,
         WindowManager::GetInstance().AnimateTo(MAX_WINDOW_ID, animationProperty, animationOption));
+}
+
+/**
+ * @tc.name: SetFrameRectForParticalZoomIn
+ * @tc.desc: test founction SetFrameRectForParticalZoomIn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAnimateToTest, SetFrameRectForParticalZoomIn, TestSize.Level1)
+{
+    Utils::TestWindowInfo windowInfo = {
+        .name = "SetFrameRectForParticalZoomIn",
+        .rect = { 0, 0, 10, 10 }, // 0, 10 is valid rect params
+        .type = WindowType::WINDOW_TYPE_MAGNIFICATION,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
+    };
+
+    const sptr<Window>& window = Utils::CreateTestWindow(windowInfo);
+    EXPECT_NE(nullptr, window);
+    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
+    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
 }
 } // namespace
 } // namespace Rosen

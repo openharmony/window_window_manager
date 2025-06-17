@@ -1189,8 +1189,208 @@ HWTEST_F(WindowSessionImplTest5, NapiSetUIContent01, Function | SmallTest | Leve
     std::string navInfo = "testInfo";
     window->SetNavDestinationInfo(navInfo);
 
-    window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+    window->NapiSetUIContent("info", (napi_env)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
     EXPECT_EQ(window->navDestinationInfo_, "");
+}
+
+/**
+ * @tc.name: HideTitleButton01
+ * @tc.desc: HideTitleButton01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton01, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton02
+ * @tc.desc: HideTitleButton02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton02, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    window->uiContent_ = nullptr;
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton03
+ * @tc.desc: HideTitleButton03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton03, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    option->SetSubWindowMaximizeSupported(false);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton04
+ * @tc.desc: HideTitleButton04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton04, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->property_->SetIsLayoutFullScreen(true);
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton05
+ * @tc.desc: HideTitleButton05
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton05, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetDisableFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton06
+ * @tc.desc: HideTitleButton06
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton06, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->property_->SetIsAtomicService(false);
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton07
+ * @tc.desc: HideTitleButton07
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton07, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->property_->SetIsAtomicService(false);
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: HideTitleButton08
+ * @tc.desc: HideTitleButton08
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, HideTitleButton08, Function | SmallTest | Level2) {
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HideTitleButton");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool hideSplitButton = false;
+    bool hideMaximizeButton = false;
+    bool hideMinimizeButton = false;
+    bool hideCloseButton = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToBackButton(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->HideTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+
+    EXPECT_FALSE(hideSplitButton);
+    EXPECT_FALSE(hideMaximizeButton);
+    EXPECT_FALSE(hideMinimizeButton);
+    EXPECT_FALSE(hideCloseButton);
 }
 } // namespace
 } // namespace Rosen

@@ -364,6 +364,7 @@ private:
     std::mutex specifyMoveStartMutex_;
     DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
     bool isSpecifyMoveStart_ = false;
+    bool isAdaptToProportionalScale_ = false;
     // Above guarded by specifyMoveStartMutex_
 };
 } // namespace OHOS::Rosen

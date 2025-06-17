@@ -101,13 +101,12 @@ namespace {
  */
 HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, TestSize.Level1)
 {
-    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::MODAL);
+    option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::CONSTRAINED_EMBEDDED);
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("WindowExtensionSessionImplTest");
-    sptr<WindowExtensionSessionImpl> window = new(std::nothrow) WindowExtensionSessionImpl(option);
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
     window = nullptr;
 }
@@ -167,6 +166,40 @@ HWTEST_F(WindowExtensionSessionImplTest, Create04, TestSize.Level1)
     window_->property_->SetPersistentId(1);
     EXPECT_CALL(*session, Connect).WillOnce(Return(WSError::WS_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window_->Create(abilityContext, session));
+}
+
+/**
+ * @tc.name: Create05
+ * @tc.desc: normal test, create modal uiextension
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Create05, TestSize.Level1)
+{
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->property_->SetPersistentId(1);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
+}
+
+/**
+ * @tc.name: Create06
+ * @tc.desc: normal test, create secure uiextension
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, Create06, TestSize.Level1)
+{
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->property_->SetPersistentId(1);
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
+    ASSERT_EQ(WMError::WM_OK, window_->Destroy(false));
 }
 
 /**
@@ -959,6 +992,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyKeyEvent05, TestSize.Level1)
     ASSERT_NE(nullptr, window_);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
     window_->NotifyKeyEvent(keyEvent, consumed, notifyInputMethod);
+    ASSERT_EQ(false, consumed);
 }
 
 /**
@@ -1299,8 +1333,15 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange1, TestSize.Leve
     ASSERT_NE(nullptr, window_);
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ASSERT_NE(nullptr, abilityContext);
+    sptr<IRemoteObject> contextToken = sptr<IRemoteObjectMocker>::MakeSptr();
+    abilityContext->SetToken(contextToken);
     window_->context_ = abilityContext;
+    EXPECT_NE(nullptr, window_->context_->GetToken());
     SessionViewportConfig config;
+    config.displayId_ = 999;
+    window_->lastDisplayId_ = 0;
+    window_->NotifyDisplayInfoChange(config);
+    window_->lastDisplayId_ = 999;
     window_->NotifyDisplayInfoChange(config);
 }
 
@@ -2101,6 +2142,7 @@ HWTEST_F(WindowExtensionSessionImplTest, ConsumePointerEvent02, TestSize.Level1)
     ASSERT_NE(nullptr, window_);
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
     auto pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
     window_->ConsumePointerEvent(pointerEvent);
 }
 /**
@@ -2849,24 +2891,26 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateExtensionConfig, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsFocused
- * @tc.desc: IsFocused test
+ * @tc.name: IsComponentFocused
+ * @tc.desc: IsComponentFocused test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowExtensionSessionImplTest, IsFocused, TestSize.Level1)
+HWTEST_F(WindowExtensionSessionImplTest, IsComponentFocused, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsFocused");
+    option->SetWindowName("IsComponentFocused");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    EXPECT_FALSE(window->IsComponentFocused());
+
     SessionInfo sessionInfo;
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    EXPECT_FALSE(window->IsFocused());
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
+    EXPECT_FALSE(window->IsComponentFocused());
     window->focusState_ = false;
-    EXPECT_FALSE(window->IsFocused());
+    EXPECT_FALSE(window->IsComponentFocused());
     window->focusState_ = true;
-    EXPECT_TRUE(window->IsFocused());
+    EXPECT_TRUE(window->IsComponentFocused());
 }
 
 /**

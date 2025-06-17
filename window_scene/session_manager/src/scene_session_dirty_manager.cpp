@@ -206,11 +206,14 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     bool isAppMainWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     const auto& singleHandData = GetSingleHandData(sceneSession);
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
-    if (singleHandData.mode != SingleHandMode::MIDDLE &&
-        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        isAppMainWindow = false;
-    }
-    if ((isAppPipWindow || isAppMainWindow) && !isMidScene) {
+    bool isSystemOrSubWindow = (WindowHelper::IsSystemWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsSubWindow(sceneSession->GetWindowType()));
+    bool isDragAccessibleWindow = windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        sceneSession->IsDragAccessible();
+    bool isSingleHandAffectedWindow = singleHandData.mode != SingleHandMode::MIDDLE &&
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN;
+    if ((isAppPipWindow || isAppMainWindow || (isSystemOrSubWindow && isDragAccessibleWindow)) &&
+        !isMidScene && !isSingleHandAffectedWindow) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -611,7 +614,6 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         } else {
             GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
-        windowInfo.groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
@@ -746,7 +748,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
     std::string windowName = sceneSession->GetWindowNameAllType();
     auto startsWith = [](const std::string& str, const std::string& prefix) {
-        return str.size() >= prefix.size() && 
+        return str.size() >= prefix.size() &&
             std::equal(prefix.begin(), prefix.end(), str.begin());
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
@@ -765,6 +767,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
+        .groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(displayId),
         .zOrder = zOrder,
         .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,

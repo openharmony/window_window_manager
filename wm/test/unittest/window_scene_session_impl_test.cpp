@@ -592,6 +592,34 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession15, TestSize
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession16
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession16, TestSize.Level0)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP() << "SceneBoard is not enabled, skipping test.";
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("CreateAndConnectSpecificSession16");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    windowSceneSession->SetWindowType(WindowType::WINDOW_TYPE_SELECTION);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CreateAndConnectSpecificSession());
+    windowSceneSession->property_->SetPersistentId(102); // 102 is persistentId
+    windowSceneSession->property_->SetParentPersistentId(100); // 100 is parentPersistentId
+    windowSceneSession->property_->SetParentId(100); // 100 is parentId
+    windowSceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Show());
+    EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
  * @tc.name: IsValidSystemWindowType01
  * @tc.desc: IsValidSystemWindowType
  * @tc.type: FUNC
@@ -2434,6 +2462,8 @@ HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowSceneSession->property_->SetDecorEnable(false);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_OPERATION, windowSceneSession->CloseSpecificScene());
     windowSceneSession->property_->SetDecorEnable(true);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -2450,10 +2480,10 @@ HWTEST_F(WindowSceneSessionImplTest, CloseSpecificScene, TestSize.Level1)
 
 /**
  * @tc.name: SetSubWindowSource
- * @tc.desc: SetSubWindowSource test
+ * @tc.desc: SetSubWindowSource test 1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -2463,9 +2493,27 @@ HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetSubWindowSource");
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    auto res = window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, res);
     window->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    EXPECT_EQ(WMError::WM_OK, window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI));
+    res = window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: SetSubWindowSource
+ * @tc.desc: SetSubWindowSource test 2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetPersistentId(0);
+    window->hostSession_ = nullptr;
+    auto res = window->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

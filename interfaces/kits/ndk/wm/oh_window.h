@@ -272,6 +272,8 @@ void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowL
  *
  * @param windowId windowId when window is created.
  * @param touchEvent multimodal touchEvent.
+ * @param windowX The position of the event relative to the abscissa of the window.
+ * @param windowY The position of the event relative to the ordinate of the window.
  * @return Returns the result code.
  *         {@link OK} the function call is successful.
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
@@ -279,7 +281,8 @@ void OH_WindowManager_ReleaseAllWindowLayoutInfoList(WindowManager_Rect* windowL
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
  * @since 20
  */
- int32_t OH_WindowManager_InjectTouchEvent(int32_t windowId, Input_TouchEvent* touchEvent);
+int32_t OH_WindowManager_InjectTouchEvent(
+    int32_t windowId, Input_TouchEvent* touchEvent, int32_t windowX, int32_t windowY);
 #ifdef __cplusplus
 }
 #endif

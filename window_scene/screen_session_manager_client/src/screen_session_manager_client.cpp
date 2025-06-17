@@ -1201,4 +1201,13 @@ void ScreenSessionManagerClient::NotifyScreenMaskAppear()
     }
     return screenSessionManager_->NotifyScreenMaskAppear();
 }
+
+DMError ScreenSessionManagerClient::SetPrimaryDisplaySystemDpi(float dpi)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return screenSessionManager_->SetPrimaryDisplaySystemDpi(dpi);
+}
 } // namespace OHOS::Rosen

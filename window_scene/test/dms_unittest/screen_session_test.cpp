@@ -1240,6 +1240,29 @@ HWTEST_F(ScreenSessionTest, SetColorSpaces, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSupportedRefreshRate
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSupportedRefreshRate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    std::vector<uint32_t> supportedRefreshRate = { 0, 0, 0, 0 };
+    std::vector<uint32_t> supportedRefreshRate_cmp = { 0, 0, 0, 0 };
+    screenSession->SetSupportedRefreshRate(std::move(supportedRefreshRate));
+    EXPECT_EQ(screenSession->supportedRefreshRate_, supportedRefreshRate_cmp);
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate end";
+}
+
+/**
  * @tc.name: SetDisplayNodeScreenId
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2132,7 +2155,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
-    std::string name { "UNKNOW" };
+    std::string name { "UNKNOWN" };
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_EQ(name, session->GetName());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";
@@ -3015,7 +3038,7 @@ HWTEST_F(ScreenSessionTest, ScreenExtendChange02, TestSize.Level1)
     ScreenId mainScreenId = 0;
     ScreenId extendScreenId = 1;
     session->ScreenExtendChange(mainScreenId, extendScreenId);
-    EXPECT_TRUE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
 }
 
 /**
@@ -3317,7 +3340,7 @@ HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
 {
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    ASSERT_EQ(nullptr, screenSession);
+    ASSERT_NE(nullptr, screenSession);
     screenSession->SetIsEnableRegionRotation(true);
     screenSession->EnableMirrorScreenRegion();
     EXPECT_EQ(screenSession->GetIsEnableRegionRotation(), true);
@@ -4205,6 +4228,43 @@ HWTEST_F(ScreenSessionTest, SetSecurity02, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     session->SetSecurity(false);
     EXPECT_EQ(session->isSecurity_, false);
+}
+
+/**
+ * @tc.name: SetHorizontalRotation01
+ * @tc.desc: SetHorizontalRotation01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation01, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+
+    session->displayNode_ = nullptr;
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_TRUE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetHorizontalRotation02
+ * @tc.desc: SetHorizontalRotation02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    EXPECT_NE(nullptr, displayNode);
+
+    session->SetDisplayNode(displayNode);
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_FALSE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen

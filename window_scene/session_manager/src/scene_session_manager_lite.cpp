@@ -197,6 +197,11 @@ WMError SceneSessionManagerLite::CheckWindowId(int32_t windowId, int32_t& pid)
     return SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
 }
 
+WMError SceneSessionManagerLite::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+{
+    return SceneSessionManager::GetInstance().UpdateWindowLayoutById(windowId, updateMode);
+}
+
 WMError SceneSessionManagerLite::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
@@ -340,6 +345,13 @@ WMError SceneSessionManagerLite::ListWindowInfo(const WindowInfoOption& windowIn
 WSError SceneSessionManagerLite::GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList)
 {
     return SceneSessionManager::GetInstance().GetRecentMainSessionInfoList(recentSessionInfoList);
+}
+
+WSError SceneSessionManagerLite::PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+    bool shouldBackToCaller)
+{
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundByPersistentId(persistentId,
+        shouldBackToCaller);
 }
 
 WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)

@@ -119,6 +119,7 @@ public:
 
     // web
     virtual uint8_t GetWebRequestId() { return 0; };
+    virtual void SetPipInitialSurfaceRect(int32_t positionX, int32_t positionY, uint32_t width, uint32_t height) {};
 
 protected:
     class WindowLifeCycleListener : public IWindowLifeCycle {

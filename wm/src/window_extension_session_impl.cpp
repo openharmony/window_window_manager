@@ -47,7 +47,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionSessionImpl"};
+#ifdef IMF_ENABLE
 constexpr int64_t DISPATCH_KEY_EVENT_TIMEOUT_TIME_MS = 1000;
+#endif // IMF_ENABLE
 constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 }
 
@@ -540,7 +542,7 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     return WMError::WM_OK;
 }
 
-bool WindowExtensionSessionImpl::IsFocused() const
+bool WindowExtensionSessionImpl::IsComponentFocused() const
 {
     if (IsWindowSessionInvalid() || focusState_ == std::nullopt) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Session is invalid");
@@ -685,10 +687,34 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
+std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env,
+    int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 1);
+}
+ 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, token, ability);
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 0);
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
+{
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, isAni);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
@@ -698,20 +724,15 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
     return SetUIContentInner(contentName, env, storage, token, ability, true);
 }
 
-WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, int isAni)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
     }
     {
-        std::unique_ptr<Ace::UIContent> uiContent;
-        if (ability != nullptr) {
-            uiContent = Ace::UIContent::Create(ability);
-        } else {
-            uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-        }
+        std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
@@ -727,9 +748,17 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
-            uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                uiContent->InitializeByName(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         } else {
-            uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());
+            } else {
+                uiContent->Initialize(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         }
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
@@ -990,6 +1019,9 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed.", GetPersistentId());
         return;
     }
+    if (config.displayId_ != lastDisplayId_) {
+        NotifyDisplayIdChange(config.displayId_);
+    }
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(
         token, config.displayId_, config.density_, static_cast<DisplayOrientation>(config.orientation_));
 }
@@ -1055,12 +1087,25 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
     const std::shared_ptr<RSTransaction>& rsTransaction,
     const Rect& callingSessionRect, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
-            info->textFieldPositionY_, info->rect_.height_);
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
     }
-    occupiedAreaInfo_ = info;
-    UpdateViewportConfig(GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    auto task = [weak = wptr(this), info, rsTransaction, callingSessionRect, avoidAreas]() {
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY: %{public}f, KeyBoardHeight: %{public}d",
+                info->textFieldPositionY_, info->rect_.height_);
+        }
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
+            return;
+        }
+        window->occupiedAreaInfo_ = info;
+        window->UpdateViewportConfig(
+            window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
+    };
+    handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_NotifyOccupiedAreaChangeInfo");
 }
 
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(

@@ -755,8 +755,8 @@ WMError SceneSessionManagerProxy::RegisterWindowPropertyChangeAgent(WindowInfoKe
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
+WMError SceneSessionManagerProxy::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+    uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageOption option;
     MessageParcel reply;

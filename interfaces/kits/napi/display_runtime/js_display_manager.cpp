@@ -336,7 +336,7 @@ void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
         TLOGE(WmsLogTag::DMS, "env is null");
         return;
     }
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, taskName.c_str()) != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {

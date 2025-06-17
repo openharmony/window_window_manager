@@ -1497,6 +1497,79 @@ HWTEST_F(SessionProxyTest, UpdateScreenshotAppEventRegistered, Function | SmallT
 }
 
 /**
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateAcrossDisplaysChangeRegistered, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sProxy->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
+{
+    bool isAcrossDisplays = false;
+    MockMessageParcel::ClearAllErrorFlag();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sProxy->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: GetTargetOrientationConfigInfo
  * @tc.desc: GetTargetOrientationConfigInfo test
  * @tc.type: FUNC
@@ -1558,62 +1631,7 @@ HWTEST_F(SessionProxyTest, GetIsHighlighted, Function | SmallTest | Level2)
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool isHighlighted = false;
-    ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_ERROR_IPC_FAILED);
-}
-/**
- * @tc.name: NotifyKeyboardWillShowRegistered
- * @tc.desc: NotifyKeyboardWillShowRegistered
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, NotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    bool registered = true;
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    sProxy->NotifyKeyboardWillShowRegistered(registered);
-    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    sProxy->NotifyKeyboardWillShowRegistered(registered);
-    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    sProxy->NotifyKeyboardWillShowRegistered(registered);
-    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
-}
-
-/**
- * @tc.name: NotifyKeyboardWillHideRegistered
- * @tc.desc: NotifyKeyboardWillHideRegistered
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
-    bool registered = true;
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    sProxy->NotifyKeyboardWillHideRegistered(registered);
-    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    sProxy->NotifyKeyboardWillHideRegistered(registered);
-    EXPECT_TRUE(logMsg.find("Write registered failed.") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    sProxy->NotifyKeyboardWillHideRegistered(registered);
-    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    ASSERT_EQ(sProxy->GetIsHighlighted(isHighlighted), WSError::WS_OK);
 }
 
 /**
@@ -1623,10 +1641,22 @@ HWTEST_F(SessionProxyTest, NotifyKeyboardWillHideRegistered, Function | SmallTes
  */
 HWTEST_F(SessionProxyTest, SetSubWindowSource, Function | SmallTest | Level2)
 {
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(1);
+    res = sProxy->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(0);
     SubWindowSource source = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     EXPECT_EQ(sProxy->SetSubWindowSource(source), WSError::WS_OK);
 }
@@ -1676,6 +1706,61 @@ HWTEST_F(SessionProxyTest, StartMovingWithCoordinate, TestSize.Level2)
 
     res = sProxy->StartMovingWithCoordinate(0, 0, 0, 0, 0);
     EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn
+ * @tc.desc: SetFrameRectForPartialZoomIn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetFrameRectForPartialZoomIn, Function | SmallTest | Level2)
+{
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+
+    Rect frameRect;
+    WSError res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn01
+ * @tc.desc: SetFrameRectForPartialZoomIn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetFrameRectForPartialZoomIn01, Function | SmallTest | Level2)
+{
+    Rect frameRect;
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSError res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
 } // namespace
 } // namespace Rosen

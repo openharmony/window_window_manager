@@ -1465,13 +1465,8 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithContext02, TestSize.Level1)
     option->SetWindowName("GetTopWindowWithContext02");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     std::shared_ptr<AbilityRuntime::Context> context;
-    uint32_t mainWinId = INVALID_WINDOW_ID;
 
-    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    ASSERT_NE(WMError::WM_OK, ret);
-    ASSERT_EQ(INVALID_WINDOW_ID, mainWinId);
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(context));
-    ret = WMError::WM_OK;
     uint32_t topWinId = INVALID_WINDOW_ID;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithContext(context));
 }

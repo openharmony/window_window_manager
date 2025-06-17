@@ -149,6 +149,9 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnregisterSessionLifecycleListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST):
             return HandleGetRecentMainSessionInfoList(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID):
+            return HandlePendingSessionToBackgroundByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CREATE_NEW_INSTANCE_KEY):
             return HandleCreateNewInstanceKey(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROUTER_STACK_INFO):
@@ -165,6 +168,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleEnterKioskMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_EXIT_KIOSK_MODE):
             return HandleExitKioskMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID):
+            return HandleUpdateWindowLayoutById(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -603,6 +608,32 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     }
     if (!reply.WriteInt32(pid)) {
         WLOGE("Failed to WriteInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t windowId = INVALID_WINDOW_ID;
+    int32_t updateMode = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(updateMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, updateMode:%{public}d",
+            windowId, updateMode);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, errCode:%{public}d", errCode);
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1214,6 +1245,25 @@ int SceneSessionManagerLiteStub::HandleGetRouterStackInfo(MessageParcel& data, M
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data,
+    MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

@@ -143,7 +143,7 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
-using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifyStartPiPFailedFunc = std::function<void(DisplayId displayId)>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
@@ -387,7 +387,9 @@ public:
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
     void OnOutsideDownEvent(int32_t x, int32_t y);
-    void NotifySessionTouchOutside(int32_t persistentId);
+    WSError GetDisplayGroupIdFromSceneSession(const sptr<SceneSession>& session, DisplayId& displayGroupId) const;
+    bool IsSameDisplayGroupId(const sptr<SceneSession>& session, const DisplayId touchDisplayGroupId) const;
+    void NotifySessionTouchOutside(int32_t persistentId, DisplayId displayId);
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetUnreliableWindowInfo(int32_t windowId,
@@ -563,7 +565,8 @@ public:
     void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
-
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    
     /*
      * Window Property
      */
@@ -626,8 +629,8 @@ public:
     /*
      * Multi Instance
      */
-    int32_t GetMaxInstanceCount(const std::string& bundleName);
-    int32_t GetInstanceCount(const std::string& bundleName);
+    uint32_t GetMaxInstanceCount(const std::string& bundleName);
+    uint32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void RefreshAppInfo(const std::string& bundleName);
 
@@ -711,7 +714,8 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener);
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
-    void refreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
+    void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
+    WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
     WMError ExitKioskMode();
@@ -735,6 +739,7 @@ public:
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+    bool IsSyncLoadStartingWindow();
 
     /*
      * Window Animation
@@ -815,6 +820,7 @@ private:
     bool isUserAuthPassed_ {false};
     NotifySceneSessionDestructFunc onSceneSessionDestruct_;
     NotifyTransferSessionToTargetScreenFunc onTransferSessionToTargetScreen_;
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseControlMap_;
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -1263,7 +1269,7 @@ private:
      * PiP Window
      */
     uint64_t pipWindowSurfaceId_ = 0;
-    bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
+    bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
@@ -1509,6 +1515,8 @@ private:
      * Window Pattern
      */
     std::atomic<bool> delayRemoveSnapshot_ = false;
+    void InitWindowPattern();
+    void InitStartingWindow();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
@@ -1529,6 +1537,7 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    bool syncLoadStartingWindow_ = false;
 };
 } // namespace OHOS::Rosen
 
