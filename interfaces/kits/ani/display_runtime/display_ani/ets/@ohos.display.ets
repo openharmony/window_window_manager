@@ -355,17 +355,6 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
         callback(err, res);
     }
     return;
-    // taskpool is not available
-    //taskpool.execute((): void => {
-    //    hilog.info(DOMAIN, TAG, 'get all display from start');
-    //    getAllDisplaysSyncNative(res);
-    //    minusDisplayArray(res);
-    //}).then((ret: NullishType) => {
-    //    callback(new BusinessError(), res);
-    //}).catch((err: NullishType) => {
-    //    hilog.info(DOMAIN, TAG, 'get all display from err');
-    //    callback(err as BusinessError, res);
-    //});
 }
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
