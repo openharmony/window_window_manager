@@ -216,7 +216,7 @@ void JsWindowListener::WindowStageLifeCycleCallBack(WindowStageLifeCycleEventTyp
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::WindowStageLifeCycleCallBack");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("this listener or eng is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -226,7 +226,7 @@ void JsWindowListener::WindowStageLifeCycleCallBack(WindowStageLifeCycleEventTyp
         napi_close_handle_scope(eng, scope);
     };
     if (!eventHandler_) {
-        WLOGFE("get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
         return;
     }
     eventHandler_->PostTask(task, "wms:JsWindowListener::WindowStageLifeCycleCallBack", 0,
