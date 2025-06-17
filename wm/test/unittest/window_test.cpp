@@ -2948,6 +2948,44 @@ HWTEST_F(WindowTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Le
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->IsPcOrPadFreeMultiWindowMode();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool res = false;
+        WindowAdapter::GetInstance().IsPcOrPadFreeMultiWindowMode(res);
+        EXPECT_EQ(ret, res);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetFreeMultiWindowModeEnabledState
+ * @tc.desc: GetFreeMultiWindowModeEnabledState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetFreeMultiWindowModeEnabledState, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->GetFreeMultiWindowModeEnabledState();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool res = false;
+        WindowAdapter::GetInstance().IsPcOrPadFreeMultiWindowMode(res);
+        EXPECT_EQ(ret, res);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

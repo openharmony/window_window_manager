@@ -367,6 +367,7 @@ public:
      * PC Window
      */
     WMError IsPcWindow(bool& isPcWindow) override;
+    WMError IsFreeMultiWindow(bool& isFreeMultiWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled,

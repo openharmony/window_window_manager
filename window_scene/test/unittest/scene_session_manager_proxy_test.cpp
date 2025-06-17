@@ -1136,6 +1136,57 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFreeMultiWindow
+ * @tc.desc: IsFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, IsFreeMultiWindow, TestSize.Level1)
+{
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    bool isFreeMultiWindow = false;
+
+    // branch1.0: WriteInterfaceToken failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    auto ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // branch1.1: remote == nullptr
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // branch1.2: SendRequest failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // branch1.3: ReadInt32 failed
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+
+    // branch1.4: ReadBool failed
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // branch1.5: interface succ
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

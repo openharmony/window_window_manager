@@ -204,6 +204,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW):
+            return HandleIsFreeMultiWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
@@ -1847,6 +1849,21 @@ int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
+{
+    bool isFreeMultiWindow = false;
+    WMError errCode = IsFreeMultiWindow(isFreeMultiWindow);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PC, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteBool(isFreeMultiWindow)) {
+        TLOGE(WmsLogTag::WMS_PC, "Write isFreeMultiWindow fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

@@ -279,6 +279,7 @@ public:
     virtual WMError UpdateScreenLockStatusForApp(
         const std::string& bundleName, bool isRelease) { return WMError::WM_OK; }
     virtual WMError IsPcWindow(bool& isPcWindow) { return WMError::WM_OK; }
+    virtual WMError IsFreeMultiWindow(bool& isFreeMultiWindow) { return WMError::WM_OK; }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
         int persistentId) { return WMError::WM_OK; }
