@@ -1632,6 +1632,73 @@ HWTEST_F(SessionStubTest, HandleSetFrameRectForPartialZoomIn, Function | SmallTe
     EXPECT_EQ(res, true);
     EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleUpdateFloatingBall
+ * @tc.desc: sessionStub HandleUpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "pip", "pip_content"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStopFloatingBall
+ * @tc.desc: sessionStub HandleStopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStopFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStartFloatingBallAbility
+ * @tc.desc: sessionStub HandleStartFloatingBallAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStartFloatingBallAbility, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStartFloatingBallAbility(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    data.WriteParcelable(want.get());
+    result = session_->HandleStartFloatingBallAbility(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFloatingBallWindowId
+ * @tc.desc: sessionStub HandleGetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleGetFloatingBallWindowId(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -208,6 +208,14 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_TEMPLATE_INFO):
             return HandleUpdatePiPTemplateInfo(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL):
+            return HandleUpdateFloatingBall(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE):
+            return HandleStopFloatingBall(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_UI_ABILITY):
+            return HandleStartFloatingBallAbility(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID):
+            return HandleGetFloatingBallWindowId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
@@ -1286,6 +1294,51 @@ int SessionStub::HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     TLOGI(WmsLogTag::WMS_PIP, "in HandleUpdatePiPTemplateInfo");
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatingBall!");
+    sptr<FloatingBallTemplateInfo> fbTemplateInfo = data.ReadParcelable<FloatingBallTemplateInfo>();
+    if (fbTemplateInfo == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "read fbTemplateInfo failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateFloatingBall(*fbTemplateInfo);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStopFloatingBall(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatingBall");
+    // 没有参数, 不需要反序列化。
+    WSError errCode = StopFloatingBall();
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStartFloatingBallAbility(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleStartFloatingBallAbility!");
+    std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
+    if (!want) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read want error");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RestoreFbMainWindow(want);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleGetFloatingBallWindowId");
+    uint32_t windowId = 0;
+    WMError errCode = GetFloatingBallWindowId(windowId);
+    reply.WriteUint32(windowId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

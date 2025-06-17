@@ -78,6 +78,7 @@
 #include "xcollie/watchdog.h"
 #include "xcollie/xcollie.h"
 #include "xcollie/xcollie_define.h"
+#include "session_permission.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -859,6 +860,8 @@ void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decor
             } else if (mode == "split") {
                 support |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+            } else if (mode == "fb") {
+                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FB;
             } else {
                 TLOGW(WmsLogTag::DEFAULT, "Invalid supporedMode");
                 support = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
@@ -2606,6 +2609,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (property != nullptr && WindowHelper::IsPipWindow(property->GetWindowType())) {
         sceneSession->SetPiPTemplateInfo(property->GetPiPTemplateInfo());
     }
+    InitFbWindow(sceneSession, property);
     auto systemConfig = systemConfig_;
     SetWindowStatusDeduplicationBySystemConfig(sessionInfo, systemConfig);
     sceneSession->SetSystemConfig(systemConfig);
@@ -2615,6 +2619,13 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
         std::to_string(sessionInfo.appIndex_);
     if (sessionLockedStateCacheSet_.find(key) != sessionLockedStateCacheSet_.end()) {
         sceneSession->NotifySessionLockStateChange(true);
+    }
+}
+
+void SceneSessionManager::InitFbWindow(sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property)
+{
+    if (property != nullptr && WindowHelper::IsFbWindow(property->GetWindowType())) {
+        sceneSession->SetFbTemplateInfo(property->GetFbTemplateInfo());
     }
 }
 
@@ -3847,6 +3858,9 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
         return true;
+    }
+    if (type == WindowType::WINDOW_TYPE_FB) {
+        return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL);
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
         bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();

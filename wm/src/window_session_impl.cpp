@@ -55,6 +55,7 @@
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
 #include "session_helper.h"
+#include "floating_ball_manager.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -5265,6 +5266,28 @@ WSError WindowSessionImpl::NotifyPipWindowSizeChange(double width, double height
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::SendFbActionEvent(const std::string& action)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "action: %{public}s", action.c_str());
+    auto task = [action]() {
+        FloatingBallManager::DoFbActionEvent(action);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SendFbActionEvent");
+    return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::GetFloatingBallWindowId(uint32_t& windowId)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WMError ret = hostSession->GetFloatingBallWindowId(windowId);
+    return ret;
+}
+
 WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
     bool isUpdate = false;
@@ -6466,6 +6489,42 @@ void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     if (auto hostSession = GetHostSession()) {
         hostSession->UpdatePiPTemplateInfo(pipTemplateInfo);
     }
+}
+
+void WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return;
+    }
+    FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->UpdateFloatingBall(fbTemplateInfo);
+}
+ 
+WMError WindowSessionImpl::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
+    return hostSession->RestoreFbMainWindow(want);
+}
+ 
+void WindowSessionImpl::NotifyPrepareCloseFloatingBall()
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyPrepareCloseFloatingBall");
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyFloatingBallPrepareClose();
 }
 
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)

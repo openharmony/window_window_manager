@@ -843,6 +843,16 @@ PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
     return pipTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
+{
+    fbTemplateInfo_ = fbTemplateInfo;
+}
+
+FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
+{
+    return fbTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -1009,6 +1019,26 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         return;
     }
     property->SetPiPTemplateInfo(*pipTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFbTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFbWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fbTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFbWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatingBallTemplateInfo> fbTemplateInfo = parcel.ReadParcelable<FloatingBallTemplateInfo>();
+    if (fbTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFbTemplateInfo(*fbTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1307,7 +1337,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
-        MarshallingShadowsInfo(parcel);
+        MarshallingShadowsInfo(parcel) &&
+        MarshallingFbTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1416,6 +1447,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
     UnmarshallingShadowsInfo(parcel, property);
+    UnmarshallingFbTemplateInfo(parcel, property);
     return property;
 }
 
@@ -1465,6 +1497,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     configLimitsVP_ = property->configLimitsVP_;
     lastVpr_ = property->lastVpr_;
     pipTemplateInfo_ = property->pipTemplateInfo_;
+    fbTemplateInfo_ = property->fbTemplateInfo_;
     keyboardLayoutParams_ = property->keyboardLayoutParams_;
     windowModeSupportType_ = property->windowModeSupportType_;
     sysBarPropMap_ = property->sysBarPropMap_;
