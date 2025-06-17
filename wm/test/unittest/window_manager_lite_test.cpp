@@ -519,6 +519,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowDrawingContentInfoChanged02, TestSiz
 
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos;
     lite.pImpl_->NotifyWindowDrawingContentInfoChanged(windowDrawingContentInfos);
+    ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterDrawingContentChangedListener(listener));
 }
 
 /**
