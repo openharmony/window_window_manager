@@ -1250,13 +1250,14 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
+    globalDisplayRect = GetGlobalDisplayRect();
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
-        parcel.WriteUint32(requestRect_.height_) && parcel.WriteInt32(globalDisplayRect_.posX_) &&
-        parcel.WriteInt32(globalDisplayRect_.posY_) && parcel.WriteUint32(globalDisplayRect_.width_) &&
-        parcel.WriteUint32(globalDisplayRect_.height_) &&
+        parcel.WriteUint32(requestRect_.height_) && parcel.WriteInt32(globalDisplayRect.posX_) &&
+        parcel.WriteInt32(globalDisplayRect.posY_) && parcel.WriteUint32(globalDisplayRect.width_) &&
+        parcel.WriteUint32(globalDisplayRect.height_) &&
         parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
         parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
         parcel.WriteFloat(rectAnimationConfig_.y2) &&
@@ -1423,6 +1424,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowName_ = property->windowName_;
     sessionInfo_ = property->sessionInfo_;
     requestRect_ = property->requestRect_;
+    globalDisplayRect_ = property->GetGlobalDisplayRect();
     rectAnimationConfig_ = property->rectAnimationConfig_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
