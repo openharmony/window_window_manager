@@ -115,8 +115,6 @@ private:
     ErrCode SetSnapshotSkipByIdNamesMapInner(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames);
 
-    static void WriteStringToFile(int32_t pid, const char* str);
-
     sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
 

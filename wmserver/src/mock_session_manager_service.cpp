@@ -748,24 +748,6 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
     return false;
 }
 
-void MockSessionManagerService::WriteStringToFile(int32_t pid, const char* str)
-{
-    char file[PATH_LEN] = {0};
-    if (snprintf_s(file, PATH_LEN, PATH_LEN - 1, "/proc/%d/unexpected_die_catch", pid) == -1) {
-        WLOGFI("failed to build path for %d.", pid);
-    }
-    int fd = open(file, O_RDWR);
-    if (fd == -1) {
-        return;
-    }
-    if (write(fd, str, strlen(str)) < 0) {
-        WLOGFI("failed to write 0 for %s", file);
-        close(fd);
-        return;
-    }
-    close(fd);
-}
-
 void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
     const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds)
 {
