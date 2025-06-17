@@ -197,7 +197,7 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    if (IsEmptyListener(cbType)) {
+    if (IsEmptyListener(eventString)) {
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
@@ -238,7 +238,7 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
     }
     if (eventString.compare("windowStageEvent") != 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Event %{public}s is invalid", eventString.c_str());
-        if (IsEmptyListener(cbType)) {
+        if (IsEmptyListener(eventString)) {
             return NapiGetUndefined(env);
         }
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
