@@ -12842,7 +12842,7 @@ bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& s
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    auto task = [this, &infos]() {
+    auto task = [this, &infos, where = __func__]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
             sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
             if (session == nullptr) {
@@ -12862,8 +12862,8 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             windowVisibilityInfo->SetZOrder(session->GetZOrder());
             Rect globalDisplayRect = session->GetSessionProperty()->GetGlobalDisplayRect();
             windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, globalDisplayRect=%{public}s",
-                static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
+                where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
