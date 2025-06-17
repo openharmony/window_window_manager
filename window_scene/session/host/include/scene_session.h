@@ -752,7 +752,7 @@ public:
     }
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
-    bool IsCompatibleModeDirtyDragScaleWindow();
+    bool IsCompatibleModeDirtyDragScaleWindow() const;
     void ResetCompatibleModeDragScaleFlags();
 
     /*
