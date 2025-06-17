@@ -12020,22 +12020,24 @@ WSError SceneSessionManager::UpdateTitleInTargetPos(int32_t persistentId, bool i
     return sceneSession->UpdateTitleInTargetPos(isShow, height);
 }
 
-void AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
+ErrCode AppAnrListener::OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
 {
     TLOGI(WmsLogTag::DEFAULT, "AppAnrListener OnAppDebugStarted");
     if (debugInfos.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "AppAnrListener OnAppDebugStarted debugInfos is empty");
-        return;
+        return ERR_OK;
     }
+    return ERR_OK;
 }
 
-void AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
+ErrCode AppAnrListener::OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos)
 {
     TLOGI(WmsLogTag::DEFAULT, "AppAnrListener OnAppDebugStoped");
     if (debugInfos.empty()) {
         TLOGE(WmsLogTag::DEFAULT, "AppAnrListener OnAppDebugStoped debugInfos is empty");
-        return;
+        return ERR_OK;
     }
+    return ERR_OK;
 }
 
 void SceneSessionManager::SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func)

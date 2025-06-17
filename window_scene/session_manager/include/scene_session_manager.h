@@ -30,7 +30,7 @@
 
 #include "ability_info.h"
 #include "agent_death_recipient.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_mgr_client.h"
 #include "common/include/task_scheduler.h"
 #include "display_change_info.h"
@@ -164,8 +164,8 @@ using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persist
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
-    void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
-    void OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
+    ErrCode OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
+    ErrCode OnAppDebugStoped(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
 };
 
 class DisplayChangeListener : public IDisplayChangeListener {
