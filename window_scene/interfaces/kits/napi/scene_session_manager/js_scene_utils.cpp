@@ -2263,6 +2263,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
+    SetTypeProperty(objValue, env, "TYPE_FLOATING_BALL", JsSessionType::TYPE_FLOATING_BALL);
     return objValue;
 }
 

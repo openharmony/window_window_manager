@@ -259,6 +259,16 @@ public:
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
+
+    /**
+     * @brief Send fb event to client.
+     *
+     * Send the fb event to client. Such as close, click events.
+     *
+     * @param action Indicates the action name.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFbActionEvent(const std::string& action) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

@@ -110,6 +110,7 @@ public:
     // Window LifeCycle
     void NotifyNonInteractiveStatus() override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
+    WSError SendFbActionEvent(const std::string& action) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

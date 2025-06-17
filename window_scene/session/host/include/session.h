@@ -34,6 +34,7 @@
 #include "vsync_station.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -53,6 +54,9 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
+using NotifyStopFloatingBallFunc = std::function<void()>;
+using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
@@ -842,6 +846,9 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
+    NotifyUpdateFloatingBallFunc updateFlotingBallFunc_;
+    NotifyStopFloatingBallFunc stopFlotingBallFunc_;
+    NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;

@@ -90,9 +90,10 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE,
     TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED,
     TRANS_ID_CLOSE_SPECIFIC_SCENE,
-
     // Layout
     TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST,
+    // Floaing ball
+    TRANS_ID_SEND_FB_ACTION_EVENT,
 };
 }   // namespace Rosen
 }   // namespace OHOS
