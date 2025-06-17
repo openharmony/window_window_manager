@@ -1762,6 +1762,19 @@ HWTEST_F(SessionProxyTest, SetFrameRectForPartialZoomIn01, Function | SmallTest 
     WSError res = sProxy->SetFrameRectForPartialZoomIn(frameRect);
     EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
+
+/**
+ * @tc.name: ChangeKeyboardEffectOption01
+ * @tc.desc: ChangeKeyboardEffectOption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, ChangeKeyboardEffectOption01, Function | SmallTest | Level2)
+{
+    KeyboardEffectOption effectOption;
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSError res = sProxy->ChangeKeyboardEffectOption(effectOption);
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
