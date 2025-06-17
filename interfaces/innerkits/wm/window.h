@@ -598,6 +598,22 @@ public:
 };
 
 /**
+ * @class IRectChangeInGlobalDisplayListener
+ *
+ * @brief Interface for observing window rectangle changes in global coordinates.
+ */
+class IRectChangeInGlobalDisplayListener : virtual public RefBase {
+public:
+    /**
+     * @brief Called when the window rectangle changes in global coordinates.
+     *
+     * @param rect The updated rectangle of the window in global coordinates.
+     * @param reason The reason for the window size or position change.
+     */
+    virtual void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) {}
+};
+
+/**
  * @class IExtensionSecureLimitChangeListener
  *
  * @brief IExtensionSecureLimitChangeListener is used to observe the window secure limit and
@@ -989,6 +1005,29 @@ public:
      * @return Rect of window.
      */
     virtual Rect GetRequestRect() const { return {}; }
+
+    /**
+     * @brief Get the window rectangle in global coordinates.
+     *
+     * @return The rectangle (position and size) of the window in global coordinates.
+     */
+    virtual Rect GetGlobalDisplayRect() const { return { 0, 0, 0, 0 }; }
+
+    /**
+     * @brief Convert a position from client (window-relative) coordinates to global coordinates.
+     *
+     * @param position The position relative to the window.
+     * @return The corresponding position in global coordinates.
+     */
+    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+
+    /**
+     * @brief Convert a position from global coordinates to client (window-relative) coordinates.
+     *
+     * @param position The position in global coordinates.
+     * @return The corresponding position relative to the window.
+     */
+    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
 
     /**
      * @brief Get the window type
@@ -1413,6 +1452,19 @@ public:
      */
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
         MoveConfiguration moveConfiguration) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Move the window to the specified position in global coordinates.
+     *
+     * @param x The target X-coordinate in global coordinates.
+     * @param y The target Y-coordinate in global coordinates.
+     * @param moveConfiguration Optional move configuration parameters.
+     * @return WMError WM_OK if the move operation succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {})
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get window global scaled rect.
@@ -3502,6 +3554,29 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register a listener to observe window rectangle changes in global coordinates.
+     *
+     * @param listener The listener to receive rectangle change notifications.
+     * @return WMError WM_OK if registration succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError RegisterRectChangeInGlobalDisplayListener(const sptr<IRectChangeInGlobalDisplayListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister a previously registered rectangle change listener in global coordinates.
+     *
+     * @param listener The listener to be unregistered.
+     * @return WMError WM_OK if unregistration succeeds; otherwise, an error code is returned.
+     */
+    virtual WMError UnregisterRectChangeInGlobalDisplayListener(
+        const sptr<IRectChangeInGlobalDisplayListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
