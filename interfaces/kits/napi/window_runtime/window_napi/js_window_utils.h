@@ -95,7 +95,6 @@ enum class ApiWindowType : uint32_t {
     TYPE_END
 };
 
-// LifeCycleEventType deprecated since api version 20, use WindowStageLifeCycleEventType instead.
 enum class LifeCycleEventType : uint32_t {
     FOREGROUND = 1,
     ACTIVE,
