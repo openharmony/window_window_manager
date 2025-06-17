@@ -2542,8 +2542,8 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         pixelMap = GetSnapshot();
     }
     if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d",
-            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d, uniqueId: %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_, pixelMap->GetUniqueId());
         if (notifySessionSnapshotFunc_) {
             notifySessionSnapshotFunc_(persistentId_);
         }
