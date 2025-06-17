@@ -304,6 +304,64 @@ HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
     curHeight = 1930;
     subSession_->RectCheck(curWidth, curHeight);
 }
+
+/**
+ * @tc.name: UpdateSessionRectInner
+ * @tc.desc: UpdateSessionRectInner Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInner, TestSize.Level1)
+{
+    WSRect rect = { 1, 1, 1, 1 };
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    subSession_->SetScbCoreEnabled(true);
+    subSession_->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->SetSessionState(SessionState::STATE_BACKGROUND);
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, false);
+
+    subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::UNDEFINED);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, false);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, false);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 1, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, true);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 1, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::MOVE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, true);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, false);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 1, 0 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, true);
+
+    subSession_->isSubWindowResizingOrMoving_ = false;
+    subSession_->winRect_ = { 0, 0, 0, 0 };
+    rect = { 0, 0, 0, 1 };
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::RESIZE);
+    ASSERT_EQ(subSession_->isSubWindowResizingOrMoving_, true);
+}
 }
 }
 }

@@ -73,6 +73,22 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     return WSError::WS_OK;
 }
 
+void SubSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason)
+{
+    if (IsSessionForeground() && Session::IsScbCoreEnabled() &&
+        (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
+        SetOriPosYBeforeRaisedByKeyboard(0);
+        const WSRect& winRect = GetSessionRect();
+        if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
+            isSubWindowResizingOrMoving_ = true;
+        }
+        if (reason == SizeChangeReason::RESIZE && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
+            isSubWindowResizingOrMoving_ = true;
+        }
+    }
+    SceneSession::UpdateSessionRectInner(rect, reason);
+}
+
 WSError SubSession::Hide()
 {
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
@@ -85,6 +101,7 @@ WSError SubSession::Hide()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
+        session->isSubWindowResizingOrMoving_ = false;
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
