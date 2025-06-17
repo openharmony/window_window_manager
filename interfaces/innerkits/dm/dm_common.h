@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 
 #include <parcel.h>
 
@@ -690,11 +691,20 @@ enum class DMDeviceStatus: uint32_t {
 };
 
 /**
+ * @struct Position
+ *
  * @brief Coordinate of points on the screen
  */
 struct Position {
     int32_t x = 0;
     int32_t y = 0;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
+    }
 };
 
 /**
