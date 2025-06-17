@@ -179,13 +179,17 @@ public:
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
 
         AreaType type;
-        if (isInRange(leftOut, rightOut / half, pointWinX) && isInRange(topOut, bottomOut / half, pointWinY)) {
+        if (isInRange(leftOut, rightOut / half, pointWinX) &&
+            isInRange(topOut, bottomOut / half, pointWinY)) {
             type = AreaType::LEFT_TOP;
-        } else if (isInRange(rightOut / half, rightOut, pointWinX) && isInRange(topOut, bottomOut / half, pointWinY)) {
+        } else if (isInRange(rightOut / half, rightOut, pointWinX) &&
+            isInRange(topOut, bottomOut / half, pointWinY)) {
             type = AreaType::RIGHT_TOP;
-        } else if (isInRange(rightOut / half, rightOut, pointWinX) && isInRange(bottomOut / half, bottomOut, pointWinY)) {
+        } else if (isInRange(rightOut / half, rightOut, pointWinX) &&
+            isInRange(bottomOut / half, bottomOut, pointWinY)) {
             type = AreaType::RIGHT_BOTTOM;
-        } else if (isInRange(leftOut, rightOut / half, pointWinX) && isInRange(bottomOut / half, bottomOut, pointWinY)) {
+        } else if (isInRange(leftOut, rightOut / half, pointWinX) &&
+            isInRange(bottomOut / half, bottomOut, pointWinY)) {
             type = AreaType::LEFT_BOTTOM;
         } else {
             type = AreaType::UNDEFINED;
