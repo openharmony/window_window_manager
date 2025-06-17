@@ -494,7 +494,7 @@ HWTEST_F(WindowSessionPropertyTest, Unmarshalling, TestSize.Level1)
     Parcel parcel = Parcel();
     property->Marshalling(parcel);
     sptr<WindowSessionProperty> property2 = property->Unmarshalling(parcel);
-    EXPECT_NE(property2, nullptr);
+    ASSERT_NE(property2, nullptr);
     EXPECT_EQ(property2->GetWindowName(), winName);
 }
 

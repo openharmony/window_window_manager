@@ -1250,7 +1250,7 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
-    globalDisplayRect = GetGlobalDisplayRect();
+    auto globalDisplayRect = GetGlobalDisplayRect();
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
