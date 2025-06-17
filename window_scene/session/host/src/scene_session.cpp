@@ -3264,7 +3264,7 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
     if (IsDragResizeScale(reason)) {
-        TLOGNE(WmsLogTag::WMS_COMPAT, "compatiblemode drag scale no need notify rect change");
+        TLOGE(WmsLogTag::WMS_COMPAT, "compatiblemode drag scale no need notify rect change");
         return;
     }
     PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig, where = __func__] {
@@ -3875,27 +3875,27 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
 
 void SceneSession::HandleMoveDragEvent(SizeChangeReason reason)
 {
-    if (IsDragResizeScale(reason)) {
-        compatibleDragScaleFlags_ = true;
-        std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
-        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
-            auto session = weakThis.promote();
-            if (!session) {
-                TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s: session is null", where);
-                return;
-            }
-            if (session->IsCompatibleModeDirtyDragScaleWindow()) {
-                session->OnSessionEvent(SessionEvent::EVENT_DRAG);
-                session->ResetCompatibleModeDragScaleFlags();
-            }
-        };
-        if (requestNextVsyncFunc_) {
-            requestNextVsyncFunc_(nextVsyncDragCallback);
-        } else {
-            TLOGNE(WmsLogTag::WMS_COMPAT, "Func is null, could not request vsync");
-        }
-    } else {
+    if (!IsDragResizeScale(reason)) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
+        return;
+    }
+    compatibleDragScaleFlags_ = true;
+    std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
+    nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s: session is null", where);
+            return;
+        }
+        if (session->IsCompatibleModeDirtyDragScaleWindow()) {
+            session->OnSessionEvent(SessionEvent::EVENT_DRAG);
+            session->ResetCompatibleModeDragScaleFlags();
+        }
+    };
+    if (requestNextVsyncFunc_) {
+        requestNextVsyncFunc_(nextVsyncDragCallback);
+    } else {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Func is null, could not request vsync");
     }
 }
 
@@ -6757,7 +6757,7 @@ void SceneSession::ResetDirtyDragFlags()
     isDragging_ = false;
 }
 
-bool SceneSession::IsCompatibleModeDirtyDragScaleWindow()
+bool SceneSession::IsCompatibleModeDirtyDragScaleWindow() const
 {
     return compatibleDragScaleFlags_;
 }

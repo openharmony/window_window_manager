@@ -518,8 +518,7 @@ Gravity MoveDragController::GetGravity()
 {
     auto iter = GRAVITY_MAP.find(dragAreaType_);
     if (iter != GRAVITY_MAP.end()) {
-        Gravity dragGravity = iter->second;
-        return dragGravity;
+        return iter->second;
     }
     return Gravity::TOP_LEFT;
 }
