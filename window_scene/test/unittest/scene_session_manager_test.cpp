@@ -607,8 +607,8 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, TestSize.Leve
 }
 
 /**
- * @tc.name: IsPcWindow
- * @tc.desc: IsPcWindow
+ * @tc.name: IsFreeMultiWindow
+ * @tc.desc: IsFreeMultiWindow
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, IsFreeMultiWindow, TestSize.Level1)
