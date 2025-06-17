@@ -9529,9 +9529,17 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             want.SetParams(sessionInfo.want->GetParams());
             want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(sessionInfo.screenId_));
         }
-        auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
-        if (ret != ERR_OK) {
-            TLOGE(WmsLogTag::WMS_LIFE, "start specified ability by SCB failed.");
+        std::shared_ptr<int32_t> retCode = std::make_shared<int32_t>(0);
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([want, retCode] {
+            int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartSpecifiedAbilityBySCB",
+                START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+            auto result = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+            HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
+            *retCode = static_cast<int32_t>(result);
+            TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB retCode: %{public}d", *retCode);
+        }, START_UI_ABILITY_TIMEOUT);
+        if (*retCode != ERR_OK || isTimeout) {
+            TLOGE(WmsLogTag::WMS_LIFE, "start specified ability by SCB failed. isTimeout: %{public}d", isTimeout);
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
                 sessionInfo.bundleName_, sessionInfo.appInstanceKey_);
         }
@@ -15866,7 +15874,7 @@ WMError SceneSessionManager::RemoveInstanceKey(const std::string& bundleName, co
         TLOGE(WmsLogTag::WMS_LIFE, "empty instanceKey");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto task = [this, bundleName, instanceKey] {
+    auto task = [bundleName, instanceKey] {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
             bundleName, instanceKey);
     };
