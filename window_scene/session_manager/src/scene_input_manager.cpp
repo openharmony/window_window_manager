@@ -312,8 +312,7 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
     }
     std::unordered_map<DisplayId, std::vector<MMI::WindowInfo>> windowInfoMap;
     for (const auto& windowInfo : windowInfoList) {
-        auto displayGroupId = SceneSessionManager::GetInstance().GetDisplayGroupId(windowInfo.displayId);
-        windowInfoMap[displayGroupId].emplace_back(windowInfo);
+        windowInfoMap[windowInfo.groupId].emplace_back(windowInfo);
     }
     std::vector<MMI::DisplayGroupInfo> DisplayGroupInfoArray;
     for (const auto& pair : displayInfoMap) {

@@ -42,10 +42,10 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
-const int32_t DURATION_0 = 0;
-const int32_t DURATION_1000 = 1000;
-const int32_t BRIGHTNESS_FACTOR_0 = 0;
-const int32_t BRIGHTNESS_FACTOR_1 = 1;
+const int DURATION_0MS = 0;
+const int DURATION_1000MS = 1000;
+const float BRIGHTNESS_FACTOR_0 = 0;
+const float BRIGHTNESS_FACTOR_1 = 1;
 const float FULL_STATUS_WIDTH = 2048;
 const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
@@ -380,6 +380,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
     displayInfo->SetOriginRotation(property_.GetScreenRotation());
+    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
     return displayInfo;
 }
 
@@ -428,6 +429,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
     displayInfo->SetPivotY(property_.GetPivotY());
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
+    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
     return displayInfo;
 }
 
@@ -1146,8 +1148,12 @@ void ScreenSession::SetHorizontalRotation()
     property_.SetScreenComponentRotation(HORIZONTAL);
     property_.SetPhysicalRotation(HORIZONTAL);
     currentSensorRotation_ = HORIZONTAL;
-    displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
-    RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    if (displayNode_ != nullptr) {
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(ROTATION_270));
+        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+    } else {
+        TLOGW(WmsLogTag::DMS, "displayNode is null, no need to set displayNode.");
+    }
 }
 
 Orientation ScreenSession::GetOrientation() const
@@ -2069,17 +2075,23 @@ void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
     colorSpaces_ = std::move(colorSpaces);
 }
 
+void ScreenSession::SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate)
+{
+    supportedRefreshRate_ = std::move(supportedRefreshRate);
+}
+
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode_ is null");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "SetForceCloseHdr %{public}d", isForceCloseHdr);
+    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
-    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0 : DURATION_1000);
+    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0MS : DURATION_1000MS);
     // Increase animation when HDR luminance changes abruptly
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     displayNode_->SetHDRBrightnessFactor(isForceCloseHdr ? BRIGHTNESS_FACTOR_0 : BRIGHTNESS_FACTOR_1);

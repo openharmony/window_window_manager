@@ -58,7 +58,7 @@ void MultiInstanceManager::SetCurrentUserId(int32_t userId)
     auto task = [this, where] {
         std::vector<AppExecFwk::ApplicationInfo> appInfos;
         auto flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-        if(!bundleMgr_ || bundleMgr_->GetApplicationInfosV9(flag, userId_, appInfos)) {
+        if (!bundleMgr_ || bundleMgr_->GetApplicationInfosV9(flag, userId_, appInfos)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:get application infos fail", where);
             return;
         }

@@ -228,7 +228,7 @@ void RssSession::OnReceiveEvent(napi_env env, napi_value callbackObj, uint32_t e
     auto napiTask = [env, ctx]() {
         RssSession::CompleteCb(env, ctx);
     };
-    if (napi_status::napi_ok != napi_send_event(env, napiTask, napi_eprio_high)) {
+    if (napi_send_event(env, napiTask, napi_eprio_high, "OnReceiveEvent") != napi_status::napi_ok) {
         WLOGFE("failed to napi_send_event");
         return;
     }

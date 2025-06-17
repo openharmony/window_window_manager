@@ -119,9 +119,10 @@ public:
         return usage == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
     }
 
-    static inline bool IsMagnificationWindow(WindowType type)
+    static inline bool IsNeedSACalling(WindowType type)
     {
-        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU ||
+            type == WindowType::WINDOW_TYPE_SELECTION;
     }
 
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
@@ -165,6 +166,25 @@ public:
             type = AreaType::UNDEFINED;
         }
         return type;
+    }
+
+    static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
+    {
+        float rotation = 0.f;
+        switch (sensorOrientation) {
+            case DisplayOrientation::LANDSCAPE:
+                rotation = 90.f; // degree 90
+                break;
+            case DisplayOrientation::PORTRAIT_INVERTED:
+                rotation = 180.f; // degree 180
+                break;
+            case DisplayOrientation::LANDSCAPE_INVERTED:
+                rotation = 270.f; // degree 270
+                break;
+            default:
+                break;
+        }
+        return rotation;
     }
 };
 } // Rosen

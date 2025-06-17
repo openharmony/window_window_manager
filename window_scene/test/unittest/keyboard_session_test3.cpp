@@ -89,6 +89,23 @@ sptr<SceneSession> KeyboardSessionTest3::GetSceneSession(const std::string& abil
 
 namespace {
 /**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: test IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, IsVisibleNotBackground, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    keyboardSession->isVisible_ = false;
+    EXPECT_EQ(false, keyboardSession->IsVisibleNotBackground());
+    keyboardSession->isVisible_ = true;
+    EXPECT_EQ(true, keyboardSession->IsVisibleNotBackground());
+}
+
+/**
  * @tc.name: GetRSTransaction01
  * @tc.desc: test function: GetRSTransaction
  * @tc.type: FUNC

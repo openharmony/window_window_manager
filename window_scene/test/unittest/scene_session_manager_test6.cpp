@@ -61,7 +61,7 @@ bool SceneSessionManagerTest6::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
+void WindowChangedFuncTest6(int32_t persistentId, WindowUpdateType type) {}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
@@ -1361,7 +1361,7 @@ HWTEST_F(SceneSessionManagerTest6, SendTouchEvent, TestSize.Level1)
     ret = ssm_->SendTouchEvent(pointerEvent, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->RegisterWindowChanged(WindowChangedFuncTest);
+    ssm_->RegisterWindowChanged(WindowChangedFuncTest6);
 }
 
 /**

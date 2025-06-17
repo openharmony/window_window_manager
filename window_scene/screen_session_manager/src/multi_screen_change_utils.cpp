@@ -257,8 +257,8 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     std::ostringstream oss;
     oss << "innerPhyScreen screenId:" << innerPhyScreen->GetScreenId()
         << ", rsId:" << innerPhyScreen->GetRSScreenId()
-        << ", externalPhyScreen screenId:" << innerPhyScreen->GetRSScreenId()
-        << ", rsId:" << innerPhyScreen->GetRSScreenId();
+        << ", externalPhyScreen screenId:" << externalPhyScreen->GetRSScreenId()
+        << ", rsId:" << externalPhyScreen->GetRSScreenId();
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
@@ -292,7 +292,7 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
         << ", name: " << innerScreen->GetName()
         << ", externalScreen screenId: " << externalScreen->GetScreenId()
         << ", rsId: " << externalScreen->GetRSScreenId()
-        << ", name: " << innerScreen->GetName();
+        << ", name: " << externalScreen->GetName();
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
@@ -319,7 +319,7 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
         << ", name: " << innerScreen->GetName()
         << ", externalScreen screenId: " << externalScreen->GetScreenId()
         << ", rsId: " << externalScreen->GetRSScreenId()
-        << ", name: " << innerScreen->GetName();
+        << ", name: " << externalScreen->GetName();
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 }

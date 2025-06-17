@@ -254,6 +254,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS):
+            return HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
@@ -288,6 +290,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED):
             return HandleUpdateScreenshotAppEventRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED):
+            return HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
@@ -296,6 +300,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowShadows(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
             return HandleSetSubWindowSource(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN):
+            return HandleSetFrameRectForPartialZoomIn(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1588,8 +1594,11 @@ int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessagePa
             effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError ret = ChangeKeyboardEffectOption(*effectOption);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    WSError errorCode = ChangeKeyboardEffectOption(*effectOption);
+    if (!reply.WriteInt32(static_cast<int32_t>(errorCode))) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write errorCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1779,6 +1788,21 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+int SessionStub::HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data, MessageParcel& reply)
+{
+    bool isAcrossDisplays = false;
+    WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write ret fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteBool(isAcrossDisplays)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write isAcrossDisplays fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
 {
     bool useImplicit = false;
@@ -1927,6 +1951,21 @@ int SessionStub::HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = false;
+    if (!data.ReadBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateAcrossDisplaysChangeRegistered(isRegister);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply)
 {
     bool isHighlighted = false;
@@ -1959,6 +1998,26 @@ int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& re
     WSError errCode = SetSubWindowSource(source);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetFrameRectForPartialZoomIn(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read frame rect failed");
+        return ERR_INVALID_DATA;
+    }
+    Rect frameRect = { posX, posY, width, height };
+    WSError ret = SetFrameRectForPartialZoomIn(frameRect);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write ret failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

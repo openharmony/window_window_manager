@@ -158,6 +158,24 @@ napi_value WindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value GlobalWindowModeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "FULLSCREEN", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FULLSCREEN)));
+    napi_set_named_property(env, objValue, "SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::SPLIT)));
+    napi_set_named_property(env, objValue, "FLOAT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FLOAT)));
+    napi_set_named_property(env, objValue, "PIP", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::PIP)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -746,7 +764,7 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
     return objValue;
 }
 
@@ -1624,6 +1642,23 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
     return ParseZLevelParam(env, jsObject, windowOption);
+}
+
+WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow)
+{
+    napi_value focusOnShowValue = nullptr;
+    napi_get_named_property(env, showWindowOptions, "focusOnShow", &focusOnShowValue);
+    if (focusOnShowValue != nullptr) {
+        if (GetType(env, focusOnShowValue) == napi_undefined) {
+            focusOnShow = true;
+            return WmErrorCode::WM_OK;
+        }
+        if (GetType(env, focusOnShowValue) != napi_boolean || !ConvertFromJsValue(env, focusOnShowValue, focusOnShow)) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "failed to convert focusOnShow to boolean");
+            return WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+        }
+    }
+    return WmErrorCode::WM_OK;
 }
 
 bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy)

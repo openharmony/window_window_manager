@@ -46,16 +46,23 @@ private:
 
 sptr<SceneSessionManager> SceneSessionManagerTest10::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
-
-bool TraverseFuncTest(const sptr<SceneSession>& session)
+bool GetCutoutInfoByRotation(Rotation rotation, Rect& rect)
 {
+    auto cutoutInfo = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
+    if (cutoutInfo == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
+        return false;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
+        return false;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        rect = { cutoutArea.posX_, cutoutArea.posY_, cutoutArea.width_, cutoutArea.height_ };
+    }
     return true;
 }
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerTest10::SetUpTestCase()
 {
@@ -1601,22 +1608,31 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
 }
 
 /**
- * @tc.name: refreshAllAppUseControlMap
- * @tc.desc: refreshAllAppUseControlMap
+ * @tc.name: RefreshAllAppUseControlMap
+ * @tc.desc: RefreshAllAppUseControlMap
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "app_bundle_name";
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+ 
     appUseControlInfo.isNeedControl_ = true;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
-
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, ssm_->allAppUseControlMap_.size());
+ 
     appUseControlInfo.isNeedControl_ = false;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
+ 
+    appUseControlInfo.isNeedControl_ = false;
+    appUseControlInfo.isControlRecentOnly_ = true;
+    appUseControlInfo.isControlRecentOnly_ = false;
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::PARENT_CONTROL);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
 }
 } // namespace
 } // namespace Rosen

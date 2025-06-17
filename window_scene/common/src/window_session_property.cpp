@@ -310,6 +310,11 @@ void WindowSessionProperty::SetDisplayId(DisplayId displayId)
     displayId_ = displayId;
 }
 
+void WindowSessionProperty::SetIsFollowParentWindowDisplayId(bool enabled)
+{
+    isFollowParentWindowDisplayId_ = enabled;
+}
+
 void WindowSessionProperty::SetFloatingWindowAppType(bool isAppType)
 {
     isFloatingWindowAppType_ = isAppType;
@@ -325,8 +330,7 @@ const SessionInfo& WindowSessionProperty::GetSessionInfo() const
     return sessionInfo_;
 }
 
-std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>
-    WindowSessionProperty::GetTransitionAnimationConfig() const
+TransitionAnimationMapType WindowSessionProperty::GetTransitionAnimationConfig() const
 {
     return transitionAnimationConfig_;
 }
@@ -452,6 +456,11 @@ bool WindowSessionProperty::GetSystemCalling() const
 DisplayId WindowSessionProperty::GetDisplayId() const
 {
     return displayId_;
+}
+
+bool WindowSessionProperty::IsFollowParentWindowDisplayId() const
+{
+    return isFollowParentWindowDisplayId_;
 }
 
 void WindowSessionProperty::SetParentId(int32_t parentId)
@@ -1245,7 +1254,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint64(displayId_) && parcel.WriteInt32(persistentId_) &&
         MarshallingSessionInfo(parcel) &&
         MarshallingTransitionAnimationMap(parcel) &&
-        parcel.WriteInt32(parentPersistentId_) &&
+        parcel.WriteInt32(parentPersistentId_) && parcel.WriteBool(isFollowParentWindowDisplayId_) &&
         parcel.WriteUint32(accessTokenId_) && parcel.WriteUint32(static_cast<uint32_t>(maximizeMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(needRotateAnimation_) &&
@@ -1322,6 +1331,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
     property->SetParentPersistentId(parcel.ReadInt32());
+    property->SetIsFollowParentWindowDisplayId(parcel.ReadBool());
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetMaximizeMode(static_cast<MaximizeMode>(parcel.ReadUint32()));
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()), parcel.ReadBool());
@@ -1425,6 +1435,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     parentId_ = property->parentId_;
     flags_ = property->flags_;
     persistentId_ = property->persistentId_;
+    isFollowParentWindowDisplayId_ = property->isFollowParentWindowDisplayId_;
     parentPersistentId_ = property->parentPersistentId_;
     accessTokenId_ = property->accessTokenId_;
     maximizeMode_ = property->maximizeMode_;
@@ -2038,11 +2049,13 @@ bool WindowSessionProperty::IsSystemKeyboard() const
 
 void WindowSessionProperty::SetKeyboardEffectOption(const KeyboardEffectOption& effectOption)
 {
+    std::lock_guard<std::mutex> lock(keyboardMutex_);
     keyboardEffectOption_ = effectOption;
 }
 
 KeyboardEffectOption WindowSessionProperty::GetKeyboardEffectOption() const
 {
+    std::lock_guard<std::mutex> lock(keyboardMutex_);
     return keyboardEffectOption_;
 }
 

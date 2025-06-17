@@ -1061,6 +1061,43 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDefaultHotAreas2
+ * @tc.desc: UpdateDefaultHotAreas2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas2, TestSize.Level1)
+{
+    std::vector<MMI::Rect> empty(0);
+    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    EXPECT_EQ(empty.size(), 0);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
+    sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    float vpr = 1.5f; // 1.5: default vp
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        vpr = screenSession->GetScreenProperty().GetDensity();
+    }
+    uint32_t offset = static_cast<uint32_t>(HOTZONE_TOUCH * vpr);
+    WSRect rect = { 0, 0, 320, 240 };
+    sceneSession->SetSessionRect(rect);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->GetSessionProperty()->dragEnabled_ = true;
+    sceneSession->dragActivated_ = true;
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, -offset);
+    sceneSession->dragActivated_ = false;
+    empty.clear();
+    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_EQ(empty[0].x, 0);
+}
+
+/**
  * @tc.name: GetWindowInfo
  * @tc.desc: GetWindowInfo
  * @tc.type: FUNC

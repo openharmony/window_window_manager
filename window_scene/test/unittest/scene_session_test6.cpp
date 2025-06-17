@@ -30,6 +30,8 @@
 #include "session/host/include/system_session.h"
 #include <ui/rs_surface_node.h>
 #include "wm_common.h"
+#include "dm_common.h"
+#include "parameters.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -936,6 +938,9 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     // test set SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN
@@ -979,23 +984,13 @@ HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAppUseControlMap
- * @tc.desc: GetAllAppUseControlMap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level3)
-{
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
-}
-
-/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
 {
-    SceneSession::ControlInfo controlInfo = {
+    ControlInfo controlInfo = {
         .isNeedControl = true,
         .isControlRecentOnly = true
     };
@@ -1003,8 +998,13 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     info.bundleName_ = "app";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-        allAppUseMap = sceneSession->GetAllAppUseControlMap();
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+ 
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMap;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMap]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+
     std::string key = "app#0";
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
@@ -1057,6 +1057,107 @@ HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromClient, Function | SmallT
     sceneSession->SetIsSystemKeyboard(true);
     EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
     EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
+}
+
+/**
+ * @tc.name: RecalculateFrameRect
+ * @tc.desc: RecalculateFrameRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RecalculateFrameRect, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "RecalculateFrameRect";
+    info.abilityName_ = "RecalculateFrameRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t displayWidth = 100; // 100 is display width
+    uint32_t displayHeight = 100; // 100 is display height
+
+    Rect frameRect {10, 10, 10, 10}; // 10 is valid frame rect param
+    Rect res = sceneSession->RecalculateFrameRect(frameRect, 90, displayWidth, displayHeight); // degree 90
+    EXPECT_EQ(res.posX_, frameRect.posY_);
+
+    res = sceneSession->RecalculateFrameRect(frameRect, 180, displayWidth, displayHeight); // degree 180
+    EXPECT_EQ(res.width_, frameRect.width_);
+
+    res = sceneSession->RecalculateFrameRect(frameRect, 270, displayWidth, displayHeight); // degree 270
+    EXPECT_EQ(res.posY_, frameRect.posX_);
+
+    res = sceneSession->RecalculateFrameRect(frameRect, 0, displayWidth, displayHeight); // degree 0
+    EXPECT_EQ(res.posY_, frameRect.posY_);
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn
+ * @tc.desc: SetFrameRectForPartialZoomIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomIn, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetFrameRectForPartialZoomIn";
+    info.abilityName_ = "SetFrameRectForPartialZoomIn";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
+    EXPECT_EQ(sceneSession->SetFrameRectForPartialZoomIn(frameRect), WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomInInner
+ * @tc.desc: SetFrameRectForPartialZoomInInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetFrameRectForPartialZoomInInner";
+    info.abilityName_ = "SetFrameRectForPartialZoomInInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
+    WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(surfaceNode, nullptr);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_DISPLAY);
+
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->name_ = "SetFrameRectForPartialZoomInInner";
+    screenSession->screenId_ = 100; // screen id 100
+    ScreenProperty screenProperty;
+    screenProperty.bounds_.rect_ = { 0, 0, 100, 100 }; // 0, 100 is valid screen rect param
+    screenSession->SetScreenProperty(screenProperty);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(100, screenSession); // screen id 100
+    EXPECT_NE(sceneSession->GetSessionProperty(), nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(100); // screen id 100
+    EXPECT_EQ(sceneSession->GetDisplayId(), 100); // screen id 100
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 1); // 1 is screen rotate
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    frameRect.posX_ = -1; // -1 is invalid frame rect param
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRotatePolicy
+ * @tc.desc: GetRotatePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, GetRotatePolicy, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "GetRotatePolicy";
+    info.abilityName_ = "GetRotatePolicy";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession->GetRotatePolicy(), 10); // 10: invalid rotate policy
 }
 } // namespace
 } // namespace Rosen

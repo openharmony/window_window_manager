@@ -226,6 +226,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
             return HandleGetRouterStackInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID):
+            return HandleUpdateWindowLayoutById(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -570,6 +572,24 @@ int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParce
         return ERR_INVALID_DATA;
     }
     WSError errCode = NotifyLayoutFinishAfterWindowModeChange(static_cast<WindowMode>(mode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t windowId = 0;
+    int32_t updateMode = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(updateMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

@@ -147,11 +147,13 @@ public:
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WSError GetCrossAxisState(CrossAxisState& state) override;
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
 
     /*
      * PC Fold Screen
      */
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isWaterfallMode) override;
 
     /*
      * PC Window
@@ -195,6 +197,11 @@ public:
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WMError NotifyDisableDelegatorChange() override;
+
+    /**
+     * window animation
+     */
+    WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

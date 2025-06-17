@@ -59,6 +59,7 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
+    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
 
     /*
      * Window Hierarchy
@@ -255,8 +256,9 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     float GetCustomDensity() const override;
-    WMError SetCustomDensity(float density) override;
+    WMError SetCustomDensity(float density, bool applyToSubWindow) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override;
     WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*
@@ -392,6 +394,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
 
     /*
      * PC Window Layout

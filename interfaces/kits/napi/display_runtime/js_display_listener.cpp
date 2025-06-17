@@ -140,7 +140,7 @@ void JsDisplayListener::OnCreate(DisplayId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnCreate");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -173,7 +173,7 @@ void JsDisplayListener::OnDestroy(DisplayId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnDestroy");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OFailed to SendEvent.");
         }
@@ -206,7 +206,7 @@ void JsDisplayListener::OnChange(DisplayId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -239,7 +239,7 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnPrivateWindow");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -272,7 +272,7 @@ void JsDisplayListener::OnFoldStatusChanged(FoldStatus foldStatus)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnFoldStatusChanged");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -304,7 +304,7 @@ void JsDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnFoldAngleChanged");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -336,7 +336,7 @@ void JsDisplayListener::OnCaptureStatusChanged(bool isCapture)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnCaptureStatusChanged");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -369,7 +369,7 @@ void JsDisplayListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnDisplayModeChanged");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -402,7 +402,7 @@ void JsDisplayListener::OnAvailableAreaChanged(DMRect area)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnAvailableAreaChanged");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }

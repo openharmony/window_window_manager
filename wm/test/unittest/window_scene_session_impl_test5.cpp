@@ -313,6 +313,27 @@ HWTEST_F(WindowSceneSessionImplTest5, MoveWindowToGlobal01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestDefaultDisplayId
+ * @tc.desc: test function: SetDefaultDisplayIdIfNee
+ * @tc.desc: test function: SetIsFollowParentWindowDisplayId
+ * @tc.desc: test function: IsFollowParentWindowDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, TestDefaultDisplayId, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetDisplayId(DISPLAY_ID_INVALID);
+    window->SetDefaultDisplayIdIfNeed();
+    auto ret = window->property_->IsFollowParentWindowDisplayId();
+    EXPECT_EQ(true, ret);
+
+    window->property_->SetIsFollowParentWindowDisplayId(false);
+    ret = window->property_->IsFollowParentWindowDisplayId();
+    EXPECT_EQ(false, ret);
+}
+
+/**
  * @tc.name: SetCustomDensity01
  * @tc.desc: SetCustomDensity
  * @tc.type: FUNC
@@ -322,7 +343,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     float density = 0.4f;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density));
+    bool applyToSubWindow = false;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density, applyToSubWindow));
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -332,16 +354,17 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density, applyToSubWindow));
 
     density = 1.5f;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density, applyToSubWindow));
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
-    ASSERT_EQ(density, window->customDensity_);
-    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+    EXPECT_EQ(density, window->customDensity_);
+    applyToSubWindow = true;
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
 }
 
 /**
@@ -400,7 +423,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetCustomDensity01, TestSize.Level1)
     window->property_->SetWindowName("SetCustomDensity01");
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetCustomDensity());
 }
 
@@ -421,7 +444,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetMainWindowCustomDensity01, TestSize.Lev
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     float density = 1.5f;
-    window->SetCustomDensity(density);
+    window->SetCustomDensity(density, false);
     EXPECT_EQ(density, window->GetMainWindowCustomDensity());
 }
 
@@ -446,6 +469,31 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, TestSize.Level1)
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetWindowDensityInfo(densityInfo));
+}
+
+/**
+ * @tc.name: IsMainWindowFullScreenAcrossDisplays01
+ * @tc.desc: IsMainWindowFullScreenAcrossDisplays
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    bool isAcrossDisplays = false;
+    window->hostSession_ = nullptr;
+    auto ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1869,7 +1917,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn01, Function 
 
 /**
  * @tc.name: SetFrameRectForParticalZoomIn02
- * @tc.desc: Test SetFrameRectForParticalZoomIn when surfaceNode is nullptr
+ * @tc.desc: Test SetFrameRectForParticalZoomIn when window session is invalid
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function | SmallTest | Level2)
@@ -1879,63 +1927,41 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function 
     option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
-    window->surfaceNode_ = nullptr;
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
-}
 
-/**
- * @tc.name: SetFrameRectForParticalZoomIn03
- * @tc.desc: Test SetFrameRectForParticalZoomIn when display is invalid
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn03");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    // default displayId is -1 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, window->SetFrameRectForParticalZoomIn(frameRect));
-}
-
-/**
- * @tc.name: SetFrameRectForParticalZoomIn04
- * @tc.desc: SetFrameRectForParticalZoomIn when parameter frameRect is invalid
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn04, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn04");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { -1, 10, 10, 10 }; // -1 is invalid frame rect posX, 10 is valid frame rect param
-    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetFrameRectForParticalZoomIn(frameRect));
-}
-
-/**
- * @tc.name: SetFrameRectForParticalZoomIn05
- * @tc.desc: SetFrameRectForParticalZoomIn
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn05, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    EXPECT_NE(nullptr, window->surfaceNode_);
-    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0)); // 0 is valid display id
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetFrameRectForParticalZoomIn02";
+    sessionInfo.abilityName_ = "SetFrameRectForParticalZoomIn02";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 100; // 100 is persistent id
+    window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.desc: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateEnableDragWhenSwitchMultiWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hasSetEnableDrag_.store(true);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
+
+    window->hasSetEnableDrag_.store(false);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
 }
 }
 } // namespace Rosen

@@ -60,6 +60,18 @@ HWTEST_F(ScreenManagerLiteTest, GetScreenInfoById, TestSize.Level1)
     ret = sml_.GetScreenInfoById(0);
     ASSERT_NE(ret, nullptr);
 }
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerLiteTest, GetPhysicalScreenIds, TestSize.Level1)
+{
+    std::vector<ScreenId> screenIds;
+    auto ret = sml_.GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

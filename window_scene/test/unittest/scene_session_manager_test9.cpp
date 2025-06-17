@@ -61,10 +61,6 @@ bool TraverseFuncTest(const sptr<SceneSession>& session)
     return true;
 }
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 void SceneSessionManagerTest9::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -1501,6 +1497,12 @@ HWTEST_F(SceneSessionManagerTest9, UpdateSpecificSessionClientDisplayId01, TestS
     EXPECT_EQ(0, property->GetDisplayId());
 
     property->SetDisplayId(999);
+    displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
+    EXPECT_EQ(999, displayId);
+    EXPECT_EQ(0, property->GetDisplayId());
+
+    property->SetDisplayId(999);
+    property->SetIsFollowParentWindowDisplayId(true);
     displayId = ssm_->UpdateSpecificSessionClientDisplayId(property);
     EXPECT_EQ(0, displayId);
     EXPECT_EQ(0, property->GetDisplayId());

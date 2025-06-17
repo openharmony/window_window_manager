@@ -1152,7 +1152,7 @@ public:
      *
      * @param sourceWindowId Window id which the pointer event shift from
      * @param targetWindowId Window id which the pointer event shift to
-     * @param fingerId finger id of the event to be shift 
+     * @param fingerId finger id of the event to be shift
      * @return WM_OK means shift window pointer event success, others means failed.
      */
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);

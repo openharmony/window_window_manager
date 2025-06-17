@@ -1976,7 +1976,7 @@ napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo)
     if (!shadowsInfo.hasRadiusValue_ && !shadowsInfo.hasColorValue_ && !shadowsInfo.hasOffsetXValue_ &&
         !shadowsInfo.hasOffsetYValue_) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Obeject is undefined!");
-        return NapiGetUndefined(env);   
+        return NapiGetUndefined(env);
     }
     return objValue;
 }
@@ -2138,7 +2138,7 @@ napi_value KeyboardViewModeInit(napi_env env)
     return objValue;
 }
 
-napi_value KeyboardFlowlightModeInit(napi_env env)
+napi_value KeyboardFlowLightModeInit(napi_env env)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
     if (env == nullptr) {
@@ -2147,17 +2147,17 @@ napi_value KeyboardFlowlightModeInit(napi_env env)
     }
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
+    napi_status status = napi_create_object(env, &objValue);
+    if (status != napi_ok || objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
         return nullptr;
     }
-    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardFlowLightMode::NONE)));
-    napi_set_named_property(env, objValue, "BACKGROUND_FLOW_LIGHT", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT)));
-    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardFlowLightMode::END)));
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "NONE", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardFlowLightMode::NONE))), "NONE set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "BACKGROUND_FLOW_LIGHT", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT))), "BACKGROUND_FLOW_LIGHT set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "END", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardFlowLightMode::END))), "END set failed");
     return objValue;
 }
 
@@ -2170,17 +2170,17 @@ napi_value KeyboardGradientModeInit(napi_env env)
     }
 
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
+    napi_status status = napi_create_object(env, &objValue);
+    if (status != napi_ok || objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
         return nullptr;
     }
-    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardGradientMode::NONE)));
-    napi_set_named_property(env, objValue, "LINEAR_GRADIENT", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardGradientMode::LINEAR_GRADIENT)));
-    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
-        static_cast<uint32_t>(KeyboardGradientMode::END)));
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "NONE", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardGradientMode::NONE))), "NONE set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "LINEAR_GRADIENT", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardGradientMode::LINEAR_GRADIENT))), "LINEAR_GRADIENT set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "END", CreateJsValue(env, \
+        static_cast<uint32_t>(KeyboardGradientMode::END))), "END set failed");
     return objValue;
 }
 
@@ -2189,14 +2189,14 @@ napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffe
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
-    napi_set_named_property(env, objValue, "viewMode", CreateJsValue(env,
-        static_cast<uint32_t>(effectOption.viewMode_)));
-    napi_set_named_property(env, objValue, "flowLightMode", CreateJsValue(env,
-        static_cast<uint32_t>(effectOption.flowLightMode_)));
-    napi_set_named_property(env, objValue, "gradientMode", CreateJsValue(env,
-        static_cast<uint32_t>(effectOption.gradientMode_)));
-    napi_set_named_property(env, objValue, "blurHeight", CreateJsValue(env,
-        effectOption.blurHeight_));
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "viewMode", CreateJsValue(env, \
+        static_cast<uint32_t>(effectOption.viewMode_))), "viewMode set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "flowLightMode", CreateJsValue(env, \
+        static_cast<uint32_t>(effectOption.flowLightMode_))), "flowLightMode set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "gradientMode", CreateJsValue(env, \
+        static_cast<uint32_t>(effectOption.gradientMode_))), "gradientMode set failed");
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "blurHeight", CreateJsValue(env, \
+        effectOption.blurHeight_)), "blurHeight set failed");
     return objValue;
 }
 
@@ -2258,6 +2258,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_DYNAMIC", JsSessionType::TYPE_DYNAMIC);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
+    SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
     return objValue;
 }
 
@@ -2417,7 +2418,7 @@ void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string trace
         handler_->PostTask(std::move(task), "wms:" + traceInfo, delayTime,
             OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE);
     } else {
-        napi_send_event(env_, task, napi_eprio_immediate);
+        napi_send_event(env_, task, napi_eprio_immediate, traceInfo.c_str());
     }
 }
 

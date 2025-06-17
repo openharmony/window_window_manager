@@ -2194,6 +2194,18 @@ HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenshotCaptureFailes, Tes
         DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: GetPrimaryDisplaySystemDpi
+ * @tc.desc: Test GetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySystemDpi, TestSize.Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    float dpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
+    EXPECT_EQ(dpi, displayInfo->GetDensityInCurResolution());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

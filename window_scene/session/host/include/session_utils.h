@@ -80,6 +80,11 @@ inline std::string GetBundleNameBySessionName(const std::string& name)
     size_t pos = name.find(SESSION_NAME_SEPARATOR);
     return pos != std::string::npos? name.substr(len, pos - 1) : name.substr(len);
 }
+
+inline std::string GetAppLockKey(const std::string& bundleName, const int32_t appIndex)
+{
+    return bundleName + "#" + std::to_string(appIndex);
+}
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H

@@ -95,6 +95,7 @@ public:
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
+        TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID,
         TRANS_ID_CREATE_NEW_INSTANCE_KEY,
         TRANS_ID_GET_ROUTER_STACK_INFO,
         TRANS_ID_REMOVE_INSTANCE_KEY,
@@ -103,7 +104,13 @@ public:
         TRANS_ID_UPDATE_KIOSK_APP_LIST,
         TRANS_ID_ENTER_KIOSK_MODE,
         TRANS_ID_EXIT_KIOSK_MODE,
+        TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID,
     };
+
+    /*
+     * Window Layout
+     */
+    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
 
     /*
      * Window Lifecycle
@@ -271,6 +278,22 @@ public:
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
      */
     virtual WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) = 0;
+
+    /**
+     * @brief pending session to background
+     *
+     * This function is used to request session to background by persistentid
+     *
+     * @caller SA or SystemApp
+     * @permission application requires ohos.permission.MANAGE_MISSIONS permission and
+     * SA permission or SystemApp permission
+     *
+     * @param persistentId the session of persistentId
+     * @param shouldBackToCaller should back to caller
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+        bool shouldBackToCaller = true) { return WSError::WS_OK; };
 
     /**
      * @brief Create a new instanceKey of a specific bundle

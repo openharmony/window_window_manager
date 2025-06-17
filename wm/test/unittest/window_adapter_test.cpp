@@ -276,12 +276,12 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     int32_t persistentId = 1;
     int32_t ret = 0;
     auto testFunc = [&ret] {
-        ret = 1;
+        ret += 1;
         return WMError::WM_DO_NOTHING;
     };
 
     auto testFunc2 = [&ret] {
-        ret = 2;
+        ret += 1;
         return WMError::WM_OK;
     };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
@@ -674,8 +674,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    windowAdapter.GetWindowStyleType(windowStyleType);
-    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowStyleType(windowStyleType));
 }
 
 /**

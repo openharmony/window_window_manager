@@ -297,7 +297,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEventInner, TestSize.Level1)
     session->specificCallback_->onSessionTouchOutside_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
 
-    NotifySessionTouchOutsideCallback func = [](int32_t persistentId) { return; };
+    NotifySessionTouchOutsideCallback func = [](int32_t persistentId, DisplayId displayId) { return; };
     session->specificCallback_->onSessionTouchOutside_ = func;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEventInner(pointerEvent, false));
     pointerEvent->SetPointerAction(2);
@@ -1421,7 +1421,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateSetBrightness02, TestSize.Level1)
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS;
     auto res = session->HandleActionUpdateSetBrightness(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-} 
+}
 
 /**
  * @tc.name: HandleActionUpdateMaximizeState

@@ -139,7 +139,12 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
 WMError Window::GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
     WindowType parentWindowType, WindowType& windowType)
 {
-    return WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(parentId, windowName, parentWindowType, windowType);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(parentId, windowName,
+            parentWindowType, windowType);
+    } else {
+        return WindowImpl::GetWindowTypeForArkUI(parentWindowType, windowType);
+    }
 }
 
 sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,

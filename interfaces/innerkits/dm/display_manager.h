@@ -861,6 +861,13 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
 
+    /**
+     * @brief Get primary display system dpi.
+     *
+     * @return primary display system dpi.
+     */
+    float GetPrimaryDisplaySystemDpi() const;
+
 private:
     DisplayManager();
     ~DisplayManager();

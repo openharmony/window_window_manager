@@ -69,6 +69,7 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
         const WindowAnimationInfo& animationInfo) override;
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
     WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
@@ -107,16 +108,18 @@ private:
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
     bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
     void PostKeyboardAnimationSyncTimeoutTask();
-    void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
-        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) override;
+    void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
+        bool needCheckRSTransaction) override;
     void NotifyOccupiedAreaChanged(const sptr<SceneSession>& callingSession,
         sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo, bool needRecalculateAvoidAreas,
         std::shared_ptr<RSTransaction> rsTransaction);
-    bool RaiseCallingSession(const sptr<SceneSession>& callingSession, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo,
-        const bool needCheckVisible);
+    bool RaiseCallingSession(const sptr<SceneSession>& callingSession, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
+    bool stateChanged_ = false;
+    bool GetStateChanged() override { return stateChanged_; }
+    void SetStateChanged(bool stateChanged) override { stateChanged_ = stateChanged; }
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

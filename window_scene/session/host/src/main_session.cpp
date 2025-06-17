@@ -386,7 +386,7 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
 void MainSession::SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush)
 {
     for (const auto& subSession : GetSubSession()) {
-        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
             WSRect subRect = subSession->GetSessionRect();
             subSession->CalcSubWindowRectByAnchor(parentRect, subRect);
             subSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
@@ -411,7 +411,7 @@ void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason rea
     const sptr<ScreenSession>& screenSession)
 {
     for (const auto& subSession : GetSubSession()) {
-        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
             subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     }
@@ -561,7 +561,7 @@ void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionSt
         default: {
             info.sessionState = RecentSessionState::END;
             break;
-        } 
+        }
     }
 }
 } // namespace OHOS::Rosen

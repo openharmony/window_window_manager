@@ -457,6 +457,8 @@ public:
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
+    virtual WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) { return WMError::WM_OK; }
+    virtual WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 
     /**
@@ -499,6 +501,14 @@ public:
     * @return Returns WSError::WS_OK if called success, otherwise failed.
     */
     virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the frameRect in a partial zoom-in scene.
+     *
+     * @param frameRect The original rect of frameBuffer before partial zoom-in.
+     * @return WSError::WS_OK means set success, otherwise failed.
+     */
+    virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

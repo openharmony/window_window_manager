@@ -608,6 +608,14 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     }
 }
 
+WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage,
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability, 1);
+}
+
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -630,8 +638,60 @@ WMError WindowImpl::SetUIContentByAbc(
         BackupAndRestoreType::NONE, ability);
 }
 
-WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
+std::unique_ptr<Ace::UIContent> WindowImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+Ace::UIContentErrorCode WindowImpl::UIContentInitByName(Ace::UIContent* uiContent,
+    const std::string& contentInfo, void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->InitializeByName(this, contentInfo, (napi_value)storage);
+    }
+}
+
+template<typename T>
+Ace::UIContentErrorCode WindowImpl::UIContentInit(Ace::UIContent* uiContent, T contentInfo,
+    void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->Initialize(this, contentInfo, (napi_value)storage);
+    }
+}
+template<typename T>
+Ace::UIContentErrorCode WindowImpl::UIContentInit(Ace::UIContent* uiContent, T contentInfo,
+    void* storage, const std::string& contentName, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, contentName);
+    } else {
+        return uiContent->Initialize(this, contentInfo, (napi_value)storage, contentName);
+    }
+}
+
+Ace::UIContentErrorCode WindowImpl::UIContentRestore(Ace::UIContent* uiContent, const std::string& contentInfo,
+    void* storage, Ace::ContentInfoType infoType, int isAni)
+{
+    if (isAni) {
+        return uiContent->Restore(this, contentInfo, (ani_object)storage, infoType);
+    } else {
+        return uiContent->Restore(this, contentInfo, (napi_value)storage, infoType);
+    }
+}
+
+
+WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability, int isAni)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "loadContent");
     if (!IsWindowValid()) {
@@ -642,12 +702,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
     if (uiContent_) {
         uiContent_->Destroy();
     }
-    std::unique_ptr<Ace::UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = Ace::UIContent::Create(ability);
-    } else {
-        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-    }
+    std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
     if (uiContent == nullptr) {
         WLOGFE("fail to NapiSetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
@@ -659,23 +714,22 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         case WindowSetUIContentType::DEFAULT: {
             auto routerStack = GetRestoredRouterStack();
             auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
-            if (!routerStack.empty() &&
-                uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+            if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, storage, type,
+                isAni) == Ace::UIContentErrorCode::NO_ERRORS) {
                 TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                 break;
             }
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
-            aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_ABC:
-            auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage, contentInfo);
+            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, contentInfo, isAni);
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -1479,6 +1533,22 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     return ret;
 }
 
+WMError WindowImpl::GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType)
+{
+    if (parentWindowType == WindowType::WINDOW_TYPE_SCENE_BOARD ||
+        parentWindowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    } else if (WindowHelper::IsUIExtensionWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (WindowHelper::IsSystemWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
+    } else {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "parentWindowType:%{public}d, windowType:%{public}d", parentWindowType, windowType);
+    return WMError::WM_OK;
+}
+
 bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (uiContent_ != nullptr) {
@@ -1774,11 +1844,25 @@ void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
     }
 }
 
+void WindowImpl::SetShowWithOptions(bool showWithOptions)
+{
+    showWithOptions_ = showWithOptions;
+}
+
+bool WindowImpl::IsShowWithOptions() const
+{
+    return showWithOptions_;
+}
+
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetWindowMode(), reason, withAnimation);
+    if (IsShowWithOptions()) {
+        SetShowWithOptions(false);
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }

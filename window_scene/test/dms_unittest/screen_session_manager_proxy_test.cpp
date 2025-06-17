@@ -25,6 +25,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "zidl/screen_session_manager_proxy.h"
+#include "mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1776,6 +1777,60 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | S
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
     }
+}
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level1)
+{
+    DisplayId displayId = 0;
+    DMRect displayArea = DMRect::NONE();
+    ScreenId screenId = 0;
+    DMRect screenArea = DMRect::NONE();
+    float dpi = 2.2f;
+    auto ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetPhysicalScreenIds, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds;
+    sptr<IRemoteObject> impl;
+    auto ret = screenSessionManagerProxy->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_, nullptr);
+        impl = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        ASSERT_NE(SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_, nullptr);
+        impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+
+    screenSessionManagerProxy = new (std::nothrow) ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = screenSessionManagerProxy->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(DMRect::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = screenSessionManagerProxy->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(DMRect::DM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    ret = screenSessionManagerProxy->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(DMRect::DM_OK, ret);
 }
 }
 }

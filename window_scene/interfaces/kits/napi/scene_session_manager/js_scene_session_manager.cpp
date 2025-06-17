@@ -130,7 +130,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "SceneType", SceneTypeInit(env));
     napi_set_named_property(env, exportObj, "KeyboardGravity", KeyboardGravityInit(env));
     napi_set_named_property(env, exportObj, "KeyboardViewMode", KeyboardViewModeInit(env));
-    napi_set_named_property(env, exportObj, "KeyboardFlowLightMode", KeyboardFlowlightModeInit(env));
+    napi_set_named_property(env, exportObj, "KeyboardFlowLightMode", KeyboardFlowLightModeInit(env));
     napi_set_named_property(env, exportObj, "KeyboardGradientMode", KeyboardGradientModeInit(env));
     napi_set_named_property(env, exportObj, "SessionSizeChangeReason", CreateJsSessionSizeChangeReason(env));
     napi_set_named_property(env, exportObj, "RSUIFirstSwitch", CreateJsRSUIFirstSwitch(env));
@@ -552,15 +552,16 @@ void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
     taskScheduler_->PostMainThreadTask(task, where);
 }
 
-void JsSceneSessionManager::OnStartPiPFailed()
+void JsSceneSessionManager::OnStartPiPFailed(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
-    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
+    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_, displayId] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
             return;
         }
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
@@ -735,7 +736,7 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 {
     rootScene_->RegisterUpdateRootSceneRectCallback([](const Rect& rect) {
         if (auto rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession()) {
-            WSRect rootSceneRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+            WSRect rootSceneRect = { 0, 0, rect.width_, rect.height_ };
             rootSceneSession->SetRootSessionRect(rootSceneRect);
         }
     });
@@ -764,9 +765,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 
 void JsSceneSessionManager::ProcessStartPiPFailedRegister()
 {
-    SceneSessionManager::GetInstance().SetStartPiPFailedListener([this] {
+    SceneSessionManager::GetInstance().SetStartPiPFailedListener([this](DisplayId displayId) {
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
-        this->OnStartPiPFailed();
+        this->OnStartPiPFailed(displayId);
     });
 }
 

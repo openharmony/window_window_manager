@@ -82,7 +82,7 @@ bool SceneSessionManagerTest3::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest3::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
+void WindowChangedFuncTest3(int32_t persistentId, WindowUpdateType type) {}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable, const std::string& bundleName) {}
 
@@ -796,8 +796,37 @@ HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside, TestSize.Level1)
 {
     int ret = 0;
-    ssm_->NotifySessionTouchOutside(0);
+    ssm_->NotifySessionTouchOutside(0, 0);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: IsSameDisplayGroupId
+ * @tc.desc: test IsSameDisplayGroupId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId01, TestSize.Level1)
+{
+    bool result = ssm_->IsSameDisplayGroupId(nullptr, 0);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSameDisplayGroupId
+ * @tc.desc: test IsSameDisplayGroupId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsSameDisplayGroupId02";
+    info.bundleName_ = "IsSameDisplayGroupId02";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(property);
+    bool result = ssm_->IsSameDisplayGroupId(sceneSession, 0);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -1392,7 +1421,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdateWindowMode, TestSize.Level1)
     WSError result = ssm_->UpdateWindowMode(persistentId, windowMode);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
     WindowChangedFunc func = [](int32_t persistentId, WindowUpdateType type) {
-        OHOS::Rosen::WindowChangedFuncTest(persistentId, type);
+        OHOS::Rosen::WindowChangedFuncTest3(persistentId, type);
     };
     ssm_->RegisterWindowChanged(func);
 }

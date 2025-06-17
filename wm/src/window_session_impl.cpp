@@ -145,11 +145,15 @@ std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
     WindowSessionImpl::systemDensityChangeListeners_;
+std::recursive_mutex WindowSessionImpl::acrossDisplaysChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
+    WindowSessionImpl::acrossDisplaysChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
-std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::secureLimitChangeListeners_;
+std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
+    WindowSessionImpl::secureLimitChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, sptr<IPreferredOrientationChangeListener>> WindowSessionImpl::preferredOrientationChangeListener_;
@@ -599,6 +603,7 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
+        property_->SetIsFollowParentWindowDisplayId(true);
         TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
@@ -1802,12 +1807,20 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     // compatible mode adapt to proportional scale, will show its button
-    bool showScaleBtn = property_->IsAdaptToProportionalScale();
+    bool showScaleBtn = property_->IsAdaptToProportionalScale() && !property_->GetIsAtomicService();
     uiContent->OnContainerModalEvent(SCB_COMPATIBLE_MAXIMIZE_VISIBILITY,
         !isLayoutFullScreen && showScaleBtn  ? "true" : "false");
     // compatible mode adapt to back, will show its button
     bool isAdaptToBackButton = property_->IsAdaptToBackButton();
     uiContent->OnContainerModalEvent(SCB_BACK_VISIBILITY, isAdaptToBackButton ? "true" : "false");
+}
+
+WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, env, storage,
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability, 1u);
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -1844,13 +1857,53 @@ void WindowSessionImpl::DestroyExistUIContent()
     }
 }
 
-WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+std::unique_ptr<Ace::UIContent> WindowSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(GetContext().get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+Ace::UIContentErrorCode WindowSessionImpl::UIContentInitByName(Ace::UIContent* uiContent,
+    const std::string& contentInfo, void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->InitializeByName(this, contentInfo, (napi_value)storage);
+    }
+}
+
+template<typename T>
+Ace::UIContentErrorCode WindowSessionImpl::UIContentInit(Ace::UIContent* uiContent, T contentInfo,
+    void* storage, int isAni)
+{
+    if (isAni) {
+        return uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage);
+    } else {
+        return uiContent->Initialize(this, contentInfo, (napi_value)storage);
+    }
+}
+
+Ace::UIContentErrorCode WindowSessionImpl::UIContentRestore(Ace::UIContent* uiContent, const std::string& contentInfo,
+    void* storage, Ace::ContentInfoType infoType, int isAni)
+{
+    if (isAni) {
+        return uiContent->Restore(this, contentInfo, (ani_object)storage, infoType);
+    } else {
+        return uiContent->Restore(this, contentInfo, (napi_value)storage, infoType);
+    }
+}
+
+WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* env, void* storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-    OHOS::Ace::UIContentErrorCode& aceRet)
+    OHOS::Ace::UIContentErrorCode& aceRet, int isAni)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
-        Ace::UIContent::Create(GetContext().get(), reinterpret_cast<NativeEngine*>(env));
+    std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1865,8 +1918,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             } else {
                 auto routerStack = GetRestoredRouterStack();
                 auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
-                if (!routerStack.empty() &&
-                    uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, storage, type,
+                    isAni) == Ace::UIContentErrorCode::NO_ERRORS) {
                     TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                     break;
                 }
@@ -1876,24 +1929,23 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
                 uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isColdStart_);
                 intentParam_ = "";
             }
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
-            aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_SHARED:
             TLOGI(WmsLogTag::WMS_LIFE, "By shared, restoreNavDestinationInfo, id:%{public}d", GetPersistentId());
             uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             navDestinationInfo_ = "";
             break;
         case WindowSetUIContentType::BY_ABC:
-            auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage, contentInfo);
+            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, isAni);
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -2019,13 +2071,15 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
         parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
     }
     bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
-    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, parallelType: %{public}d, "
-        "isRouter: %{public}u", GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
+    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
+        "parallelType: %{public}d, isRouter: %{public}u",
+        GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    int isAni)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, state:%{public}u, persistentId: %{public}d",
         contentInfo.c_str(), state_, GetPersistentId());
@@ -2036,7 +2090,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet);
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
+        isAni);
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
@@ -2867,6 +2922,7 @@ WMError WindowSessionImpl::EnableDrag(bool enableDrag)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetDragEnabled(enableDrag);
+    hasSetEnableDrag_.store(true);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WMError errorCode = hostSession->SetSystemWindowEnableDrag(enableDrag);
@@ -3482,14 +3538,16 @@ EnableIfSame<T, IExtensionSecureLimitChangeListener,
     return secureLimitChangeListeners;
 }
 
-WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::RegisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
     return RegisterListener(secureLimitChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(const sptr<IExtensionSecureLimitChangeListener>& listener)
+WMError WindowSessionImpl::UnregisterExtensionSecureLimitChangeListener(
+    const sptr<IExtensionSecureLimitChangeListener>& listener)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
@@ -3785,6 +3843,15 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        if (acrossDisplaysChangeListeners_.find(persistentId) != acrossDisplaysChangeListeners_.end() &&
+            !acrossDisplaysChangeListeners_[persistentId].empty()) {
+            if (auto hostSession = GetHostSession()) {
+                hostSession->UpdateAcrossDisplaysChangeRegistered(true);
+            }
+        }
+    }
 }
 
 template<typename T>
@@ -3888,6 +3955,24 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
         listeners.push_back(listener);
     }
     return listeners;
+}
+
+WMError WindowSessionImpl::NotifyAcrossDisplaysChange(bool isAcrossDisplays)
+{
+    static bool isFirstNotify = true;
+    if (!isFirstNotify && isAcrossDisplays_ == isAcrossDisplays) {
+        return WMError::WM_DO_NOTHING;
+    }
+    std::lock_guard<std::recursive_mutex> lock(acrossDisplaysChangeListenerMutex_);
+    const auto& acrossMultiDisplayChangeListeners = GetListeners<IAcrossDisplaysChangeListener>();
+    for (const auto& listener : acrossMultiDisplayChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnAcrossDisplaysChanged(isAcrossDisplays);
+        }
+    }
+    isFirstNotify = false;
+    isAcrossDisplays_ = isAcrossDisplays;
+    return WMError::WM_OK;
 }
 
 void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
@@ -4078,6 +4163,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
         ClearUselessListeners(systemDensityChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ClearUselessListeners(acrossDisplaysChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -4825,6 +4914,7 @@ EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventList
     return screenshotAppEventListeners_[GetPersistentId()];
 }
 
+
 WSError WindowSessionImpl::NotifyDestroy()
 {
     if (WindowHelper::IsDialogWindow(property_->GetWindowType())) {
@@ -5328,6 +5418,78 @@ WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDe
     return UnregisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
+    const IAcrossDisplaysChangeListenerSptr& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ret = RegisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (acrossDisplaysChangeListeners_[persistentId].size() == 1) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateAcrossDisplaysChangeRegistered(true);
+    }
+    if (ret != WMError::WM_OK) {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        UnregisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnRegisterAcrossDisplaysChangeListener(
+    const IAcrossDisplaysChangeListenerSptr& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto persistentId = GetPersistentId();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", persistentId);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = WMError::WM_OK;
+    bool isUpdate = false;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        ret = UnregisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        if (acrossDisplaysChangeListeners_[persistentId].empty()) {
+            isUpdate = true;
+        }
+    }
+    auto hostSession = GetHostSession();
+    if (isUpdate && hostSession != nullptr) {
+        ret = hostSession->UpdateAcrossDisplaysChangeRegistered(false);
+    }
+    if (ret != WMError::WM_OK) {
+        std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
+        RegisterListener(acrossDisplaysChangeListeners_[persistentId], listener);
+    }
+    return ret;
+}
+
 WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
 {
     WLOGFD("in");
@@ -5421,6 +5583,12 @@ EnableIfSame<T, ISystemDensityChangeListener,
     std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return systemDensityChangeListeners_[GetPersistentId()];
+}
+
+template<typename T>
+EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return acrossDisplaysChangeListeners_[GetPersistentId()];
 }
 
 template<typename T>
@@ -6063,17 +6231,17 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingWindowRect,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-            ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, callingWindowRect: %{public}s",
-            rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
-            info->rect_.height_, callingWindowRect.ToString().c_str());
-    }
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
         return;
     }
     auto task = [weak = wptr(this), info, rsTransaction, callingWindowRect, avoidAreas]() {
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
+                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
+                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
+        }
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");

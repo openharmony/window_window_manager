@@ -71,10 +71,6 @@ bool SceneSessionManagerTest4::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 void SceneSessionManagerTest4::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -693,8 +689,10 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     sceneSession->sessionInfo_.screenId_ = 6;
+    sceneSession->SetPropertyDirtyFlags(0);
     result = ssm_->UpdateSessionDisplayId(1, 2);
     EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
 }
 
 /**
@@ -730,7 +728,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 
     ssm_->screenshotAppEventListenerSessionSet_.insert(1);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
+    EXPECT_EQ(ret, WMError::WM_OK);
 
     SessionInfo info;
     info.abilityName_ = "NotifyScreenshotEvent";
@@ -740,16 +738,14 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
-    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 }

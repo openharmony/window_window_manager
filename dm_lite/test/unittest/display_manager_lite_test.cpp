@@ -722,7 +722,7 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, TestSize
 {
     sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
     auto ret = DisplayManagerLite::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener);
-    ASSERT_EQ(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
     listener.clear();
 }
 
@@ -746,6 +746,7 @@ HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus02, TestSize.Level1)
 {
     auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

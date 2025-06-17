@@ -84,10 +84,6 @@ bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 void SceneSessionManagerTest2::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
@@ -139,17 +135,53 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterWindowManagerAgent
+ * @tc.name: RegisterWindowManagerAgent01
  * @tc.desc: SceneSesionManager rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent01, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent02
+ * @tc.desc: SceneSesionManager rigister window manager agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent02, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: Register and unregister window property change agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    uint32_t interestInfo = static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(ssm_->observedFlags_, static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID));
+    EXPECT_EQ(ssm_->interestedFlags_, static_cast<uint32_t>(WindowInfoKey::WINDOW_ID));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
 }
 
 /**

@@ -65,6 +65,11 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
 
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    WMError NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni);
+    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
@@ -121,7 +126,7 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    bool IsFocused() const override;
+    bool IsComponentFocused() const override;
 
     /*
      * Gesture Back
@@ -201,8 +206,8 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false, int isAni = 0);
     void RegisterDataConsumer();
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);

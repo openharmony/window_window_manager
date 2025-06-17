@@ -53,6 +53,11 @@ public:
         const sptr<OccupiedAreaChangeInfo>& info));
 };
 
+class MockAcrossDisplaysChangeListener : public IAcrossDisplaysChangeListener {
+public:
+    MOCK_METHOD1(OnAvoidAreaChanged, void(bool isAcrossDisplays));
+};
+
 class MockTouchOutsideListener : public ITouchOutsideListener {
 public:
     MOCK_CONST_METHOD0(OnTouchOutside, void());

@@ -50,8 +50,9 @@ void DisplayManagerIpcServiceTest::SetUpTestCase()
         { 0, 0 }
     };
 
-    const char** perms = new const char*[1];
-    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    const char* perms[] = {
+        "ohos.permission.CAPTURE_SCREEN"
+    };
     CommonTestUtils::SetAceessTokenPermission("DisplayManagerIpcServiceTest", perms, 1);
 }
 

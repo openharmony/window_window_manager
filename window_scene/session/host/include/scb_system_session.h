@@ -40,6 +40,7 @@ public:
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
     /*
      * App Use Control
