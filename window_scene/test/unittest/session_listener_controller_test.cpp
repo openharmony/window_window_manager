@@ -48,6 +48,11 @@ public:
         isMissionDestroyed_ = true;
     }
 
+    void OnMissionMovedToBackground(int32_t missionId) override
+    {
+        isMissionBackground_ = true;
+    }
+
     void OnMissionSnapshotChanged(int32_t missionId) override
     {
         isMissionSnapshotChanged_ = true;
@@ -84,6 +89,11 @@ public:
     {
         return isMissionDestroyed_;
     }
+    
+    bool isMissionBackground() const
+    {
+        return isMissionBackground_;
+    }
 
     bool IsMissionSnapshotChanged() const
     {
@@ -118,6 +128,7 @@ private:
     bool isMissionIconUpdated_ = false;
     bool isMissionClosed_ = false;
     bool isMissionLabelUpdated_ = false;
+    bool isMissionBackground_ = false;
 };
 
 class SessionListenerControllerTest : public testing::Test {
@@ -227,6 +238,21 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, TestSize.Level1)
 
     slController->NotifySessionCreated(persistentId);
     EXPECT_EQ(persistentId, 1);
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionBackground, TestSize.Level1)
+{
+    int32_t persistentId = -1;
+    ASSERT_NE(slController, nullptr);
+    slController->NotifySessionBackground(persistentId);
+
+    persistentId = 1;
+    slController->NotifySessionBackground(persistentId);
 }
 
 /**
