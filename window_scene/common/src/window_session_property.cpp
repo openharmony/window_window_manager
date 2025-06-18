@@ -864,6 +864,19 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
     return shadowsInfo_;
 }
 
+
+void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState);
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    isUseControlState_ = isUseControlState;
+}
+
+bool WindowSessionProperty::GetUseControlStateFromProperty() const
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    return isUseControlState_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&

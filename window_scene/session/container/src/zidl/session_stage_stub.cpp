@@ -222,6 +222,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAUSED_STATUS):
             return HandleNotifyPausedStatus();
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_USE_CONTROL_STATUS):
+            return HandleNotifyAppUseControlStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
@@ -608,6 +610,14 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     WLOGFD("NotifyForegroundInteractiveStatus!");
     bool interactive = data.ReadBool();
     NotifyForegroundInteractiveStatus(interactive);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "called");
+    bool useControlState = data.ReadBool();
+    NotifyAppUseControlStatus(useControlState);
     return ERR_NONE;
 }
 

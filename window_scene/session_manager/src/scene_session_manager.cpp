@@ -3112,8 +3112,6 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
-        TLOGNI(WmsLogTag::WMS_LIFE, "Request background, Notify scene session id: %{public}d paused", persistentId);
-        sceneSession->UpdateLifecyclePausedInner();
         sceneSession->SetActive(false);
 
         if (isToDesktop) {
@@ -3365,8 +3363,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
-        TLOGNI(WmsLogTag::WMS_LIFE, "destruct session, Notify scene session id: %{public}d paused", persistentId);
-        sceneSession->UpdateLifecyclePausedInner();
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);

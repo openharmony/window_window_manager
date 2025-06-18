@@ -109,6 +109,24 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
 }
 
 /**
+ * @tc.name: HandleNotifyAppUseControlStatus
+ * @tc.desc: test function : HandleNotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyAppUseControlStatus, TestSize.Level1)
+ {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppUseControlStatus(data, reply));
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: NotifySessionForeground
  * @tc.desc: test function : NotifySessionForeground
  * @tc.type: FUNC

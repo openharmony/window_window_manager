@@ -969,6 +969,34 @@ void SessionStageProxy::NotifyForegroundInteractiveStatus(bool interactive)
     }
 }
 
+void SessionStageProxy::NotifyAppUseControlStatus(bool isUseControl)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteBool(isUseControl)) {
+        WLOGFE("Write isUseControl failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    int sendResult = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_USE_CONTROL_STATUS),
+        data, reply, option);
+    if (sendResult != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendResult);
+    }
+}
+
 void SessionStageProxy::NotifyLifecyclePausedStatus()
 {
     MessageParcel data;

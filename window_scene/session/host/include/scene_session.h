@@ -602,6 +602,9 @@ public:
     void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func);
     void SetIsUserRequestedExit(bool isUserRequestedExit);
     void SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& callback);
+    void UpdateLifecyclePausedInner();
+    void SetUseControlResult(bool isAppUseControl);
+    bool GetUseControlResult() const;
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -834,11 +837,6 @@ public:
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
 
-    /*
-     * Window LifeCycle
-     */
-    void UpdateLifecyclePausedInner();
-
     /**
      * Window Transition Animation For PC
      */
@@ -960,6 +958,8 @@ protected:
     /*
      * Window Lifecycle
      */
+    bool isAppUseControl_ = false;
+    mutable std::mutex appControlMutex_;
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;

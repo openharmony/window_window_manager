@@ -1120,6 +1120,37 @@ HWTEST_F(SceneSessionTest3, UpdateLifecyclePausedInner, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetUseControlStateToProperty
+ * @tc.desc: SetUseControlStateToProperty and GetUseControlStateFromProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetUseControlStateToProperty, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    bool isUseControl = true;
+    property->SetUseControlStateToProperty(isUseControl);
+    EXPECT_EQ(true, property->GetUseControlStateFromProperty());
+}
+
+/**
+ * @tc.name: SetUseControlResult
+ * @tc.desc: SetUseControlResult and GetUseControlResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetUseControlResult, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetUseControlResult";
+    info.bundleName_ = "SetUseControlResult";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    bool isUseControl = true;
+    session->SetUseControlResult(isUseControl);
+    EXPECT_EQ(true, session->GetUseControlResult());
+}
+
+/**
  * @tc.name: GetMaxSubWindowLevel
  * @tc.desc: GetMaxSubWindowLevel
  * @tc.type: FUNC

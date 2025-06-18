@@ -480,6 +480,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
+        reply.WriteBool(property->GetUseControlStateFromProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
