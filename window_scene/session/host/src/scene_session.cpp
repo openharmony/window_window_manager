@@ -9209,6 +9209,7 @@ WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect, i
         "screen component rotation: %{public}f", rotatePolicy, deviceRotation, screenComponentRotation);
     rotation = rotatePolicy != ROTATE_POLICY_SCREEN ? rotation :
         static_cast<uint32_t>(screenComponentRotation) % 360; // degree 360
+    AutoRSTransaction trans(GetRSUIContext(), true);
     Rect newRect = RecalculateFrameRect(frameRect, rotation, screenWidth, screenHeight);
     surfaceNode->SetRegionToBeMagnified({ newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ });
     return WSError::WS_OK;
