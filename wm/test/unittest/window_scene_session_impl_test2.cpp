@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <application_context.h>
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
@@ -463,6 +464,27 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level
     EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
     windowSceneSession->GetTopNavDestinationName(topNavDestName);
     EXPECT_EQ(topNavDestName, "test");
+}
+
+/**
+ * @tc.name: UpdateDefaultStatusBarColor01
+ * @tc.desc: test UpdateDefaultStatusBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateDefaultStatusBarColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDefaultStatusBarColor01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
+    ASSERT_NE(appContext, nullptr);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    configuration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "light");
+    appContext->SetConfiguration(configuration);
+    windowSceneSession->UpdateDefaultStatusBarColor();
+    configuration->AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP, "light");
+    windowSceneSession->UpdateDefaultStatusBarColor();
 }
 
 /**
