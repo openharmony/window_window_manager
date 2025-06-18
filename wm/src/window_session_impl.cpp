@@ -2515,9 +2515,6 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_DELAY_RAISE_STATE),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    } else {
-        TLOGE(WmsLogTag::WMS_FOCUS, "uiContent is null, windowId: %{public}u", GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
     }
     return WMError::WM_OK;
 }

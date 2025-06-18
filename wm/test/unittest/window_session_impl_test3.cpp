@@ -1367,9 +1367,6 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->uiContent_ = nullptr;
-    ret = window->SetWindowDelayRaiseEnabled(true);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ret = window->SetWindowDelayRaiseEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
