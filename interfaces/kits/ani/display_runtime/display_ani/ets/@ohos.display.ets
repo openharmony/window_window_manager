@@ -18,7 +18,7 @@ import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 import hdrCapability from '@ohos.graphics.hdrCapability';
 
 export default namespace display {
-const DISPLAY_ARRAY_LENGTH = 5;  
+
 loadLibrary('displayani_kit.z');
 
 export interface Rect {
@@ -105,6 +105,8 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
 
     readonly creaseRects: Array<Rect>;
 }
+
+const DISPLAY_ARRAY_LENGTH = 5;  
 
 export enum FoldDisplayMode {
 
