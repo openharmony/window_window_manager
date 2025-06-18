@@ -22,7 +22,6 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniEmbeddableWindowStage*> localObjs;
 } // namespace
