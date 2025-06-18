@@ -286,17 +286,21 @@ void JsWindowListener::AfterDestroyed()
 
 void JsWindowListener::AfterLifecycleForeground()
 {
-    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
-        WindowStageLifeCycleCallBack(WindowStageLifeCycleEventType::FOREGROUND);
-        state_ = WindowState::STATE_SHOWN;
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+            WindowStageLifeCycleCallBack(WindowStageLifeCycleEventType::FOREGROUND);
+            state_ = WindowState::STATE_SHOWN;
+        }
     }
 }
 
 void JsWindowListener::AfterLifecycleBackground()
 {
-    if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
-        WindowStageLifeCycleCallBack(WindowStageLifeCycleEventType::BACKGROUND);
-        state_ = WindowState::STATE_HIDDEN;
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+            WindowStageLifeCycleCallBack(WindowStageLifeCycleEventType::BACKGROUND);
+            state_ = WindowState::STATE_HIDDEN;
+        }
     }
 }
 

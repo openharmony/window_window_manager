@@ -520,6 +520,7 @@ public:
      * Window LifeCycle
      */
     void NotifyLifecyclePausedStatus() override;
+    void NotifyAppUseControlStatus(bool isUseControl) override;
     void NotifyAfterLifecycleForeground();
     void NotifyAfterLifecycleBackground();
     void NotifyAfterLifecycleResumed();
@@ -682,7 +683,9 @@ protected:
     /*
      * Window Lifecycle
      */
+    mutable std::mutex appUseControlMutex_;
     bool hasFirstNotifyInteractive_ = false;
+    bool isAppUseControl_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
     bool isInteractiveStateFlag_ = false;

@@ -109,6 +109,7 @@ public:
 
     // Window LifeCycle
     void NotifyLifecyclePausedStatus() override;
+    void NotifyAppUseControlStatus(bool isUseControl) override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
 
 private:

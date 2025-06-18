@@ -133,6 +133,28 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyLifecyclePausedStatus, TestSize.L
 }
 
 /**
+ * @tc.name: NotifyAppUseControlStatus
+ * @tc.desc: test function : NotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyAppUseControlStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    bool appControl = true;
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: NotifySessionBackground
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC

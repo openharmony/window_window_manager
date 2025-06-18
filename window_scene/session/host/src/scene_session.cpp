@@ -127,6 +127,18 @@ SceneSession::~SceneSession()
     }
 }
 
+void SceneSession::SetUseControlResult(bool isAppUseControl)
+{
+    std::lock_guard<std::mutex> lock(appControlMutex_);
+    isAppUseControl_ = isAppUseControl;
+}
+
+bool SceneSession::GetUseControlResult() const
+{
+    std::lock_guard<std::mutex> lock(appControlMutex_);
+    return isAppUseControl_;
+}
+
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -149,6 +161,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
+            property->SetUseControlStateToProperty(session->GetUseControlResult());
         }
         session->RetrieveStatusBarDefaultVisibility();
         auto ret = LOCK_GUARD_EXPR(SCENE_GUARD, session->Session::ConnectInner(
@@ -504,6 +517,8 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (state == SessionState::STATE_BACKGROUND) {
             return WSError::WS_OK;
         }
+        TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
+        session->UpdateLifecyclePausedInner();
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
@@ -619,6 +634,11 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
+        if (isMainWindow) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
+            session->UpdateLifecyclePausedInner();
         }
         if (isFromClient) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
@@ -1191,12 +1211,17 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
         if (allAppUseControlMap.find(key) == allAppUseControlMap.end()) {
             return;
         }
+        bool appUseControlResult = false;
         for (const auto& [type, info] : allAppUseControlMap[key]) {
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
                 key.c_str(), info.isNeedControl, info.isControlRecentOnly);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
+            if (info.isNeedControl && !info.isControlRecentOnly) {
+                appUseControlResult = (info.isNeedControl && !info.isControlRecentOnly);
+            }
         }
+        session->SetUseControlResult(appUseControlResult);
     }, __func__);
 }
 
@@ -1211,6 +1236,19 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
+            if (session->sessionState_ == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+                return;
+            }
+            bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
+            session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
+            if (isAppUseControl) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "begin call pause");
+                session->NotifyForegroundInteractiveStatus(false);
+            } else if (!controlInfo.isNeedControl) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "begin call resume");
+                session->NotifyForegroundInteractiveStatus(true);
+            }
         }
     }, __func__);
 }

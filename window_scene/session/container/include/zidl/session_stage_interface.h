@@ -118,6 +118,7 @@ public:
     virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) = 0;
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
+    virtual void NotifyAppUseControlStatus(bool isUseControl) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;

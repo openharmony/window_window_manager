@@ -249,6 +249,12 @@ public:
     ShadowsInfo GetWindowShadows() const;
 
     /*
+     * Window Property
+     */
+    void SetUseControlStateToProperty(bool isUseControlState);
+    bool GetUseControlStateFromProperty() const;
+
+    /*
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -534,6 +540,12 @@ private:
     bool focusable_ { true };
     bool focusableOnShow_ { true };
     bool isExclusivelyHighlighted_ { true };
+    
+    /*
+     * Window Focus
+     */ 
+    mutable std::mutex lifecycleUseControlMutex_;
+    bool isUseControlState_ = false;
     
     /*
      * Window Property
