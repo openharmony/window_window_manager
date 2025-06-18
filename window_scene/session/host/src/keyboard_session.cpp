@@ -100,7 +100,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             session->GetPersistentId(), session->GetCallingSessionId(),
             property->GetKeyboardEffectOption().ToString().c_str());
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
-        session->stateChanged_ = true;
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
@@ -481,10 +480,6 @@ bool KeyboardSession::RaiseCallingSession(const sptr<SceneSession>& callingSessi
 {
     bool occupiedAreaChanged = false;
     WSRect panelAvoidRect = GetPanelRect();
-    if (callingSession == nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is null");
-        return false;
-    }
     if (!keyboardAvoidAreaActive_) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", callingSession->GetPersistentId(), IsSystemKeyboard(), GetSessionState(),
@@ -716,6 +711,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
                 !animationInfo.isGravityChanged) {
                 session->GetSessionProperty()->SetCallingSessionId(callingId);
             }
+            session->stateChanged_ = true;
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             if (!animationInfo.isGravityChanged) {
@@ -1086,5 +1082,23 @@ WSError KeyboardSession::UpdateSizeChangeReason(SizeChangeReason reason)
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
+}
+
+void KeyboardSession::CheckIfSessionRectHasChanged(const uint32_t& callingId, const int32_t& persistentId,
+    const uint32_t& sessionMapDirty, bool& keyboardRectChanged, bool& callingSessionRectChanged)
+{
+    if (GetPersistentId() == persistentId) {
+        if ((sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
+            static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
+            (sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
+            static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+            keyboardRectChanged = true;
+            stateChanged_ = false;
+        }
+    } else if (callingId == static_cast<uint32_t>(persistentId) &&
+        (sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
+        callingSessionRectChanged = true;
+    }
 }
 } // namespace OHOS::Rosen
