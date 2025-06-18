@@ -10257,4 +10257,16 @@ DMError ScreenSessionManager::SetPrimaryDisplaySystemDpi(float virtualPixelRatio
     screenSession->SetDensityInCurResolution(virtualPixelRatio);
     return DMError::DM_OK;
 }
+
+DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    bool res = ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    TLOGI(WmsLogTag::DMS, "unique screenId: %{public}" PRIu64" rsScreenId: %{public}" PRIu64, screenId, rsScreenId);
+    if (!res) {
+        TLOGE(WmsLogTag::DMS, "convert screenId to rsScreenId failed");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    return static_cast<DMError>(rsInterface_.SetVirtualScreenAutoRotation(rsScreenId, enable));
+}
 } // namespace OHOS::Rosen

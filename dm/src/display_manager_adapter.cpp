@@ -1638,4 +1638,15 @@ DMError DisplayManagerAdapter::GetScreenAreaOfDisplayArea(DisplayId displayId, c
     }
     return DMError::DM_OK;
 }
+
+DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    TLOGI(WmsLogTag::DMS, "enter!");
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->SetVirtualScreenAutoRotation(screenId, enable);
+    }
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen

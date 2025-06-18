@@ -467,6 +467,7 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
 
 protected:
     ScreenSessionManager();
