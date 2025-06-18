@@ -18,7 +18,7 @@ import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 import hdrCapability from '@ohos.graphics.hdrCapability';
 
 export default namespace display {
-
+const DISPLAY_ARRAY_LENGTH = 5;  
 loadLibrary('displayani_kit.z');
 
 export interface Rect {
@@ -75,7 +75,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(5);
+        this.boundingRects = new Array<Rect>(DISPLAY_ARRAY_LENGTH);
         for (let i = 0; i < this.boundingRects.length; i++) {
             this.boundingRects[i] = new RectImpl();
         }
@@ -343,7 +343,7 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    let res: Array<Display> = new Array<Display>(5);
+    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
     for (let i = 0; i < res.length; i++) {
         res[i] = new DisplayImpl();
     }
@@ -359,7 +359,7 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(5);
+            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
             for (let i = 0; i < res.length; i++) {
                 res[i] = new DisplayImpl();
             }
