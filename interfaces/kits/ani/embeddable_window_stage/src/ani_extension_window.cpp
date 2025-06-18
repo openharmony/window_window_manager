@@ -57,7 +57,6 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     std::shared_ptr<ExtensionWindow> extensionWindow = std::make_shared<ExtensionWindowImpl>(window);
     std::unique_ptr<AniExtensionWindow> aniExtensionWindow =
         std::make_unique<AniExtensionWindow>(extensionWindow, hostWindowId);
-    TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] native obj %{public}p", aniExtensionWindow.get());
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
@@ -309,8 +308,7 @@ static ani_int ExtWindowOffWindowSizeChange(ani_env* env, ani_object obj, ani_lo
 // test from ts
 ani_object createExtentionWindow(ani_env* env, ani_long win, ani_int hostId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] create extwindow with window 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(win), hostId);
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] create extwindow with hostId:%{public}d", hostId);
     sptr<Rosen::Window> winPtr;
     return AniExtensionWindow::CreateAniExtensionWindow(env, winPtr, (int32_t)hostId);
 }
