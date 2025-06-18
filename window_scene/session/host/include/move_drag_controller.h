@@ -101,7 +101,7 @@ public:
     AreaType GetAreaType() const { return type_; };
     void SetScale(float scalex, float scaley);
     void SetParentRect(const Rect& parentRect);
-    Gravity GetGravity();
+    Gravity GetGravity() const;
 
     /*
      * Cross Display Move Drag
