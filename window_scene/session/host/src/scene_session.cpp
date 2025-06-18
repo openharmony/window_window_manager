@@ -6170,7 +6170,7 @@ void SceneSession::SetWindowFlags(const sptr<WindowSessionProperty>& property)
     if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
         OnShowWhenLocked(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    TLOGI(WmsLogTag::DEFAULT, "flags: %{public}u", flags);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}u", flags);
 }
 
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,

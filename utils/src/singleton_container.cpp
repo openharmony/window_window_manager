@@ -79,11 +79,11 @@ void SingletonContainer::SetSingleton(const std::string& name, void* instance)
 void* SingletonContainer::GetSingleton(const std::string& name)
 {
     if (stringMap.find(name) == stringMap.end()) {
-        WLOGFE("can not get %{public}s", name.c_str());
+        WLOGFE("cant get %{public}s", name.c_str());
         return nullptr;
     }
     if (singletonMap.find(stringMap[name]) == singletonMap.end()) {
-        WLOGFE("can not find singleton, name is %{public}s", name.c_str());
+        WLOGFE("cant find singleton %{public}s", name.c_str());
         return nullptr;
     }
     return singletonMap[stringMap[name]].value;

@@ -116,7 +116,7 @@ sptr<SceneSession> SCBSystemSession::GetKeyboardSession() const
 
 void SCBSystemSession::PresentFocusIfPointDown()
 {
-    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    WLOGFI("Id:%{public}d,type:%{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);

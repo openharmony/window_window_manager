@@ -623,7 +623,7 @@ void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 
 void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](
         DisplayId displayId, uint32_t type, SizeChangeReason reason) {
         auto jsSceneSession = weakThis.promote();
@@ -643,7 +643,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
 
 void JsSceneSession::OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
 
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1049,7 +1049,7 @@ void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
 
 void JsSceneSession::OnSessionInfoLockedStateChange(bool lockedState)
 {
-    WLOGFI("state: %{public}u", lockedState);
+    WLOGFI("%{public}u", lockedState);
 
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, lockedState, env = env_, where] {
@@ -1117,7 +1117,7 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
 
 void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag)
 {
-    WLOGFI("flag: %{public}u", isNeedDefaultAnimationFlag);
+    WLOGFI("%{public}u", isNeedDefaultAnimationFlag);
 
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isNeedDefaultAnimationFlag, env = env_] {
         auto jsSceneSession = weakThis.promote();
@@ -1819,7 +1819,7 @@ void JsSceneSession::ProcessContextTransparentRegister()
 
 void JsSceneSession::OnSessionEvent(uint32_t eventId, const SessionEventParam& param)
 {
-    WLOGFI("eventId: %{public}d", eventId);
+    WLOGFI("%{public}d", eventId);
 
     auto task = [weakThis = wptr(this), persistentId = persistentId_, eventId, param, env = env_] {
         auto jsSceneSession = weakThis.promote();
@@ -1989,7 +1989,7 @@ void JsSceneSession::ProcessForceHideChangeRegister()
 
 void JsSceneSession::OnForceHideChange(bool hide)
 {
-    WLOGFI("hide: %{public}u", hide);
+    WLOGFI("%{public}u", hide);
 
     auto task = [weakThis = wptr(this), persistentId = persistentId_, hide, env = env_] {
         auto jsSceneSession = weakThis.promote();
@@ -2029,7 +2029,7 @@ void JsSceneSession::ProcessTouchOutsideRegister()
 
 void JsSceneSession::OnTouchOutside()
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -2153,21 +2153,21 @@ napi_value JsSceneSession::UpdateNativeVisibility(napi_env env, napi_callback_in
     if (Session::IsScbCoreEnabled()) {
         return nullptr;
     }
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUpdateNativeVisibility(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetPrivacyMode(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPrivacyMode(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSkipSelfWhenShowOnVirtualScreen(env, info) : nullptr;
 }
@@ -2181,7 +2181,7 @@ napi_value JsSceneSession::SetSkipEventOnCastPlus(napi_env env, napi_callback_in
 
 napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSystemSceneOcclusionAlpha(env, info) : nullptr;
 }
@@ -2330,7 +2330,7 @@ napi_value JsSceneSession::SetSystemActive(napi_env env, napi_callback_info info
 
 napi_value JsSceneSession::SetFloatingScale(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFloatingScale(env, info) : nullptr;
 }
@@ -2344,7 +2344,7 @@ napi_value JsSceneSession::SetIsMidScene(napi_env env, napi_callback_info info)
 
 napi_value JsSceneSession::SetSCBKeepKeyboard(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSCBKeepKeyboard(env, info) : nullptr;
 }
@@ -2354,7 +2354,7 @@ napi_value JsSceneSession::SetOffset(napi_env env, napi_callback_info info)
     if (Session::IsScbCoreEnabled()) {
         return nullptr;
     }
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetOffset(env, info) : nullptr;
 }
@@ -2999,7 +2999,7 @@ napi_value JsSceneSession::OnUpdateNativeVisibility(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->UpdateNativeVisibility(visible);
-    WLOGFI("end");
+    WLOGFD("end");
     return NapiGetUndefined(env);
 }
 
@@ -3028,7 +3028,7 @@ napi_value JsSceneSession::OnSetPrivacyMode(napi_env env, napi_callback_info inf
     }
     session->SetPrivacyMode(isPrivacy);
     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
-    WLOGFI("end");
+    WLOGFD("end");
     return NapiGetUndefined(env);
 }
 
@@ -3056,7 +3056,7 @@ napi_value JsSceneSession::OnSetSystemSceneOcclusionAlpha(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     session->SetSystemSceneOcclusionAlpha(alpha);
-    WLOGFI("end");
+    WLOGFD("end");
     return NapiGetUndefined(env);
 }
 
@@ -3270,7 +3270,7 @@ napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     session->SetSystemSceneBlockingFocus(blocking);
-    WLOGFI("end");
+    WLOGFD("end");
     return NapiGetUndefined(env);
 }
 
@@ -3364,7 +3364,7 @@ napi_value JsSceneSession::OnUpdateSizeChangeReason(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->UpdateSizeChangeReason(reason);
-    WLOGFI("reason: %{public}u end", reason);
+    WLOGFI("%{public}u", reason);
     return NapiGetUndefined(env);
 }
 
@@ -3569,7 +3569,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
 void JsSceneSession::OnBindDialogTarget(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFI("sceneSession is nullptr");
+        WLOGFD("sceneSession is nullptr");
         return;
     }
 
@@ -3841,7 +3841,7 @@ void JsSceneSession::OnUpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 /** @note @window.hierarchy */
 void JsSceneSession::OnRaiseToTop()
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -3863,7 +3863,7 @@ void JsSceneSession::OnRaiseToTop()
 /** @note @window.hierarchy */
 void JsSceneSession::OnRaiseToTopForPointDown()
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -3906,7 +3906,7 @@ void JsSceneSession::OnClickModalWindowOutside()
 
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, subWindowId] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -4501,7 +4501,7 @@ void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateTyp
 
 void JsSceneSession::UpdateSessionLabel(const std::string& label)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, label, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -4567,7 +4567,7 @@ void JsSceneSession::ProcessUpdateSessionIconRegister()
 
 void JsSceneSession::UpdateSessionIcon(const std::string& iconPath)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, iconPath, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -4837,7 +4837,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_value animationValue = CreateJsValue(env, needAnimation);
         napi_value argv[] = { rotationValue, animationValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        WLOGFI("change rotation success %{public}u", rotation);
+        WLOGFI("%{public}u", rotation);
     };
     std::string taskName;
     if (needAnimation) {
@@ -5214,7 +5214,7 @@ napi_value JsSceneSession::SetScale(napi_env env, napi_callback_info info)
     if (Session::IsScbCoreEnabled()) {
         return nullptr;
     }
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetScale(env, info) : nullptr;
 }
@@ -5403,7 +5403,7 @@ napi_value JsSceneSession::RequestHideKeyboard(napi_env env, napi_callback_info 
 
 napi_value JsSceneSession::OnRequestHideKeyboard(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
@@ -5676,7 +5676,7 @@ napi_value JsSceneSession::OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, na
         return NapiGetUndefined(env);
     }
     session->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
-    WLOGFI("end");
+    WLOGFD("end");
     return NapiGetUndefined(env);
 }
 

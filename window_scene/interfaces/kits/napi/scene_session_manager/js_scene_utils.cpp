@@ -2089,7 +2089,7 @@ static void SetTypeProperty(napi_value object, napi_env env, const std::string& 
 
 napi_value KeyboardGravityInit(napi_env env)
 {
-    WLOGFI("KeyboardGravityInit");
+    WLOGFD("KeyboardGravityInit");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");

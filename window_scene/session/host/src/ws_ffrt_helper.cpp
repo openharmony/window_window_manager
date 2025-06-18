@@ -57,7 +57,7 @@ public:
             if (iter->second != nullptr) {
                 auto ret = ffrtQueue->cancel(iter->second);
                 if (ret != 0) {
-                    WLOGI("Failed to cancel task, taskName=%{public}s, retcode=%{public}d", taskName.c_str(), ret);
+                    WLOGI("Cancel failed, name=%{public}s, ret=%{public}d", taskName.c_str(), ret);
                 }
             }
             taskMap_.erase(iter);
