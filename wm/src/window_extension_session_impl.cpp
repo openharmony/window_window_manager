@@ -1336,7 +1336,7 @@ WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeRegister(
             TLOGNE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeRegister error, no uiContent");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT,
+        TLOGND(WmsLogTag::WMS_UIEXT,
             "NotifyAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
     });
@@ -1752,7 +1752,7 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
                                                       [[maybe_unused]] MessageOption& option)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
     return WSError::WS_OK;
 }
