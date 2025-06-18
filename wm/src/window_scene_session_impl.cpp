@@ -844,12 +844,18 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
             return;
         }
         colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        bool hasDarkRes = false;
-        appContext->AppHasDarkRes(hasDarkRes);
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
-            GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
-        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
-            (hasDarkRes ? WHITE : BLACK);
+        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+        if (isColorModeSetByApp) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+        } else {
+            bool hasDarkRes = false;
+            appContext->AppHasDarkRes(hasDarkRes);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
+                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+                (hasDarkRes ? WHITE : BLACK);
+        }
     }
 
     statusBarProp.contentColor_ = contentColor;
