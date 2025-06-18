@@ -38,6 +38,39 @@ constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsExtensionWindow"};
+const std::unordered_set<std::string> g_emptyListener = {
+    "windowVisibilityChange",
+    "noInteractionDetected",
+    "dialogTargetTouch",
+    "windowEvent",
+    "windowStatusChange",
+    "windowTitleButtonRectChange",
+    "windowRectChange",
+    "rotationChange",
+    "touchOutside",
+};
+const std::unordered_set<std::string> g_unsupportListener = {
+    "windowWillClose",
+    "windowHighlightChange",
+};
+const std::unordered_set<std::string> g_invalidListener = {
+    "subWindowClose",
+};
+
+bool IsEmptyListener(const std::string& type)
+{
+    return g_emptyListener.find(type) != g_emptyListener.end();
+}
+
+bool IsUnsupportListener(const std::string& type)
+{
+    return g_unsupportListener.find(type) != g_unsupportListener.end();
+}
+
+bool IsInvalidListener(const std::string& type)
+{
+    return g_invalidListener.find(type) != g_invalidListener.end();
+}
 } // namespace
 
 JsExtensionWindow::JsExtensionWindow(
@@ -109,27 +142,19 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     napi_wrap(env, objValue, jsExtensionWindow.release(), JsExtensionWindow::Finalizer, nullptr, nullptr);
 
     const char *moduleName = "JsExtensionWindow";
-    BindNativeFunction(env, objValue, "on", moduleName, JsExtensionWindow::RegisterExtensionWindowCallback);
-    BindNativeFunction(env, objValue, "off", moduleName, JsExtensionWindow::UnRegisterExtensionWindowCallback);
-    BindNativeFunction(env, objValue, "moveWindowTo", moduleName, JsExtensionWindow::MoveWindowTo);
-    BindNativeFunction(env, objValue, "resize", moduleName, JsExtensionWindow::ResizeWindow);
+    BindNativeFunction(env, objValue, "on", moduleName, JsExtensionWindow::AtomicRegisterExtensionWindowCallback);
+    BindNativeFunction(env, objValue, "off", moduleName, JsExtensionWindow::AtomicUnRegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "getUIContext", moduleName, JsExtensionWindow::GetUIContext);
     BindNativeFunction(env, objValue, "setWindowBrightness", moduleName, JsExtensionWindow::SetWindowBrightness);
     BindNativeFunction(env, objValue, "setWindowKeepScreenOn", moduleName, JsExtensionWindow::SetWindowKeepScreenOn);
-    BindNativeFunction(env, objValue, "showWindow", moduleName, JsExtensionWindow::ShowWindow);
-    BindNativeFunction(env, objValue, "destroyWindow", moduleName, JsExtensionWindow::DestroyWindow);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsExtensionWindow::LoadContent);
     BindNativeFunction(env, objValue, "loadContentByName", moduleName, JsExtensionWindow::LoadContentByName);
     BindNativeFunction(env, objValue, "setUIContent", moduleName, JsExtensionWindow::SetUIContent);
     BindNativeFunction(env, objValue, "isWindowShowing", moduleName, JsExtensionWindow::IsWindowShowingSync);
     BindNativeFunction(env, objValue, "getWindowProperties", moduleName, JsExtensionWindow::GetWindowPropertiesSync);
     BindNativeFunction(env, objValue, "getWindowAvoidArea", moduleName, JsExtensionWindow::GetWindowAvoidArea);
-    BindNativeFunction(env, objValue, "setWindowBackgroundColor", moduleName,
-        JsExtensionWindow::SetWindowBackgroundColorSync);
     BindNativeFunction(env, objValue, "setSpecificSystemBarEnabled", moduleName,
         JsExtensionWindow::SetSpecificSystemBarEnabled);
-    BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName,
-        JsExtensionWindow::SetPreferredOrientation);
     BindNativeFunction(env, objValue, "getPreferredOrientation", moduleName,
         JsExtensionWindow::GetPreferredOrientation);
     BindNativeFunction(env, objValue, "createSubWindowWithOptions", moduleName,
@@ -152,7 +177,86 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::IsWindowSupportWideGamut);
     BindNativeFunction(env, objValue, "getGlobalRect", moduleName, JsExtensionWindow::GetGlobalScaledRect);
 
+    //return default value
+    BindNativeFunction(env, objValue, "getTitleButtonRect", moduleName, JsExtensionWindow::GetTitleButtonRect);
+    BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
+    BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
+        JsExtensionWindow::GetWindowSystemBarProperties);
+    BindNativeFunction(env, objValue, "isWindowShowing", moduleName, JsExtensionWindow::IsWindowShowing);
+
+    RegisterUnsupportFuncs(env, objValue, moduleName);
+
     return objValue;
+}
+
+void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue, const char *moduleName)
+{
+    BindNativeFunction(env, objValue, "moveWindowTo", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "moveWindowToAsync", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "moveWindowToGlobal", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "resize", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "resizeAsync", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "showWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "destroyWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowFocusable", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setExclusivelyHighlighted", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowTouchable", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "snapshot", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "snapshotIgnorePrivacy", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setAspectRatio", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "resetAspectRatio", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "minimize", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "maximize", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setResizeByDragEnabled", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "enableLandscapeMultiWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "disableLandscapeMultiWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowMask", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowGrayScale", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setParentWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setFollowParentMultiScreenPolicy", moduleName,
+        JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowSystemBarProperties", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setStatusBarColor", moduleName, JsExtensionWindow::EmptyAsyncCall);
+
+    BindNativeFunction(env, objValue, "setWindowBackgroundColor", moduleName, JsExtensionWindow::EmptySyncCall);
+    BindNativeFunction(env, objValue, "setWindowDecorVisible", moduleName, JsExtensionWindow::EmptySyncCall);
+    BindNativeFunction(env, objValue, "getParentWindow", moduleName, JsExtensionWindow::EmptySyncCall);
+
+    BindNativeFunction(env, objValue, "setFollowParentWindowLayoutEnabled", moduleName,
+        JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setSystemAvoidAreaEnabled", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowTopmost", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowLimits", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "recover", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "restore", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowTitle", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setSubWindowModal", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "startMoving", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "stopMoving", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+    BindNativeFunction(env, objValue, "setTitleAndDockHoverShown", moduleName, JsExtensionWindow::UnsupportAsyncCall);
+
+    BindNativeFunction(env, objValue, "isSystemAvoidAreaEnabled", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "isWindowHighlighted", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "getWindowLimits", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "getWindowDecorVisible", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "setWindowTitleMoveEnabled", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "setWindowDecorHeight", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "getWindowDecorHeight", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "setDecorButtonStyle", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "getDecorButtonStyle", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "setWindowTitleButtonVisible", moduleName, JsExtensionWindow::UnsupportSyncCall);
+    BindNativeFunction(env, objValue, "setWindowDelayRaiseOnDrag", moduleName, JsExtensionWindow::UnsupportSyncCall);
+
+    BindNativeFunction(env, objValue, "setDialogBackGestureEnabled", moduleName, JsExtensionWindow::InvalidAsyncCall);
+    BindNativeFunction(env, objValue, "setSubWindowZLevel", moduleName, JsExtensionWindow::InvalidAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowCornerRadius", moduleName, JsExtensionWindow::InvalidAsyncCall);
+
+    BindNativeFunction(env, objValue, "keepKeyboardOnFocus", moduleName, JsExtensionWindow::InvalidSyncCall);
+    BindNativeFunction(env, objValue, "getSubWindowZLevel", moduleName, JsExtensionWindow::InvalidSyncCall);
+    BindNativeFunction(env, objValue, "getWindowCornerRadius", moduleName, JsExtensionWindow::InvalidSyncCall);
+    BindNativeFunction(env, objValue, "setWindowShadowRadius", moduleName, JsExtensionWindow::InvalidSyncCall);
 }
 
 void JsExtensionWindow::Finalizer(napi_env env, void* data, void* hint)
@@ -181,6 +285,21 @@ napi_value JsExtensionWindow::UnRegisterExtensionWindowCallback(napi_env env, na
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnUnRegisterExtensionWindowCallback(env, info) : nullptr;
 }
+
+napi_value JsExtensionWindow::AtomicRegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnRegisterExtensionWindowCallback(env, info, true) : nullptr;
+}
+
+napi_value JsExtensionWindow::AtomicUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnUnRegisterExtensionWindowCallback(env, info, true) : nullptr;
+}
+
 
 napi_value JsExtensionWindow::HideNonSecureWindows(napi_env env, napi_callback_info info)
 {
@@ -224,13 +343,6 @@ napi_value JsExtensionWindow::LoadContentByName(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
 
-napi_value JsExtensionWindow::ShowWindow(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnShowWindow(env, info) : nullptr;
-}
-
 napi_value JsExtensionWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
@@ -245,39 +357,11 @@ napi_value JsExtensionWindow::SetUIContent(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
 
-napi_value JsExtensionWindow::DestroyWindow(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnDestroyWindow(env, info) : nullptr;
-}
-
-napi_value JsExtensionWindow::SetWindowBackgroundColorSync(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnSetWindowBackgroundColorSync(env, info) : nullptr;
-}
-
 napi_value JsExtensionWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
-}
-
-napi_value JsExtensionWindow::MoveWindowTo(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnMoveWindowTo(env, info) : nullptr;
-}
-
-napi_value JsExtensionWindow::ResizeWindow(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
@@ -287,18 +371,11 @@ napi_value JsExtensionWindow::SetSpecificSystemBarEnabled(napi_env env, napi_cal
     return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
 }
 
-napi_value JsExtensionWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
-}
-
 napi_value JsExtensionWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
-    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
+    ApiOrientation apiOrientation = ApiOrientation::UNSPECIFIED;
+    return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
 }
 
 napi_value JsExtensionWindow::GetUIContext(napi_env env, napi_callback_info info)
@@ -406,6 +483,82 @@ napi_value JsExtensionWindow::GetGlobalScaledRect(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnGetGlobalScaledRect(env, info) : nullptr;
 }
 
+napi_value JsExtensionWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
+{
+    TitleButtonRect titleButtonRect { 0, 0, 0, 0 };
+    napi_value TitleButtonAreaObj = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
+    if (TitleButtonAreaObj == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return TitleButtonAreaObj;
+}
+
+napi_value JsExtensionWindow::GetWindowStatus(napi_env env, napi_callback_info info)
+{
+    WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    return CreateJsValue(env, static_cast<uint32_t>(windowStatus));
+}
+
+napi_value JsExtensionWindow::EmptyAsyncCall(napi_env env, napi_callback_info info)
+{
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnEmptyAsyncCall(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::EmptySyncCall(napi_env env, napi_callback_info info)
+{
+    return NapiGetUndefined(env);
+}
+
+napi_value JsExtensionWindow::UnsupportAsyncCall(napi_env env, napi_callback_info info)
+{
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnUnsupportAsyncCall(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::UnsupportSyncCall(napi_env env, napi_callback_info info)
+{
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+napi_value JsExtensionWindow::InvalidAsyncCall(napi_env env, napi_callback_info info)
+{
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnInvalidAsyncCall(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::InvalidSyncCall(napi_env env, napi_callback_info info)
+{
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+}
+
+napi_value JsExtensionWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
+{
+    WindowDensityInfo densityInfo {};
+    auto objValue = ConvertWindowDensityInfoToJsValue(env, densityInfo);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "create js windowDensityInfo failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return objValue;
+}
+
+napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_callback_info info)
+{
+    auto window = sptr<Window>::MakeSptr();
+    auto objValue = CreateJsSystemBarPropertiesObject(env, window);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return objValue;
+}
+
+napi_value JsExtensionWindow::IsWindowShowing(napi_env env, napi_callback_info info)
+{
+    return CreateJsValue(env, true);
+}
+
 napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
@@ -504,31 +657,6 @@ napi_value JsExtensionWindow::OnGetUIContext(napi_env env, napi_callback_info in
     }
 }
 
-napi_value JsExtensionWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask]() {
-        task->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientation") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
-    return result;
-}
-
-napi_value JsExtensionWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
-{
-    return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-}
-
 napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -576,46 +704,6 @@ napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_c
     return result;
 }
 
-napi_value JsExtensionWindow::OnResizeWindow(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc <= 2) ? nullptr :
-        ((argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask]() {
-        task->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResizeWindow") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
-    return result;
-}
-
-napi_value JsExtensionWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc <= 2) ? nullptr :
-        ((argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask]() {
-        task->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
-    return result;
-}
-
 napi_value JsExtensionWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
@@ -633,52 +721,6 @@ napi_value JsExtensionWindow::OnGetWindowPropertiesSync(napi_env env, napi_callb
     }
 }
 
-napi_value JsExtensionWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_info info)
-{
-    return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-}
-
-napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc == 0) ? nullptr :
-        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [extWindow = extensionWindow_, env, task = napiAsyncTask]() {
-        if (extWindow == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
-            task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        sptr<Window> windowImpl = extWindow->GetWindow();
-        if (windowImpl == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
-            task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowImpl->Destroy());
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret=%{public}d",
-            windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
-        if (ret != WmErrorCode::WM_OK) {
-            task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(ret),
-                "Window destroy failed"));
-            return;
-        }
-        task->Resolve(env, NapiGetUndefined(env));
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnDestroyWindow") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
-    return result;
-}
-
 napi_value JsExtensionWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info)
 {
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
@@ -690,46 +732,6 @@ napi_value JsExtensionWindow::OnIsWindowShowingSync(napi_env env, napi_callback_
     TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] get show state end, state=%{public}u",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), state);
     return CreateJsValue(env, state);
-}
-
-napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc == 0) ? nullptr :
-        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [extWindow = extensionWindow_, env, task = napiAsyncTask]() {
-        if (extWindow == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        sptr<Window> windowImpl = extWindow->GetWindow();
-        if (windowImpl == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            return;
-        }
-        WMError ret = windowImpl->Show(0, false);
-        if (ret == WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
-            task->Reject(env, CreateJsError(env,
-                static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
-        }
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret=%{public}d",
-            windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShowWindow") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
-    }
-    return result;
 }
 
 napi_value JsExtensionWindow::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -920,7 +922,8 @@ napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env env, size_t 
     return NapiGetUndefined(env);
 }
 
-napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info,
+    bool atomicService)
 {
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
@@ -942,6 +945,17 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
     if (cbType == RECT_CHANGE) {
         return OnRegisterRectChangeCallback(env, argc, argv, windowImpl);
     }
+    if (atomicService) {
+        if (IsInvalidListener(cbType)) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        }
+        if (IsEmptyListener(cbType)) {
+            return NapiGetUndefined(env);
+        }
+        if (IsUnsupportListener(cbType)) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
+    }
     napi_value value = argv[INDEX_ONE];
     if (!NapiIsCallable(env, value)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
@@ -958,7 +972,8 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
     return NapiGetUndefined(env);
 }
 
-napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info,
+    bool atomicService)
 {
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
@@ -980,6 +995,17 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     if (cbType == RECT_CHANGE) {
         if (!windowImpl->IsPcWindow()) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
+    }
+    if (atomicService) {
+        if (IsInvalidListener(cbType)) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        }
+        if (IsEmptyListener(cbType)) {
+            return NapiGetUndefined(env);
+        }
+        if (IsUnsupportListener(cbType)) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
     }
@@ -1645,12 +1671,55 @@ napi_value JsExtensionWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_
 
 napi_value JsExtensionWindow::OnUnsupportAsyncCall(napi_env env, napi_callback_info info)
 {
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc <= 0) ? nullptr :
+        ((argv[argc - 1] != nullptr && GetType(env, argv[argc - 1]) == napi_function) ? argv[argc - 1] : nullptr);
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnUnsupportAsyncCall") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
+    }
+    return result;
+}
+
+napi_value JsExtensionWindow::OnEmptyAsyncCall(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc <= 0) ? nullptr :
+        ((argv[argc - 1] != nullptr && GetType(env, argv[argc - 1]) == napi_function) ? argv[argc - 1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask] {
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnEmptyAsyncCall") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
+    }
+    return result;
+}
+
+napi_value JsExtensionWindow::OnInvalidAsyncCall(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc <= 0) ? nullptr :
+        ((argv[argc - 1] != nullptr && GetType(env, argv[argc - 1]) == napi_function) ? argv[argc - 1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask] {
+        task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnInvalidAsyncCall") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
     }
