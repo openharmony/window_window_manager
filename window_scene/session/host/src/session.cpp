@@ -101,7 +101,7 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 
     if (info.want != nullptr) {
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
-        TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
     }
 
@@ -700,7 +700,7 @@ void Session::SetFocusedOnShow(bool focusedOnShow)
     if (focusedOnShow == focusedOnShow_) {
         return;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow, GetPersistentId());
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d, %{public}d]", focusedOnShow, GetPersistentId());
     focusedOnShow_ = focusedOnShow;
 }
 
@@ -2956,8 +2956,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
 WSError Session::NotifyHighlightChange(bool isHighlight)
 {
     if (IsSystemSession()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
-            persistentId_, GetSessionState());
+        TLOGW(WmsLogTag::WMS_FOCUS, "Invalid [%{public}d, %{public}u]", persistentId_, GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {

@@ -28,7 +28,7 @@ bool ScenePersistentStorage::HasKey(const std::string& key, ScenePersistentStora
     bool res = false;
     auto pref = GetPreference(storageType);
     if (!pref) {
-        WLOGE("[ScenePersistentStorage] Preferences is nullptr");
+        WLOGD("[ScenePersistentStorage] Preferences is nullptr");
         return res;
     }
     res = pref->HasKey(key);

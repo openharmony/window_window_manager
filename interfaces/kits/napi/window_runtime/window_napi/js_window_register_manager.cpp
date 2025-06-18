@@ -481,7 +481,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
 bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("Method %{public}s has not been registerted", type.c_str());
+        WLOGD("Method %{public}s has not been registerted", type.c_str());
         return false;
     }
 
@@ -530,8 +530,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGI("Register type %{public}s success! callback map size: %{public}zu",
-        type.c_str(), jsCbMap_[type].size());
+    WLOGI("Register success [%{public}s, %{public}zu]", type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
 

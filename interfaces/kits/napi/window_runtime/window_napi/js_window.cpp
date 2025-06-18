@@ -117,35 +117,35 @@ void JsWindow::Finalizer(napi_env env, void* data, void* hint)
 
 napi_value JsWindow::Show(napi_env env, napi_callback_info info)
 {
-    WLOGI("Show");
+    WLOGD("Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShow(env, info) : nullptr;
 }
 
 napi_value JsWindow::ShowWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Show");
+    WLOGD("Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShowWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::ShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WLOGI("ShowWithAnimation");
+    WLOGD("ShowWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShowWithAnimation(env, info) : nullptr;
 }
 
 napi_value JsWindow::Destroy(napi_env env, napi_callback_info info)
 {
-    WLOGI("Destroy");
+    WLOGD("Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDestroy(env, info) : nullptr;
 }
 
 napi_value JsWindow::DestroyWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Destroy");
+    WLOGD("Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDestroyWindow(env, info) : nullptr;
 }
@@ -159,7 +159,7 @@ napi_value JsWindow::Hide(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::HideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WLOGI("HideWithAnimation");
+    WLOGD("HideWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHideWithAnimation(env, info) : nullptr;
 }
@@ -196,7 +196,7 @@ napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "MoveToAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowToAsync(env, info) : nullptr;
 }
@@ -204,7 +204,7 @@ napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::MoveWindowToGlobal(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "MoveWindowToGlobal");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "MoveWindowToGlobal");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowToGlobal(env, info) : nullptr;
 }
@@ -228,7 +228,7 @@ napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Resize");
+    WLOGD("Resize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
@@ -236,7 +236,7 @@ napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "ResizeAsync");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindowAsync(env, info) : nullptr;
 }
@@ -250,7 +250,7 @@ napi_value JsWindow::ResizeWindowWithAnimation(napi_env env, napi_callback_info 
 
 napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowType");
+    WLOGD("SetWindowType");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowType(env, info) : nullptr;
 }
@@ -258,7 +258,7 @@ napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::SetWindowMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowMode");
+    WLOGD("SetWindowMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowMode(env, info) : nullptr;
 }
@@ -293,7 +293,7 @@ napi_value JsWindow::UnregisterWindowCallback(napi_env env, napi_callback_info i
 
 napi_value JsWindow::BindDialogTarget(napi_env env, napi_callback_info info)
 {
-    WLOGI("BindDialogTarget");
+    WLOGD("BindDialogTarget");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnBindDialogTarget(env, info) : nullptr;
 }
@@ -306,14 +306,14 @@ napi_value JsWindow::SetDialogBackGestureEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsWindow::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
@@ -327,7 +327,7 @@ napi_value JsWindow::GetUIContext(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
@@ -383,14 +383,14 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::EnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnEnableLandscapeMultiWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::DisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDisableLandscapeMultiWindow(env, info) : nullptr;
 }
@@ -460,14 +460,14 @@ napi_value JsWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::IsSupportWideGamut(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsSupportWideGamut");
+    WLOGD("IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsSupportWideGamut(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsWindowSupportWideGamut(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsSupportWideGamut");
+    WLOGD("IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowSupportWideGamut(env, info) : nullptr;
 }
@@ -481,42 +481,42 @@ napi_value JsWindow::SetBackgroundColor(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowBackgroundColorSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackgroundColor");
+    WLOGD("SetBackgroundColor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBackgroundColorSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBrightness(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBrightness");
+    WLOGD("SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBrightness(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowBrightness(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBrightness");
+    WLOGD("SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBrightness(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetDimBehind(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetDimBehind");
+    WLOGD("SetDimBehind");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetDimBehind(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetFocusable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusable");
+    TLOGD(WmsLogTag::WMS_FOCUS, "SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetFocusable");
+    WLOGD("SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowFocusable(env, info) : nullptr;
 }
@@ -524,7 +524,7 @@ napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "SetTopmost");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
 }
@@ -540,7 +540,7 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetSubWindowZLevel(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSubWindowZLevel(env, info) : nullptr;
 }
@@ -548,7 +548,7 @@ napi_value JsWindow::SetSubWindowZLevel(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::GetSubWindowZLevel(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetSubWindowZLevel(env, info) : nullptr;
 }
@@ -562,42 +562,42 @@ napi_value JsWindow::SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info 
 
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetKeepScreenOn");
+    WLOGD("SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetKeepScreenOn(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowKeepScreenOn(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetKeepScreenOn");
+    WLOGD("SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowKeepScreenOn(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWakeUpScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWakeUpScreen");
+    WLOGD("SetWakeUpScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWakeUpScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetOutsideTouchable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetOutsideTouchable");
+    WLOGD("SetOutsideTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetOutsideTouchable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetPrivacyMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPrivacyMode");
+    WLOGD("SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPrivacyMode(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowPrivacyMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPrivacyMode");
+    WLOGD("SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowPrivacyMode(env, info) : nullptr;
 }
@@ -626,7 +626,7 @@ napi_value JsWindow::SetResizeByDragEnabled(napi_env env, napi_callback_info inf
 /** @note @window.hierarchy */
 napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetRaiseByClickEnabled");
+    WLOGD("SetRaiseByClickEnabled");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetRaiseByClickEnabled(env, info) : nullptr;
 }
@@ -647,14 +647,14 @@ napi_value JsWindow::SetWindowTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTransparent(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetTransparent");
+    WLOGD("SetTransparent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTransparent(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetCallingWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetCallingWindow");
+    WLOGD("SetCallingWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetCallingWindow(env, info) : nullptr;
 }
@@ -675,14 +675,14 @@ napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info in
 
 napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSnapshotSkip");
+    WLOGD("SetSnapshotSkip");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSingleFrameComposerEnabled");
+    WLOGD("SetSingleFrameComposerEnabled");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSingleFrameComposerEnabled(env, info) : nullptr;
 }
@@ -690,7 +690,7 @@ napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_i
 /** @note @window.hierarchy */
 napi_value JsWindow::RaiseToAppTop(napi_env env, napi_callback_info info)
 {
-    WLOGI("RaiseToAppTop");
+    WLOGD("RaiseToAppTop");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRaiseToAppTop(env, info) : nullptr;
 }
@@ -704,84 +704,84 @@ napi_value JsWindow::DisableWindowDecor(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetColorSpace");
+    WLOGD("SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetColorSpace");
+    WLOGD("SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetColorSpace");
+    WLOGD("GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowColorSpaceSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetColorSpace");
+    WLOGD("GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowColorSpaceSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::Dump(napi_env env, napi_callback_info info)
 {
-    WLOGI("Dump");
+    WLOGD("Dump");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDump(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetForbidSplitMove(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetForbidSplitMove");
+    WLOGD("SetForbidSplitMove");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetForbidSplitMove(env, info) : nullptr;
 }
 
 napi_value JsWindow::Opacity(napi_env env, napi_callback_info info)
 {
-    WLOGI("Opacity");
+    WLOGD("Opacity");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnOpacity(env, info) : nullptr;
 }
 
 napi_value JsWindow::Scale(napi_env env, napi_callback_info info)
 {
-    WLOGI("Scale");
+    WLOGD("Scale");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnScale(env, info) : nullptr;
 }
 
 napi_value JsWindow::Rotate(napi_env env, napi_callback_info info)
 {
-    WLOGI("Rotate");
+    WLOGD("Rotate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRotate(env, info) : nullptr;
 }
 
 napi_value JsWindow::Translate(napi_env env, napi_callback_info info)
 {
-    WLOGI("Translate");
+    WLOGD("Translate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnTranslate(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetTransitionController(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetTransitionController");
+    WLOGD("GetTransitionController");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetTransitionController(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetCornerRadius(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetCornerRadius");
+    WLOGD("SetCornerRadius");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetCornerRadius(env, info) : nullptr;
 }
@@ -802,7 +802,7 @@ napi_value JsWindow::GetWindowCornerRadius(napi_env env, napi_callback_info info
 
 napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetShadow");
+    WLOGD("SetShadow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetShadow(env, info) : nullptr;
 }
@@ -816,28 +816,28 @@ napi_value JsWindow::SetWindowShadowRadius(napi_env env, napi_callback_info info
 
 napi_value JsWindow::SetBlur(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBlur");
+    WLOGD("SetBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBlur(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBackdropBlur(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackdropBlur");
+    WLOGD("SetBackdropBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBackdropBlur(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBackdropBlurStyle(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackdropBlurStyle");
+    WLOGD("SetBackdropBlurStyle");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWaterMarkFlag");
+    WLOGD("SetWaterMarkFlag");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
@@ -851,14 +851,14 @@ napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetAspectRatio(env, info) : nullptr;
 }
 
 napi_value JsWindow::ResetAspectRatio(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResetAspectRatio(env, info) : nullptr;
 }
@@ -880,14 +880,14 @@ napi_value JsWindow::Maximize(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
 napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnKeepKeyboardOnFocus(env, info) : nullptr;
 }
@@ -902,7 +902,7 @@ napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
 }
@@ -910,7 +910,7 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLimits(env, info) : nullptr;
 }
@@ -1001,14 +1001,14 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_DECOR, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowContainerModalColor(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_DECOR, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowContainerModalColor(env, info) : nullptr;
 }
@@ -1043,7 +1043,7 @@ napi_value JsWindow::SetWindowTitle(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowGrayScale(env, info) : nullptr;
 }
@@ -2464,8 +2464,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    WLOGFI("Register end, window [%{public}u, %{public}s], type=%{public}s",
-        windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
+    WLOGFI("Id=%{public}u, type=%{public}s", windowToken->GetWindowId(), cbType.c_str());
     // if comptible mode app adpt to immersive, avoid area change will be called when regist
     if (cbType == AVOID_AREA_CHANGE_CB && windowToken->IsAdaptToCompatibleImmersive()) {
         TLOGI(WmsLogTag::WMS_COMPAT, "notify avoid area change for compatible mode app when regist callback");
@@ -3606,8 +3605,7 @@ napi_value JsWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     bool state = (windowToken_->GetWindowState() == WindowState::STATE_SHOWN);
-    WLOGFI("end, window [%{public}u, %{public}s] state=%{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), state);
+    WLOGFI("Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(), state);
     return CreateJsValue(env, state);
 }
 
@@ -5355,14 +5353,14 @@ napi_value JsWindow::Snapshot(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SnapshotSync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSnapshotSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSnapshotIgnorePrivacy(env, info) : nullptr;
 }

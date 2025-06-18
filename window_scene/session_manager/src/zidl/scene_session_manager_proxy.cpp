@@ -2671,7 +2671,7 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetWindowModeType Write interfaceToken failed");
+        WLOGFD("GetWindowModeType Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

@@ -128,7 +128,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     }
 
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is nullptr!");
+        WLOGFD("uiContent_ is nullptr!");
         return;
     }
     Ace::ViewportConfig config;

@@ -5320,7 +5320,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
+        TLOGE(WmsLogTag::DEFAULT, "Null");
         return;
     }
     if (sessionInfo.supportedWindowModes.empty()) {
@@ -5365,7 +5365,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
     bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, uId, *abilityInfo);
     if (!ret) {
-        TLOGE(WmsLogTag::DEFAULT, "Get ability info from BMS failed!");
+        TLOGE(WmsLogTag::DEFAULT, "Failed");
         return nullptr;
     }
     abilityInfoMap_[list] = abilityInfo;
@@ -5840,7 +5840,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
             focusInfo.uid_ = sceneSession->GetCallingUid();
             focusInfo.windowType_ = sceneSession->GetWindowType();
             focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
-            TLOGNI(WmsLogTag::WMS_FOCUS, "Get focus session info success");
+            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -6213,7 +6213,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
-            TLOGW(WmsLogTag::DEFAULT, "nullptr");
+            TLOGD(WmsLogTag::DEFAULT, "nullptr");
             continue;
         }
         if (!curSession->GetSessionInfo().isSystem_ &&
@@ -6880,7 +6880,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(const sptr<SceneSessio
         return false;
     }
     auto lastFocusedAppSessionId = focusGroup->GetLastFocusedAppSessionId();
-    TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
+    TLOGI(WmsLogTag::WMS_FOCUS, "last=%{public}d, next=%{public}d",
         lastFocusedAppSessionId, nextSession->GetPersistentId());
 
     if (lastFocusedAppSessionId == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId) {
@@ -7352,8 +7352,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
             notifyDiffSCBAfterUnfocusedFunc_(focusedSessionDisplayId, nextSessionDisplayId);
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
-        ", focusedId: %{public}d, nextId: %{public}d, reason: %{public}d", displayId, focusedId, nextId, reason);
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}" PRIu64 ",%{public}d,%{public}d,%{public}d",
+        displayId, focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -7457,7 +7457,7 @@ void SceneSessionManager::SetHighlightSessionIds(const sptr<SceneSession>& scene
         highlightIds_.clear();
         highlightIds_.insert(sceneSession->GetPersistentId());
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -7492,7 +7492,7 @@ void SceneSessionManager::RemoveHighlightSessionIds(const sptr<SceneSession>& sc
         }
 
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -7521,12 +7521,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 
-    TLOGI(WmsLogTag::WMS_FOCUS,
-        "name: %{public}s/%{public}s/%{public}s, id: %{public}d, isFocused: %{public}d",
-        sceneSession->GetSessionInfo().bundleName_.c_str(),
-        sceneSession->GetSessionInfo().abilityName_.c_str(),
-        sceneSession->GetWindowNameAllType().c_str(),
-        persistentId, isFocused);
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d, %{public}d]", persistentId, isFocused);
     if (isFocused) {
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
@@ -8611,7 +8606,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 
 WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
-    TLOGI(WmsLogTag::DEFAULT, "hasWaterMark: %{public}u", static_cast<uint32_t>(hasWaterMark));
+    TLOGD(WmsLogTag::DEFAULT, "hasWaterMark: %{public}u", static_cast<uint32_t>(hasWaterMark));
     SessionManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(hasWaterMark);
     return WSError::WS_OK;
 }
@@ -9929,7 +9924,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     TLOGD(WmsLogTag::DEFAULT, "persistentId=%{public}d, updateType=%{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession nullptr!");
+        TLOGD(WmsLogTag::DEFAULT, "sceneSession nullptr!");
         return;
     }
     wptr<SceneSession> weakSceneSession(sceneSession);

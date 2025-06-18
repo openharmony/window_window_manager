@@ -116,7 +116,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    WLOGFI("[NAPI] %{public}u", mode);
+    WLOGFI("%{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
