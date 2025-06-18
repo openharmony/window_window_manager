@@ -915,6 +915,11 @@ protected:
     static bool isScbCoreEnabled_;
 
     /*
+     *CompatibleMode Window scale
+     */
+    uint32_t compatibleDragScaleFlags_ = 0;
+
+    /*
      * Keyboard Window
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
