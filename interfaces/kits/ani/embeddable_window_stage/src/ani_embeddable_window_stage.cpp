@@ -70,7 +70,6 @@ ani_object CreateAniEmbeddableWindowStage(ani_env* env, sptr<Rosen::Window> wind
 
     std::unique_ptr<AniEmbeddableWindowStage> aniEmbeddableWindowStage =
         std::make_unique<AniEmbeddableWindowStage>(window, sessionInfo);
-    WLOGFI("[ANI] native obj %{public}p", aniEmbeddableWindowStage.get());
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeWindowStage", &contextField)) != ANI_OK) {
