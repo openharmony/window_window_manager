@@ -13915,7 +13915,7 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "info: [id: %{public}d, pid: %{public}d, "
         "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
         callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
     return WMError::WM_OK;

@@ -1529,7 +1529,7 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
             static_cast<uint32_t>(defaultDisplay->GetPhysicalHeight()) : screenHeight;
         TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, display is half-fold", GetPersistentId());
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: [%{public}d, %{public}d]", screenWidth, screenHeight);
     return true;
 }
 
@@ -1548,7 +1548,7 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
         screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetPhysicalHeight());
         TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, display is half-fold", GetPersistentId());
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenSize: [%{public}d, %{public}d]", screenWidth, screenHeight);
     return true;
 }
 
@@ -8328,7 +8328,7 @@ void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation,
             return;
         }
         if (session->sessionStage_ == nullptr) {
-            TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
                 where, session->GetPersistentId());
             return;
         }
@@ -8365,11 +8365,11 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
             return;
         }
         if (isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillShowRegistered_) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "keyboard will show listener is not registered");
             return;
         }
         if (!isKeyboardShow && !session->GetSessionProperty()->EditSessionInfo().isKeyboardWillHideRegistered_) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "keyboard will hide listener is not registered");
             return;
         }
         KeyboardAnimationInfo keyboardAnimationInfo;

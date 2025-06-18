@@ -2338,9 +2338,10 @@ struct KeyboardEffectOption : public Parcelable {
     std::string ToString() const
     {
         std::ostringstream oss;
-        oss << "viewMode: " << std::to_string(static_cast<uint32_t>(viewMode_)) << ", flowLightMode: " << \
-            std::to_string(static_cast<uint32_t>(flowLightMode_)) << ", gradientMode: " << \
-            std::to_string(static_cast<uint32_t>(gradientMode_)) << ", blurHeight: " << std::to_string(blurHeight_);
+        oss << "[" << static_cast<uint32_t>(viewMode_) << ", "
+            << static_cast<uint32_t>(flowLightMode_) << ", "
+            << static_cast<uint32_t>(gradientMode_) << ", "
+            << blurHeight_ << "]";
         return oss.str();
     }
 };
