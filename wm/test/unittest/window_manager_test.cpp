@@ -56,7 +56,12 @@ public:
 // tanhong
 class TestWindowSystemBarPropertyChangedListener : public IWindowSystemBarPropertyChangedListener {
 public:
-    void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override {};
+    int32_t count_ = 0;
+    void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override
+    {
+        count_ = 1;
+        TLOGI(WmsLogTag::WMS_IMMS, "TestSystemBarChangedListener");
+    }
 };
 
 class TestWindowUpdateListener : public IWindowUpdateListener {
@@ -1994,7 +1999,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowSystemBarPropertyChangedListener, Func
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowSystemBarPropertyChangedListener(listener));
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowSystemBarPropertyChangedListener(listener));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, windowManager.RegisterWindowSystemBarPropertyChangedListener(listener));
     windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
 }
@@ -2014,7 +2019,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSystemBarPropertyChangedListener, Fu
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowSystemBarPropertyChangedListener(nullptr));
     sptr<TestWindowSystemBarPropertyChangedListener> listener =
         sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
     windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
@@ -2039,6 +2044,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1
     EXPECT_EQ(1, windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.size());
     WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
         WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_EQ(1, listener->count_);
     windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
 }
 

@@ -1646,7 +1646,7 @@ WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
             pImpl_->windowSystemBarPropertyChangedListeners_.end(), listener);
         if (iter != pImpl_->windowSystemBarPropertyChangedListeners_.end()) {
             TLOGI(WmsLogTag::WMS_IMMS, "listener is already registered.");
-            return WMError::WM_OK;
+            return WMError::WM_DO_NOTHING;
         }
         pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
         TLOGI(WmsLogTag::WMS_IMMS, "listener registere success.");
@@ -1666,7 +1666,7 @@ WMError WindowManager::UnregisterWindowSystemBarPropertyChangedListener(
         pImpl_->windowSystemBarPropertyChangedListeners_.end(), listener);
     if (iter == pImpl_->windowSystemBarPropertyChangedListeners_.end()) {
         TLOGI(WmsLogTag::WMS_IMMS, "could not find this listener.");
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     WMError ret = WMError::WM_OK;
     if (pImpl_->windowSystemBarPropertyChangedListeners_.empty() &&

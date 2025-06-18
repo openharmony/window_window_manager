@@ -164,23 +164,28 @@ void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
         TLOGI(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return;
     }
-
     if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write type failed");
         return;
     }
     if (!data.WriteBool(systemBarProperty.enable_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write enable failed");
         return;
     }
     if (!data.WriteUint32(systemBarProperty.backgroundColor_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write backgroundColor failed");
         return;
     }
     if (!data.WriteUint32(systemBarProperty.contentColor_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write contentColor failed");
         return;
     }
     if (!data.WriteBool(systemBarProperty.enableAnimation_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write enableAnimation failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(systemBarProperty.settingFlag_))) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write settingFlag failed");
         return;
     }
     MessageParcel reply;
