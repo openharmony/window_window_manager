@@ -15516,7 +15516,8 @@ void SceneSessionManager::NotifyWindowSystemBarPropertyChange(
 {
     {
         std::lock_guard<std::mutex> lock(lastSystemBarPropertyMapMutex_);
-        if (lastSystemBarPropertyMap_.count(type) != 0 && lastSystemBarPropertyMap_[type] == systemBarProperty) {
+        auto iter = lastSystemBarPropertyMap_.find(type);
+        if (iter != lastSystemBarPropertyMap_.end() && lastSystemBarPropertyMap_[type] == systemBarProperty) {
             TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d prop same as last time.", type);
             return;
         }
