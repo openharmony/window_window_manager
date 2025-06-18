@@ -21,6 +21,9 @@ export default namespace display {
 
 loadLibrary('displayani_kit.z');
 
+const DISPLAY_ARRAY_LENGTH = 15;  
+const CUTO_ARRAY_LENGTH = 5;  
+
 export interface Rect {
     left: number;
 
@@ -75,7 +78,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(DISPLAY_ARRAY_LENGTH);
+        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
         for (let i = 0; i < this.boundingRects.length; i++) {
             this.boundingRects[i] = new RectImpl();
         }
@@ -105,8 +108,6 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
 
     readonly creaseRects: Array<Rect>;
 }
-
-const DISPLAY_ARRAY_LENGTH = 5;  
 
 export enum FoldDisplayMode {
 
