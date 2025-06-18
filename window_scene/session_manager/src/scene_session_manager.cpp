@@ -9519,7 +9519,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
 void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
 {
     const char* const where = __func__;
-    auto task = [this, sessionInfo, where]() {
+    ffrtQueueHelper_->SubmitTask([sessionInfo, where] {
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: bundleName: %{public}s, "
             "moduleName: %{public}s, abilityName: %{public}s", where,
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
@@ -9529,23 +9529,16 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             want.SetParams(sessionInfo.want->GetParams());
             want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(sessionInfo.screenId_));
         }
-        std::shared_ptr<int32_t> retCode = std::make_shared<int32_t>(0);
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([want, retCode] {
-            int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartSpecifiedAbilityBySCB",
-                START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-            auto result = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
-            HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
-            *retCode = static_cast<int32_t>(result);
-            TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB retCode: %{public}d", *retCode);
-        }, START_UI_ABILITY_TIMEOUT);
-        if (*retCode != ERR_OK || isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "start specified ability by SCB failed. isTimeout: %{public}d", isTimeout);
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB result: %{public}d", result);
+        if (result == ERR_OK) {
+            return;
+        }
+        taskScheduler_->PostAsyncTask([] {
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
                 sessionInfo.bundleName_, sessionInfo.appInstanceKey_);
-        }
-    };
-
-    taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
+        }, where);
+    });
 }
 
 void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId)
