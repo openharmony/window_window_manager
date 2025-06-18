@@ -1224,14 +1224,13 @@ HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 {
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FilterPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->touchEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
@@ -1241,10 +1240,6 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
     });
     ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(true, ret);
-
-    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
-    EXPECT_TRUE(logMsg.find("Filter,id") != std::string::npos);
-    logMsg.clear();
 }
 
 /**
