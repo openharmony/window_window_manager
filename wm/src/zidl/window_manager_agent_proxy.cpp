@@ -161,7 +161,7 @@ void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteInt32(static_cast<int32_t>(type))) {
@@ -192,7 +192,7 @@ void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
     MessageOption option(MessageOption::TF_ASYNC);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "remote is null");
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(

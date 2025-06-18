@@ -1692,7 +1692,7 @@ void WindowManager::Impl::NotifyWindowSystemBarPropertyChange(
     TLOGI(WmsLogTag::WMS_IMMS, "tanhong debug enable %{public}d.", systemBarProperty.enable_);
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners;
     {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         windowSystemBarPropertyChangedListeners = windowSystemBarPropertyChangedListeners_;
     }
     for (auto &listener : windowSystemBarPropertyChangedListeners) {
