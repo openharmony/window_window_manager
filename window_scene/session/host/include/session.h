@@ -859,6 +859,10 @@ protected:
         DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     HasRequestedVsyncFunc hasRequestedVsyncFunc_;
     RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
     WSError RequestNextVsyncWhenModeChange();

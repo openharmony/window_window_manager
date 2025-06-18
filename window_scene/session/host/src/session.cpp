@@ -3945,6 +3945,45 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     }
 }
 
+std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFromMetaData(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    if (abilityInfo == nullptr) {
+        return updateWindowModes;
+    }
+    if (IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        auto metadata = abilityInfo->metadata;
+        for (const auto& item : metadata) {
+            if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
+                updateWindowModes = ParseWindowModeFromMetaData(item.value);
+            }
+        }
+    }
+    if (updateWindowModes.empty()) {
+        updateWindowModes = abilityInfo->windowModes;
+    }
+    return updateWindowModes;
+}
+
+std::vector<AppExecFwk::SupportWindowMode> Session::ParseWindowModeFromMetaData(
+    const std::string& supportModesInFreeMultiWindow)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    std::stringstream supportModes(supportModesInFreeMultiWindow);
+    std::string supportWindowMode;
+    while (getline(supportModes, supportWindowMode, ',')) {
+        if (supportWindowMode == "fullscreen") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+        } else if (supportWindowMode == "split") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+        } else if (supportWindowMode == "floating") {
+            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        }
+    }
+    return updateWindowModes;
+}
+
 WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
 {
     bool enable = config.freeMultiWindowEnable_;
