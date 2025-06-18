@@ -5222,8 +5222,9 @@ std::vector<AppExecFwk::SupportWindowMode> SceneSessionManager::ExtractSupportWi
     const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
     std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
-    if (abilityInfo == nullptr)
+    if (abilityInfo == nullptr) {
         return updateWindowModes;
+    }
     if (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
         auto metadata = abilityInfo->metadata;
         for (auto item : metadata) {
