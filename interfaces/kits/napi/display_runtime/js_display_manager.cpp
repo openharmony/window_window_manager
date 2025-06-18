@@ -36,7 +36,6 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
-
 class JsDisplayManager {
 public:
 explicit JsDisplayManager(napi_env env) {
@@ -186,6 +185,18 @@ static napi_value RemoveVirtualScreenBlockList(napi_env env, napi_callback_info 
 {
     auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
     return (me != nullptr) ? me->OnRemoveVirtualScreenBlockList(env, info) : nullptr;
+}
+
+static napi_value ConvertRelativeCoordinateToGlobal(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnConvertRelativeCoordinateToGlobal(env, info) : nullptr;
+}
+
+static napi_value ConvertGlobalCoordinateToRelative(napi_env env, napi_callback_info info)
+{
+    auto* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnConvertGlobalCoordinateToRelative(env, info) : nullptr;
 }
 
 private:
@@ -1242,6 +1253,164 @@ napi_value OnRemoveVirtualScreenBlockList(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnConvertGlobalCoordinateToRelative(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "in");
+    Position globalPosition;
+    int64_t displayIdTemp = 0;
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid args count, need one arg at least!");
+    }
+    if (argv[0] == nullptr) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+            "Failed to get globalPosition, globalPosition is nullptr");
+    }
+    if (argc == ARGC_TWO) {
+        if (!ConvertFromJsValue(env, argv[1], displayIdTemp)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+                "Failed to convert displayIdObject to displayId.");
+        }
+        if (displayIdTemp < 0) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayId less than 0.");
+        }
+    }
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    errCode = GetPositionFromJs(env, argv[0], globalPosition);
+    if (errCode != DmErrorCode::DM_OK) {
+        return NapiThrowError(env, errCode, "Get position from js failed.");
+    }
+    RelativePosition relativePosition;
+    if (argc == ARGC_TWO) {
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+                static_cast<DisplayId>(displayIdTemp), relativePosition));
+    } else {
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelative(globalPosition,
+                relativePosition));
+    }
+    if (errCode != DmErrorCode::DM_OK) {
+        return NapiThrowError(env, errCode, "Convert global coordinate to relative failed");
+    }
+    return CreateJsRelativePositionObject(env, relativePosition);
+}
+
+napi_value CreateJsRelativePositionObject(napi_env env, RelativePosition& relativePosition)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "displayId",
+        CreateJsValue(env, static_cast<int64_t>(relativePosition.displayId)));
+    napi_set_named_property(env, objValue, "position",
+        CreateJsGlobalPositionObject(env, relativePosition.position));
+    return objValue;
+}
+
+napi_value OnConvertRelativeCoordinateToGlobal(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "in");
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    RelativePosition relativePosition;
+    std::string errMsg;
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid args count, need one arg at least!");
+    }
+
+    errCode = GetRelativePositionFromJs(env, argv[0], relativePosition);
+    if (errCode != DmErrorCode::DM_OK) {
+        return NapiThrowError(env, errCode, "Failed to get relativePosition!");
+    }
+    Position globalPosition;
+    errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<DisplayManager>().ConvertRelativeCoordinateToGlobal(relativePosition, globalPosition));
+    if (errCode != DmErrorCode::DM_OK) {
+        return NapiThrowError(env, errCode, "Convert relative coordinate to global failed");
+    }
+    return CreateJsGlobalPositionObject(env, globalPosition);
+}
+
+napi_value CreateJsGlobalPositionObject(napi_env env, Position& globalPosition)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "x", CreateJsValue(env, globalPosition.x));
+    napi_set_named_property(env, objValue, "y", CreateJsValue(env, globalPosition.y));
+    return objValue;
+}
+
+DmErrorCode GetRelativePositionFromJs(napi_env env, napi_value relativePositionObject,
+    RelativePosition& relativePosition)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    if (relativePositionObject == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get relativePosition, relativePosition is nullptr.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    napi_value displayId = nullptr;
+    napi_get_named_property(env, relativePositionObject, "displayId", &displayId);
+    int64_t displayIdTemp = 0;
+    if (!ConvertFromJsValue(env, displayId, displayIdTemp)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to displayId.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (displayIdTemp < 0) {
+        TLOGE(WmsLogTag::DMS, "DisplayId is invalid, less than 0.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    relativePosition.displayId = static_cast<uint64_t>(displayIdTemp);
+    napi_value position = nullptr;
+    napi_get_named_property(env, relativePositionObject, "position", &position);
+    return GetPositionFromJs(env, position, relativePosition.position);
+}
+
+DmErrorCode GetPositionFromJs(napi_env env, napi_value positionObject, Position& position)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value positionX = nullptr;
+    double positionXTemp = 0;
+    napi_get_named_property(env, positionObject, "x", &positionX);
+    if (!ConvertFromJsValue(env, positionX, positionXTemp)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to positionX.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (positionXTemp < INT32_MIN || positionXTemp > INT32_MAX) {
+        TLOGE(WmsLogTag::DMS, "Coordinate x exceeded the range!");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+
+    napi_value positionY = nullptr;
+    double positionYTemp = 0;
+    napi_get_named_property(env, positionObject, "y", &positionY);
+    if (!ConvertFromJsValue(env, positionY, positionYTemp)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to positionY.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    if (positionYTemp < INT32_MIN || positionYTemp > INT32_MAX) {
+        TLOGE(WmsLogTag::DMS, "Coordinate y exceeded the range!");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+
+    position.x = static_cast<int32_t>(positionXTemp);
+    position.y = static_cast<int32_t>(positionYTemp);
+    return DmErrorCode::DM_OK;
+}
+
 DmErrorCode GetVirtualScreenOptionFromJs(napi_env env, napi_value optionObject, VirtualScreenOption& option)
 {
     napi_value name = nullptr;
@@ -1647,6 +1816,14 @@ napi_value InitDisplaySourceMode(napi_env env)
     return objValue;
 }
 
+static void BindCoordinateConvertNativeFunction(napi_env env, napi_value exportObj, const char* moduleName)
+{
+    BindNativeFunction(env, exportObj, "convertRelativeCoordinateToGlobal", moduleName,
+        JsDisplayManager::ConvertRelativeCoordinateToGlobal);
+    BindNativeFunction(env, exportObj, "convertGlobalCoordinateToRelative", moduleName,
+        JsDisplayManager::ConvertGlobalCoordinateToRelative);
+}
+
 napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
 {
     TLOGD(WmsLogTag::DMS, "JsDisplayManagerInit is called");
@@ -1690,18 +1867,16 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
     BindNativeFunction(env, exportObj, "getAllDisplayPhysicalResolution", moduleName,
         JsDisplayManager::GetAllDisplayPhysicalResolution);
-    BindNativeFunction(env, exportObj, "createVirtualScreen", moduleName,
-        JsDisplayManager::CreateVirtualScreen);
-    BindNativeFunction(env, exportObj, "makeUnique", moduleName,
-        JsDisplayManager::MakeUnique);
-    BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName,
-        JsDisplayManager::DestroyVirtualScreen);
+    BindNativeFunction(env, exportObj, "createVirtualScreen", moduleName, JsDisplayManager::CreateVirtualScreen);
+    BindNativeFunction(env, exportObj, "makeUnique", moduleName, JsDisplayManager::MakeUnique);
+    BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName, JsDisplayManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsDisplayManager::SetVirtualScreenSurface);
     BindNativeFunction(env, exportObj, "addVirtualScreenBlockList", moduleName,
         JsDisplayManager::AddVirtualScreenBlockList);
     BindNativeFunction(env, exportObj, "removeVirtualScreenBlockList", moduleName,
         JsDisplayManager::RemoveVirtualScreenBlockList);
+    BindCoordinateConvertNativeFunction(env, exportObj, moduleName);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
