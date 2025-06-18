@@ -192,6 +192,7 @@ public:
     virtual ScreenPowerState GetScreenPower();
     virtual void SetFoldStatusExpandAndLocked(bool locked);
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+    virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
