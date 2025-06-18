@@ -94,7 +94,7 @@ uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName
     if (!IsMultiInstance(bundleName)) {
         return 0u;
     }
-    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
     auto iter = appInfoMap_.find(bundleName);
     if (iter != appInfoMap_.end()) {
         return iter->second.multiAppMode.maxCount;
