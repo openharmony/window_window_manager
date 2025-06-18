@@ -603,7 +603,10 @@ ohos_unittest("ws_window_manager_service_dump_test") {
   module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
 
-  sources = [ "window_manager_service_dump_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "window_manager_service_dump_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
