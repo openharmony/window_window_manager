@@ -118,8 +118,8 @@ private:
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
     bool stateChanged_ = false;
-    bool GetStateChanged() override { return stateChanged_; }
-    void SetStateChanged(bool stateChanged) override { stateChanged_ = stateChanged; }
+    void CheckIfSessionRectHasChanged(const uint32_t& callingId, const int32_t& persistentId,
+        const uint32_t& sessionMapDirty, bool& keyboardRectChanged, bool& callingSessionRectChanged) override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

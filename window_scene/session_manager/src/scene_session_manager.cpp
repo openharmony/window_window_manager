@@ -12136,25 +12136,19 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                         startingAppZOrderList.push_back(iter->second.zOrder_);
                         sceneSession->SetStartingBeforeVisible(false);
                     }
-                    if (keyboardSession != nullptr) {
-                        if(keyboardSession->GetPersistentId() == sceneSession->GetPersistentId() &&
-                            (!keyboardSession->IsVisibleForeground() ||
-                            (!iter->second.rect_.IsInvalid() && keyboardSession->GetSessionRect() != iter->second.rect_)
-                            || keyboardSession->GetStateChanged())) {
-                            keyboardRectChanged = true;
-                            keyboardSession->SetStateChanged(false);
-                        } else if (callingId == static_cast<uint32_t>(sceneSession->GetPersistentId()) &&
-                            (!iter->second.rect_.IsInvalid() && sceneSession->GetSessionRect() != iter->second.rect_)) {
-                            callingSessionRectChanged = true;
-                        }
-                    }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
+                    if (keyboardSession != nullptr &&
+                        (keyboardSession->GetPersistentId() == sceneSession->GetPersistentId() ||
+                        callingId == static_cast<uint32_t>(sceneSession->GetPersistentId()))) {
+                        keyboardSession->CheckIfSessionRectHasChanged(callingId, sceneSession->GetPersistentId(),
+                                                    sessionMapDirty_, keyboardRectChanged, callingSessionRectChanged);
+                    }
                 } else {
                     sessionMapDirty_ |= sceneSession->UpdateUIParam();
                 }
             }
             if (keyboardRectChanged || (callingSessionRectChanged && keyboardSession->IsVisibleForeground())) {
-                keyboardSession->ProcessKeyboardOccupiedAreaInfo(callingId, false, true);
+                keyboardSession->ProcessKeyboardOccupiedAreaInfo(callingId, false, keyboardRectChanged);
             }
         }
         processingFlushUIParams_.store(false);
