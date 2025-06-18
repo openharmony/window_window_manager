@@ -5850,7 +5850,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
             action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Filter,id:%{public}d", pointerEvent->GetId());
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d", pointerEvent->GetId());
         }
         pointerEvent->MarkProcessed();
     }
