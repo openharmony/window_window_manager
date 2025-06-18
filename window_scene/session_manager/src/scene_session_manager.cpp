@@ -9519,7 +9519,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
 void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
 {
     const char* const where = __func__;
-    auto task = [this, sessionInfo, where]() {
+    ffrtQueueHelper_->SubmitTask([this, sessionInfo, where] {
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: bundleName: %{public}s, "
             "moduleName: %{public}s, abilityName: %{public}s", where,
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
@@ -9529,10 +9529,17 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             want.SetParams(sessionInfo.want->GetParams());
             want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(sessionInfo.screenId_));
         }
-        AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
-    };
-
-    taskScheduler_->PostAsyncTask(task, "StartAbilityBySpecified:PID:" + sessionInfo.bundleName_);
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB result: %{public}d", result);
+        if (result == ERR_OK) {
+            return;
+        }
+        auto task = [bundleName = sessionInfo.bundleName_, appInstanceKey = sessionInfo.appInstanceKey_] {
+            MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
+                bundleName, appInstanceKey);
+        };
+        taskScheduler_->PostAsyncTask(task, where);
+    });
 }
 
 void SceneSessionManager::NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId)
@@ -15861,7 +15868,11 @@ WMError SceneSessionManager::RemoveInstanceKey(const std::string& bundleName, co
         TLOGE(WmsLogTag::WMS_LIFE, "empty instanceKey");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    MultiInstanceManager::GetInstance().RemoveInstanceKey(bundleName, instanceKey);
+    auto task = [bundleName, instanceKey] {
+        MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
+            bundleName, instanceKey);
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
     TLOGI(WmsLogTag::WMS_LIFE, "remove instanceKey:%{public}s of bundle:%{public}s",
         instanceKey.c_str(), bundleName.c_str());
     return WMError::WM_OK;
