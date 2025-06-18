@@ -1642,6 +1642,15 @@ HWTEST_F(SceneSessionTest2, HandleMoveDragEvent, TestSize.Level1)
     SessionEvent event = { SessionEvent::EVENT_DRAG };
     EXPECT_EQ(WSError::WS_OK, session->OnSessionEvent(event));
  
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = moveDragController;
+    session->moveDragController_->isStartDrag_ = true;
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    session->compatibleDragScaleFlags_ = true;
+ 
     session->SetRequestNextVsyncFunc(nullptr);
     ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
     session->HandleMoveDragEvent(reason);
@@ -1652,17 +1661,6 @@ HWTEST_F(SceneSessionTest2, HandleMoveDragEvent, TestSize.Level1)
         info1.bundleName_ = "HandleMoveDragEventRequestNextVsync";
     });
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
- 
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
-    session->moveDragController_ = moveDragController;
- 
-    session->moveDragController_->isStartDrag_ = true;
-    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    session->systemConfig_.freeMultiWindowSupport_ = true;
-    session->systemConfig_.freeMultiWindowEnable_ = true;
-    session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
-    session->compatibleDragScaleFlags_ = true;
- 
     session->HandleMoveDragEvent(reason);
     EXPECT_EQ(WSError::WS_OK, session->OnSessionEvent(event));
 }

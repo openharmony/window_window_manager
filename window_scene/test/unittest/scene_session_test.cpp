@@ -909,22 +909,19 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
 
-    SessionInfo info2;
-    info2.abilityName_ = "NotifySessionRectChange";
-    info2.bundleName_ = "NotifySessionRectChangebundle";
-    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    session->property_ = property;
-    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
-    session->moveDragController_ = moveDragController;
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = oriProperty;
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = moveDragController;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
-    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    session->systemConfig_.freeMultiWindowSupport_ = true;
-    session->systemConfig_.freeMultiWindowEnable_ = true;
-    session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
-    session->moveDragController_->isStartDrag_ = true;
-    session->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->compatibleDragScaleFlags_ = true;
+    sceneSession->NotifySessionRectChange(overlapRect, reason, 11);
+    EXPECT_EQ(sceneSession->IsDragResizeScale(reason), true);
 }
 
 /**
