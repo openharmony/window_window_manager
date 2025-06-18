@@ -5703,7 +5703,10 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             TLOGD(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
         if (IsWindowDelayRaiseEnabled()) {
-            if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+            if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+                pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
+                pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+                pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
                 TLOGI(WmsLogTag::WMS_EVENT, "Delay,id:%{public}d", pointerEvent->GetId());
             }
             pointerEvent->MarkProcessed();
@@ -5841,8 +5844,11 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
         isFiltered = mouseEventFilter_(*pointerEvent.get());
     }
     if (isFiltered) {
-        if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Filter,id:%{public}d", pointerEvent->GetId());
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d", pointerEvent->GetId());
         }
         pointerEvent->MarkProcessed();
     }
