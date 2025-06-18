@@ -119,7 +119,7 @@ public:
 
     void SetGlobalDisplayRect(const Rect& globalDisplayRect) { globalDisplayRect_ = globalDisplayRect; }
 
-    const Rect& GetGlobalDisplayRect() const { return globalDisplayRect_; }
+    Rect GetGlobalDisplayRect() const { return globalDisplayRect_; }
 
     int32_t GetCallingPid() const { return callingPid_; }
 
