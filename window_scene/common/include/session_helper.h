@@ -168,6 +168,35 @@ public:
         return type;
     }
 
+    static AreaType GetDragAreaType(int32_t pointWinX, int32_t pointWinY, int outside, const WSRect& rect)
+    {
+        constexpr uint32_t HALF = 2;
+        int32_t leftOut = -outside;
+        int32_t rightOut = rect.width_ + outside;
+        int32_t topOut = -outside;
+        int32_t bottomOut = rect.height_ + outside;
+
+        auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
+
+        AreaType type;
+        if (isInRange(leftOut, rightOut / HALF, pointWinX) &&
+            isInRange(topOut, bottomOut / HALF, pointWinY)) {
+            type = AreaType::LEFT_TOP;
+        } else if (isInRange(rightOut / HALF, rightOut, pointWinX) &&
+            isInRange(topOut, bottomOut / HALF, pointWinY)) {
+            type = AreaType::RIGHT_TOP;
+        } else if (isInRange(rightOut / HALF, rightOut, pointWinX) &&
+            isInRange(bottomOut / HALF, bottomOut, pointWinY)) {
+            type = AreaType::RIGHT_BOTTOM;
+        } else if (isInRange(leftOut, rightOut / HALF, pointWinX) &&
+            isInRange(bottomOut / HALF, bottomOut, pointWinY)) {
+            type = AreaType::LEFT_BOTTOM;
+        } else {
+            type = AreaType::UNDEFINED;
+        }
+        return type;
+    }
+
     static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
     {
         float rotation = 0.f;

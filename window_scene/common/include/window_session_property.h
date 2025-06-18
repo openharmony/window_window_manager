@@ -293,6 +293,7 @@ public:
     bool IsAdaptToEventMapping() const;
     bool IsAdaptToProportionalScale() const;
     bool IsAdaptToBackButton() const;
+    bool IsAdaptToDragScale() const;
     bool IsDragResizeDisabled() const;
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
@@ -564,6 +565,9 @@ public:
     void SetIsAdaptToBackButton(bool isAdaptToBackButton);
     bool IsAdaptToBackButton() const;
 
+    void SetIsAdaptToDragScale(bool isAdaptToDragScale);
+    bool IsAdaptToDragScale() const;
+
     void SetDisableDragResize(bool disableDragResize);
     bool IsDragResizeDisabled() const;
 
@@ -597,6 +601,7 @@ public:
         ss << "isAdaptToEventMapping_:" << isAdaptToEventMapping_ << " ";
         ss << "isAdaptToProportionalScale_:" << isAdaptToProportionalScale_ << " ";
         ss << "isAdaptToBackButton_:" << isAdaptToBackButton_<< " ";
+        ss << "isAdaptToDragScale_:" << isAdaptToDragScale_<< " ";
         ss << "disableDragResize_:" << disableDragResize_<< " ";
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
@@ -612,6 +617,7 @@ private:
     bool isAdaptToEventMapping_ { false };
     bool isAdaptToProportionalScale_ { false };
     bool isAdaptToBackButton_ { false };
+    bool isAdaptToDragScale_ { false };
     bool disableDragResize_ { false };
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };

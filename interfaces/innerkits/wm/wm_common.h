@@ -540,6 +540,7 @@ enum class DragResizeType : uint32_t {
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
     RESIZE_KEY_FRAME = 3,
+    RESIZE_SCALE = 4,
     RESIZE_MAX_VALUE,  // invalid value begin, add new value above
 };
 

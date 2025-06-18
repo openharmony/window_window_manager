@@ -689,6 +689,30 @@ HWTEST_F(MoveDragControllerTest, InitDecorValue01, TestSize.Level1)
 }
 
 /**
+ *@tc.name: GetGravity_TopLeft
+ *@tc.desc: test function : GetGravity
+ *@tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetGravity_TopLeft, TestSize.Level1)
+{
+    moveDragController->dragAreaType_ = AreaType::UNDEFINED;
+    Gravity gravity = moveDragController->GetGravity();
+    ASSERT_EQ(gravity, Gravity::TOP_LEFT);
+}
+
+/**
+ *@tc.name: GetGravity_TopRight
+ *@tc.desc: test function : GetGravity
+ *@tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetGravity_TopRight, TestSize.Level1)
+{
+    moveDragController->dragAreaType_ = AreaType::LEFT_BOTTOM;
+    Gravity gravity = moveDragController->GetGravity();
+    ASSERT_EQ(gravity, Gravity::TOP_RIGHT);
+}
+
+/**
  * @tc.name: ConsumeMoveEvent
  * @tc.desc: test function : ConsumeMoveEvent
  * @tc.type: FUNC
