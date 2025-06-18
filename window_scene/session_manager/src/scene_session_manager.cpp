@@ -9519,7 +9519,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
 void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo)
 {
     const char* const where = __func__;
-    ffrtQueueHelper_->SubmitTask([sessionInfo, where] {
+    ffrtQueueHelper_->SubmitTask([this, sessionInfo, where] {
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: bundleName: %{public}s, "
             "moduleName: %{public}s, abilityName: %{public}s", where,
             sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str());
@@ -9534,10 +9534,11 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         if (result == ERR_OK) {
             return;
         }
-        taskScheduler_->PostAsyncTask([] {
+        auto task = [bundleName = sessionInfo.bundleName_, appInstanceKey = sessionInfo.appInstanceKey_] {
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
-                sessionInfo.bundleName_, sessionInfo.appInstanceKey_);
-        }, where);
+                bundleName, appInstanceKey);
+        };
+        taskScheduler_->PostAsyncTask(task, where);
     });
 }
 
