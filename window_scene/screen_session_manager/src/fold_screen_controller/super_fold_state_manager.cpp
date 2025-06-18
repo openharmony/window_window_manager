@@ -516,7 +516,8 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         TLOGE(WmsLogTag::DMS, "screen session is null!");
         return false;
     }
-    auto screenProperty = screenSession->GetScreenProperty();
+    auto screenProperty = ScreenSessionManager::GetInstance().
+        GetPhyScreenProperty(screenSession->GetScreenId());
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {
