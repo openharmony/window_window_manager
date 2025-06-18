@@ -90,7 +90,7 @@ public:
         return isMissionDestroyed_;
     }
     
-    bool isMissionBackground() const
+    bool IsMissionBackground() const
     {
         return isMissionBackground_;
     }

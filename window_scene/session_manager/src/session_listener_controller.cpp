@@ -456,7 +456,7 @@ void SessionListenerController::NotifyMissionEvent(
             break;
         case ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND:
             NotifySessionBackground(persistentId);
-            break;            
+            break;
         default:
             break;
     }
