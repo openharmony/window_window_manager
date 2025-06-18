@@ -16,7 +16,6 @@
 #ifndef OHOS_IDL_WINDOW_COMMOH_H
 #define OHOS_IDL_WINDOW_COMMOH_H
 
-#include "../generated/native/window.h"
 #include "window.h"
 
 class IdlWindowCommon {
