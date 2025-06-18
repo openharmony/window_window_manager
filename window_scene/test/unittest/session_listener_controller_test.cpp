@@ -128,6 +128,7 @@ public:
     void TearDown() override;
     std::shared_ptr<TaskScheduler> taskScheduler_ = std::make_shared<TaskScheduler>(LISTENER_CONTROLLER_TEST_THREAD);
     std::shared_ptr<SessionListenerController> slController;
+    static sptr<SceneSessionManager> ssm_;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -146,9 +147,17 @@ private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
-void SessionListenerControllerTest::SetUpTestCase() {}
+sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
 
-void SessionListenerControllerTest::TearDownTestCase() {}
+void SessionListenerControllerTest::SetUpTestCase()
+{
+    ssm_ = &SceneSessionManager::GetInstance();
+}
+
+void SessionListenerControllerTest::TearDownTestCase()
+{
+    ssm_ = nullptr;
+}
 
 void SessionListenerControllerTest::SetUp()
 {
@@ -479,16 +488,28 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, T
 {
     std::vector<int32_t> persistentIdList1 = { 1, 2 };
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     std::vector<int32_t> persistentIdList2;
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert({ 101, sceneSession });
+    res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
+    EXPECT_EQ(res, WMError::WM_OK);
 }
 
 /**
@@ -556,13 +577,47 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     info.moduleName_ = "entry";
     info.persistentId_ = 102;
     info.appIndex_ = 0;
-    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm->sceneSessionMap_.insert({ 102, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 102, sceneSession });
     slController->RegisterSessionLifecycleListener(listener, persistentIdList);
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
-    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent03
+ * @tc.desc: NotifySessionLifecycleEvent03
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent03, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<int32_t> persistentIdList = { 103 };
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 103;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert({ 103, sceneSession });
+    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
+    slController->RegisterSessionLifecycleListener(listener, persistentIdList);
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE, info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE);
 }
 } // namespace
 } // namespace Rosen

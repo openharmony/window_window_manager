@@ -277,6 +277,17 @@ HWTEST_F(WindowProxyTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowProxyTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    WMError err = windowProxy_->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(err, WMError::WM_OK);
+}
+
+/**
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: normal function
  * @tc.type: FUNC

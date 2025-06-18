@@ -1249,10 +1249,9 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveLi
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
     uint64_t displayId, NativeDisplayManager_Rect** availableArea)
 {
-    DMError ret = DMError::DM_OK;
     if (availableArea == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
@@ -1281,8 +1280,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
         displayAvailableArea.posX_, displayAvailableArea.posY_, displayAvailableArea.width_, displayAvailableArea.height_);
     OH_SetDisplayRect(displayAvailableArea, availableAreaInfo);
     *availableArea = availableAreaInfo;
-    return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
-        NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
 }
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(NativeDisplayManager_Rect* availableArea)
@@ -1300,10 +1298,9 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(Nati
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
     uint64_t displayId, NativeDisplayManager_SourceMode* sourceMode)
 {
-    DMError ret = DMError::DM_OK;
     if (sourceMode == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input sourceMode null.");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
@@ -1318,15 +1315,14 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
     DisplaySourceMode getSourceMode = displayInfo->GetDisplaySourceMode();
     TLOGI(WmsLogTag::DMS, "[DMNDK] getSourceMode = %{public}d", getSourceMode);
     *sourceMode = static_cast<NativeDisplayManager_SourceMode>(getSourceMode);
-    return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
-        NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
 }
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64_t displayId, int32_t* x, int32_t* y)
 {
     if (x == nullptr || y == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] input x or y is null.");
-        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
     }
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
@@ -1338,7 +1334,13 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64
         TLOGE(WmsLogTag::DMS, "[DMNDK] get displayInfo null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
-    *x = displayInfo->GetX();
-    *y = displayInfo->GetY();
-    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    DisplaySourceMode getSourceMode = displayInfo->GetDisplaySourceMode();
+    if (getSourceMode == DisplaySourceMode::MAIN || getSourceMode == DisplaySourceMode::EXTEND) {
+        *x = displayInfo->GetX();
+        *y = displayInfo->GetY();
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    } else {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] just main and extend has x, y.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
 }

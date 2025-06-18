@@ -71,8 +71,8 @@ public:
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
-    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
-    void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
+    WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
+    void SetKeyboardEffectOptionChangeListener(const NotifyKeyboarEffectOptionChangeFunc& func) override;
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     bool GetIsKeyboardSyncTransactionOpen() const { return isKeyboardSyncTransactionOpen_; }
@@ -117,10 +117,13 @@ private:
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
+    void MarkOccupiedAreaAsDirty() override;
+    void ResetOccupiedAreaDirtyFlags() override;
+    uint32_t GetOccupiedAreaDirtyFlags() override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
-    NotifyKeyboarViewModeChangeFunc changeKeyboardViewModeFunc_;
+    NotifyKeyboarEffectOptionChangeFunc changeKeyboardEffectOptionFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

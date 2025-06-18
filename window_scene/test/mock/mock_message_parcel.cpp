@@ -23,6 +23,7 @@ bool g_setWriteBoolErrorFlag = false;
 bool g_setWriteInt32ErrorFlag = false;
 bool g_setWriteInt64ErrorFlag = false;
 bool g_setWriteUint32ErrorFlag = false;
+bool g_setWriteUint64ErrorFlag = false;
 bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteString16ErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
@@ -48,6 +49,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteInt32ErrorFlag = false;
     g_setWriteInt64ErrorFlag = false;
     g_setWriteUint32ErrorFlag = false;
+    g_setWriteUint64ErrorFlag = false;
     g_setWriteFloatErrorFlag = false;
     g_setWriteString16ErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
@@ -76,6 +78,11 @@ void MockMessageParcel::SetWriteInt64ErrorFlag(bool flag)
 void MockMessageParcel::SetWriteUint32ErrorFlag(bool flag)
 {
     g_setWriteUint32ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetWriteUint64ErrorFlag(bool flag)
+{
+    g_setWriteUint64ErrorFlag = flag;
 }
 
 void MockMessageParcel::SetWriteFloatErrorFlag(bool flag)
@@ -175,6 +182,15 @@ bool Parcel::WriteUint32(uint32_t value)
 {
     (void)value;
     if (g_setWriteUint32ErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
+bool Parcel::WriteUint64(uint64_t value)
+{
+    (void)value;
+    if (g_setWriteUint64ErrorFlag) {
         return false;
     }
     return true;

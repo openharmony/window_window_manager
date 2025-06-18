@@ -41,6 +41,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "session_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -69,7 +70,7 @@ constexpr int32_t UIEXTENTION_ROTATION_ANIMATION_TIME = 400;
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-        property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
@@ -139,7 +140,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     }
 
     auto usage = property_->GetUIExtensionUsage();
-    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage)) {
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
 
@@ -265,7 +266,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
         "needClearListener:%{public}d", GetPersistentId(), state_, needNotifyServer, needClearListener);
 
     auto usage = property_->GetUIExtensionUsage();
-    if ((usage == UIExtensionUsage::MODAL) || (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED)) {
+    if ((usage == UIExtensionUsage::MODAL) || SessionHelper::IsSecureUIExtension(usage)) {
         InputTransferStation::GetInstance().RemoveInputWindow(GetPersistentId());
     }
 
@@ -301,7 +302,8 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     auto ret = SendExtensionMessageToHost(
         static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER), want);
     if (ret != WMError::WM_OK) {
-        return ret;
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send unregister host window rect change listener message failed, errCode: "
+            "%{public}d", ret);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Erase in set, id: %{public}d.", GetPersistentId());
     if (context_) {
@@ -454,24 +456,20 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
 {
     WMError ret = WMError::WM_OK;
     bool isHostWindowRectChangeListenerEmpty = false;
-    bool isRectChangeUIExtListenerIdsEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
-    size_t rectChangeUIExtListenerIdsSize = 0;
     {
         std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
         ret = UnregisterListener(hostWindowRectChangeListener_, listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
         isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
         hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
     }
-    {
-        std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-        isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
-        rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
-    }
-    if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
+    if (!isHostWindowRectChangeListenerEmpty || !rectChangeUIExtListenerIds_.empty()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
             "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
+            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIds_.size());
         return ret;
     }
     AAFwk::Want dataToSend;
@@ -628,6 +626,10 @@ void WindowExtensionSessionImpl::NotifyKeyEvent(const std::shared_ptr<MMI::KeyEv
         WLOGFE("keyEvent is nullptr");
         return;
     }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", keyEvent->GetId());
+        return;
+    }
 
 #ifdef IMF_ENABLE
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
@@ -683,10 +685,34 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
     }
 }
 
+std::unique_ptr<Ace::UIContent> WindowExtensionSessionImpl::UIContentCreate(AppExecFwk::Ability* ability, void* env,
+    int isAni)
+{
+    if (isAni) {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        return  ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 1);
+}
+ 
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, token, ability);
+    return NapiSetUIContentInner(contentInfo, env, storage, type, token, ability, 0);
+}
+ 
+WMError WindowExtensionSessionImpl::NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni)
+{
+    return SetUIContentInner(contentInfo, env, storage, token, ability, false, isAni);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
@@ -696,27 +722,22 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
     return SetUIContentInner(contentName, env, storage, token, ability, true);
 }
 
-WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName, int isAni)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
     }
     {
-        std::unique_ptr<Ace::UIContent> uiContent;
-        if (ability != nullptr) {
-            uiContent = Ace::UIContent::Create(ability);
-        } else {
-            uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
-        }
+        std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
         if (uiContent == nullptr) {
             WLOGFE("failed, id: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
         auto usage = property_->GetUIExtensionUsage();
-        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        if (SessionHelper::IsSecureUIExtension(usage)) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         } else if (usage == UIExtensionUsage::EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
@@ -725,9 +746,17 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
-            uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                uiContent->InitializeByName(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         } else {
-            uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+            if (isAni) {
+                uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage, property_->GetParentId());
+            } else {
+                uiContent->Initialize(this, contentInfo, (napi_value)storage, property_->GetParentId());
+            }
         }
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
@@ -1189,7 +1218,7 @@ float WindowExtensionSessionImpl::GetDefaultDensity(const sptr<DisplayInfo>& dis
 WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool shouldHide)
 {
     if ((property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
-         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) && !shouldHide) {
+         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) && !shouldHide) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS")) {
             extensionWindowFlags_.hideNonSecureWindowsFlag = true;
             TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied in %{public}s UIExtension.",
@@ -1466,6 +1495,10 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
         TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
         return;
     }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", pointerEvent->GetId());
+        return;
+    }
     if (hostSession_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "hostSession is nullptr, windowId: %{public}d", GetWindowId());
         pointerEvent->MarkProcessed();
@@ -1500,7 +1533,7 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
 void WindowExtensionSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr, windowId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr, windowId: %{public}d", GetWindowId());
         return;
     }
     WindowSessionImpl::NotifyPointerEvent(pointerEvent);
@@ -1546,18 +1579,9 @@ void WindowExtensionSessionImpl::ProcessPointerEventWithHostWindowDelayRaise(
     bool needNotifyHostWindowToRaise = isPointerUp || !isHitTargetDraggable;
     if (needNotifyHostWindowToRaise) {
         // Send message to host window to raise hierarchy
-        auto dataHandler = GetExtensionDataHandler();
-        if (dataHandler == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is nullptr!");
-            return;
-        }
         auto businessCode = Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE;
         AAFwk::Want dataToSend;
-        auto sendResult = dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(businessCode),
-            dataToSend);
-        if (sendResult != DataHandlerErr::OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, errCode: "
-                "%{public}u", businessCode, sendResult);
+        if (SendExtensionMessageToHost(static_cast<uint32_t>(businessCode), dataToSend) != WMError::WM_OK) {
             return;
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "Notify host window to raise, id: %{public}d, isHitTargetDraggable: %{public}d, "
@@ -1572,6 +1596,10 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
 {
     if (keyEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
+        return false;
+    }
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::PREVIEW_EMBEDDED) {
+        TLOGD(WmsLogTag::WMS_EVENT, "Preview uiext does not handle event, eid:%{public}d", keyEvent->GetId());
         return false;
     }
     RefreshNoInteractionTimeoutMonitor();
@@ -1623,7 +1651,7 @@ WindowType WindowExtensionSessionImpl::GetParentWindowType() const
 void WindowExtensionSessionImpl::NotifyModalUIExtensionMayBeCovered(bool byLoadContent)
 {
     if (property_->GetUIExtensionUsage() != UIExtensionUsage::MODAL &&
-        property_->GetUIExtensionUsage() != UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        !SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
         return;
     }
 
@@ -1750,7 +1778,7 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
         state, isFullScreenWaterfallMode_.load(), rootHostWindowType, isHostWindowDelayRaiseEnabled, GetWindowId());
 }
 
-WMError WindowExtensionSessionImpl::SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data)
+WMError WindowExtensionSessionImpl::SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const
 {
     auto dataHandler = GetExtensionDataHandler();
     if (dataHandler == nullptr) {
@@ -1761,18 +1789,8 @@ WMError WindowExtensionSessionImpl::SendExtensionMessageToHost(uint32_t code, co
     if (sendResult == DataHandlerErr::OK) {
         return WMError::WM_OK;
     }
-    if (code == static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Send raise message to host window failed, businessCode: %{public}u, "
-            "errCode: %{public}u", code, sendResult);
-    } else if (code == static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Send register host window rect change listener message failed, businessCode: "
-            "%{public}u, errCode: %{public}u", code, sendResult);
-    } else if (code == static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Send unregister host window rect change listener message failed, businessCode: "
-            "%{public}u, errCode: %{public}u", code, sendResult);
-    } else {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendDataAsync failed, errCode: %{public}u", sendResult);
-    }
+    TLOGE(WmsLogTag::WMS_UIEXT, "SendDataAsync failed, businessCode: %{public}u, errCode: %{public}u", code,
+        sendResult);
     return WMError::WM_ERROR_IPC_FAILED;
 }
 
@@ -1780,52 +1798,15 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
 {
     switch (code) {
         case static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_TO_RAISE): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            auto ret = SendExtensionMessageToHost(code, data);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
+            return HandleHostWindowRaise(code, persistentId, data);
             break;
         }
         case static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            auto ret = SendExtensionMessageToHost(code, data);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                rectChangeUIExtListenerIds_.emplace(persistentId);
-            }
+            return HandleRegisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
         case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
-            TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
-            bool isHostWindowRectChangeListenerEmpty = false;
-            bool isRectChangeUIExtListenerIdsEmpty = false;
-            size_t hostWindowRectChangeListenerSize = 0;
-            size_t rectChangeUIExtListenerIdsSize = 0;
-            {
-                std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
-                rectChangeUIExtListenerIds_.erase(persistentId);
-                isRectChangeUIExtListenerIdsEmpty = rectChangeUIExtListenerIds_.empty();
-                rectChangeUIExtListenerIdsSize = rectChangeUIExtListenerIds_.size();
-            }
-            {
-                std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
-                isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
-                hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
-            }
-            if (!isHostWindowRectChangeListenerEmpty || !isRectChangeUIExtListenerIdsEmpty) {
-                TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
-                    "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
-                    hostWindowRectChangeListenerSize, rectChangeUIExtListenerIdsSize);
-                return WMError::WM_OK;
-            }
-            auto ret = SendExtensionMessageToHost(code, data);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
+            return HandleUnregisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
         default: {
@@ -1834,6 +1815,45 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
         }
     }
     return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    return SendExtensionMessageToHost(code, data);
+}
+
+WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    auto ret = SendExtensionMessageToHost(code, data);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    rectChangeUIExtListenerIds_.emplace(persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    bool isHostWindowRectChangeListenerEmpty = false;
+    size_t hostWindowRectChangeListenerSize = 0;
+    rectChangeUIExtListenerIds_.erase(persistentId);
+    {
+        std::lock_guard<std::mutex> lockListener(hostWindowRectChangeListenerMutex_);
+        isHostWindowRectChangeListenerEmpty = hostWindowRectChangeListener_.empty();
+        hostWindowRectChangeListenerSize = hostWindowRectChangeListener_.size();
+    }
+    if (!isHostWindowRectChangeListenerEmpty || !rectChangeUIExtListenerIds_.empty()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "No need to send message to host to unregister, size of "
+            "hostWindowRectChangeListener_: %{public}zu, size of rectChangeUIExtListenerIds_: %{public}zu",
+            hostWindowRectChangeListenerSize, rectChangeUIExtListenerIds_.size());
+        return WMError::WM_OK;
+    }
+    return SendExtensionMessageToHost(code, data);
 }
 
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
@@ -1972,35 +1992,6 @@ WMError WindowExtensionSessionImpl::OnHostWindowDelayRaiseStateChange(AAFwk::Wan
     return WMError::WM_OK;
 }
 
-template<typename T>
-WMError WindowExtensionSessionImpl::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
-{
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "listener is null!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "already registered!");
-        return WMError::WM_OK;
-    }
-    holder.emplace_back(listener);
-    return WMError::WM_OK;
-}
-
-template<typename T>
-WMError WindowExtensionSessionImpl::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
-{
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "listener could not be null!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    holder.erase(std::remove_if(holder.begin(), holder.end(),
-        [listener](sptr<T> registeredListener) {
-            return registeredListener == listener;
-        }), holder.end());
-    return WMError::WM_OK;
-}
-
 WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     auto rectX = data.GetIntParam(Extension::RECT_X, 0);
@@ -2020,7 +2011,6 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
         }
     }
     auto uiContent = GetUIContentSharedPtr();
-    std::lock_guard<std::mutex> lockListenerId(rectChangeUIExtListenerIdsMutex_);
     if (!rectChangeUIExtListenerIds_.empty() && uiContent != nullptr) {
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE), data,

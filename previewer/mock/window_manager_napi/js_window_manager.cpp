@@ -140,6 +140,12 @@ napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info
     return nullptr;
 }
 
+napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mock");
+    return nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -262,6 +268,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetGestureNavigationEnabled);
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
+    BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName, JsWindowManager::NotifyScreenshotEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

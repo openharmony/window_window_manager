@@ -32,14 +32,10 @@ class NativePiPWindowListener : public IPiPLifeCycle,
                             public IPiPWindowSize,
                             public IPiPStartObserver {
 public:
-    explicit NativePiPWindowListener(NativePipLifeCycleCallback callback)
-        : lifeCycleCallBack_(callback) {}
-    explicit NativePiPWindowListener(NativePipControlEventCallback callback)
-        : controlEventCallBack_(callback) {}
-    explicit NativePiPWindowListener(NativePipResizeCallback callback)
-        : windowSizeCallBack_(callback) {}
-    explicit NativePiPWindowListener(NativePipStartPipCallback callback)
-        : pipStartCallback_(callback) {}
+    explicit NativePiPWindowListener(NativePipLifeCycleCallback callback) : lifeCycleCallBack_(callback) {}
+    explicit NativePiPWindowListener(NativePipControlEventCallback callback) : controlEventCallBack_(callback) {}
+    explicit NativePiPWindowListener(NativePipResizeCallback callback) : windowSizeCallBack_(callback) {}
+    explicit NativePiPWindowListener(NativePipStartPipCallback callback) : pipStartCallback_(callback) {}
     ~NativePiPWindowListener();
     NativePipLifeCycleCallback GetLifeCycleCallbackRef() const { return lifeCycleCallBack_; }
     NativePipControlEventCallback GetControlEventCallbackRef() const { return controlEventCallBack_; }

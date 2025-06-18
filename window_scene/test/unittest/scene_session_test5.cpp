@@ -2315,7 +2315,7 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_01, TestSize.Level1)
     const SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = nullptr;
-    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 0);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -2330,7 +2330,7 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_02, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
     sceneSession->moveDragController_->isStartMove_ = true;
-    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 0);
     EXPECT_EQ(result, WSError::WS_ERROR_REPEAT_OPERATION);
 }
 
@@ -2345,7 +2345,22 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_03, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
     sceneSession->moveDragController_->isStartMove_ = false;
-    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 0);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_04
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_04, TestSize.Level1)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_->isStartMove_ = false;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500, 999);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 

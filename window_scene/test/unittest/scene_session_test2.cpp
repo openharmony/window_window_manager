@@ -1577,30 +1577,6 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckGetAvoidAreaAvailable
- * @tc.desc: CheckGetAvoidAreaAvailable
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, CheckGetAvoidAreaAvailable, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CheckGetAvoidAreaAvailable";
-    info.bundleName_ = "CheckGetAvoidAreaAvailable";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-}
-
-/**
  * @tc.name: SetWindowAnimationFlag
  * @tc.desc: SetWindowAnimationFlag
  * @tc.type: FUNC

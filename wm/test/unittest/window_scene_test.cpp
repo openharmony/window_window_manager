@@ -621,6 +621,31 @@ HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
 }
+
+/**
+ * @tc.name: SetNavDestinationInfo01
+ * @tc.desc: SetNavDestinationInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo01, TestSize.Level1)
+{
+    std::string navInfo = "testInfo";
+    auto ret = scene_->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetNavDestinationInfo02
+ * @tc.desc: SetNavDestinationInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo02, TestSize.Level1)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::string navInfo = "testInfo";
+    auto ret = scene->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

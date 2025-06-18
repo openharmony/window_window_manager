@@ -495,6 +495,34 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, TestSize.Level1
 }
 
 /**
+ * @tc.name: CheckIfNeedRaiseCallingSession02
+ * @tc.desc: CheckIfNeedRaiseCallingSession02
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckIfNeedRaiseCallingSession02";
+    info.bundleName_ = "CheckIfNeedRaiseCallingSession02";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(keyboardSession, nullptr);
+    ASSERT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+
+
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(callingSession, nullptr);
+    callingSession->isSubWinowResizingOrMoving_ = true;
+    callingSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    auto ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, false);
+    EXPECT_EQ(ret, true);
+
+    callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, false);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: FlushUIParams03
  * @tc.desc: FlushUIParams03
  * @tc.type: FUNC

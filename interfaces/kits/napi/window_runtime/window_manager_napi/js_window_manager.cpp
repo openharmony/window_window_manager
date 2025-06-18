@@ -179,6 +179,13 @@ napi_value JsWindowManager::GetGlobalWindowMode(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnGetGlobalWindowMode(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetTopNavDestinationName(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -201,6 +208,12 @@ napi_value JsWindowManager::ShiftAppWindowTouchEvent(napi_env env, napi_callback
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnShiftAppWindowTouchEvent(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenshotEvent(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -1374,6 +1387,48 @@ napi_value JsWindowManager::OnGetGlobalWindowMode(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    int32_t windowId = 0;
+    if (!ConvertFromJsValue(env, argv[0], windowId) || windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    std::string topNavDestName;
+    WMError retErrCode = WMError::WM_OK;
+    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
+        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
+            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+    };
+    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (retErrCode != WMError::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
+                    where, static_cast<int32_t>(retErrCode), windowId);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                return;
+            }
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
+                where, topNavDestName.c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, topNavDestName));
+        };
+    napi_value result = nullptr;
+    auto asyncTask = CreateAsyncTask(env, nullptr,
+        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopNavDestinationName", env, std::move(asyncTask));
+    return result;
+}
+
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1558,6 +1613,46 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     return result;
 }
 
+napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t type = static_cast<int32_t>(ScreenshotEventType::END);
+    if (!ConvertFromJsValue(env, argv[0], type) ||
+        type < static_cast<int32_t>(ScreenshotEventType::START) ||
+        type >= static_cast<int32_t>(ScreenshotEventType::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    ScreenshotEventType screenshotEventType = static_cast<ScreenshotEventType>(type);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [errCodePtr, screenshotEventType, where] {
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().NotifyScreenshotEvent(screenshotEventType));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end, event: %{public}d, result: %{public}d",
+            where, screenshotEventType, *errCodePtr);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnNotifyScreenshotEvent",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1572,6 +1667,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowType", WindowTypeInit(env));
     napi_set_named_property(env, exportObj, "AvoidAreaType", AvoidAreaTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
+    napi_set_named_property(env, exportObj, "ScreenshotEventType", ScreenshotEventTypeInit(env));
     napi_set_named_property(env, exportObj, "ColorSpace", ColorSpaceInit(env));
     napi_set_named_property(env, exportObj, "WindowStageEventType", WindowStageEventTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnchor", WindowAnchorInit(env));
@@ -1611,6 +1707,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);
+    BindNativeFunction(env, exportObj, "getTopNavDestinationName", moduleName,
+        JsWindowManager::GetTopNavDestinationName);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
@@ -1619,6 +1717,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetStartWindowBackgroundColor);
     BindNativeFunction(env, exportObj, "shiftAppWindowTouchEvent", moduleName,
         JsWindowManager::ShiftAppWindowTouchEvent);
+    BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName,
+        JsWindowManager::NotifyScreenshotEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

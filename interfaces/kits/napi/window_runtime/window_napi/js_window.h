@@ -233,6 +233,7 @@ public:
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value IsImmersiveLayout(napi_env env, napi_callback_info info);
     static napi_value SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
@@ -442,6 +443,7 @@ private:
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnIsImmersiveLayout(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);

@@ -707,6 +707,11 @@ HWTEST_F(WindowSessionImplTest5, SetFollowScreenChange, Function | SmallTest | L
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
     ret = window->SetFollowScreenChange(true);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
@@ -1103,6 +1108,89 @@ HWTEST_F(WindowSessionImplTest5, SetIntentParam, Function | SmallTest | Level2)
     window->SetIntentParam(intentParam, testCallback, isColdStart);
     EXPECT_EQ(window->isColdStart_, true);
     EXPECT_EQ(window->intentParam_, intentParam);
+}
+
+/**
+ * @tc.name: SetNavDestinationInfo
+ * @tc.desc: SetNavDestinationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetNavDestinationInfo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetNavDestinationInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    std::string navInfo = "testInfo";
+    window->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(window->navDestinationInfo_, navInfo);
+}
+
+/**
+ * @tc.name: OnNewWant01
+ * @tc.desc: OnNewWant01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, OnNewWant01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnNewWant01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    std::string navInfo = "testInfo";
+    AAFwk::Want want;
+    want.SetParam(AAFwk::Want::ATOMIC_SERVICE_SHARE_ROUTER, navInfo);
+    window->OnNewWant(want);
+
+    EXPECT_EQ(window->navDestinationInfo_, "");
+}
+
+/**
+ * @tc.name: OnNewWant02
+ * @tc.desc: OnNewWant when uiContent is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, OnNewWant02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnNewWant02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    std::string navInfo = "testInfo";
+    AAFwk::Want want;
+    want.SetParam(AAFwk::Want::ATOMIC_SERVICE_SHARE_ROUTER, navInfo);
+    window->uiContent_ = nullptr;
+    window->OnNewWant(want);
+
+    EXPECT_EQ(window->navDestinationInfo_, "testInfo");
+}
+
+/**
+ * @tc.name: NapiSetUIContent01
+ * @tc.desc: NapiSetUIContent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NapiSetUIContent01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NapiSetUIContent01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"NapiSetUIContent01", "NapiSetUIContent01", "NapiSetUIContent01"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+
+    std::string navInfo = "testInfo";
+    window->SetNavDestinationInfo(navInfo);
+
+    window->NapiSetUIContent("info", (napi_env)nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr);
+    EXPECT_EQ(window->navDestinationInfo_, "");
 }
 } // namespace
 } // namespace Rosen

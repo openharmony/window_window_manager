@@ -35,8 +35,13 @@ struct WebPiPContent {
   buildXComponent() {
     XComponent({ id: this.xComponentId, type: this.xComponentType, controller: this.xComponentController })
       .onLoad(() => {
-        pip.initWebXComponentController(this.xComponentController, this.xComponentController.getXComponentSurfaceId());
-        console.debug(TAG, 'WebXComponent onLoad done');
+        try {
+          pip.initWebXComponentController(this.xComponentController,
+            this.xComponentController.getXComponentSurfaceId());
+          console.debug(TAG, 'WebXComponent onLoad done');
+        } catch (error) {
+          console.error(TAG, 'WebXComponent onLoad failed');
+        }
       })
       .size({ width: '100%', height: '100%' })
       .backgroundColor(Color.Transparent);

@@ -50,12 +50,12 @@ public:
         taskMap_[taskName] = std::move(handle);
     }
     
-    void RemoveTask(const std::string& taskName)
+    void RemoveTask(const std::string& taskName, std::unique_ptr<ffrt::queue>& ffrtQueue)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (auto iter = taskMap_.find(taskName); iter != taskMap_.end()) {
             if (iter->second != nullptr) {
-                auto ret = ffrt::skip(iter->second);
+                auto ret = ffrtQueue->cancel(iter->second);
                 if (ret != 0) {
                     WLOGI("Failed to cancel task, taskName=%{public}s, retcode=%{public}d", taskName.c_str(), ret);
                 }
@@ -115,7 +115,7 @@ void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& t
 
 void WSFFRTHelper::CancelTask(const std::string& taskName)
 {
-    taskHandleMap_->RemoveTask(taskName);
+    taskHandleMap_->RemoveTask(taskName, ffrtQueue_);
 }
 
 bool WSFFRTHelper::IsTaskExisted(const std::string& taskName) const

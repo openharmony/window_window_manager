@@ -41,6 +41,7 @@ enum class RegisterListenerType : uint32_t {
     KEYBOARD_DID_HIDE_CB,
     TOUCH_OUTSIDE_CB,
     SCREENSHOT_EVENT_CB,
+    SCREENSHOT_APP_EVENT_CB,
     DIALOG_TARGET_TOUCH_CB,
     DIALOG_DEATH_RECIPIENT_CB,
     WINDOW_STATUS_CHANGE_CB,
@@ -93,6 +94,8 @@ private:
     WmErrorCode ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
+        napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessScreenshotAppEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);

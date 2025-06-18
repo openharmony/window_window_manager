@@ -61,10 +61,6 @@ bool TraverseFuncTest(const sptr<SceneSession>& session)
     return true;
 }
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
-
 void SceneSessionManagerTest9::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
