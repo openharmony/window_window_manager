@@ -514,7 +514,7 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
         moveDragProperty_.targetRect_.ToString().c_str(), trans.first, trans.second);
 }
 
-Gravity MoveDragController::GetGravity()
+Gravity MoveDragController::GetGravity() const
 {
     auto iter = GRAVITY_MAP.find(dragAreaType_);
     if (iter != GRAVITY_MAP.end()) {
