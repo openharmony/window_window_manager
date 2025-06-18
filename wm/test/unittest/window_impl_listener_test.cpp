@@ -108,6 +108,20 @@ HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, TestSize.Level1)
     window_->UnregisterDialogTargetTouchListener(dialogTargetTouchListener);
     ASSERT_EQ(window_->dialogTargetTouchListeners_[window_->GetWindowId()].size(), 0);
 }
+
+/**
+ * @tc.name: InterfacesRegisterUnregister02
+ * @tc.desc: test all interfaces listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister02, TestSize.Level1)
+{
+    sptr<IScreenshotAppEventListener> screenshotAppEventListener = new IScreenshotAppEventListener();
+    window_->RegisterScreenshotAppEventListener(screenshotAppEventListener);
+    EXPECT_EQ(window_->screenshotAppEventListeners_[window_->GetWindowId()].size(), 1);
+    window_->UnregisterScreenshotAppEventListener(screenshotAppEventListener);
+    EXPECT_EQ(window_->screenshotAppEventListeners_[window_->GetWindowId()].size(), 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

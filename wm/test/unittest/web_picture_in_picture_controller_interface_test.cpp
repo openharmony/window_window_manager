@@ -34,7 +34,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    int num = 0;
     sptr<WebPictureInPictureControllerInterface> controller = nullptr;
+    PiPConfig pipConfig{};
 };
 
 void WebPictureInPictureControllerInterfaceTest::SetUpTestCase()
@@ -47,24 +49,18 @@ void WebPictureInPictureControllerInterfaceTest::TearDownTestCase()
 
 void WebPictureInPictureControllerInterfaceTest::SetUp()
 {
-    uint32_t mainWindowId = 100;
-    PiPTemplateType pipTemplateType = PiPTemplateType::VIDEO_PLAY;
-    uint32_t width = 100;
-    uint32_t height = 150;
-    std::vector<uint32_t> controlGroup = {101};
-    int num = 0;
-    napi_env env = reinterpret_cast<napi_env>(&num);
+    pipConfig.mainWindowId = 100;
+    pipConfig.pipTemplateType = 0;
+    pipConfig.width = 100;
+    pipConfig.height = 150;
+    pipConfig.controlGroup = {101};
+    pipConfig.env = reinterpret_cast<napi_env>(&num);
     controller = sptr<WebPictureInPictureControllerInterface>::MakeSptr();
-    controller->Create();
-    controller->SetMainWindowId(mainWindowId);
-    controller->SetTemplateType(pipTemplateType);
-    controller->SetRect(width, height);
-    controller->SetControlGroup(controlGroup);
-    controller->SetNapiEnv(env);
 }
 
 void WebPictureInPictureControllerInterfaceTest::TearDown()
 {
+    pipConfig = {};
     controller = nullptr;
 }
 
@@ -91,64 +87,56 @@ namespace {
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, Create, TestSize.Level1)
 {
-    controller->isPipEnabled_ = false;
-    WMError ret = controller->Create();
-    controller->StartPip(0);
-    controller->isPipEnabled_ = true;
-    EXPECT_EQ(WMError::WM_OK, ret);
+    pipConfig.mainWindowId = 0;
+    WMError ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.mainWindowId = 100;
+    pipConfig.width = 0;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.height = 0;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.width = 100;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.height = 150;
+    pipConfig.env = nullptr;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    int num = 0;
+    pipConfig.env = reinterpret_cast<napi_env>(&num);
+    pipConfig.pipTemplateType = 5;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.pipTemplateType = 0;
+    pipConfig.controlGroup = {101, 102, 201, 202};
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.controlGroup = {201};
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    pipConfig.pipTemplateType = 1;
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    pipConfig.pipTemplateType = 0;
+    pipConfig.controlGroup = {101, 102};
+    ret = controller->Create(pipConfig);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
- * @tc.name: SetMainWindowId
- * @tc.desc: SetMainWindowId
+ * @tc.name: StartPip
+ * @tc.desc: StartPip
  * @tc.type: FUNC
  */
-HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetMainWindowId, TestSize.Level1)
+HWTEST_F(WebPictureInPictureControllerInterfaceTest, StartPip, TestSize.Level1)
 {
-    controller->Create();
-    controller->isPipEnabled_ = false;
-    WMError ret = controller->SetMainWindowId(0);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    controller->isPipEnabled_ = true;
-    ret = controller->SetMainWindowId(0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller->SetMainWindowId(100);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: SetTemplateType
- * @tc.desc: SetTemplateType
- * @tc.type: FUNC
- */
-HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetTemplateType, TestSize.Level1)
-{
-    controller->Create();
-    controller->isPipEnabled_ = false;
-    PiPTemplateType pipTemplateType = PiPTemplateType::VIDEO_PLAY;
-    WMError ret = controller->SetTemplateType(pipTemplateType);
-    controller->isPipEnabled_ = true;
-    ret = controller->SetTemplateType(pipTemplateType);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: SetRect
- * @tc.desc: SetRect
- * @tc.type: FUNC
- */
-HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetRect, TestSize.Level1)
-{
-    controller->Create();
-    controller->isPipEnabled_ = false;
-    WMError ret = controller->SetRect(100, 150);
-    controller->isPipEnabled_ = true;
-    ret = controller->SetRect(0, 150);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller->SetRect(100, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = controller->SetRect(100, 150);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    WMError ret = controller->StartPip(0);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
+    ret = controller->StartPip(0);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_CREATE_FAILED);
 }
 
 /**
@@ -158,11 +146,11 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, SetRect, TestSize.Level1)
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->StopPip();
-    controller->sptrWebPipController_ = nullptr;
+    WMError ret = controller->StopPip();
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
     ret = controller->StopPip();
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_STATE_ABNORMALLY);
 }
 
 /**
@@ -172,13 +160,17 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, StopPip, TestSize.Level1)
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->UpdateContentSize(10, 20);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    controller->sptrWebPipController_ = nullptr;
-    ret = controller->UpdateContentSize(10, 20);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
+    WMError ret =controller->UpdateContentSize(0, 0);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ret =controller->UpdateContentSize(0, 10);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ret =controller->UpdateContentSize(10, 0);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ret =controller->UpdateContentSize(10, 10);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
+    ret =controller->UpdateContentSize(10, 10);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -188,16 +180,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdateContentSize, TestSize
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, TestSize.Level1)
 {
-    controller->StartPip(0);
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto status = PiPControlStatus::PAUSE;
-    controller->sptrWebPipController_->pipOption_->pipControlStatusInfoList_.clear();
-    controller->UpdatePiPControlStatus(controlType, status);
-    EXPECT_EQ(controller->sptrWebPipController_->pipOption_->pipControlStatusInfoList_[0].status,
-        PiPControlStatus::PAUSE);
-    controller->sptrWebPipController_ = nullptr;
-    controller->UpdatePiPControlStatus(controlType, status);
-    EXPECT_EQ(controller->sptrWebPipController_, nullptr);
+    WMError ret =controller->UpdatePiPControlStatus(controlType, status);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
+    ret =controller->UpdatePiPControlStatus(controlType, status);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -207,14 +196,12 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UpdatePiPControlStatus, Tes
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestSize.Level1)
 {
-    controller->StartPip(0);
     auto controlType = PiPControlType::VIDEO_PREVIOUS;
-    controller->setPiPControlEnabled(controlType, true);
-    controller->setPiPControlEnabled(controlType, false);
-
-    controller->sptrWebPipController_ = nullptr;
-    controller->setPiPControlEnabled(controlType, true);
-    EXPECT_EQ(controller->sptrWebPipController_, nullptr);
+    WMError ret =controller->setPiPControlEnabled(controlType, true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+    controller->Create(pipConfig);
+    ret = controller->setPiPControlEnabled(controlType, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -224,13 +211,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, setPiPControlEnabled, TestS
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->RegisterStartPipListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = controller->RegisterStartPipListener(PipStartPipCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -240,8 +227,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterStartPipListener, T
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -250,7 +237,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener,
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     ret = controller->UnregisterStartPipListener(PipStartPipCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -260,13 +247,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterStartPipListener,
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->RegisterLifeCycleListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -276,8 +263,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterLifeCycleListener, 
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -286,7 +273,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     controller->sptrWebPipController_ = nullptr;
     ret = controller->UnregisterLifeCycleListener(PipLifeCycleCallback);
@@ -300,13 +287,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterLifeCycleListener
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->RegisterControlEventListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = controller->RegisterControlEventListener(PipControlEventCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -316,8 +303,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterControlEventListene
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -326,7 +313,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListe
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     ret = controller->UnregisterControlEventListener(PipControlEventCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     controller->sptrWebPipController_ = nullptr;
     ret = controller->UnregisterControlEventListener(PipControlEventCallback);
@@ -340,13 +327,13 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterControlEventListe
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterResizeListener(PipResizeCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->RegisterResizeListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = controller->RegisterResizeListener(PipResizeCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
 /**
@@ -356,8 +343,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, RegisterResizeListener, Tes
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterResizeListener(PipResizeCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -366,7 +353,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, T
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     ret = controller->UnregisterResizeListener(PipResizeCallback);
-    EXPECT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     controller->sptrWebPipController_ = nullptr;
     ret = controller->UnregisterResizeListener(PipResizeCallback);
@@ -380,8 +367,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterResizeListener, T
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterStartPipListener(PipStartPipCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterStartPipListener(PipStartPipCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterAllPiPStart();
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -399,8 +386,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPStart, Test
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterLifeCycleListener(PipLifeCycleCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterAllPiPLifecycle();
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -418,8 +405,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPLifecycle, 
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObserver, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterControlEventListener(PipControlEventCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterControlEventListener(PipControlEventCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterAllPiPControlObserver();
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -437,8 +424,8 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPControlObse
  */
 HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnregisterAllPiPWindowSize, TestSize.Level1)
 {
-    controller->StartPip(0);
-    auto ret = controller->RegisterResizeListener(PipResizeCallback);
+    controller->Create(pipConfig);
+    WMError ret = controller->RegisterResizeListener(PipResizeCallback);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = controller->UnregisterAllPiPWindowSize();
     EXPECT_EQ(WMError::WM_OK, ret);

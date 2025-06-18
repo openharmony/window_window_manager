@@ -1,0 +1,88 @@
+# Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../../../windowmanager_aafwk.gni")
+
+config("scene_session_manager_common_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "${window_base_path}/utils/include",
+    "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/interfaces/innerkits/wm",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/window_scene/interfaces/include",
+  ]
+}
+
+config("scene_session_manager_kit_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [ "scene_session_manager_ani/include" ]
+}
+
+# lib generate
+ohos_shared_library("scenesessionmanagerani_kit") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "scene_session_manager_ani/src/ani_err_utils.cpp",
+    "scene_session_manager_ani/src/ani_scene_session_manager.cpp",
+    "scene_session_manager_ani/src/ani_scene_session_utils.cpp",
+  ]
+
+  configs = [
+    ":scene_session_manager_common_config",
+    ":scene_session_manager_kit_public_config",
+    "${window_base_path}/resources/config/build:coverage_flags",
+  ]
+
+  public_configs = [ ":scene_session_manager_kit_public_config" ]
+
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
+    "${window_base_path}/wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "runtime_core:ani",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+group("scene_session_manager_ani") {
+  deps = [
+    ":scenesessionmanagerani_kit",
+  ]
+}

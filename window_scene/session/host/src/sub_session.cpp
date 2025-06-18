@@ -126,6 +126,18 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         HandleCrossMoveTo(globaleRect);
         return;
     }
+
+    if (IsSessionForeground() && (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
+        SetOriPosYBeforeRaisedByKeyboard(0);
+        const WSRect& winRect = GetSessionRect();
+        if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
+            isSubWinowResizingOrMoving_ = true;
+        }
+        if (reason == SizeChangeReason::RESIZE && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
+            isSubWinowResizingOrMoving_ = true;
+        }
+    }
+
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
 
@@ -150,6 +162,7 @@ WSError SubSession::Hide(bool needSyncHide)
             TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        session->isSubWinowResizingOrMoving_ = false;
         TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
@@ -335,6 +348,36 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
         }
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, const sptr<ScreenSession>& screenSession)
+{
+    if (!screenSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, ScreenSession is null", GetPersistentId());
+        return;
+    }
+    auto surfaceNode = GetSurfaceNodeForMoveDrag();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
+        return;
+    }
+    DisplayId displayId = screenSession->GetDisplayId();
+    if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
+        AutoRSTransaction trans(GetRSUIContext());
+        surfaceNode->SetPositionZ(GetZOrder());
+        screenSession->GetDisplayNode()->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
+        surfaceNode->SetIsCrossNode(true);
+        cloneNodeCountDuringCross_.fetch_add(1);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
+            "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
+    } else if (reason == SizeChangeReason::DRAG_END) {
+        surfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+        screenSession->GetDisplayNode()->RemoveCrossScreenChild(surfaceNode);
+        surfaceNode->SetIsCrossNode(false);
+        cloneNodeCountDuringCross_.fetch_sub(1);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window from display:%{public}" PRIu64 " persistentId:%{public}d, "
+            "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
+    }
 }
 
 WSError SubSession::SetSubWindowZLevel(int32_t zLevel)

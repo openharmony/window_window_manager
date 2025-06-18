@@ -20,6 +20,7 @@
 #include "mock_uicontent.h"
 #include <viewport_config.h>
 #include "root_scene.h"
+#include "screen_scene.h"
 
 #include "app_mgr_client.h"
 #include "mock_uicontent.h"
@@ -584,6 +585,46 @@ HWTEST_F(RootSceneTest, GetStatusBarHeight, TestSize.Level1)
     height = rootScene.GetStatusBarHeight();
     EXPECT_EQ(100, height);
 }
+
+/**
+ * @tc.name: AddRootScene
+ * @tc.desc: For AddRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, AddRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    sptr<ScreenScene> screenScene = sptr<ScreenScene>::MakeSptr("AddRootScene");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    wptr<Window> weakWindow1(screenScene);
+    rootScene->AddRootScene(1, weakWindow);
+    rootScene->AddRootScene(12, weakWindow1);
+
+    auto res = rootScene->GetUIContentByDisplayId(1);
+    ASSERT_EQ(res.second, true);
+    res = rootScene->GetUIContentByDisplayId(12);
+}
+
+/**
+ * @tc.name: RemoveRootScene
+ * @tc.desc: For RemoveRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RemoveRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    rootScene->AddRootScene(0, weakWindow);
+
+    auto res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, true);
+    rootScene->RemoveRootScene(0);
+    res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, false);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

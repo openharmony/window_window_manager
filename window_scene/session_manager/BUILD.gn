@@ -87,6 +87,8 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
     "src/zidl/session_lifecycle_listener_stub.cpp",
+    "src/zidl/session_router_stack_listener_stub.cpp",
+    "src/zidl/session_router_stack_listener_proxy.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
@@ -135,6 +137,7 @@ ohos_shared_library("scene_session_manager") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",

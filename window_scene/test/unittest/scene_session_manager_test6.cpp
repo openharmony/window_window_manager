@@ -61,7 +61,7 @@ bool SceneSessionManagerTest6::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest6::callbackFunc_ =
     [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
+void WindowChangedFuncTest6(int32_t persistentId, WindowUpdateType type) {}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
@@ -389,6 +389,37 @@ HWTEST_F(SceneSessionManagerTest6, UpdateWindowMode, TestSize.Level1)
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->UpdateWindowMode(2, 0);
     EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: GetTopNavDestinationName
+ * @tc.desc: test GetTopNavDestinationName whether get the top nav destination name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetTopNavDestinationName, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+
+    std::string topNavDestName;
+    EXPECT_EQ(ssm_->GetTopNavDestinationName(1000, topNavDestName), WMError::WM_ERROR_INVALID_WINDOW);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    EXPECT_EQ(ssm_->GetTopNavDestinationName(2, topNavDestName), WMError::WM_ERROR_INVALID_OPERATION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->sessionStage_ = nullptr;
+    EXPECT_EQ(ssm_->GetTopNavDestinationName(2, topNavDestName), WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_EQ(ssm_->GetTopNavDestinationName(2, topNavDestName), WMError::WM_OK);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
 }
 
 /**
@@ -1251,11 +1282,11 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo05, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSessionVisibilityInfo
- * @tc.desc: SetSessionVisibilityInfo
+ * @tc.name: SetSessionVisibilityInfo01
+ * @tc.desc: SetSessionVisibilityInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo01, TestSize.Level1)
 {
     sptr<SceneSession> session = nullptr;
     WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
@@ -1274,6 +1305,35 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo, TestSize.Level1)
     ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
     ssm_->windowVisibilityListenerSessionSet_.insert(1);
     ssm_->SetSessionVisibilityInfo(session, visibleState, windowVisibilityInfos, visibilityInfo);
+}
+
+/**
+ * @tc.name: SetSessionVisibilityInfo02
+ * @tc.desc: SetSessionVisibilityInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo02, TestSize.Level1)
+{
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    std::string visibilityInfo = "";
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.callerPersistentId_ = 2;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    session1->persistentId_ = 1;
+    session2->persistentId_ = 2;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ 1, session1 });
+    ssm_->sceneSessionMap_.insert({ 2, session2 });
+    ssm_->windowVisibilityListenerSessionSet_.clear();
+    ssm_->windowVisibilityListenerSessionSet_.insert(1);
+    ssm_->SetSessionVisibilityInfo(session1, visibleState, windowVisibilityInfos, visibilityInfo);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
@@ -1301,7 +1361,7 @@ HWTEST_F(SceneSessionManagerTest6, SendTouchEvent, TestSize.Level1)
     ret = ssm_->SendTouchEvent(pointerEvent, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->RegisterWindowChanged(WindowChangedFuncTest);
+    ssm_->RegisterWindowChanged(WindowChangedFuncTest6);
 }
 
 /**

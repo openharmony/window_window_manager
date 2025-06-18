@@ -168,6 +168,18 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionAll, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpSesGetFloatWidthsionAll
+ * @tc.desc: Get Float Width
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceDumpTest, GetFloatWidth, TestSize.Level1)
+{
+    float value = 0.1234;
+    std::string strValue = ssm_->GetFloatWidth(5, value);
+    ASSERT_EQ("0.123", strValue);
+}
+
+/**
  * @tc.name: DumpSessionWithId
  * @tc.desc: ScreenSesionManager dump session with id
  * @tc.type: FUNC

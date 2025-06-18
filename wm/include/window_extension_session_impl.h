@@ -65,6 +65,11 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
 
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    WMError NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni);
+    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
@@ -167,8 +172,13 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
-    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data);
+    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
+    WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -196,8 +206,8 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false, int isAni = 0);
     void RegisterDataConsumer();
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
@@ -206,8 +216,6 @@ private:
     WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
-    template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*

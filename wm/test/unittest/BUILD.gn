@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
+    ":wm_oh_window_pip_test",
     ":wm_oh_window_test",
     ":wm_pattern_detach_callback_proxy_test",
     ":wm_pattern_detach_callback_test",
@@ -86,8 +87,8 @@ test_external_deps = [
   "ability_runtime:ability_context_native",
   "ability_runtime:ability_manager",
   "ability_runtime:app_context",
-  "ace_engine:ace_uicontent",
   "accessibility:accessibility_common",
+  "ace_engine:ace_uicontent",
   "bundle_framework:appexecfwk_base",
   "c_utils:utils",
   "googletest:gmock",
@@ -377,14 +378,16 @@ ohos_unittest("wm_window_impl_listener_test") {
   external_deps = test_external_deps
 }
 
-ohos_unittest("wm_window_proxy_test") {
-  module_out_path = module_out_path
+if (!window_manager_use_sceneboard) {
+  ohos_unittest("wm_window_proxy_test") {
+    module_out_path = module_out_path
 
-  sources = [ "window_proxy_test.cpp" ]
+    sources = [ "window_proxy_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+    deps = [ ":wm_unittest_common" ]
 
-  external_deps = test_external_deps
+    external_deps = test_external_deps
+  }
 }
 
 ohos_unittest("wm_window_stub_test") {
@@ -557,8 +560,7 @@ ohos_unittest("wm_picture_in_picture_option_test") {
 ohos_unittest("wm_web_picture_in_picture_controller_interface_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-    [ "${window_base_path}/interfaces/innerkits/wm/" ]
+  include_dirs = [ "${window_base_path}/interfaces/innerkits/wm/" ]
 
   sources = [ "web_picture_in_picture_controller_interface_test.cpp" ]
 
@@ -581,6 +583,26 @@ ohos_unittest("wm_web_picture_in_picture_controller_test") {
   sources = [ "web_picture_in_picture_controller_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_oh_window_pip_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
+
+  sources = [ "oh_window_pip_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/wm:libpip_ndk",
+  ]
 
   external_deps = [
     "ability_runtime:runtime",

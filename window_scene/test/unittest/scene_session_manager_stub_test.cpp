@@ -2038,6 +2038,31 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetStartWindowBackgroundColor, TestS
 }
 
 /**
+ * @tc.name: HandleNotifyScreenshotEvent
+ * @tc.desc: test HandleNotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleNotifyScreenshotEvent, TestSize.Level1)
+{
+    ASSERT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(2);
+    res = stub_->HandleNotifyScreenshotEvent(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_SCREEN_SHOT_EVENT);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleAddExtensionWindowStageToSCB
  * @tc.desc: test HandleAddExtensionWindowStageToSCB
  * @tc.type: FUNC

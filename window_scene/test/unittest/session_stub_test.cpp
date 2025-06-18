@@ -36,6 +36,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+const uint32_t MAX_INT = -1;
 }
 
 namespace OHOS::Accessibility {
@@ -1082,6 +1083,26 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
 }
 
 /**
+ * @tc.name: HandleUpdateScreenshotAppEventRegistered
+ * @tc.desc: sessionStub HandleUpdateScreenshotAppEventRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(u"OHOS.ISession");
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardWillShowRegistered
  * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
  * @tc.type: FUNC
@@ -1157,25 +1178,6 @@ HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
     MessageParcel reply;
     auto result = session_->HandleGetIsHighlighted(data, reply);
     ASSERT_EQ(result, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleChangeKeyboardViewMode
- * @tc.desc: sessionStub HandleChangeKeyboardViewMode
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleChangeKeyboardViewMode, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-    data.WriteUint32(static_cast<uint32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE));
-    result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
-    data.WriteUint32(static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END));
-    result = session_->HandleChangeKeyboardViewMode(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -1419,25 +1421,32 @@ HWTEST_F(SessionStubTest, HandleStartMovingWithCoordinate, Function | SmallTest 
     MessageParcel data;
     MessageParcel reply;
     auto result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteInt32(1);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteInt32(1);
     data.WriteInt32(1);
     result = session_->HandleStartMovingWithCoordinate(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint64(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**q
@@ -1478,6 +1487,72 @@ HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level
     data.WriteUint32(1);
     auto result = session_->HandleSetSubWindowSource(data, reply);
     EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption01
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    KeyboardEffectOption effectOption;
+    data.WriteParcelable(&effectOption);
+    result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption02
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = static_cast<KeyboardViewMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption03
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.flowLightMode_ = static_cast<KeyboardFlowLightMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption04
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption04, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.gradientMode_ = static_cast<KeyboardGradientMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

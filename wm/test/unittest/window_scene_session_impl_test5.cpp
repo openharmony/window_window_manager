@@ -33,7 +33,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
 using WindowAdapterMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+}
 class WindowSceneSessionImplTest5 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -552,24 +554,32 @@ HWTEST_F(WindowSceneSessionImplTest5, ShowKeyboard01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     keyboardWindow->property_->SetPersistentId(1000);
     keyboardWindow->hostSession_ = session;
-    keyboardWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    keyboardWindow->property_->SetWindowName("ShowKeyboard01");
     keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardWindow->state_ = WindowState::STATE_DESTROYED;
 
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT;
+    effectOption.gradientMode_ = KeyboardGradientMode::LINEAR_GRADIENT;
     // normal value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE), WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
 
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    effectOption.gradientMode_ = KeyboardGradientMode::END;
     // exception value
-    ASSERT_EQ(keyboardWindow->ShowKeyboard(KeyboardViewMode::VIEW_MODE_END), WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_EQ(keyboardWindow->property_->GetKeyboardViewMode(), KeyboardViewMode::NON_IMMERSIVE_MODE);
+    ASSERT_EQ(keyboardWindow->ShowKeyboard(effectOption), WMError::WM_ERROR_INVALID_WINDOW);
+    auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
+    ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::NON_IMMERSIVE_MODE);
 }
 
 /**
- * @tc.name: ChangeKeyboardViewMode01
+ * @tc.name: ChangeKeyboardEffectOption01
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardViewMode01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardEffectOption01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -578,34 +588,85 @@ HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardViewMode01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     keyboardWindow->property_->SetPersistentId(1000);
     keyboardWindow->hostSession_ = session;
-    keyboardWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    keyboardWindow->property_->SetWindowName("ChangeKeyboardEffectOption01");
     keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    keyboardWindow->property_->SetKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE);
 
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    keyboardWindow->property_->SetKeyboardEffectOption(effectOption);
     auto result = WMError::WM_OK;
     // exception mode value
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::VIEW_MODE_END);
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 
     // same mode
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::NONE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_DO_NOTHING);
 
     // invalid window state
     keyboardWindow->state_ = WindowState::STATE_DESTROYED;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
 
     // window state not shown
     keyboardWindow->state_ = WindowState::STATE_HIDDEN;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
 
     keyboardWindow->state_ = WindowState::STATE_SHOWN;
-    result = keyboardWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
     ASSERT_EQ(result, WMError::WM_OK);
-    auto currentMode = keyboardWindow->property_->GetKeyboardViewMode();
-    ASSERT_EQ(currentMode, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    auto lastOption = keyboardWindow->property_->GetKeyboardEffectOption();
+    ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+}
+
+/**
+ * @tc.name: ChangeKeyboardEffectOption02
+ * @tc.desc: SwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardEffectOption02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> keyboardWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    keyboardWindow->property_->SetPersistentId(1000);
+    keyboardWindow->hostSession_ = session;
+    keyboardWindow->property_->SetWindowName("ChangeKeyboardEffectOption02");
+    keyboardWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    keyboardWindow->property_->SetKeyboardEffectOption(effectOption);
+    auto result = WMError::WM_OK;
+    // exception mode value
+    effectOption.viewMode_ = KeyboardViewMode::VIEW_MODE_END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    effectOption.viewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    effectOption.flowLightMode_ = KeyboardFlowLightMode::NONE;
+    effectOption.gradientMode_ = KeyboardGradientMode::END;
+    result = keyboardWindow->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1399,6 +1460,11 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function |
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_OK);
 
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -1432,11 +1498,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
-    property->SetWindowState(WindowState::STATE_SHOWN);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ret = window->GetWindowTransitionAnimation(type);
-    ASSERT_EQ(ret, nullptr);
-
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ret = window->GetWindowTransitionAnimation(type);
@@ -1448,9 +1509,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ASSERT_EQ(ret, nullptr);
 
     TransitionAnimation animation;
+    property->SetWindowState(WindowState::STATE_SHOWN);
     property->SetTransitionAnimationConfig(type, animation);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_NE(ret, nullptr);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_EQ(ret, nullptr);
 }
 
 /**

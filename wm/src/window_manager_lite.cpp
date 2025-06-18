@@ -784,27 +784,31 @@ WMError WindowManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindow
 WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener)
 {
     int32_t clientUserId = GetUserIdByUid(getuid());
+    // only system applications or services with a userId of 0 are allowed to communicate
+    // with multiple WMS-Servers and are permitted to listen for WMS connection status.
     if (clientUserId != SYSTEM_USERID) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "Not u0 user, permission denied");
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "Permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Register failed: listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "Start registration");
     {
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         if (pImpl_->wmsConnectionChangedListener_) {
-            TLOGI(WmsLogTag::WMS_MULTI_USER, "wmsConnectionChangedListener is already registered, do nothing");
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Listener already registered, skipping");
             return WMError::WM_OK;
         }
         pImpl_->wmsConnectionChangedListener_ = listener;
     }
-    auto ret = SingletonContainer::Get<WindowAdapterLite>().RegisterWMSConnectionChangedListener(
-        std::bind(&WindowManagerLite::OnWMSConnectionChanged, this, std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3));
+    auto ret = WindowAdapterLite::GetInstance().RegisterWMSConnectionChangedListener(
+        std::bind(&WindowManagerLite::OnWMSConnectionChanged, this,
+                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Register failed: error = %{public}d", static_cast<int32_t>(ret));
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         pImpl_->wmsConnectionChangedListener_ = nullptr;
     }
     return ret;

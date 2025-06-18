@@ -135,8 +135,18 @@ public:
     /*
      * PC Window Layout
      */
-    void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    struct MoveCoordinateProperty {
+        int32_t pointerWindowX = 0;
+        int32_t pointerWindowY = 0;
+        int32_t pointerPosX = 0;
+        int32_t pointerPosY = 0;
+        DisplayId displayId = DISPLAY_ID_INVALID;
+        WSRect winRect = { 0, 0, 0, 0 };
+    };
+    void HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property);
+    void SetSpecifyMoveStartDisplay(DisplayId displayId);
+    void ClearSpecifyMoveStartDisplay();
+    WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
     int32_t GetLastMovePointerPosX() const;
     void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
@@ -351,6 +361,10 @@ private:
     int32_t lastMovePointerPosX_ = -1;
     bool isMoveDragHotAreaCrossDisplay_ = false;
     // Above guarded by displayIdSetDuringMoveDragMutex_
+    std::mutex specifyMoveStartMutex_;
+    DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
+    bool isSpecifyMoveStart_ = false;
+    // Above guarded by specifyMoveStartMutex_
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

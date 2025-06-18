@@ -24,7 +24,10 @@ config("libwmutil_private_config") {
 }
 
 config("libwmutil_public_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${window_base_path}/window_scene/interfaces/include",
+  ]
 }
 
 ## build libwmutil_static.a

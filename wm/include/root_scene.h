@@ -42,6 +42,7 @@ using GetStatusBarHeightCallback = std::function<uint32_t()>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
+using UIContentResult = std::pair<Ace::UIContent*, bool>;
 
 class RootScene : public Window {
 public:
@@ -121,7 +122,7 @@ public:
 
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
 
-    Ace::UIContent* GetUIContentByDisplayId(DisplayId displayId);
+    UIContentResult GetUIContentByDisplayId(DisplayId displayId);
 
     void AddRootScene(DisplayId displayId, wptr<Window> window);
 

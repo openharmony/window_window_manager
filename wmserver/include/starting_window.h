@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,20 @@
 #ifndef OHOS_ROSEN_STARTING_WINDOW_H
 #define OHOS_ROSEN_STARTING_WINDOW_H
 
+#include <bundlemgr/launcher_service.h>
 #include <refbase.h>
-#include "pixel_map.h"
+#include <resource_manager.h>
+
+#include "ability_info.h"
 #include "animation_config.h"
+#include "bundle_info.h"
+#include "image_source.h"
+#include "pixel_map.h"
 #include "surface_draw.h"
-#include "wm_common.h"
 #include "window_node.h"
 #include "window_root.h"
 #include "window_transition_info.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -57,6 +63,20 @@ private:
     static bool IsWindowFollowParent(WindowType type);
     static sptr<WindowProperty> InitializeWindowProperty(const sptr<WindowTransitionInfo>& info, uint32_t winId);
     static void UpdateRSTree(sptr<WindowNode>& node, bool isMultiDisplay);
+    static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    static std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfoFromBMS(const sptr<WindowNode>& node,
+        const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
+    static std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    static std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t mediaDataId,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    static bool LoadCustomStartingWindowInfo(const sptr<WindowNode>& node,
+        const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
+    static bool DoLoadCustomStartingWindowInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
+    static WMError DrawStartingWindow(const sptr<WindowNode>& node, const Rect& rect);
+    static std::shared_ptr<Rosen::StartingWindowPageDrawInfo> startingWindowPageDrawInfo_;
 };
 } // Rosen
 } // OHOS

@@ -212,6 +212,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             std::vector<uint64_t> missionIds;
             data.ReadUInt64Vector(&missionIds);
             VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
+            bool isSecurity = data.ReadBool();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -229,7 +230,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .flags_ = flags,
                 .isForShot_ = isForShot,
                 .missionIds_ = missionIds,
-                .virtualScreenType_ = virtualScreenType
+                .virtualScreenType_ = virtualScreenType,
+                .isSecurity_ = isSecurity
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -870,7 +872,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             auto rotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
+            bool isSwitchUser = data.ReadBool();
+            UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType, isSwitchUser);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA: {

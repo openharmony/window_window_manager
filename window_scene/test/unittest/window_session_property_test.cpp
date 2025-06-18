@@ -1192,7 +1192,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTransitionAnimationMap, TestSiz
     ASSERT_NE(nullptr, property);
     property->transitionAnimationConfig_[WindowTransitionType::DESTROY] =
         std::make_shared<TransitionAnimation>(animation);
-    bool result = property->MarshallingSessionInfo(parcel);
+    bool result = property->MarshallingTransitionAnimationMap(parcel);
     ASSERT_EQ(result, true);
     result = property->UnmarshallingTransitionAnimationMap(parcel, &windowSessionProperty);
     ASSERT_EQ(result, true);

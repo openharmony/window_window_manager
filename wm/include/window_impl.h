@@ -255,6 +255,8 @@ public:
         const sptr<IAnimationTransitionController>& listener) override;
     virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
+    virtual WMError UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
     virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
@@ -289,6 +291,7 @@ public:
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
     void NotifyScreenshot();
+    WMError NotifyScreenshotAppEvent(ScreenshotEventType type);
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
@@ -299,6 +302,8 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive);
     void NotifyMMIServiceOnline(uint32_t winId);
     virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -361,7 +366,7 @@ public:
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
 
     /*
      * RS Client Multi Instance
@@ -387,6 +392,8 @@ private:
     EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T> EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
@@ -478,8 +485,19 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
+
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, const std::string& contentName,
+        int isAni);
+    Ace::UIContentErrorCode UIContentRestore(Ace::UIContent*, const std::string& contentInfo, void* storage,
+        Ace::ContentInfoType infoType, int isAni);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+        int isAni = 0);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
     std::string GetRestoredRouterStack();
 
@@ -505,6 +523,7 @@ private:
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
     static std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
+    static std::map<uint32_t, std::vector<IScreenshotAppEventListenerSptr>> screenshotAppEventListeners_;
     static std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListeners_;
     static std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;

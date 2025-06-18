@@ -586,24 +586,32 @@ HWTEST_F(KeyboardSessionTest, NotifySystemKeyboardAvoidChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: ChangeKeyboardViewMode
- * @tc.desc: test ChangeKeyboardViewMode
+ * @tc.name: ChangeKeyboardEffectOption
+ * @tc.desc: test ChangeKeyboardEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest, ChangeKeyboardViewMode, TestSize.Level1)
+HWTEST_F(KeyboardSessionTest, ChangeKeyboardEffectOption, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "ChangeKeyboardViewMode";
-    info.bundleName_ = "ChangeKeyboardViewMode";
+    info.abilityName_ = "ChangeKeyboardEffectOption";
+    info.bundleName_ = "ChangeKeyboardEffectOption";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-
+    
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
     auto result = KeyboardViewMode::NON_IMMERSIVE_MODE;
-    keyboardSession->changeKeyboardViewModeFunc_ = [&result](KeyboardViewMode mode) { result = mode; };
-    keyboardSession->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    keyboardSession->ChangeKeyboardEffectOption(effectOption);
+    ASSERT_NE(result, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+
+    keyboardSession->changeKeyboardEffectOptionFunc_ = [&result](const KeyboardEffectOption& effectOption) {
+        result = effectOption.viewMode_;
+    };
+    keyboardSession->ChangeKeyboardEffectOption(effectOption);
+
     sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(result, KeyboardViewMode::DARK_IMMERSIVE_MODE);
-    auto mode = keyboardSession->property_->GetKeyboardViewMode();
-    ASSERT_EQ(mode, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    auto lastOption = keyboardSession->property_->GetKeyboardEffectOption();
+    ASSERT_EQ(lastOption.viewMode_, KeyboardViewMode::DARK_IMMERSIVE_MODE);
 }
 } // namespace
 } // namespace Rosen

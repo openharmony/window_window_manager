@@ -1210,7 +1210,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     SystemSessionConfig& systemConfig, sptr<WindowSessionProperty> property,
     sptr<IRemoteObject> token, int32_t pid, int32_t uid, const std::string& identityToken)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "ConnectInner session, id: %{public}d, state: %{public}u,"
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] ConnectInner session, state: %{public}u,"
         "isTerminating:%{public}d, callingPid:%{public}d, disableDelegator:%{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionState()), isTerminating_, pid, property->GetIsAbilityHookOff());
     if (GetSessionState() != SessionState::STATE_DISCONNECT && !isTerminating_ &&
@@ -1281,7 +1281,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
-    TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
+    TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u,"
         " userRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
@@ -1364,7 +1364,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, state:%{public}u, isTerminating:%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] state:%{public}u, isTerminating:%{public}d",
         GetPersistentId(), static_cast<uint32_t>(state), isTerminating_);
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
@@ -1436,7 +1436,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "Background session, id: %{public}d, state: %{public}" PRIu32, GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background session, state: %{public}" PRIu32, GetPersistentId(),
         static_cast<uint32_t>(state));
     if (state == SessionState::STATE_ACTIVE && GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         UpdateSessionState(SessionState::STATE_INACTIVE);
@@ -1446,7 +1446,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
     isStarting_ = false;
     isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
-        TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -1459,7 +1459,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
 
 void Session::ResetSessionConnectState()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "ResetSessionState, id: %{public}d, state: %{public}u",
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] ResetSessionState, state: %{public}u",
         GetPersistentId(), GetSessionState());
     SetSessionState(SessionState::STATE_DISCONNECT);
     SetCallingPid(-1);
@@ -1467,7 +1467,7 @@ void Session::ResetSessionConnectState()
 
 void Session::ResetIsActive()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, isActive: %{public}u",
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] isActive: %{public}u",
         GetPersistentId(), IsActive());
     isActive_ = false;
 }
@@ -1475,7 +1475,7 @@ void Session::ResetIsActive()
 WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto state = GetSessionState();
-    TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] Disconnect session, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
     isStartingBeforeVisible_ = false;
@@ -2036,6 +2036,28 @@ WSError Session::PendingSessionToForeground()
     return WSError::WS_OK;
 }
 
+void Session::SetPendingSessionToBackgroundListener(NotifyPendingSessionToBackgroundFunc&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->pendingSessionToBackgroundFunc_ = std::move(func);
+    }, __func__);
+}
+
+WSError Session::PendingSessionToBackground(const BackgroundParams& params)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
+        GetPersistentId(), params.shouldBackToCaller);
+    if (pendingSessionToBackgroundFunc_) {
+        pendingSessionToBackgroundFunc_(GetSessionInfo(), params);
+    }
+    return WSError::WS_OK;
+}
+
 void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {
@@ -2070,6 +2092,16 @@ void Session::NotifyScreenshot()
         return;
     }
     sessionStage_->NotifyScreenshot();
+}
+
+WSError Session::NotifyScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, event: %{public}d", GetPersistentId(), type);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyScreenshotAppEvent(type);
 }
 
 WSError Session::NotifyCloseExistPipWindow()
@@ -2720,7 +2752,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
             session->keyboardStateChangeFunc_) {
-            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardViewMode());
+            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardEffectOption());
         } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {

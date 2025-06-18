@@ -1797,16 +1797,34 @@ HWTEST_F(WindowSessionImplTest2, NotifySizeChange, TestSize.Level1)
     sptr<IWindowRectChangeListener> listener1 = sptr<MockWindowRectChangeListener>::MakeSptr();
     window->RegisterWindowRectChangeListener(listener1);
     window->NotifySizeChange(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->rectChangeUIExtListenerIds_.emplace(111);
-    ASSERT_FALSE(window->rectChangeUIExtListenerIds_.empty());
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    ASSERT_TRUE(WindowHelper::IsUIExtensionWindow(window->GetType()));
-    sptr<IWindowRectChangeListener> listener2 = sptr<MockWindowRectChangeListener>::MakeSptr();
-    window->RegisterWindowRectChangeListener(listener2);
-    window->NotifySizeChange(rect, WindowSizeChangeReason::MOVE);
     window->Destroy(true);
+}
+
+/**
+ * @tc.name: NotifyUIExtHostWindowRectChangeListeners
+ * @tc.desc: NotifyUIExtHostWindowRectChangeListeners test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyUIExtHostWindowRectChangeListeners, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyUIExtHostWindowRectChangeListeners");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    ASSERT_NE(0, window->GetPersistentId());
+    window->uiContent_ = nullptr;
+
+    Rect rect;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::MOVE;
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_TRUE(window->rectChangeUIExtListenerIds_.empty());
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+    window->rectChangeUIExtListenerIds_.emplace(111);
+    window->NotifyUIExtHostWindowRectChangeListeners(rect, reason);
 }
 
 /**
@@ -1837,6 +1855,102 @@ HWTEST_F(WindowSessionImplTest2, AvoidAreaChangeListener, TestSize.Level1)
 
     window->UnregisterAvoidAreaChangeListener(listener);
     window->UnregisterAvoidAreaChangeListener(listener1);
+}
+
+/**
+ * @tc.name: RegisterScreenshotAppEventListener
+ * @tc.desc: RegisterScreenshotAppEventListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterScreenshotAppEventListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    WMError ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_NE(existsListener, holder.end());
+
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    EXPECT_EQ(holder.size(), 1);
+}
+
+/**
+ * @tc.name: unregisterScreenshotAppEventListener
+ * @tc.desc: unregisterScreenshotAppEventListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, unregisterScreenshotAppEventListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("unregisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IScreenshotAppEventListener> listener = nullptr;
+    WMError ret = window->UnregisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->UnregisterScreenshotAppEventListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_EQ(existsListener, holder.end());
+}
+
+/**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent IScreenshotAppEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("unregisterScreenshotAppEventListener");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->screenshotAppEventListeners_.clear();
+    EXPECT_EQ(0, window->screenshotAppEventListeners_.size());
+
+    sptr<IScreenshotAppEventListener> listeners = sptr<IScreenshotAppEventListener>::MakeSptr();
+    std::vector<sptr<IScreenshotAppEventListener>> holder;
+    holder.push_back(listeners);
+    window->screenshotAppEventListeners_[window->property_->GetPersistentId()] = holder;
+    EXPECT_EQ(1, window->screenshotAppEventListeners_.size());
+    auto ret = window->NotifyScreenshotAppEvent(ScreenshotEventType::SCROLL_SHOT_START);
+    EXPECT_EQ(WSError::WS_OK, ret);
 }
 
 /**
@@ -2075,13 +2189,13 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     std::string routerStack = "stackInfo:{}";
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
-              WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(window->NapiSetUIContent("info", (napi_env)nullptr, (napi_value)nullptr, BackupAndRestoreType::NONE,
+        nullptr, nullptr), WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
  * @tc.name: RegisterKeyboardWillShowListener
- * @tc.desc: RegisterKeyboardWillShowListener UnregisterKeyboardWillShowListener
+ * @tc.desc: RegisterKeyboardWillShowListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2089,23 +2203,35 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillShowListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
     sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
-    window_->RegisterKeyboardWillShowListener(listener);
-    KeyboardAnimationInfo animationInfo;
-    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
-    animationInfo.isShow = true;
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillShowListener(listener);
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
-    ASSERT_FALSE(window_->keyboardWillShowListeners_[window_->GetPersistentId()].empty());
+    status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillShowListener
+ * @tc.desc: UnregisterKeyboardWillShowListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillShowListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillShowListener");
+    sptr<IKeyboardWillShowListener> listener = sptr<MockIKeyboardWillShowListener>::MakeSptr();
+
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillShowListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
 
     EXPECT_EQ(window_->UnregisterKeyboardWillShowListener(listener), WMError::WM_OK);
 }
 
 /**
  * @tc.name: RegisterKeyboardWillHideListener
- * @tc.desc: RegisterKeyboardWillHideListener UnregisterKeyboardWillHideListener
+ * @tc.desc: RegisterKeyboardWillHideListener
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2113,16 +2239,27 @@ HWTEST_F(WindowSessionImplTest2, RegisterKeyboardWillHideListener, TestSize.Leve
 {
     window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
     sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
-    window_->RegisterKeyboardWillHideListener(listener);
-    KeyboardAnimationInfo animationInfo;
-    const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
-    animationInfo.isShow = false;
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
  
     window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
-    window_->RegisterKeyboardWillHideListener(listener);
-    window_->NotifyKeyboardAnimationWillBegin(animationInfo, rsTransaction);
-    ASSERT_FALSE(window_->keyboardWillHideListeners_[window_->GetPersistentId()].empty());
+    status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterKeyboardWillHideListener
+ * @tc.desc: UnregisterKeyboardWillHideListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterKeyboardWillHideListener, TestSize.Level1)
+{
+    window_ = GetTestWindowImpl("RegisterKeyboardWillHideListener");
+    sptr<IKeyboardWillHideListener> listener = sptr<MockIKeyboardWillHideListener>::MakeSptr();
+    window_->windowSystemConfig_.supportFunctionType_ = SupportFunctionType::ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION;
+    auto status = window_->RegisterKeyboardWillHideListener(listener);
+    EXPECT_EQ(status, WMError::WM_OK);
  
     EXPECT_EQ(window_->UnregisterKeyboardWillHideListener(listener), WMError::WM_OK);
 }

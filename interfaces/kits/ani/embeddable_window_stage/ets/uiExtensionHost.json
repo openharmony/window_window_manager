@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "std": [
+        "../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+      ],
+      "escompat": [
+        "../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+      ],
+      "@ohos.window": [
+        "../../sdk/@ohos.window.d.ets"
+      ],
+      "@ohos.uiExtensionHost": [
+        "./uiExtensionHost.ets"
+      ],
+      "application/BaseContext":[
+        "../../../../../../../../interface/sdk-js/api/application/BaseContext.d.ets"
+      ],
+      "@ohos.base": [
+        "../../../../../../../../interface/sdk-js/api/@ohos.base.d.ets"
+      ],
+      "@ohos.hilog": [
+        "../../../../../../../../interface/sdk-js/api/@ohos.hilog.d.ets"
+      ]
+    },
+    "outDir": "./cache/uiExtensionHost",
+    "package": "@ohos"
+  },
+  "files": [
+    "./uiExtensionHost.ets"
+  ]
+}

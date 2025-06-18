@@ -28,17 +28,12 @@ class WebPictureInPictureControllerInterface : virtual public RefBase {
 public:
     WebPictureInPictureControllerInterface() = default;
     ~WebPictureInPictureControllerInterface() = default;
-    WMError Create();
-    WMError SetMainWindowId(uint32_t mainWindowId);
-    WMError SetTemplateType(PiPTemplateType pipTemplateType);
-    WMError SetRect(uint32_t width, uint32_t height);
-    WMError SetControlGroup(const std::vector<uint32_t>& controlGroup);
-    WMError SetNapiEnv(void* env);
+    WMError Create(const PiPConfig& pipConfig);
     WMError StartPip(uint32_t controllerId);
     WMError StopPip();
     WMError UpdateContentSize(int32_t width, int32_t height);
-    void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
-    void setPiPControlEnabled(PiPControlType controlType, bool enabled);
+    WMError UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
+    WMError setPiPControlEnabled(PiPControlType controlType, bool enabled);
     WMError RegisterStartPipListener(NativePipStartPipCallback);
     WMError RegisterLifeCycleListener(NativePipLifeCycleCallback);
     WMError RegisterControlEventListener(NativePipControlEventCallback);
@@ -51,6 +46,7 @@ public:
     WMError UnregisterAllPiPLifecycle();
     WMError UnregisterAllPiPControlObserver();
     WMError UnregisterAllPiPWindowSize();
+    bool IsStarted() const { return isStarted_; }
 
 private:
     enum class ListenerType : uint32_t {
@@ -59,22 +55,21 @@ private:
         SIZE_CHANGE_CB,
         PIP_START_CB,
     };
-
+    WMError CheckRegisterParam(const sptr<NativePiPWindowListener>& listener);
     WMError RegisterListenerWithType(ListenerType type, const sptr<NativePiPWindowListener>& listener);
     WMError UnregisterListenerWithType(ListenerType type, const sptr<NativePiPWindowListener>& listener);
     WMError ProcessStateChangeRegister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessControlEventRegister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessSizeChangeRegister(const sptr<NativePiPWindowListener>& listener);
     WMError ProcessPipStartRegister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessStateChangeUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessControlEventUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
-    int32_t ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessStateChangeUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessControlEventUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessSizeChangeUnregister(const sptr<NativePiPWindowListener>& listener);
+    WMError ProcessPipStartUnregister(const sptr<NativePiPWindowListener>& listener);
     bool IsRegistered(ListenerType type, const sptr<NativePiPWindowListener>& listener);
-    void UnregisterAll(ListenerType type);
-    WMError CreateWebPipController();
-    PiPConfig config_{};
+    WMError UnregisterAll(ListenerType type);
     bool isPipEnabled_ = false;
+    bool isStarted_ = false;
     sptr<WebPictureInPictureController> sptrWebPipController_;
     std::set<sptr<NativePiPWindowListener>> lifeCycleCallbackSet_;
     std::set<sptr<NativePiPWindowListener>> controlEventCallbackSet_;

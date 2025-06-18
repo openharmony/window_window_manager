@@ -677,6 +677,28 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRouterStackInfo
+ * @tc.desc: GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, GetRouterStackInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetRouterStackInfo";
+    info.bundleName_ = "GetRouterStackInfo";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    testSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+
+    std::string routerInfo;
+    auto res = testSession->GetRouterStackInfo(routerInfo);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    testSession->sessionStage_ = nullptr;
+    res = testSession->GetRouterStackInfo(routerInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: NotifySubAndDialogFollowRectChange_scaleMode
  * @tc.desc: NotifySubAndDialogFollowRectChange
  * @tc.type: FUNC

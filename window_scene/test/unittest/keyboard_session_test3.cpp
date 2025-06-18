@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "display_manager.h"
 #include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
 #include <ui/rs_surface_node.h>
@@ -182,7 +183,13 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
 
     // branch SESSION_GRAVITY_BOTTOM
     param.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    Rect expectRect = param.PortraitKeyboardRect_;
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(defaultDisplayInfo, nullptr);
+    screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
+    screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
+    const Rect& expectRect = screenWidth > screenHeight ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
     keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
     ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
 }

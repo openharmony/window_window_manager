@@ -114,6 +114,8 @@ public:
 };
 class IScreenshotListener : virtual public RefBase {
 };
+class IScreenshotAppEventListener : virtual public RefBase {
+};
 class IDialogTargetTouchListener : virtual public RefBase {
 };
 class IDialogDeathRecipientListener : virtual public RefBase {
@@ -283,6 +285,10 @@ public:
     virtual WMError RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
     virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual WMError RegisterScreenshotAppEventListener(
+        const sptr<IScreenshotAppEventListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
+    virtual WMError UnregisterScreenshotAppEventListener(
+        const sptr<IScreenshotAppEventListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
     virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
@@ -330,7 +336,8 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowRectAutoSave(bool enabled,
         bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -512,6 +519,8 @@ public:
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
 
     virtual bool GetImmersiveModeEnabledState() const { return true; }
+
+    virtual WMError IsImmersiveLayout(bool& isImmersiveLayout) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 

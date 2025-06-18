@@ -58,7 +58,6 @@ public:
     PictureInPictureControllerBase() { weakRef_ = this; }
     PictureInPictureControllerBase(sptr<PipOption> pipOption, sptr<Window> mainWindow, uint32_t windowId, napi_env env);
     virtual ~PictureInPictureControllerBase();
-    static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc);
     WMError StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim = true);
     WMError StopPictureInPictureFromClient();
     WMError DestroyPictureInPictureWindow();
@@ -98,9 +97,9 @@ public:
     std::vector<sptr<IPiPStartObserver>> GetPictureInPictureStartObserver() const;
     PiPWindowState GetControllerState() const;
     void OnPictureInPictureStart();
-    void SetSurfaceId(std::string surfaceId);
+    void SetSurfaceId(uint64_t surfaceId);
     static bool GetPipEnabled();
-    std::string GetSurfaceId() const;
+    uint64_t GetSurfaceId() const;
     bool isWeb_ = false;
 
     // diffrent between normal and web
@@ -127,6 +126,7 @@ protected:
         void AfterDestroyed() override;
     };
 
+    void NotifyOpretationError(WMError errCode, StartPipType startType);
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
@@ -154,7 +154,7 @@ protected:
     napi_env env_ = nullptr;
     bool isStoppedFromClient_ = false;
     int32_t handleId_ = -1;
-    std::string surfaceId_;
+    uint64_t surfaceId_ = 0;
 
     // diffrent between normal and web
     virtual WMError CreatePictureInPictureWindow(StartPipType startType) = 0;

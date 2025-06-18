@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":ws_ability_info_manager_test",
     ":ws_anomaly_detection_test",
+    ":ws_compatible_mode_property_test",
     ":ws_dfx_hisysevent_test",
     ":ws_distributed_client_test",
     ":ws_ffrt_helper_test",
@@ -48,17 +49,6 @@ group("unittest") {
     ":ws_scene_session_manager_stub_test",
     ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
-    ":ws_scene_session_manager_test10",
-    ":ws_scene_session_manager_test11",
-    ":ws_scene_session_manager_test12",
-    ":ws_scene_session_manager_test2",
-    ":ws_scene_session_manager_test3",
-    ":ws_scene_session_manager_test4",
-    ":ws_scene_session_manager_test5",
-    ":ws_scene_session_manager_test6",
-    ":ws_scene_session_manager_test7",
-    ":ws_scene_session_manager_test8",
-    ":ws_scene_session_manager_test9",
     ":ws_scene_session_test",
     ":ws_scene_system_ability_listener_test",
     ":ws_session_change_recorder_test",
@@ -98,7 +88,6 @@ group("unittest") {
     ":ws_window_manager_service_dump_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
-    ":ws_compatible_mode_property_test",
     "animation:ws_scene_session_animation_test",
     "animation:ws_session_proxy_animation_test",
     "animation:ws_window_session_property_animation_test",
@@ -142,6 +131,7 @@ test_external_deps = [
   "ability_runtime:session_handler",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
+  "access_token:libaccesstoken_sdk",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
@@ -536,155 +526,22 @@ ohos_unittest("ws_session_stage_stub_lifecycle_test") {
 ohos_unittest("ws_scene_session_manager_test") {
   module_out_path = module_out_path
 
-  sources = [ "scene_session_manager_test.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test2") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test2.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test3") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test3.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test4") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test4.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:app_context",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test5") {
-  module_out_path = module_out_path
   include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
 
-  sources = [ "scene_session_manager_test5.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [
-    ":ws_unittest_common",
-    "${window_base_path}/test/common/utils:libtestutil",
+  sources = [
+    "scene_session_manager_test.cpp",
+    "scene_session_manager_test10.cpp",
+    "scene_session_manager_test11.cpp",
+    "scene_session_manager_test12.cpp",
+    "scene_session_manager_test2.cpp",
+    "scene_session_manager_test3.cpp",
+    "scene_session_manager_test4.cpp",
+    "scene_session_manager_test5.cpp",
+    "scene_session_manager_test6.cpp",
+    "scene_session_manager_test7.cpp",
+    "scene_session_manager_test8.cpp",
+    "scene_session_manager_test9.cpp",
   ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test6") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test6.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test7") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test7.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test8") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test8.cpp" ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 
@@ -696,99 +553,7 @@ ohos_unittest("ws_scene_session_manager_test8") {
     "ability_base:session_info",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test9") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test9.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test10") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test10.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test11") {
-  module_out_path = module_out_path
-
-  sources = [ "scene_session_manager_test11.cpp" ]
-
-  cflags_cc = [ "-Wno-thread-safety" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:mission_info",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
-  ]
-}
-
-ohos_unittest("ws_scene_session_manager_test12") {
-  module_out_path = module_out_path
-  include_dirs = [
-    "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock",
-  ]
-
-  sources = [
-    "scene_session_manager_test12.cpp",
-    "../mock/mock_session_permission.cpp",
-  ]
-
-  defines = [
-    "ENABLE_MOCK_IS_SYSTEM_CALLING",
-    "ENABLE_MOCK_VERIFY_CALLING_PERMISSION",
-    "ENABLE_MOCK_START_BY_HDCD",
-  ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-  external_deps += [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ability_runtime:ability_context_native",
+    "ability_runtime:app_context",
     "ability_runtime:mission_info",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -840,7 +605,10 @@ ohos_unittest("ws_ssmgr_specific_window_test") {
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "scene_session_manager_proxy_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "scene_session_manager_proxy_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1618,6 +1386,7 @@ ohos_unittest("ws_session_change_recorder_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
+    "hilog:libhilog",
   ]
 }
 ## Build ws_unittest_common.a }}}

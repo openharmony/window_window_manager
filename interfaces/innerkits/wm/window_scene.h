@@ -195,6 +195,14 @@ public:
     WMError NotifyMemoryLevel(int32_t level);
 
     /**
+     * @brief Set the navDestinationInfo of atomicService to arkui.
+     *
+     * @param navDestinationInfo navDestinationInfo in atomicService hap
+     * @return the error code of window
+     */
+    WMError SetNavDestinationInfo(const std::string& navDestinationInfo);
+
+    /**
      * @brief Set the bundleName, moduleName and abilityName of the hooked window
      *
      * @param elementName includes bundleName, moduleName and abilityName

@@ -2138,6 +2138,68 @@ napi_value KeyboardViewModeInit(napi_env env)
     return objValue;
 }
 
+napi_value KeyboardFlowlightModeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::NONE)));
+    napi_set_named_property(env, objValue, "BACKGROUND_FLOW_LIGHT", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::BACKGROUND_FLOW_LIGHT)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardFlowLightMode::END)));
+    return objValue;
+}
+
+napi_value KeyboardGradientModeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::NONE)));
+    napi_set_named_property(env, objValue, "LINEAR_GRADIENT", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::LINEAR_GRADIENT)));
+    napi_set_named_property(env, objValue, "END", CreateJsValue(env,
+        static_cast<uint32_t>(KeyboardGradientMode::END)));
+    return objValue;
+}
+
+napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "viewMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.viewMode_)));
+    napi_set_named_property(env, objValue, "flowLightMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.flowLightMode_)));
+    napi_set_named_property(env, objValue, "gradientMode", CreateJsValue(env,
+        static_cast<uint32_t>(effectOption.gradientMode_)));
+    napi_set_named_property(env, objValue, "blurHeight", CreateJsValue(env,
+        effectOption.blurHeight_));
+    return objValue;
+}
+
 napi_value SessionTypeInit(napi_env env)
 {
     WLOGFD("in");

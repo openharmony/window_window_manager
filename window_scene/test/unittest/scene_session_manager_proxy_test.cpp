@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "mock/mock_message_parcel.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
@@ -778,6 +779,39 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, TestSize.
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateSessionAvoidAreaListener(persistendId, haveListener));
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = ssmProxy->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**

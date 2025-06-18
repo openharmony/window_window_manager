@@ -430,7 +430,7 @@ public:
     virtual WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
 
-    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
+    virtual WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) { return WSError::WS_OK; };
 
     /**
      * @brief Start Moving window with coordinate.
@@ -439,10 +439,11 @@ public:
      * @param offsetY expected pointer position y-axis offset in window when start moving.
      * @param pointerPosX current pointer position x-axis offset in screen.
      * @param pointerPosY current pointer position y-axis offset in screen.
+     * @param displayId current pointer display id.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) { return WSError::WS_OK; }
     virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
 
     /**
@@ -455,6 +456,7 @@ public:
     virtual WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
+    virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 
     /**

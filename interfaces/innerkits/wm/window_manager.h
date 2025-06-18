@@ -874,6 +874,15 @@ public:
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
 
     /**
+     * @brief Get the name of the top page.
+     *
+     * @param windowId Window id which want to get.
+     * @param topNavDestName The top page name of specified window.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const;
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
@@ -1147,6 +1156,14 @@ public:
      * @return WM_OK means shift window pointer event success, others means failed.
      */
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
+
+    /**
+     * @brief Notify screenshot event.
+     *
+     * @param type screenshot event type.
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
     /**
      * @brief Request focus.

@@ -28,6 +28,13 @@
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_object* ani_object;
+#ifdef __cplusplus
+typedef struct __ani_env ani_env;
+#else
+typedef const struct __ani_interaction_api *ani_env;
+#endif
+
 namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
@@ -445,6 +452,20 @@ public:
 };
 
 /**
+ * @class IScreenshotAppEventListener
+ *
+ * @brief IScreenshotAppEventListener is a Listener to observe event when screenshot happened.
+ */
+class IScreenshotAppEventListener : virtual public RefBase {
+public:
+    /**
+     * @brief Observe event when screenshot happened.
+     */
+    virtual void OnScreenshotAppEvent(ScreenshotEventType type) {}
+};
+using IScreenshotAppEventListenerSptr = sptr<IScreenshotAppEventListener>;
+
+/**
  * @class IDialogTargetTouchListener
  *
  * @brief IDialogTargetTouchListener is a Listener to observe event when touch dialog window.
@@ -827,6 +848,18 @@ public:
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
         const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
+
+    /**
+     * @brief get and verify windowType, include sub_window/system_window
+     *
+     * @param parentId parent window id
+     * @param windowName current window name
+     * @param parentWindowType parent window type
+     * @param windowType current window type
+     * @return WMError::WM_OK means check success, otherwise failed.
+     */
+    static WMError GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+        WindowType parentWindowType, WindowType& windowType);
 
     /**
      * @brief create pip window with session
@@ -1916,6 +1949,24 @@ public:
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) { return WMError::WM_OK; }
 
     /**
+     * @brief Register screen shot app event listener.
+     *
+     * @param listener IScreenshotAppEventListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterScreenshotAppEventListener(
+        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister screen shot app event listener.
+     *
+     * @param listener IScreenshotAppEventListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterScreenshotAppEventListener(
+        const IScreenshotAppEventListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register dialog target touch listener.
      *
      * @param listener IDialogTargetTouchListener.
@@ -1974,6 +2025,12 @@ public:
      * @return WMError
      */
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
@@ -3172,9 +3229,12 @@ public:
      * @brief Sets the supported window modes.
      *
      * @param supportedWindowModes Supported window modes of the window.
+     * @param grayOutMaximizeButton Whether to gray out the window maximize button.
+                                    The value true means to gray out the button, and false means the opposite.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
+        bool grayOutMaximizeButton = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3508,6 +3568,13 @@ public:
     virtual bool GetImmersiveModeEnabledState() const { return true; }
 
     /**
+     * @brief Get whether the window is in immersive layout or not.
+     *
+     * @return true means the window is in immersive layout, and false means the opposite.
+     */
+    virtual WMError IsImmersiveLayout(bool& isImmersiveLayout) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the height of status bar.
      *
      * @return the height of status bar.
@@ -3671,21 +3738,21 @@ public:
     /**
      * @brief Show keyboard window
      *
-     * @param mode Keyboard will show with special mode.
+     * @param effectOption Keyboard will show with special effect option.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    virtual WMError ShowKeyboard(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }
 
     /**
-     * @brief Change keyboard view mode
+     * @brief Change keyboard effect with option
      *
-     * @param mode Keyboard will update to the special mode.
-     * @return WM_OK means view mode update success, others means failed.
+     * @param effectOption Keyboard will update to the special effect option.
+     * @return WM_OK means effect update success, others means failed.
      */
-    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    virtual WMError ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
     {
         return WMError::WM_OK;
     }
@@ -4135,6 +4202,13 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set the navDestinationInfo of atomicService to arkui.
+     *
+     * @param navDestinationInfo navDestinationInfo in atomicService hap
+     */
+    virtual void SetNavDestinationInfo(const std::string& navDestinationInfo) {}
 
     /**
      * @brief Inject a pointerEvent to arkui.
