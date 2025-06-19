@@ -739,12 +739,14 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetParentToken(token);
         auto usage = property_->GetUIExtensionUsage();
-        if (SessionHelper::IsSecureUIExtension(usage)) {
+        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         } else if (usage == UIExtensionUsage::EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
         } else if (usage == UIExtensionUsage::MODAL) {
             uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::PREVIEW_EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::PREVIEW_UI_EXTENSION);
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
