@@ -1302,20 +1302,25 @@ int SessionStub::HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& re
     TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatingBall!");
     sptr<FloatingBallTemplateInfo> fbTemplateInfo = data.ReadParcelable<FloatingBallTemplateInfo>();
     if (fbTemplateInfo == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "read fbTemplateInfo failed.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read fbTemplateInfo failed.");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateFloatingBall(*fbTemplateInfo);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
 int SessionStub::HandleStopFloatingBall(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatingBall");
-    // 没有参数, 不需要反序列化。
     WSError errCode = StopFloatingBall();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1328,7 +1333,10 @@ int SessionStub::HandleStartFloatingBallAbility(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     WMError errCode = RestoreFbMainWindow(want);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1337,8 +1345,14 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
     TLOGI(WmsLogTag::WMS_SYSTEM, "HandleGetFloatingBallWindowId");
     uint32_t windowId = 0;
     WMError errCode = GetFloatingBallWindowId(windowId);
-    reply.WriteUint32(windowId);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (!reply.WriteUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write windowId fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

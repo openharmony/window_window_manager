@@ -49,7 +49,7 @@ private:
 
     napi_value OnGetFloatingBallWindowInfo(napi_env env, napi_callback_info info);
 
-    bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
+    bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListener(const std::string& type, const sptr<JsFbWindowListener>& fbWindowListener);
@@ -60,8 +60,8 @@ private:
     WMError ProcessClickEventUnRegister(const sptr<JsFbWindowListener>& listener);
 
     napi_value GetFloatingBallOptionFromJs(napi_env env, napi_value optionObject, FbOption& option);
-    napi_value CheckParams(const napi_env &env, const FbOption& option);
-    napi_value GetIcon(const napi_env &env, const napi_value &value, FbOption& option);
+    napi_value CheckParams(napi_env env, const FbOption& option);
+    napi_value GetIcon(napi_env env, napi_value value, FbOption& option);
 
     sptr<FloatingBallController> fbController_ = nullptr;
     std::unordered_map<std::string, std::set<sptr<JsFbWindowListener>>> jsCbMap_;
