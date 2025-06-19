@@ -130,6 +130,7 @@ using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorIn
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 using NotifySetParentSessionFunc = std::function<void(int32_t oldParentWindowId, int32_t newParentWindowId)>;
 using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
+using GetStartWindowTypeFunc = std::function<void(const SessionInfo& info, std::string& startWindowType)>;
 using NotifyRotationChangeFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using NotifyHookSceneSessionActivationFunc = std::function<void(const sptr<SceneSession>& session, bool isNewWant)>;
 using NotifySceneSessionDestructFunc = std::function<void(int32_t persistentId)>;
@@ -618,6 +619,7 @@ public:
     void SetIsUserRequestedExit(bool isUserRequestedExit);
     void SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& callback);
     void UpdateLifecyclePausedInner();
+    void CalculatedStartWindowType(SessionInfo& sessionInfo, bool hideStartWindow);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -650,6 +652,7 @@ public:
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     WMError NotifyDisableDelegatorChange() override;
     virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
+    void RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func);
 
     /*
      * Window Decor
@@ -1051,6 +1054,8 @@ private:
     NotifySceneSessionDestructFunc notifySceneSessionDestructFunc_;
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
     bool CheckPidIfMatched();
+    GetStartWindowTypeFunc getStartWindowConfigFunc_;
+    StartWindowType startWindowType_;
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
