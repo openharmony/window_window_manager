@@ -100,7 +100,6 @@ const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
-constexpr const char* STARTING_WINDOW_SYNC_PARAMETER = "const.window.sync_startingWindow";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -442,24 +441,7 @@ void SceneSessionManager::Init()
         std::placeholders::_2, std::placeholders::_3));
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
 
-    InitWindowPattern();
-}
-
-void SceneSessionManager::InitWindowPattern()
-{
     InitSnapshotCache();
-    InitStartingWindow();
-}
-
-void SceneSessionManager::InitStartingWindow()
-{
-    syncLoadStartingWindow_ = system::GetBoolParameter(STARTING_WINDOW_SYNC_PARAMETER, false);
-    TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow:%{public}d", syncLoadStartingWindow_);
-}
-
-bool SceneSessionManager::IsSyncLoadStartingWindow()
-{
-    return syncLoadStartingWindow_;
 }
 
 void SceneSessionManager::RegisterFlushWindowInfoCallback()

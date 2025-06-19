@@ -32,12 +32,6 @@ namespace {
 const std::string TEST_RDB_PATH = "/data/test/";
 const std::string TEST_INVALID_PATH = "";
 const std::string TEST_RDB_NAME = "starting_window_config_test.db";
-std::string g_logMsg;
-void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
-    const char* msg)
-{
-    g_logMsg = msg;
-}
 } // namespace
 
 class WindowPatternStartingWindowTest : public testing::Test {
@@ -357,36 +351,6 @@ HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize
     std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> outValues;
     ssm_->GetBundleStartingWindowInfos(bundleInfo, outValues);
     ASSERT_EQ(outValues.size(), 0);
-}
-
-/**
- * @tc.name: InitStartingWindow
- * @tc.desc: InitStartingWindow
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPatternStartingWindowTest, InitStartingWindow, TestSize.Level1)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->syncLoadStartingWindow_ = false;
-    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
-    ssm_->InitStartingWindow();
-    EXPECT_TRUE(g_logMsg.find("Sync Load StartingWindow:") != std::string::npos);
-}
-
-/**
- * @tc.name: IsSyncLoadStartingWindow
- * @tc.desc: IsSyncLoadStartingWindow
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPatternStartingWindowTest, IsSyncLoadStartingWindow, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->syncLoadStartingWindow_ = false;
-    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), false);
-    ssm_->syncLoadStartingWindow_ = true;
-    EXPECT_EQ(ssm_->IsSyncLoadStartingWindow(), true);
 }
 } // namespace
 } // namespace Rosen
