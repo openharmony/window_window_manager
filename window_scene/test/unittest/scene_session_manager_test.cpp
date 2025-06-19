@@ -607,6 +607,27 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsFreeMultiWindow
+ * @tc.desc: IsFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsFreeMultiWindow, TestSize.Level1)
+{
+    bool isFreeMultiWindow = false;
+    // freeMultiWindowEnable false
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
+    auto result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
+    ASSERT_EQ(isFreeMultiWindow, false);
+    ASSERT_EQ(result, WMError::WM_OK);
+    
+    // freeMultiWindowEnable true
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
+    ASSERT_EQ(isFreeMultiWindow, true);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: MoveSessionsToBackground01
  * @tc.desc: SceneSesionManager move sessions to background
  * @tc.type: FUNC

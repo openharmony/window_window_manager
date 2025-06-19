@@ -18,6 +18,7 @@
 #include "root_scene.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/zidl/session_interface.h"
+#include "window_adapter.h"
 #include "window_helper.h"
 #include "window_impl.h"
 #include "window_session_impl.h"
@@ -263,6 +264,28 @@ void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Con
         WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(configuration);
     } else {
         WindowImpl::UpdateConfigurationSyncForAll(configuration);
+    }
+}
+
+bool Window::IsPcOrPadFreeMultiWindowMode() const
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool isPcOrFreeMultiWindow = false;
+        SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrFreeMultiWindow);
+        return isPcOrFreeMultiWindow;
+    } else {
+        return false;
+    }
+}
+
+bool Window::GetFreeMultiWindowModeEnabledState()
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool isFreeMultiWindow = false;
+        SingletonContainer::Get<WindowAdapter>().IsFreeMultiWindowMode(isFreeMultiWindow);
+        return isFreeMultiWindow;
+    } else {
+        return false;
     }
 }
 } // namespace Rosen
