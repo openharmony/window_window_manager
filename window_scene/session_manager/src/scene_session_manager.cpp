@@ -1790,7 +1790,6 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) {
         return this->HandleSecureSessionShouldHide(sceneSession);
     };
-    // tanhong
     specificCb->onNotifyWindowSystemBarPropertyChange_ = [this](
         WindowType type, const SystemBarProperty& systemBarProperty) {
         return this->NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
@@ -15510,7 +15509,6 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
     });
 }
 
-//tanhong
 void SceneSessionManager::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {

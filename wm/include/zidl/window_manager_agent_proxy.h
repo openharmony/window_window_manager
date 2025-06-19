@@ -43,7 +43,6 @@ public:
     void NotifyWindowStyleChange(WindowStyleType type) override;
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override;
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override;
-    // tanhong
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) override;
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,

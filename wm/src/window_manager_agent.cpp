@@ -78,7 +78,6 @@ void WindowManagerAgent::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManager>().NotifyWindowStyleChange(type);
 }
 
-// tanhong
 void WindowManagerAgent::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {

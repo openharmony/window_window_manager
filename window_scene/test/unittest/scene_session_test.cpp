@@ -854,7 +854,6 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
               WSError::WS_OK);
 }
 
-// tanhong
 /**
  * @tc.name: SetSystemBarProperty03
  * @tc.desc: SetSystemBarProperty03

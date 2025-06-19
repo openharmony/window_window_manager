@@ -53,7 +53,6 @@ public:
     };
 };
 
-// tanhong
 class TestWindowSystemBarPropertyChangedListener : public IWindowSystemBarPropertyChangedListener {
 public:
     int32_t count_ = 0;
@@ -1979,7 +1978,6 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
     windowManager.pImpl_->windowDisplayIdChangeListeners_ = oldListeners;
 }
 
-// tanhong
 /**
  * @tc.name: RegisterWindowSystemBarPropertyChangedListener
  * @tc.desc: check RegisterWindowSystemBarPropertyChangedListener

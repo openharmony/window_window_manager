@@ -155,7 +155,6 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
     }
 }
 
-// tanhong
 void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {
