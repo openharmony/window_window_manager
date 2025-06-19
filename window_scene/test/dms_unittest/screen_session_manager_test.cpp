@@ -39,6 +39,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 std::string logMsg;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
     const char *msg)
@@ -6948,6 +6949,26 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 {
     DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
     EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: ChangeIsPcDeviceValue
+ * @tc.desc: ChangeIsPcDeviceValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeIsPcDeviceValue, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!IS_SUPPORT_PC_MODE) {
+        ASSERT_EQ(ssm_->ChangeIsPcDeviceValue(), g_isPcDevice);
+        return;
+    }
+    bool isPcDevice = ssm_->ChangeIsPcDeviceValue();
+    if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
+        EXPECT_TRUE(isPcDevice);
+    } else {
+        EXPECT_FALSE(isPcDevice);
+    }
 }
 }
 } // namespace Rosen
