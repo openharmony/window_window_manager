@@ -1218,13 +1218,13 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Le
     info.bundleName_ = "NotifyUpdateAppUseControl";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
-        std::cout << "isNeedControl:" << isNeedControl << ";isControlRecentOnly:" << std::endl;
+        std::cout << "isNeedControl:" << isNeedControl << ";isControlRecentOnly:" << isControlRecentOnly << std::endl;
     };
     sceneSession->onUpdateAppUseControlFunc_ = std::move(callback);
     sceneSession->sessionStage_ = nullptr;
-    ControlAppType type = ContentInfoType::APP_LOCK;
+    ControlAppType type = ControlAppType::APP_LOCK;
     sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
-    sceneSession->sessionStage_ = sptr<SessionMocker>::MakeSptr();
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
 
     ControlInfo controlInfoSec = {
