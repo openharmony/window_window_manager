@@ -53,7 +53,7 @@ void SceneSessionManagerStubTest2::TearDownTestCase()
 }
 
 void SceneSessionManagerStubTest2::SetUp()
-{}
+{
     stub_ = sptr<SceneSessionManager>::MakeSptr();
 }
 
