@@ -3465,6 +3465,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
+    bool needSetBoundsNextVsync = false;
     throwSlipToFullScreenAnimCount_.store(0);
     UpdateSizeChangeReason(reason);
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
@@ -3479,18 +3480,23 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         }
         pcFoldScreenController_->RecordMoveRects(rect);
     } else {
-        SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        if (reason != SizeChangeReason::DRAG || keyFramePolicy_.running_) {
+            SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        } else {
+            needSetBoundsNextVsync = true;
+        }
     }
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
-        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
+        nextVsyncDragCallback->onCallback = [weakThis = wptr(this),
+            globalRect, isGlobal, needFlush, needSetBoundsNextVsync, where = __func__](int64_t, int64_t) {
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
                 return;
             }
-            session->OnNextVsyncReceivedWhenDrag();
+            session->OnNextVsyncReceivedWhenDrag(globalRect, isGlobal, needFlush, needSetBoundsNextVsync);
         };
         if (requestNextVsyncFunc_) {
             requestNextVsyncFunc_(nextVsyncDragCallback);
@@ -3500,9 +3506,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
 }
 
-void SceneSession::OnNextVsyncReceivedWhenDrag()
+void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
+    bool isGlobal, bool needFlush, bool needSetBoundsNextVsync)
 {
-    PostTask([weakThis = wptr(this), where = __func__] {
+    PostTask([weakThis = wptr(this), globalRect, isGlobal, needFlush, needSetBoundsNextVsync, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
@@ -3516,6 +3523,9 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 where, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+            if (needSetBoundsNextVsync) {
+                session->SetSurfaceBounds(globalRect, isGlobal, needFlush);
+            }
             session->ResetDirtyDragFlags();
         }
     });
