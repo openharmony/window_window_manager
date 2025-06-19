@@ -115,7 +115,7 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
-    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) = 0;
+    virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; }
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyNonInteractiveStatus() = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;

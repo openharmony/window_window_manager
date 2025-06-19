@@ -55,7 +55,7 @@ private:
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
