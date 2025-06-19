@@ -2524,19 +2524,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsFreeMultiWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int res = stub_->HandleIsFreeMultiWindow(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleIsFreeMultiWindow
- * @tc.desc: test HandleIsFreeMultiWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleIsFreeMultiWindow, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
 
     // writeInt32 failed
     MockMessageParcel::ClearAllErrorFlag();
