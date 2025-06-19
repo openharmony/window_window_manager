@@ -325,6 +325,7 @@ HWTEST_F(WindowSceneSessionImplTest2, DestroySubWindow01, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest2, UpdateFloatingWindowSizeBySizeLimits01, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateFloatingWindowSizeBySizeLimits01");
@@ -332,6 +333,7 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateFloatingWindowSizeBySizeLimits01, Te
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->UpdateFloatingWindowSizeBySizeLimits(MaxWith, MaxWith);
     EXPECT_FALSE(g_errLog.find("float camera type window") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -497,6 +499,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RemoveWindowFlag01, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo01, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetConfigurationFromAbilityInfo01");
@@ -504,6 +507,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo01, TestSiz
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->GetConfigurationFromAbilityInfo();
     EXPECT_TRUE(g_errLog.find("abilityContext is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -999,6 +1003,7 @@ HWTEST_F(WindowSceneSessionImplTest2, FindParentSessionByParentId02, TestSize.Le
  */
 HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetConfigurationFromAbilityInfo02");
@@ -1006,6 +1011,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->GetConfigurationFromAbilityInfo();
     EXPECT_TRUE(g_errLog.find("abilityContext is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1015,6 +1021,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetConfigurationFromAbilityInfo02, TestSiz
  */
 HWTEST_F(WindowSceneSessionImplTest2, NotifyWindowSessionProperty01, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyWindowSessionProperty01");
@@ -1023,10 +1030,12 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifyWindowSessionProperty01, TestSize.Le
     windowSceneSession->NotifyWindowSessionProperty();
     EXPECT_TRUE(g_errLog.find("session is invalid") != std::string::npos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->NotifyWindowSessionProperty());
+    LOG_SetCallback(nullptr);
 }
 
 HWTEST_F(WindowSceneSessionImplTest2, IsTransparent01, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsTransparent01");
@@ -1034,6 +1043,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsTransparent01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->IsTransparent();
     EXPECT_FALSE(g_errLog.find("color: %{public}u, alpha: %{public}u") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1043,6 +1053,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsTransparent01, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetTransparent02, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTransparent02");
@@ -1052,6 +1063,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransparent02, TestSize.Level1)
     windowSceneSession->SetTransparent(isTransparent);
     EXPECT_TRUE(g_errLog.find("session is invalid") != std::string::npos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SetTransparent(isTransparent));
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1858,6 +1870,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible02");
@@ -1875,6 +1888,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     EXPECT_FALSE(g_errLog.find("device not support") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1884,6 +1898,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible03");
@@ -1901,6 +1916,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     EXPECT_TRUE(g_errLog.find("device not support") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
