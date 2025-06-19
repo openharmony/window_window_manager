@@ -14002,7 +14002,14 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
         return WMError::WM_ERROR_NULLPTR;
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
-    callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId) && !PcFoldScreenManager::GetInstance().HasSystemKeyboard())
+    {
+        callingWindowInfo.displayId_ = sceneSession->GetClientDisplayId();
+    }
+    else
+    {
+        callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
+    }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
         "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
         callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
@@ -14010,7 +14017,7 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
 }
 
 WSError SceneSessionManager::NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId)
-{    
+{
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
         TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
