@@ -37,6 +37,11 @@ protected:
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     bool IsTopmost() const override;
     bool IsModal() const override;
+
+    /*
+     * Window Layout
+     */
+    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

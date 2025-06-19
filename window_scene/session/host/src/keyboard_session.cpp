@@ -306,7 +306,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
         // avoidHeight is set, notify avoidArea in case ui params don't flush
         if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
-            session->NotifyClientToUpdateAvoidArea();
+            session->OnKeyboardPanelUpdated();
         }
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
@@ -417,6 +417,17 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session, gravity: %{public}d", gravity);
         return false;
     }
+
+    /**
+     * When an app calls move or resize, if the layout pipeline hasn't yet refreshed the window size, the calling
+     * window dimensions obtained for keyboard avoidance will be incorrect. To prevent the app's intended dimensions
+     * from being overridden, avoidance is deliberately skipped.
+     */
+    if (callingSession->isSubWindowResizingOrMoving_ && WindowHelper::IsSubWindow(callingSession->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "subWindow is resizing or moving");
+        return false;
+    }
+
     bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
         (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);

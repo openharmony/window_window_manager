@@ -480,6 +480,11 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    /*
+     * Window Keyboard
+     */
+    bool isSubWindowResizingOrMoving_ = false;
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -541,6 +546,7 @@ protected:
     /*
      * Window Layout
      */
+    virtual void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
     /*
@@ -604,7 +610,6 @@ private:
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason& reason);
     void FixKeyboardPositionByKeyboardPanel(sptr<SceneSession> panelSession, sptr<SceneSession> keyboardSession);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
