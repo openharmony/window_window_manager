@@ -773,6 +773,29 @@ HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFreeMultiWindowMode
+ * @tc.desc: WindowAdapter/IsFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+
+    auto proxy = windowAdapter.GetWindowManagerServiceProxy();
+    ASSERT_NE(proxy, nullptr);
+    bool proxyIsFreeMultWindow = false;
+    auto proxyRet = proxy->IsFreeMultiWindow(proxyIsFreeMultWindow);
+    ASSERT_EQ(proxyRet, WMError::WM_OK);
+
+    bool isFreeMultiWindow = false;
+    auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
+    ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: WindowAdapter/IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
