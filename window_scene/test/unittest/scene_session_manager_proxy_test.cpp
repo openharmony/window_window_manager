@@ -1182,6 +1182,11 @@ HWTEST_F(sceneSessionManagerProxyTest, IsFreeMultiWindow, TestSize.Level1)
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadBoolErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
+
+    // interface success
+    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**

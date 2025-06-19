@@ -778,6 +778,7 @@ HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
 
     bool isFreeMultiWindow = false;
     auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
+
     ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
     ASSERT_EQ(err, WMError::WM_OK);
 }
