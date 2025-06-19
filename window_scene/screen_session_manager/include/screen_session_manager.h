@@ -798,9 +798,11 @@ private:
     bool IsSupportCoordination();
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
+    bool ChangeIsPcDeviceValue();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
+    std::mutex pcModeChangeMutex_;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

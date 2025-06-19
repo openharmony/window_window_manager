@@ -173,6 +173,7 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -7931,6 +7932,22 @@ void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> o
         displayNode->SetScbNodePid(oldScbPids, newScbPid);
     }
     RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
+}
+
+bool ChangeIsPcDeviceValue()
+{
+    if (!IS_SUPPORT_PC_MODE) {
+        return g_isPcDevice;
+    }
+    std::lock_guard<std::mutex> lock(pcModeChangeMutex_);
+    if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
+        TLOGE(WmsLogTag::DMS, "PcMode change isPcDevice true");
+        g_isPcDevice = true;
+    } else {
+        TLOGE(WmsLogTag::DMS, "PadMode change isPcDevice false");
+        g_isPcDevice = false;
+    }
+    return g_isPcDevice;
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
