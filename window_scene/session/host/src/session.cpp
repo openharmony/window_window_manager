@@ -4018,10 +4018,10 @@ void Session::NotifySessionInfoChange()
     }
 }
 
-void Session::NotifyCallingWindowDisplayChanged(int32_t persistentid, uint64_t screenId)
+void Session::NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId)
 {
     if (callingWindowDisplayChangedNotifyManagerFunc_) {
-        callingWindowDisplayChangedNotifyManagerFunc_(persistentid, screenId);
+        callingWindowDisplayChangedNotifyManagerFunc_(persistentId, screenId);
     } else {
         TLOGD(WmsLogTag::WMS_EVENT, "callingWindowDisplayChangedNotifyManagerFunc is nullptr");
     }

@@ -8016,7 +8016,7 @@ void SceneSessionManager::RegisterCallingWindowDisplayChangedNotifyManagerFunc(c
         TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
-    sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentid, uint64_t screenId) {        
+    sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentId, uint64_t screenId) {        
     NotifyCallingWindowDisplayChanged(persistentId, newScreenId);
     });
 }
