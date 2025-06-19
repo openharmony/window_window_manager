@@ -1624,7 +1624,7 @@ WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
     const sptr<IWindowSystemBarPropertyChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "listener is nullptr.");
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is nullptr.");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
@@ -1646,7 +1646,7 @@ WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
             return WMError::WM_DO_NOTHING;
         }
         pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
-        TLOGI(WmsLogTag::WMS_IMMS, "listener registere success.");
+        TLOGI(WmsLogTag::WMS_IMMS, "listener registered success.");
     }
     return ret;
 }
@@ -1666,8 +1666,7 @@ WMError WindowManager::UnregisterWindowSystemBarPropertyChangedListener(
         return WMError::WM_DO_NOTHING;
     }
     WMError ret = WMError::WM_OK;
-    if (pImpl_->windowSystemBarPropertyChangedListeners_.empty() &&
-        pImpl_->windowSystemBarPropertyChangeAgent_ != nullptr) {
+    if (pImpl_->windowSystemBarPropertyChangeAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
             pImpl_->windowSystemBarPropertyChangeAgent_);

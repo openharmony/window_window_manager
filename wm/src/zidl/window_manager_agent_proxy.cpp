@@ -196,7 +196,7 @@ void WindowManagerAgentProxy::NotifyWindowSystemBarPropertyChange(
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE), data, reply, option) != ERR_NONE) {
-        TLOGI(WmsLogTag::WMS_IMMS, "sendRequest failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "sendRequest failed");
     }
 }
 
