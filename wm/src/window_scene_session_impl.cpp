@@ -655,7 +655,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     WindowLifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.windowId = GetPersistentId();
     lifeCycleInfo.windowType = GetType();
-    lifeCycleInfo.windowName = GetWindowName();   
+    lifeCycleInfo.windowName = GetWindowName();
     SingletonContainer::Get<WindowManager>().NotifyWMSWindowCreated(lifeCycleInfo);
 
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
@@ -1893,7 +1893,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     WindowLifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.windowId = GetPersistentId();
     lifeCycleInfo.windowType = GetType();
-    lifeCycleInfo.windowName = GetWindowName();   
+    lifeCycleInfo.windowName = GetWindowName();
     SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(lifeCycleInfo);
 
     // delete after replace WSError with WMError
