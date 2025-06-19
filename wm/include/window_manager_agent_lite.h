@@ -40,7 +40,6 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable) override {};
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWindowStyleChange(WindowStyleType type) override;
-    // tanhong
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) override {};
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override;
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override {};

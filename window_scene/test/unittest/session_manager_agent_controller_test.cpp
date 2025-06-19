@@ -230,7 +230,6 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowStyleChange, TestSize.Le
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
 }
 
-// tanhong
 /**
  * @tc.name: NotifyWindowSystemBarPropertyChange
  * @tc.desc: NotifyWindowSystemBarPropertyChange Test

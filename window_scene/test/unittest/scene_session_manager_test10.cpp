@@ -1607,7 +1607,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     ssm_->sceneSessionMap_.clear();
 }
 
-// tanhong
 /**
  * @tc.name: NotifyWindowSystemBarPropertyChange
  * @tc.desc: SceneSesionManager test NotifyWindowSystemBarPropertyChange

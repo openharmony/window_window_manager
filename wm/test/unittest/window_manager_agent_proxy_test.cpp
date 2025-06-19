@@ -459,7 +459,6 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
-// tanhong
 /**
  * @tc.name: NotifyWindowSystemBarPropertyChange
  * @tc.desc: test NotifyWindowSystemBarPropertyChange

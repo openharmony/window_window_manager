@@ -444,7 +444,6 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
     EXPECT_EQ(res, 0);
 }
 
-// tanhong
 /**
  * @tc.name: OnRemoteRequest22
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_DRAWING_STATE

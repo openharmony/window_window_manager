@@ -71,7 +71,6 @@ public:
         float density, DisplayOrientation orientation);
     void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
-    // tanhong
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
@@ -113,7 +112,6 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners_;
     sptr<WindowManagerAgent> windowPropertyChangeAgent_;
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
-    // tanhong
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
 };
@@ -1622,7 +1620,6 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
     return ret;
 }
 
-// tanhong
 WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
     const sptr<IWindowSystemBarPropertyChangedListener>& listener)
 {
@@ -1689,7 +1686,6 @@ void WindowManager::NotifyWindowSystemBarPropertyChange(WindowType type, const S
 void WindowManager::Impl::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "tanhong debug enable %{public}d.", systemBarProperty.enable_);
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners;
     {
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
@@ -1697,7 +1693,7 @@ void WindowManager::Impl::NotifyWindowSystemBarPropertyChange(
     }
     for (auto &listener : windowSystemBarPropertyChangedListeners) {
         if (listener != nullptr) {
-            TLOGI(WmsLogTag::WMS_IMMS, "tanhong enter enable %{public}d.", systemBarProperty.enable_);
+            TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d, enable %{public}d.", type, systemBarProperty.enable_);
             listener->OnWindowSystemBarPropertyChanged(type, systemBarProperty);
         }
     }

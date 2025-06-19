@@ -256,7 +256,6 @@ private:
     std::unordered_set<int32_t> interestWindowIds_;
 };
 
-// tanhong
 /*
  * @class IWindowSystemBarPropertyChangedListener
  *
@@ -801,7 +800,6 @@ public:
      */
     WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
 
-    // tanhong
     /*
      * @brief Register window System Bar property changed Listener.
      *

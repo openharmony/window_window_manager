@@ -266,7 +266,6 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
     }
 }
 
-// tanhong
 void SessionManagerAgentController::NotifyWindowSystemBarPropertyChange(
     WindowType type, const SystemBarProperty& systemBarProperty)
 {
