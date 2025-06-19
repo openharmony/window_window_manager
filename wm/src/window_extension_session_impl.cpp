@@ -565,7 +565,7 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
     }
     focusState_ = focusState;
     if (focusState_ != std::nullopt) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "persistentId:%{public}d focusState:%{public}d",
+        TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d,%{public}d]",
             GetPersistentId(), static_cast<int32_t>(focusState_.value()));
     }
 }
