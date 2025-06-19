@@ -196,16 +196,16 @@ public:
 
     void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo) override
     {
-        listenerLifeCycleInfo.windowId = 0;
-        listenerLifeCycleInfo.windowType = WindowType::SYSTEM_WINDOW_END;
-        listenerLifeCycleInfo.windowName = "";        
+        listenerLifeCycleInfo.windowId = lifeCycleInfo.windowId;
+        listenerLifeCycleInfo.windowType = lifeCycleInfo.windowType;
+        listenerLifeCycleInfo.windowName = lifeCycleInfo.windowName;        
     }
 
     TestIWindowLifeCycleListener()
     {
-        listenerLifeCycleInfo.windowId = lifeCycleInfo.windowId;
-        listenerLifeCycleInfo.windowType = lifeCycleInfo.windowType;
-        listenerLifeCycleInfo.windowName = lifeCycleInfo.windowName;        
+        listenerLifeCycleInfo.windowId = 0;
+        listenerLifeCycleInfo.windowType = WindowType::SYSTEM_WINDOW_END;
+        listenerLifeCycleInfo.windowName = "";        
     }
 
     WindowLifeCycleInfo listenerLifeCycleInfo;
@@ -2264,7 +2264,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowCreated01, TestSize.Level1)
 
     lifeCycleInfo.windowId = 105;
     lifeCycleInfo.windowType = WindowType::SYSTEM_SUB_WINDOW_BASE;
-    lifeCycleInfo.windowName = "window104";     
+    lifeCycleInfo.windowName = "window105";     
     ret = WindowManager::GetInstance().NotifyWMSWindowCreated(lifeCycleInfo);
     ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
     ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
@@ -2340,7 +2340,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed01, TestSize.Level1)
 
     lifeCycleInfo.windowId = 105;
     lifeCycleInfo.windowType = WindowType::SYSTEM_SUB_WINDOW_BASE;
-    lifeCycleInfo.windowName = "window104";     
+    lifeCycleInfo.windowName = "window105";     
     ret = WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
     ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
     ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
