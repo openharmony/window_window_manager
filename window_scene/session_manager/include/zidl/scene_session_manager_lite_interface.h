@@ -401,7 +401,8 @@ public:
      * @param pointerEvent The pointer event for hover
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
      */
-    virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+    virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+        { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
