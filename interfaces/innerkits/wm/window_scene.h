@@ -127,7 +127,6 @@ public:
 
     /**
      * Window go resume.
-     * Window go resume.
      *
      * @return the error code of window
      */

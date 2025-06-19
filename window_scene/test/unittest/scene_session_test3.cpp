@@ -1216,7 +1216,7 @@ HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Le
     SessionInfo info;
     info.abilityName_ = "NotifyUpdateAppUseControl";
     info.bundleName_ = "NotifyUpdateAppUseControl";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
         std::cout << "isNeedControl:" << isNeedControl << ";isControlRecentOnly:" << isControlRecentOnly << std::endl;
     };
