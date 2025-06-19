@@ -900,6 +900,7 @@ void ScreenSessionManager::OnFoldScreenChange(sptr<ScreenSession>& screenSession
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldSensorManager::GetInstance().SetTaskScheduler(screenPowerTaskScheduler_);
         SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
         SuperFoldSensorManager::GetInstance().RegisterHallCallback();
         SetSensorSubscriptionEnabled();
