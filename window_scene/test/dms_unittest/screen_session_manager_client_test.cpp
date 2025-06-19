@@ -1630,7 +1630,7 @@ HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
 
     ScreenId screenId11 = 11;
     client->extraScreenSessionMap_.emplace(screenId11, nullptr);
-    client->ExtraDestroyScreen(screenId11)
+    client->ExtraDestroyScreen(screenId11);
     EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
 }
 
