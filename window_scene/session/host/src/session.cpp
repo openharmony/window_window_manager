@@ -2418,7 +2418,7 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "Session TransferPointEvent, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_EVENT, "id: %{public}d", GetPersistentId());
     if (!IsSystemSession() && !IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
