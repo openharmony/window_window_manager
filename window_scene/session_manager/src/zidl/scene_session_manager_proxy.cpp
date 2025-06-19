@@ -2671,12 +2671,12 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFD("GetWindowModeType Write interfaceToken failed");
+        TLOGD(WmsLogTag::DEFAULT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::DEFAULT, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(

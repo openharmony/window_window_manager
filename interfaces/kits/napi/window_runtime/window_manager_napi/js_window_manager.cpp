@@ -63,7 +63,7 @@ JsWindowManager::~JsWindowManager()
 
 void JsWindowManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGD("Finalizer");
+    TLOGD(WmsLogTag::DEFAULT, "Finalizer");
     std::unique_ptr<JsWindowManager>(static_cast<JsWindowManager*>(data));
 }
 

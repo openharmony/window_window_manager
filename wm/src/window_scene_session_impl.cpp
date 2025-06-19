@@ -3796,7 +3796,7 @@ void WindowSceneSessionImpl::PerformBack()
         if (abilityContext != nullptr) {
             abilityContext->OnBackPressedCallBack(needMoveToBackground);
         }
-        WLOGFI("%{public}d", needMoveToBackground);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}d", needMoveToBackground);
         hostSession->RequestSessionBack(needMoveToBackground);
     }
 }

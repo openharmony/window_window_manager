@@ -1957,7 +1957,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
-        WLOGFI("[%{public}d, %{public}d]",
+        TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     RegisterUIContenCallback();
@@ -5863,7 +5863,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-        WLOGFI("In");
+        TLOGI(WmsLogTag::DEFAULT, "In");
         if (inputEventConsumer != nullptr) {
             WLOGFD("Transfer key event to inputEventConsumer");
             if (inputEventConsumer->OnInputEvent(keyEvent)) {
