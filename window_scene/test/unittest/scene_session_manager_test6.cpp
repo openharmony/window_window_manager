@@ -82,6 +82,7 @@ void SceneSessionManagerTest6::SetUp()
 
 void SceneSessionManagerTest6::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -1678,6 +1679,7 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId001, TestSize.L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->TerminateSessionByPersistentId(sceneSession->GetPersistentId());
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
@@ -1697,6 +1699,7 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, TestSize.L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->TerminateSessionByPersistentId(INVALID_SESSION_ID);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }

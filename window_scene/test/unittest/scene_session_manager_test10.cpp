@@ -78,6 +78,7 @@ void SceneSessionManagerTest10::SetUp() {}
 
 void SceneSessionManagerTest10::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -1048,7 +1049,7 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, TestSi
     DisplayId displayId = 1001;
     sceneSession->property_->SetDisplayId(displayId);
     auto ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true);
-    ASSERT_TRUE(ret);
+    EXPECT_TRUE(ret);
 
     ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false);
     ASSERT_FALSE(ret);
@@ -1104,6 +1105,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     std::vector<AppUseControlInfo> controlList;
     controlList.emplace_back();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
               ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 

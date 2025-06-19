@@ -79,6 +79,7 @@ void SceneSessionManagerTest11::TearDown()
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     ssm_->RefreshAppInfo(BUNDLE_NAME);
     usleep(SLEEP_TIME);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 sptr<SceneSession> SceneSessionManagerTest11::GetSceneSession(const std::string& instanceKey)
@@ -361,6 +362,7 @@ HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, TestSize.Level1)
     abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
     abilityInfo.appIndex = 0;
 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }

@@ -104,6 +104,7 @@ void SceneSessionManagerTest3::SetUp()
 
 void SceneSessionManagerTest3::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
 }
@@ -914,6 +915,8 @@ HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch1, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, GetSessionInfoByContinueSessionId, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     std::string continueSessionId = "";
     SessionInfoBean missionInfo;
     EXPECT_EQ(ssm_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo),
@@ -1561,8 +1564,8 @@ HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, TestSize.Level1)
     sceneSession1->AddSubSession(sceneSession2);
     sceneSession1->AddSubSession(sceneSession3);
     uint32_t topWinId;
-    ASSERT_NE(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
-              WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
+              WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -1577,7 +1580,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     ssm_->ConfigWindowImmersive(immersiveConfig);
 
-    ASSERT_NE(ssm_->SwitchFreeMultiWindow(false), WSError::WS_OK);
+    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
     SystemSessionConfig systemConfig;
     systemConfig.freeMultiWindowSupport_ = true;
     ssm_->SwitchFreeMultiWindow(false);
