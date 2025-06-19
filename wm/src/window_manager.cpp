@@ -76,7 +76,7 @@ public:
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     void NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo);
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);    
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
