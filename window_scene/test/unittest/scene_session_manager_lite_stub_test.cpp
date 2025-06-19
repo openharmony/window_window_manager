@@ -142,7 +142,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override
+    WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override
     {
         return WMError::WM_OK;
     }
@@ -797,6 +797,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleCheckWindowId, TestSize.Level1)
     int32_t numMax = 100;
     data.WriteInt32(numMax);
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleCheckWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleUpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : HandleUpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteInt32(1);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    MessageParcel data2;
+    data2.WriteInt32(1);
+    data2.WriteInt32(2);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data2, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

@@ -55,7 +55,7 @@ private:
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
