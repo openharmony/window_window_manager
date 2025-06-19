@@ -102,4 +102,38 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, PendingSessionToBackgroundByPersisten
     MockMessageParcel::SetReadInt32ErrorFlag(false);
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
 }
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, SendPointerEventForHover, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    const int32_t persistentId = 1;
+    bool shouldBackToCaller = true;
+    MockMessageParcel::ClearAllErrorFlag();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSError errCode = sceneSessionManagerLiteProxy->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+}
 }

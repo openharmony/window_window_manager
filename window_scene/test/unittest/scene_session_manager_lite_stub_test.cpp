@@ -293,6 +293,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override
+    {
+        return WSError::WS_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -1199,6 +1203,47 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleExitKioskMode, Function | SmallT
     data.WriteRemoteObject(token);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleExitKioskMode(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: ProcessRemoteRequest
+ * @tc.desc: ProcessRemoteRequest TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, ProcessRemoteRequest_Hover, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSendPointerEventForHover
+ * @tc.desc: HandleSendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->WriteToParcel(data);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace

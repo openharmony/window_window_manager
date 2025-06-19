@@ -290,6 +290,7 @@ ohos_shared_library("session_manager_lite") {
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
     "input:libmmi-napi",
+    "input:libmmi-client",
   ]
 
   external_deps = [
