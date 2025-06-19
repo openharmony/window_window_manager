@@ -942,6 +942,7 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);
 }
+
 /**
  * @tc.name: CloseKeyboardSyncTransaction5
  * @tc.desc: test function: CloseKeyboardSyncTransaction
@@ -949,10 +950,9 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
  */
 HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction5, TestSize.Level1)
 {
-    std::string abilityName = "CloseKeyboardSyncTransaction4";
-    std::string bundleName = "CloseKeyboardSyncTransaction4";
+    std::string abilityName = "CloseKeyboardSyncTransaction5";
+    std::string bundleName = "CloseKeyboardSyncTransaction5";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-    ASSERT_NE(keyboardSession, nullptr);
     WSRect keyboardPanelRect = { 0, 0, 0, 0 };
     WindowAnimationInfo animationInfo;
     animationInfo.callingId = 3;
