@@ -53,6 +53,36 @@ struct WindowSnapshotDataPack {
     WMError result = WMError::WM_OK;
 };
 
+struct WindowLifeCycleInfo {
+    int32_t windowId;
+    WindowType windowType;
+    std::string windowName;
+};
+
+/**
+ * @class IWMSConnectionChangedListener
+ *
+ * @brief Listener to observe WMS connection status.
+ */
+class IWindowLifeCycleListener : virtual public RefBase {
+    public:
+        /**
+         * @brief Notify caller when window is created
+         *
+         * @param lifeCycleInfo window info while its lifecycle status changed.
+         *
+         */
+        virtual void OnWindowCreated(WindowLifeCycleInfo lifeCycleInfo) = 0;
+    
+        /**
+         * @brief Notify caller when WMS disconnected
+         *
+         * @param lifeCycleInfo window info while its lifecycle status changed.
+         *
+         */
+        virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo) = 0;
+};
+
 /**
  * @class IWMSConnectionChangedListener
  *
@@ -1274,6 +1304,32 @@ public:
      */
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
+
+    /**
+     * @brief Register window lifecycle status changed listener.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Unregister window lifecycle status changed listener.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief notify window created.
+     * @param lifeCycleInfo window lifecycle info.
+     */
+    void NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo);
+
+        /**
+     * @brief notify window created.
+     * @param lifeCycleInfo window lifecycle info.
+     */
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);
 
 private:
     WindowManager();

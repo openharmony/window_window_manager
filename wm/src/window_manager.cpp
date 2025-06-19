@@ -75,6 +75,9 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
+    void NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo);
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);    
+
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::shared_mutex listenerMutex_;
@@ -114,6 +117,7 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
+    sptr<IWindowLifeCycleListener> windowLifeCycleListener_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -460,6 +464,34 @@ void WindowManager::Impl::NotifyWindowRectChange(
         if (listener != nullptr) {
             listener->OnWindowInfoChanged(windowInfoList);
         }
+    }
+}
+
+void WindowManager::Impl::NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "notify window created");
+
+    sptr<IWindowLifeCycleListener> wmsWindowCreatedListener;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        wmsWindowCreatedListener = windowLifeCycleListener_;
+    }
+    if (wmsWindowCreatedListener != nullptr) {
+        wmsWindowCreatedListener->OnWindowCreated(lifeCycleInfo);
+    }
+}
+
+void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "notify window destroyed");
+
+    sptr<IWindowLifeCycleListener> wmsWindowDestroyedListener;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        wmsWindowDestroyedListener = windowLifeCycleListener_;
+    }
+    if (wmsWindowDestroyedListener != nullptr) {
+        wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo);
     }
 }
 
@@ -2141,5 +2173,53 @@ WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty
     }
     return ret;
 }
+
+
+WMError WindowManager::RegisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window lifecycle listener registered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Register window lifecycle listener");
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (pImpl_->windowLifeCycleListener_) {
+            TLOGI(WmsLogTag::WMS_LIFE, "WindowLifeCycleListener is already registered, do nothing");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowLifeCycleListener_ = listener;
+    }
+ 
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UnregisterWMSConnectionChangedListener(const sptr<IWindowLifeCycleListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window lifecycle listener unregistered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Unregister window lifecycle listener");
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        pImpl_->windowLifeCycleListener_ = nullptr;
+    }
+ 
+    return WMError::WM_OK;
+}
+
+void WindowManager::NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo)
+{
+    pImpl_->NotifyWMSWindowCreated(lifeCycleInfo);
+    return;
+}
+
+void WindowManager::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo)
+{
+    pImpl_->NotifyWMSWindowDestroyed(lifeCycleInfo);
+    return;
+}
+
 } // namespace Rosen
 } // namespace OHOS
