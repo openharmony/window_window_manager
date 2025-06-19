@@ -309,16 +309,6 @@ public:
         DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
-     * @brief Get SDR&HDR screenshot with option.
-     *
-     * @param snapShotConfig Parameter of rotation.
-     * @param errorCode error code.
-     * @return PixelMap vector object of screenshot.
-     */
-    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotwithConfig(
-        const SnapShotConfig& snapShotConfig, DmErrorCode* errorCode = nullptr, bool isUseDma = false);
-
-    /**
      * @brief Begin to wake up screen.
      *
      * @param reason Reason for power state change.
@@ -872,19 +862,6 @@ public:
      */
     std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotWithOption(
         const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
-
-    /**
-     * @brief Get SDR&HDR screenshot with capture option.
-     *
-     * @param captureOption  screen capture option.
-     * @param rect Rect of screenshot.
-     * @param size Size of screenshot.
-     * @param rotation Parameter of rotation.
-     * @param errorCode error code.
-     * @return PixelMap vector object of screenshot.
-     */
-    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotWithOption(const CaptureOption& captureOption,
-        const Media::Rect& rect, const Media::Size& size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
      * @brief Get CutoutInfo with rotation

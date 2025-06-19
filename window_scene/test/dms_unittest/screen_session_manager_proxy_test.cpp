@@ -57,9 +57,10 @@ void ScreenSessionManagerProxyTest::SetUp()
 namespace {
 static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
 static const int32_t PIXELMAP_SIZE = 2;
-static const int32_t DEFAULT_ROATION = 0;
 static const int32_t SDR_PIXELMAP = 0;
 static const int32_t HDR_PIXELMAP = 1;
+static const int ERR_NO_PERMISSION = 201;
+static const int ERR_NO = 0;
 
 /**
  * @tc.name: SetPrivacyStateByDisplayId
@@ -1744,11 +1745,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
         res = screenSessionManagerProxy->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(res, expectation);
-    } else {
-        EXPECT_EQ(res, expectation);
-    }
+    EXPECT_EQ(res, expectation);
 }
  
 /**
@@ -1756,7 +1753,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
  * @tc.desc: GetDisplayHdrSnapshotWithOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, TestSize.Level1)
 {
     CaptureOption captureOption = {
         .displayId_ = DEFAULT_DISPLAY,
@@ -1778,7 +1775,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, Func
  * @tc.desc: GetDisplayHdrSnapshotWithOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, TestSize.Level1)
 {
     CaptureOption captureOption = {
         .displayId_ = DEFAULT_DISPLAY,
@@ -1789,21 +1786,68 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, Func
     };
     DmErrorCode errorCode;
     std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+ 
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(
         captureOption, &errorCode);
     EXPECT_EQ(result, tmpVec);
- 
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    result = screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(
-        captureOption, &errorCode);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
  
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     result = screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(
         captureOption, &errorCode);
     EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption003
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption003, TestSize.Level1)
+{
+    CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        screenSessionManagerProxyTmp->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption004
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption004, TestSize.Level1)
+{
+    CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+    auto remoteObj = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp =
+        sptr<ScreenSessionManagerProxy>::MakeSptr(remoteObj);
+    remoteObj->SetRequestResult(ERR_NO_PERMISSION);
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        screenSessionManagerProxyTmp->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    remoteObj->SetRequestResult(ERR_NON);
 }
  
 /**
@@ -1811,7 +1855,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, Func
  * @tc.desc: GetDisplayHdrSnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, TestSize.Level1)
 {
     DmErrorCode errorCode;
     DisplayId validDisplayId = DEFAULT_DISPLAY;
@@ -1829,28 +1873,110 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, Function | Sma
  * @tc.desc: GetDisplayHdrSnapshotWithOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot002, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot002, TestSize.Level1)
 {
     DmErrorCode errorCode;
     DisplayId validDisplayId = DEFAULT_DISPLAY;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
     std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+ 
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
         validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
     EXPECT_EQ(result, tmpVec);
- 
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
  
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
         validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
     EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+ 
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
+        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+    EXPECT_EQ(result, tmpVec);
+    MockMessageParcel::ClearAllErrorFlag();
 }
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot003
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot003, TestSize.Level1)
+{
+    DmErrorCode errorCode;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
+        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+    EXPECT_EQ(result, tmpVec);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot004
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot004, TestSize.Level1)
+{
+    DmErrorCode errorCode;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+ 
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
+        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+    EXPECT_EQ(result, tmpVec);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot005
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot005, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    DmErrorCode* errorCode = nullptr;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
+        validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
+    EXPECT_EQ(result, tmpVec);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot006
+ * @tc.desc: GetDisplayHdrSnapshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot006, TestSize.Level1)
+{
+    DmErrorCode* errorCode = nullptr;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+    auto remoteObj = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp =
+        sptr<ScreenSessionManagerProxy>::MakeSptr(remoteObj);
+    remoteObj->SetRequestResult(ERR_NO_PERMISSION);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
+        validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
+    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
+    EXPECT_EQ(result, tmpVec);
+    remoteObj->SetRequestResult(ERR_NON);
+}
+
 }
 }

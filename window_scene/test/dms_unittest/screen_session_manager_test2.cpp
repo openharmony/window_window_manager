@@ -34,6 +34,11 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr uint32_t M_STATUS_WIDTH = 1008;
 constexpr uint32_t F_STATUS_WIDTH = 2048;
 constexpr uint32_t G_STATUS_WIDTH = 3184;
+static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
+static const int32_t PIXELMAP_SIZE = 2;
+static const int32_t SDR_PIXELMAP = 0;
+static const int32_t HDR_PIXELMAP = 1;
+static const ScreenId VIRTUAL_SCREEN_ID = 2;
 }
 namespace {
     std::string g_errLog;
@@ -872,6 +877,368 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenIds, Function | SmallTest | 
     std::vector<ScreenId> screenIds1;
     auto ret1 = ssm_->GetPhysicalScreenIds(screenIds1);
     EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+
+/**
+ * @tc.name: GetScreenHdrSnapshot00
+ * @tc.desc: GetScreenHdrSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenHdrSnapshot00, TestSize.Level1)
+{
+    bool isUseDma = false;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    bool isCaptureFullOfScreen = false;
+    std::vector<NodeId> blackList = {};
+    std::vector<std::shared_ptr<Media::PixelMap>> result = ssm_->GetScreenHdrSnapshot(
+        validDisplayId, isUseDma, isCaptureFullOfScreen, blackList);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrSnapshot01
+ * @tc.desc: GetScreenHdrSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenHdrSnapshot01, TestSize.Level1)
+{
+    bool isUseDma = false;
+    DisplayId validDisplayId = DISPLAY_ID_FAKE;
+    bool isCaptureFullOfScreen = false;
+    std::vector<NodeId> blackList = {};
+    std::vector<std::shared_ptr<Media::PixelMap>> result = ssm_->GetScreenHdrSnapshot(
+        validDisplayId, isUseDma, isCaptureFullOfScreen, blackList);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot00
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot00, TestSize.Level1)
+{
+    DisplayId displayId = DEFAULT_DISPLAY;
+    DmErrorCode* errorCode = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot01
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot01, TestSize.Level1)
+{
+    DisplayId displayId = DEFAULT_DISPLAY;
+    DmErrorCode* errorCode = nullptr;
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+ 
+    if (screenSession->GetDisplayNode() != nullptr) {
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot02
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot02, TestSize.Level1)
+{
+    DisplayId displayId = DEFAULT_DISPLAY;
+    DmErrorCode* errorCode = nullptr;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    bool isSupportSnapshot = system::GetBoolParameter("persist.edm.disallow_screenshot", false);
+    if (isSupportSnapshot) {
+        std::vector<std::shared_ptr<Media::PixelMap>> result =
+            ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+        EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+        EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+        EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot03
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot03, TestSize.Level1)
+{
+    DisplayId displayId = DEFAULT_DISPLAY;
+    DmErrorCode* errorCode = nullptr;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    bool isSupportSnapshot = system::GetBoolParameter("persist.edm.disallow_screenshot", false);
+    if (isSupportSnapshot) {
+        std::vector<std::shared_ptr<Media::PixelMap>> result =
+            ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+        EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+        EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+        EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot04
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot04, TestSize.Level1)
+{
+    DisplayId displayId = DEFAULT_DISPLAY;
+    DmErrorCode* errorCode = nullptr;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    bool isSupportSnapshot = system::GetBoolParameter("persist.edm.disallow_screenshot", false);
+    if (isSupportSnapshot) {
+        std::vector<std::shared_ptr<Media::PixelMap>> result =
+            ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+        EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+        EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+        EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshot05
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot05, TestSize.Level1)
+{
+    DisplayId displayId = DISPLAY_ID_FAKE;
+    DmErrorCode* errorCode = nullptr;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    bool isSupportSnapshot = system::GetBoolParameter("persist.edm.disallow_screenshot", false);
+    if (isSupportSnapshot) {
+        std::vector<std::shared_ptr<Media::PixelMap>> result =
+            ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+        EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+        EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+        EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption00
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption00, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption01
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption01, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption02
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption02, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption03
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption03, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption04
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption04, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DISPLAY_ID_FAKE,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    bool isSupportSnapshot = system::GetBoolParameter("persist.edm.disallow_screenshot", false);
+    if (isSupportSnapshot) {
+        std::vector<std::shared_ptr<Media::PixelMap>> result =
+            ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+        EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+        EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+        EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+    }
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption05
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption05, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption06
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption06, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = false,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption07
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshotWithOption07, TestSize.Level1)
+{
+        CaptureOption captureOption = {
+        .displayId_ = DEFAULT_DISPLAY,
+        .isNeedNotify_ = true,
+        .isNeedPointer_ = false,
+        .isCaptureFullOfScreen = false,
+        .blackList_ = {}
+    };
+    DmErrorCode errorCode;
+ 
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    std::vector<std::shared_ptr<Media::PixelMap>> result = 
+        ssm_->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
 }
 }

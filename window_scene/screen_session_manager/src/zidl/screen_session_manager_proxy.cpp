@@ -4200,8 +4200,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return { nullptr, nullptr };
     }
-    if (!data.WriteUint64(captureOption.displayId_) ||
-        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
+    if (!data.WriteUint64(captureOption.displayId_) || !data.WriteBool(captureOption.isNeedNotify_) ||
         !data.WriteBool(captureOption.isCaptureFullOfScreen_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return { nullptr, nullptr };

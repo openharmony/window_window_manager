@@ -49,6 +49,8 @@ public:
     MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
     MOCK_METHOD4(GetDisplayHdrSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
         DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+    MOCK_METHOD2(GetDisplayHdrSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+        const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {

@@ -37,7 +37,8 @@
 
 namespace OHOS::Rosen {
 namespace save {
-const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t SDR_PIXMAP = 0;
 struct Option {
     Media::Rect rect;
     Media::Size size;
@@ -290,30 +291,14 @@ static void AsyncGetScreenHdrshot(napi_env env, std::unique_ptr<HdrParam>& param
     }
     CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
         param->option.isCaptureFullOfScreen};
-    if (!(option.isNeedNotify_ && option.isNeedPointer_)) {
-        if (param->useInputOption) {
-            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option,
-                param->option.rect, param->option.size, param->option.rotation, &param->wret);
-        } else {
-            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option, &param->wret);
-        }
+    if (!option.isNeedNotify_) {
+        param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option, &param->wret);
     } else {
-        if (param->useInputOption) {
-            TLOGI(WmsLogTag::DMS, "Get Screenshot by input option");
-            SnapShotConfig snapConfig;
-            snapConfig.displayId_ = param->option.displayId;
-            snapConfig.imageRect_ = param->option.rect;
-            snapConfig.imageSize_ = param->option.size;
-            snapConfig.rotation_ = param->option.rotation;
-            snapConfig.isCaptureFullOfScreen_ = param->option.isCaptureFullOfScreen;
-            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotwithConfig(snapConfig, &param->wret, true);
-        } else {
-            TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
-            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshot(param->option.displayId, &param->wret,
-                true, param->option.isCaptureFullOfScreen);
-        }
+        TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
+        param->imageVec = DisplayManager::GetInstance().GetScreenHdrshot(param->option.displayId, &param->wret,
+            true, param->option.isCaptureFullOfScreen);
     }
-    if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[0] == nullptr) &&
+    if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[SDR_PIXMAP] == nullptr) &&
         param->wret == DmErrorCode::DM_OK) {
         TLOGI(WmsLogTag::DMS, "Get Screenshot failed!");
         param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
@@ -569,8 +554,8 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
 napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "%{public}s called", __PRETTY_FUNCTION__);
-    napi_value argv[1] = {nullptr}; // the max number of input parameters is 2
-    size_t argc = 1; // the max number of input parameters is 2
+    napi_value argv[1] = {nullptr}; // the max number of input parameters is 1
+    size_t argc = 1; // the max number of input parameters is 1
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
  
     auto param = std::make_unique<Param>();
@@ -596,10 +581,8 @@ napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
     hdrParam->wret = param->wret;
     hdrParam->option = param->option;
     hdrParam->errMessage = param->errMessage;
-    hdrParam->useInputOption = param->useInputOption;
     hdrParam->validInputParam = param->validInputParam;
-    hdrParam->imageRect = param->imageRect;
-    hdrParam->isPick = false;
+    hdrParam->useInputOption = param->useInputOption;
     return AsyncProcess<HdrParam>(env, __PRETTY_FUNCTION__, AsyncGetScreenHdrshot, HdrResolve, ref, hdrParam);
 }
 } // namespace save

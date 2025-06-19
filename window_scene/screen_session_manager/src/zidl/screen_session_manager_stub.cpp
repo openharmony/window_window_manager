@@ -496,10 +496,22 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT: {
-            DisplayId displayId = data.ReadUint64();
+            DisplayId displayId = DISPLAY_ID_INVALID;
+            bool isUseDma = false;
+            bool isCaptureFullOfScreen = false;
             DmErrorCode errCode = DmErrorCode::DM_OK;
-            bool isUseDma = data.ReadBool();
-            bool isCaptureFullOfScreen = data.ReadBool();
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::DMS, "Read displayId failed");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadBool(isUseDma)) {
+                TLOGE(WmsLogTag::DMS, "Read isUseDma failed");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadBool(isCaptureFullOfScreen)) {
+                TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+                return ERR_INVALID_DATA;
+            }
             std::vector<std::shared_ptr<Media::PixelMap>> displaySnapshotVec = GetDisplayHdrSnapshot(
                 displayId, &errCode, isUseDma, isCaptureFullOfScreen);
             if (displaySnapshotVec.size() != PIXMAP_VECTOR_SIZE) {
@@ -507,7 +519,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 reply.WriteParcelable(nullptr);
                 reply.WriteParcelable(nullptr);
             } else {
-                TLOGE(WmsLogTag::DMS, "WriteParcelable to receive displaySnapshotVec in stub.");
+                TLOGI(WmsLogTag::DMS, "WriteParcelable to receive displaySnapshotVec in stub.");
                 reply.WriteParcelable(displaySnapshotVec[0] == nullptr ? nullptr : displaySnapshotVec[0].get());
                 reply.WriteParcelable(displaySnapshotVec[1] == nullptr ? nullptr : displaySnapshotVec[1].get());
             }
@@ -1365,10 +1377,21 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
 void ScreenSessionManagerStub::ProcGetDisplayHdrSnapshotWithOption(MessageParcel& data, MessageParcel& reply)
 {
     CaptureOption option;
-    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
-    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
-    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
-    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
+    option.displayId_ = DISPLAY_ID_INVALID;
+    option.isNeedNotify_ = false;
+    option.isCaptureFullOfScreen_ = false;
+    if (!data.ReadUint64(option.displayId_)) {
+        TLOGE(WmsLogTag::DMS, "Read displayId failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedNotify_)) {
+        TLOGE(WmsLogTag::DMS, "Read isNeedNotify failed");
+        return;
+    }
+    if (!data.ReadBool(option.isCaptureFullOfScreen_)) {
+        TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+        return;
+    }
     if (!data.ReadUInt64Vector(&option.blackList_)) {
         TLOGE(WmsLogTag::DMS, "Read node blackList failed");
         return;
