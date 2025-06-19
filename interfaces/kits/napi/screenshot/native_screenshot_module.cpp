@@ -37,6 +37,7 @@
 
 namespace OHOS::Rosen {
 namespace save {
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 struct Option {
     Media::Rect rect;
     Media::Size size;
@@ -54,6 +55,17 @@ struct Param {
     bool useInputOption;
     bool validInputParam;
     std::shared_ptr<Media::PixelMap> image;
+    Media::Rect imageRect;
+    bool isPick;
+};
+
+struct HdrParam {
+    DmErrorCode wret;
+    Option option;
+    std::string errMessage;
+    bool useInputOption;
+    bool validInputParam;
+    std::vector<std::shared_ptr<Media::PixelMap>> imageVec;
     Media::Rect imageRect;
     bool isPick;
 };
@@ -267,6 +279,49 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     }
 }
 
+static void AsyncGetScreenHdrshot(napi_env env, std::unique_ptr<HdrParam>& param)
+{
+    if (!param->validInputParam) {
+        TLOGE(WmsLogTag::DMS, "Invalid Input Param!");
+        param->imageVec = {};
+        param->wret = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        param->errMessage = "Get Screenshot Failed: Invalid input param";
+        return;
+    }
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
+        param->option.isCaptureFullOfScreen};
+    if (!(option.isNeedNotify_ && option.isNeedPointer_)) {
+        if (param->useInputOption) {
+            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else {
+            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option, &param->wret);
+        }
+    } else {
+        if (param->useInputOption) {
+            TLOGI(WmsLogTag::DMS, "Get Screenshot by input option");
+            SnapShotConfig snapConfig;
+            snapConfig.displayId_ = param->option.displayId;
+            snapConfig.imageRect_ = param->option.rect;
+            snapConfig.imageSize_ = param->option.size;
+            snapConfig.rotation_ = param->option.rotation;
+            snapConfig.isCaptureFullOfScreen_ = param->option.isCaptureFullOfScreen;
+            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotwithConfig(snapConfig, &param->wret, true);
+        } else {
+            TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
+            param->imageVec = DisplayManager::GetInstance().GetScreenHdrshot(param->option.displayId, &param->wret,
+                true, param->option.isCaptureFullOfScreen);
+        }
+    }
+    if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[0] == nullptr) &&
+        param->wret == DmErrorCode::DM_OK) {
+        TLOGI(WmsLogTag::DMS, "Get Screenshot failed!");
+        param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        param->errMessage = "Get Screenshot failed: Screenshot imageVec is nullptr";
+        return;
+    }
+}
+
 napi_value CreateJsNumber(napi_env env, int32_t value)
 {
     napi_value valRet = nullptr;
@@ -348,6 +403,57 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     }
     napi_value jsImage = OHOS::Media::PixelMapNapi::CreatePixelMap(env, param->image);
     return jsImage;
+}
+
+napi_value HdrResolve(napi_env env, std::unique_ptr<HdrParam> &param)
+{
+    napi_value result;
+    napi_value error;
+    napi_value code;
+    bool isThrowError = true;
+    if (param->wret != DmErrorCode::DM_OK) {
+        napi_create_error(env, nullptr, nullptr, &error);
+        napi_create_int32(env, (int32_t)param->wret, &code);
+    }
+    switch (param->wret) {
+        case DmErrorCode::DM_ERROR_NO_PERMISSION:
+            napi_set_named_property(env, error, "DM_ERROR_NO_PERMISSION", code);
+            break;
+        case DmErrorCode::DM_ERROR_INVALID_PARAM:
+            napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+            break;
+        case DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT:
+            napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+            break;
+        case DmErrorCode::DM_ERROR_SYSTEM_INNORMAL:
+            napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            break;
+        default:
+            isThrowError = false;
+            break;
+    }
+    TLOGI(WmsLogTag::DMS, "screen shot ret=%{public}d.", param->wret);
+    if (isThrowError) {
+        napi_throw(env, error);
+        return error;
+    }
+    if (param->wret != DmErrorCode::DM_OK) {
+        NAPI_CALL(env, napi_get_undefined(env, &result));
+        return result;
+    }
+ 
+    napi_value jsImages = nullptr;
+    napi_create_array_with_length(env, PIXMAP_VECTOR_SIZE, &jsImages);
+    if (jsImages == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create pixelmap array");
+        NAPI_CALL(env, napi_get_undefined(env, &result));
+        return result;
+    }
+    uint32_t index = 0;
+    for (const auto pixelmap : param->imageVec) {
+        napi_set_element(env, jsImages, index++, OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmap));
+    }
+    return jsImages;
 }
 
 napi_value PickFunc(napi_env env, napi_callback_info info)
@@ -459,6 +565,43 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     param->isPick = false;
     return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
+
+napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "%{public}s called", __PRETTY_FUNCTION__);
+    napi_value argv[1] = {nullptr}; // the max number of input parameters is 2
+    size_t argc = 1; // the max number of input parameters is 2
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+ 
+    auto param = std::make_unique<Param>();
+    auto hdrParam = std::make_unique<HdrParam>();
+    if (param == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Create param failed.");
+        return nullptr;
+    }
+    param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    napi_ref ref = nullptr;
+    if (argc == 0) { // 0 valid parameters
+        TLOGI(WmsLogTag::DMS, "argc == 0");
+        param->validInputParam = true;
+    } else if (GetType(env, argv[0]) == napi_object) {
+        TLOGI(WmsLogTag::DMS, "argc = 1, argv[0]'s type is napi_object");
+        param->validInputParam = true;
+        param->useInputOption = true;
+        GetScreenshotParam(env, param, argv[0]);
+    } else { // parameters > 1
+        TLOGI(WmsLogTag::DMS, "argc == 0");
+        param->validInputParam = true;
+    }
+    hdrParam->wret = param->wret;
+    hdrParam->option = param->option;
+    hdrParam->errMessage = param->errMessage;
+    hdrParam->useInputOption = param->useInputOption;
+    hdrParam->validInputParam = param->validInputParam;
+    hdrParam->imageRect = param->imageRect;
+    hdrParam->isPick = false;
+    return AsyncProcess<HdrParam>(env, __PRETTY_FUNCTION__, AsyncGetScreenHdrshot, HdrResolve, ref, hdrParam);
+}
 } // namespace save
 
 void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, const char *propName)
@@ -519,6 +662,7 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
 
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
+        DECLARE_NAPI_FUNCTION("saveHdrPicture", save::SaveHdrFunc),
         DECLARE_NAPI_FUNCTION("pick", save::PickFunc),
         DECLARE_NAPI_FUNCTION("capture", save::CaptureFunc),
         DECLARE_NAPI_PROPERTY("DMError", errorCode),

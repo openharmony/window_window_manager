@@ -3306,6 +3306,30 @@ HWTEST_F(ScreenSessionManagerStubTest, GetPhysicalScreenIds, Function | SmallTes
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: OnRemoteRequest155
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
+ 
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 }
 }
 }

@@ -263,6 +263,18 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
+    
+    /**
+     * @brief Get SDR&HDR screenshot of the target display.
+     *
+     * @param displayId Display id.
+     * @param errorCode error code.
+     * @param isUseDma Whether to use DMA, not used by default.
+     * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
+     * @return PixelMap vector object of screenshot.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -295,6 +307,16 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
         DmErrorCode* errorCode = nullptr, bool isUseDma = false);
+
+    /**
+     * @brief Get SDR&HDR screenshot with option.
+     *
+     * @param snapShotConfig Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap vector object of screenshot.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotwithConfig(
+        const SnapShotConfig& snapShotConfig, DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Begin to wake up screen.
@@ -840,6 +862,29 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get SDR&HDR screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap vector object of screenshot.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotWithOption(
+        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get SDR&HDR screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param rect Rect of screenshot.
+     * @param size Size of screenshot.
+     * @param rotation Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap vector object of screenshot.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotWithOption(const CaptureOption& captureOption,
+        const Media::Rect& rect, const Media::Size& size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
      * @brief Get CutoutInfo with rotation

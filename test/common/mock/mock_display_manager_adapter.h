@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "display_manager_adapter.h"
+#include "display_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -45,6 +46,8 @@ public:
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
     MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
+    MOCK_METHOD4(GetDisplayHdrSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {
@@ -91,6 +94,14 @@ public:
     MOCK_METHOD1(SetScreenRotationLocked, DMError(bool isLocked));
     MOCK_METHOD1(IsScreenRotationLocked, DMError(bool& isLocked));
     MOCK_METHOD4(SetResolution, DMError(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio));
+};
+
+class MockDisplayManger : public DisplayManager {
+    public:
+        MOCK_METHOD4(GetScreenHdrshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+            DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+        MOCK_METHOD2(GetDisplayHdrSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+            const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 } // namespace Rosen
 } // namespace OHOS
