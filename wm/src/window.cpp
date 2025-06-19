@@ -271,7 +271,7 @@ bool Window::IsPcOrPadFreeMultiWindowMode() const
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         bool isPcOrFreeMultiWindow = false;
-        WindowAdapter::GetInstance().IsPcOrPadFreeMultiWindowMode(isPcOrFreeMultiWindow);
+        SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrFreeMultiWindow);
         return isPcOrFreeMultiWindow;
     } else {
         return false;
@@ -282,7 +282,7 @@ bool Window::GetFreeMultiWindowModeEnabledState()
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         bool isFreeMultiWindow = false;
-        WindowAdapter::GetInstance().IsFreeMultiWindowMode(isFreeMultiWindow);
+        SingletonContainer::Get<WindowAdapter>().IsFreeMultiWindowMode(isFreeMultiWindow);
         return isFreeMultiWindow;
     } else {
         return false;

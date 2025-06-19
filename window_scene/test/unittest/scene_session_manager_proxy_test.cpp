@@ -1142,48 +1142,46 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, TestSize.Level1)
  */
 HWTEST_F(sceneSessionManagerProxyTest, IsFreeMultiWindow, TestSize.Level1)
 {
-    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     bool isFreeMultiWindow = false;
 
-    // branch1.0: WriteInterfaceToken failed
+    // remote == nullptr
+    auto ret = tempProxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_NE(proxy, nullptr);
-    auto ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
-    MockMessageParcel::ClearAllErrorFlag();
-
-    // branch1.1: remote == nullptr
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    // branch1.2: SendRequest failed
-    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    // SendRequest failed
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
+    EXPECT_EQ(isFreeMultiWindow, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
-    // branch1.3: ReadInt32 failed
+    // ReadInt32 failed
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
     EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
 
-    // branch1.4: ReadBool failed
+    // ReadBool failed
     MockMessageParcel::SetReadBoolErrorFlag(true);
     ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
     EXPECT_EQ(isFreeMultiWindow, false);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
-
-    // branch1.5: interface succ
-    ret = proxy->IsFreeMultiWindow(isFreeMultiWindow);
-    EXPECT_EQ(isFreeMultiWindow, false);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**
