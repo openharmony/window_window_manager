@@ -879,6 +879,11 @@ struct SystemSessionConfig : public Parcelable {
     {
         return windowUIType_ == WindowUIType::PAD_WINDOW;
     }
+
+    bool IsPcOrPcMode() const
+    {
+        return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
+    }
 };
 } // namespace Rosen
 } // namespace OHOS
