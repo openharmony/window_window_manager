@@ -31,6 +31,16 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
     void OnPrivateWindow(bool hasPrivate) {WLOGFI("IPrivateWindowListener hasPrivatewindow: %{public}u", hasPrivate);}
@@ -1597,6 +1607,31 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
     client->SetScreenCombination(50, 51, combination);
     client->SetScreenCombination(50, 50, combination);
     EXPECT_NE(client, nullptr);
+}
+
+/**
+ * @tc.name: ExtraDestroyScreen
+ * @tc.desc: ExtraDestroyScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    ScreenId screenId = 1;
+    sptr<ScreenSession> screenSession1 = new ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->extraScreenSessionMap_.emplace(screenId, screenSession1);
+
+    ScreenId screenId11 = 11;
+    client->extraScreenSessionMap_.emplace(screenId11, nullptr);
+    client->ExtraDestroyScreen(screenId11)
+    EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
 }
 
 /**
