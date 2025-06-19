@@ -1235,7 +1235,7 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
-            if (session->sessionState_ == nullptr) {
+            if (session->sessionStage_ == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
                 return;
             }
