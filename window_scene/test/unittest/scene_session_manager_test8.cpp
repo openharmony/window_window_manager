@@ -979,6 +979,24 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Test
 }
 
 /**
+ * @tc.name: RegisterCallingWindowDisplayChangedNotifyManagerFunc
+ * @tc.desc: test function : RegisterCallingWindowDisplayChangedNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RegisterCallingWindowDisplayChangedNotifyManagerFunc, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->RegisterCallingWindowDisplayChangedNotifyManagerFunc(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "RegisterCallingWindowDisplayChangedNotifyManagerFunc";
+    sessionInfo.abilityName_ = "RegisterCallingWindowDisplayChangedNotifyManagerFunc";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    ssm_->RegisterCallingWindowDisplayChangedNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->callingWindowDisplayChangedNotifyManagerFunc_);
+}
+
+/**
  * @tc.name: GetIsLayoutFullScreen
  * @tc.desc: test function : GetIsLayoutFullScreen
  * @tc.type: FUNC

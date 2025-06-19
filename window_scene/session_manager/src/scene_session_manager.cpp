@@ -8017,7 +8017,7 @@ void SceneSessionManager::RegisterCallingWindowDisplayChangedNotifyManagerFunc(c
         return;
     }
     sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentId, uint64_t screenId) {        
-    NotifyCallingWindowDisplayChanged(persistentId, newScreenId);
+        NotifyCallingWindowDisplayChanged(persistentId, screenId);
     });
 }
 
