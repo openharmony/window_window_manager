@@ -168,10 +168,10 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleEnterKioskMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_EXIT_KIOSK_MODE):
             return HandleExitKioskMode(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID):
-            return HandleUpdateWindowLayoutById(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER):
             return HandleSendPointerEventForHover(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST):
+            return HandleUpdateWindowModeByIdForUITest(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -615,7 +615,7 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t windowId = INVALID_WINDOW_ID;
@@ -628,14 +628,14 @@ int SceneSessionManagerLiteStub::HandleUpdateWindowLayoutById(MessageParcel& dat
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = UpdateWindowLayoutById(windowId, updateMode);
+    WMError errCode = UpdateWindowModeByIdForUITest(windowId, updateMode);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, windowId:%{public}d, updateMode:%{public}d",
-            windowId, updateMode);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowModeByIdForUITest, "
+            "windowId:%{public}d, updateMode:%{public}d", windowId, updateMode);
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowLayoutById, errCode:%{public}d", errCode);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowModeByIdForUITest, errCode:%{public}d", errCode);
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

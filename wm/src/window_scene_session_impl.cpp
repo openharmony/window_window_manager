@@ -2280,9 +2280,9 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
     return static_cast<WMError>(hostSession->SetFrameRectForPartialZoomIn(frameRect));
 }
 
-WMError WindowSceneSessionImpl::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError WindowSceneSessionImpl::UpdateWindowModeForUITest(int32_t updateMode)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", windowId, updateMode);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", GetPersistentId(), updateMode);
     switch (updateMode) {
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN):
             return Maximize();
