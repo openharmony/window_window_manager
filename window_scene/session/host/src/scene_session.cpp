@@ -517,8 +517,6 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (state == SessionState::STATE_BACKGROUND) {
             return WSError::WS_OK;
         }
-        TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
-        session->UpdateLifecyclePausedInner();
         auto ret = session->Session::Background();
         if (ret != WSError::WS_OK) {
             return ret;
