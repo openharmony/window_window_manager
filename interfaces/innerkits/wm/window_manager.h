@@ -65,22 +65,22 @@ struct WindowLifeCycleInfo {
  * @brief Listener to observe WMS connection status.
  */
 class IWindowLifeCycleListener : virtual public RefBase {
-    public:
-        /**
-         * @brief Notify caller when window is created
-         *
-         * @param lifeCycleInfo window info while its lifecycle status changed.
-         *
-         */
-        virtual void OnWindowCreated(WindowLifeCycleInfo lifeCycleInfo) = 0;
-    
-        /**
-         * @brief Notify caller when WMS disconnected
-         *
-         * @param lifeCycleInfo window info while its lifecycle status changed.
-         *
-         */
-        virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo) = 0;
+public:
+    /**
+     * @brief Notify caller when window is created
+     *
+     * @param lifeCycleInfo window info while its lifecycle status changed.
+     *
+     */
+    virtual void OnWindowCreated(WindowLifeCycleInfo lifeCycleInfo) = 0;
+
+    /**
+     * @brief Notify caller when WMS disconnected
+     *
+     * @param lifeCycleInfo window info while its lifecycle status changed.
+     *
+     */
+    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo) = 0;
 };
 
 /**
