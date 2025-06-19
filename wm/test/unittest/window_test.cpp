@@ -203,6 +203,38 @@ HWTEST_F(WindowTest, CreatePiP, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateFb
+ * @tc.desc: Create FloatingBall window with option
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, CreateFb, TestSize.Level1)
+{
+    sptr<WindowOption> option = nullptr;
+    FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    WMError errCode = WMError::WM_OK;
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option->SetWindowName("fb_window");
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FB);
+    Rect rect = {0, 0, 10, 10};
+    option->SetWindowRect(rect);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        sptr<Window> window = Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode);
+        if (errCode == WMError::WM_OK) {
+            ASSERT_NE(nullptr, window);
+        } else {
+            ASSERT_EQ(nullptr, window);
+        }
+    } else {
+        ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    }
+}
+
+/**
  * @tc.name: Find01
  * @tc.desc: Find with no name
  * @tc.type: FUNC

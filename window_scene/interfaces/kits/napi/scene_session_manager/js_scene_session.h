@@ -106,6 +106,9 @@ enum class ListenerFuncType : uint32_t {
     SET_SUB_WINDOW_SOURCE_CB,
     ANIMATE_TO_CB,
     PENDING_SESSION_TO_BACKGROUND_CB,
+    FLOATING_BALL_UPDATE_CB,
+    FLOATING_BALL_STOP_CB,
+    FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
 };
 
 class SceneSession;
@@ -238,6 +241,8 @@ private:
     static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
+    static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
+    static napi_value SetFbWindowId(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -325,6 +330,8 @@ private:
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
+    napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnSetFbWindowId(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -337,6 +344,9 @@ private:
     void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
+    void ProcessFloatingBallUpdateRegister();
+    void ProcessFloatingBallStopRegister();
+    void ProcessFloatingBallRestoreMainWindowRegister();
     void ProcessSessionDisplayIdChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
     void ProcessAutoStartPiPStatusChangeRegister();
@@ -419,6 +429,9 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
+    void OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo);
+    void OnFloatingBallStop();
+    void OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk::Want>& want);
     void OnSessionDisplayIdChange(uint64_t displayId);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height);

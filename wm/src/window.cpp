@@ -26,6 +26,7 @@
 #include "window_extension_session_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -176,6 +177,41 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     if (error != WMError::WM_OK) {
         errCode = error;
         TLOGW(WmsLogTag::WMS_PIP, "Create pip window, error: %{public}u", static_cast<uint32_t>(errCode));
+        return nullptr;
+    }
+    return windowSessionImpl;
+}
+
+sptr<Window> Window::CreateFb(sptr<WindowOption>& option, const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+    const std::shared_ptr<Media::PixelMap>& icon, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    WMError& errCode)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return nullptr;
+    }
+    if (!option) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "option is null.");
+        return nullptr;
+    }
+    if (option->GetWindowName().empty()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "the window name of option is empty.");
+        return nullptr;
+    }
+    if (!WindowHelper::IsFbWindow(option->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "window type is not fb window.");
+        return nullptr;
+    }
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    if (windowSessionImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "malloc windowSessionImpl failed.");
+        return nullptr;
+    }
+    FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
+    windowSessionImpl->GetProperty()->SetFbTemplateInfo(fbTemplateInfo);
+    WMError error = windowSessionImpl->Create(context, nullptr);
+    if (error != WMError::WM_OK) {
+        errCode = error;
+        TLOGW(WmsLogTag::WMS_SYSTEM, "Create fb window, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;

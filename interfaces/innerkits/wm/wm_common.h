@@ -158,6 +158,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
+    WINDOW_TYPE_FB,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -192,7 +193,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP,
-    END = WINDOW_MODE_PIP,
+    WINDOW_MODE_FB,
+    END = WINDOW_MODE_FB,
 };
 
 /**
@@ -248,11 +250,13 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_FB = 1 << 5,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
                               WINDOW_MODE_SUPPORT_FLOATING |
-                              WINDOW_MODE_SUPPORT_PIP
+                              WINDOW_MODE_SUPPORT_PIP |
+                              WINDOW_MODE_SUPPORT_FB
 };
 
 /**
@@ -329,6 +333,14 @@ enum class WMError : int32_t {
     WM_ERROR_ILLEGAL_PARAM,
     WM_ERROR_FILTER_ERROR,
     WM_ERROR_TIMEOUT,
+    WM_ERROR_FB_PARAM_INVALID,
+    WM_ERROR_FB_CREATE_FAILED,
+    WM_ERROR_FB_REPEAT_CONTROLLER,
+    WM_ERROR_FB_REPEAT_OPERATION,
+    WM_ERROR_FB_INTERNAL_ERROR,
+    WM_ERROR_FB_STATE_ABNORMALLY,
+    WM_ERROR_FB_INVALID_STATE,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
 };
 
 /**
@@ -358,6 +370,14 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_ILLEGAL_PARAM = 1300016,
     WM_ERROR_FILTER_ERROR = 1300017,
     WM_ERROR_TIMEOUT = 1300018,
+    WM_ERROR_FB_PARAM_INVALID = 1300019,
+    WM_ERROR_FB_CREATE_FAILED = 1300020,
+    WM_ERROR_FB_REPEAT_CONTROLLER = 1300021,
+    WM_ERROR_FB_REPEAT_OPERATION = 1300022,
+    WM_ERROR_FB_INTERNAL_ERROR = 1300023,
+    WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
+    WM_ERROR_FB_INVALID_STATE = 1300025,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
 };
 
 /**
@@ -1585,10 +1605,42 @@ struct PiPTemplateInfo : public Parcelable {
     }
 };
 
+
+/**
+ * @brief Enumerates floating ball state.
+ */
+enum class FloatingBallState : uint32_t {
+    STARTED = 1,
+    STOPPED = 2,
+    ERROR = 3,
+};
+ 
+/**
+ * @brief Enumerates floating ball template.
+ */
+enum class FloatingBallTemplate : uint32_t {
+    STATIC = 1,
+    NORMAL = 2,
+    EMPHATIC = 3,
+    SIMPLE = 4,
+    END = 5,
+};
+
 struct PiPWindowSize {
     uint32_t width;
     uint32_t height;
     double scale;
+};
+
+/**
+ * @brief Enumerates floating ball window state.
+ */
+enum class FbWindowState : uint32_t {
+    STATE_UNDEFINED = 0,
+    STATE_STARTING = 1,
+    STATE_STARTED = 2,
+    STATE_STOPPING = 3,
+    STATE_STOPPED = 4,
 };
 
 /**

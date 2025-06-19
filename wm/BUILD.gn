@@ -96,6 +96,9 @@ ohos_static_library("libwm_static") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
+    "src/floating_ball_controller.cpp",
+    "src/floating_ball_manager.cpp",
+    "src/floating_ball_option.cpp",
   ]
 
   configs = [
@@ -240,6 +243,9 @@ ohos_shared_library("libwm") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
+    "src/floating_ball_controller.cpp",
+    "src/floating_ball_manager.cpp",
+    "src/floating_ball_option.cpp",
   ]
 
   configs = [

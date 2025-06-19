@@ -26,6 +26,7 @@
 #include "dm_common.h"
 #include <cfloat>
 #include "pixel_map.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -102,6 +103,7 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
+    void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -168,6 +170,7 @@ public:
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    FloatingBallTemplateInfo GetFbTemplateInfo() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -181,6 +184,8 @@ public:
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingPiPTemplateInfo(Parcel& parcel) const;
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFbTemplateInfo(Parcel& parcel) const;
+    static void UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
@@ -438,6 +443,7 @@ private:
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
+    FloatingBallTemplateInfo fbTemplateInfo_ = {};
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
