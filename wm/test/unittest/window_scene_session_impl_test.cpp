@@ -1936,11 +1936,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowShadowEnabled(true));
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->containerColorList_.insert("abc");
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, window->SetWindowShadowEnabled(false));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, window->SetWindowShadowEnabled(true));
-
-    window->containerColorList_.insert("SetWindowShadowEnabled");
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowShadowEnabled(false));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowShadowEnabled(true));
 

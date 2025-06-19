@@ -117,7 +117,7 @@ WSError KeyboardSession::Hide()
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Hide keyboard session, set callingSessionId to 0, id: %{public}d",
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Hide keyboard session, set callingSessionId to 0, id: %{public}d",
             session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
@@ -272,10 +272,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
-            "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
-            "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
+            "Landscape: %{public}s, Portrait: %{public}s, LandscapePanel: %{public}s, "
+            "PortraitPanel: %{public}s, request: %{public}s", session->GetPersistentId(),
             static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
@@ -380,7 +380,7 @@ bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSes
             callingSession->GetScaleX(), callingSession->GetScaleY());
     const WSRect& lastSafeRect = callingSession->GetLastSafeRect();
     if (lastSafeRect == safeRect) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "SafeRect is same to lastSafeRect: %{public}s", safeRect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Same safeRect: %{public}s", safeRect.ToString().c_str());
         return false;
     }
     callingSession->SetLastSafeRect(safeRect);
@@ -533,7 +533,7 @@ bool KeyboardSession::RaiseCallingSession(const sptr<SceneSession>& callingSessi
     }
 
     TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardRect: %{public}s, callSession OriRect: %{public}s, newRect: %{public}s"
-        ", oriPosYBeforeRaisedByKeyboard: %{public}d, isCallingSessionFloating: %{public}d",
+        ", isFloating: %{public}d, oriPosY: %{public}d",
         panelAvoidRect.ToString().c_str(), callingSessionRect.ToString().c_str(), newRect.ToString().c_str(),
         oriPosYBeforeRaisedByKeyboard, isCallingSessionFloating);
     return occupiedAreaChanged;
@@ -686,7 +686,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto callingId = animationInfo.callingId;
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, callingId: %{public}d, isKeyboardShow: %{public}d,"
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, callingId: %{public}d, isShow: %{public}d,"
             " isGravityChanged: %{public}d", callingId, isKeyboardShow, animationInfo.isGravityChanged);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (session->isKeyboardSyncTransactionOpen_) {
@@ -736,7 +736,7 @@ void KeyboardSession::CloseRSTransaction()
     isKeyboardSyncTransactionOpen_ = false;
     auto handler = GetEventHandler();
     if (handler) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard anim_sync event cancelled");
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "cancelled");
         handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
     }
     RSSyncTransactionAdapter::CloseSyncTransaction(GetRSUIContext(), handler);
@@ -795,7 +795,7 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         SessionHelper::TransferToWSRect(params.PortraitKeyboardRect_);
     SetSessionRequestRect(rect);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, isLandscape: %{public}d"
-        ", screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(),
+        ", screenSize: [%{public}d, %{public}d]", GetPersistentId(),
         rect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
 

@@ -357,6 +357,14 @@ public:
      */
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
 
+    /**
+     * @brief Send pointer event for hover.
+     *
+     * @param pointerEvent The pointer event for hover.
+     * @return WM_OK means send success, others means send failed.
+     */
+    WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
 private:
     WindowManagerLite();
     ~WindowManagerLite();

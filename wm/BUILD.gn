@@ -373,6 +373,7 @@ ohos_shared_library("libwm_lite") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "input:libmmi-client",
   ]
 
   defines += [ "FRAME_TRACE_ENABLE" ]

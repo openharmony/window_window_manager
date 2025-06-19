@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,6 +48,7 @@ ohos_unittest("ws_extension_session_manager_test") {
   deps = [ ws_unittest_common ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
@@ -70,6 +71,7 @@ ohos_unittest("ws_extension_session_test") {
     "ability_base:want",
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest",

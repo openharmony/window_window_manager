@@ -31,7 +31,7 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence(const std::string& bundleName, int32_t persistentId, SnapshotStatus capacity = defaultCapcity);
+    ScenePersistence(const std::string& bundleName, int32_t persistentId, SnapshotStatus capacity = defaultCapacity);
     virtual ~ScenePersistence();
 
     static bool CreateSnapshotDir(const std::string& directory);
@@ -49,7 +49,7 @@ public:
     std::shared_ptr<WSFFRTHelper> GetSnapshotFfrtHelper() const;
 
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        const std::function<void()> resetSnapshotCallback = [](){}, SnapshotStatus key = defaultStatus,
+        const std::function<void()> resetSnapshotCallback = []() {}, SnapshotStatus key = defaultStatus,
         DisplayOrientation rotate = DisplayOrientation::PORTRAIT);
     bool IsSavingSnapshot(SnapshotStatus key = defaultStatus);
     void ResetSnapshotCache();

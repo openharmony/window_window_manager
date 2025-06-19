@@ -376,8 +376,8 @@ bool WindowSessionImpl::IsAdaptToSubWindow() const
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
-    TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
     if (IsPcOrFreeMultiWindowCapabilityEnabled() && windowOption_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
         // The context of the UEC child window is not the context of the main window
         auto mainWindow = FindMainWindowWithContext();
         // The child Windows created by compatible applications are mounted within the parent window,
@@ -604,7 +604,7 @@ void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
         property_->SetIsFollowParentWindowDisplayId(true);
-        TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}" PRIu64, defaultDisplayId);
     }
 }
 
@@ -1026,10 +1026,12 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ", duration:%{public}d, [name:%{public}s, id:%{public}d], clientDisplayId: %{public}" PRIu64,
-        rect.ToString().c_str(), preRect.ToString().c_str(), wmReason, config.rsTransaction_ != nullptr,
-        config.animationDuration_, GetWindowName().c_str(), GetPersistentId(), property_->GetDisplayId());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u,"
+        "[name:%{public}s, id:%{public}d], clientDisplayId: %{public}" PRIu64,
+        rect.ToString().c_str(), preRect.ToString().c_str(), wmReason,
+        GetWindowName().c_str(), GetPersistentId(), property_->GetDisplayId());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "hasRSTransaction:%{public}d, duration:%{public}d" PRIu64,
+        config.rsTransaction_ != nullptr, config.animationDuration_);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
@@ -1957,7 +1959,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
-        WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
+        TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     RegisterUIContenCallback();
@@ -2281,7 +2283,7 @@ std::shared_ptr<RSSurfaceNode> WindowSessionImpl::GetSurfaceNode() const
 
 const std::shared_ptr<AbilityRuntime::Context> WindowSessionImpl::GetContext() const
 {
-    TLOGI(WmsLogTag::DEFAULT, "name:%{public}s, id:%{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "name:%{public}s, id:%{public}d",
         property_->GetWindowName().c_str(), GetPersistentId());
     std::shared_lock<std::shared_mutex> lock(contextMutex_);
     return context_;
@@ -4564,7 +4566,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
 #ifdef IMF_ENABLE
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
     }
@@ -5866,7 +5868,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-        WLOGFI("event consumed by back");
+        TLOGI(WmsLogTag::DEFAULT, "In");
         if (inputEventConsumer != nullptr) {
             WLOGFD("Transfer key event to inputEventConsumer");
             if (inputEventConsumer->OnInputEvent(keyEvent)) {
@@ -6497,7 +6499,7 @@ uint32_t WindowSessionImpl::GetStatusBarHeight() const
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u height %{public}u", GetPersistentId(), height);
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u height %{public}u", GetPersistentId(), height);
     return height;
 }
 

@@ -16,6 +16,7 @@
 #include "session_manager/include/zidl/scene_session_manager_lite_proxy.h"
 
 #include "marshalling_helper.h"
+#include "pointer_event.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -804,7 +805,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SceneSessionManagerLiteProxy::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -828,7 +829,7 @@ WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, i
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID),
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST),
         data, reply, option);
     if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);
@@ -2178,5 +2179,37 @@ WMError SceneSessionManagerLiteProxy::ExitKioskMode(const sptr<IRemoteObject>& t
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
+}
+
+WSError SceneSessionManagerLiteProxy::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!pointerEvent->WriteToParcel(data)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write pointer event failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

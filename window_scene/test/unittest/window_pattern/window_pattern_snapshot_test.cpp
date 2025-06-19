@@ -153,10 +153,7 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot01, TestSize.Level1)
     ASSERT_NE(nullptr, scenePersistence);
     scenePersistence->SaveSnapshot(pixelMap, []() {}, key);
 
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(nullptr, session);
     scenePersistence->snapshotPath_[key.first][key.second] = "/data/1.png";
-
     scenePersistence->SaveSnapshot(mPixelMap, []() {}, key);
     uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
     std::string test =
@@ -670,14 +667,14 @@ HWTEST_F(WindowPatternSnapshotTest, InitSnapshotCapacity, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->systemConfig_.supportSnapshotAllSessionStatus_ = flase;
+    sceneSession->systemConfig_.supportSnapshotAllSessionStatus_ = false;
     sceneSession->InitSnapshotCapacity();
     EXPECT_EQ(sceneSession->capacity_, defaultCapacity);
 
     sceneSession->systemConfig_.supportSnapshotAllSessionStatus_ = true;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
     sceneSession->InitSnapshotCapacity();
-    EXPECT_EQ(sceneSession->scenePersistence->capacity_, maxCapacity);
+    EXPECT_EQ(sceneSession->scenePersistence_->capacity_, maxCapacity);
 }
 
 /**
@@ -694,7 +691,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetWindowStatus, TestSize.Level1)
     EXPECT_EQ(ret, defaultStatus);
 
     sceneSession->capacity_ = maxCapacity;
-    auto ret = sceneSession->GetWindowStatus();
+    ret = sceneSession->GetWindowStatus();
     EXPECT_NE(ret.second, 3);
 }
 
@@ -779,12 +776,12 @@ HWTEST_F(WindowPatternSnapshotTest, GetScreenStatus, TestSize.Level1)
     auto ret = WSSnapshotHelper::GetScreenStatus(foldStatus);
     EXPECT_EQ(ret, SCREEN_FOLDED);
 
-    FoldStatus foldStatus = FoldStatus::HALF_FOLD;
-    auto ret = WSSnapshotHelper::GetScreenStatus(foldStatus);
+    foldStatus = FoldStatus::HALF_FOLD;
+    ret = WSSnapshotHelper::GetScreenStatus(foldStatus);
     EXPECT_EQ(ret, SCREEN_EXPAND);
 
-    FoldStatus foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
-    auto ret = WSSnapshotHelper::GetScreenStatus(foldStatus);
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    ret = WSSnapshotHelper::GetScreenStatus(foldStatus);
     EXPECT_EQ(ret, SCREEN_UNKNOWN);
 }
 
@@ -817,16 +814,16 @@ HWTEST_F(WindowPatternSnapshotTest, GetDisplayOrientation, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConfigSupportSnapshotAllSnapshotStatus
- * @tc.desc: ConfigSupportSnapshotAllSnapshotStatus Test
+ * @tc.name: ConfigSupportSnapshotAllSessionStatus
+ * @tc.desc: ConfigSupportSnapshotAllSessionStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, ConfigSupportSnapshotAllSnapshotStatus, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, ConfigSupportSnapshotAllSessionStatus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->ConfigSupportSnapshotAllSnapshotStatus();
+    ssm_->ConfigSupportSnapshotAllSessionStatus();
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(ssm_->systemConfig_.supportSnapshotAllSnapshotStatus_, true);
+    EXPECT_EQ(ssm_->systemConfig_.supportSnapshotAllSessionStatus_, true);
 }
 } // namespace
 } // namespace Rosen

@@ -2948,6 +2948,52 @@ HWTEST_F(WindowTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Le
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isPcOrFreeMultiWindow = true;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), IsPcOrPadFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
+        SetArgReferee<0>(isPcOrFreeMultiWindow),
+        Return(WMError::WM_OK)
+    ));
+    auto ret = window->IsPcOrPadFreeMultiWindowMode();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, isPcOrFreeMultiWindow);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetFreeMultiWindowModeEnabledState
+ * @tc.desc: GetFreeMultiWindowModeEnabledState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetFreeMultiWindowModeEnabledState, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isFreeMultiWindow = true;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), IsFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
+        SetArgReferee<0>(isFreeMultiWindow),
+        Return(WMError::WM_OK)
+    ));
+    auto ret = window->GetFreeMultiWindowModeEnabledState();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, isFreeMultiWindow);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

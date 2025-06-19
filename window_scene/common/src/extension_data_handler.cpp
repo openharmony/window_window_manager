@@ -235,7 +235,7 @@ DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional
                  func = std::move(callback)]() mutable {
         std::optional<AAFwk::Want> reply;
         auto ret = func(subSystemId, customId, std::move(input), reply);
-        TLOGNI(WmsLogTag::WMS_UIEXT, "subSystemId: %{public}hhu, customId: %{public}u, ret: %{public}d", subSystemId,
+        TLOGND(WmsLogTag::WMS_UIEXT, "subSystemId: %{public}hhu, customId: %{public}u, ret: %{public}d", subSystemId,
                customId, ret);
     };
 

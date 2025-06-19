@@ -1159,6 +1159,26 @@ HWTEST_F(SceneSessionTest6, GetRotatePolicy, Function | SmallTest | Level3)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession->GetRotatePolicy(), 10); // 10: invalid rotate policy
 }
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SendPointerEventForHover, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SendPointerEventForHover";
+    info.abilityName_ = "SendPointerEventForHover";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSError ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

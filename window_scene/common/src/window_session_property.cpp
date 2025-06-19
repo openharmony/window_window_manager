@@ -340,6 +340,19 @@ SessionInfo& WindowSessionProperty::EditSessionInfo()
     return sessionInfo_;
 }
 
+void WindowSessionProperty::SetGlobalDisplayRect(const Rect& globalDisplayRect)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "globalDisplayRect=%{public}s", globalDisplayRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    globalDisplayRect_ = globalDisplayRect;
+}
+
+Rect WindowSessionProperty::GetGlobalDisplayRect() const
+{
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    return globalDisplayRect_;
+}
+
 Rect WindowSessionProperty::GetWindowRect() const
 {
     std::lock_guard<std::mutex> lock(windowRectMutex_);
@@ -1237,11 +1250,14 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
+    auto globalDisplayRect = GetGlobalDisplayRect();
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
-        parcel.WriteUint32(requestRect_.height_) &&
+        parcel.WriteUint32(requestRect_.height_) && parcel.WriteInt32(globalDisplayRect.posX_) &&
+        parcel.WriteInt32(globalDisplayRect.posY_) && parcel.WriteUint32(globalDisplayRect.width_) &&
+        parcel.WriteUint32(globalDisplayRect.height_) &&
         parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
         parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
         parcel.WriteFloat(rectAnimationConfig_.y2) &&
@@ -1305,6 +1321,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetRequestRect(reqRect);
+    Rect globalDisplayRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    property->SetGlobalDisplayRect(globalDisplayRect);
     RectAnimationConfig rectAnimationConfig = { parcel.ReadUint32(), parcel.ReadFloat(),
         parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetRectAnimationConfig(rectAnimationConfig);
@@ -1406,6 +1424,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowName_ = property->windowName_;
     sessionInfo_ = property->sessionInfo_;
     requestRect_ = property->requestRect_;
+    globalDisplayRect_ = property->GetGlobalDisplayRect();
     rectAnimationConfig_ = property->rectAnimationConfig_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;

@@ -100,7 +100,6 @@ const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
-constexpr const char* STARTING_WINDOW_SYNC_PARAMETER = "const.window.sync_startingWindow";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -442,24 +441,7 @@ void SceneSessionManager::Init()
         std::placeholders::_2, std::placeholders::_3));
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
 
-    InitWindowPattern();
-}
-
-void SceneSessionManager::InitWindowPattern()
-{
     InitSnapshotCache();
-    InitStartingWindow();
-}
-
-void SceneSessionManager::InitStartingWindow()
-{
-    syncLoadStartingWindow_ = system::GetBoolParameter(STARTING_WINDOW_SYNC_PARAMETER, false);
-    TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow:%{public}d", syncLoadStartingWindow_);
-}
-
-bool SceneSessionManager::IsSyncLoadStartingWindow()
-{
-    return syncLoadStartingWindow_;
 }
 
 void SceneSessionManager::RegisterFlushWindowInfoCallback()
@@ -3101,7 +3083,7 @@ WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>
 
 void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "support")
+    TLOGI(WmsLogTag::WMS_PATTERN, "support");
     auto task = [this] {
         systemConfig_.supportSnapshotAllSessionStatus_ = true;
     };
@@ -5330,7 +5312,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
         sessionInfo.moduleName_);
     if (abilityInfo == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
+        TLOGE(WmsLogTag::DEFAULT, "Null");
         return;
     }
     if (sessionInfo.supportedWindowModes.empty()) {
@@ -5375,7 +5357,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
     bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, uId, *abilityInfo);
     if (!ret) {
-        TLOGE(WmsLogTag::DEFAULT, "Get ability info from BMS failed!");
+        TLOGE(WmsLogTag::DEFAULT, "Failed");
         return nullptr;
     }
     abilityInfoMap_[list] = abilityInfo;
@@ -5850,7 +5832,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
             focusInfo.uid_ = sceneSession->GetCallingUid();
             focusInfo.windowType_ = sceneSession->GetWindowType();
             focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
-            TLOGNI(WmsLogTag::WMS_FOCUS, "Get focus session info success");
+            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -5865,6 +5847,34 @@ WSError SceneSessionManager::AddFocusGroup(DisplayId displayId)
 WSError SceneSessionManager::RemoveFocusGroup(DisplayId displayId)
 {
     return windowFocusController_->RemoveFocusGroup(displayId);
+}
+
+WSError SceneSessionManager::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isHoverDown = pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    if (!isHoverDown) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointer event is not hover down");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &pointerEvent]() {
+        int32_t windowId = pointerEvent->GetAgentWindowId();
+        TLOGNI(WmsLogTag::WMS_EVENT, "windowId: %{public}d", windowId);
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        return sceneSession->SendPointerEventForHover(pointerEvent);
+    }, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
@@ -6223,7 +6233,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr) {
-            TLOGW(WmsLogTag::DEFAULT, "nullptr");
+            TLOGD(WmsLogTag::DEFAULT, "nullptr");
             continue;
         }
         if (!curSession->GetSessionInfo().isSystem_ &&
@@ -6890,7 +6900,7 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(const sptr<SceneSessio
         return false;
     }
     auto lastFocusedAppSessionId = focusGroup->GetLastFocusedAppSessionId();
-    TLOGI(WmsLogTag::WMS_FOCUS, "lastFocusedAppSessionId: %{public}d, nextSceneSession: %{public}d",
+    TLOGI(WmsLogTag::WMS_FOCUS, "last=%{public}d, next=%{public}d",
         lastFocusedAppSessionId, nextSession->GetPersistentId());
 
     if (lastFocusedAppSessionId == INVALID_SESSION_ID || nextSession->GetPersistentId() == lastFocusedAppSessionId) {
@@ -7362,8 +7372,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
             notifyDiffSCBAfterUnfocusedFunc_(focusedSessionDisplayId, nextSessionDisplayId);
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
-        ", focusedId: %{public}d, nextId: %{public}d, reason: %{public}d", displayId, focusedId, nextId, reason);
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}" PRIu64 ",%{public}d,%{public}d,%{public}d",
+        displayId, focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -7467,7 +7477,7 @@ void SceneSessionManager::SetHighlightSessionIds(const sptr<SceneSession>& scene
         highlightIds_.clear();
         highlightIds_.insert(sceneSession->GetPersistentId());
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -7502,7 +7512,7 @@ void SceneSessionManager::RemoveHighlightSessionIds(const sptr<SceneSession>& sc
         }
 
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -7531,12 +7541,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 
-    TLOGI(WmsLogTag::WMS_FOCUS,
-        "name: %{public}s/%{public}s/%{public}s, id: %{public}d, isFocused: %{public}d",
-        sceneSession->GetSessionInfo().bundleName_.c_str(),
-        sceneSession->GetSessionInfo().abilityName_.c_str(),
-        sceneSession->GetWindowNameAllType().c_str(),
-        persistentId, isFocused);
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d, %{public}d]", persistentId, isFocused);
     if (isFocused) {
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
@@ -8621,7 +8626,7 @@ void SceneSessionManager::CheckAndNotifyWaterMarkChangedResult()
 
 WSError SceneSessionManager::NotifyWaterMarkFlagChangedResult(bool hasWaterMark)
 {
-    TLOGI(WmsLogTag::DEFAULT, "hasWaterMark: %{public}u", static_cast<uint32_t>(hasWaterMark));
+    TLOGD(WmsLogTag::DEFAULT, "hasWaterMark: %{public}u", static_cast<uint32_t>(hasWaterMark));
     SessionManagerAgentController::GetInstance().NotifyWaterMarkFlagChangedResult(hasWaterMark);
     return WSError::WS_OK;
 }
@@ -9946,7 +9951,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
     TLOGD(WmsLogTag::DEFAULT, "persistentId=%{public}d, updateType=%{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession nullptr!");
+        TLOGD(WmsLogTag::DEFAULT, "sceneSession nullptr!");
         return;
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
@@ -10957,7 +10962,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
     auto task = [this, persistentId, where = __func__] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
+            TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
@@ -12084,11 +12089,11 @@ void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
     requestVsyncByRootSceneWhenModeChangeFunc_ = std::move(func);
 }
 
-WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SceneSessionManager::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, windowId, updateMode, where = __func__] {
         auto sceneSession = GetSceneSession(windowId);
@@ -12098,10 +12103,10 @@ WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t up
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
-        return sceneSession->UpdateWindowLayoutById(windowId, updateMode);
+        return sceneSession->UpdateWindowModeForUITest(updateMode);
     };
     return taskScheduler_->PostSyncTask(task,
-        "UpdateWindowLayoutById windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
+        "UpdateWindowModeByIdForUITest windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
 }
 
 WSError SceneSessionManager::RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback)
@@ -12864,7 +12869,7 @@ bool SceneSessionManager::IsSessionInSpecificDisplay(const sptr<SceneSession>& s
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
-    auto task = [this, &infos]() {
+    auto task = [this, &infos, where = __func__]() {
         for (auto [surfaceId, _] : lastVisibleData_) {
             sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
             if (session == nullptr) {
@@ -12882,6 +12887,10 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
             windowVisibilityInfo->SetZOrder(session->GetZOrder());
+            Rect globalDisplayRect = session->GetSessionProperty()->GetGlobalDisplayRect();
+            windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
+                where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
@@ -14006,7 +14015,7 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "info: [id: %{public}d, pid: %{public}d, "
         "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
         callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
     return WMError::WM_OK;
@@ -14884,6 +14893,12 @@ WMError SceneSessionManager::RelockScreenLockForApp(const std::string& bundleNam
 WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
 {
     isPcWindow = systemConfig_.IsPcWindow();
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::IsFreeMultiWindow(bool& isFreeMultiWindow)
+{
+    isFreeMultiWindow = systemConfig_.freeMultiWindowEnable_;
     return WMError::WM_OK;
 }
 
