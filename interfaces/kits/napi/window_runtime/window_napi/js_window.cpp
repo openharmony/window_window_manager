@@ -1793,7 +1793,7 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveToAsync(x, y, moveConfiguration));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1871,7 +1871,7 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execu
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->MoveWindowToGlobal(x, y, moveConfiguration));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -2088,7 +2088,7 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
             weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -2164,7 +2164,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(rect.width_, rect.height_, rectAnimationConfig));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -6526,7 +6526,7 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ResetAspectRatio failed."));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResetAspectRatio") != napi_status::napi_ok) {

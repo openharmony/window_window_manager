@@ -3858,7 +3858,7 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
 {
     auto property = GetSessionProperty();
     if (property == nullptr || moveDragController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "property or controller is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property or controller is null");
         return true;
     }
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
@@ -3871,7 +3871,7 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
         if (reason == SizeChangeReason::DRAG) {
             HandleMoveDragEvent(reason);
         } else {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "trigger client rect change by scb");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb");
             WSRect relativeRect = moveDragController_->GetTargetRect(
                 MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY);
             HandleMoveDragEnd(relativeRect, reason);
@@ -3924,32 +3924,32 @@ bool SceneSession::IsDragResizeScale(SizeChangeReason reason)
 WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
     std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
     if (keyFrameCloneNode_) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "keyFrameCloneNode_ already exist");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "keyFrameCloneNode_ already exist");
         return WSError::WS_OK;
     }
     if (!rsCanvasNode || !sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "get nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
-        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "begin rsTransaction");
     }
     keyFrameCloneNode_ = rsCanvasNode;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "change key frame node to %{public}" PRIu64 "", keyFrameCloneNode_->GetId());
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "change key frame node to %{public}" PRIu64 "", keyFrameCloneNode_->GetId());
     sessionStage_->LinkKeyFrameCanvasNode(keyFrameCloneNode_);
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
-        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "commit rsTransaction");
     }
     return WSError::WS_OK;
 }
 
 void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
     bool running = keyFramePolicy_.running_;
     bool stopping = keyFramePolicy_.stopping_;
     keyFramePolicy_ = keyFramePolicy;
@@ -3959,7 +3959,7 @@ void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 
 WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
     bool running = keyFramePolicy_.running_;
     bool stopping = keyFramePolicy_.stopping_;
     keyFramePolicy_ = keyFramePolicy;
@@ -3970,14 +3970,14 @@ WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy
 
 void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d rect: %{public}s reason: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d rect: %{public}s reason: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), reason);
     if (!moveDragController_ || !sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "no moveDragController or sessionStage");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "no moveDragController or sessionStage");
         return;
     }
     if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "key frame start check");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame start check");
         if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
             keyFramePolicy_.running_ = false;
             return;
@@ -3985,11 +3985,11 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         return InitKeyFrameState(rect);
     }
     if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "key frame not start");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame not start");
         return;
     }
     if (reason == SizeChangeReason::DRAG) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "reset gravity and resize clone node");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "reset gravity and resize clone node");
         uint64_t timeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
         if (keyFrameDragPauseNoticed_) {
@@ -4003,7 +4003,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         keyFrameCloneNode_->SetFrame(0, 0, rect.width_, rect.height_);
         RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     } else if (reason == SizeChangeReason::DRAG_END) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame stopping");
         keyFramePolicy_.running_ = false;
         keyFramePolicy_.stopping_ = true;
         sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
@@ -4013,7 +4013,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
 
 void SceneSession::InitKeyFrameState(const WSRect& rect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start init");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame start init");
     uint64_t timeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
     keyFramePolicy_.running_ = true;
