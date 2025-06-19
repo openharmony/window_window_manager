@@ -58,6 +58,7 @@ public:
                                                      DisplayId kDisplayId,
                                                      SessionState keyboardState,
                                                      WindowGravity gravity);
+    WSError NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId);
 
     static sptr<SceneSessionManager> ssm_;
 
@@ -187,6 +188,11 @@ void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const Key
 
     ssm_->sceneSessionMap_.insert({ keyboardTestData.callingSessionId_, callingSession });
     ssm_->sceneSessionMap_.insert({ 2, keyboardSession });
+}
+
+WSError SceneSessionManagerTest12::NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId)
+{
+    return WSError::WS_OK;
 }
 
 namespace {
@@ -2056,8 +2062,45 @@ HWTEST_F(SceneSessionManagerTest12, NotifyCallingWindowDisplayChanged, TestSize.
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     auto result = ssm_->NotifyCallingWindowDisplayChanged(85, 12);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
-    ssm_->NotifyCallingWindowDisplayChanged(86, 12);
+    result = ssm_->NotifyCallingWindowDisplayChanged(86, 12);
     EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RegisterCallingWindowDisplayChangedNotifyManagerFunc
+ * @tc.desc: test function : RegisterCallingWindowDisplayChangedNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterCallingWindowDisplayChangedNotifyManagerFunc, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->RegisterCallingWindowDisplayChangedNotifyManagerFunc(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "RegisterCallingWindowDisplayChangedNotifyManagerFunc";
+    sessionInfo.abilityName_ = "RegisterCallingWindowDisplayChangedNotifyManagerFunc";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+    ssm_->RegisterCallingWindowDisplayChangedNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->callingWindowDisplayChangedNotifyManagerFunc_);
+}
+
+/**
+ * @tc.name: SetCallingWindowDspChangedNotifyManagerListener
+ * @tc.desc: test function : SetCallingWindowDspChangedNotifyManagerListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetCallingWindowDspChangedNotifyManagerListener, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetCallingWindowDspChangedNotifyManagerListener";
+    sessionInfo.abilityName_ = "SetCallingWindowDspChangedNotifyManagerListener";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(nullptr, sceneSession);    
+    sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentId, uint64_t screenId) {
+        NotifyCallingWindowDisplayChanged(persistentId, screenId);
+    });
+    EXPECT_NE(nullptr, sceneSession->callingWindowDisplayChangedNotifyManagerFunc_);
 }
 
 /**
