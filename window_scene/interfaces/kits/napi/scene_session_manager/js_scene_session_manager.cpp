@@ -305,6 +305,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetApplicationInfo);
     BindNativeFunction(env, exportObj, "updateRecentMainSessionList", moduleName,
         JsSceneSessionManager::UpdateRecentMainSessionInfos);
+    BindNativeFunction(env, exportObj, "supportSnapshotAllSessionStatus", moduleName,
+        JsSceneSessionManager::SupportSnapshotAllSessionStatus);
     return NapiGetUndefined(env);
 }
 
@@ -3587,6 +3589,19 @@ napi_value JsSceneSessionManager::OnUnregisterRssData(napi_env env, napi_callbac
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     return RssSession::UnregisterRssData(env, info);
 #endif
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportSnapshotAllSessionStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportSnapshotAllSessionStatus();
     return NapiGetUndefined(env);
 }
 

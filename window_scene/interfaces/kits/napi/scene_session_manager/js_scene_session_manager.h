@@ -159,6 +159,11 @@ public:
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
     static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
 
+    /*
+     * Window Scene
+     */
+    static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -362,6 +367,11 @@ private:
     std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
         const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
         const RotationChangeInfo& rotationChangeInfo);
+
+    /*
+     * Window Scene
+     */
+    napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

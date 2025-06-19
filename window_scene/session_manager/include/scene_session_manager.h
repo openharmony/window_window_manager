@@ -740,6 +740,7 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     bool IsSyncLoadStartingWindow();
+    void ConfigSupportSnapshotAllSessionStatus();
 
     /*
      * Window Animation

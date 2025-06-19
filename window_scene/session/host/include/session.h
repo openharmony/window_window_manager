@@ -685,6 +685,13 @@ public:
      */
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
+    bool IsPersistentImageFit() const;
+    bool SupportSnapshotAllSessionStatus() const;
+    void InitSnapshotCapacity();
+    SnapshotStatus GetWindowStatus() const;
+    SnapshotStatus GetSessionStatus() const;
+    uint32_t GetWindowOrientation() const;
+    uint32_t GetLastOrientation() const;
 
     /*
      * Specific Window
@@ -761,7 +768,7 @@ protected:
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     mutable std::mutex snapshotMutex_;
-    std::shared_ptr<Media::PixelMap> snapshot_;
+    std::shared_ptr<Media::PixelMap> snapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
@@ -904,6 +911,8 @@ protected:
      */
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> needNotifyAttachState_ = { false };
+    uint32_t lastSnapshotScreen_ = SCREEN_UNKNOWN;
+    SnapshotStatus capacity_ = defaultCapacity;
 
     /*
      * Window Pipeline

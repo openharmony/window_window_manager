@@ -32,7 +32,7 @@ constexpr int32_t MAX_LABEL_SIZE = 1024;
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId());
+    scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId(), capacity_);
     if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
@@ -84,7 +84,7 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
             session->isActive_ = false;
             session->UpdateSessionState(SessionState::STATE_BACKGROUND);
             if (session->scenePersistence_) {
-                session->scenePersistence_->SetHasSnapshot(true);
+                session->scenePersistence_->SetHasSnapshot(true, session->GetWindowStatus());
             }
         }
         if (session->pcFoldScreenController_) {
