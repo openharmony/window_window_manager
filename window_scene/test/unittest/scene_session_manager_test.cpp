@@ -614,13 +614,13 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, TestSize.Leve
 HWTEST_F(SceneSessionManagerTest, IsFreeMultiWindow, TestSize.Level1)
 {
     bool isFreeMultiWindow = false;
-    // branch1.0: freeMultiWindowEnable false
+    // freeMultiWindowEnable false
     ssm_->systemConfig_.freeMultiWindowEnable_ = false;
     auto result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
     ASSERT_EQ(isFreeMultiWindow, false);
     ASSERT_EQ(result, WMError::WM_OK);
     
-    // branch1.1: freeMultiWindowEnable true
+    // freeMultiWindowEnable true
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
     ASSERT_EQ(isFreeMultiWindow, true);
