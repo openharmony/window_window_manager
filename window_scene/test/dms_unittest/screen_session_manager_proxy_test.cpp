@@ -55,6 +55,12 @@ void ScreenSessionManagerProxyTest::SetUp()
 }
 
 namespace {
+static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
+static const int32_t PIXELMAP_SIZE = 2;
+static const int32_t DEFAULT_ROATION = 0;
+static const int32_t SDR_PIXELMAP = 0;
+static const int32_t HDR_PIXELMAP = 1;
+
 /**
  * @tc.name: SetPrivacyStateByDisplayId
  * @tc.desc: SetPrivacyStateByDisplayId
@@ -1731,7 +1737,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
 {
     std::vector<std::shared_ptr<Media::PixelMap>> expectation = { nullptr, nullptr };
     std::vector<std::shared_ptr<Media::PixelMap>> res = { nullptr, nullptr };
-    DisplayId displayId {0};
+    DisplayId displayId = DEFAULT_DISPLAY;
     DmErrorCode* errorCode = nullptr;
     std::function<void()> func = [&]()
     {
@@ -1739,9 +1745,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
+        EXPECT_NE(res, expectation);
     } else {
-        ASSERT_EQ(res, expectation);
+        EXPECT_EQ(res, expectation);
     }
 }
  
@@ -1753,7 +1759,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, Function | SmallTest | Level1)
 {
     CaptureOption captureOption = {
-        .displayId_ = 1,
+        .displayId_ = DEFAULT_DISPLAY,
         .isNeedNotify_ = false,
         .isNeedPointer_ = false,
         .isCaptureFullOfScreen = false,
@@ -1762,9 +1768,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, Func
     DmErrorCode errorCode;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
         screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
-    EXPECT_EQ(result.size(), 2);
-    EXPECT_EQ(result[0], nullptr);
-    EXPECT_EQ(result[1], nullptr);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
  
 /**
@@ -1775,7 +1781,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, Func
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, Function | SmallTest | Level1)
 {
     CaptureOption captureOption = {
-        .displayId_ = 1,
+        .displayId_ = DEFAULT_DISPLAY,
         .isNeedNotify_ = false,
         .isNeedPointer_ = false,
         .isCaptureFullOfScreen = false,
@@ -1808,14 +1814,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, Func
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, Function | SmallTest | Level1)
 {
     DmErrorCode errorCode;
-    DisplayId validDisplayId = 1;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
         screenSessionManagerProxy->GetDisplayHdrSnapshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result.size(), 2);
-    EXPECT_EQ(result[0], nullptr);
-    EXPECT_EQ(result[1], nullptr);
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
  
 /**
@@ -1826,7 +1832,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, Function | Sma
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot002, Function | SmallTest | Level1)
 {
     DmErrorCode errorCode;
-    DisplayId validDisplayId = 1;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
     std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };

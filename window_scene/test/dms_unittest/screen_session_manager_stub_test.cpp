@@ -31,6 +31,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+const int32_t MSGID = 0;
+
 }
 class ScreenSessionManagerStubTest : public testing::Test {
 public:
@@ -3328,7 +3330,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
         DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
  
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, MSGID);
 }
 }
 }

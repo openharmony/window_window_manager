@@ -496,7 +496,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT: {
-            TLOGI(WmsLogTag::DMS, "TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT stub.");
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
             bool isUseDma = data.ReadBool();
@@ -514,7 +513,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
-        } 
+        }
         case DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER: {
             ProcGetSnapshotByPicker(reply);
             break;
