@@ -84,6 +84,7 @@ void SceneSessionManagerTest::SetUp()
 
 void SceneSessionManagerTest::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -262,6 +263,7 @@ HWTEST_F(SceneSessionManagerTest, IsValidSessionIds, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, UnRegisterSessionListener, TestSize.Level1)
 {
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     OHOS::MessageParcel data;
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     WSError result = ssm_->UnRegisterSessionListener(listener);
@@ -275,6 +277,7 @@ HWTEST_F(SceneSessionManagerTest, UnRegisterSessionListener, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, GetSessionInfos01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     std::string deviceId = "1245";
     int32_t numMax = 1024;
     AAFwk::MissionInfo infoFrist;
@@ -282,6 +285,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos01, TestSize.Level1)
     AAFwk::MissionInfo infoSecond;
     infoSecond.label = "secondBundleName";
     std::vector<SessionInfoBean> sessionInfos = { infoFrist, infoSecond };
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     WSError result = ssm_->GetSessionInfos(deviceId, numMax, sessionInfos);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
@@ -293,12 +297,14 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, GetSessionInfos02, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     std::string deviceId = "1245";
     AAFwk::MissionInfo infoFrist;
     infoFrist.label = "fristBundleName";
     AAFwk::MissionInfo infoSecond;
     infoSecond.label = "secondBundleName";
     std::vector<SessionInfoBean> sessionInfos = { infoFrist, infoSecond };
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
     int32_t persistentId = 24;
     SessionInfoBean sessionInfo;
     int result01 = ssm_->GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
@@ -415,6 +421,7 @@ HWTEST_F(SceneSessionManagerTest, TerminateSessionNew, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     OHOS::MessageParcel data;
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     WSError result = ssm_->RegisterSessionListener(listener);
@@ -634,6 +641,7 @@ HWTEST_F(SceneSessionManagerTest, IsFreeMultiWindow, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     int32_t type = CollaboratorType::RESERVE_TYPE;
     WSError result01 = ssm_->UnregisterIAbilityManagerCollaborator(type);
     EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
@@ -646,8 +654,10 @@ HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground02, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     std::vector<std::int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     std::vector<int32_t> res = { 1, 2, 3, 15, 1423 };
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     WSError result03 = ssm_->MoveSessionsToBackground(sessionIds, res);
     ASSERT_EQ(result03, WSError::WS_ERROR_INVALID_PERMISSION);
 }
@@ -740,8 +750,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest, MoveSessionsToForeground, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     std::vector<std::int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     int32_t topSessionId = 1;
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     WSError result = ssm_->MoveSessionsToForeground(sessionIds, topSessionId);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
@@ -753,6 +765,7 @@ HWTEST_F(SceneSessionManagerTest, MoveSessionsToForeground, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, UnlockSession, TestSize.Level1)
 {
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     int32_t sessionId = 1;
     WSError result = ssm_->UnlockSession(sessionId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
@@ -1154,6 +1167,7 @@ HWTEST_F(SceneSessionManagerTest, AddOrRemoveSecureSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, UpdateExtWindowFlags, TestSize.Level1)
 {
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     SessionInfo info;
     info.abilityName_ = "UpdateExtWindowFlags";
     info.bundleName_ = "UpdateExtWindowFlags";
