@@ -57,12 +57,12 @@ public:
             if (iter->second != nullptr) {
                 auto ret = ffrtQueue->cancel(iter->second);
                 if (ret != 0) {
-                    WLOGI("Cancel failed, name=%{public}s, ret=%{public}d", taskName.c_str(), ret);
+                    TLOGI(WmsLogTag::DEFAULT, "Failed, name=%{public}s, ret=%{public}d", taskName.c_str(), ret);
                 }
             }
             taskMap_.erase(iter);
         } else {
-            WLOGI("Task is not existed, taskName=%{public}s", taskName.c_str());
+            TLOGI(WmsLogTag::DEFAULT, "Task is not existed, name=%{public}s", taskName.c_str());
         }
     }
 

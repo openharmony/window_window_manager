@@ -28,12 +28,12 @@ bool ScenePersistentStorage::HasKey(const std::string& key, ScenePersistentStora
     bool res = false;
     auto pref = GetPreference(storageType);
     if (!pref) {
-        WLOGD("[ScenePersistentStorage] Preferences is nullptr");
+        TLOGD(WmsLogTag::DEFAULT, "[ScenePersistentStorage] Preferences is nullptr");
         return res;
     }
     res = pref->HasKey(key);
-    WLOGD("[ScenePersistentStorage] %{public}s %{public}s", (res ? "Has persisted key:" : "Don't have persisted key:"),
-          key.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "[ScenePersistentStorage] %{public}s %{public}s",
+        (res ? "Has persisted key:" : "Don't have persisted key:"), key.c_str());
     return res;
 }
 
