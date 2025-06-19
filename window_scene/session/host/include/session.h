@@ -470,6 +470,7 @@ public:
      */
     bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
     void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
+    uint32_t GetDirtyFlags() { return dirtyFlags_; }
 
     bool IsSessionValid() const;
     bool IsActive() const;

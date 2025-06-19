@@ -698,6 +698,9 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         }
         bool isLayoutFinished = true;
         if (isKeyboardShow) {
+            // When the keyboard shows/hides rapidly in succession,
+            // the attributes aren't refreshed but occupied area info recalculation needs to be triggered.
+            session->stateChanged_ = true;
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
                 session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
@@ -706,12 +709,13 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, true, true);
+                session->stateChanged_ = false;
             }
             if (session->IsSessionForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
                 !animationInfo.isGravityChanged) {
                 session->GetSessionProperty()->SetCallingSessionId(callingId);
             }
-            session->stateChanged_ = true;
+            
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             if (!animationInfo.isGravityChanged) {
@@ -1084,21 +1088,24 @@ WSError KeyboardSession::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-void KeyboardSession::CheckIfSessionRectHasChanged(const uint32_t& callingId, const int32_t& persistentId,
-    const uint32_t& sessionMapDirty, bool& keyboardRectChanged, bool& callingSessionRectChanged)
+void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callingId)
 {
-    if (GetPersistentId() == persistentId) {
-        if ((sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
-            static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
-            (sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
-            static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
-            keyboardRectChanged = true;
-            stateChanged_ = false;
-        }
-    } else if (callingId == static_cast<uint32_t>(persistentId) &&
-        (sessionMapDirty & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
-        static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
-        callingSessionRectChanged = true;
+    bool needRecalculateOccupiedArea = false;
+    if ((GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
+        (GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+        needRecalculateOccupiedArea = true;
+    }
+    // Recalculate the occupied area info when calling session rect changes && keyboard is visible.
+    sptr<SceneSession> callingSession = GetSceneSession(callingId);
+    if (callingSession && (callingSession->GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) && IsVisibleForeground()) {
+        needRecalculateOccupiedArea = true;
+    }
+    if (needRecalculateOccupiedArea) {
+        ProcessKeyboardOccupiedAreaInfo(callingId, false, stateChanged_);
+        stateChanged_ = false;
     }
 }
 } // namespace OHOS::Rosen
