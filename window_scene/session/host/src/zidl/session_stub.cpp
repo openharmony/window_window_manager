@@ -1594,11 +1594,7 @@ int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessagePa
             effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError errorCode = ChangeKeyboardEffectOption(*effectOption);
-    if (!reply.WriteInt32(static_cast<int32_t>(errorCode))) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write errorCode failed.");
-        return ERR_INVALID_DATA;
-    }
+    ChangeKeyboardEffectOption(*effectOption);
     return ERR_NONE;
 }
 
