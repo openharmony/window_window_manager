@@ -328,7 +328,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 {
-    WLOGFI("Notify water mark flag changed result, showWaterMark=%{public}d", showWaterMark);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}d", showWaterMark);
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
