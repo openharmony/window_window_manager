@@ -1194,8 +1194,8 @@ HWTEST_F(SceneSessionTest3, RegisterUpdateAppUseControlCallback, Function | Smal
     sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMapThd]() ->
         std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMapThd;});
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
-    std::string keySec = "app#0";
-    allAppUseMapThd[keySec][ControlAppType::APP_LOCK] = controlInfoThd;
+    std::string keyThd = "app#0";
+    allAppUseMapThd[keyThd][ControlAppType::APP_LOCK] = controlInfoThd;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
 }
