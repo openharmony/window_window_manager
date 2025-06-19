@@ -29,6 +29,7 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "test/mock/mock_session_stage.h"
 #include "test/mock/mock_window_event_channel.h"
+#include "test/mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1461,6 +1462,62 @@ HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTes
     EXPECT_EQ(infos.size(), 1);
     ssm_->lastVisibleData_ = oldVisibleData;
     ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Vaild, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    pointerEvent->agentWindowId_ = 1;
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SendPointerEventForHover_Success
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Success, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(true);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    pointerEvent->agentWindowId_ = 1;
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest11";
+    sessionInfo.abilityName_ = "SendPointerEventForHover";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

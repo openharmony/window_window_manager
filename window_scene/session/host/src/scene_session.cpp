@@ -2982,6 +2982,15 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return WSError::WS_OK;
 }
 
+WSError SceneSession::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (!IsSystemSession() && !IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    HandlePointerEventForFocus(pointerEvent, false);
+    return WSError::WS_OK;
+}
+
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // notify touchOutside and touchDown event
@@ -3087,7 +3096,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-            PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+            PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             return WSError::WS_OK;
         }
@@ -3095,7 +3104,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
              WindowHelper::IsSubWindow(windowType) ||
              WindowHelper::IsSystemWindow(windowType)) && !isFollowParentLayout_ &&
             moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
-            PresentFoucusIfNeed(pointerEvent->GetPointerAction());
+            PresentFocusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
             ProcessWindowMoving(pointerEvent);
