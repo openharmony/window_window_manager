@@ -2302,7 +2302,7 @@ int32_t ScreenSession::GetApiVersion()
     }
     if (apiVersion == NO_EXIST_UID_VERSION) {
         apiVersion = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
-        TLOGI(WmsLogTag::DMS, "Get version from IPC");
+        TLOGI(WmsLogTag::DMS, "IPC get");
         g_uidVersionMap.Set(currentPid, apiVersion);
     }
     lastRequestTime = currentTime;

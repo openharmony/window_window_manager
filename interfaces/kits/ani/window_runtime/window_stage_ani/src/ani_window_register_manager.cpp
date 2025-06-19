@@ -368,73 +368,91 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std:
     return WmErrorCode::WM_OK;
 }
 
+WmErrorCode AniWindowRegisterManager::ProcessWindowStageListener(RegisterListenerType registerListenerType,
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    switch (registerListenerType) {
+        case RegisterListenerType::WINDOW_STAGE_EVENT_CB:
+            return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
+        case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
+            return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env);
+        default:
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
+                static_cast<uint32_t>(registerListenerType));
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessWindowListener(RegisterListenerType registerListenerType,
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    switch (static_cast<uint32_t>(registerListenerType)) {
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_SIZE_CHANGE_CB):
+            return ProcessWindowChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB):
+            return ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::AVOID_AREA_CHANGE_CB):
+            return ProcessAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::LIFECYCLE_EVENT_CB):
+            return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_EVENT_CB):
+            return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
+            return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
+            return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
+            return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
+            return ProcessDialogTargetTouchRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB):
+            return ProcessDialogDeathRecipientRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
+            return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
+            return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
+            return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
+            return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
+            return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
+            return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env);
+        default:
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
+                static_cast<uint32_t>(registerListenerType));
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessWindowManagerListener(RegisterListenerType registerListenerType,
+    const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
+{
+    switch (static_cast<uint32_t>(registerListenerType)) {
+        case static_cast<uint32_t>(RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB):
+            return ProcessSystemBarChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
+            return ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, isRegister,
+                env);
+        case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
+            return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env);
+        default:
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
+                static_cast<uint32_t>(registerListenerType));
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+}
+
 WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
     const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        switch (static_cast<uint32_t>(registerListenerType)) {
-            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB):
-                return ProcessSystemBarChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB):
-                return ProcessGestureNavigationEnabledChangeRegister(windowManagerListener, window, isRegister,
-                    env);
-            case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
-                return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env);
-            default:
-                TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
-                    static_cast<uint32_t>(registerListenerType));
-                return WmErrorCode::WM_ERROR_INVALID_PARAM;
-        }
+        ProcessWindowManagerListener(registerListenerType, windowManagerListener, window, isRegister, env);
     } else if (caseType == CaseType::CASE_WINDOW) {
-        switch (static_cast<uint32_t>(registerListenerType)) {
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_SIZE_CHANGE_CB):
-                return ProcessWindowChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_AVOID_AREA_CHANGE_CB):
-                return ProcessSystemAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::AVOID_AREA_CHANGE_CB):
-                return ProcessAvoidAreaChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::LIFECYCLE_EVENT_CB):
-                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_EVENT_CB):
-                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::KEYBOARD_HEIGHT_CHANGE_CB):
-                return ProcessOccupiedAreaChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::TOUCH_OUTSIDE_CB):
-                return ProcessTouchOutsideRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::SCREENSHOT_EVENT_CB):
-                return ProcessScreenshotRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::DIALOG_TARGET_TOUCH_CB):
-                return ProcessDialogTargetTouchRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB):
-                return ProcessDialogDeathRecipientRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_CHANGE_CB):
-                return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
-                return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
-                return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
-                return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
-                return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env);
-            case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
-                return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env);
-            default:
-                TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
-                    static_cast<uint32_t>(registerListenerType));
-                return WmErrorCode::WM_ERROR_INVALID_PARAM;
-        }
+        ProcessWindowListener(registerListenerType, windowManagerListener, window, isRegister, env);
     } else if (caseType == CaseType::CASE_STAGE) {
-        switch (registerListenerType) {
-            case RegisterListenerType::WINDOW_STAGE_EVENT_CB:
-                return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
-            case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
-                return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env);
-            default:
-                TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
-                    static_cast<uint32_t>(registerListenerType));
-                return WmErrorCode::WM_ERROR_INVALID_PARAM;
-        }
+        ProcessWindowStageListener(registerListenerType, windowManagerListener, window, isRegister, env);
     }
     return WmErrorCode::WM_OK;
 }

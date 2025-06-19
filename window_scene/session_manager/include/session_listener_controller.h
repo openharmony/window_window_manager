@@ -84,6 +84,8 @@ private:
 
     void NotifySessionDestroyed(int32_t persistentId);
 
+    void NotifySessionBackground(int32_t persistentId);
+
     void NotifyMissionEvent(ISessionLifecycleListener::SessionLifecycleEvent event, int32_t persistentId);
 
     template<typename F, typename... Args>

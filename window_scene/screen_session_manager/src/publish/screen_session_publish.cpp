@@ -133,8 +133,7 @@ void ScreenSessionPublish::PublishCastPlugOutEvent()
 void ScreenSessionPublish::PublishDisplayRotationEvent(
     const ScreenId& screenId, const Rotation& displayRotation)
 {
-    TLOGI(WmsLogTag::DMS,
-        "start to publish display rotation event, screenId: %{public}d, displayRotation: %{public}d",
+    TLOGI(WmsLogTag::DMS, "start event, screenId: %{public}d, displayRotation: %{public}d",
         static_cast<int32_t>(screenId), static_cast<int32_t>(displayRotation));
     EventFwk::CommonEventData eventData;
     eventData.SetCode(TRANS_CODE_ROTATION_CHANGED);
@@ -151,7 +150,7 @@ void ScreenSessionPublish::PublishDisplayRotationEvent(
         TLOGE(WmsLogTag::DMS, "PublishEvents failed");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "end of publish display rotation event");
+    TLOGI(WmsLogTag::DMS, "end event");
 }
 
 void ScreenSessionPublish::PublishSmartNotificationEvent(const std::string& faultDesc, const std::string& faultSuggest)

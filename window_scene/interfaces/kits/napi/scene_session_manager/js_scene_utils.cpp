@@ -2093,7 +2093,7 @@ static void SetTypeProperty(napi_value object, napi_env env, const std::string& 
 
 napi_value KeyboardGravityInit(napi_env env)
 {
-    WLOGFI("KeyboardGravityInit");
+    TLOGD(WmsLogTag::DEFAULT, "KeyboardGravityInit");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -2117,7 +2117,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value KeyboardViewModeInit(napi_env env)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
     if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
         return nullptr;

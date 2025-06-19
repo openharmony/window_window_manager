@@ -392,7 +392,7 @@ public:
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick(bool requestFocus = true, bool isClick = true);
     bool GetStateFromManager(const ManagerState key);
-    virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
+    virtual void PresentFocusIfNeed(int32_t pointerAcrion, int32_t sourceType = 0);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
@@ -457,6 +457,8 @@ public:
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
     WSError GetIsHighlighted(bool& isHighlighted) override;
+    WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false);
 
     /*
      * Multi Window
@@ -690,7 +692,7 @@ public:
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
     SnapshotStatus GetSessionStatus() const;
-    uint32_t GetWindowOrientation() const;
+    DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
 
     /*
@@ -941,7 +943,7 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    WSError HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise = false);
+    WSError HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise = false);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

@@ -63,7 +63,7 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
     return true;
 }
 
-bool ScenePersistence::SetSnapshotCapacity(SnapshotStatus capacity)
+void ScenePersistence::SetSnapshotCapacity(SnapshotStatus capacity)
 {
     capacity_ = capacity;
 }
@@ -74,10 +74,10 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
     for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
             if (isAstcEnabled_) {
-                snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+                snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
                     std::to_string(persistentId) + ASTC_IMAGE_SUFFIX;
             } else {
-                snapshotPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+                snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
                     std::to_string(persistentId) + IMAGE_SUFFIX;
             }
         }
@@ -175,7 +175,7 @@ bool ScenePersistence::IsSavingSnapshot(SnapshotStatus key)
 
 void ScenePersistence::ResetSnapshotCache()
 {
-    for (const auto& row : isSavingSnapshot_) {
+    for (auto& row : isSavingSnapshot_) {
         for (auto& isSavingSnapshot : row) {
             isSavingSnapshot.store(false);
         }
@@ -193,6 +193,7 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
         std::string oldSnapshotPath;
         for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
             for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
+                auto& snapshotPath = scenePersistence->snapshotPath_[screen][orientation];
                 if (isAstcEnabled_) {
                     oldSnapshotPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
                         std::to_string(oldPersistentId) + ASTC_IMAGE_SUFFIX;
@@ -201,17 +202,16 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
                         std::to_string(oldPersistentId) + IMAGE_SUFFIX;
                 }
                 std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
-                int ret = std::rename(oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
+                int ret = std::rename(oldSnapshotPath.c_str(), snapshotPath.c_str());
                 if (ret == 0) {
                     TLOGNI(WmsLogTag::WMS_PATTERN, "Rename snapshot from %{public}s to %{public}s.",
-                        oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
+                        oldSnapshotPath.c_str(), snapshotPath.c_str());
                 } else {
                     TLOGNW(WmsLogTag::WMS_PATTERN, "Failed to rename snapshot from %{public}s to %{public}s.",
-                        oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
+                        oldSnapshotPath.c_str(), snapshotPath.c_str());
                 }
             }
         }
-        
     };
     snapshotFfrtHelper_->SubmitTask(std::move(task), "RenameSnapshotFromOldPersistentId"
         + std::to_string(oldPersistentId));

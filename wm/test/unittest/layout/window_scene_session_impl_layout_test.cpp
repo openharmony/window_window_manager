@@ -668,14 +668,14 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo03, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateWindowLayoutById01
- * @tc.desc: UpdateWindowLayoutById
+ * @tc.name: UpdateWindowModeForUITest01
+ * @tc.desc: UpdateWindowModeForUITest
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowLayoutById01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateWindowLayoutById01");
+    option->SetWindowName("UpdateWindowModeForUITest01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     const int32_t windowId = 1;
@@ -684,15 +684,15 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowLayoutById01, TestSize.Le
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    WMError res = window->UpdateWindowLayoutById(windowId, static_cast<int32_t>(WindowMode::WINDOW_MODE_UNDEFINED));
+    WMError res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_UNDEFINED));
     EXPECT_EQ(WMError::WM_DO_NOTHING, res);
-    res = window->UpdateWindowLayoutById(windowId, static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
     EXPECT_EQ(WMError::WM_OK, res);
-    res = window->UpdateWindowLayoutById(windowId, static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
     EXPECT_EQ(WMError::WM_OK, res);
-    res = window->UpdateWindowLayoutById(windowId, static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
     EXPECT_EQ(WMError::WM_OK, res);
-    res = window->UpdateWindowLayoutById(windowId, static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
     EXPECT_EQ(WMError::WM_OK, res);
 }
 } // namespace

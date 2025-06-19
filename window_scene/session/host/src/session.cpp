@@ -101,7 +101,7 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 
     if (info.want != nullptr) {
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
-        TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
     }
 
@@ -701,7 +701,7 @@ void Session::SetFocusedOnShow(bool focusedOnShow)
     if (focusedOnShow == focusedOnShow_) {
         return;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow, GetPersistentId());
+    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d, %{public}d]", focusedOnShow, GetPersistentId());
     focusedOnShow_ = focusedOnShow;
 }
 
@@ -2335,7 +2335,7 @@ void Session::HandlePointDownDialog()
     }
 }
 
-WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
+WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
@@ -2344,8 +2344,10 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     }
     const auto& property = GetSessionProperty();
     bool raiseEnabled = property->GetRaiseEnabled();
+    bool isHoverDown = action == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        sourceType ==  MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN || isHoverDown;
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
     if (isExecuteDelayRaise) {
         if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
@@ -2369,27 +2371,28 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     return WSError::WS_OK;
 }
 
-WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    bool needNotifyClient, bool isExecuteDelayRaise)
+WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
-    WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
-    if (!IsSystemSession() && !IsSessionValid()) {
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (pointerEvent == nullptr) {
-        WLOGFE("PointerEvent is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, persistentId:%{public}d ",
+        pointerEvent->GetId(), pointerEvent->DumpPointerAction(), persistentId_);
     auto pointerAction = pointerEvent->GetPointerAction();
+    auto sourceType = pointerEvent->GetSourceType();
+    bool isHoverDown = pointerAction == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        sourceType ==  MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     bool isPointDown = (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN) ||
-        (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) || isHoverDown;
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        WSError ret = HandleSubWindowClick(pointerAction, isExecuteDelayRaise);
+        WSError ret = HandleSubWindowClick(pointerAction, sourceType, isExecuteDelayRaise);
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -2405,16 +2408,34 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         }
     }
     if (!isExecuteDelayRaise) {
-        PresentFoucusIfNeed(pointerAction);
+        PresentFocusIfNeed(pointerAction, sourceType);
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
         if (!isFocused_ && GetFocusable()) {
             NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
         }
         NotifyClick();
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool needNotifyClient, bool isExecuteDelayRaise)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "id: %{public}d", GetPersistentId());
+    if (!IsSystemSession() && !IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "PointerEvent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    WSError focusRet = HandlePointerEventForFocus(pointerEvent, isExecuteDelayRaise);
+    if (focusRet != WSError::WS_OK) {
+        return focusRet;
+    }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
-            WLOGFE("windowEventChannel_ is null");
+            TLOGE(WmsLogTag::WMS_EVENT, "windowEventChannel_ is null");
         }
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2429,6 +2450,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     } else {
         pointerEvent->MarkProcessed();
     }
+    auto pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
@@ -2444,7 +2466,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
-        WLOGFD("Action:%{public}s, eventId:%{public}d, report without timer",
+        TLOGD(WmsLogTag::WMS_EVENT, "Action:%{public}s, eventId:%{public}d, report without timer",
             pointerEvent->DumpPointerAction(), pointerEvent->GetId());
     }
     return WSError::WS_OK;
@@ -2561,7 +2583,7 @@ void Session::ResetSnapshot()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
-    for (const auto& row : snapshot_) {
+    for (auto& row : snapshot_) {
         for (auto& snapshot : row) {
             snapshot = nullptr;
         }
@@ -2677,7 +2699,7 @@ SnapshotStatus Session::GetWindowStatus() const
     }
     uint32_t snapshotScreen = WSSnapshotHelper::GetScreenStatus();
     auto windowOrientation = GetWindowOrientation();
-    uint32_t orientation = WSSNapshotHelper::GetOrientation(windowOrientation);
+    uint32_t orientation = WSSnapshotHelper::GetOrientation(windowOrientation);
     return std::make_pair(snapshotScreen, orientation);
 }
 
@@ -2717,10 +2739,10 @@ DisplayOrientation Session::GetWindowOrientation() const
     return static_cast<DisplayOrientation>(windowOrientation);
 }
 
-uint32_t SessionGetLastOrientation() const
+uint32_t Session::GetLastOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
-        return DisplayOrientation::PORTRAIT;
+        return SNAPSHOT_PORTRAIT;
     }
     return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
@@ -2954,11 +2976,14 @@ void Session::NotifyUILostFocus()
     }
 }
 
-void Session::PresentFoucusIfNeed(int32_t pointerAction)
+void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
 {
-    WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_FOCUS, "OnClick down, id: %{public}d", GetPersistentId());
+    bool isHoverDown = pointerAction == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        sourceType ==  MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        isHoverDown) {
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -3047,8 +3072,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlight
 WSError Session::NotifyHighlightChange(bool isHighlight)
 {
     if (IsSystemSession()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
-            persistentId_, GetSessionState());
+        TLOGW(WmsLogTag::WMS_FOCUS, "Invalid [%{public}d, %{public}u]", persistentId_, GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {

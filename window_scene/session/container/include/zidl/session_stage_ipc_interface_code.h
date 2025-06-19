@@ -92,7 +92,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_CLOSE_SPECIFIC_SCENE,
 
     // Layout
-    TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID,
+    TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST,
 };
 }   // namespace Rosen
 }   // namespace OHOS

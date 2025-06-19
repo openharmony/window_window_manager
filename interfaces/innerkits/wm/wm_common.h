@@ -2164,6 +2164,7 @@ struct WindowDensityInfo {
 struct WindowPropertyInfo {
     Rect windowRect { 0, 0, 0, 0 };
     Rect drawableRect { 0, 0, 0, 0 };
+    Rect globalDisplayRect { 0, 0, 0, 0 };
     uint32_t apiCompatibleVersion = 0;
     WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     bool isLayoutFullScreen = false;
@@ -2347,9 +2348,10 @@ struct KeyboardEffectOption : public Parcelable {
     std::string ToString() const
     {
         std::ostringstream oss;
-        oss << "viewMode: " << std::to_string(static_cast<uint32_t>(viewMode_)) << ", flowLightMode: " << \
-            std::to_string(static_cast<uint32_t>(flowLightMode_)) << ", gradientMode: " << \
-            std::to_string(static_cast<uint32_t>(gradientMode_)) << ", blurHeight: " << std::to_string(blurHeight_);
+        oss << "[" << static_cast<uint32_t>(viewMode_) << ", "
+            << static_cast<uint32_t>(flowLightMode_) << ", "
+            << static_cast<uint32_t>(gradientMode_) << ", "
+            << blurHeight_ << "]";
         return oss.str();
     }
 };
