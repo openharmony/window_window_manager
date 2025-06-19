@@ -108,7 +108,7 @@ void SessionListenerController::NotifySessionBackground(int32_t persistentId)
     if (persistentId == -1) {
         return;
     }
-    WLOGFI("Id:%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d", persistentId);
     CallListeners(&ISessionListener::OnMissionMovedToBackground, persistentId);
 }
 
