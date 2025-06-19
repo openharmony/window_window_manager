@@ -423,7 +423,7 @@ public:
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override { return WMError::WM_OK; }
+    WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     /*
      * Free Multi Window
      */

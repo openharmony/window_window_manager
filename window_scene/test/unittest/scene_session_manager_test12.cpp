@@ -2264,6 +2264,25 @@ HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_Invalid_Param, TestSize.Le
 }
 
 /**
+ * @tc.name: UpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : UpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    const int32_t windowId = 123456;
+    const int32_t updateMode = 1;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
  * @tc.name: RemoveInstanceKey_OK
  * @tc.desc: test function : UpdateSessionDisplayId
  * @tc.type: FUNC

@@ -1132,16 +1132,19 @@ HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleUpdateWindowLayoutById01
- * @tc.desc: test function : HandleUpdateWindowLayoutById
+ * @tc.name: HandleUpdateWindowModeForUITest01
+ * @tc.desc: test function : HandleUpdateWindowModeForUITest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateWindowLayoutById01, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowModeForUITest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowLayoutById(data, reply));
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
+
+    data.WriteInt32(0);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
 }
 } // namespace
 } // namespace Rosen

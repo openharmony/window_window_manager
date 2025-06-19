@@ -12079,11 +12079,11 @@ void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
     requestVsyncByRootSceneWhenModeChangeFunc_ = std::move(func);
 }
 
-WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SceneSessionManager::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, windowId, updateMode, where = __func__] {
         auto sceneSession = GetSceneSession(windowId);
@@ -12093,10 +12093,10 @@ WMError SceneSessionManager::UpdateWindowLayoutById(int32_t windowId, int32_t up
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, windowId: %{public}d, updateMode: %{public}d", where , windowId, updateMode);
-        return sceneSession->UpdateWindowLayoutById(windowId, updateMode);
+        return sceneSession->UpdateWindowModeForUITest(updateMode);
     };
     return taskScheduler_->PostSyncTask(task,
-        "UpdateWindowLayoutById windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
+        "UpdateWindowModeByIdForUITest windowId: " + std::to_string(windowId) + " updateMode: " + std::to_string(updateMode));
 }
 
 WSError SceneSessionManager::RequestVsyncByRootSceneWhenModeChange(const std::shared_ptr<VsyncCallback>& vsyncCallback)

@@ -805,7 +805,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SceneSessionManagerLiteProxy::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -829,7 +829,7 @@ WMError SceneSessionManagerLiteProxy::UpdateWindowLayoutById(int32_t windowId, i
         return WMError::WM_ERROR_NULLPTR;
     }
     int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID),
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST),
         data, reply, option);
     if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Send request failed, ret:%{public}d", ret);

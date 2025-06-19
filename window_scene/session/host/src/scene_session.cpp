@@ -6964,15 +6964,15 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
 }
 
 /** @note @Window.Layout */
-WMError SceneSession::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SceneSession::UpdateWindowModeForUITest(int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     if (sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", windowId, updateMode);
-    return sessionStage_->UpdateWindowLayoutById(windowId, updateMode);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", GetPersistentId(), updateMode);
+    return sessionStage_->UpdateWindowModeForUITest(updateMode);
 }
 
 void SceneSession::SetForceHideState(ForceHideState forceHideState)

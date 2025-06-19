@@ -104,14 +104,14 @@ public:
         TRANS_ID_UPDATE_KIOSK_APP_LIST,
         TRANS_ID_ENTER_KIOSK_MODE,
         TRANS_ID_EXIT_KIOSK_MODE,
-        TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID,
+        TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST,
         TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER,
     };
 
     /*
      * Window Layout
      */
-    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
+    virtual WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
 
     /*
      * Window Lifecycle
