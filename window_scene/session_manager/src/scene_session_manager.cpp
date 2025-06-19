@@ -14002,13 +14002,11 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
         return WMError::WM_ERROR_NULLPTR;
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId) && !PcFoldScreenManager::GetInstance().HasSystemKeyboard())
+    callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(callingWindowInfo.displayId_) && 
+        !PcFoldScreenManager::GetInstance().HasSystemKeyboard())
     {
         callingWindowInfo.displayId_ = sceneSession->GetClientDisplayId();
-    }
-    else
-    {
-        callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
         "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
