@@ -389,4 +389,9 @@ WMError SceneSessionManagerLite::ExitKioskMode(const sptr<IRemoteObject>& token)
 {
     return SceneSessionManager::GetInstance().ExitKioskMode();
 }
+
+WSError SceneSessionManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return SceneSessionManager::GetInstance().SendPointerEventForHover(pointerEvent);
+}
 } // namespace OHOS::Rosen
