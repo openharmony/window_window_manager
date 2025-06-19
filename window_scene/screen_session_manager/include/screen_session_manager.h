@@ -178,7 +178,7 @@ public:
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, bool isUseDma = false,
         bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
-        std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrSnapshot(DisplayId displayId, bool isUseDma = false,
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrSnapshot(DisplayId displayId, bool isUseDma = false,
         bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);

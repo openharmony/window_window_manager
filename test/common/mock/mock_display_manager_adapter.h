@@ -17,8 +17,9 @@
 #define FRAMEWORKS_WM_TEST_UT_MOCK_DISPLAY_MANAGER_ADAPTER_H
 #include <gmock/gmock.h>
 
-#include "display_manager_adapter.h"
+
 #include "display_manager.h"
+#include "display_manager_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
