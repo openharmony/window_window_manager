@@ -2968,7 +2968,7 @@ HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
         EXPECT_EQ(ret, isPcOrFreeMultiWindow);
     } else {
         EXPECT_EQ(ret, false);
-   }
+    }
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
