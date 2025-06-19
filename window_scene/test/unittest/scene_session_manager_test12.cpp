@@ -2096,7 +2096,7 @@ HWTEST_F(SceneSessionManagerTest12, SetCallingWindowDspChangedNotifyManagerListe
     sessionInfo.bundleName_ = "SetCallingWindowDspChangedNotifyManagerListener";
     sessionInfo.abilityName_ = "SetCallingWindowDspChangedNotifyManagerListener";
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);    
+    EXPECT_NE(nullptr, sceneSession);
     sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentId, uint64_t screenId) {
         NotifyCallingWindowDisplayChanged(persistentId, screenId);
     });
