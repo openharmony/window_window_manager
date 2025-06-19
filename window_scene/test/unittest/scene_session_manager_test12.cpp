@@ -2045,6 +2045,22 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyCallingWindowDisplayChanged
+ * @tc.desc: test function : NotifyCallingWindowDisplayChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyCallingWindowDisplayChanged, TestSize.Level1)
+{
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    auto result = ssm_->NotifyCallingWindowDisplayChanged(85, 12);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+    ssm_->NotifyCallingWindowDisplayChanged(86, 12);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TerminateSessionByPersistentIdWhenNoPermission
  * @tc.desc: test function : TerminateSessionByPersistentIdWhenNoPermission
  * @tc.type: FUNC
