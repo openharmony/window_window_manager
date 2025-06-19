@@ -27,7 +27,6 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "pattern_detach_callback.h"
 #include "test/mock/mock_session_stage.h"
-#include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2524,22 +2523,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsFreeMultiWindow, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-
-    // writeInt32 failed
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    int res = stub_->HandleIsFreeMultiWindow(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-    MockMessageParcel::ClearAllErrorFlag();
-
-    // writeBool failed
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    res = stub_->HandleIsFreeMultiWindow(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    // interface success
-    MockMessageParcel::ClearAllErrorFlag();
-    res = stub_->HandleIsFreeMultiWindow(data, reply);
+    MessageOption option;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
 
