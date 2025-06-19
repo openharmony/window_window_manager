@@ -1433,6 +1433,35 @@ HWTEST_F(SceneSessionManagerTest11, GetRecentMainSessionInfoList, Function | Sma
     auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: GetVisibilityWindowInfo
+ * @tc.desc: test whether get the visibility window information
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTest | Level2)
+{
+    auto oldVisibleData = ssm_->lastVisibleData_;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    std::map<int32_t, sptr<SceneSession>> currSessionMap;
+    currSessionMap.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->sceneSessionMap_ = currSessionMap;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    currVisibleData.emplace_back(surfaceNode->GetId(), WindowVisibilityState::START);
+    ssm_->lastVisibleData_ = currVisibleData;
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    auto result = ssm_->GetVisibilityWindowInfo(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(infos.size(), 1);
+    ssm_->lastVisibleData_ = oldVisibleData;
+    ssm_->sceneSessionMap_ = oldSessionMap;
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
