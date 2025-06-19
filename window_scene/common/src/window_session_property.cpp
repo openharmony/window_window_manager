@@ -864,7 +864,6 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
     return shadowsInfo_;
 }
 
-
 void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState)
 {
     std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
