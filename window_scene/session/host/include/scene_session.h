@@ -42,7 +42,6 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 
 class SceneSession;
 class ScreenSession;
-struct ControlInfo;
 
 using NotifySessionLockStateChangeCallback = std::function<void(bool isLockedState)>;
 using SpecificSessionCreateCallback =
@@ -147,11 +146,6 @@ struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
     sptr<IRemoteObject> abilityToken;
-};
-
-struct ControlInfo {
-    bool isNeedControl;
-    bool isControlRecentOnly;
 };
 
 class SceneSession : public Session {
@@ -592,7 +586,7 @@ public:
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
-    void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo);
+    void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) override;
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}

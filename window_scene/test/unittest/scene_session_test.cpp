@@ -592,6 +592,29 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetPrivacyMode03
+ * @tc.desc: Set PrivacyMode as true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestAbility";
+    info.bundleName_ = "TestBundle";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sceneSession->SetEventHandler(handler, handler);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetPrivacyMode(true);
+    ASSERT_EQ(true, sceneSession->appUseControlMap_.size() == 0);
+}
+
+/**
  * @tc.name: UpdateScreenshotAppEventRegistered
  * @tc.desc: UpdateScreenshotAppEventRegistered01
  * @tc.type: FUNC
