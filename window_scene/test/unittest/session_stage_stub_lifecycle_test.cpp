@@ -98,8 +98,8 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
  * @tc.desc: test function : HandleNotifyPausedStatus
  * @tc.type: FUNC
  */
- HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
- {
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
+{
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
@@ -113,8 +113,8 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
  * @tc.desc: test function : HandleNotifyAppUseControlStatus
  * @tc.type: FUNC
  */
- HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyAppUseControlStatus, TestSize.Level1)
- {
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyAppUseControlStatus, TestSize.Level1)
+{
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MessageParcel data;
