@@ -12086,9 +12086,9 @@ void SceneSessionManager::SetRequestVsyncByRootSceneWhenModeChangeFunc(
 
 WMError SceneSessionManager::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
 {
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, windowId, updateMode, where = __func__] {
         auto sceneSession = GetSceneSession(windowId);
