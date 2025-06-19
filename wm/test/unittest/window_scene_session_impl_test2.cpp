@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <application_context.h>
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
@@ -426,13 +425,9 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateDefaultStatusBarColor01, TestSize.Le
     option->SetWindowName("UpdateDefaultStatusBarColor01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
-    ASSERT_NE(appContext, nullptr);
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
-    configuration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "light");
-    appContext->SetConfiguration(configuration);
+    ASSERT_NE(windowSceneSession, nullptr);
     windowSceneSession->UpdateDefaultStatusBarColor();
-    configuration->AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP, "light");
+    windowSceneSession->specifiedColorMode_ = "light";
     windowSceneSession->UpdateDefaultStatusBarColor();
 }
 
