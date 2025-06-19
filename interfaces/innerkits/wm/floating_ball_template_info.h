@@ -30,8 +30,8 @@ public:
         const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(templateType, title, content),
         icon_(icon) {};
     FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
-        const std::shared_ptr<Media::PixelMap>& icon)
-        : FloatingBallTemplateBaseInfo(baseInfo.template_, baseInfo.title_, baseInfo.content_), icon_(icon) {};
+        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
+        baseInfo.title_, baseInfo.content_), icon_(icon) {};
     ~FloatingBallTemplateInfo() override = default;
 
     std::shared_ptr<Media::PixelMap> icon_ {};

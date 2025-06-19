@@ -22,6 +22,7 @@
 #include "floating_ball_controller.h"
 #include "js_fb_window_controller.h"
 #include "floating_ball_manager.h"
+#include "js_err_utils.h"
 
 namespace OHOS {
 namespace Rosen {

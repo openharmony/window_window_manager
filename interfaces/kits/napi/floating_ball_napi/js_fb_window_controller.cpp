@@ -339,7 +339,7 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
     return CheckParams(env, option);
 }
 
-napi_value JsFbController::CheckParams(const napi_env &env, const FbOption& option)
+napi_value JsFbController::CheckParams(napi_env env, const FbOption& option)
 {
     if (option.GetTemplate() < static_cast<uint32_t>(FloatingBallTemplate::STATIC) ||
         option.GetTemplate() >= static_cast<uint32_t>(FloatingBallTemplate::END)) {
@@ -369,7 +369,7 @@ napi_value JsFbController::CheckParams(const napi_env &env, const FbOption& opti
     return NapiGetUndefined(env);
 }
 
-napi_value JsFbController::GetIcon(const napi_env &env, const napi_value &value, FbOption& option)
+napi_value JsFbController::GetIcon(napi_env env, const napi_value value, FbOption& option)
 {
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -431,7 +431,7 @@ napi_value JsFbController::OnRegisterCallback(napi_env env, napi_callback_info i
 WmErrorCode JsFbController::RegisterListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     std::lock_guard<std::mutex> lock(callbBackMutex_);
-    if (IfCallbackRegistered(env, type, value)) {
+    if (IsCallbackRegistered(env, type, value)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Callback already registered");
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
@@ -444,20 +444,24 @@ WmErrorCode JsFbController::RegisterListenerWithType(napi_env env, const std::st
         TLOGE(WmsLogTag::WMS_SYSTEM, "New JsFbWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    jsCbMap_[type].insert(fbWindowListener);
-    
+    WMError ret = WMError::WM_OK;
     if (type == STATE_CHANGE_CB) {
-        ProcessStateChangeRegister(fbWindowListener);
+        ret = ProcessStateChangeRegister(fbWindowListener);
     }
     if (type == CLICK_EVENT) {
-        ProcessClickEventRegister(fbWindowListener);
+        ret = ProcessClickEventRegister(fbWindowListener);
     }
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "register failed");
+        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    }
+    jsCbMap_[type].insert(fbWindowListener);
     TLOGI(WmsLogTag::WMS_SYSTEM, "Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
 
-bool JsFbController::IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
+bool JsFbController::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "methodName %{public}s not registered", type.c_str());
@@ -578,13 +582,14 @@ WmErrorCode JsFbController::UnRegisterListenerWithType(napi_env env, const std::
 WmErrorCode JsFbController::UnRegisterListener(const std::string& type,
     const sptr<JsFbWindowListener>& fbWindowListener)
 {
+    WMError ret = WMError::WM_OK;
     if (type == STATE_CHANGE_CB) {
-        ProcessStateChangeUnRegister(fbWindowListener);
+        ret = ProcessStateChangeUnRegister(fbWindowListener);
     }
     if (type == CLICK_EVENT) {
-        ProcessClickEventUnRegister(fbWindowListener);
+        ret = ProcessClickEventUnRegister(fbWindowListener);
     }
-    return WmErrorCode::WM_OK;
+    return WM_JS_TO_ERROR_CODE_MAP.at(ret);
 }
 
 WMError JsFbController::ProcessStateChangeUnRegister(const sptr<JsFbWindowListener>& listener)

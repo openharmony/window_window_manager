@@ -31,6 +31,7 @@ namespace Rosen {
 
 class MockWindow : public Window {
 public:
+    const uint32_t mockWindowId_ = 101;
     MockWindow() {};
     ~MockWindow() {};
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
@@ -42,7 +43,7 @@ public:
     MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
     uint32_t GetWindowId() const override
     {
-        return 101;
+        return mockWindowId_;
     }
 };
 
