@@ -1475,7 +1475,7 @@ HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Vaild, Function | S
     ssm_->sceneSessionMap_.clear();
     MockAccesstokenKit::MockIsSACalling(false);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    auto ret = ssm_->SendPointerEventForHover(pointerEvent);
+    WSError ret = ssm_->SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 
     MockAccesstokenKit::MockIsSACalling(true);
@@ -1516,7 +1516,7 @@ HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Success, Function |
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    WSError ret = ssm_->SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
