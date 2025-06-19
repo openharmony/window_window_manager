@@ -792,8 +792,7 @@ public:
     virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
         bool needCheckRSTransaction) {}
     bool isSubWindowResizingOrMoving_ = false;
-    virtual void CheckIfSessionRectHasChanged(const uint32_t& callingId, const int32_t& persistentId,
-        const uint32_t& sessionMapDirty, bool& keyboardRectChanged, bool& callingSessionRectChanged) {}
+    virtual void CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callingId) {}
 
     /*
      * Window Focus
