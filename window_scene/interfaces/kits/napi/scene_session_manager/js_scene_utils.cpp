@@ -2117,7 +2117,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value KeyboardViewModeInit(napi_env env)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
     if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
         return nullptr;

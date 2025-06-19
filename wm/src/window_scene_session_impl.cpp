@@ -1535,7 +1535,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with effect option: %{public}s", effectOption.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Effect option: %{public}s", effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
             static_cast<uint32_t>(effectOption.viewMode_));
@@ -4960,7 +4960,7 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 
 WMError WindowSceneSessionImpl::ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard effect option to %{public}s",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "effect option: %{public}s",
         effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
         effectOption.flowLightMode_ >= KeyboardFlowLightMode::END ||
@@ -4972,7 +4972,7 @@ WMError WindowSceneSessionImpl::ChangeKeyboardEffectOption(KeyboardEffectOption 
 
     auto lastOption = property_->GetKeyboardEffectOption();
     if (effectOption == lastOption) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "EffectOption is same. last option: %{public}s", lastOption.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Is same option: %{public}s", lastOption.ToString().c_str());
         return WMError::WM_DO_NOTHING;
     }
 
@@ -5709,7 +5709,7 @@ WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(
 
 void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "isKeyboardPanelShown: %{public}d, gravity: %{public}d"
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShown: %{public}d, gravity: %{public}d"
         ", rect_: [%{public}d, %{public}d, %{public}d, %{public}d]", keyboardPanelInfo.isShowing_,
         keyboardPanelInfo.gravity_, keyboardPanelInfo.rect_.posX_, keyboardPanelInfo.rect_.posY_,
         keyboardPanelInfo.rect_.width_, keyboardPanelInfo.rect_.height_);

@@ -6834,9 +6834,7 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         napi_value jsKeyboardEffectOptionObj = ConvertKeyboardEffectOptionToJsValue(env, effectOption);
         napi_value argv[] = { jsKeyboardStateObj, jsKeyboardEffectOptionObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGI(WmsLogTag::WMS_KEYBOARD,
-            "%{public}s: Callback success. id: %{public}d, state: %{public}d, keyboardEffectOption: %{public}s",
-            where, persistentId, state, effectOption.ToString().c_str());
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s: id: %{public}d, state: %{public}d", where, persistentId, state);
     };
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardStateChange, state:" +
         std::to_string(static_cast<uint32_t>(state)));
