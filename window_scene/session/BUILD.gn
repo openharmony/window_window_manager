@@ -121,6 +121,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-napi",
   ]
   defines = []
+  defines += [ "MODIFIER_NG" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.barrierfree_accessibility)) {
@@ -208,6 +209,7 @@ ohos_shared_library("screen_session") {
   ]
 
   defines = []
+  defines += [ "MODIFIER_NG" ]
   if (window_manager_feature_screen_color_gamut) {
     defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
   }
