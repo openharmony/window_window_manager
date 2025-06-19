@@ -22,6 +22,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "session/host/include/ws_ffrt_helper.h"
+#include "session/host/include/ws_snapshot_helper.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -30,43 +31,51 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence(const std::string& bundleName, int32_t persistentId);
+    ScenePersistence(const std::string& bundleName, int32_t persistentId, SnapshotStatus capacity = defaultCapcity);
     virtual ~ScenePersistence();
 
     static bool CreateSnapshotDir(const std::string& directory);
     static bool CreateUpdatedIconDir(const std::string& directory);
 
+    void SetSnapshotCapacity(SnapshotStatus capacity);
+    static void InitAstcEnabled();
     static bool IsAstcEnabled();
-    void SetHasSnapshot(bool hasSnapshot);
+    void SetHasSnapshot(bool hasSnapshot, SnapshotStatus key = defaultStatus);
     bool HasSnapshot() const;
-    bool IsSnapshotExisted() const;
-    std::string GetSnapshotFilePath();
-    std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
+    bool HasSnapshot(SnapshotStatus key) const;
+    bool IsSnapshotExisted(SnapshotStatus key = defaultStatus) const;
+    std::string GetSnapshotFilePath(SnapshotStatus& key);
+    std::pair<uint32_t, uint32_t> GetSnapshotSize(SnapshotStatus key = defaultStatus) const;
     std::shared_ptr<WSFFRTHelper> GetSnapshotFfrtHelper() const;
 
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        const std::function<void()> resetSnapshotCallback = [](){});
-    bool IsSavingSnapshot();
+        const std::function<void()> resetSnapshotCallback = [](){}, SnapshotStatus key = defaultStatus,
+        DisplayOrientation rotate = DisplayOrientation::PORTRAIT);
+    bool IsSavingSnapshot(SnapshotStatus key = defaultStatus);
     void ResetSnapshotCache();
     void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
-    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale) const;
+    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale,
+        SnapshotStatus key = defaultStatus) const;
+    DisplayOrientation rotate_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
 
 private:
     static std::string snapshotDirectory_;
     std::string bundleName_;
     int32_t persistentId_;
-    std::string snapshotPath_;
-    std::pair<uint32_t, uint32_t> snapshotSize_;
-    bool hasSnapshot_ = false;
+    SnapshotStatus capacity_;
+    std::string snapshotPath_[SCREEN_COUNT][ORIENTATION_COUNT];
+    std::pair<uint32_t, uint32_t> snapshotSize_[SCREEN_COUNT][ORIENTATION_COUNT];
+    bool hasSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
 
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
+    static bool isAstcEnabled_;
 
     std::atomic<int> savingSnapshotSum_ { 0 };
-    std::atomic<bool> isSavingSnapshot_ { false };
+    std::atomic<bool> isSavingSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
     mutable std::mutex savingSnapshotMutex_;

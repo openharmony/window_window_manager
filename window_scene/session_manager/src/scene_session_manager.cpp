@@ -2627,6 +2627,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     auto systemConfig = systemConfig_;
     SetWindowStatusDeduplicationBySystemConfig(sessionInfo, systemConfig);
     sceneSession->SetSystemConfig(systemConfig);
+    sceneSession->InitSnapshotCapacity();
     sceneSession->SetSnapshotScale(snapshotScale_);
     UpdateParentSessionForDialog(sceneSession, property);
     std::string key = sessionInfo.bundleName_ + "_" + sessionInfo.moduleName_ + "_" + sessionInfo.abilityName_ + "_" +
@@ -3096,6 +3097,15 @@ WSError SceneSessionManager::RegisterRemoveSnapshotFunc(const sptr<SceneSession>
         this->RemoveSnapshotFromCache(persistentId);
     });
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "support")
+    auto task = [this] {
+        systemConfig_.supportSnapshotAllSessionStatus_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportSnapshotAllSessionStatus");
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
