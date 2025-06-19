@@ -479,6 +479,7 @@ void WindowManager::Impl::NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleIn
     if (wmsWindowCreatedListener != nullptr) {
         wmsWindowCreatedListener->OnWindowCreated(lifeCycleInfo);
     }
+    return;
 }
 
 void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo)
@@ -493,6 +494,7 @@ void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycle
     if (wmsWindowDestroyedListener != nullptr) {
         wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo);
     }
+    return;
 }
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
@@ -2194,7 +2196,7 @@ WMError WindowManager::RegisterWindowLifeCycleListener(const sptr<IWindowLifeCyc
     return WMError::WM_OK;
 }
 
-WMError WindowManager::UnregisterWMSConnectionChangedListener(const sptr<IWindowLifeCycleListener>& listener)
+WMError WindowManager::UnregisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "window lifecycle listener unregistered could not be null");
