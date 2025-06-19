@@ -38,10 +38,6 @@ const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
-static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
-static const int32_t PIXELMAP_SIZE = 2;
-static const int32_t SDR_PIXELMAP = 0;
-static const int32_t HDR_PIXELMAP = 1;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 std::string logMsg;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
@@ -6952,39 +6948,6 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 {
     DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
     EXPECT_EQ(DMError::DM_OK, ret);
-}
-
-/**
- * @tc.name: GetDisplayHdrSnapshot
- * @tc.desc: ScreenSesionManager screen shot
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot, TestSize.Level1)
-{
-    DisplayId displayId = DEFAULT_DISPLAY;
-    DmErrorCode* errorCode = nullptr;
-    std::vector<std::shared_ptr<Media::PixelMap>> result = { nullptr, nullptr };
-    std::vector<std::shared_ptr<Media::PixelMap>> pixvec = { nullptr, nullptr };
-    pixvec = ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
-    ASSERT_EQ(pixvec, result);
-}
-
-/**
- * @tc.name: GetScreenHdrSnapshot001
- * @tc.desc: GetScreenHdrSnapshot test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetScreenHdrSnapshot001, TestSize.Level1)
-{
-    bool isUseDma = false;
-    DisplayId validDisplayId = DISPLAY_ID_FAKE;
-    bool isCaptureFullOfScreen = false;
-    std::vector<NodeId> blackList = {};
-    std::vector<std::shared_ptr<Media::PixelMap>> result = ssm_->GetScreenHdrSnapshot(
-        validDisplayId, isUseDma, isCaptureFullOfScreen, blackList);
-    EXPECT_EQ(result.size(), EXECUTION_TIMES);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
 }
 } // namespace Rosen

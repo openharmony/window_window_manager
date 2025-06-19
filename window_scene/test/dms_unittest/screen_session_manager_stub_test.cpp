@@ -32,6 +32,7 @@ namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 const int32_t MSGID = 0;
+static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
 
 }
 class ScreenSessionManagerStubTest : public testing::Test {
@@ -3309,12 +3310,36 @@ HWTEST_F(ScreenSessionManagerStubTest, GetPhysicalScreenIds, Function | SmallTes
     EXPECT_EQ(res, 0);
 }
 
+
 /**
- * @tc.name: OnRemoteRequest155
+ * @tc.name: OnRemoteRequest155_0
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_0, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest155_1
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_1, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3329,6 +3354,150 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(
         DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
  
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest155_2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_2, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
+ 
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest155_3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(DEFAULT_DISPLAY);
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
+ 
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest155_4
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_4, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(DEFAULT_DISPLAY);
+    data.WriteBool(true);
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT);
+ 
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+ 
+/**
+ * @tc.name: OnRemoteRequest156_0
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest156_0, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    data.WriteUint32(static_cast<uint32_t>(type));
+    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+ 
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest156_1
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest156_1, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest156_2
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest156_2, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(DEFAULT_DISPLAY);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, MSGID);
+}
+ 
+/**
+ * @tc.name: OnRemoteRequest156_3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest156_3, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+ 
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(DEFAULT_DISPLAY);
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, MSGID);
 }

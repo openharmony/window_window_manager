@@ -86,7 +86,6 @@ namespace {
 static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
 static const int32_t EXECUTION_TIMES = 1;
 static const int32_t PIXELMAP_SIZE = 2;
-static const int32_t DEFAULT_ROATION = 0;
 static const int32_t SDR_PIXELMAP = 0;
 static const int32_t HDR_PIXELMAP = 1;
 
@@ -1994,65 +1993,6 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHdrSnapshot002, TestSize
 }
 
 /**
- * @tc.name: GetScreenHdrshotwithConfigreturnsnullptrvec01
- * @tc.desc: GetScreenHdrshotwithConfig returns nullptr fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec01, TestSize.Level1)
-{
-    DisplayManager displayManager;
-    SnapShotConfig config;
-    DmErrorCode errorCode;
-    bool isUseDma = false;
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
-    auto result = displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
-    EXPECT_EQ(result, pixRVec);
-}
- 
-/**
- * @tc.name: GetScreenHdrshotwithConfigreturnsnullptrvec02
- * @tc.desc: GetScreenHdrshotwithConfig returns nullptr fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec02, TestSize.Level1)
-{
-    DisplayManager displayManager;
-    SnapShotConfig config;
-    config.displayId_ = DEFAULT_DISPLAY;
-    DmErrorCode errorCode;
-    bool isUseDma = false;
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
-    auto result = displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
-    EXPECT_EQ(result, pixRVec);
-}
- 
-/**
- * @tc.name: GetScreenHdrshotreturnsnullptrvec03
- * @tc.desc: GetScreenHdrshot returns nullptr fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec03, TestSize.Level1)
-{
-    DisplayManager displayManager;
-    SnapShotConfig config;
-    config.displayId_ = DEFAULT_DISPLAY;
-    DmErrorCode errorCode;
-    bool isUseDma = false;
- 
-    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
-    EXPECT_CALL(m->Mock(), GetScreenHdrshot(_, _, _, _)).Times(1).WillOnce(
-        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
-}
-
-/**
  * @tc.name: InvalidimageRect
  * @tc.desc: Invalid imageRect fun
  * @tc.type: FUNC
@@ -2420,25 +2360,6 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_ShouldReturnNull_WhenGet
 }
  
 /**
- * @tc.name: ShouldReturnNullptrWhenScreenHdrshotCaptureFailes
- * @tc.desc: Test screenHdrshot capture failure
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenHdrshotCaptureFailes, TestSize.Level1)
-{
-    CaptureOption captureOption;
-    Media::Rect rect;
-    Media::Size size;
-    int rotation = DEFAULT_ROATION;
-    DmErrorCode errorCode;
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, rect, size, rotation, &errorCode);
-    EXPECT_EQ(result, pixRVec);
-}
- 
-/**
  * @tc.name: GetDisplayHdrSnapshotWithOption_whenerrorCodeisnullptr
  * @tc.desc: Test screenHdrshot capture failure
  * @tc.type: FUNC
@@ -2453,32 +2374,6 @@ HWTEST_F(DisplayManagerTest, GetDisplayHdrSnapshotWithOption_whenerrorCodeisnull
     std::vector<std::shared_ptr<Media::PixelMap>> result =
         DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, errorCode);
     EXPECT_EQ(result, pixRVec);
-}
- 
-/**
- * @tc.name: GetScreenHdrshotWithOption_WhenScreenHdrshotWithOptionFails
- * @tc.desc: Test that the function returns a vector with two nullptrs when displayId is valid but snapshot fails.
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_WhenScreenHdrshotWithOptionFails, TestSize.Level1)
-{
-    CaptureOption captureOption;
-    captureOption.displayId_ = DEFAULT_DISPLAY;
-    Media::Rect rect;
-    Media::Size size;
-    int rotation = DEFAULT_ROATION;
-    DmErrorCode errorCode;
- 
-    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
- 
-    EXPECT_CALL(m->Mock(), GetDisplayHdrSnapshotWithOption(_, _)).Times(1).WillOnce(
-        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, rect, size, rotation, &errorCode);
- 
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
  
 /**

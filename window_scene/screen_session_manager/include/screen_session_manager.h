@@ -178,8 +178,6 @@ public:
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, bool isUseDma = false,
         bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
-    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrSnapshot(DisplayId displayId, bool isUseDma = false,
-        bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
 
     sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
@@ -578,6 +576,8 @@ private:
     void CreateExtendVirtualScreen(ScreenId screenId);
     void SetMultiScreenModeInner(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode);
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrSnapshot(DisplayId displayId, bool isUseDma = false,
+        bool isCaptureFullOfScreen = false, const std::vector<NodeId>& blackList = {});
 
     void IsEnableRegionRotation(sptr<ScreenSession> screenSession);
     void CalculateXYPosition(sptr<ScreenSession> firstScreenSession,

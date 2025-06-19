@@ -173,8 +173,10 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
-const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 const long GET_HDR_PIXELMAP_TIMEOUT = 2000;
+
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t SDR_PIXMAP = 0;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -6132,18 +6134,24 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHd
     DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
         return {nullptr, nullptr};
     }
-    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false) && errorCode) {
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGE(WmsLogTag::DMS, "snapshot disabled by edm!");
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        }
         return {nullptr, nullptr};
     }
-    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -6151,7 +6159,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHd
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHdrSnapshot(%" PRIu64")", displayId);
         std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHdrSnapshot(
             displayId, isUseDma, isCaptureFullOfScreen);
-        if (res.size() == 2 && res[0] != nullptr) {
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
             NotifyScreenshot(displayId);
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
@@ -6225,9 +6233,11 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHd
         TLOGE(WmsLogTag::DMS, "snapshot was disabled by edm!");
         return {nullptr, nullptr};
     }
-    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
+    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
-        *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -6235,7 +6245,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHd
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHdrSnapshot(%" PRIu64")", option.displayId_);
         std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHdrSnapshot(
             option.displayId_, true, option.isCaptureFullOfScreen_, option.blackList_);
-        if (res.size() == 2 && res[0] != nullptr && res[1] != nullptr) {
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }

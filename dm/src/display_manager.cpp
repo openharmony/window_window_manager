@@ -899,18 +899,6 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const S
     return dstScreenshot;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshotwithConfig(
-    const SnapShotConfig& snapShotConfig, DmErrorCode* errorCode, bool isUseDma)
-{
-    std::vector<std::shared_ptr<Media::PixelMap>> screenShotVec =
-        GetScreenHdrshot(snapShotConfig.displayId_, errorCode, isUseDma, snapShotConfig.isCaptureFullOfScreen_);
-    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
-        TLOGE(WmsLogTag::DMS, "failed!");
-        return { nullptr, nullptr };
-    }
-    return screenShotVec;
-}
-
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
     const Media::Size &size, int rotation, DmErrorCode* errorCode)
 {
@@ -2548,20 +2536,6 @@ std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshotWi
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshotWithOption(captureOption, errorCode);
     if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "get snapshot with option failed!");
-        return { nullptr, nullptr };
-    }
-    TLOGI(WmsLogTag::DMS, "end!");
-    return screenShotVec;
-}
- 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshotWithOption(
-    const CaptureOption& captureOption, const Media::Rect& rect,
-    const Media::Size& size, int rotation, DmErrorCode* errorCode)
-{
-    TLOGI(WmsLogTag::DMS, "start!");
-    std::vector<std::shared_ptr<Media::PixelMap>> screenShotVec = GetScreenHdrshotWithOption(captureOption, errorCode);
-    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
-        TLOGE(WmsLogTag::DMS, "set snapshot with option failed!");
         return { nullptr, nullptr };
     }
     return screenShotVec;
