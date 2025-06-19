@@ -823,6 +823,261 @@ HWTEST_F(SystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
     parentSession->isVisible_ = true;
     EXPECT_EQ(true, systemSession->IsVisibleNotBackground());
 }
+
+/**
+ * @tc.name: SetAndGetFbTemplateInfo
+ * @tc.desc: SetAndGetFbTemplateInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetAndGetFbTemplateInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "Background01";
+
+    sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
+    EXPECT_NE(systemSession, nullptr);
+    systemSession->isActive_ = true;
+    FloatingBallTemplateInfo fbTemplateInfo;
+    fbTemplateInfo.template_ = 1;
+    systemSession->SetFbTemplateInfo(fbTemplateInfo);
+    ASSERT_EQ(systemSession->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+}
+
+/**
+ * @tc.name: SetAndGetFbTemplateInfo
+ * @tc.desc: SetAndGetFbTemplateInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SetAndGetFbWindowId, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAndGetFbWindowId";
+    info.bundleName_ = "SetAndGetFbWindowId";
+
+    sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
+    EXPECT_NE(systemSession, nullptr);
+    systemSession->isActive_ = true;
+    uint32_t windowId = 100;
+    systemSession->SetFbWindowId(windowId);
+    ASSERT_EQ(systemSession->GetFbWindowId(), windowId);
+}
+
+/**
+ * @tc.name: UpdateFloatingBall
+ * @tc.desc: UpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, UpdateFloatingBall, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    FloatingBallTemplateInfo fbTemplateInfo;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_DO_NOTHING);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_OK);
+
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: StopFloatingBall
+ * @tc.desc: StopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, StopFloatingBall, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->StopFloatingBall(), WSError::WS_DO_NOTHING);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->StopFloatingBall(), WSError::WS_OK);
+
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+    EXPECT_EQ(systemSession->StopFloatingBall(), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RestoreFbMainWindow
+ * @tc.desc: RestoreFbMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, RestoreFbMainWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_DO_NOTHING);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_INVALID_PERMISSION);
+
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
+
+    std::string bundle = "testBundle";
+    want->SetBundle(bundle);
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
+    systemSession->EditSessionInfo().bundleName_ = bundle;
+    uint64_t nowTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    systemSession->fbClickTime_ = nowTime - 1000;
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetFloatingBallWindowId
+ * @tc.desc: GetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    uint32_t windowId = 0;
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_DO_NOTHING);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_ERROR_INVALID_PERMISSION);
+
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+    EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyUpdateFloatingBall
+ * @tc.desc: NotifyUpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyUpdateFloatingBall, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    FloatingBallTemplateInfo fbTemplateInfo {1, "fb", "fb_content", nullptr};
+    FloatingBallTemplateInfo newFbTemplateInfo {2, "fb_new", "fb_content_new", nullptr};
+    systemSession->SetFloatingBallUpdateCallback(nullptr);
+    systemSession->NotifyUpdateFloatingBall(newFbTemplateInfo);
+    EXPECT_NE(fbTemplateInfo.template_, newFbTemplateInfo.template_);
+
+    auto updateFbFuncCb = [&fbTemplateInfo] (const FloatingBallTemplateInfo& newFbTemplateInfo) {
+        fbTemplateInfo.template_ = newFbTemplateInfo.template_;
+    };
+    systemSession->SetFloatingBallUpdateCallback(updateFbFuncCb);
+    systemSession->NotifyUpdateFloatingBall(newFbTemplateInfo);
+    EXPECT_EQ(fbTemplateInfo.template_, newFbTemplateInfo.template_);
+}
+
+/**
+ * @tc.name: NotifyStopFloatingBall
+ * @tc.desc: NotifyStopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyStopFloatingBall, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    uint32_t stopFuncCallTimes = 0;
+    auto fbStopFuncCb = [&stopFuncCallTimes] () {
+        stopFuncCallTimes++;
+    };
+
+    systemSession->SetFloatingBallStopCallback(nullptr);
+    systemSession->NotifyStopFloatingBall();
+ 
+    systemSession->SetFloatingBallStopCallback(fbStopFuncCb);
+    systemSession->NotifyStopFloatingBall();
+    EXPECT_EQ(stopFuncCallTimes, 2);
+}
+
+/**
+ * @tc.name: NotifyRestoreFloatingBallMainWindow
+ * @tc.desc: NotifyRestoreFloatingBallMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, NotifyRestoreFloatingBallMainWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetParam("NotifyRestoreFloatingBallMainWindow", 100);
+    int res = -1;
+    systemSession->SetFloatingBallRestoreMainWindowCallback(nullptr);
+    systemSession->NotifyRestoreFloatingBallMainWindow(want);
+
+    auto fbStopFuncCb = [&res] (const std::shared_ptr<AAFwk::Want>& want) {
+        res = want->GetIntParam("NotifyRestoreFloatingBallMainWindow", -1);
+    };
+    systemSession->SetFloatingBallRestoreMainWindowCallback(fbStopFuncCb);
+    systemSession->NotifyRestoreFloatingBallMainWindow(want);
+    EXPECT_EQ(res, 100);
+}
+
+/**
+ * @tc.name: SendFbActionEvent
+ * @tc.desc: SendFbActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, SendFbActionEvent, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
+
+    systemSession_->sessionStage_ = nullptr;
+    EXPECT_EQ(systemSession->SendFbActionEvent(""), WSError::WS_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    systemSession_->sessionStage_ = mockSessionStage;
+    auto ret = systemSession_->SendFbActionEvent("click");
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    ret = systemSession_->SendFbActionEvent("on");
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -266,6 +266,10 @@ ohos_unittest("ws_sub_session_test") {
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
+  defines = [
+    "ENABLE_MOCK_WRITE_STRING",
+  ]
+
   sources = [ "sub_session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
