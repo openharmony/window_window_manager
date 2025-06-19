@@ -1426,7 +1426,7 @@ VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "screenId invalid");
         return VirtualScreenFlag::DEFAULT;
     }
 

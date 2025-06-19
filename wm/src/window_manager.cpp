@@ -377,7 +377,7 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         iter = displayInfoChangedListeners_.find(token);
         if (iter == displayInfoChangedListeners_.end()) {
-            TLOGI(WmsLogTag::DMS, "can not find token in listener list, need not notify the change of display info");
+            TLOGI(WmsLogTag::DMS, "can not find token in listener list");
             return;
         }
         displayInfoChangedListeners = iter->second;

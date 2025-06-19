@@ -1741,7 +1741,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             return fakeDisplayInfo;
         }
     }
-    TLOGE(WmsLogTag::DMS, "GetDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
+    TLOGE(WmsLogTag::DMS, "failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
 }
 
@@ -3151,12 +3151,11 @@ void ScreenSessionManager::UpdateDisplayState(std::vector<ScreenId> screenIds, D
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screenSession = GetScreenSession(screenId);
         if (screenSession == nullptr) {
-            TLOGW(WmsLogTag::DMS, "[UL_POWER] cannot get ScreenSession, screenId: %{public}" PRIu64"",
-                screenId);
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]screenId: %{public}" PRIu64, screenId);
             continue;
         }
         screenSession->UpdateDisplayState(state);
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]set screenSession displayState property: %{public}u",
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]displayState: %{public}u",
             screenSession->GetScreenProperty().GetDisplayState());
     }
 }
@@ -3176,7 +3175,7 @@ void ScreenSessionManager::BlockScreenOnByCV(void)
 void ScreenSessionManager::BlockScreenOffByCV(void)
 {
     if (gotScreenOffNotify_ == false) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ set, delay:%{public}d", screenOffDelay_);
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]delay:%{public}d", screenOffDelay_);
         needScreenOffNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOffMutex_);
         if (screenOffCV_.wait_for(lock, std::chrono::milliseconds(screenOffDelay_)) == std::cv_status::timeout) {
@@ -3397,10 +3396,10 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
             if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT) {
                 // 预亮屏
                 status = ScreenPowerStatus::POWER_STATUS_ON_ADVANCED;
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON_ADVANCED");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]POWER_STATUS_ON_ADVANCED");
             } else {
                 status = ScreenPowerStatus::POWER_STATUS_ON;
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]POWER_STATUS_ON");
             }
             break;
         }
@@ -3408,17 +3407,17 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
             if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
                 // 预亮屏时指纹认证失败
                 status = ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED;
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF_ADVANCED");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]POWER_STATUS_OFF_ADVANCED");
             } else {
                 status = ScreenPowerStatus::POWER_STATUS_OFF;
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]POWER_STATUS_OFF");
             }
             rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
         case ScreenPowerState::POWER_SUSPEND: {
             status = ScreenPowerStatus::POWER_STATUS_SUSPEND;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            TLOGI(WmsLogTag::DMS, "[UL_POWER] POWER_SUSPEND");
             rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
@@ -3433,7 +3432,7 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
             break;
         }
         default: {
-            TLOGW(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerStatus state not support");
+            TLOGW(WmsLogTag::DMS, "[UL_POWER]not support");
             return false;
         }
     }
@@ -3679,7 +3678,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 
 void ScreenSessionManager::UnregisterInHandlerSensorWithPowerOff(PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
+    TLOGI(WmsLogTag::DMS, "unsubscribe sensor when off");
     if (isMultiScreenCollaboration_) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
     } else {
@@ -3696,7 +3695,7 @@ void ScreenSessionManager::UnregisterInHandlerSensorWithPowerOff(PowerStateChang
             FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
         }
     } else {
-        TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
+        TLOGI(WmsLogTag::DMS, "not fold product, failed unregister posture.");
     }
 #endif
 }
@@ -6001,7 +6000,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
     config.useDma = isUseDma;
-    TLOGW(WmsLogTag::DMS, "take surface capture with dma=%{public}d", isUseDma);
+    TLOGW(WmsLogTag::DMS, "dma=%{public}d", isUseDma);
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         config.mainScreenRect = foldScreenController_->GetScreenSnapshotRect();
@@ -6327,7 +6326,7 @@ void ScreenSessionManager::NotifyPrivateSessionStateChanged(bool hasPrivate)
         TLOGD(WmsLogTag::DMS, "screen session state is not changed, return");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "PrivateSession status : %{public}u", hasPrivate);
+    TLOGI(WmsLogTag::DMS, "status : %{public}u", hasPrivate);
     screenPrivacyStates = hasPrivate;
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
     if (agents.empty()) {
