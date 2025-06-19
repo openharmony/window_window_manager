@@ -249,7 +249,7 @@ public:
     ShadowsInfo GetWindowShadows() const;
 
     /*
-     * Window Property
+     * Window Lifecycle
      */
     void SetUseControlStateToProperty(bool isUseControlState);
     bool GetUseControlStateFromProperty() const;
@@ -542,7 +542,7 @@ private:
     bool isExclusivelyHighlighted_ { true };
     
     /*
-     * Window Focus
+     * Window Lifecycle
      */ 
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;

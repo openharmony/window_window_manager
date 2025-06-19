@@ -975,18 +975,18 @@ void SessionStageProxy::NotifyAppUseControlStatus(bool isUseControl)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, ("WriteInterfaceToken failed");
         return;
     }
 
     if (!data.WriteBool(isUseControl)) {
-        WLOGFE("Write isUseControl failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isUseControl failed");
         return;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return;
     }
     int sendResult = remote->SendRequest(

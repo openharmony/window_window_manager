@@ -4809,6 +4809,7 @@ void WindowSessionImpl::NotifyAfterLifecyclePaused()
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
+    interactive_ = false;
     isInteractiveStateFlag_ = false;
     auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
