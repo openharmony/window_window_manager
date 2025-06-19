@@ -8016,9 +8016,17 @@ void SceneSessionManager::RegisterCallingWindowDisplayChangedNotifyManagerFunc(c
         TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
-    sceneSession->SetCallingWindowDspChangedNotifyManagerListener([this](int32_t persistentId, uint64_t screenId) {
-        NotifyCallingWindowDisplayChanged(persistentId, screenId);
-    });
+    wptr<SceneSessionManager> weakThis = this;
+    sceneSession->SetCallingWindowDspChangedNotifyManagerListener(
+        [weakThis](int32_t persistentId, uint64_t screenId) {
+            sptr<SceneSessionManager> sharedThis = weakThis.promote();
+            if (sharedThis != nullptr) {
+                sharedThis->NotifyCallingWindowDisplayChanged(persistentId, screenId);
+            } else {
+                TLOGW(WmsLogTag::DEFAULT, "SceneSessionManager already destroyed");
+            }
+        }
+    );
 }
 
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
@@ -11933,11 +11941,15 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     }
 
     uint64_t newScreenId = screenId;
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId) && !PcFoldScreenManager::GetInstance().HasSystemKeyboard())
-    {
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId) && 
+        !PcFoldScreenManager::GetInstance().HasSystemKeyboard()){
         newScreenId = sceneSession->GetClientDisplayId();
     }
-    NotifyCallingWindowDisplayChanged(persistentId, newScreenId);
+    auto res = NotifyCallingWindowDisplayChanged(persistentId, newScreenId);
+    if (res != WSError::WS_OK){        
+        TLOGE(WmsLogTag::DEFAULT, "notify calling window display change error!");
+        return res;
+    }
     return WSError::WS_OK;
 }
 
@@ -14004,8 +14016,7 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
     if (PcFoldScreenManager::GetInstance().IsHalfFolded(callingWindowInfo.displayId_) && 
-        !PcFoldScreenManager::GetInstance().HasSystemKeyboard())
-    {
+        !PcFoldScreenManager::GetInstance().HasSystemKeyboard()){
         callingWindowInfo.displayId_ = sceneSession->GetClientDisplayId();
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindowInfo: [id: %{public}d, pid: %{public}d, "
