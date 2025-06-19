@@ -3069,40 +3069,6 @@ WMError SceneSessionManagerProxy::IsFreeMultiWindow(bool& isFreeMultiWindow)
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_PC, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    bool result = false;
-    if (!reply.ReadBool(result)) {
-        TLOGE(WmsLogTag::WMS_PC, "Read isFreeMultiWindow failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    isFreeMultiWindow = result;
-    return static_cast<WMError>(ret);
-}
-
-WMError SceneSessionManagerProxy::IsFreeMultiWindow(bool& isFreeMultiWindow)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_PC, "Write interfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "Remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_PC, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_PC, "Read ret failed ret:%{public}d", ret);
         return WMError::WM_ERROR_IPC_FAILED;
     }

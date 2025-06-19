@@ -1859,21 +1859,6 @@ int SceneSessionManagerStub::HandleIsFreeMultiWindow(MessageParcel& data, Messag
     bool isFreeMultiWindow = false;
     WMError errCode = IsFreeMultiWindow(isFreeMultiWindow);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_PC, "Write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
-    if (!reply.WriteBool(isFreeMultiWindow)) {
-        TLOGE(WmsLogTag::WMS_PC, "Write isFreeMultiWindow fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
-{
-    bool isFreeMultiWindow = false;
-    WMError errCode = IsFreeMultiWindow(isFreeMultiWindow);
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PC, "Write errorCode fail.");
         return ERR_INVALID_DATA;
     }
