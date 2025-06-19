@@ -692,6 +692,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         if (session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
         }
+        // The callingId may change in WindowManager.
+        // Use scb's callingId to properly handle callingWindow raise/restore.
         sptr<SceneSession> callingSession = session->GetSceneSession(callingId);
         if (callingSession != nullptr) {
             callingSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo.beginRect,
