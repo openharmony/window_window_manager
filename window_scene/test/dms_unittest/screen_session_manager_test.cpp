@@ -6949,6 +6949,39 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
     DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
     EXPECT_EQ(DMError::DM_OK, ret);
 }
+
+/**
+ * @tc.name: GetDisplayHdrSnapshot
+ * @tc.desc: ScreenSesionManager screen shot
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHdrSnapshot, TestSize.Level1)
+{
+    DisplayId displayId(0);
+    DmErrorCode* errorCode = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result = { nullptr, nullptr };
+    std::vector<std::shared_ptr<Media::PixelMap>> pixvec = { nullptr, nullptr };
+    pixvec = ssm_->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
+    ASSERT_EQ(pixvec, result);
+}
+
+/**
+ * @tc.name: GetScreenHdrSnapshot001
+ * @tc.desc: GetScreenHdrSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenHdrSnapshot001, TestSize.Level1)
+{
+    bool isUseDma = false;
+    DisplayId validDisplayId = 999;
+    bool isCaptureFullOfScreen = false;
+    std::vector<NodeId> blackList = {};
+    std::vector<std::shared_ptr<Media::PixelMap>> result = ssm_->GetScreenHdrSnapshot(
+        validDisplayId, isUseDma, isCaptureFullOfScreen, blackList);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

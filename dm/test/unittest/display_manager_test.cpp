@@ -30,6 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
+using MockerManager = SingletonMocker<DisplayManager, MockDisplayManger>;
 class DmMockScreenshotListener : public DisplayManager::IScreenshotListener {
 public:
     void OnScreenshot(const ScreenshotInfo info) override {}
@@ -1863,6 +1864,188 @@ HWTEST_F(DisplayManagerTest, GetScreenshotreturnsnullptr, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnapshotFails
+ * @tc.desc: Test that GetScreenHdrshot returns a vector with two nullptrs when the snapshot fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnapshotFails, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayId validDisplayId = 1; // Assume 1 is a valid displayId
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    // Mock the behavior of DisplayManagerAdapter to return a vector with size != PIXMAP_VECTOR_SIZE
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDisplayHdrSnapshot(_, _, _, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result = displayManager.GetScreenHdrshot(
+        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo
+ * @tc.desc: Test that GetScreenHdrshot returns a vector with two nullptrs when snapshotSize is two.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayManagerAdapter displayManagerAdapter;
+    DisplayId validDisplayId = 1;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    // Mock the GetDisplayHdrSnapshot function to return a vector with size equal to 2
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDisplayHdrSnapshot(_, _, _, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        displayManager.GetScreenHdrshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshot_GetDisplayHdrSnapshot
+ * @tc.desc: Test that GetScreenHdrshot returns a vector when snapshotSize is two.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHdrSnapshot, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayManagerAdapter displayManagerAdapter;
+    DisplayId validDisplayId = 1; // Assume 1 is a valid displayId
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        displayManager.GetScreenHdrshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshot_GetDisplayHdrSnapshot001
+ * @tc.desc: Test that GetScreenHdrshot returns a vector when snapshotSize is two.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHdrSnapshot001, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayManagerAdapter displayManagerAdapter;
+    DisplayId validDisplayId = 1; // Assume 1 is a valid displayId
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        displayManager.GetScreenHdrshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshot_GetDisplayHdrSnapshot002
+ * @tc.desc: Test that GetScreenHdrshot returns a vector when snapshotSize is two.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHdrSnapshot002, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    DisplayManagerAdapter displayManagerAdapter;
+    DisplayId validDisplayId = 1; // Assume 1 is a valid displayId
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        displayManager.GetScreenHdrshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+    screenSessionManagerServiceProxyTmp;
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotwithConfigreturnsnullptrvec01
+ * @tc.desc: GetScreenHdrshotwithConfig returns nullptr fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec01, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    auto result = displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotwithConfigreturnsnullptrvec02
+ * @tc.desc: GetScreenHdrshotwithConfig returns nullptr fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec02, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    config.displayId_ = 1;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    auto result = displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotreturnsnullptrvec03
+ * @tc.desc: GetScreenHdrshot returns nullptr fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotreturnsnullptrvec03, TestSize.Level1)
+{
+    DisplayManager displayManager;
+    SnapShotConfig config;
+    config.displayId_ = 1;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+ 
+    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
+    EXPECT_CALL(m->Mock(), GetScreenHdrshot(_, _, _, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        displayManager.GetScreenHdrshotwithConfig(config, &errorCode, isUseDma);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+
+/**
  * @tc.name: InvalidimageRect
  * @tc.desc: Invalid imageRect fun
  * @tc.type: FUNC
@@ -2193,6 +2376,126 @@ HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenshotCaptureFailes, Tes
     auto result =
         DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenHdrshotWithOption_ShouldReturnNull_WhenDisplayIdInvalid
+ * @tc.desc: Test GetScreenHdrshotWithOption function when display is idInvalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_ShouldReturnNull_WhenDisplayIdInvalid, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = DISPLAY_ID_INVALID;
+    DmErrorCode errorCode;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotWithOption_ShouldReturnNull_WhenGetSnapshotFailed
+ * @tc.desc: Test GetScreenHdrshotWithOption function when GetDisplaySnapshotWithOption returns { nullptr, nullptr }.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_ShouldReturnNull_WhenGetSnapshotFailed, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = 1;
+    DmErrorCode errorCode;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, &errorCode);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: ShouldReturnNullptrWhenScreenHdrshotCaptureFailes
+ * @tc.desc: Test screenHdrshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenHdrshotCaptureFailes, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect;
+    Media::Size size;
+    int rotation = 0;
+    DmErrorCode errorCode;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: GetDisplayHdrSnapshotWithOption_whenerrorCodeisnullptr
+ * @tc.desc: Test screenHdrshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetDisplayHdrSnapshotWithOption_whenerrorCodeisnullptr, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = 1;
+    DmErrorCode *errorCode = nullptr;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, errorCode);
+    EXPECT_EQ(result, pixRVec);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotWithOption_WhenScreenHdrshotWithOptionFails
+ * @tc.desc: Test that the function returns a vector with two nullptrs when displayId is valid but snapshot fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_WhenScreenHdrshotWithOptionFails, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = 1;
+    Media::Rect rect;
+    Media::Size size;
+    int rotation = 0;
+    DmErrorCode errorCode;
+ 
+    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
+ 
+    EXPECT_CALL(m->Mock(), GetDisplayHdrSnapshotWithOption(_, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, rect, size, rotation, &errorCode);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
+}
+ 
+/**
+ * @tc.name: GetScreenHdrshotWithOption_WhenDisplayIdIsValidButSnapshotFails
+ * @tc.desc: Test that the function returns a vector with two nullptrs when displayId is valid but snapshot fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHdrshotWithOption_WhenDisplayIdIsValidButSnapshotFails, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = 1;
+    DmErrorCode errorCode;
+ 
+    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
+ 
+    EXPECT_CALL(m->Mock(), GetDisplayHdrSnapshotWithOption(_, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHdrshotWithOption(captureOption, &errorCode);
+ 
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], nullptr);
+    EXPECT_EQ(result[1], nullptr);
 }
 
 /**
