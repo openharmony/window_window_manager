@@ -14033,7 +14033,7 @@ WSError SceneSessionManager::NotifyCallingWindowDisplayChanged(int32_t persisten
         }
     }
 
-    return WSError::WM_OK;
+    return WSError::WS_OK;
 }
 
 WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
