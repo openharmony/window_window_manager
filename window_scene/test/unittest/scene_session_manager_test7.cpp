@@ -17,6 +17,7 @@
 
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -71,6 +72,7 @@ void SceneSessionManagerTest7::SetUp()
 
 void SceneSessionManagerTest7::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -293,6 +295,7 @@ HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator, TestSize
     int32_t type = 0;
     sptr<AAFwk::IAbilityManagerCollaborator> impl = nullptr;
     ASSERT_NE(nullptr, ssm_);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, impl);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
 }

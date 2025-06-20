@@ -1,0 +1,78 @@
+/*
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef OHOS_FLOATING_BALL_TEMPALTE_INFO_H
+#define OHOS_FLOATING_BALL_TEMPALTE_INFO_H
+
+#include <pixel_map.h>
+
+#include "wm_common.h"
+#include "floating_ball_template_base_info.h"
+
+namespace OHOS::Rosen {
+class FloatingBallTemplateInfo : public FloatingBallTemplateBaseInfo,
+                                 public Parcelable {
+public:
+    FloatingBallTemplateInfo() = default;
+    FloatingBallTemplateInfo(const uint32_t& templateType, const std::string& title, const std::string& content,
+        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(templateType, title, content),
+        icon_(icon) {};
+    FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
+        baseInfo.title_, baseInfo.content_), icon_(icon) {};
+    ~FloatingBallTemplateInfo() override = default;
+
+    std::shared_ptr<Media::PixelMap> icon_ {};
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) || !parcel.WriteString(content_)) {
+            return false;
+        }
+        bool hasIcon = icon_ ? true : false;
+        if (!parcel.WriteBool(hasIcon)) {
+            return false;
+        }
+        if (hasIcon && !parcel.WriteParcelable(icon_.get())) {
+            return false;
+        }
+        return true;
+    }
+
+    static FloatingBallTemplateInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto* fbTemplateInfo = new FloatingBallTemplateInfo();
+        if (!parcel.ReadUint32(fbTemplateInfo->template_) || !parcel.ReadString(fbTemplateInfo->title_) ||
+            !parcel.ReadString(fbTemplateInfo->content_)) {
+            delete fbTemplateInfo;
+            return nullptr;
+        }
+        bool hasIcon = false;
+        if (!parcel.ReadBool(hasIcon)) {
+            delete fbTemplateInfo;
+            return nullptr;
+        }
+        if (hasIcon) {
+            fbTemplateInfo->icon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+            if (!fbTemplateInfo->icon_) {
+                delete fbTemplateInfo;
+                return nullptr;
+            }
+        }
+        return fbTemplateInfo;
+    }
+};
+} // namespace OHOS::Rosen
+#endif // OHOS_FLOATING_BALL_TEMPALTE_INFO_H

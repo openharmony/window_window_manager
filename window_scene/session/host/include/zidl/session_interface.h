@@ -509,6 +509,38 @@ public:
      * @return WSError::WS_OK means set success, otherwise failed.
      */
     virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
+
+    /**
+     * @brief update the floating-ball window instance (w,h,r).
+     *
+     * @param fbTemplateInfo the template info of the floating-ball.
+     */
+    virtual WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+    {
+        return WSError::WS_OK;
+    }
+ 
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId) {return WMError::WM_OK;}
+ 
+    /**
+     * @brief Close flating ball window while stopFb is called.
+     *
+     * Notify system that flating ball window is stopping and execute animation.
+     */
+    virtual void NotifyFloatingBallPrepareClose() {}
+ 
+    /**
+     * @brief Notify prepare to close window
+     */
+    virtual WSError StopFloatingBall()
+    {
+        return WSError::WS_OK;
+    }
+ 
+    virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WMError::WM_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

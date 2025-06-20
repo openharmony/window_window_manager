@@ -350,5 +350,13 @@ WMError WindowAdapterLite::ListWindowInfo(const WindowInfoOption& windowInfoOpti
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->ListWindowInfo(windowInfoOption, infos);
 }
+
+WMError WindowAdapterLite::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return static_cast<WMError>(wmsProxy->SendPointerEventForHover(pointerEvent));
+}
 } // namespace Rosen
 } // namespace OHOS

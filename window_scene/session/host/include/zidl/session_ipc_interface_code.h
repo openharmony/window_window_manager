@@ -143,6 +143,12 @@ enum class SessionInterfaceCode {
 
     // window animation
     TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN,
+
+    // Floating Ball
+    TRANS_ID_UPDATE_FLOATING_BALL,
+    TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE,
+    TRANS_ID_START_FLOATING_BALL_UI_ABILITY,
+    TRANS_ID_GET_FLOATING_BALL_WINDOW_ID,
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -354,7 +354,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 {
     if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
-        type == WindowType::WINDOW_TYPE_TOAST) {
+        type == WindowType::WINDOW_TYPE_TOAST || WindowHelper::IsFbWindow(type)) {
         property_->SetParentPersistentId(GetFloatingWindowParentId());
         TLOGI(WmsLogTag::WMS_SYSTEM, "parentId: %{public}d, type: %{public}d",
             property_->GetParentPersistentId(), type);
@@ -1535,7 +1535,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with effect option: %{public}s", effectOption.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Effect option: %{public}s", effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
             static_cast<uint32_t>(effectOption.viewMode_));
@@ -1943,12 +1943,9 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
     }
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
-        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
-        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.posX_, requestRect.posY_,
-        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
-        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
-        newRect.width_, newRect.height_);
+        "%{public}s, windowRect: %{public}s, newRect: %{public}s",
+        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.ToString().c_str(),
+        windowRect.ToString().c_str(), newRect.ToString().c_str());
 
     property_->SetRequestRect(newRect);
 
@@ -1981,12 +1978,9 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     const auto& requestRect = GetRequestRect();
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
-        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
-        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.posX_, requestRect.posY_,
-        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
-        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
-        newRect.width_, newRect.height_);
+        "%{public}s, windowRect: %{public}s, newRect: %{public}s",
+        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.ToString().c_str(),
+        windowRect.ToString().c_str(), newRect.ToString().c_str());
 
     property_->SetRequestRect(newRect);
 
@@ -2213,12 +2207,9 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
 
     Rect newRect = { requestRect.posX_, requestRect.posY_, width, height }; // must keep w/h
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
-        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
-        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.posX_, requestRect.posY_,
-        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
-        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
-        newRect.width_, newRect.height_);
+        "%{public}s, windowRect: %{public}s, newRect: %{public}s",
+        property_->GetPersistentId(), state_, GetType(), GetWindowMode(), requestRect.ToString().c_str(),
+        windowRect.ToString().c_str(), newRect.ToString().c_str());
 
     property_->SetRequestRect(newRect);
     property_->SetRectAnimationConfig(rectAnimationConfig);
@@ -2280,9 +2271,9 @@ WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameR
     return static_cast<WMError>(hostSession->SetFrameRectForPartialZoomIn(frameRect));
 }
 
-WMError WindowSceneSessionImpl::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError WindowSceneSessionImpl::UpdateWindowModeForUITest(int32_t updateMode)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", windowId, updateMode);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, updateMode: %{public}d", GetPersistentId(), updateMode);
     switch (updateMode) {
         case static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN):
             return Maximize();
@@ -3796,7 +3787,7 @@ void WindowSceneSessionImpl::PerformBack()
         if (abilityContext != nullptr) {
             abilityContext->OnBackPressedCallBack(needMoveToBackground);
         }
-        WLOGFI("back to host, needMoveToBackground %{public}d", needMoveToBackground);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}d", needMoveToBackground);
         hostSession->RequestSessionBack(needMoveToBackground);
     }
 }
@@ -4704,10 +4695,6 @@ WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, permission denied", GetPersistentId());
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -4960,7 +4947,7 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 
 WMError WindowSceneSessionImpl::ChangeKeyboardEffectOption(KeyboardEffectOption effectOption)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard effect option to %{public}s",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "effect option: %{public}s",
         effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
         effectOption.flowLightMode_ >= KeyboardFlowLightMode::END ||
@@ -4972,7 +4959,7 @@ WMError WindowSceneSessionImpl::ChangeKeyboardEffectOption(KeyboardEffectOption 
 
     auto lastOption = property_->GetKeyboardEffectOption();
     if (effectOption == lastOption) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "EffectOption is same. last option: %{public}s", lastOption.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Is same option: %{public}s", lastOption.ToString().c_str());
         return WMError::WM_DO_NOTHING;
     }
 
@@ -5709,7 +5696,7 @@ WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(
 
 void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "isKeyboardPanelShown: %{public}d, gravity: %{public}d"
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShown: %{public}d, gravity: %{public}d"
         ", rect_: [%{public}d, %{public}d, %{public}d, %{public}d]", keyboardPanelInfo.isShowing_,
         keyboardPanelInfo.gravity_, keyboardPanelInfo.rect_.posX_, keyboardPanelInfo.rect_.posY_,
         keyboardPanelInfo.rect_.width_, keyboardPanelInfo.rect_.height_);

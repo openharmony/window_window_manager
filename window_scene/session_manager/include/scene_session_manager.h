@@ -310,6 +310,7 @@ public:
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError AddFocusGroup(DisplayId displayId);
     WSError RemoveFocusGroup(DisplayId displayId);
+    WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -367,6 +368,7 @@ public:
      * PC Window
      */
     WMError IsPcWindow(bool& isPcWindow) override;
+    WMError IsFreeMultiWindow(bool& isFreeMultiWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled,
@@ -565,7 +567,7 @@ public:
     void ConfigSupportFollowRelativePositionToParent();
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override;
     
     /*
      * Window Property
@@ -688,7 +690,7 @@ public:
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
-    WSError NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
+    void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
@@ -740,7 +742,6 @@ public:
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
-    bool IsSyncLoadStartingWindow();
 
     /*
      * Window Animation
@@ -826,6 +827,7 @@ private:
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property) REQUIRES(SCENE_GUARD);
+    void InitFbWindow(sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
@@ -1517,8 +1519,6 @@ private:
      * Window Pattern
      */
     std::atomic<bool> delayRemoveSnapshot_ = false;
-    void InitWindowPattern();
-    void InitStartingWindow();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
@@ -1539,7 +1539,6 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
-    bool syncLoadStartingWindow_ = false;
 };
 } // namespace OHOS::Rosen
 

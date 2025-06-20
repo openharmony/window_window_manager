@@ -76,7 +76,7 @@ public:
     MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
-    MOCK_METHOD2(UpdateWindowLayoutById, WMError(int32_t windowId, int32_t updateMode));
+    MOCK_METHOD2(UpdateWindowModeByIdForUITest, WMError(int32_t windowId, int32_t updateMode));
     MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
@@ -88,6 +88,7 @@ public:
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
+    MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
 };
 } // namespace Rosen
 } // namespace OHOS

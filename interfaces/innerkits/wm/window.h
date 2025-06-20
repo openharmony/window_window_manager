@@ -25,6 +25,7 @@
 #include "window_option.h"
 #include "occupied_area_change_info.h"
 #include "data_handler_interface.h"
+#include "floating_ball_template_base_info.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -898,6 +899,20 @@ public:
      */
     static sptr<Window> CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
         const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode = DefaultCreateErrCode);
+
+    /**
+     * @brief create fb window with session
+     *
+     * @param option window propertion
+     * @param fbTemplateBaseInfo baseInfo of fb window
+     * @param icon icon of fb window
+     * @param context ability context
+     * @param errCode error code of create fb window
+     * @return sptr<Window> If create fb window success, return window instance; Otherwise, return nullptr
+     */
+    static sptr<Window> CreateFb(sptr<WindowOption>& option, const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+        WMError& errCode);
 
     /**
      * @brief find window by windowName
@@ -2720,7 +2735,7 @@ public:
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
      */
-    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const;
 
     /**
      * @brief Judge whether SceneBoard is enabled.
@@ -3715,7 +3730,7 @@ public:
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
-    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+    virtual bool GetFreeMultiWindowModeEnabledState();
 
     /**
      * @brief Get the window status of current window.
@@ -4355,6 +4370,40 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
+
+    /**
+     * @brief update the floating ball window instance (w,h,r).
+     *
+     * @param fbTemplateInfo the tempalte info of the floating-ball.
+     * @param icon the icon of the floating-ball.
+     */
+    virtual void UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon) {}
+    
+    /**
+     * @brief Notify prepare to close window
+     */
+    virtual void NotifyPrepareCloseFloatingBall() {}
+ 
+    /**
+     * @brief restore floating ball ability (w,h,r).
+     *
+     * @param want the want of the ability.
+     */
+    virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief get windowId of floating-ball
+     *
+     * @param windowId the windowId of floating-ball.
+     */
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
