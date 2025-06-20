@@ -101,6 +101,11 @@ public:
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
+    WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError GetFloatingBallWindowId(uint32_t& windowId) override;
+    void NotifyFloatingBallPrepareClose() override;
+
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) override;

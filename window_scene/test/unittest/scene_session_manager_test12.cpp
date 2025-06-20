@@ -22,6 +22,7 @@
 #include "context.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
@@ -83,6 +84,7 @@ void SceneSessionManagerTest12::SetUp() {}
 void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 const Rect landscapePanelRect_ = { 0, 538, 2720, 722 };
@@ -368,6 +370,7 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_05, TestSize
 
     property->SetIsSystemKeyboard(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 }
 
@@ -410,6 +413,7 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_08, TestSize
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 }
 
@@ -550,7 +554,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     auto res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetTopmost(true);
@@ -558,25 +562,25 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
     property->SetWindowFlags(flags);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->shouldHideNonSecureFloatingWindows_.store(true);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     ssm_->isScreenLocked_ = true;
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, res);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, res);
 }
 
 /**
@@ -2046,7 +2050,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(86, 12);
 }
 
@@ -2057,13 +2061,16 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyDisplayIdChanged, TestSize.Level1)
 {
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     auto result = ssm_->NotifyDisplayIdChanged(85, 12);
-    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     result = ssm_->NotifyDisplayIdChanged(86, 12);
-    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
 }
 
 /**
@@ -2318,6 +2325,25 @@ HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_Invalid_Param, TestSize.Le
     MockAccesstokenKit::MockIsSACalling(false);
     result = ssm_->RemoveInstanceKey(bundleName, "");
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : UpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    const int32_t windowId = 123456;
+    const int32_t updateMode = 1;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

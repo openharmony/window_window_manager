@@ -34,6 +34,7 @@
 #include "vsync_station.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -53,6 +54,9 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
+using NotifyStopFloatingBallFunc = std::function<void()>;
+using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
@@ -394,7 +398,7 @@ public:
     void NotifySessionTouchableChange(bool touchable);
     void NotifyClick(bool requestFocus = true, bool isClick = true);
     bool GetStateFromManager(const ManagerState key);
-    virtual void PresentFoucusIfNeed(int32_t pointerAcrion);
+    virtual void PresentFocusIfNeed(int32_t pointerAcrion, int32_t sourceType = 0);
     virtual WSError UpdateWindowMode(WindowMode mode);
     WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
@@ -459,6 +463,8 @@ public:
     virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
     WSError GetIsHighlighted(bool& isHighlighted) override;
+    WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false);
 
     /*
      * Multi Window
@@ -844,6 +850,9 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
+    NotifyUpdateFloatingBallFunc updateFlotingBallFunc_;
+    NotifyStopFloatingBallFunc stopFlotingBallFunc_;
+    NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
@@ -936,7 +945,7 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    WSError HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise = false);
+    WSError HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise = false);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);

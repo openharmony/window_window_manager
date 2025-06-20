@@ -212,37 +212,37 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, TestSize.Level1)
     auto ret = scbSystemSession_->SetFocusable(false);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, true);
 
     scbSystemSession_->isFocused_ = false;
     ret = scbSystemSession_->SetFocusable(false);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, false);
 
     scbSystemSession_->isFocused_ = true;
     ret = scbSystemSession_->SetFocusable(true);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, true);
 }
 
 /**
- * @tc.name: PresentFoucusIfNeed
- * @tc.desc: check func PresentFoucusIfNeed
+ * @tc.name: PresentFocusIfNeed
+ * @tc.desc: check func PresentFocusIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, TestSize.Level1)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfNeed, TestSize.Level1)
 {
     int32_t pointerAction = 8;
-    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
     ASSERT_EQ(pointerAction, 8);
 
     pointerAction = 100;
-    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
     ASSERT_EQ(pointerAction, 100);
 }
 

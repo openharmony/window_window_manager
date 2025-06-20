@@ -113,6 +113,19 @@ HWTEST_F(WindowAdapterLiteTest, ListWindowInfo01, Function | SmallTest | Level2)
     auto err = WindowAdapterLite.ListWindowInfo(windowInfoOption, infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
 }
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, SendPointerEventForHover, Function | SmallTest | Level2)
+{
+    std::shared_ptr<WindowAdapterLite> windowAdapterLite_ = std::make_shared<WindowAdapterLite>();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    auto err = windowAdapterLite_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

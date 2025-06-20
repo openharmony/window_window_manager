@@ -1540,6 +1540,26 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
     auto result = property->GetIsAtomicService();
     ASSERT_EQ(result, isAtomicService);
 }
+
+/**
+ * @tc.name: UnmarshallingFbTemplateInfoTest
+ * @tc.desc: UnmarshallingFbTemplateInfoTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+
+    Parcel parcel;
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content"}, nullptr};
+    property->UnmarshallingFbTemplateInfo(parcel, property);
+    ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+
+    parcel.WriteParcelable(&fbTemplateInfo);
+    property->UnmarshallingFbTemplateInfo(parcel, property);
+    ASSERT_EQ(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

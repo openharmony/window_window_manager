@@ -42,6 +42,7 @@
 #include "window_option.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -340,6 +341,14 @@ public:
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
+    void UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon) override;
+    void NotifyPrepareCloseFloatingBall() override;
+    WSError SendFbActionEvent(const std::string& action) override;
+    WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
+    
+    WMError GetFloatingBallWindowId(uint32_t& windowId) override;
+
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -423,7 +432,7 @@ public:
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override { return WMError::WM_OK; }
+    WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     /*
      * Free Multi Window
      */
