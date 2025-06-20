@@ -204,6 +204,51 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayGroupId
+ * @tc.desc: GetDisplayGroupId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetDisplayGroupId, TestSize.Level1)
+{
+    DisplayId displayGroupId = ssm_->GetDisplayGroupId(DEFAULT_DISPLAY_ID);
+    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
+    displayGroupId = ssm_->GetDisplayGroupId(1);
+    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
+}
+
+/**
+ * @tc.name: GetDisplayGroupId01
+ * @tc.desc: GetDisplayGroupId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetDisplayGroupId01, TestSize.Level1)
+{
+    ssm_->AddFocusGroup(1);
+    DisplayId displayGroupId = ssm_->GetDisplayGroupId(1);
+    EXPECT_EQ(displayGroupId, 1);
+    displayGroupId = ssm_->GetDisplayGroupId(2);
+    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
+    ssm_->RemoveFocusGroup(1);
+}
+
+/**
+ * @tc.name: GetAllFocusedSessionList
+ * @tc.desc: GetAllFocusedSessionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetAllFocusedSessionList, TestSize.Level1)
+{
+    auto focusInfoMapArray = ssm_->GetAllFocusedSessionList();
+    EXPECT_EQ(focusInfoMapArray.size(), 1);
+    ssm_->AddFocusGroup(1);
+    ssm_->AddFocusGroup(2);
+    focusInfoMapArray = ssm_->GetAllFocusedSessionList();
+    EXPECT_EQ(focusInfoMapArray.size(), 3);
+    ssm_->RemoveFocusGroup(1);
+    ssm_->RemoveFocusGroup(2);
+}
+
+/**
  * @tc.name: RequestKeyboardPanelSession
  * @tc.desc: test RequestKeyboardPanelSession
  * @tc.type: FUNC
