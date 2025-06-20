@@ -4435,7 +4435,7 @@ bool SceneSessionManager::IsSameDisplayGroupId(const sptr<SceneSession>& session
 {
     DisplayId displayGroupId = 0;
     if (GetDisplayGroupIdFromSceneSession(session, displayGroupId) != WSError::WS_OK) {
-        TLOGD(WmsLogTag::WMS_EVENT, "session is null");
+        TLOGD(WmsLogTag::WMS_EVENT, "session is null.");
         return false;
     }
     return displayGroupId == touchDisplayGroupId;
