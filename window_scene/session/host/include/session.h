@@ -145,6 +145,11 @@ struct DetectTaskInfo {
     DetectTaskState taskState = DetectTaskState::NO_TASK;
 };
 
+struct ControlInfo {
+    bool isNeedControl;
+    bool isControlRecentOnly;
+};
+
 const std::string ATTACH_EVENT_NAME { "wms::ReportWindowTimeout_Attach" };
 const std::string DETACH_EVENT_NAME { "wms::ReportWindowTimeout_Detach" };
 
@@ -197,6 +202,7 @@ public:
      */
     virtual bool GetIsUseControlSession() const { return false; }
     virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    virtual void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) {}
 
     /*
      * Window Recover
