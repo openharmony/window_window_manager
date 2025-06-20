@@ -921,14 +921,14 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, TestSize.Level1)
 }
 
 /**
- * @tc.name: Interactive
- * @tc.desc: Interactive
+ * @tc.name: Resume
+ * @tc.desc: Resume
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, Interactive, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, Resume, TestSize.Level1)
 {
-    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
-    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
+    sptr<MockWindowStageLifeCycleListener> mockListener = sptr<MockWindowStageLifeCycleListener>::MakeSptr();
+    sptr<IWindowStageLifeCycle> listener = static_cast<sptr<IWindowStageLifeCycle>>(mockListener);
 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Test");
@@ -940,16 +940,66 @@ HWTEST_F(WindowSceneSessionImplTest5, Interactive, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->RegisterLifeCycleListener(listener));
+    EXPECT_EQ(WMError::WM_OK, window->RegisterWindowStageLifeCycleListener(listener));
     window->isDidForeground_ = false;
     window->isColdStart_ = true;
     window->state_ = WindowState::STATE_SHOWN;
-
-    EXPECT_CALL(*mockListener, AfterInteractive()).Times(1);
-    window->Interactive();
+    EXPECT_CALL(*mockListener, AfterLifecycleResumed()).Times(1);
+    window->Resume();
     EXPECT_EQ(window->isDidForeground_, true);
     EXPECT_EQ(window->isColdStart_, false);
+
+    EXPECT_CALL(*mockListener, AfterLifecyclePaused()).Times(1);
+    window->Pause();
+    EXPECT_EQ(window->isDidForeground_, true);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: NotifyDialogStateChange
+ * @tc.desc: NotifyDialogStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyDialogStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyDialogStateChange");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    auto ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    windowSceneSessionImpl->state_ = WindowState::STATE_HIDDEN;
+    windowSceneSessionImpl->requestState_ = WindowState::STATE_SHOWN;
+    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyFreeMultiWindowModeResume
+ * @tc.desc: NotifyFreeMultiWindowModeResume
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyFreeMultiWindowModeResume, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyFreeMultiWindowModeResume");
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> multiWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    multiWindow->hostSession_ = session;
+    multiWindow->property_->SetPersistentId(1);
+    multiWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(true, multiWindow->IsPcOrFreeMultiWindowCapabilityEnabled());
+    multiWindow->Resume();
+    EXPECT_EQ(false, multiWindow->isColdStart_);
+    multiWindow->NotifyFreeMultiWindowModeResume();
+    EXPECT_EQ(true, multiWindow->isDidForeground_);
+    EXPECT_EQ(WMError::WM_OK, multiWindow->Destroy(true));
 }
 
 /**

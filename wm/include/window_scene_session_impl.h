@@ -307,7 +307,8 @@ public:
     /*
      * Window LifeCycle
      */
-    void Interactive() override;
+    void Resume() override;
+    void Pause() override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
@@ -497,7 +498,7 @@ private:
     /*
      * Window Lifecycle
      */
-    void NotifyFreeMultiWindowModeInteractive();
+    void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 

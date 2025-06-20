@@ -220,8 +220,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
-            return HandleNotifyNonInteractiveStatus(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAUSED_STATUS):
+            return HandleNotifyPausedStatus();
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_USE_CONTROL_STATUS):
+            return HandleNotifyAppUseControlStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
@@ -611,10 +613,18 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "called");
-    NotifyNonInteractiveStatus();
+    bool useControlState = data.ReadBool();
+    NotifyAppUseControlStatus(useControlState);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPausedStatus()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "called");
+    NotifyLifecyclePausedStatus();
     return ERR_NONE;
 }
 

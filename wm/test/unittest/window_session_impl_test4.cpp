@@ -1137,31 +1137,6 @@ HWTEST_F(WindowSessionImplTest4, Notify03, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyAfterInteractive
- * @tc.desc: NotifyCloseExistPipWindow NotifyAfterInteractive NotifyAfterNonInteractive
- * @tc.type: FUNC
- */
- HWTEST_F(WindowSessionImplTest4, NotifyAfterInteractive, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyAfterInteractive");
-    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    EXPECT_EQ(WMError::WM_OK, windowSession->Create(nullptr, session));
-
-    windowSession->NotifyAfterInteractive();
-    windowSession->NotifyAfterNonInteractive();
-    WSError res = windowSession->NotifyCloseExistPipWindow();
-    EXPECT_EQ(res, WSError::WS_OK);
-    AAFwk::WantParams wantParams;
-    WSError result = windowSession->NotifyTransferComponentData(wantParams);
-    EXPECT_EQ(result, WSError::WS_OK);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSession->Destroy());
-}
-
-/**
  * @tc.name: Filter
  * @tc.desc: Filter
  * @tc.type: FUNC

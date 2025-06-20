@@ -149,6 +149,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
+            property->SetUseControlStateToProperty(session->isAppUseControl_);
         }
         session->RetrieveStatusBarDefaultVisibility();
         auto ret = LOCK_GUARD_EXPR(SCENE_GUARD, session->Session::ConnectInner(
@@ -620,6 +621,11 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
+        if (isMainWindow) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
+            session->UpdateLifecyclePausedInner();
+        }
         if (isFromClient) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
                 where, session->GetPersistentId());
@@ -627,7 +633,6 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             return WSError::WS_OK;
         }
         auto state = session->GetSessionState();
-        auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
         if ((session->needSnapshot_ || (state == SessionState::STATE_ACTIVE && isMainWindow)) &&
             isSaveSnapshot && needSaveSnapshot) {
             session->SaveSnapshot(false);
@@ -1191,12 +1196,17 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
         if (allAppUseControlMap.find(key) == allAppUseControlMap.end()) {
             return;
         }
+        bool appUseControlResult = false;
         for (const auto& [type, info] : allAppUseControlMap[key]) {
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "notify appUseControl when register, key: %{public}s, control: %{public}d, controlRecent: %{public}d",
                 key.c_str(), info.isNeedControl, info.isControlRecentOnly);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
+            if (info.isNeedControl && !info.isControlRecentOnly) {
+                appUseControlResult = true;
+            }
         }
+        session->isAppUseControl_ = appUseControlResult;
     }, __func__);
 }
 
@@ -1210,7 +1220,21 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         }
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
+            bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
+            session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
+            if (session->sessionStage_ == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+                return;
+            }
+            session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
+            if (isAppUseControl) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "begin call pause");
+                session->NotifyForegroundInteractiveStatus(false);
+            } else {
+                TLOGNI(WmsLogTag::WMS_LIFE, "begin call resume");
+                session->NotifyForegroundInteractiveStatus(true);
+            }
         }
     }, __func__);
 }
@@ -7695,7 +7719,7 @@ void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
     }
 }
 
-void SceneSession::UpdateNonInteractiveInner()
+void SceneSession::UpdateLifecyclePausedInner()
 {
     if (!sessionStage_) {
         return;
@@ -7703,7 +7727,7 @@ void SceneSession::UpdateNonInteractiveInner()
     const auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
     if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        sessionStage_->NotifyNonInteractiveStatus();
+        sessionStage_->NotifyLifecyclePausedStatus();
     }
 }
 

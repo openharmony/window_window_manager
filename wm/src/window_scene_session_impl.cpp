@@ -1518,7 +1518,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
         NotifyAfterDidForeground(reason);
-        NotifyFreeMultiWindowModeInteractive();
+        NotifyFreeMultiWindowModeResume();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1555,23 +1555,30 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
     return Show();
 }
 
-void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
+void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrFreeMultiWindowCapabilityEnabled(),
         isColdStart_);
     if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
-        NotifyAfterInteractive();
+        NotifyAfterLifecycleResumed();
     }
 }
 
-void WindowSceneSessionImpl::Interactive()
+void WindowSceneSessionImpl::Resume()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d",
         isColdStart_, isDidForeground_);
     isDidForeground_ = true;
     isColdStart_ = false;
-    NotifyAfterInteractive();
+    NotifyAfterLifecycleResumed();
+}
+
+void WindowSceneSessionImpl::Pause()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d", isColdStart_);
+    isColdStart_ = false;
+    NotifyAfterLifecyclePaused();
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)

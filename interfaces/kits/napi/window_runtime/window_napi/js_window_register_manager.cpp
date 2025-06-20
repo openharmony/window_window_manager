@@ -67,6 +67,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
     {WINDOW_STAGE_EVENT_CB, RegisterListenerType::WINDOW_STAGE_EVENT_CB},
     {WINDOW_STAGE_CLOSE_CB, RegisterListenerType::WINDOW_STAGE_CLOSE_CB},
+    {WINDOW_STAGE_LIFECYCLE_EVENT_CB, RegisterListenerType::WINDOW_STAGE_LIFECYCLE_EVENT_CB},
 };
 
 const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_CODE_MAP {
@@ -153,6 +154,23 @@ WmErrorCode JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindow
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowStageLifeCycleEventRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStageLifeCycle> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStageLifeCycleListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStageLifeCycleListener(thisListener));
     }
     return ret;
 }
@@ -625,6 +643,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessLifeCycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
             case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
                 return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            case RegisterListenerType::WINDOW_STAGE_LIFECYCLE_EVENT_CB:
+                return ProcessWindowStageLifeCycleEventRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             default:
                 TLOGE(WmsLogTag::DEFAULT, "RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));

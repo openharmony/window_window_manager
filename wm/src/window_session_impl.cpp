@@ -125,6 +125,7 @@ Ace::ViewportConfig FillViewportConfig(
 
 std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> WindowSessionImpl::systemBarPropertyListeners_;
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
+std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> WindowSessionImpl::windowStageLifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::displayMoveListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowCrossAxisListener>>> WindowSessionImpl::windowCrossAxisListeners_;
@@ -164,6 +165,7 @@ std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessi
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
+std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowCrossAxisListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -1569,38 +1571,43 @@ bool WindowSessionImpl::IsNotifyInteractiveDuplicative(bool interactive)
 
 void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
-    if (IsWindowSessionInvalid()) {
+    TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d, state: %{public}d", interactive, state_);
+    if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
+    bool useControlState = property_->GetUseControlStateFromProperty();
+    if (useControlState && interactive) {
+        TLOGI(WmsLogTag::WMS_LIFE, "app is in control state, no need notify new resume");
+        NotifyAfterResumed();
+        return;
+    }
+
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (interactive) {
-        // RESUMED and INTERACTIVE are out of order
+        NotifyAfterLifecycleResumed();
         NotifyAfterResumed();
-        if (state_ != WindowState::STATE_SHOWN || !isDidForeground_) {
-            TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d, isDidForeground: %{public}d", state_, isDidForeground_);
-            return;
-        }
-        NotifyAfterInteractive();
     } else {
         NotifyAfterPaused();
-        NotifyAfterNonInteractive();
+        NotifyAfterLifecyclePaused();
     }
 }
 
-void WindowSessionImpl::NotifyNonInteractiveStatus()
+void WindowSessionImpl::NotifyAppUseControlStatus(bool isUseControl)
+{
+    std::lock_guard<std::mutex> lock(appUseControlMutex_);
+    isAppUseControl_ = isUseControl;
+    property_->SetUseControlStateToProperty(isUseControl);
+}
+
+void WindowSessionImpl::NotifyLifecyclePausedStatus()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    if (state_ != WindowState::STATE_SHOWN) {
-        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d is not shown", state_);
-        return;
-    }
-    NotifyAfterNonInteractive();
+    NotifyAfterLifecyclePaused();
 }
 
 WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
@@ -2880,6 +2887,20 @@ WMError WindowSessionImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle
     return RegisterListener(lifecycleListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+    return RegisterListener(windowStageLifecycleListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+    return UnregisterListener(windowStageLifecycleListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
     WLOGFD("in");
@@ -3870,6 +3891,16 @@ EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSes
 }
 
 template<typename T>
+EnableIfSame<T, IWindowStageLifeCycle, std::vector<sptr<IWindowStageLifeCycle>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowStageLifeCycle>> windowStageLifecycleListeners;
+    for (auto& listener : windowStageLifecycleListeners_[GetPersistentId()]) {
+        windowStageLifecycleListeners.push_back(listener);
+    }
+    return windowStageLifecycleListeners;
+}
+
+template<typename T>
 EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
@@ -4241,6 +4272,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(windowRotationChangeListenerMutex_);
         ClearUselessListeners(windowRotationChangeListeners_, persistentId);
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+        ClearUselessListeners(windowStageLifecycleListeners_, persistentId);
+    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
@@ -4451,9 +4486,12 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
 void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        NotifyAfterLifecycleForeground();
+        {
+            std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        }
     }
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
@@ -4518,9 +4556,12 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
-        std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
-        auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+        {
+            std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+            auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+        }
+        NotifyAfterLifecycleBackground();
     }
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
@@ -4728,30 +4769,58 @@ void WindowSessionImpl::NotifyAfterPaused()
     CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
 }
 
-void WindowSessionImpl::NotifyAfterInteractive()
+void WindowSessionImpl::NotifyAfterLifecycleForeground()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterLifecycleForeground, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyAfterLifecycleBackground()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+    auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterLifecycleBackground, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyAfterLifecycleResumed()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
+    bool useControlState = property_->GetUseControlStateFromProperty();
+    if (useControlState) {
+        auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
+        isInteractiveStateFlag_ = false;
+        interactive_ = false;
+        return;
+    }
+
     if (isInteractiveStateFlag_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in interactive status");
         return;
     }
+    if (state_ != WindowState::STATE_SHOWN || !isDidForeground_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d, isDidForeground: %{public}d", state_, isDidForeground_);
+        return;
+    }
     isInteractiveStateFlag_ = true;
-    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterInteractive, lifecycleListeners);
+    auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterLifecycleResumed, lifecycleListeners);
 }
 
-void WindowSessionImpl::NotifyAfterNonInteractive()
+void WindowSessionImpl::NotifyAfterLifecyclePaused()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     if (!isInteractiveStateFlag_) {
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
+    interactive_ = false;
     isInteractiveStateFlag_ = false;
-    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterNonInteractive, lifecycleListeners);
+    auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
 }
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)
