@@ -2245,9 +2245,6 @@ bool SceneSession::CheckGetSystemWindowAvoidAreaAvailable()
         static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW)) {
         return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u "
-        "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
-        GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
     return false;
 }
 
