@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SLEEP_TIME_US = 100000;
     std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
