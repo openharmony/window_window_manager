@@ -7957,6 +7957,7 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
     std::lock_guardstd::recursive_mutex lock(screenSessionMapMutex_);
     std::ostringstream oss;
     std::vector<ScreenId> externalScreenIds;
+    bool hasExternalScreen = false;
     for (const auto& iter : screenSessionMap_) {
         auto screenSession = iter.second;
         if (screenSession == nullptr) {
@@ -7965,13 +7966,17 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
         if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
             screenSession->GetMirrorScreenType() == MirrorScreenType::PHYSICAL_MIRROR) {
             externalScreenIds.emplace_back(screenSession->GetScreenId());
+            hasExternalScreen = true;
             oss << screenSession->GetScreenId() << ",";
         }
     }
     TLOGW(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
     ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
     MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
-    NotifyCastWhenScreenConnectChange(true);
+    if (hasExternalScreen) {
+        TLOGW(WmsLogTag::DMS, "notify cast screen connect");
+        NotifyCastWhenScreenConnectChange(true);
+    }
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
