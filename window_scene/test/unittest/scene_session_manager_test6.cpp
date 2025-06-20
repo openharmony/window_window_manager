@@ -180,9 +180,20 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, TestSize.Level1)
     std::shared_ptr<RSOcclusionData> occlusionDataPtr = std::make_shared<RSOcclusionData>(visibleData);
     ASSERT_NE(nullptr, occlusionDataPtr);
     ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    sceneSession02->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(sceneSession02->surfaceNode_, nullptr);
+    sceneSession02->surfaceNode->SetId(2);
+    sceneSession02->hidingStartWindow_ = true;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     ssm_->GetWindowLayerChangeInfo(occlusionDataPtr, currVisibleData, currDrawingContentData);
     ASSERT_EQ(currVisibleData.size(), 7);
     ASSERT_EQ(currDrawingContentData.size(), 4);
+    ssm_->sceneSessionMap_ = oldSessionMap;
 }
 
 /**
@@ -1212,6 +1223,9 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo01, TestSize.Level1)
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
+    sceneSession->hidingStartWindow_ = true;
+    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    EXPECT_EQ(ret, false);
 }
 
 /**

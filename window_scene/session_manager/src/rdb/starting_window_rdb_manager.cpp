@@ -15,7 +15,9 @@
 
 #include "rdb/starting_window_rdb_manager.h"
 
+#include "ability_info.h"
 #include "rdb/scope_guard.h"
+#include "resource_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -35,6 +37,7 @@ const std::string DB_ILLUSTRATION_PATH = "ILLUSTRATION_PATH";
 const std::string DB_BRANDING_PATH = "BRANDING_PATH";
 const std::string DB_BACKGROUND_IMAGE_PATH = "BACKGROUND_IMAGE_PATH";
 const std::string DB_BACKGROUND_IMAGE_FIT = "BACKGROUND_IMAGE_FIT";
+const std::string DB_STARTWINDOW_TYPE = "STARTWINDOW_TYPE";
 constexpr int32_t DB_PRIMARY_KEY_INDEX = 0;
 constexpr int32_t DB_BUNDLE_NAME_INDEX = 1;
 constexpr int32_t DB_MODULE_NAME_INDEX = 2;
@@ -49,6 +52,9 @@ constexpr int32_t DB_ILLUSTRATION_PATH_INDEX = 10;
 constexpr int32_t DB_BRANDING_PATH_INDEX = 11;
 constexpr int32_t DB_BACKGROUND_IMAGE_PATH_INDEX = 12;
 constexpr int32_t DB_BACKGROUND_IMAGE_FIT_INDEX = 13;
+constexpr int32_t DB_STARTWINDOW_TYPE_INDEX = 14;
+constexpr const char* PROFILE_PREFIX = "$profile:";
+constexpr uint16_t MAX_JSON_STRING_LENGTH = 4096;
 
 NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value)
 {
@@ -66,6 +72,7 @@ NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, c
     valuesBucket.PutString(DB_BRANDING_PATH, value.brandingPath_);
     valuesBucket.PutString(DB_BACKGROUND_IMAGE_PATH, value.backgroundImagePath_);
     valuesBucket.PutString(DB_BACKGROUND_IMAGE_FIT, value.backgroundImageFit_);
+    valuesBucket.PutString(DB_STARTWINDOW_TYPE, value.startWindowType_);
     return valuesBucket;
 }
 
@@ -101,7 +108,7 @@ StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& wmsRdbCon
         DB_CONFIG_FILE_ENABLED + " BOOLEAN, " + DB_BACKGROUND_COLOR + " INTEGER, " + DB_ICON_PATH + " TEXT, " +
         DB_ILLUSTRATION_PATH + " TEXT, " + DB_BRANDING_PATH + " TEXT, " +
         DB_BACKGROUND_IMAGE_PATH + " TEXT, " + DB_BACKGROUND_IMAGE_FIT + " TEXT, " +
-        uniqueConstraint + ");");
+        DB_STARTWINDOW_TYPE + " TEXT, " + uniqueConstraint + ");");
 }
 
 StartingWindowRdbManager::~StartingWindowRdbManager()
@@ -212,13 +219,56 @@ bool StartingWindowRdbManager::QueryData(const StartingWindowRdbItemKey& key, St
         !CheckRdbResult(absSharedResultSet->GetString(DB_ILLUSTRATION_PATH_INDEX, value.illustrationPath_)) ||
         !CheckRdbResult(absSharedResultSet->GetString(DB_BRANDING_PATH_INDEX, value.brandingPath_)) ||
         !CheckRdbResult(absSharedResultSet->GetString(DB_BACKGROUND_IMAGE_PATH_INDEX, value.backgroundImagePath_)) ||
-        !CheckRdbResult(absSharedResultSet->GetString(DB_BACKGROUND_IMAGE_FIT_INDEX, value.backgroundImageFit_))) {
+        !CheckRdbResult(absSharedResultSet->GetString(DB_BACKGROUND_IMAGE_FIT_INDEX, value.backgroundImageFit_)) ||
+        !CheckRdbResult(absSharedResultSet->GetString(DB_STARTWINDOW_TYPE_INDEX, value.startWindowType_))) {
         return false;
     }
     value.backgroundColorEarlyVersion_ = static_cast<uint32_t>(backgroundColorEarlyVersion);
     value.backgroundColor_ = static_cast<uint32_t>(backgroundColor);
     value.configFileEnabled_ = configFileEnabled;
     return true;
+}
+
+std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExecFwk::AbilityInfo& abilityInfo,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const std::string& key, const std::string& defaultVal)
+{
+    auto pos = abilityInfo.startWindow.find(PROFILE_PREFIX);
+    if (pos == std::string::npos) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "invalid profile");
+        return defaultVal;
+    }
+    std::string startWindowName = abilityInfo.startWindow.substr(pos + strlen(PROFILE_PREFIX));
+    std::unique_ptr<uint8_t[]> fileContentPtr = nullptr;
+    size_t len = 0;
+    if (resourceMgr->GetProfileDataByName(startWindowName.c_str(), len, fileContentPtr) != Global::Resource::RState::SUCCESS) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "getProfileData failed");
+        return defaultVal;
+    }
+    if (fileContentPtr == nullptr || len == 0) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "invalid data");
+        return defaultVal;
+    }
+    std::string rawData(fileContentPtr.get(), fileContentPtr.get() + len);
+    nlohmann::json profileJson = nlohmann::json::parse(rawData);
+    if (profileJson.is_discarded()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "bad profile file");
+        return defaultVal;
+    }
+    if (profileJson.find(key) == profileJson.end()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "the default value is %{public}s", defaultVal.c_str());
+        return defaultVal;
+    }
+    if (!profileJson.at(key).is_string()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "the default value is not string");
+        return defaultVal;
+    }
+    std::string res = profileJson.at(key).get<std::string>();
+    if (res.empty() || res.length() > MAX_JSON_STRING_LENGTH) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "exceeding the maximum string length");
+        return defaultVal;
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "startWindowType: %{public}s", res.c_str());
+    return res;
 }
 } // namespace Rosen
 } // namespace OHOS

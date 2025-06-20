@@ -61,7 +61,7 @@ using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
-using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
+using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable, bool startWindowInvisible)>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyRequestFocusStatusNotifyManagerFunc =
     std::function<void(int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason)>;
@@ -355,7 +355,7 @@ public:
     WSRectF GetBounds();
     void SetRotation(Rotation rotation);
     Rotation GetRotation() const;
-    void SetBufferAvailable(bool bufferAvailable);
+    void SetBufferAvailable(bool bufferAvailable, bool startWindowInvisible = false);
     bool GetBufferAvailable() const;
     void SetNeedSnapshot(bool needSnapshot);
     virtual void SetExitSplitOnBackground(bool isExitSplitOnBackground);
@@ -625,6 +625,8 @@ public:
     bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
+    WSError SetHidingStartingWindow(bool hidingStartWindow);
+    bool GetHidingStartingWindow() const;
 
     /*
      * Window Hierarchy
@@ -1051,6 +1053,7 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
+    bool hidingStartWindow_ { false };
 
     /*
      * Window Layout

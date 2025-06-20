@@ -2683,7 +2683,7 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
 {
     bufferAvailableChangeFunc_ = func;
     if (bufferAvailable_ && bufferAvailableChangeFunc_ != nullptr) {
-        bufferAvailableChangeFunc_(bufferAvailable_);
+        bufferAvailableChangeFunc_(bufferAvailable_, false);
     }
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
@@ -3381,6 +3381,27 @@ WSRect Session::GetClientRect() const
     return clientRect_;
 }
 
+WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
+{
+    if (hidingStartWindow == hidingStartWindow_) {
+        return WSError::WS_OK;;
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "hidingStartWindow: %{public}d", hidingStartWindow);
+    hidingStartWindow_ = hidingStartWindow;
+    auto leashSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashSurfaceNode == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    hidingStartWindow ? leashSurfaceNode->SetAlpha(0) : leashSurfaceNode->SetAlpha(1);
+    SetTouchable(!hidingStartWindow);
+    return WSError::WS_OK;
+}
+
+bool Session::GetHidingStartingWindow() const
+{
+    return hidingStartWindow_;
+}
+
 void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
 {
     enableRemoveStartingWindow_ = enableRemoveStartingWindow;
@@ -3810,11 +3831,11 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
     SetDetectTaskInfo(detectTaskInfo);
 }
 
-void Session::SetBufferAvailable(bool bufferAvailable)
+void Session::SetBufferAvailable(bool bufferAvailable, bool startWindowInvisible)
 {
-    TLOGD(WmsLogTag::DEFAULT, "Set:%{public}d", bufferAvailable);
+    TLOGD(WmsLogTag::DEFAULT, "Set:%{public}d %{public}d", bufferAvailable, startWindowInvisible);
     if (bufferAvailableChangeFunc_) {
-        bufferAvailableChangeFunc_(bufferAvailable);
+        bufferAvailableChangeFunc_(bufferAvailable, startWindowInvisible);
     }
     bufferAvailable_ = bufferAvailable;
 }

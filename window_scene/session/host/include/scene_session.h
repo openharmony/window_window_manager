@@ -825,6 +825,7 @@ public:
     void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    bool IsDelayFocusChange();
 
     /*
      * Window Property
