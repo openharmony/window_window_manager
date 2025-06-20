@@ -1864,19 +1864,17 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     info.abilityName_ = "HandleMoveDragSurfaceBounds";
     info.bundleName_ = "HandleMoveDragSurfaceBounds";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
 
-    WSRect preRect = {0, 0, 50, 50};
-    WSRect rect = {0, 0, 100, 100};
-    WSRect globalRect = {0, 0, 100, 100};
+    WSRect preRect = { 0, 0, 50, 50 };
+    WSRect rect = { 0, 0, 100, 100 };
+    WSRect globalRect = { 0, 0, 100, 100 };
 
     session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
         callback->onCallback(1, 1);
     });
-    EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
     session->keyFramePolicy_.running_ = true;
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
