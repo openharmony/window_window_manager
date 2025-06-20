@@ -36,8 +36,11 @@ public:
     explicit VsyncStation(NodeId nodeId);
     ~VsyncStation()
     {
-        std::lock_guard<std::mutex> lock(mtx_);
-        destroyed_ = true;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            destroyed_ = true;
+        }
+        receiver_.reset();
     }
     
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
