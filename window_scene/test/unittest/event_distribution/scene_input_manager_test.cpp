@@ -18,9 +18,19 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_dirty_manager.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -465,6 +475,57 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
 
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI end";
+}
+
+/**
+ * @tc.name: PrintWindowInfo
+ * @tc.desc: check func PrintWindowInfo
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneInputManagerTest, PrintWindowInfo, TestSize.Level0)
+ {
+    GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintWindowInfo start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<MMI::WindowInfo> windowInfoList;
+    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
+    EXPECT_EQ(windowInfoList.size(), 0);
+    MMI::WindowInfo windowInfo;
+    windowInfo.transform = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+    windowInfo.defaultHotAreas = {{0, 0, 0, 0}};
+    windowInfo.pointerHotAreas = {{0, 0, 0, 0}};
+    windowInfo.pointerChangeAreas {0, 0, 0, 0, 0, 0, 0, 0};
+    windowInfoList.emplace_back(windowInfo);
+    EXPECT_EQ(windowInfoList.size(), 1);
+    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
+    EXPECT_TRUE(logMsg.find("LogWinInfo:") != std::string::npos);
+    logMsg.clear();
+
+    GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintWindowInfo end";
+ }
+
+ /**
+ * @tc.name: PrintDisplayInfo
+ * @tc.desc: check func PrintDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, PrintDisplayInfo, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintDisplayInfo start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<MMI::DisplayInfo> displayInfos;
+    SceneInputManager::GetInstance().PrintDisplayInfo(displayInfos);
+    EXPECT_EQ(displayInfos.size(), 0);
+    MMI::DisplayInfo displayInfo;
+    displayInfo.transform = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+    displayInfos.emplace_back(displayInfo);
+    EXPECT_EQ(displayInfos.size(), 1);
+    SceneInputManager::GetInstance().PrintDisplayInfo(displayInfos);
+    EXPECT_TRUE(logMsg.find(",list:") != std::string::npos);
+    logMsg.clear();
+
+    GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintDisplayInfo end";
 }
 
 /**
