@@ -729,7 +729,7 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
 {
     std::ostringstream transformStream;
     transformStream << "[";
-    for (auto& it : displayinfo.transform) {
+    for (auto& it : displayInfo.transform) {
         transformStream << it << ", ";
     }
     transformStream << "]";
