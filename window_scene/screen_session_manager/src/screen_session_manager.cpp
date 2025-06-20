@@ -7954,7 +7954,7 @@ bool ScreenSessionManager::SwitchPcMode()
 
 void ScreenSessionManager::SwitchExternalScreenToMirror()
 {
-    std::lock_guardstd::recursive_mutex lock(screenSessionMapMutex_);
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     std::ostringstream oss;
     std::vector<ScreenId> externalScreenIds;
     bool hasExternalScreen = false;
