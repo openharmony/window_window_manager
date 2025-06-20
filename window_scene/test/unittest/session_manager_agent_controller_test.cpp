@@ -240,12 +240,12 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowSystemBarPropertyChange,
     int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY;
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
     SystemBarProperty systemBarProperty;
     SessionManagerAgentController::GetInstance().NotifyWindowSystemBarPropertyChange(
         WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
-    ASSERT_EQ(WMError::WM_OK,
+    EXPECT_EQ(WMError::WM_OK,
         SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
 }
 
