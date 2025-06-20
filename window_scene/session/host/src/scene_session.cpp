@@ -2072,8 +2072,8 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
     }
     if (onSystemBarPropertyChange_) {
         onSystemBarPropertyChange_(property->GetSystemBarProperty());
-        if (specificCallback_ != nullptr && specificCallback_->onNotifyWindowSystemBarPropertyChange_ != nullptr) {
-            specificCallback_->onNotifyWindowSystemBarPropertyChange_(type, systemBarProperty);
+        if (specificCallback_ != nullptr && specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ != nullptr) {
+            specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_(type, systemBarProperty);
         }
     }
     return WSError::WS_OK;

@@ -262,14 +262,14 @@ private:
  * @brief Observe the property change of System Bar.
  */
 class IWindowSystemBarPropertyChangedListener : virtual public RefBase {
-    public:
-        /**
-         * @brief Notify caller when System Bar property changed.
-         *
-         * @param type Type of System Bar
-         * @param systemBarProperty Property of System Bar
-         */
-        virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
+public:
+    /**
+     * @brief Notify caller when System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
 };
 
 /**

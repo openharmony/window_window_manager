@@ -184,7 +184,7 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
-        NotifyWindowSystemBarPropertyChangeFunc onNotifyWindowSystemBarPropertyChange_;
+        NotifyWindowSystemBarPropertyChangeFunc onNotifyWindowSystemBarPropertyChangeFunc_;
         GetKeyboardOccupiedAreaWithRotationCallback onKeyboardRotationChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;

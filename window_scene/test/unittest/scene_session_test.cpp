@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
     info.windowType_ = 1;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCallback->onNotifyWindowSystemBarPropertyChange_ = [](
+    specificCallback->onNotifyWindowSystemBarPropertyChangeFunc_ = [](
         WindowType type, const SystemBarProperty& systemBarProperty) {};
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     sceneSession->onSystemBarPropertyChange_ =[](
@@ -879,7 +879,7 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
     ASSERT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, statusBarProperty),
         WSError::WS_OK);
-    sceneSession->specificCallback_->onNotifyWindowSystemBarPropertyChange_ = nullptr;
+    sceneSession->specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ = nullptr;
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
         WSError::WS_OK);
 }

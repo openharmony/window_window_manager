@@ -1790,7 +1790,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) {
         return this->HandleSecureSessionShouldHide(sceneSession);
     };
-    specificCb->onNotifyWindowSystemBarPropertyChange_ = [this](
+    specificCb->onNotifyWindowSystemBarPropertyChangeFunc_ = [this](
         WindowType type, const SystemBarProperty& systemBarProperty) {
         return this->NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
     };

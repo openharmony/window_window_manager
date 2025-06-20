@@ -50,14 +50,38 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE: {
-            uint32_t type = data.ReadUint32();
-            bool enable = data.ReadBool();
-            uint32_t backgroundColor = data.ReadUint32();
-            uint32_t contentColor = data.ReadUint32();
-            bool enableAnimation = data.ReadBool();
-            SystemBarSettingFlag settingFlag = static_cast<SystemBarSettingFlag>(data.ReadUint32());
+            uint32_t type = 0;
+            if (!data.ReadUint32()) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read type failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t backgroundColor = 0;
+            if (!data.ReadUint32(backgroundColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read backgroundColor failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t contentColor = 0;
+            if (!data.ReadUint32(contentColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read contentColor failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enableAnimation = false;
+            if (!data.ReadBool(enableAnimation)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enableAnimation failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t settingFlag = 0;
+            if (!data.ReadUint32(settingFlag)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read settingFlag failed");
+                return ERR_INVALID_DATA;
+            }
             SystemBarProperty systemBarProperty = { enable, backgroundColor,
-                contentColor, enableAnimation, settingFlag };
+                contentColor, enableAnimation, static_cast<SystemBarSettingFlag>(settingFlag) };
             NotifyWindowSystemBarPropertyChange(static_cast<WindowType>(type), systemBarProperty);
             break;
         }
