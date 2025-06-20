@@ -30,6 +30,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
+#include "session_manager/include/scene_session_dirty_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1809,6 +1810,61 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
     ssm_->UpdateRootSceneAvoidArea();
     auto res = ssm_->rootSceneSession_->GetPersistentId();
     EXPECT_NE(res, 0);
+}
+
+/**
+ * @tc.name: NotifySessionTouchOutside
+ * @tc.desc: call NotifySessionTouchOutside02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ssm = ssm_;
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->SetSessionProperty(property);
+    ssm->sceneSessionMap_.insert({1, sceneSession});
+    ssm->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+
+    SessionInfo info02;
+    info02.abilityName_ = "test1";
+    info02.bundleName_ = "test2";
+    info02.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info02, nullptr);
+    sceneSession02->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+
+    auto sessionTouchOutsideFun = [ssm](int32_t persistentId, DisplayId displayId) {
+        ssm->NotifySessionTouchOutside(persistentId, 20);
+    };
+    auto outsideDownEventFun = [sceneSession02](int32_t x, int32_t y) {
+        int z = x + y;
+        sceneSession02->SetCollaboratorType(z);
+    };
+    sceneSession02->specificCallback_->onSessionTouchOutside_ = sessionTouchOutsideFun;
+    sceneSession02->specificCallback_->onOutsideDownEvent_ = outsideDownEventFun;
+    sceneSession02->SetSessionProperty(property);
+    ssm->sceneSessionMap_.insert({2, sceneSession02});
+    sceneSession->isVisible_ = true;
+    sceneSession02->isVisible_ = true;
+    ssm->NotifySessionTouchOutside(1, 20);
+    ssm->NotifySessionTouchOutside(1, 0);
+    EXPECT_EQ(true, sceneSession->IsVisible());
+    EXPECT_EQ(true, sceneSession02->IsVisible());
+    EXPECT_EQ(0, sceneSession->GetDisplayId());
+    EXPECT_EQ(0, sceneSession02->GetDisplayId());
+    EXPECT_EQ(20, ssm->GetDisplayGroupId(20));
+    EXPECT_EQ(false, ssm->IsSameDisplayGroupId(sceneSession, 20));
+    EXPECT_EQ(false, ssm->IsSameDisplayGroupId(sceneSession02, 20));
+    EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession->GetDisplayId()));
+    EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession02->GetDisplayId()));
+    EXPECT_EQ(WSError::WS_OK, sceneSession02->ProcessPointDownSession(3, 4));
+    ssm->sceneSessionMap_.erase(1);
+    ssm->sceneSessionMap_.erase(2);
 }
 } // namespace
 } // namespace Rosen
