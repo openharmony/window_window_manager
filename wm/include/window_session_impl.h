@@ -265,6 +265,8 @@ public:
     WMError UnRegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
+    WMError RegisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
+    WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     WMError UnregisterSystemBarPropertyListener(const sptr<ISystemBarPropertyListener>& listener) override;
     void NotifySystemBarPropertyUpdate(WindowType type, const SystemBarProperty& property) override;
@@ -526,10 +528,13 @@ public:
     /*
      * Window LifeCycle
      */
-    void NotifyAfterInteractive();
+    void NotifyLifecyclePausedStatus() override;
+    void NotifyAppUseControlStatus(bool isUseControl) override;
+    void NotifyAfterLifecycleForeground();
+    void NotifyAfterLifecycleBackground();
+    void NotifyAfterLifecycleResumed();
+    void NotifyAfterLifecyclePaused();
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
-    void NotifyAfterNonInteractive();
-    void NotifyNonInteractiveStatus() override;
     void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
 
 protected:
@@ -687,7 +692,9 @@ protected:
     /*
      * Window Lifecycle
      */
+    mutable std::mutex appUseControlMutex_;
     bool hasFirstNotifyInteractive_ = false;
+    bool isAppUseControl_ = false;
     bool interactive_ = true;
     bool isDidForeground_ = false;
     bool isInteractiveStateFlag_ = false;
@@ -780,6 +787,8 @@ private:
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowStageLifeCycle, std::vector<sptr<IWindowStageLifeCycle>>> GetListeners();
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
@@ -915,6 +924,7 @@ private:
     bool InitWaterfallMode();
 
     static std::recursive_mutex lifeCycleListenerMutex_;
+    static std::recursive_mutex windowStageLifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
     static std::recursive_mutex windowCrossAxisListenerMutex_;
     static std::recursive_mutex avoidAreaChangeListenerMutex_;
@@ -942,6 +952,7 @@ private:
     static std::mutex windowRotationChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<ISystemBarPropertyListener>>> systemBarPropertyListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowStageLifeCycle>>> windowStageLifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowCrossAxisListener>>> windowCrossAxisListeners_;

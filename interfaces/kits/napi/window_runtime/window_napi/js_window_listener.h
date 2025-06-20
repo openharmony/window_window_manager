@@ -36,6 +36,7 @@ const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
+const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string KEYBOARD_WILL_SHOW_CB = "keyboardWillShow";
@@ -69,6 +70,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
+                         public IWindowStageLifeCycle,
                          public IOccupiedAreaChangeListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
@@ -112,9 +114,11 @@ public:
     void AfterUnfocused() override;
     void AfterResumed() override;
     void AfterPaused() override;
-    void AfterInteractive() override;
-    void AfterNonInteractive() override;
     void AfterDestroyed() override;
+    void AfterLifecycleForeground() override;
+    void AfterLifecycleBackground() override;
+    void AfterLifecycleResumed() override;
+    void AfterLifecyclePaused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
@@ -176,6 +180,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
+    void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_;
