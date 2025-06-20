@@ -20,7 +20,7 @@
 #include "floating_ball_template_info.h"
 namespace OHOS {
 namespace Rosen {
-class FbOption : virtual public RefBase {
+class FbOption : public RefBase {
 public:
     explicit FbOption();
     virtual ~FbOption() = default;

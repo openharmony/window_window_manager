@@ -342,7 +342,7 @@ public:
     virtual void SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func) {};
     virtual void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) {};
     virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
-    virtual void GegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
+    virtual void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
 
     /*
      * Window Layout

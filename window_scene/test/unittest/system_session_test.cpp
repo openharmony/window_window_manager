@@ -864,7 +864,7 @@ HWTEST_F(SystemSessionTest, GetFbWindowId, TestSize.Level1)
     auto func = [testWindowId](uint32_t& windowId) {
         windowId = testWindowId;
         return WMError::WM_OK;
-    }
+    };
     systemSession->RegisterGetFbPanelWindowIdFunc(func);
     EXPECT_EQ(systemSession->GetFbWindowId(), testWindowId);
 }
@@ -997,8 +997,8 @@ HWTEST_F(SystemSessionTest, NotifyUpdateFloatingBall, Function | SmallTest | Lev
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
 
-    FloatingBallTemplateInfo fbTemplateInfo {1, "fb", "fb_content", nullptr};
-    FloatingBallTemplateInfo newFbTemplateInfo {2, "fb_new", "fb_content_new", nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {1, "fb", "fb_content", "red", nullptr};
+    FloatingBallTemplateInfo newFbTemplateInfo {2, "fb_new", "fb_content_new", "red", nullptr};
     systemSession->SetFloatingBallUpdateCallback(nullptr);
     systemSession->NotifyUpdateFloatingBall(newFbTemplateInfo);
     EXPECT_NE(fbTemplateInfo.template_, newFbTemplateInfo.template_);

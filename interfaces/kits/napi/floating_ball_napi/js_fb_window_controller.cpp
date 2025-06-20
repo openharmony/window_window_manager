@@ -119,7 +119,7 @@ napi_value JsFbController::OnStartFloatingBall(napi_env env, napi_callback_info 
             return;
         }
         sptr<FbOption> optionPtr = sptr<FbOption>::MakeSptr(option);
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(fbController->StartFloatingBall(optionPtr));
+        *errCodePtr = FindCodeByError(fbController->StartFloatingBall(optionPtr));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -180,7 +180,7 @@ napi_value JsFbController::OnUpdateFloatingBall(napi_env env, napi_callback_info
             return;
         }
         sptr<FbOption> optionPtr = sptr<FbOption>::MakeSptr(option);
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(fbController->UpdateFloatingBall(optionPtr));
+        *errCodePtr = FindCodeByError(fbController->UpdateFloatingBall(optionPtr));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -221,7 +221,7 @@ napi_value JsFbController::OnStopFloatingBall(napi_env env, napi_callback_info i
             *errCodePtr = WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(fbController->StopFloatingBallFromClient());
+        *errCodePtr = FindCodeByError(fbController->StopFloatingBallFromClient());
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -282,7 +282,7 @@ napi_value JsFbController::OnRestoreMainWindow(napi_env env, napi_callback_info 
             *errCodePtr = WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(fbController->RestoreMainWindow(abilityWant));
+        *errCodePtr = FindCodeByError(fbController->RestoreMainWindow(abilityWant));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -461,7 +461,7 @@ WmErrorCode JsFbController::RegisterListenerWithType(napi_env env, const std::st
     }
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "register failed");
-        return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        return FindCodeByError(ret);
     }
     jsCbMap_[type].insert(fbWindowListener);
     TLOGI(WmsLogTag::WMS_SYSTEM, "Register type %{public}s success! callback map size: %{public}zu",
@@ -471,11 +471,16 @@ WmErrorCode JsFbController::RegisterListenerWithType(napi_env env, const std::st
 
 bool JsFbController::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+    if (jsCbMap_.empty()) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "callback empty, methodName %{public}s not registered", type.c_str());
+        return false;
+    }
+    auto callback = jsCbMap_.find(type);
+    if (callback == jsCbMap_.end()) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "methodName %{public}s not registered", type.c_str());
         return false;
     }
-    for (auto& listener : jsCbMap_[type]) {
+    for (auto& listener : callback->second) {
         if (listener == nullptr || listener->GetCallbackRef() == nullptr) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "listener or listener callback is null");
             continue;
@@ -519,7 +524,7 @@ napi_value JsFbController::OnUnregisterCallback(napi_env env, napi_callback_info
     size_t argc = NUMBER_TWO;
     napi_value argv[NUMBER_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc == 0 || argc > NUMBER_TWO) {
+    if (argc <= 0) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "JsFbController Params not match: %{public}zu", argc);
         return NapiThrowInvalidParam(env, "Params num not match");
     }
@@ -597,7 +602,7 @@ WmErrorCode JsFbController::UnRegisterListener(const std::string& type,
     if (type == CLICK_EVENT) {
         ret = ProcessClickEventUnRegister(fbWindowListener);
     }
-    return WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    return FindCodeByError(ret);
 }
 
 WMError JsFbController::ProcessStateChangeUnRegister(const sptr<JsFbWindowListener>& listener)
@@ -654,7 +659,7 @@ napi_value JsFbController::OnGetFloatingBallWindowInfo(napi_env env, napi_callba
             return;
         }
         uint32_t windowId = 0;
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(fbController->GetFloatingBallWindowInfo(windowId));
+        *errCodePtr = FindCodeByError(fbController->GetFloatingBallWindowInfo(windowId));
         *windowIdPtr = windowId;
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -675,6 +680,5 @@ napi_value JsFbController::OnGetFloatingBallWindowInfo(napi_env env, napi_callba
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
-
 } // namespace Rosen
 } // namespace OHOS

@@ -141,7 +141,7 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
 
     fbController->curState_ = FbWindowState::STATE_UNDEFINED;
     FloatingBallManager::SetActiveController(fbController);
-    XPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->StartFloatingBall(option));
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->StartFloatingBall(option));
     FloatingBallManager::RemoveActiveController(fbController);
 
     auto activeFbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);

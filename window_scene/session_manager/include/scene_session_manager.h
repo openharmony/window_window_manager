@@ -619,9 +619,7 @@ public:
      /*
      * FloatingBall Window
      */
-    WMError CloseTargetPiPWindow(const std::string& bundleName);
-    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
-    void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
+    WMError GetFbPanelWindowId(uint32_t& windowId);
 
     /*
      * Window Watermark
@@ -833,7 +831,7 @@ private:
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property) REQUIRES(SCENE_GUARD);
-    void InitFbWindow(sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
+    void InitFbWindow(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,

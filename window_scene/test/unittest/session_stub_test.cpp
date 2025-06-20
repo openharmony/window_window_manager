@@ -1646,7 +1646,7 @@ HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level
     auto result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "pip", "pip_content"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_NONE);
@@ -1667,22 +1667,22 @@ HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleStartFloatingBallAbility
- * @tc.desc: sessionStub HandleStartFloatingBallAbility
+ * @tc.name: HandleStartFloatingBallMainWindow
+ * @tc.desc: sessionStub HandleStartFloatingBallMainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleStartFloatingBallAbility, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleStartFloatingBallMainWindow, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
     
     data.WriteParcelable(nullptr);
-    auto result = session_->HandleStartFloatingBallAbility(data, reply);
+    auto result = session_->HandleStartFloatingBallMainWindow(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     data.WriteParcelable(want.get());
-    result = session_->HandleStartFloatingBallAbility(data, reply);
+    result = session_->HandleStartFloatingBallMainWindow(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 

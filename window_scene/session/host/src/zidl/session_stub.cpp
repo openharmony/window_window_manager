@@ -213,7 +213,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE):
             return HandleStopFloatingBall(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_UI_ABILITY):
-            return HandleStartFloatingBallAbility(data, reply);
+            return HandleStartFloatingBallMainWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID):
             return HandleGetFloatingBallWindowId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
@@ -1299,15 +1299,15 @@ int SessionStub::HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel&
 
 int SessionStub::HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatingBall!");
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatingBall");
     sptr<FloatingBallTemplateInfo> fbTemplateInfo = data.ReadParcelable<FloatingBallTemplateInfo>();
     if (fbTemplateInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read fbTemplateInfo failed.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read fbTemplateInfo failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateFloatingBall(*fbTemplateInfo);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1318,15 +1318,15 @@ int SessionStub::HandleStopFloatingBall(MessageParcel& data, MessageParcel& repl
     TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatingBall");
     WSError errCode = StopFloatingBall();
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
 }
 
-int SessionStub::HandleStartFloatingBallAbility(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleStartFloatingBallMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleStartFloatingBallAbility!");
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleStartFloatingBallMainWindow");
     std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
     if (!want) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "read want error");
@@ -1334,7 +1334,7 @@ int SessionStub::HandleStartFloatingBallAbility(MessageParcel& data, MessageParc
     }
     WMError errCode = RestoreFbMainWindow(want);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1345,12 +1345,12 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
     TLOGI(WmsLogTag::WMS_SYSTEM, "HandleGetFloatingBallWindowId");
     uint32_t windowId = 0;
     WMError errCode = GetFloatingBallWindowId(windowId);
-    if (!reply.WriteUint32(windowId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write windowId fail.");
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
         return ERR_INVALID_DATA;
     }
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+    if (!reply.WriteUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write windowId fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
