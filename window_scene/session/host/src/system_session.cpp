@@ -408,8 +408,9 @@ WSError SystemSession::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemp
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        TLOGNI(WmsLogTag::WMS_SYSTEM, "%{public}s, template %{public}d, title: %{public}s, content: %{public}s", where,
-            fbTemplateInfo.template_, fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str());
+        TLOGNI(WmsLogTag::WMS_SYSTEM, "template %{public}d, title: %{public}s, content: %{public}s, color: %{public}s",
+            fbTemplateInfo.template_, fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str(),
+            fbTemplateInfo.backgroundColor_.c_str());
         session->NotifyUpdateFloatingBall(fbTemplateInfo);
         return WSError::WS_OK;
     };
@@ -459,7 +460,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        windowId = session->floatingBallWindowId_;
+        windowId = session->GetFbWindowId();
         TLOGND(WmsLogTag::WMS_SYSTEM, "%{public}s mode: %{public}u", where, windowId);
         return WMError::WM_OK;
     }, __func__);
@@ -582,14 +583,14 @@ void SystemSession::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplate
     fbTemplateInfo_ = fbTemplateInfo;
 }
 
-void SystemSession::SetFbWindowId(const uint32_t& windowId)
+uint32_t SystemSession::GetFbWindowId() const
 {
-    floatingBallWindowId_ = windowId;
-}
-
-uint32_t SystemSession::GetFbWindowId()
-{
-    return floatingBallWindowId_;
+    uint32_t windowId = 0;
+    if (getFbPanelWindowIdFunc_) {
+        return getFbPanelWindowIdFunc_(windowId);
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Get fb window Id %{public}d", windowId);
+    return windowId;
 }
 
 void SystemSession::SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func)
@@ -639,5 +640,10 @@ void SystemSession::SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloati
             session->fbWant_ = nullptr;
         }
     }, __func__);
+}
+
+void SystemSession::RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& callback)
+{
+    getFbPanelWindowIdFunc_ = std::move(callback);
 }
 } // namespace OHOS::Rosen

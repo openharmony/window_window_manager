@@ -36,6 +36,11 @@ void FbOption::SetContent(const std::string& content)
     content_ = content;
 }
 
+void FbOption::SetBackgroundColor(const std::string& color)
+{
+    backgroundColor_ = color;
+}
+
 void FbOption::SetIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     icon_ = icon;
@@ -56,6 +61,11 @@ std::string FbOption::GetContent() const
     return content_;
 }
 
+std::string FbOption::GetBackgroundColor() const
+{
+    return backgroundColor_;
+}
+
 std::shared_ptr<Media::PixelMap> FbOption::GetIcon() const
 {
     return icon_;
@@ -66,6 +76,7 @@ void FbOption::GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBas
     fbTemplateBaseInfo.template_ = template_;
     fbTemplateBaseInfo.title_ = title_;
     fbTemplateBaseInfo.content_ = content_;
+    fbTemplateBaseInfo.backgroundColor_ = backgroundColor_;
 }
 
 } // namespace Rosen

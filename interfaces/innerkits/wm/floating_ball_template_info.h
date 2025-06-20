@@ -27,18 +27,19 @@ class FloatingBallTemplateInfo : public FloatingBallTemplateBaseInfo,
 public:
     FloatingBallTemplateInfo() = default;
     FloatingBallTemplateInfo(const uint32_t& templateType, const std::string& title, const std::string& content,
-        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(templateType, title, content),
-        icon_(icon) {};
+        const std::string& color, const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(
+        templateType, title, content, color), icon_(icon) {};
     FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
-        baseInfo.title_, baseInfo.content_), icon_(icon) {};
+        baseInfo.title_, baseInfo.content_, baseInfo.backgroundColor_), icon_(icon) {};
     ~FloatingBallTemplateInfo() override = default;
 
     std::shared_ptr<Media::PixelMap> icon_ {};
 
     bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) || !parcel.WriteString(content_)) {
+        if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) ||
+            !parcel.WriteString(content_) || !parcel.WriteString(backgroundColor_)) {
             return false;
         }
         bool hasIcon = icon_ ? true : false;
@@ -55,7 +56,7 @@ public:
     {
         auto* fbTemplateInfo = new FloatingBallTemplateInfo();
         if (!parcel.ReadUint32(fbTemplateInfo->template_) || !parcel.ReadString(fbTemplateInfo->title_) ||
-            !parcel.ReadString(fbTemplateInfo->content_)) {
+            !parcel.ReadString(fbTemplateInfo->content_) || !parcel.ReadString(fbTemplateInfo->backgroundColor_)) {
             delete fbTemplateInfo;
             return nullptr;
         }

@@ -51,11 +51,11 @@ public:
     WSError SendFbActionEvent(const std::string& action) override;
     FloatingBallTemplateInfo GetFbTemplateInfo() const override;
     void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo) override;
-    void SetFbWindowId(const uint32_t& windowId) override;
-    uint32_t GetFbWindowId() override;
+    uint32_t GetFbWindowId() const override;
     void SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func) override;
     void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) override;
     void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) override;
+    void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) override;
 
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -82,6 +82,8 @@ private:
     std::shared_mutex fbCallBackMutex_;
     bool needStopFb_ = false;
     std::shared_ptr<AAFwk::Want> fbWant_ = nullptr;
+
+    GetFbPanelWindowIdFunc getFbPanelWindowIdFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

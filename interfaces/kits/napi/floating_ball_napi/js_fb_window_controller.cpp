@@ -308,10 +308,12 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
     napi_value templateValue = nullptr;
     napi_value titleValue = nullptr;
     napi_value contentValue = nullptr;
+    napi_value colorValue = nullptr;
 
     uint32_t templateType = 0;
     std::string title = "";
     std::string content = "";
+    std::string color = "";
     bool hasProperty = false;
     napi_has_named_property(env, optionObject, "template", &hasProperty);
     if (hasProperty) {
@@ -330,6 +332,12 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
         napi_get_named_property(env, optionObject, "content", &contentValue);
         ConvertFromJsValue(env, contentValue, content);
         option.SetContent(content);
+    }
+    napi_has_named_property(env, optionObject, "backgroundColor", &hasProperty);
+    if (hasProperty) {
+        napi_get_named_property(env, optionObject, "backgroundColor", &colorValue);
+        ConvertFromJsValue(env, colorValue, color);
+        option.SetBackgroundColor(color);
     }
     if (GetIcon(env, optionObject, option) == nullptr) {
         napi_throw(env, AbilityRuntime::CreateJsError(env,

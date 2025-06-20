@@ -147,6 +147,7 @@ constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
+const std::string FB_PANEL_NAME = "Fb_panel";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2271,6 +2272,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {
             return allAppUseControlMap_;
         });
+        sceneSession->RegisterGetFbPanelWindowIdFunc([this](uint32_t& windowId)) {
+            return this->GetFbPanelWindowId(windowId);
+        }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -15315,6 +15319,25 @@ WMError SceneSessionManager::HasFloatingWindowForeground(const sptr<IRemoteObjec
         hasOrNot = false;
         return WMError::WM_OK;
     }, __func__);
+}
+
+WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
+{
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "The caller has not permission granted");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lockstd::shared_mutex lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FB &&
+            session->GetWindowName().find(FB_PANEL_NAME) != std::string::npos) {
+            windowId = session->GetWindowId();
+            return WMError::WM_OK;
+        }
+    }
+    TLOGW(WmsLogTag::WMS_SYSTEM, "no Fb panel");
+    return WMError::WM_OK;
 }
 
 void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
