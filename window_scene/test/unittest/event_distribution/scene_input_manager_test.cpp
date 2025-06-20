@@ -494,7 +494,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     windowInfo.transform = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
     windowInfo.defaultHotAreas = {{0, 0, 0, 0}};
     windowInfo.pointerHotAreas = {{0, 0, 0, 0}};
-    windowInfo.pointerChangeAreas {0, 0, 0, 0, 0, 0, 0, 0};
+    windowInfo.pointerChangeAreas = {0, 0, 0, 0, 0, 0, 0, 0};
     windowInfoList.emplace_back(windowInfo);
     EXPECT_EQ(windowInfoList.size(), 1);
     SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);

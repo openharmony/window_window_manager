@@ -571,7 +571,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
                           << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
                           << displayInfo.expandHeight << "|" << displayInfo.uniqueId << ",";
-        ConstructDumpWindowInfo(displayInfo, dumpWindowListStream);
+        ConstructDumpDisplayInfo(displayInfo, dumpDisplayListStream);
     }
 
     std::string displayList = displayListStream.str();
@@ -729,12 +729,12 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
 {
     std::ostringstream transformStream;
     transformStream << "[";
-    for (auto& it : disaplyinfo.transform) {
-        transformStream << it << ', ';
+    for (auto& it : displayinfo.transform) {
+        transformStream << it << ", ";
     }
-    transformStream << ']';
+    transformStream << "]";
     dumpDisplayListStream << "id:" << displayInfo.id << "|x:" << displayInfo.x << "|y:" << displayInfo.y
-                          << "width:" << displayInfo.width << "|height:" << displayInfo.height << "|dpi:"
+                          << "|width:" << displayInfo.width << "|height:" << displayInfo.height << "|dpi:"
                           << displayInfo.dpi << "|name:" << displayInfo.name << "|uniq:" << displayInfo.uniq
                           << "|direction:" << static_cast<int32_t>(displayInfo.direction) << "|displayDirection:"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|displayMode:"
@@ -746,7 +746,7 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
                           << displayInfo.screenRealWidth << "|screenRealHeight:" << displayInfo.screenRealHeight
                           << "|screenRealPPI:" << displayInfo.screenRealPPI << "|screenRealDPI:"
                           << displayInfo.screenRealDPI << "|screenCombination:"
-                          << static_cast<int32_t>(displayInfo.screenCombination) << "|validWidth"
+                          << static_cast<int32_t>(displayInfo.screenCombination) << "|validWidth:"
                           << displayInfo.validWidth << "|validHeight:" << displayInfo.validHeight
                           << "|fixedDirection:" << displayInfo.fixedDirection << "|physicalWidth:"
                           << displayInfo.physicalWidth << "|physicalHeight:" << displayInfo.physicalHeight
