@@ -192,6 +192,14 @@ void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const Key
 }
 
 namespace {
+
+std::string g_logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg = msg;
+}
+
 /**
  * @tc.name: GetResourceManager
  * @tc.desc: GetResourceManager
@@ -2345,6 +2353,94 @@ HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_OK, TestSize.Level1)
     MockAccesstokenKit::MockIsSACalling(true);
     auto result = ssm_->RemoveInstanceKey(bundleName, instanceKey);
     EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType01
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType01";
+    info.bundleName_ = "SetSessionInfoStartWindowType01";
+    info.isSetStartWindowType_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType02
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType02";
+    info.bundleName_ = "SetSessionInfoStartWindowType02";
+    info.isSetStartWindowType_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType03
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType03, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType03";
+    info.bundleName_ = "SetSessionInfoStartWindowType03";
+    info.isSetStartWindowType_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: RegisterGetStartWindowConfigCallback
+ * @tc.desc: test function : RegisterGetStartWindowConfigCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterGetStartWindowConfigCallback, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterGetStartWindowConfigCallback";
+    info.bundleName_ = "RegisterGetStartWindowConfigCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    ssm_->RegisterGetStartWindowConfigCallback(sceneSession);
+
+    EXPECT_NE(sceneSession->getStartWindowConfigFunc_, nullptr);
+    
+    g_logMsg.clear();
+    ssm_->RegisterGetStartWindowConfigCallback(nullptr);
+    EXPECT_TRUE(g_logMsg.find("session is nullptr") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen
