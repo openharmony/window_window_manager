@@ -857,7 +857,6 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
                 (hasDarkRes ? WHITE : BLACK);
         }
     }
-
     statusBarProp.contentColor_ = contentColor;
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
