@@ -600,7 +600,15 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Displa
         FlushFullInfoToMMI(displayInfos, windowInfoList);
         return;
     }
-    windowInfoList.back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
+    std::unordered_map<int32_t, std::vector<int32_t>> windowIndexMap;
+    int32_t index = 0;
+    for (const auto& windowInfo : windowInfoList) {
+        windowIndexMap[windowInfo.groupId].emplace_back(index);
+        index++;
+    }
+    for (auto& [displayGroupId, indexInfos] : windowIndexMap) {
+        windowInfoList[indexInfos.back()].action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
+    }
     auto iterBegin = windowInfoList.begin();
     auto iterEnd = windowInfoList.end();
     auto iterNext = std::next(iterBegin, windowBatchSize);

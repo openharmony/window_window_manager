@@ -877,7 +877,7 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     }
     napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType);
     if (avoidAreaObj != nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "avoidAreaObj is finish");
+        TLOGD(WmsLogTag::WMS_UIEXT, "avoidAreaObj is finish");
         return avoidAreaObj;
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "avoidAreaObj is nullptr");

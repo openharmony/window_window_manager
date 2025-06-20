@@ -118,7 +118,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session, id=%{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (IsExtensionSessionInvalid(persistentId)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
@@ -167,7 +167,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Background session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Background session, id=%{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionBackground");
         extSession->SetActive(false);
         extSession->Background();

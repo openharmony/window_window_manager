@@ -1627,6 +1627,8 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, TestSize.Level1)
     ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
     globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
+    floatWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_FB);
+    ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
 }
 
 /**

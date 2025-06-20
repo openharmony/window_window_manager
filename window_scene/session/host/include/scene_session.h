@@ -21,6 +21,7 @@
 #include <animation/rs_symbol_animation.h>
 #include <pipeline/rs_node_map.h>
 #include <ui/rs_canvas_node.h>
+#include <chrono>
 
 #include "display_manager.h"
 #include "session/host/include/session.h"
@@ -321,10 +322,27 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) override;
+    WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+
+    /*
+     * Floating Ball Window
+     */
+    WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override { return WSError::WS_OK; };
+    WSError StopFloatingBall() override { return WSError::WS_OK; };
+    WMError GetFloatingBallWindowId(uint32_t& windowId) override { return WMError::WM_OK; };
+    WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override { return WMError::WM_OK; };
+    virtual WSError SendFbActionEvent(const std::string& action) { return WSError::WS_OK; };
+    virtual FloatingBallTemplateInfo GetFbTemplateInfo() const { return fbTemplateInfo_; };
+    virtual void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo) {};
+    virtual void SetFbWindowId(const uint32_t& windowId) {};
+    virtual uint32_t GetFbWindowId() { return floatingBallWindowId_; };
+    virtual void SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func) {};
+    virtual void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) {};
+    virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
 
     /*
      * Window Layout
@@ -333,7 +351,7 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode);
+    WMError UpdateWindowModeForUITest(int32_t updateMode);
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func);
 
@@ -769,6 +787,7 @@ public:
     void OnThrowSlipAnimationStateChange(bool isAnimating);
     void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
+    bool IsPcFoldDevice();
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);
@@ -956,6 +975,17 @@ protected:
     MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
     SubWindowSource subWindowSource_ = SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN;
     NotifySetSubWindowSourceFunc subWindowSourceFunc_ = nullptr;
+
+    /*
+     * Floating Ball Window
+     */
+    virtual void NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) {};
+    virtual void NotifyStopFloatingBall() {};
+    virtual void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) {};
+    uint64_t fbClickTime_ = 0;
+    std::mutex fbClickMutex_;
+    FloatingBallTemplateInfo fbTemplateInfo_ = {};
+    uint32_t floatingBallWindowId_ = 0;
 
     /*
      * Window Lifecycle

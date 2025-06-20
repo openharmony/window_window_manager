@@ -1132,16 +1132,44 @@ HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleUpdateWindowLayoutById01
- * @tc.desc: test function : HandleUpdateWindowLayoutById
+ * @tc.name: HandleUpdateWindowModeForUITest01
+ * @tc.desc: test function : HandleUpdateWindowModeForUITest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateWindowLayoutById01, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowModeForUITest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowLayoutById(data, reply));
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
+
+    data.WriteInt32(0);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
+}
+
+/**
+ * @tc.name: HandleSendFbActionEvent
+ * @tc.desc: test function : HandleSendFbActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSendFbActionEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
+
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    MessageParcel data1;
+    std::string action = "SendFbActionEvent";
+    data1.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data1.WriteString(action);
+    code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data1, reply, option));
 }
 } // namespace
 } // namespace Rosen

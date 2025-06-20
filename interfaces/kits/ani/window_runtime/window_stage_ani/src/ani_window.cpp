@@ -504,7 +504,6 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     std::unique_ptr<AniWindow> aniWindow = std::make_unique<AniWindow>(window);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] native obj %{public}p", aniWindow.get());
 
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
@@ -954,7 +953,6 @@ __attribute__((no_sanitize("cfi")))
     }
 
     std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(window);
-    TLOGD(WmsLogTag::WMS_IMMS, "[ANI] native obj %{public}p", uniqueWindow.get());
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
@@ -980,15 +978,12 @@ __attribute__((no_sanitize("cfi")))
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
     localObjs.insert(std::pair(obj, uniqueWindow.release()));
 
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] window stage created  %{public}p", reinterpret_cast<void*>(obj));
     return obj;
 }
 
 static ani_object WindowCreate(ani_env* env, ani_long window)
 {
     using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create window with scene 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(env), (int32_t)window);
     Rect baseWindowRect = { 150, 150, 400, 600 };
     OHOS::sptr<WindowOption> baseOp = new WindowOption();
     SystemBarProperty barProperty = SystemBarProperty();

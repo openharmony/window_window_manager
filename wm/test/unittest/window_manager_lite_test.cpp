@@ -1453,5 +1453,27 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
     windowManager.pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowVisibilityStateListeners_ = oldListeners;
 }
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SendPointerEventForHover, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    WMError ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 } // namespace
 } // namespace OHOS::Rosen

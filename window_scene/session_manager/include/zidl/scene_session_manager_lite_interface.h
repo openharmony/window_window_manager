@@ -104,13 +104,14 @@ public:
         TRANS_ID_UPDATE_KIOSK_APP_LIST,
         TRANS_ID_ENTER_KIOSK_MODE,
         TRANS_ID_EXIT_KIOSK_MODE,
-        TRANS_ID_UPDATE_WINDOW_LAYOUT_BY_ID,
+        TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST,
+        TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER,
     };
 
     /*
      * Window Layout
      */
-    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
+    virtual WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
 
     /*
      * Window Lifecycle
@@ -388,6 +389,20 @@ public:
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
     virtual WMError ExitKioskMode(const sptr<IRemoteObject>& token) { return WMError::WM_OK; }
+
+    /**
+     * @brief Send pointer event for hover.
+     *
+     * This function is used to send pointer event for hover
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pointerEvent The pointer event for hover
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+        { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
