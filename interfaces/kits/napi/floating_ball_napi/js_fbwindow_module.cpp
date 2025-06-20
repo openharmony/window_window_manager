@@ -16,6 +16,7 @@
 #include "native_engine/native_engine.h"
 #include "js_fb_window_manager.h"
 
+namespace {
 static napi_module g_winManagerModule = {
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Rosen::JsFbWindowManagerInit,
@@ -25,4 +26,5 @@ static napi_module g_winManagerModule = {
 extern "C" __attribute__((constructor)) void NapiApplicationFbWindowAutoRegister()
 {
     napi_module_register(&g_winManagerModule);
+}
 }

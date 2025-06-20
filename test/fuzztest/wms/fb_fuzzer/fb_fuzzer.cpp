@@ -16,6 +16,7 @@
 #include "marshalling_helper.h"
 #include <securec.h>
 #include <iremote_broker.h>
+#include <fuzzer/FuzzedDataProvider.h>
 #include "ability_context.h"
 #include "ability_context_impl.h"
 #include "fb_fuzzer.h"
@@ -39,26 +40,6 @@ size_t GetObject(T& object, const uint8_t* data, size_t size)
         return 0;
     }
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
-}
-
-/* 调用该接口后, 需要释放内存 */
-char *CopyDataToString(const uint8_t* data, size_t size)
-{
-    if (size > DATA_MAX_SIZE) {
-        return nullptr;
-    }
-    char *string = (char *)malloc(size);
-    if (string == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return nullptr;
-    }
-
-    if (memcpy_s(string, size, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(string);
-        return nullptr;
-    }
-    return string;
 }
 
 void CheckFbControllerFunctionsPart(sptr<FloatingBallController> controller, const uint8_t* data, size_t size)
@@ -117,11 +98,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     controller->StartFloatingBall(option);
 
-    uint16_t strlen = 10;
-    char* str = CopyDataToString(data, strlen);
-    startPos += strlen;
-    title.assign(str);
-    free(str);
+    FuzzedDataProvider fdp(data, size);
+    title = fdp.ConsumeRandomLengthString();
     controller->UpdateFloatingBall(option);
 
     CheckFbControllerFunctionsPart(controller, data + startPos, size - startPos);

@@ -846,8 +846,8 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
-    NotifyUpdateFloatingBallFunc updateFlotingBallFunc_;
-    NotifyStopFloatingBallFunc stopFlotingBallFunc_;
+    NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
+    NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;

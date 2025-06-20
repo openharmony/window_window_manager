@@ -55,7 +55,7 @@ private:
     WMError StartFloatingBallInner();
  
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
-    template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> WMError UnRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
  
     void OnFloatingBallStart();
     void OnFloatingBallStop();

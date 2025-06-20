@@ -1138,10 +1138,10 @@ HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "Fb_panel8";
     sessionInfo.abilityName_ = "Fb_panel8";
-    sptr property = sptr::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
     property->SetWindowName(sessionInfo.bundleName_);
-    sptr sceneSession = sptr::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_ = property;
     sceneSession->SetSessionInfoPersistentId(18);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
@@ -1151,6 +1151,7 @@ HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
     ASSERT_EQ(sceneSession->GetWindowId(), windowId);
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
 }
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

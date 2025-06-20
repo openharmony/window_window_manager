@@ -1829,7 +1829,7 @@ WSError SessionProxy::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTempl
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteParcelable(&fbTemplateInfo)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write fbTemplateInfo failed.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write fbTemplateInfo failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1860,7 +1860,7 @@ WMError SessionProxy::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& wa
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteParcelable(want.get())) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "write icon failed.");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write icon failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1902,15 +1902,16 @@ WMError SessionProxy::GetFloatingBallWindowId(uint32_t& windowId)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!reply.ReadUint32(windowId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Read windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Read reply failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (!reply.ReadUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
     TLOGI(WmsLogTag::WMS_SYSTEM, "GetFloatingBallWindowId send success, %{public}d, %{public}d", ret, windowId);
     return static_cast<WMError>(ret);
 }

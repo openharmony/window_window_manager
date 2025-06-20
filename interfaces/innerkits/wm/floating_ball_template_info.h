@@ -54,25 +54,22 @@ public:
 
     static FloatingBallTemplateInfo* Unmarshalling(Parcel& parcel)
     {
-        auto* fbTemplateInfo = new FloatingBallTemplateInfo();
+        std::unique_ptr<FloatingBallTemplateInfo> fbTemplateInfo = std::make_unique<FloatingBallTemplateInfo>();
         if (!parcel.ReadUint32(fbTemplateInfo->template_) || !parcel.ReadString(fbTemplateInfo->title_) ||
             !parcel.ReadString(fbTemplateInfo->content_) || !parcel.ReadString(fbTemplateInfo->backgroundColor_)) {
-            delete fbTemplateInfo;
             return nullptr;
         }
         bool hasIcon = false;
         if (!parcel.ReadBool(hasIcon)) {
-            delete fbTemplateInfo;
             return nullptr;
         }
         if (hasIcon) {
             fbTemplateInfo->icon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
             if (!fbTemplateInfo->icon_) {
-                delete fbTemplateInfo;
                 return nullptr;
             }
         }
-        return fbTemplateInfo;
+        return fbTemplateInfo.release();
     }
 };
 } // namespace OHOS::Rosen

@@ -64,11 +64,11 @@ WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
         TLOGE(WmsLogTag::WMS_SYSTEM, "cur state is not started, can not update");
         return WMError::WM_ERROR_FB_INVALID_STATE;
     }
-    fbOption_ = option;
-    if (fbOption_ == nullptr || window_ == nullptr) {
+    if (option == nullptr || window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "option or window is nullptr");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
+    fbOption_ = option;
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     fbOption_->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
     window_->UpdateFloatingBall(fbTemplateBaseInfo, fbOption_->GetIcon());
@@ -207,15 +207,15 @@ WMError FloatingBallController::DestroyFloatingBallWindow()
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when destroy fb");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window_->Destroy());
-    if (ret != WmErrorCode::WM_OK) {
+    WMError ret = window_->Destroy();
+    if (ret != WMError::WM_OK) {
         curState_ = FbWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_SYSTEM, "window destroy failed, err:%{public}u", ret);
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     curState_ = FbWindowState::STATE_STOPPED;
     OnFloatingBallStop();
-    FloatingBallManager::RemoveActiveController(this);
+    FloatingBallManager::RemoveActiveController(weakRef_);
     if (mainWindow_ != nullptr) {
         mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
     }
@@ -288,12 +288,12 @@ WMError FloatingBallController::RegisterFbClickObserver(const sptr<IFbClickObser
 
 WMError FloatingBallController::UnRegisterFbLifecycle(const sptr<IFbLifeCycle>& listener)
 {
-    return UnregisterListener(fbLifeCycleListeners_, listener);
+    return UnRegisterListener(fbLifeCycleListeners_, listener);
 }
 
 WMError FloatingBallController::UnRegisterFbClickObserver(const sptr<IFbClickObserver>& listener)
 {
-    return UnregisterListener(fbClickObservers_, listener);
+    return UnRegisterListener(fbClickObservers_, listener);
 }
 
 template<typename T>
@@ -312,7 +312,7 @@ WMError FloatingBallController::RegisterListener(std::vector<sptr<T>>& holder, c
 }
 
 template<typename T>
-WMError FloatingBallController::UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");

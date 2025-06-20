@@ -294,9 +294,7 @@ static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pip
 
 static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateInfo& fbTemplateInfo)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "template %{public}d, title %{public}s, content%{public}s, color%{public}s",
-        fbTemplateInfo.template_, fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str(),
-        fbTemplateInfo.backgroundColor_.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "template %{public}d", fbTemplateInfo.template_);
     napi_value fbTemplateInfoValue = nullptr;
     napi_create_object(env, &fbTemplateInfoValue);
     napi_set_named_property(env, fbTemplateInfoValue, "template",
@@ -307,12 +305,15 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.content_));
     napi_set_named_property(env, fbTemplateInfoValue, "backgroundColor",
         CreateJsValue(env, fbTemplateInfo.backgroundColor_));
-    napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
-    if (jsIcon == nullptr) {
-        TLOGNE(WmsLogTag::WMS_SYSTEM, "icon is nullptr");
-        return nullptr;
+
+    if (fbTemplateInfo.icon_ != nullptr) {
+        napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
+        if (jsIcon == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "icon is nullptr");
+            return nullptr;
+        }
+        napi_set_named_property(env, fbTemplateInfoValue, "icon", jsIcon);
     }
-    napi_set_named_property(env, fbTemplateInfoValue, "icon", jsIcon);
     return fbTemplateInfoValue;
 }
 
@@ -3828,7 +3829,6 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
 
 void JsSceneSession::OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
-    TLOGND(WmsLogTag::WMS_LAYOUT, "OnFloatingBallUpdate [NAPI]");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, fbTemplateInfo, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -3906,8 +3906,8 @@ void JsSceneSession::OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk
     auto task = [weakThis = wptr(this), want, persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnFloatingBallStop jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_LAYOUT,
+                "OnFloatingBallRestoreMainWindow jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(FLOATING_BALL_RESTORE_MAIN_WINDOW_CB);

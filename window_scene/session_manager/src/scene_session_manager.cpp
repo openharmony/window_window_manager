@@ -2272,9 +2272,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {
             return allAppUseControlMap_;
         });
-        sceneSession->RegisterGetFbPanelWindowIdFunc([this](uint32_t& windowId)) {
+        sceneSession->RegisterGetFbPanelWindowIdFunc([this](uint32_t& windowId) {
             return this->GetFbPanelWindowId(windowId);
-        }
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -2626,7 +2626,8 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
 }
 
-void SceneSessionManager::InitFbWindow(sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property)
+void SceneSessionManager::InitFbWindow(const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& property)
 {
     if (property != nullptr && WindowHelper::IsFbWindow(property->GetWindowType())) {
         sceneSession->SetFbTemplateInfo(property->GetFbTemplateInfo());
@@ -15327,7 +15328,7 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
         TLOGE(WmsLogTag::WMS_SYSTEM, "The caller has not permission granted");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    std::shared_lockstd::shared_mutex lock(sceneSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FB &&
