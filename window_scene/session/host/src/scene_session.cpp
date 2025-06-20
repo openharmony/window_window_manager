@@ -4573,6 +4573,11 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         }
     }
     NotifyPrivacyModeChange();
+    auto mainSession = GetMainSession();
+    if (mainSession) {
+        ControlInfo controlInfo = { .isNeedControl = isPrivacy, .isControlRecentOnly = true };
+        mainSession->NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
+    }
 }
 
 void SceneSession::NotifyPrivacyModeChange()
