@@ -6952,23 +6952,52 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 }
 
 /**
- * @tc.name: ChangeIsPcDeviceValue
- * @tc.desc: ChangeIsPcDeviceValue
+ * @tc.name: SwitchPCMode
+ * @tc.desc: SwitchPCMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, ChangeIsPcDeviceValue, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     if (!IS_SUPPORT_PC_MODE) {
-        ASSERT_EQ(ssm_->ChangeIsPcDeviceValue(), g_isPcDevice);
+        bool isPcDevice = ssm_->SwitchPCMode();
+        ASSERT_EQ(isPcDevice, g_isPcDevice);
         return;
     }
-    bool isPcDevice = ssm_->ChangeIsPcDeviceValue();
-    if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
+    bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    bool isPcDevice = ssm_->SwitchPCMode();
+    if (isPcMode) {
         EXPECT_TRUE(isPcDevice);
     } else {
         EXPECT_FALSE(isPcDevice);
     }
+}
+
+/**
+ * @tc.name: SwitchExternalScreenToMirror
+ * @tc.desc: SwitchExternalScreenToMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr displayManagerAgent = sptr::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
+    sptr displayManagerAgent1 = sptr::MakeSptr();
+    ASSERT_NE(displayManagerAgent1, nullptr);
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption2";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
+    ssm_->SwitchExternalScreenToMirror();
+    EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
 }
 }
 } // namespace Rosen
