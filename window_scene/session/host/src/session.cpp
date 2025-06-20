@@ -1024,7 +1024,7 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     sessionStage_->UpdateDisplayId(displayId);
     if (displayId != clientDisplayId_) {
         AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
-        NotifyCallingWindowDisplayChanged(GetPersistentId(), displayId);
+        NotifyDisplayIdChanged(GetPersistentId(), displayId);
     }
     clientDisplayId_ = displayId;
     return WSError::WS_OK;
@@ -2728,9 +2728,9 @@ void Session::SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoC
     sessionInfoChangeNotifyManagerFunc_ = func;
 }
 
-void Session::SetCallingWindowDspChangedNotifyManagerListener(const NotifyCallingWinDspChangedNotifyManagerFunc& func)
+void Session::SetDisplayIdChangedNotifyManagerListener(const NotifyDisplayIdChangedNotifyManagerFunc& func)
 {
-    callingWindowDisplayChangedNotifyManagerFunc_ = func;
+    displayIdChangedNotifyManagerFunc_ = func;
 }
 
 void Session::SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func)
@@ -4018,12 +4018,12 @@ void Session::NotifySessionInfoChange()
     }
 }
 
-void Session::NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId)
+void Session::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
 {
-    if (callingWindowDisplayChangedNotifyManagerFunc_) {
-        callingWindowDisplayChangedNotifyManagerFunc_(persistentId, screenId);
+    if (displayIdChangedNotifyManagerFunc_) {
+        displayIdChangedNotifyManagerFunc_(persistentId, displayId);
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "callingWindowDisplayChangedNotifyManagerFunc is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "displayIdChangedNotifyManagerFunc is nullptr");
     }
 }
 

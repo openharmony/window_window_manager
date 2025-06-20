@@ -2657,7 +2657,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     RegisterSessionInfoChangeNotifyManagerFunc(sceneSession);
-    RegisterCallingWindowDisplayChangedNotifyManagerFunc(sceneSession);
+    RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
@@ -8010,20 +8010,20 @@ void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneS
     });
 }
 
-void SceneSessionManager::RegisterCallingWindowDisplayChangedNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::RegisterDisplayIdChangedNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
     wptr<SceneSessionManager> weakThis = this;
-    sceneSession->SetCallingWindowDspChangedNotifyManagerListener(
-        [weakThis](int32_t persistentId, uint64_t screenId) {
+    sceneSession->SetDisplayIdChangedNotifyManagerListener(
+        [weakThis](int32_t persistentId, uint64_t displayId) {
             sptr<SceneSessionManager> sharedThis = weakThis.promote();
             if (sharedThis != nullptr) {
-                sharedThis->NotifyCallingWindowDisplayChanged(persistentId, screenId);
+                sharedThis->NotifyDisplayIdChanged(persistentId, displayId);
             } else {
-                TLOGW(WmsLogTag::DEFAULT, "SceneSessionManager already destroyed");
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "SceneSessionManager already destroyed");
             }
         }
     );
@@ -11940,14 +11940,14 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
 
-    uint64_t newScreenId = screenId;
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId) && 
+    uint64_t displayId = screenId;
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) && 
         !PcFoldScreenManager::GetInstance().HasSystemKeyboard()){
-        newScreenId = sceneSession->GetClientDisplayId();
+        displayId = sceneSession->GetClientDisplayId();
     }
-    auto res = NotifyCallingWindowDisplayChanged(persistentId, newScreenId);
+    auto res = NotifyDisplayIdChanged(persistentId, displayId);
     if (res != WSError::WS_OK){        
-        TLOGE(WmsLogTag::DEFAULT, "notify calling window display change error!");
+        TLOGE(WmsLogTag::DEFAULT, "notify display id change error!");
         return res;
     }
     return WSError::WS_OK;
@@ -14025,11 +14025,11 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
     return WMError::WM_OK;
 }
 
-WSError SceneSessionManager::NotifyCallingWindowDisplayChanged(int32_t persistentId, uint64_t screenId)
+WSError SceneSessionManager::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
-        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     
@@ -14043,7 +14043,7 @@ WSError SceneSessionManager::NotifyCallingWindowDisplayChanged(int32_t persisten
             keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
         if (!keyboardSession->IsSystemKeyboard() &&
             static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
-            CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), screenId, GetUserIdByUid(getuid()));
+            CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), displayId, GetUserIdByUid(getuid()));
             SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
             break;
         }
