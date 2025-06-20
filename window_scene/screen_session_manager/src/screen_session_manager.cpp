@@ -7956,7 +7956,7 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
 {
     std::lock_guardstd::recursive_mutex lock(screenSessionMapMutex_);
     std::ostringstream oss;
-    std::vector externalScreenIds;
+    std::vector<ScreenId> externalScreenIds;
     for (const auto& iter : screenSessionMap_) {
         auto screenSession = iter.second;
         if (screenSession == nullptr) {
