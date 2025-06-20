@@ -18,6 +18,7 @@
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -79,6 +80,7 @@ void SceneSessionManagerTest11::TearDown()
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     ssm_->RefreshAppInfo(BUNDLE_NAME);
     usleep(SLEEP_TIME);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 sptr<SceneSession> SceneSessionManagerTest11::GetSceneSession(const std::string& instanceKey)
@@ -361,6 +363,7 @@ HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, TestSize.Level1)
     abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
     abilityInfo.appIndex = 0;
 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
