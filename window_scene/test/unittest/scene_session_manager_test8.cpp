@@ -18,6 +18,7 @@
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -659,6 +660,7 @@ HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, TestSize.Level1)
 
 HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     SessionInfo info;
     info.bundleName_ = "GetWindowModeType";
     info.abilityName_ = "GetWindowModeType";
@@ -1022,6 +1024,7 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     uint32_t interestInfo = 0;
     interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
@@ -1040,6 +1043,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
  */
 HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     uint32_t interestInfo = 0;
     interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
@@ -1114,6 +1118,38 @@ HWTEST_F(SceneSessionManagerTest8, InitFbWindow, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
     ssm_->InitFbWindow(sceneSession, property);
     EXPECT_EQ(0, sceneSession->GetFbTemplateInfo().template_);
+}
+
+/**
+@tc.name: GetFbPanelWindowId
+@tc.desc: test function : GetFbPanelWindowId
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    uint32_t windowId = 0;
+    ASSERT_NE(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->GetFbPanelWindowId(windowId));
+
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    ASSERT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "Fb_panel8";
+    sessionInfo.abilityName_ = "Fb_panel8";
+    sptr property = sptr::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    property->SetWindowName(sessionInfo.bundleName_);
+    sptr sceneSession = sptr::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_ = property;
+    sceneSession->SetSessionInfoPersistentId(18);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    ASSERT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
+    ASSERT_EQ(sceneSession->GetWindowId(), windowId);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
 }
 } // namespace
 } // namespace Rosen

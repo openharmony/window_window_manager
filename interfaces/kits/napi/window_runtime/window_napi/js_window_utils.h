@@ -167,7 +167,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION         },
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
-    { ApiWindowType::TYPE_FB,                WindowType::WINDOW_TYPE_FB },
+    { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
 };
 
 enum class ApiWindowMode : uint32_t {

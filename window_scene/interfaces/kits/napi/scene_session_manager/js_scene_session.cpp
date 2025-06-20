@@ -294,8 +294,9 @@ static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pip
 
 static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateInfo& fbTemplateInfo)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "template %{public}d, title %{public}s, content%{public}s", fbTemplateInfo.template_,
-        fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "template %{public}d, title %{public}s, content%{public}s, color%{public}s",
+        fbTemplateInfo.template_, fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str(),
+        fbTemplateInfo.backgroundColor_.c_str());
     napi_value fbTemplateInfoValue = nullptr;
     napi_create_object(env, &fbTemplateInfoValue);
     napi_set_named_property(env, fbTemplateInfoValue, "template",
@@ -304,6 +305,8 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.title_));
     napi_set_named_property(env, fbTemplateInfoValue, "content",
         CreateJsValue(env, fbTemplateInfo.content_));
+    napi_set_named_property(env, fbTemplateInfoValue, "backgroundColor",
+        CreateJsValue(env, fbTemplateInfo.backgroundColor_));
     napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
     if (jsIcon == nullptr) {
         TLOGNE(WmsLogTag::WMS_SYSTEM, "icon is nullptr");
@@ -548,7 +551,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "requestSpecificSessionClose", moduleName,
         JsSceneSession::RequestSpecificSessionClose);
     BindNativeFunction(env, objValue, "sendFbActionEvent", moduleName, JsSceneSession::SendFbActionEvent);
-    BindNativeFunction(env, objValue, "setFbWindowId", moduleName, JsSceneSession::SetFbWindowId);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2762,13 +2764,6 @@ napi_value JsSceneSession::SendFbActionEvent(napi_env env, napi_callback_info in
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSendFbActionEvent(env, info) : nullptr;
 }
- 
-napi_value JsSceneSession::SetFbWindowId(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_SYSTEM, "[SetFbWindowId]");
-    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetFbWindowId(env, info) : nullptr;
-}
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
@@ -3861,6 +3856,11 @@ void JsSceneSession::OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemp
             TLOGNE(WmsLogTag::WMS_MAIN, "jsContent is nullptr");
             return;
         }
+        napi_value jsBackgroundColor = CreateJsValue(env, fbTemplateInfo.backgroundColor_);
+        if (jsBackgroundColor == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "jsBackgroundColor is nullptr");
+            return;
+        }
         napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
         if (jsIcon == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "icon is nullptr");
@@ -3871,6 +3871,7 @@ void JsSceneSession::OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemp
         napi_set_named_property(env, fbTemplateInfoValue, "template", jsTemplate);
         napi_set_named_property(env, fbTemplateInfoValue, "title", jsTitle);
         napi_set_named_property(env, fbTemplateInfoValue, "content", jsContent);
+        napi_set_named_property(env, fbTemplateInfoValue, "backgroundColor", jsBackgroundColor);
         napi_set_named_property(env, fbTemplateInfoValue, "icon", jsIcon);
         napi_value argv[] = {fbTemplateInfoValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -5642,34 +5643,6 @@ napi_value JsSceneSession::OnSendFbActionEvent(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
     session->SendFbActionEvent(action);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnSetFbWindowId(napi_env env, napi_callback_info info)
-{
-    size_t argc = 1;
-    napi_value argv[1] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) { // 1: params num
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc count is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    uint32_t windowId = 0;
-    if (!ConvertFromJsValue(env, argv[0], windowId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to uint32_t");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    session->SetFbWindowId(windowId);
-    TLOGI(WmsLogTag::WMS_SYSTEM, "SetFbWindowId id:%{public}d", windowId);
     return NapiGetUndefined(env);
 }
 

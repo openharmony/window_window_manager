@@ -616,6 +616,13 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
+     /*
+     * FloatingBall Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+    void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
+
     /*
      * Window Watermark
      */
