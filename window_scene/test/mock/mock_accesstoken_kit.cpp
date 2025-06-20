@@ -39,6 +39,13 @@ void MockAccesstokenKit::MockAccessTokenKitRet(int32_t accessTokenKitRet)
 {
     g_accessTokenKitRet = accessTokenKitRet;
 }
+
+void MockAccesstokenKit::ChangeMockStateToInit()
+{
+    g_isSystemApp = true;
+    g_isMockGetTokenTypeFlagRet = true;
+    g_accessTokenKitRet = 0;
+}
 }
 
 namespace OHOS::Security::AccessToken {
