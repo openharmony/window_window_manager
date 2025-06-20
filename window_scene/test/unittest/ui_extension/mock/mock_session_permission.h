@@ -23,6 +23,6 @@ public:
     static void ClearAllFlag();
     static void SetIsStartedByUIExtensionFlag(const bool isStartedByUIExtensionFlag);
 };
-}// namespace Rosen
-}// namespace OHOS
+}
+}
 #endif

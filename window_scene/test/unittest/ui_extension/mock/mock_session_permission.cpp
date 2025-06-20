@@ -35,5 +35,5 @@ bool SessionPermission::IsStartedByUIExtension()
 {
     return g_isStartedByUIExtensionFlag;
 }
-}// namespace Rosen
-}// namespace OHOS
+}
+}

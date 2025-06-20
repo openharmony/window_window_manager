@@ -26,6 +26,6 @@ public:
     static void SetUIExtensionRootHostInfo(const UIExtensionHostInfo& hostInfo);
     static void SetUIExtensionSessionInfo(const UIExtensionSessionInfo& sessionInfo);
 };
-}  // namespace AAFwk
-}  // namespace OHOS
+}
+}
 #endif // MOCK_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
