@@ -166,6 +166,12 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
+const std::map<std::string, StartWindowType> CONVERT_STRING_TO_START_WINDOW_TYPE_MAP = {
+    {"REQUIRED_SHOW", StartWindowType::DEFAULT},
+    {"REQUIRED_HIDE", StartWindowType::RETAIN_AND_INVISIBLE},
+    {"OPTIONAL_SHOW", StartWindowType::DEFAULT},
+};
+
 const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBSmartDock",
     "SCBExtScreenDock",
@@ -2599,6 +2605,9 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     RegisterSessionExceptionFunc(sceneSession);
     RegisterVisibilityChangedDetectFunc(sceneSession);
     RegisterSaveSnapshotFunc(sceneSession);
+    if (systemConfig_.IsPcOrPcMode()) {
+        RegisterGetStartWindowConfigCallback(sceneSession);
+    }
     if (systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
         RegisterRemoveSnapshotFunc(sceneSession);
     }
@@ -3442,6 +3451,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         }
         ResetWantInfo(sceneSession);
         sceneSession->ResetSessionInfoResultCode();
+        sceneSession->EditSessionInfo().isSetStartWindowType_ = false;
     }
     NotifySessionForCallback(sceneSession, needRemoveSession);
     // Clear js cb map if needed.
@@ -5332,11 +5342,44 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }
+    SetSessionInfoStartWindowType(sceneSession);
     TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
         "excludeFromMissions:%{public}d label:%{public}s iconPath:%{public}s collaboratorType:%{public}s.",
         abilityInfo->bundleName.c_str(), abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
         abilityInfo->label.c_str(), abilityInfo->iconPath.c_str(), abilityInfo->applicationInfo.codePath.c_str());
 }
+
+void SceneSessionManager::SetSessionInfoStartWindowType(const sptr<SceneSession>& sceneSession)
+{
+    if (systemConfig_.IsPcOrPcMode() && !sceneSession->GetSessionInfo().isSetStartWindowType_) {
+        StartingWindowInfo startingWindowInfo;
+        GetStartupPage(sceneSession->GetSessionInfo(), startingWindowInfo);
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, startWindowType from rdb:%{public}s",
+            sceneSession->GetPersistentId(), startingWindowInfo.startWindowType_.c_str());
+        if (CONVERT_STRING_TO_START_WINDOW_TYPE_MAP.count(startingWindowInfo.startWindowType_) > 0) {
+            sceneSession->EditSessionInfo().startWindowType_ =
+                CONVERT_STRING_TO_START_WINDOW_TYPE_MAP.at(startingWindowInfo.startWindowType_);
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, startWindowType:%{public}d",
+            sceneSession->GetPersistentId(), sceneSession->GetSessionInfo().startWindowType_);
+    }
+}
+
+void SceneSessionManager::RegisterGetStartWindowConfigCallback(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return;
+    }
+    sceneSession->RegisterGetStartWindowConfigFunc([this](const SessionInfo& sessionInfo, std::string& startWindowType) {
+        StartingWindowInfo startingWindowInfo;
+        GetStartupPage(sessionInfo, startingWindowInfo);
+        startWindowType = startingWindowInfo.startWindowType_;
+        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, startWindowType:%{public}s",
+            sessionInfo.persistentId_, startWindowType.c_str());
+    });
+}
+    
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
     const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
@@ -15864,14 +15907,21 @@ WMError SceneSessionManager::GetRouterStackInfo(int32_t persistentId,
         TLOGE(WmsLogTag::WMS_LIFE, "Session with persistentId %{public}d not found", persistentId);
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [this, session, listener, where = __func__] {
-        std::string routerStack;
-        auto ret = session->GetRouterStackInfo(routerStack);
-        if (ret != WMError::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "failed, persistentId %{public}d", session->GetPersistentId());
+    auto task = [this, weakSceneSession = wptr(session), listener, where = __func__] {
+        sptr<SceneSession> session = weakSceneSession.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return;
         }
+        std::string routerStack;
+        auto ret = session->GetRouterStackInfo(routerStack);
         sptr<RouterStackInfo> routerStackInfo = sptr<RouterStackInfo>::MakeSptr(session->GetPersistentId(), routerStack);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "failed, persistentId %{public}d", session->GetPersistentId());
+            routerStackInfo->errCode_ = ret;
+            listener->SendRouterStackInfo(routerStackInfo);
+            return;
+        }
         listener->SendRouterStackInfo(routerStackInfo);
     };
     ffrtQueueHelper_->SubmitTask(task);

@@ -91,6 +91,7 @@ constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
+const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -5302,20 +5303,41 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
         info.fullScreenStart_ = true;
     }
+    session->CalculatedStartWindowType(info, abilitySessionInfo->hideStartWindow);
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
         "supportedWindowModes.size:%{public}zu, requestId:%{public}d, "
         "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d, "
-        "reuseDelegatorWindow:%{public}d",
+        "reuseDelegatorWindow:%{public}d, startWindowType:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
-        info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight, info.reuseDelegatorWindow);
+        info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight,
+        info.reuseDelegatorWindow, info.startWindowType_);
     return info;
+}
+
+void SceneSession::CalculatedStartWindowType(SessionInfo& info, bool hideStartWindow)
+{
+    if (getStartWindowConfigFunc_ == nullptr || GetSessionInfo().bundleName_ != info.bundleName_) {
+        TLOGI(WmsLogTag::WMS_LIFE, "only same app in pc or pcMode.");
+        return;
+    }
+    std::string startWindowType;
+    getStartWindowConfigFunc_(info, startWindowType);
+    if (startWindowType == OPTIONAL_SHOW) {
+        info.startWindowType_ = hideStartWindow ? StartWindowType::RETAIN_AND_INVISIBLE : StartWindowType::DEFAULT;
+        info.isSetStartWindowType_ = true;
+    }
+}
+
+void SceneSession::RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func)
+{
+    getStartWindowConfigFunc_ = std::move(func);
 }
 
 WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)

@@ -351,6 +351,12 @@ struct WindowSizeLimits {
     }
 };
 
+enum class StartWindowType : uint32_t {
+    DEFAULT = 0,
+    RETAIN_AND_INVISIBLE,
+    REMOVE_NODE_INVISIBLE,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -413,6 +419,8 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    StartWindowType startWindowType_ = StartWindowType::DEFAULT;
+    bool isSetStartWindowType_ = false;
 
     /*
      * Keyboard
@@ -720,6 +728,7 @@ struct StartingWindowInfo {
     std::string brandingPath_;
     std::string backgroundImagePath_;
     std::string backgroundImageFit_;
+    std::string startWindowType_;
 };
 
 struct StartingWindowPageDrawInfo {
