@@ -1617,9 +1617,9 @@ HWTEST_F(SceneSessionManagerTest10, NotifyWindowSystemBarPropertyChange, TestSiz
     ASSERT_NE(ssm_, nullptr);
     SystemBarProperty systemBarProperty;
     ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
-    ASSERT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+    EXPECT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
     ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
-    ASSERT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+    EXPECT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
 }
 
 /**
