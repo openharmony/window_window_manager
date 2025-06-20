@@ -55,5 +55,5 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
     }
     return 0;
 }
-} // namespace AAFwk
-} // namespace OHOS
+}
+}
