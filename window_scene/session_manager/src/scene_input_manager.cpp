@@ -20,6 +20,7 @@
 #include "scene_session_dirty_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session/host/include/session_change_recorder.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -499,6 +500,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
     std::ostringstream idListStream;
+    std::ostringstream dumpWindowListStream;
     static std::string lastIdList;
     static uint32_t windowEventID = 0;
     if (windowEventID == UINT32_MAX) {
@@ -526,6 +528,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         if (e.uiExtentionWindowInfo.size() > 0) {
             DumpUIExtentionWindowInfo(e);
         }
+        ConstructDumpWindowInfo(e, dumpWindowListStream);
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
     SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
@@ -538,12 +541,19 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
             windowEventID, windowListSize, idList.c_str());
         lastIdList = idList;
     }
+    std::string dumpWindowList = dumpWindowListStream.str();
+    SceneSessionChangeInfo changeInfo {
+        .changeInfo_ = "WindowInfos: " + dumpWindowList,
+        .logTag_ = WmsLogTag::WMS_EVENT,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::EVENT_RECORD, changeInfo);
 }
 
 void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos)
 {
     int displayListSize = static_cast<int>(displayInfos.size());
     std::ostringstream displayListStream;
+    std::ostringstream dumpDisplayListStream;
     static std::string lastDisplayList = "";
     for (auto& displayInfo : displayInfos) {
         displayListStream << displayInfo.id << "|" << displayInfo.x << "|" << displayInfo.y << "|"
@@ -561,6 +571,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
                           << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
                           << displayInfo.expandHeight << "|" << displayInfo.uniqueId << ",";
+        ConstructDumpWindowInfo(displayInfo, dumpWindowListStream);
     }
 
     std::string displayList = displayListStream.str();
@@ -568,6 +579,12 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
         TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", displayListSize, displayList.c_str());
         lastDisplayList = displayList;
     }
+    std::string dumpDisplayList = dumpDisplayListStream.str();
+    SceneSessionChangeInfo changeInfo {
+        .changeInfo_ = "DisplayInfos: " + dumpDisplayList,
+        .logTag_ = WmsLogTag::WMS_EVENT,
+    };
+    SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::EVENT_RECORD, changeInfo);
 }
 
 void SceneInputManager::SetUserBackground(bool userBackground)
@@ -705,6 +722,82 @@ std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalEx
         .persistentId = persistentId,
         .pid = constrainedModalUIExtInfo.uiExtensionPid,
         .isConstrainedModal = true };
+}
+
+void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& displayInfo,
+    std::ostringstream& dumpDisplayListStream)
+{
+    std::ostringstream transformStream;
+    transformStream << "[";
+    for (auto& it : disaplyinfo.transform) {
+        transformStream << it << ', ';
+    }
+    transformStream << ']';
+    dumpDisplayListStream << "id:" << displayInfo.id << "|x:" << displayInfo.x << "|y:" << displayInfo.y
+                          << "width:" << displayInfo.width << "|height:" << displayInfo.height << "|dpi:"
+                          << displayInfo.dpi << "|name:" << displayInfo.name << "|uniq:" << displayInfo.uniq
+                          << "|direction:" << static_cast<int32_t>(displayInfo.direction) << "|displayDirection:"
+                          << static_cast<int32_t>(displayInfo.displayDirection) << "|displayMode:"
+                          << static_cast<int32_t>(displayInfo.displayMode) << "|transform:" << transformStream.str()
+                          << "|offsetX:" << displayInfo.offsetX << "|offsetY:" << displayInfo.offsetY << "|ppi:"
+                          << displayInfo.ppi << "|scalePercent:" << displayInfo.scalePercent << "|expandHeight:"
+                          << displayInfo.expandHeight << "|isCurrentOffScreenRendering:"
+                          << displayInfo.isCurrentOffScreenRendering << "|screenRealWidth:"
+                          << displayInfo.screenRealWidth << "|screenRealHeight:" << displayInfo.screenRealHeight
+                          << "|screenRealPPI:" << displayInfo.screenRealPPI << "|screenRealDPI:"
+                          << displayInfo.screenRealDPI << "|screenCombination:"
+                          << static_cast<int32_t>(displayInfo.screenCombination) << "|validWidth"
+                          << displayInfo.validWidth << "|validHeight:" << displayInfo.validHeight
+                          << "|fixedDirection:" << displayInfo.fixedDirection << "|physicalWidth:"
+                          << displayInfo.physicalWidth << "|physicalHeight:" << displayInfo.physicalHeight
+                          << "|oneHandX:" << displayInfo.oneHandX << "|oneHandY:" << displayInfo.oneHandY
+                          << "|pointerActiveWidth:" << displayInfo.pointerActiveWidth << "|pointerActiveHeight:"
+                          << displayInfo.pointerActiveHeight << "|uniqueId:" << displayInfo.uniqueId << ", ";
+}
+
+void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInfo,
+    std::ostringstream& dumpWindowListStream)
+{
+    std::ostringstream transformStream;
+    transformStream << "[";
+    for (auto& it : windowInfo.transform) {
+        transformStream << it << ", ";
+    }
+    transformStream << "]";
+    std::ostringstream defaultHotAreasStream;
+    for (auto& defaultHotArea : windowInfo.defaultHotAreas) {
+        std::ostringstream defaultHotAreaStream;
+        defaultHotAreaStream << "[" << defaultHotArea.x << ", " <<defaultHotArea.y << ", "
+                             << defaultHotArea.width << ", " <<defaultHotArea.height << "]";
+        defaultHotAreasStream << defaultHotAreaStream.str() << " ";
+    }
+    std::ostringstream pointerHotAreasStream;
+    for (auto& pointerHotArea : windowInfo.pointerHotAreas) {
+        std::ostringstream pointerHotAreaStream;
+        pointerHotAreaStream << "[" << pointerHotArea.x << ", " <<pointerHotArea.y << ", "
+                             << pointerHotArea.width << ", " <<pointerHotArea.height << "]";
+        pointerHotAreasStream << pointerHotAreaStream.str() << " ";
+    }
+    std::ostringstream pointerChangeAreasStream;
+    pointerChangeAreasStream << "[";
+    for (auto& pointerChangeArea : windowInfo.pointerChangeAreas) {
+        pointerChangeAreasStream << pointerChangeArea << ", ";
+    }
+    pointerChangeAreasStream << "]";
+    dumpWindowListStream << "id:" << windowInfo.id << "|pid:" << windowInfo.pid << "|uid:" << windowInfo.uid
+                          << "|area:[" << windowInfo.area.x << ", " << windowInfo.area.y << ", "
+                          << windowInfo.area.width << ", " << windowInfo.area.height << "]"
+                          << "|defaultHotAreas:" << defaultHotAreasStream.str()
+                          << "|pointerHotAreas:" << pointerHotAreasStream.str() << "|agentWindowId:"
+                          << windowInfo.agentWindowId << "|action:" << static_cast<uint32_t>(windowInfo.action)
+                          << "|displayId:" << windowInfo.displayId << "|zOrder:" << windowInfo.zOrder
+                          << "|pointerChangeAreas:" << pointerChangeAreasStream.str() << "|transform:"
+                          << transformStream.str() << "|windowInputType:"
+                          << static_cast<int32_t>(windowInfo.windowInputType) << "|windowType:"
+                          << windowInfo.windowType << "|isSkipSelfWhenShowOnVirtualScreen:"
+                          << windowInfo.isSkipSelfWhenShowOnVirtualScreen << "|windowNameType:"
+                          << windowInfo.windowNameType << "|groupId:" << windowInfo.groupId
+                          << "|flags:" << windowInfo.flags << ", ";
 }
 }
 } // namespace OHOS::Rosen

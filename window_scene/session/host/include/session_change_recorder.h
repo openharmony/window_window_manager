@@ -36,6 +36,7 @@ enum class RecordType : uint32_t {
     VISIBLE_RECORD,
     PRIVACY_MODE,
     ORIENTAION_RECORD,
+    EVENT_RECORD,
     RECORD_TYPE_END,
 };
 
