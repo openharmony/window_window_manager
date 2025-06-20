@@ -4889,6 +4889,12 @@ bool SceneSession::IsSameMainSession(const sptr<SceneSession>& prevSession)
     return currSessionId == prevSessionId && prevSessionId != INVALID_SESSION_ID;
 }
 
+/* @note @window.focus */
+bool SceneSession::IsDelayFocusChange()
+{
+    return GetHidingStartingWindow();
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
@@ -5330,7 +5336,11 @@ void SceneSession::CalculatedStartWindowType(SessionInfo& info, bool hideStartWi
     std::string startWindowType;
     getStartWindowConfigFunc_(info, startWindowType);
     if (startWindowType == OPTIONAL_SHOW) {
-        info.startWindowType_ = hideStartWindow ? StartWindowType::RETAIN_AND_INVISIBLE : StartWindowType::DEFAULT;
+        info.startWindowType_ = StartWindowType::DEFAULT;
+        if (hideStartWindow) {
+            info.startWindowType_ = StartWindowType::RETAIN_AND_INVISIBLE;
+            SetHidingStartingWindow(true);
+        }
         info.isSetStartWindowType_ = true;
     }
 }
