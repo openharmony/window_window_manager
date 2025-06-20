@@ -15324,10 +15324,6 @@ WMError SceneSessionManager::HasFloatingWindowForeground(const sptr<IRemoteObjec
 
 WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
 {
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "The caller has not permission granted");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
@@ -15338,7 +15334,7 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
         }
     }
     TLOGW(WmsLogTag::WMS_SYSTEM, "no Fb panel");
-    return WMError::WM_OK;
+    return WMError::WM_ERROR_FB_INTERNAL_ERROR;
 }
 
 void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
