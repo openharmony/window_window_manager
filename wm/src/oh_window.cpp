@@ -563,7 +563,7 @@ int32_t OH_WindowManager_InjectTouchEvent(
     }
     if (OH_Input_GetTouchEventWindowId(touchEvent) == -1) {
         OH_Input_SetTouchEventWindowId(touchEvent, windowId);
-        TLOGE(WmsLogTag::WMS_EVENT, "windowId is default");
+        TLOGI(WmsLogTag::WMS_EVENT, "windowId is default");
     }
     if (OH_Input_GetTouchEventWindowId(touchEvent) != windowId) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowIds are not equal, windowId:%{public}d", windowId);
