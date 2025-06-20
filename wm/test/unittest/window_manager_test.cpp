@@ -22,12 +22,20 @@
 #include "window_manager.h"
 
 #include "window_manager.cpp"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
 public:
@@ -794,10 +802,6 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObj;
     WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
-        return;
-    }
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -809,9 +813,13 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 HWTEST_F(WindowManagerTest, GetFocusWindowInfo, TestSize.Level1)
 {
     FocusChangeInfo focusInfo;
-    auto ret = 0;
-    WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
-    ASSERT_EQ(0, ret);
+    DisplayId displayId = 0;
+    WindowManager::GetInstance().GetFocusWindowInfo(focusInfo, displayId);
+    WindowAdapter windowAdapter;
+
+    windowAdapter.GetFocusWindowInfo(focusInfo, displayId);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -863,11 +871,14 @@ HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 0;
     bool isShowing = true;
-    auto ret = 0;
     WindowManager::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -877,10 +888,13 @@ HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     bool showwatermark = true;
-    auto ret = 0;
     WindowManager::GetInstance().NotifyWaterMarkFlagChangedResult(showwatermark);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -890,10 +904,13 @@ HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     bool enable = true;
-    auto ret = 0;
     WindowManager::GetInstance().NotifyGestureNavigationEnabledResult(enable);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Notify gesture navigation enable result, enable=%{public}d")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1027,9 +1044,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, TestSize.Level
     newInfo.displayId = 0;
     newInfo.visibleWindowNum = 2;
     visibleWindowNumInfo.push_back(newInfo);
-    auto ret = 0;
     windowManager.UpdateVisibleWindowNum(visibleWindowNumInfo);
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -2058,6 +2073,7 @@ HWTEST_F(WindowManagerTest, AnimateTo01, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
     EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace
 } // namespace Rosen
