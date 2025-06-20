@@ -183,7 +183,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
-    BindNativeFunction(env, objValue, "isWindowShowing", moduleName, JsExtensionWindow::IsWindowShowing);
+        
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
 
@@ -552,11 +552,6 @@ napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_ca
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     return objValue;
-}
-
-napi_value JsExtensionWindow::IsWindowShowing(napi_env env, napi_callback_info info)
-{
-    return CreateJsValue(env, true);
 }
 
 napi_valuetype GetType(napi_env env, napi_value value)
