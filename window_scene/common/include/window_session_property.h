@@ -543,7 +543,7 @@ private:
     
     /*
      * Window Lifecycle
-     */ 
+     */
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;
     
