@@ -52,9 +52,9 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
             moveDragController_->SetAspectRatio(aspectRatio_);
         }
     }
-    auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (persistentImageFit) {
+    auto isPersistentImageFit = ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(GetPersistentId()), ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (isPersistentImageFit) {
         ScenePersistence_->SetHasSnapshot(true);
     }
 
