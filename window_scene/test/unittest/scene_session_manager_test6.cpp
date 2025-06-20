@@ -19,6 +19,7 @@
 #include <regex>
 #include "context.h"
 #include "interfaces/include/ws_common.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_ibundle_mgr.h"

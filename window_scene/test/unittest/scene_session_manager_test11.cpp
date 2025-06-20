@@ -18,6 +18,7 @@
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
