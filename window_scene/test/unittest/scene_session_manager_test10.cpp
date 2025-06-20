@@ -1614,7 +1614,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerTest10, NotifyWindowSystemBarPropertyChange, TestSize.Level0)
 {
-    ASSERT_NE(ssm_, nullptr);
+    EXPECT_NE(ssm_, nullptr);
     SystemBarProperty systemBarProperty;
     ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
     EXPECT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);

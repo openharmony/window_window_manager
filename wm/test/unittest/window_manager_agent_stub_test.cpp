@@ -458,7 +458,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest22, TestSize.Level1)
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE);
-    ASSERT_NE(stub_, nullptr);
+    EXPECT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
