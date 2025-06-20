@@ -1775,6 +1775,10 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onHandleSecureSessionShouldHide_ = [this](const sptr<SceneSession>& sceneSession) {
         return this->HandleSecureSessionShouldHide(sceneSession);
     };
+    specificCb->onNotifyWindowSystemBarPropertyChangeFunc_ = [this](
+        WindowType type, const SystemBarProperty& systemBarProperty) {
+        return this->NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+    };
     specificCb->onCameraSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraWindowStatus(accessTokenId, isShowing);
     };
@@ -15546,6 +15550,21 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
         }
         return SetParentWindowInner(subSession, oldParentSession, newParentSession);
     });
+}
+
+void SceneSessionManager::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    {
+        std::lock_guard<std::mutex> lock(lastSystemBarPropertyMapMutex_);
+        auto iter = lastSystemBarPropertyMap_.find(type);
+        if (iter != lastSystemBarPropertyMap_.end() && iter->second == systemBarProperty) {
+            TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d prop same as last time.", type);
+            return;
+        }
+        lastSystemBarPropertyMap_[type] = systemBarProperty;
+    }
+    SessionManagerAgentController::GetInstance().NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
 }
 
 WMError SceneSessionManager::MinimizeByWindowId(const std::vector<int32_t>& windowIds)

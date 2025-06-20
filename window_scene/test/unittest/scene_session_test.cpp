@@ -1031,6 +1031,36 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetSystemBarProperty03
+ * @tc.desc: SetSystemBarProperty03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemBarProperty03";
+    info.bundleName_ = "SetSystemBarProperty03";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallback->onNotifyWindowSystemBarPropertyChangeFunc_ = [](
+        WindowType type, const SystemBarProperty& systemBarProperty) {};
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    sceneSession->onSystemBarPropertyChange_ =[](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {};
+    SystemBarProperty statusBarProperty;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
+    EXPECT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, statusBarProperty),
+        WSError::WS_OK);
+    sceneSession->specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ = nullptr;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
+}
+
+/**
  * @tc.name: OnShowWhenLocked
  * @tc.desc: OnShowWhenLocked
  * @tc.type: FUNC ok
