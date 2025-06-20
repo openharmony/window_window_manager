@@ -482,8 +482,8 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
  * @tc.desc: check func PrintWindowInfo
  * @tc.type: FUNC
  */
- HWTEST_F(SceneInputManagerTest, PrintWindowInfo, TestSize.Level0)
- {
+HWTEST_F(SceneInputManagerTest, PrintWindowInfo, TestSize.Level0)
+{
     GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintWindowInfo start";
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -502,7 +502,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     logMsg.clear();
 
     GTEST_LOG_(INFO) << "SceneInputManagerTest: PrintWindowInfo end";
- }
+}
 
  /**
  * @tc.name: PrintDisplayInfo
