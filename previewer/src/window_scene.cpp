@@ -29,6 +29,9 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 }
 WindowScene::~WindowScene()
 {
+    if (mainWindow_ != nullptr) {
+        mainWindow_->Destroy();
+    }
 }
 
 WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
