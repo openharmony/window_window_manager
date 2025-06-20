@@ -2067,10 +2067,10 @@ HWTEST_F(SceneSessionManagerTest12, NotifyDisplayIdChanged, TestSize.Level1)
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    auto result = ssm_->NotifyDisplayIdChanged(85, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
-    result = ssm_->NotifyDisplayIdChanged(86, 12);
+    ssm_->NotifyDisplayIdChanged(85, 12);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->NotifyDisplayIdChanged(86, 12);
 }
 
 /**

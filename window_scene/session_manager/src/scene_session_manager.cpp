@@ -8035,17 +8035,9 @@ void SceneSessionManager::RegisterDisplayIdChangedNotifyManagerFunc(const sptr<S
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
         return;
     }
-    wptr<SceneSessionManager> weakThis = this;
-    sceneSession->SetDisplayIdChangedNotifyManagerListener(
-        [weakThis](int32_t persistentId, uint64_t displayId) {
-            sptr<SceneSessionManager> sharedThis = weakThis.promote();
-            if (sharedThis != nullptr) {
-                sharedThis->NotifyDisplayIdChanged(persistentId, displayId);
-            } else {
-                TLOGE(WmsLogTag::WMS_KEYBOARD, "SceneSessionManager already destroyed");
-            }
-        }
-    );
+    sceneSession->SetDisplayIdChangedNotifyManagerListener([this](int32_t persistentId, uint64_t displayId) {
+        NotifyDisplayIdChanged(persistentId, displayId);
+    });
 }
 
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
