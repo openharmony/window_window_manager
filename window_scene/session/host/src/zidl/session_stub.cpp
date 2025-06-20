@@ -212,7 +212,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateFloatingBall(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE):
             return HandleStopFloatingBall(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_UI_ABILITY):
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW):
             return HandleStartFloatingBallMainWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID):
             return HandleGetFloatingBallWindowId(data, reply);

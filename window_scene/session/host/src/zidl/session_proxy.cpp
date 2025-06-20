@@ -1868,7 +1868,7 @@ WMError SessionProxy::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& wa
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_UI_ABILITY),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

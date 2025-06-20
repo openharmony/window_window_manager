@@ -14,6 +14,7 @@
  */
 
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -64,6 +65,7 @@ WmErrorCode FindCodeByError(WMError error)
     if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
         return iter->second;
     }
+    TLOGE(WmsLogTag::DEFAULT, "not find error::%{public}d", static_cast<int32_t>(error));
     return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
 }
 }

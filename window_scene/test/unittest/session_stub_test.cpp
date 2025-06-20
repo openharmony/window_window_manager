@@ -425,6 +425,36 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest08
+ * @tc.desc: sessionStub ProcessRemoteRequestTest08
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
