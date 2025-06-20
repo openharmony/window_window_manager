@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "chrono": "cpp",
-        "span": "cpp",
-        "string": "cpp",
-        "mutex": "cpp",
-        "shared_mutex": "cpp"
-    }
-}
