@@ -86,8 +86,7 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
 void IPCSpecificInterfaceFuzzTest1(const sptr<IRemoteObject>& proxy, MessageParcel& sendData, MessageParcel& reply,
     MessageOption& option)
 {
-    for (uint32_t i = 0;
-        i <= static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_DISPLAY_PHYSICAL_RESOLUTION); i++) {
+    for (uint32_t i = 0; i <= static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_BRIGHTNESS); i++) {
         proxy->SendRequest(i, sendData, reply, option);
     }
 }
