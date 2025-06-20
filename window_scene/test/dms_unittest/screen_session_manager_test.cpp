@@ -6981,17 +6981,17 @@ HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    sptr displayManagerAgent = sptr::MakeSptr();
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "testVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr screenSession = ssm_->GetScreenSession(screenId);
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
     ssm_->SwitchExternalScreenToMirror();
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
     ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
-    sptr displayManagerAgent1 = sptr::MakeSptr();
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = sptr<DisplayManagerAgentDefault>::MakeSptr();
     ASSERT_NE(displayManagerAgent1, nullptr);
     VirtualScreenOption virtualOption1;
     virtualOption1.name_ = "createVirtualOption2";
@@ -6999,6 +6999,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     ssm_->SwitchExternalScreenToMirror();
     EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+    ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
 }
 }
