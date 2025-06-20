@@ -127,18 +127,6 @@ SceneSession::~SceneSession()
     }
 }
 
-void SceneSession::SetUseControlResult(bool isAppUseControl)
-{
-    std::lock_guard<std::mutex> lock(appControlMutex_);
-    isAppUseControl_ = isAppUseControl;
-}
-
-bool SceneSession::GetUseControlResult() const
-{
-    std::lock_guard<std::mutex> lock(appControlMutex_);
-    return isAppUseControl_;
-}
-
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -1215,10 +1203,10 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
                 key.c_str(), info.isNeedControl, info.isControlRecentOnly);
             session->onUpdateAppUseControlFunc_(type, info.isNeedControl, info.isControlRecentOnly);
             if (info.isNeedControl && !info.isControlRecentOnly) {
-                appUseControlResult = (info.isNeedControl && !info.isControlRecentOnly);
+                appUseControlResult = true;
             }
         }
-        session->SetUseControlResult(appUseControlResult);
+        session->isAppUseControl_ = appUseControlResult;
     }, __func__);
 }
 
@@ -1232,17 +1220,18 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
         }
         session->appUseControlMap_[type] = controlInfo;
         if (session->onUpdateAppUseControlFunc_) {
+            bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
+            session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
             if (session->sessionStage_ == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
                 return;
             }
-            bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
             if (isAppUseControl) {
                 TLOGNI(WmsLogTag::WMS_LIFE, "begin call pause");
                 session->NotifyForegroundInteractiveStatus(false);
-            } else if (!controlInfo.isNeedControl) {
+            } else {
                 TLOGNI(WmsLogTag::WMS_LIFE, "begin call resume");
                 session->NotifyForegroundInteractiveStatus(true);
             }

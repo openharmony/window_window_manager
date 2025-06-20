@@ -1134,23 +1134,6 @@ HWTEST_F(SceneSessionTest3, SetUseControlStateToProperty, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetUseControlResult
- * @tc.desc: SetUseControlResult and GetUseControlResult
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetUseControlResult, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetUseControlResult";
-    info.bundleName_ = "SetUseControlResult";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
-    bool isUseControl = true;
-    session->SetUseControlResult(isUseControl);
-    EXPECT_EQ(true, session->GetUseControlResult());
-}
-
-/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC
