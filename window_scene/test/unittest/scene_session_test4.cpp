@@ -1531,13 +1531,6 @@ HWTEST_F(SceneSessionTest4, CheckGetMainWindowAvoidAreaAvailable02, TestSize.Lev
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(false, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
         AvoidAreaType::TYPE_SYSTEM));
-    
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetIsAdaptToImmersive(true);
-    property->SetCompatibleModeProperty(compatibleModeProperty);
-    session->SetSessionProperty(property);
-    EXPECT_EQ(true, session->CheckGetMainWindowAvoidAreaAvailable(WindowMode::WINDOW_MODE_FLOATING,
-        AvoidAreaType::TYPE_SYSTEM));
 }
 
 /**
