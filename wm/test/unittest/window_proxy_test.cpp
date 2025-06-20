@@ -17,11 +17,19 @@
 #include "window_proxy.h"
 
 #include "window_agent.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 class WindowProxyTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -294,13 +302,15 @@ HWTEST_F(WindowProxyTest, NotifyScreenshotAppEvent, TestSize.Level1)
  */
 HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(windowProxy_, nullptr);
-    WMError err = WMError::WM_OK;
     bool interactive = false;
     windowProxy_->NotifyForegroundInteractiveStatus(interactive);
-    ASSERT_EQ(err, WMError::WM_OK);
+    EXPECT_TRUE(g_errLog.find("remote is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
-
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

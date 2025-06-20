@@ -132,6 +132,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent1, TestSize.Level1)
  */
 HWTEST_F(InputTransferStationTest, OnInputEvent2, TestSize.Level1)
 {
+    g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     auto axisEvent = MMI::AxisEvent::Create();
     auto tempAxisEvent = axisEvent;
@@ -141,6 +142,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent2, TestSize.Level1)
     axisEvent = tempAxisEvent;
     listener->OnInputEvent(axisEvent);
     EXPECT_FALSE(g_errLog.find("Receive axisEvent, windowId: %{public}d") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
