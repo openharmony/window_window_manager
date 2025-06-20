@@ -2203,7 +2203,7 @@ bool SceneSession::CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, Avoid
 {
     if (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
         return true;
-     }
+    }
     if (winMode == WindowMode::WINDOW_MODE_FLOATING && IsFreeMultiWindowMode()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type pad free multi window mode, return 0", GetPersistentId());
         return false;
