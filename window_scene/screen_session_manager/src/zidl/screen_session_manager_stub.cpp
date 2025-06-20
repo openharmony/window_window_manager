@@ -1386,8 +1386,16 @@ void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& dat
 
 void ScreenSessionManagerStub::ProcSetVirtualScreenAutoRotation(MessageParcel& data, MessageParcel& reply)
 {
-    ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-    bool enable = static_cast<bool>(data.ReadBool());
+    ScreenId screenId = 0;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Read screenId failed.");
+        return;
+    }
+    bool enable = false;
+    if (!data.ReadBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Read enable failed.");
+        return;
+    }
     DMError ret = SetVirtualScreenAutoRotation(screenId, enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
 }
