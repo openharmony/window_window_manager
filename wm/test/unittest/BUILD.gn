@@ -72,6 +72,8 @@ group("unittest") {
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
     "window_recover:wm_window_recover_manager_test",
+    ":wm_floating_ball_test",
+    ":wm_floating_ball_manager_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
@@ -607,6 +609,35 @@ ohos_unittest("wm_oh_window_pip_test") {
   external_deps = [
     "ability_runtime:runtime",
     "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_floating_ball_test") {
+  module_out_path = module_out_path
+ 
+  sources = [ "floating_ball_controller_test.cpp",
+              "floating_ball_option_test.cpp", ]
+ 
+  deps = [ ":wm_unittest_common" ]
+ 
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+ 
+ohos_unittest("wm_floating_ball_manager_test") {
+  module_out_path = module_out_path
+ 
+  sources = [ "floating_ball_manager_test.cpp", ]
+ 
+  deps = [ ":wm_unittest_common" ]
+ 
+  external_deps = [
+    "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
   ]

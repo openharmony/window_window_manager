@@ -55,7 +55,7 @@ void WindowDisplayChangeAdapter::OnDestroy(DisplayId displayId)
 void WindowDisplayChangeAdapter::OnChange(DisplayId displayId)
 {
     if (displayInfoChangeListener_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "notify display info failed because of the listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
@@ -71,7 +71,7 @@ void WindowDisplayChangeAdapter::OnChange(DisplayId displayId)
     auto density = displayInfo->GetVirtualPixelRatio();
     auto orientation = displayInfo->GetDisplayOrientation();
     if (displayId_ == displayId && NearEqual(density_, density) && orientation_ == orientation) {
-        TLOGW(WmsLogTag::DMS, "not need notify display info, data is not changed.");
+        TLOGW(WmsLogTag::DMS, "data is not changed.");
         return;
     }
     displayId_ = displayId;
@@ -84,11 +84,11 @@ void WindowDisplayChangeAdapter::OnDisplayInfoChange(const sptr<IRemoteObject>& 
     DisplayId displayId, float density, DisplayOrientation orientation)
 {
     if (displayInfoChangeListener_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "notify display info failed because of the listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return;
     }
     if (displayId_ == displayId && NearEqual(density_, density) && orientation_ == orientation) {
-        TLOGW(WmsLogTag::DMS, "not need notify display info, data is not changed.");
+        TLOGW(WmsLogTag::DMS, "data is not changed.");
         return;
     }
     displayId_ = displayId;

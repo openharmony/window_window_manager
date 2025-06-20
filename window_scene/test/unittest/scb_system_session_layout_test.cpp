@@ -65,7 +65,7 @@ namespace {
 HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, TestSize.Level1)
 {
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(WSError::WS_OK, scbSystemSession_->SetSystemSceneBlockingFocus(true));
     WSRect rect = { 0, 0, 0, 0 };
     scbSystemSession_->UpdatePointerArea(rect);

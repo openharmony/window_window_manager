@@ -907,7 +907,7 @@ WSError SessionStageProxy::NotifyLayoutFinishAfterWindowModeChange(WindowMode mo
     return WSError::WS_OK;
 }
 
-WMError SessionStageProxy::UpdateWindowLayoutById(int32_t windowId, int32_t updateMode)
+WMError SessionStageProxy::UpdateWindowModeForUITest(int32_t updateMode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -915,11 +915,6 @@ WMError SessionStageProxy::UpdateWindowLayoutById(int32_t windowId, int32_t upda
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteInt32(windowId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -934,7 +929,7 @@ WMError SessionStageProxy::UpdateWindowLayoutById(int32_t windowId, int32_t upda
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t requestCode =
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_WINDOW_LAYOUT_BY_ID);
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST);
     if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1288,6 +1283,34 @@ WSError SessionStageProxy::SetPipActionEvent(const std::string& action, int32_t 
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::SendFbActionEvent(const std::string& action)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteString(action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;

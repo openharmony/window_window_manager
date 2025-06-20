@@ -1775,6 +1775,126 @@ HWTEST_F(SessionProxyTest, ChangeKeyboardEffectOption01, Function | SmallTest | 
     WSError res = sProxy->ChangeKeyboardEffectOption(effectOption);
     EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
+
+/**
+ * @tc.name: UpdateFloatingBall
+ * @tc.desc: UpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateFloatingBall, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    FloatingBallTemplateInfo fbTemplateInfo;
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError res = sProxy->UpdateFloatingBall(fbTemplateInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    res = sProxy->UpdateFloatingBall(fbTemplateInfo);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+
+    iRemoteObjectMocker->sendRequestResult_ = 1;
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+}
+
+/**
+ * @tc.name: RestoreFbMainWindow
+ * @tc.desc: RestoreFbMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RestoreFbMainWindow, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto want = std::make_shared<AAFwk::Want>();
+    ASSERT_NE(want, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->RestoreFbMainWindow(want));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->RestoreFbMainWindow(want));
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    WMError res = sProxy->RestoreFbMainWindow(want);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->RestoreFbMainWindow(want));
+
+    iRemoteObjectMocker->sendRequestResult_ = 1;
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->RestoreFbMainWindow(want));
+}
+
+/**
+ * @tc.name: GetFloatingBallWindowId
+ * @tc.desc: GetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    uint32_t windowId = 0;
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetFloatingBallWindowId(windowId));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    WMError res = sProxy->GetFloatingBallWindowId(windowId);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetFloatingBallWindowId(windowId));
+
+    iRemoteObjectMocker->sendRequestResult_ = 1;
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetFloatingBallWindowId(windowId));
+}
+
+/**
+ * @tc.name: NotifyFloatingBallPrepareClose
+ * @tc.desc: NotifyFloatingBallPrepareClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyFloatingBallPrepareClose, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyFloatingBallPrepareClose();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    sProxy->NotifyFloatingBallPrepareClose();
+
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    sProxy->NotifyFloatingBallPrepareClose();
+
+    iRemoteObjectMocker->sendRequestResult_ = 1;
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sProxy->NotifyFloatingBallPrepareClose();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

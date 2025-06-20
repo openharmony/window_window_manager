@@ -328,7 +328,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 {
-    WLOGFI("Notify water mark flag changed result, showWaterMark=%{public}d", showWaterMark);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}d", showWaterMark);
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -377,7 +377,7 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         iter = displayInfoChangedListeners_.find(token);
         if (iter == displayInfoChangedListeners_.end()) {
-            TLOGI(WmsLogTag::DMS, "can not find token in listener list, need not notify the change of display info");
+            TLOGI(WmsLogTag::DMS, "can not find token in listener list");
             return;
         }
         displayInfoChangedListeners = iter->second;
