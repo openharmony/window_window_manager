@@ -973,7 +973,7 @@ void SessionStageProxy::NotifyAppUseControlStatus(bool isUseControl)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return;
