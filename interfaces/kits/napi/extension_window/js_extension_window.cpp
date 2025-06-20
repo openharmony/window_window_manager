@@ -183,7 +183,6 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
-        
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
 
