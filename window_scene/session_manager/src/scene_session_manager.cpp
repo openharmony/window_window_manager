@@ -12117,7 +12117,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         std::vector<uint32_t> startingAppZOrderList;
         processingFlushUIParams_.store(true);
         auto keyboardSession = GetKeyboardSession(screenId, false);
-        uint32_t callingId = (keyboardSession != nullptr) ? keyboardSession->GetCallingSessionId() : 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -12140,7 +12139,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
             }
             if (keyboardSession != nullptr) {
-                keyboardSession->CalculateOccupiedAreaAfterUIRefresh(callingId);
+                keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
             }
         }
         processingFlushUIParams_.store(false);

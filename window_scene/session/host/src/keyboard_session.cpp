@@ -266,7 +266,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
                 session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
-                    isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
+                isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
             }
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d",
@@ -704,7 +704,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
                 session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
-                    isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
+                isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
             }
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
@@ -715,7 +715,6 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
                 !animationInfo.isGravityChanged) {
                 session->GetSessionProperty()->SetCallingSessionId(callingId);
             }
-            
         } else {
             session->RestoreCallingSession(callingId, rsTransaction);
             if (!animationInfo.isGravityChanged) {
@@ -1088,7 +1087,7 @@ WSError KeyboardSession::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callingId)
+void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
 {
     bool needRecalculateOccupiedArea = false;
     if ((GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
@@ -1098,6 +1097,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callin
         needRecalculateOccupiedArea = true;
     }
     // Recalculate the occupied area info when calling session rect changes && keyboard is visible.
+    uint32_t callingId = GetCallingSessionId();
     sptr<SceneSession> callingSession = GetSceneSession(callingId);
     if (callingSession && (callingSession->GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) && IsVisibleForeground()) {

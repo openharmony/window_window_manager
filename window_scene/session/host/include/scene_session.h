@@ -789,10 +789,8 @@ public:
     void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
-    virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
-        bool needCheckRSTransaction) {}
     bool isSubWindowResizingOrMoving_ = false;
-    virtual void CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callingId) {}
+    virtual void CalculateOccupiedAreaAfterUIRefresh() {}
 
     /*
      * Window Focus

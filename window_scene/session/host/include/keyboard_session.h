@@ -109,7 +109,7 @@ private:
     bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
     void PostKeyboardAnimationSyncTimeoutTask();
     void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
-        bool needCheckRSTransaction) override;
+        bool needCheckRSTransaction);
     void NotifyOccupiedAreaChanged(const sptr<SceneSession>& callingSession,
         sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo, bool needRecalculateAvoidAreas,
         std::shared_ptr<RSTransaction> rsTransaction);
@@ -118,7 +118,7 @@ private:
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
     bool stateChanged_ = false;
-    void CalculateOccupiedAreaAfterUIRefresh(const uint32_t& callingId) override;
+    void CalculateOccupiedAreaAfterUIRefresh() override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
