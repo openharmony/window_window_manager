@@ -59,6 +59,7 @@ public:
                                                      DisplayId kDisplayId,
                                                      SessionState keyboardState,
                                                      WindowGravity gravity);
+    WSError NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
 
     static sptr<SceneSessionManager> ssm_;
 
@@ -189,6 +190,11 @@ void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const Key
 
     ssm_->sceneSessionMap_.insert({ keyboardTestData.callingSessionId_, callingSession });
     ssm_->sceneSessionMap_.insert({ 2, keyboardSession });
+}
+
+WSError SceneSessionManagerTest12::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
+{
+    return WSError::WS_OK;
 }
 
 namespace {
@@ -2099,6 +2105,60 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(86, 12);
+}
+
+/**
+ * @tc.name: NotifyDisplayIdChanged
+ * @tc.desc: test function : NotifyDisplayIdChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyDisplayIdChanged, TestSize.Level1)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->NotifyDisplayIdChanged(85, 12);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->NotifyDisplayIdChanged(86, 12);
+}
+
+/**
+ * @tc.name: RegisterDisplayIdChangedNotifyManagerFunc
+ * @tc.desc: test function : RegisterDisplayIdChangedNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterDisplayIdChangedNotifyManagerFunc, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "RegisterDisplayIdChangedNotifyManagerFunc";
+    sessionInfo.abilityName_ = "RegisterDisplayIdChangedNotifyManagerFunc";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->displayIdChangedNotifyManagerFunc_);
+}
+
+/**
+ * @tc.name: SetDisplayIdChangedNotifyManagerListener
+ * @tc.desc: test function : SetDisplayIdChangedNotifyManagerListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetDisplayIdChangedNotifyManagerListener, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetDisplayIdChangedNotifyManagerListener";
+    sessionInfo.abilityName_ = "SetDisplayIdChangedNotifyManagerListener";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetDisplayIdChangedNotifyManagerListener([this](int32_t persistentId, uint64_t displayId) {
+        NotifyDisplayIdChanged(persistentId, displayId);
+    });
+    EXPECT_NE(nullptr, sceneSession->displayIdChangedNotifyManagerFunc_);
 }
 
 /**

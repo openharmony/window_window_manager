@@ -788,6 +788,7 @@ public:
     void OnThrowSlipAnimationStateChange(bool isAnimating);
     void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
+    bool IsPcFoldDevice();
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(ThrowSlipMode throwSlipMode, const WSRectF& velocity);

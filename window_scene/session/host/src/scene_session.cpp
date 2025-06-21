@@ -5742,6 +5742,11 @@ bool SceneSession::IsMissionHighlighted()
         });
 }
 
+bool SceneSession::IsPcFoldDevice()
+{
+    return (pcFoldScreenController_ != nullptr);
+}
+
 void SceneSession::MaskSupportEnterWaterfallMode()
 {
     if (pcFoldScreenController_ == nullptr) {
