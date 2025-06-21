@@ -468,6 +468,23 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level
 }
 
 /**
+ * @tc.name: UpdateDefaultStatusBarColor01
+ * @tc.desc: test UpdateDefaultStatusBarColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateDefaultStatusBarColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDefaultStatusBarColor01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(windowSceneSession, nullptr);
+    windowSceneSession->UpdateDefaultStatusBarColor();
+    windowSceneSession->specifiedColorMode_ = "light";
+    windowSceneSession->UpdateDefaultStatusBarColor();
+}
+
+/**
  * @tc.name: RemoveWindowFlag01
  * @tc.desc: RemoveWindowFlag
  * @tc.type: FUNC
