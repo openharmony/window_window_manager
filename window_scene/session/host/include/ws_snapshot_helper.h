@@ -55,6 +55,7 @@ public:
         }
         return SNAPSHOT_PORTRAIT;
     }
+
     static inline uint32_t GetOrientation(DisplayOrientation displayOrientation)
     {
         if (displayOrientation == DisplayOrientation::LANDSCAPE ||
