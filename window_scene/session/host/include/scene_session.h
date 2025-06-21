@@ -145,7 +145,7 @@ using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& an
     const WindowAnimationOption& animationOption)>;
 using GetAllAppUseControlMapFunc =
     std::function<std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>&()>;
-
+using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
@@ -336,11 +336,11 @@ public:
     virtual WSError SendFbActionEvent(const std::string& action) { return WSError::WS_OK; };
     virtual FloatingBallTemplateInfo GetFbTemplateInfo() const { return fbTemplateInfo_; };
     virtual void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo) {};
-    virtual void SetFbWindowId(const uint32_t& windowId) {};
-    virtual uint32_t GetFbWindowId() { return floatingBallWindowId_; };
+    virtual uint32_t GetFbWindowId() const { return 0; };
     virtual void SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func) {};
     virtual void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) {};
     virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
+    virtual void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
 
     /*
      * Window Layout
@@ -981,7 +981,6 @@ protected:
     uint64_t fbClickTime_ = 0;
     std::mutex fbClickMutex_;
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
-    uint32_t floatingBallWindowId_ = 0;
 
     /*
      * Window Lifecycle

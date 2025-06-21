@@ -408,8 +408,7 @@ WSError SystemSession::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemp
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        TLOGNI(WmsLogTag::WMS_SYSTEM, "%{public}s, template %{public}d, title: %{public}s, content: %{public}s", where,
-            fbTemplateInfo.template_, fbTemplateInfo.title_.c_str(), fbTemplateInfo.content_.c_str());
+        TLOGNI(WmsLogTag::WMS_SYSTEM, "update template %{public}d", fbTemplateInfo.template_);
         session->NotifyUpdateFloatingBall(fbTemplateInfo);
         return WSError::WS_OK;
     };
@@ -459,7 +458,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-        windowId = session->floatingBallWindowId_;
+        windowId = session->GetFbWindowId();
         TLOGND(WmsLogTag::WMS_SYSTEM, "%{public}s mode: %{public}u", where, windowId);
         return WMError::WM_OK;
     }, __func__);
@@ -470,6 +469,10 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
     if (!WindowHelper::IsFbWindow(GetWindowType())) {
         return WMError::WM_DO_NOTHING;
     }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
+        TLOGNE(WmsLogTag::WMS_SYSTEM, "check floating ball permission failed");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     return PostSyncTask([weakThis = wptr(this), &want, callingPid, where = __func__]() {
         auto session = weakThis.promote();
@@ -477,9 +480,8 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
-        if (callingPid != session->GetCallingPid() ||
-            !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s check floating ball permission failed", where);
+        if (callingPid != session->GetCallingPid()) {
+            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
         if (session->GetSessionInfo().bundleName_ != want->GetBundle()) {
@@ -515,8 +517,8 @@ void SystemSession::NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbT
             return;
         }
         session->SetFbTemplateInfo(fbTemplateInfo);
-        if (session->updateFlotingBallFunc_) {
-            session->updateFlotingBallFunc_(fbTemplateInfo);
+        if (session->updateFloatingBallFunc_) {
+            session->updateFloatingBallFunc_(fbTemplateInfo);
         }
     }, __func__);
 }
@@ -530,9 +532,9 @@ void SystemSession::NotifyStopFloatingBall()
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
             return;
         }
-        if (session->stopFlotingBallFunc_) {
+        if (session->stopFloatingBallFunc_) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBall Func");
-            session->stopFlotingBallFunc_();
+            session->stopFloatingBallFunc_();
         } else {
             TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s StopFloatingBall Func is null", where);
             session->needStopFb_ = true;
@@ -582,14 +584,14 @@ void SystemSession::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplate
     fbTemplateInfo_ = fbTemplateInfo;
 }
 
-void SystemSession::SetFbWindowId(const uint32_t& windowId)
+uint32_t SystemSession::GetFbWindowId() const
 {
-    floatingBallWindowId_ = windowId;
-}
-
-uint32_t SystemSession::GetFbWindowId()
-{
-    return floatingBallWindowId_;
+    uint32_t windowId = 0;
+    if (getFbPanelWindowIdFunc_) {
+        getFbPanelWindowIdFunc_(windowId);
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Get fb window Id %{public}d", windowId);
+    return windowId;
 }
 
 void SystemSession::SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func)
@@ -600,8 +602,8 @@ void SystemSession::SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&&
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s update floating ball id is null", where);
             return;
         }
-        session->updateFlotingBallFunc_ = std::move(func);
-        session->updateFlotingBallFunc_(session->GetFbTemplateInfo());
+        session->updateFloatingBallFunc_ = std::move(func);
+        session->updateFloatingBallFunc_(session->GetFbTemplateInfo());
     }, __func__);
 }
 
@@ -614,10 +616,10 @@ void SystemSession::SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& fun
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s stop floating ball id is null", where);
             return;
         }
-        session->stopFlotingBallFunc_ = std::move(func);
+        session->stopFloatingBallFunc_ = std::move(func);
         if (session->needStopFb_) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "StopFloatingBall when register callBack");
-            session->stopFlotingBallFunc_();
+            session->stopFloatingBallFunc_();
             session->needStopFb_ = false;
         }
     }, __func__);
@@ -639,5 +641,10 @@ void SystemSession::SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloati
             session->fbWant_ = nullptr;
         }
     }, __func__);
+}
+
+void SystemSession::RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& callback)
+{
+    getFbPanelWindowIdFunc_ = std::move(callback);
 }
 } // namespace OHOS::Rosen

@@ -22,13 +22,15 @@ namespace OHOS::Rosen {
 class FloatingBallTemplateBaseInfo {
 public:
     FloatingBallTemplateBaseInfo() = default;
-    FloatingBallTemplateBaseInfo(const uint32_t& templateType, const std::string& title, const std::string& content)
-        : template_(templateType), title_(title), content_(content) {};
+    FloatingBallTemplateBaseInfo(const uint32_t& templateType, const std::string& title,
+        const std::string& content, const std::string& color) : template_(templateType), title_(title),
+        content_(content), backgroundColor_(color) {};
     virtual ~FloatingBallTemplateBaseInfo() = default;
 
     uint32_t template_ {};
     std::string title_ {};
     std::string content_ {};
+    std::string backgroundColor_ {};
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_FLOATING_BALL_TEMPALTE_BASE_INFO_H

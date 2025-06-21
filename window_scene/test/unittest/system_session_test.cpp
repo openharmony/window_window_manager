@@ -836,31 +836,37 @@ HWTEST_F(SystemSessionTest, SetAndGetFbTemplateInfo, TestSize.Level1)
     info.bundleName_ = "Background01";
 
     sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
-    EXPECT_NE(systemSession, nullptr);
+    ASSERT_NE(systemSession, nullptr);
     systemSession->isActive_ = true;
     FloatingBallTemplateInfo fbTemplateInfo;
     fbTemplateInfo.template_ = 1;
     systemSession->SetFbTemplateInfo(fbTemplateInfo);
-    ASSERT_EQ(systemSession->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+    EXPECT_EQ(systemSession->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
 }
 
 /**
- * @tc.name: SetAndGetFbTemplateInfo
- * @tc.desc: SetAndGetFbTemplateInfo Test
+ * @tc.name: GetFbWindowId
+ * @tc.desc: GetFbWindowId Test
  * @tc.type: FUNC
  */
-HWTEST_F(SystemSessionTest, SetAndGetFbWindowId, TestSize.Level1)
+HWTEST_F(SystemSessionTest, GetFbWindowId, TestSize.Level1)
 {
     SessionInfo info;
     info.abilityName_ = "SetAndGetFbWindowId";
     info.bundleName_ = "SetAndGetFbWindowId";
 
     sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
-    EXPECT_NE(systemSession, nullptr);
-    systemSession->isActive_ = true;
-    uint32_t windowId = 100;
-    systemSession->SetFbWindowId(windowId);
-    ASSERT_EQ(systemSession->GetFbWindowId(), windowId);
+    ASSERT_NE(systemSession, nullptr);
+
+    EXPECT_EQ(systemSession->GetFbWindowId(), 0);
+
+    uint32_t testWindowId = 100;
+    auto func = [testWindowId](uint32_t& windowId) {
+        windowId = testWindowId;
+        return WMError::WM_OK;
+    };
+    systemSession->RegisterGetFbPanelWindowIdFunc(func);
+    EXPECT_EQ(systemSession->GetFbWindowId(), testWindowId);
 }
 
 /**
@@ -991,8 +997,8 @@ HWTEST_F(SystemSessionTest, NotifyUpdateFloatingBall, Function | SmallTest | Lev
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
 
-    FloatingBallTemplateInfo fbTemplateInfo {1, "fb", "fb_content", nullptr};
-    FloatingBallTemplateInfo newFbTemplateInfo {2, "fb_new", "fb_content_new", nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {1, "fb", "fb_content", "red", nullptr};
+    FloatingBallTemplateInfo newFbTemplateInfo {2, "fb_new", "fb_content_new", "red", nullptr};
     systemSession->SetFloatingBallUpdateCallback(nullptr);
     systemSession->NotifyUpdateFloatingBall(newFbTemplateInfo);
     EXPECT_NE(fbTemplateInfo.template_, newFbTemplateInfo.template_);

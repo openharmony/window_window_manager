@@ -954,7 +954,6 @@ HWTEST_F(SessionStageProxyTest, SendFbActionEvent, TestSize.Level1)
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SendFbActionEvent("SendFbActionEvent"));
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SendFbActionEvent("error"));
 
     ASSERT_EQ(WSError::WS_OK, sessionStage_->SendFbActionEvent("SendFbActionEvent"));
 
@@ -965,6 +964,9 @@ HWTEST_F(SessionStageProxyTest, SendFbActionEvent, TestSize.Level1)
     remoteMocker->sendRequestResult_ = 1;
     sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->SendFbActionEvent("click"));
+
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SendFbActionEvent("error"));
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen

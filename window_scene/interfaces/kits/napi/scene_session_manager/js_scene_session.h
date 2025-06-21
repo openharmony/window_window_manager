@@ -242,7 +242,6 @@ private:
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
-    static napi_value SetFbWindowId(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -331,7 +330,6 @@ private:
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
     napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
-    napi_value OnSetFbWindowId(napi_env env, napi_callback_info info);
     
     /*
      * PC Window

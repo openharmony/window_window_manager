@@ -63,6 +63,10 @@ void JsFbWindowListener::OnFbListenerCallback(const FloatingBallState& state, co
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "state: %{public}d", static_cast<int32_t>(state));
     auto napiTask = [jsCallback = jsCallBack_, state, errorCode, env = env_]() {
+        if (jsCallback == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
+            return;
+        }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };

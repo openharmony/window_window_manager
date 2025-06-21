@@ -425,6 +425,36 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest08
+ * @tc.desc: sessionStub ProcessRemoteRequestTest08
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -1646,7 +1676,7 @@ HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level
     auto result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "pip", "pip_content"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_NONE);
@@ -1667,22 +1697,22 @@ HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleStartFloatingBallAbility
- * @tc.desc: sessionStub HandleStartFloatingBallAbility
+ * @tc.name: HandleStartFloatingBallMainWindow
+ * @tc.desc: sessionStub HandleStartFloatingBallMainWindow
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleStartFloatingBallAbility, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleStartFloatingBallMainWindow, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
     
     data.WriteParcelable(nullptr);
-    auto result = session_->HandleStartFloatingBallAbility(data, reply);
+    auto result = session_->HandleStartFloatingBallMainWindow(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     data.WriteParcelable(want.get());
-    result = session_->HandleStartFloatingBallAbility(data, reply);
+    result = session_->HandleStartFloatingBallMainWindow(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 
