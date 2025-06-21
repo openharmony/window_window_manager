@@ -43,6 +43,7 @@ private:
     void ProcSetScreenSkipProtectedWindow(MessageParcel& data, MessageParcel& reply);
     void ProcGetScreenAreaOfDisplayArea(MessageParcel& data, MessageParcel& reply);
     void ProcSetPrimaryDisplaySystemDpi(MessageParcel& data, MessageParcel& reply);
+    void ProcSetVirtualScreenAutoRotation(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace Rosen
 } // namespace OHOS
