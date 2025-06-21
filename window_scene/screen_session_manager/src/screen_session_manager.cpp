@@ -7942,10 +7942,10 @@ bool ScreenSessionManager::SwitchPcMode()
     }
     std::lock_guard<std::mutex> lock(pcModeSwitchMutex_);
     if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
-        TLOGW(WmsLogTag::DMS, "PcMode change isPcDevice true");
+        TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
     } else {
-        TLOGW(WmsLogTag::DMS, "PadMode change isPcDevice false");
+        TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
         SwitchExternalScreenToMirror();
     }
@@ -7970,11 +7970,11 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
             oss << screenSession->GetScreenId() << ",";
         }
     }
-    TLOGW(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
+    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
     if (hasExternalScreen) {
         ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
         MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
-        TLOGW(WmsLogTag::DMS, "notify cast screen connect");
+        TLOGI(WmsLogTag::DMS, "notify cast screen connect");
         NotifyCastWhenScreenConnectChange(true);
     }
 }
