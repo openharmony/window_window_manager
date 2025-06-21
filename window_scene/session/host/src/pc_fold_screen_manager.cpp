@@ -582,7 +582,6 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
     {
         std::unique_lock<std::mutex> lock(callbackMutex_);
         foldScreenStatusChangeCallbacksCopy = foldScreenStatusChangeCallbacks_;
-
     }
     for (auto iter = foldScreenStatusChangeCallbacksCopy.begin(); iter != foldScreenStatusChangeCallbacksCopy.end();) {
         auto callback = iter->second.lock();
