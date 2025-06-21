@@ -7971,9 +7971,9 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
         }
     }
     TLOGW(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
-    ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
-    MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
     if (hasExternalScreen) {
+        ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
+        MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
         TLOGW(WmsLogTag::DMS, "notify cast screen connect");
         NotifyCastWhenScreenConnectChange(true);
     }
