@@ -173,6 +173,8 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
+const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -7932,6 +7934,50 @@ void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> o
     RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
+bool ScreenSessionManager::SwitchPcMode()
+{
+    if (!IS_SUPPORT_PC_MODE) {
+        return g_isPcDevice;
+    }
+    std::lock_guard<std::mutex> lock(pcModeSwitchMutex_);
+    if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
+        TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
+        g_isPcDevice = true;
+    } else {
+        TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
+        g_isPcDevice = false;
+        SwitchExternalScreenToMirror();
+    }
+    return g_isPcDevice;
+}
+
+void ScreenSessionManager::SwitchExternalScreenToMirror()
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    std::ostringstream oss;
+    std::vector<ScreenId> externalScreenIds;
+    bool hasExternalScreen = false;
+    for (const auto& iter : screenSessionMap_) {
+        auto screenSession = iter.second;
+        if (screenSession == nullptr) {
+            continue;
+        }
+        if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
+            screenSession->GetMirrorScreenType() == MirrorScreenType::PHYSICAL_MIRROR) {
+            externalScreenIds.emplace_back(screenSession->GetScreenId());
+            hasExternalScreen = true;
+            oss << screenSession->GetScreenId() << ",";
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
+    if (hasExternalScreen) {
+        ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
+        MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
+        TLOGI(WmsLogTag::DMS, "notify cast screen connect");
+        NotifyCastWhenScreenConnectChange(true);
+    }
+}
+
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -7943,6 +7989,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         TLOGE(WmsLogTag::DMS, "SetClient client is null");
         return;
     }
+    SwitchPcMode();
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
         if (switchUserCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_USERSWITCH_MS)) == std::cv_status::timeout) {
