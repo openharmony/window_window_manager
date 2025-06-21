@@ -2663,6 +2663,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionSnapshotFunc(sceneSession);
     RegisterSessionStateChangeNotifyManagerFunc(sceneSession);
     RegisterSessionInfoChangeNotifyManagerFunc(sceneSession);
+    RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
     RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
@@ -8073,6 +8074,17 @@ void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneS
     });
 }
 
+void SceneSessionManager::RegisterDisplayIdChangedNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        return;
+    }
+    sceneSession->SetDisplayIdChangedNotifyManagerListener([this](int32_t persistentId, uint64_t displayId) {
+        NotifyDisplayIdChanged(persistentId, displayId);
+    });
+}
+
 void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
@@ -11983,22 +11995,11 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     if (fromScreenId != screenId) {
         sceneSession->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     }
-
-    // Find keyboard session.
-    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    for (const auto& keyboardSession : keyboardSessionVec) {
-        if (!keyboardSession) {
-            continue;
-        }
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
-            keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
-        if (!keyboardSession->IsSystemKeyboard() &&
-            static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
-            CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), screenId, GetUserIdByUid(getuid()));
-            SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
-            break;
-        }
+    uint64_t displayId = screenId;
+    if (sceneSession->IsPcFoldDevice() && PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        displayId = sceneSession->GetClientDisplayId();
     }
+    NotifyDisplayIdChanged(persistentId, displayId);
     return WSError::WS_OK;
 }
 
@@ -14064,10 +14065,38 @@ WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWind
     }
     callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
     callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
+    if (sceneSession->IsPcFoldDevice() && PcFoldScreenManager::GetInstance().IsHalfFolded(callingWindowInfo.displayId_)) {
+        callingWindowInfo.displayId_ = sceneSession->GetClientDisplayId();
+    }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "info: [id: %{public}d, pid: %{public}d, "
         "displayId: %{public}" PRIu64" , userId: %{public}d]", callingWindowInfo.windowId_,
         callingWindowInfo.callingPid_, callingWindowInfo.displayId_, callingWindowInfo.userId_);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        return;
+    }
+    // Find keyboard session.
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    for (const auto& keyboardSession : keyboardSessionVec) {
+        if (!keyboardSession) {
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
+            keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        if (!keyboardSession->IsSystemKeyboard() &&
+            static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
+            CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), displayId, GetUserIdByUid(getuid()));
+            SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
+            break;
+        }
+    }
+    return;
 }
 
 WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,

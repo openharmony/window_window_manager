@@ -690,6 +690,7 @@ public:
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
+    void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
@@ -1223,6 +1224,7 @@ private:
     RSInterfaces& rsInterface_;
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterDisplayIdChangedNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state) REQUIRES(SCENE_GUARD);
     void ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession);
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
