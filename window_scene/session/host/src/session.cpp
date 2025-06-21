@@ -220,8 +220,9 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
+    auto key = GetWindowStatus();
     std::lock_guard<std::mutex> lock(snapshotMutex_);
-    return snapshot_;
+    return snapshot_[key.first][key.second];
 }
 
 void Session::SetSessionInfoAncoSceneState(int32_t ancoSceneState)
@@ -1455,6 +1456,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
     PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
@@ -1497,6 +1499,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
+    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
     NotifyDisconnect();
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
@@ -2537,11 +2540,14 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     auto surfaceNode = GetSurfaceNode();
+    auto key = GetSessionStatus();
+    auto isPersistentImageFit = IsPersistentImageFit();
+    if (isPersistentImageFit) key = defaultStatus;
     if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
-        scenePersistence_->SetHasSnapshot(false);
+        scenePersistence_->SetHasSnapshot(false, key);
         return nullptr;
     }
-    scenePersistence_->SetHasSnapshot(true);
+    scenePersistence_->SetHasSnapshot(true, key);
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
@@ -2557,8 +2563,6 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
-    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
-        "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (isPersistentImageFit && GetSnapshot()) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
@@ -2580,7 +2584,11 @@ void Session::ResetSnapshot()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
-    snapshot_ = nullptr;
+    for (auto& row : snapshot_) {
+        for (auto& snapshot : row) {
+            snapshot = nullptr;
+        }
+    }
     if (scenePersistence_ == nullptr) {
         TLOGI(WmsLogTag::WMS_PATTERN, "scenePersistence_ %{public}d nullptr", persistentId_);
         return;
@@ -2605,8 +2613,14 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     if (scenePersistence_ == nullptr) {
         return;
     }
+    auto key = GetSessionStatus();
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
+    if (persistentPixelMap) {
+        key = defaultStatus;
+        rotate = DisplayOrientation::PORTRAIT;
+    }
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
-        updateSnapshot]() {
+        updateSnapshot, key, rotate]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2619,7 +2633,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         {
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
-            session->snapshot_ = pixelMap;
+            session->snapshot_[key.first][key.second] = pixelMap;
         }
         {
             std::lock_guard<std::mutex> lock(session->addSnapshotCallbackMutex_);
@@ -2642,7 +2656,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             std::lock_guard lock(session->removeSnapshotCallbackMutex_);
             removeSnapshotCallback = session->removeSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback);
+        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate);
         if (updateSnapshot) {
             session->NotifyUpdateSnapshotWindow();
         }
@@ -2655,6 +2669,83 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     std::string taskName = "Session::SaveSnapshot" + std::to_string(persistentId_);
     snapshotFfrtHelper->CancelTask(taskName);
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
+void Session::InitSnapshotCapacity()
+{
+    if (systemConfig_.supportSnapshotAllSessionStatus_) {
+        capacity_ = maxCapacity;
+    }
+    if (scenePersistence_) {
+        scenePersistence_->SetSnapshotCapacity(capacity_);
+    }
+}
+
+bool Session::IsPersistentImageFit() const
+{
+    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
+    return isPersistentImageFit;
+}
+
+bool Session::SupportSnapshotAllSessionStatus() const
+{
+    return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
+}
+
+SnapshotStatus Session::GetWindowStatus() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return defaultStatus;
+    }
+    uint32_t snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    auto windowOrientation = GetWindowOrientation();
+    uint32_t orientation = WSSnapshotHelper::GetOrientation(windowOrientation);
+    return std::make_pair(snapshotScreen, orientation);
+}
+
+SnapshotStatus Session::GetSessionStatus() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return defaultStatus;
+    }
+    uint32_t snapshotScreen;
+    if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
+        snapshotScreen = lastSnapshotScreen_;
+    } else {
+        snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    }
+    uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
+    return std::make_pair(snapshotScreen, orientation);
+}
+
+DisplayOrientation Session::GetWindowOrientation() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return DisplayOrientation::PORTRAIT;
+    }
+    DisplayId displayId = GetScreenId();
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "screenSession is nullptr, id:%{public}d", persistentId_);
+        return DisplayOrientation::PORTRAIT;
+    }
+    auto screenProperty = screenSession->GetScreenProperty();
+    DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
+    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
+    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    if (snapshotScreen == SCREEN_UNKNOWN) {
+        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
+    }
+    return static_cast<DisplayOrientation>(windowOrientation);
+}
+
+uint32_t Session::GetLastOrientation() const
+{
+    if (!SupportSnapshotAllSessionStatus()) {
+        return SNAPSHOT_PORTRAIT;
+    }
+    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
@@ -4125,8 +4216,9 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
-        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
+    auto key = GetWindowStatus();
+    return scenePersistence_->IsSavingSnapshot(key) ? GetSnapshot() :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key);
 }
 
 bool Session::IsVisibleForeground() const

@@ -743,6 +743,7 @@ public:
     bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+    void ConfigSupportSnapshotAllSessionStatus();
 
     /*
      * Window Animation
