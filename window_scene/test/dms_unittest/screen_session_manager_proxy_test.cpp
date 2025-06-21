@@ -1721,5 +1721,25 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPhysicalScreenIds, Function | SmallTe
     ret = screenSessionManagerProxy->GetPhysicalScreenIds(screenIds);
     EXPECT_EQ(DMRect::DM_OK, ret);
 }
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenAutoRotation, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+    ScreenId screenId = 0;
+    bool enable = false;
+    auto res = screenSessionManagerProxy->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    ScreenId screenId = 111;
+    bool enable = false;
+
+    auto ret = screenSessionManagerProxy->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ret);
+}
 }
 }
