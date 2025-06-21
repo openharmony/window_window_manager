@@ -54,6 +54,7 @@ public:
     bool IsSavingSnapshot(SnapshotStatus key = defaultStatus);
     void ResetSnapshotCache();
     void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
+    void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId, SnapshotStatus key);
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;

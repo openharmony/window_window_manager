@@ -160,7 +160,7 @@ public:
     static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
 
     /*
-     * Window Scene
+     * Window Pattern
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 
@@ -369,7 +369,7 @@ private:
         const RotationChangeInfo& rotationChangeInfo);
 
     /*
-     * Window Scene
+     * Window Pattern
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 };
