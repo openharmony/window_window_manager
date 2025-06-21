@@ -66,6 +66,7 @@ ohos_shared_library("scene_session") {
     "host/src/system_session.cpp",
     "host/src/ui_extension/host_data_handler.cpp",
     "host/src/ws_ffrt_helper.cpp",
+    "host/src/ws_snapshot_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]

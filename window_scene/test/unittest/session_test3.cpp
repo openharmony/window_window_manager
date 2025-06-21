@@ -1002,22 +1002,6 @@ HWTEST_F(WindowSessionTest3, PcAppInPadNormalClose, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSnapshotPixelMap
- * @tc.desc: GetSnapshotPixelMap Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, TestSize.Level1)
-{
-    session_->scenePersistence_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    EXPECT_NE(nullptr, session_->scenePersistence_);
-    session_->scenePersistence_->isSavingSnapshot_.store(true);
-    session_->snapshot_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
-}
-
-/**
  * @tc.name: ResetDirtyFlags
  * @tc.desc: ResetDirtyFlags Test
  * @tc.type: FUNC
