@@ -1266,6 +1266,39 @@ HWTEST_F(WindowSessionImplTest5, HideTitleButton03, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetUIContentByName
+ * @tc.desc: SetUIContentByName, load content by name
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetUIContentByName, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetUIContentByName");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"SetUIContentByName", "SetUIContentByName", "SetUIContentByName"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "test";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+
+    intentParam = "";
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+}
+
+/**
  * @tc.name: HideTitleButton04
  * @tc.desc: HideTitleButton04
  * @tc.type: FUNC

@@ -1208,6 +1208,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetPrimaryDisplaySystemDpi(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION: {
+            ProcSetVirtualScreenAutoRotation(data, reply);
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1377,6 +1381,22 @@ void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& dat
         return;
     }
     DMError ret = SetPrimaryDisplaySystemDpi(dpi);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+void ScreenSessionManagerStub::ProcSetVirtualScreenAutoRotation(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = 0;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Read screenId failed.");
+        return;
+    }
+    bool enable = false;
+    if (!data.ReadBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Read enable failed.");
+        return;
+    }
+    DMError ret = SetVirtualScreenAutoRotation(screenId, enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen

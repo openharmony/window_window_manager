@@ -719,6 +719,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
                 TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                 break;
             }
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Default setIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+                intentParam_ = "";
+            }
             aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
@@ -726,6 +731,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
             aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "By name setIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+                intentParam_ = "";
+            }
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_ABC:
@@ -4122,6 +4132,16 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
+    if (!intentParam_.empty()) {
+        auto uiContent = GetUIContent();
+        if (uiContent != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+            uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+            intentParam_ = "";
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
+        }
+    }
 }
 
 void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
@@ -4764,6 +4784,16 @@ std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+WMError WindowImpl::SetIntentParam(const std::string& intentParam,
+    const std::function<void()>& loadPageCallback, bool isColdStart)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    intentParam_ = intentParam;
+    loadPageCallback_ = loadPageCallback;
+    isIntentColdStart_ = isColdStart;
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

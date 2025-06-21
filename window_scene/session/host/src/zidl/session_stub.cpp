@@ -488,6 +488,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
+        reply.WriteBool(property->GetUseControlStateFromProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -790,6 +791,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadBool(abilitySessionInfo->reuseDelegatorWindow)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuseDelegatorWindow failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->hideStartWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hideStartWindow failed.");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
@@ -1661,11 +1666,7 @@ int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessagePa
             effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError errorCode = ChangeKeyboardEffectOption(*effectOption);
-    if (!reply.WriteInt32(static_cast<int32_t>(errorCode))) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write errorCode failed.");
-        return ERR_INVALID_DATA;
-    }
+    ChangeKeyboardEffectOption(*effectOption);
     return ERR_NONE;
 }
 

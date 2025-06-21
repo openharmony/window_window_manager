@@ -1093,6 +1093,87 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
 }
+
+/**
+ * @tc.name: CalculatedStartWindowType01
+ * @tc.desc: CalculatedStartWindowType when getStartWindowConfigFunc_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalculatedStartWindowType01";
+    info.bundleName_ = "CalculatedStartWindowType01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    SessionInfo info2;
+
+    sceneSession->CalculatedStartWindowType(info2, false);
+    EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
+}
+
+/**
+ * @tc.name: CalculatedStartWindowType02
+ * @tc.desc: CalculatedStartWindowType when hideStartWindow is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType02, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalculatedStartWindowType02";
+    info.bundleName_ = "CalculatedStartWindowType02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->getStartWindowConfigFunc_ = [](SessionInfo sessionInfo, std::string& startWindowType) {
+        startWindowType = "OPTIONAL_SHOW";
+    };
+    SessionInfo info2;
+
+    sceneSession->CalculatedStartWindowType(info2, true);
+    EXPECT_EQ(info2.startWindowType_, StartWindowType::RETAIN_AND_INVISIBLE);
+}
+
+/**
+ * @tc.name: CalculatedStartWindowType03
+ * @tc.desc: CalculatedStartWindowType when hideStartWindow is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalculatedStartWindowType03";
+    info.bundleName_ = "CalculatedStartWindowType03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->getStartWindowConfigFunc_ = [](SessionInfo sessionInfo, std::string& startWindowType) {
+        startWindowType = "OPTIONAL_SHOW";
+    };
+    SessionInfo info2;
+
+    sceneSession->CalculatedStartWindowType(info2, false);
+    EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
+}
+
+/**
+ * @tc.name: CalculatedStartWindowType04
+ * @tc.desc: CalculatedStartWindowType when startWindowType is not optional
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType04, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalculatedStartWindowType04";
+    info.bundleName_ = "CalculatedStartWindowType04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->getStartWindowConfigFunc_ = [](SessionInfo sessionInfo, std::string& startWindowType) {
+        startWindowType = "REQUIRED_HIDE";
+    };
+    SessionInfo info2;
+
+    sceneSession->CalculatedStartWindowType(info2, false);
+    EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

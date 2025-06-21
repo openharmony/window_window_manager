@@ -509,6 +509,25 @@ HWTEST_F(WindowSceneTest, GoResume02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GoPause
+ * @tc.desc: GoPause with mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoPause, TestSize.Level1)
+{
+    sptr<WindowScene> winScene = new WindowScene();
+    ASSERT_NE(nullptr, winScene);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, winScene->GoPause());
+    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(mocker->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    EXPECT_EQ(WMError::WM_OK, winScene->Init(displayId, abilityContext_, listener));
+    EXPECT_EQ(WMError::WM_OK, winScene->GoPause());
+}
+
+/**
  * @tc.name: RequestFocus01
  * @tc.desc: RequestFocus01 without mainWindow
  * @tc.type: FUNC

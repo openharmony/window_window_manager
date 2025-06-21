@@ -844,14 +844,19 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
             return;
         }
         colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        bool hasDarkRes = false;
-        appContext->AppHasDarkRes(hasDarkRes);
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
-            GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
-        contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
-            (hasDarkRes ? WHITE : BLACK);
+        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+        if (isColorModeSetByApp) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, appColor=%{public}s", GetWindowId(), colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK : WHITE;
+        } else {
+            bool hasDarkRes = false;
+            appContext->AppHasDarkRes(hasDarkRes);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u hasDarkRes %{public}u colorMode %{public}s",
+                GetPersistentId(), GetType(), hasDarkRes, colorMode.c_str());
+            contentColor = colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT ? BLACK :
+                (hasDarkRes ? WHITE : BLACK);
+        }
     }
-
     statusBarProp.contentColor_ = contentColor;
     statusBarProp.settingFlag_ = static_cast<SystemBarSettingFlag>(
         static_cast<uint32_t>(statusBarProp.settingFlag_) |
@@ -1518,7 +1523,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
         NotifyAfterDidForeground(reason);
-        NotifyFreeMultiWindowModeInteractive();
+        NotifyFreeMultiWindowModeResume();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1555,23 +1560,30 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
     return Show();
 }
 
-void WindowSceneSessionImpl::NotifyFreeMultiWindowModeInteractive()
+void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "IsPcMode %{public}d, isColdStart %{public}d", IsPcOrFreeMultiWindowCapabilityEnabled(),
         isColdStart_);
     if (IsPcOrFreeMultiWindowCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
-        NotifyAfterInteractive();
+        NotifyAfterLifecycleResumed();
     }
 }
 
-void WindowSceneSessionImpl::Interactive()
+void WindowSceneSessionImpl::Resume()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d",
         isColdStart_, isDidForeground_);
     isDidForeground_ = true;
     isColdStart_ = false;
-    NotifyAfterInteractive();
+    NotifyAfterLifecycleResumed();
+}
+
+void WindowSceneSessionImpl::Pause()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d", isColdStart_);
+    isColdStart_ = false;
+    NotifyAfterLifecyclePaused();
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)

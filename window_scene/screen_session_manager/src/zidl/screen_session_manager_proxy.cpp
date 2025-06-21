@@ -4368,4 +4368,36 @@ DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
     }
     return DMError::DM_OK;
 }
+
+DMError ScreenSessionManagerProxy::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen
