@@ -230,7 +230,8 @@ bool StartingWindowRdbManager::QueryData(const StartingWindowRdbItemKey& key, St
 }
 
 std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExecFwk::AbilityInfo& abilityInfo,
-    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const std::string& key, const std::string& defaultVal)
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+    const std::string& key, const std::string& defaultVal)
 {
     auto pos = abilityInfo.startWindow.find(PROFILE_PREFIX);
     if (pos == std::string::npos) {
@@ -240,7 +241,8 @@ std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExec
     std::string startWindowName = abilityInfo.startWindow.substr(pos + strlen(PROFILE_PREFIX));
     std::unique_ptr<uint8_t[]> fileContentPtr = nullptr;
     size_t len = 0;
-    if (resourceMgr->GetProfileDataByName(startWindowName.c_str(), len, fileContentPtr) != Global::Resource::RState::SUCCESS) {
+    if (resourceMgr->GetProfileDataByName(startWindowName.c_str(), len, fileContentPtr) !=
+        Global::Resource::RState::SUCCESS) {
         TLOGE(WmsLogTag::WMS_PATTERN, "getProfileData failed");
         return defaultVal;
     }

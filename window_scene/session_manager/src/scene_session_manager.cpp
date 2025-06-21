@@ -5373,7 +5373,7 @@ void SceneSessionManager::SetSessionInfoStartWindowType(const sptr<SceneSession>
             sceneSession->EditSessionInfo().startWindowType_ =
                 CONVERT_STRING_TO_START_WINDOW_TYPE_MAP.at(startingWindowInfo.startWindowType_);
         }
-        if (sceneSession->GetStartingWindowEnableStatus() == StartWindowType::RETAIN_AND_INVISIBLE) {
+        if (sceneSession->GetSessionInfo().startWindowType_ == StartWindowType::RETAIN_AND_INVISIBLE) {
             sceneSession->SetHidingStartingWindow(true);
         }
         TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, startWindowType:%{public}d",

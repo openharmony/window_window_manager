@@ -183,9 +183,10 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession02, nullptr);
+    struct RSSurfaceNodeConfig config;
     sceneSession02->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(sceneSession02->surfaceNode_, nullptr);
-    sceneSession02->surfaceNode->SetId(2);
+    sceneSession02->surfaceNode_->SetId(2);
     sceneSession02->hidingStartWindow_ = true;
     auto oldSessionMap = ssm_->sceneSessionMap_;
     ssm_->sceneSessionMap_.clear();

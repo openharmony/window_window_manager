@@ -1327,6 +1327,36 @@ HWTEST_F(WindowSessionTest4, SetLifeCycleTaskRunning, TestSize.Level1)
     ret = session_->SetLifeCycleTaskRunning(lifeCycleNullTask);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: SetHidingStartingWindow
+ * @tc.desc: check func SetHidingStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->hidingStartWindow_ = true;
+    auto ret = session_->SetHidingStartingWindow(true);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(session_->GetHidingStartingWindow());
+
+    session_->SetLeashWinSurfaceNode(nullptr);
+    ret = session_->SetHidingStartingWindow(false);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_TRUE(session_->GetHidingStartingWindow() == false);
+
+    ret = session_->SetHidingStartingWindow(false);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session_->SetLeashWinSurfaceNode(surfaceNode);
+    ret = session_->SetHidingStartingWindow(true);
+    EXPECT_TRUE(session_->GetHidingStartingWindow());
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

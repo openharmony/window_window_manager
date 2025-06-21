@@ -3779,7 +3779,8 @@ void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& typ
 void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable, bool startWindowInvisible)
 {
     TLOGD(WmsLogTag::DEFAULT, "state: %{public}u, %{public}u", isBufferAvailable, startWindowInvisible);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isBufferAvailable, startWindowInvisible, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+                isBufferAvailable, startWindowInvisible, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "OnBufferAvailableChange jsSceneSession id:%{public}d has been destroyed",

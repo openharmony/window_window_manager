@@ -559,7 +559,8 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
     session_->SetBufferAvailableChangeListener(nullptr);
 
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue += 1; };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue += 1; };
     session_->SetBufferAvailableChangeListener(func);
     ASSERT_EQ(resultValue, 1);
 }
@@ -942,7 +943,8 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue = 1; };
     session_->SetBufferAvailableChangeListener(func);
     session_->SetBufferAvailable(true);
     ASSERT_EQ(session_->bufferAvailable_, true);
@@ -956,7 +958,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
+    NotifySessionInfoChangeNotifyManagerFunc func = [&resultValue](int32_t persistentid) { resultValue = 1; };
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
