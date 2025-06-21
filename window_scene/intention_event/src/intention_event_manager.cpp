@@ -237,8 +237,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             SetPointerEventStatus(pointerEvent->GetPointerId(), action, sourceType, sceneSession);
         }
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
-            ",wName:%{public}s,ac:%{public}d,sys:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d,eid:%{public}d,wid:%{public}u"
+            ",wn:%{public}s,ac:%{public}d,sys:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
