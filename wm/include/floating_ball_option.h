@@ -20,7 +20,7 @@
 #include "floating_ball_template_info.h"
 namespace OHOS {
 namespace Rosen {
-class FbOption : virtual public RefBase {
+class FbOption : public RefBase {
 public:
     explicit FbOption();
     virtual ~FbOption() = default;
@@ -28,11 +28,13 @@ public:
     void SetTemplate(const uint32_t& type);
     void SetTitle(const std::string& title);
     void SetContent(const std::string& content);
+    void SetBackgroundColor(const std::string& color);
     void SetIcon(const std::shared_ptr<Media::PixelMap>& icon);
  
     uint32_t GetTemplate() const;
     std::string GetTitle() const;
     std::string GetContent() const;
+    std::string GetBackgroundColor() const;
     std::shared_ptr<Media::PixelMap> GetIcon() const;
  
     void GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBaseInfo);
@@ -40,6 +42,7 @@ private:
     uint32_t template_ {};
     std::string title_ {};
     std::string content_ {};
+    std::string backgroundColor_ {};
     std::shared_ptr<Media::PixelMap> icon_ {};
 };
 }

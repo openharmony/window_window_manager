@@ -14,6 +14,7 @@
  */
 
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -57,4 +58,14 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
     {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
 };
+
+WmErrorCode FindCodeByError(WMError error)
+{
+    auto iter = WM_JS_TO_ERROR_CODE_MAP.find(error);
+    if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        return iter->second;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "not find error::%{public}d", static_cast<int32_t>(error));
+    return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+}
 }

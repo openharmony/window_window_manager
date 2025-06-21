@@ -520,7 +520,10 @@ public:
         return WSError::WS_OK;
     }
  
-    virtual WMError GetFloatingBallWindowId(uint32_t& windowId) {return WMError::WM_OK;}
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
+    {
+        return WMError::WM_OK;
+    }
  
     /**
      * @brief Close flating ball window while stopFb is called.

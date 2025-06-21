@@ -1552,7 +1552,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
 
     Parcel parcel;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
 

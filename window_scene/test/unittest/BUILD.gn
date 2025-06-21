@@ -1148,6 +1148,10 @@ ohos_unittest("ws_session_stage_proxy_test") {
     "session_stage_proxy_test.cpp",
   ]
 
+  defines = [
+    "ENABLE_MOCK_WRITE_STRING",
+  ]
+
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   deps = [ ":ws_unittest_common" ]
