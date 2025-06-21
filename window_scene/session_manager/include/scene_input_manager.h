@@ -71,6 +71,10 @@ private:
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
     void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
         std::vector<MMI::WindowInfo> windowInfoList);
+    void ConstructDumpDisplayInfo(const MMI::DisplayInfo& displayInfo,
+        std::ostringstream& dumpDisplayListStream);
+    void ConstructDumpWindowInfo(const MMI::WindowInfo& windowInfo,
+        std::ostringstream& dumpWindowListStream);
     std::unordered_map<DisplayId, int32_t> GetFocusedSessionMap() const;
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
