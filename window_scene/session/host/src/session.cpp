@@ -3384,7 +3384,7 @@ WSRect Session::GetClientRect() const
 WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
 {
     if (hidingStartWindow == hidingStartWindow_) {
-        return WSError::WS_OK;;
+        return WSError::WS_OK;
     }
     TLOGI(WmsLogTag::WMS_PATTERN, "hidingStartWindow: %{public}d", hidingStartWindow);
     hidingStartWindow_ = hidingStartWindow;
