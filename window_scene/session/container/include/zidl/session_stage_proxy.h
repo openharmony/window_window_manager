@@ -108,7 +108,8 @@ public:
     WSError CloseSpecificScene() override;
 
     // Window LifeCycle
-    void NotifyNonInteractiveStatus() override;
+    void NotifyLifecyclePausedStatus() override;
+    void NotifyAppUseControlStatus(bool isUseControl) override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     WSError SendFbActionEvent(const std::string& action) override;
 

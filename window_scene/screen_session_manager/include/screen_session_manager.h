@@ -467,6 +467,7 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
 
 protected:
     ScreenSessionManager();
@@ -798,9 +799,12 @@ private:
     bool IsSupportCoordination();
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
+    bool SwitchPcMode();
+    void SwitchExternalScreenToMirror();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
+    std::mutex pcModeSwitchMutex_;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

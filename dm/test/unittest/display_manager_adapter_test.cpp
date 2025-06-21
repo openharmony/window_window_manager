@@ -883,5 +883,18 @@ HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
         EXPECT_EQ(err, DMError::DM_OK);
     }
 }
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
+{
+    ScreenId screenId = 1111;
+    bool enable = false;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
 }
 }

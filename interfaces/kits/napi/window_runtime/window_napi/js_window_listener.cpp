@@ -209,6 +209,30 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void JsWindowListener::WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "event type: %{public}u", eventType);
+    auto task = [self = weakRef_, eventType, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::WindowStageLifecycleCallback");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or eng is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
+        napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
+        thisListener->CallJsMethod(WINDOW_STAGE_LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "wms:JsWindowListener::WindowStageLifecycleCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void JsWindowListener::AfterForeground()
 {
     if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
@@ -253,24 +277,44 @@ void JsWindowListener::AfterPaused()
     }
 }
 
-void JsWindowListener::AfterInteractive()
-{
-    if (caseType_ == CaseType::CASE_STAGE) {
-        LifeCycleCallBack(LifeCycleEventType::INTERACTIVE);
-    }
-}
-
-void JsWindowListener::AfterNonInteractive()
-{
-    if (caseType_ == CaseType::CASE_STAGE) {
-        LifeCycleCallBack(LifeCycleEventType::NONINTERACTIVE);
-    }
-}
-
 void JsWindowListener::AfterDestroyed()
 {
     if (caseType_ == CaseType::CASE_WINDOW) {
         LifeCycleCallBack(LifeCycleEventType::DESTROYED);
+    }
+}
+
+void JsWindowListener::AfterLifecycleForeground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::FOREGROUND);
+            state_ = WindowState::STATE_SHOWN;
+        }
+    }
+}
+
+void JsWindowListener::AfterLifecycleBackground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::BACKGROUND);
+            state_ = WindowState::STATE_HIDDEN;
+        }
+    }
+}
+
+void JsWindowListener::AfterLifecycleResumed()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::RESUMED);
+    }
+}
+
+void JsWindowListener::AfterLifecyclePaused()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::PAUSED);
     }
 }
 

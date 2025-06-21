@@ -308,7 +308,10 @@ void ProxyInterfaceFuzzTestPart3(const uint8_t* data, size_t size)
     proxy->StopMirror(screenIds);
 
     std::vector<Point> startPoint{
-        source.GetObject<Point>(), source.GetObject<Point>(), source.GetObject<Point>()};
+        Point(source.GetObject<int32_t>(), source.GetObject<int32_t>()),
+        Point(source.GetObject<int32_t>(), source.GetObject<int32_t>()),
+        Point(source.GetObject<int32_t>(), source.GetObject<int32_t>())
+    };
     proxy->MakeExpand(screenIds, startPoint, screenGroupId);
     proxy->StopExpand(screenIds);
     proxy->RemoveVirtualScreenFromGroup(screenIds);

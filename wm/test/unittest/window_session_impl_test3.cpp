@@ -167,27 +167,26 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     window_ = GetTestWindowImpl("SetForceSplitEnable");
     ASSERT_NE(window_, nullptr);
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    int32_t res = 0;
     AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { FORCE_SPLIT_MODE, "MainPage", false };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
+    EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
 }
 

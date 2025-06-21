@@ -332,6 +332,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
+        property->SetUseControlStateToProperty(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -528,6 +529,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     if (!data.WriteBool(abilitySessionInfo->reuseDelegatorWindow)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write reuseDelegatorWindow failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(abilitySessionInfo->hideStartWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write hideStartWindow failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -2159,12 +2164,7 @@ WSError SessionProxy::ChangeKeyboardEffectOption(const KeyboardEffectOption& eff
         TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read reply failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,

@@ -266,6 +266,17 @@ void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::strin
     }
 }
 
+void SessionManagerAgentController::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY)) {
+        if (agent != nullptr) {
+            agent->NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+        }
+    }
+}
+
 void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {

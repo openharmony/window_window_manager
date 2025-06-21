@@ -37,6 +37,16 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -1078,6 +1088,135 @@ HWTEST_F(SceneSessionTest3, UpdateSubWindowLevel, TestSize.Level1)
     EXPECT_NE(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
     sceneSession->UpdateSubWindowLevel(subWindowLevel);
     EXPECT_EQ(subWindowLevel, sceneSession->GetSessionProperty()->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: UpdateLifecyclePausedInner
+ * @tc.desc: UpdateLifecyclePausedInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateLifecyclePausedInner, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "UpdateLifecyclePausedInner";
+    info.bundleName_ = "UpdateLifecyclePausedInner";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") == std::string::npos);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    session->sessionStage_ = mockSessionStage;
+    session->state_ = SessionState::STATE_ACTIVE;
+    session->UpdateLifecyclePausedInner();
+    session->state_ = SessionState::STATE_FOREGROUND;
+    session->UpdateLifecyclePausedInner();
+    session->state_ = SessionState::STATE_BACKGROUND;
+    session->UpdateLifecyclePausedInner();
+    EXPECT_TRUE(logMsg.find("state: ") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetUseControlStateToProperty
+ * @tc.desc: SetUseControlStateToProperty and GetUseControlStateFromProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetUseControlStateToProperty, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    bool isUseControl = true;
+    property->SetUseControlStateToProperty(isUseControl);
+    EXPECT_EQ(true, property->GetUseControlStateFromProperty());
+}
+
+/**
+ * @tc.name: RegisterUpdateAppUseControlCallback
+ * @tc.desc: RegisterUpdateAppUseControlCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
+{
+    ControlInfo controlInfo = {
+        .isNeedControl = false,
+        .isControlRecentOnly = true
+    };
+    ControlInfo controlInfoSec = {
+        .isNeedControl = false,
+        .isControlRecentOnly = false
+    };
+    ControlInfo controlInfoThd = {
+        .isNeedControl = true,
+        .isControlRecentOnly = false
+    };
+    SessionInfo info;
+    info.bundleName_ = "app";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+ 
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMap;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMap]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    std::string key = "app#0";
+    allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMapSec;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMapSec]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMapSec;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    std::string keySec = "app#0";
+    allAppUseMapSec[keySec][ControlAppType::APP_LOCK] = controlInfoSec;
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMapThd;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMapThd]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMapThd;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    std::string keyThd = "app#0";
+    allAppUseMapThd[keyThd][ControlAppType::APP_LOCK] = controlInfoThd;
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
+
+/**
+ * @tc.name: NotifyUpdateAppUseControl
+ * @tc.desc: NotifyUpdateAppUseControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyUpdateAppUseControl, Function | SmallTest | Level3)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ControlInfo controlInfo = {
+        .isNeedControl = true,
+        .isControlRecentOnly = false
+    };
+    SessionInfo info;
+    info.abilityName_ = "NotifyUpdateAppUseControl";
+    info.bundleName_ = "NotifyUpdateAppUseControl";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {
+        std::cout << "isNeedControl:" << isNeedControl << ";isControlRecentOnly:" << isControlRecentOnly << std::endl;
+    };
+    sceneSession->onUpdateAppUseControlFunc_ = std::move(callback);
+    sceneSession->sessionStage_ = nullptr;
+    ControlAppType type = ControlAppType::APP_LOCK;
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfo);
+
+    ControlInfo controlInfoSec = {
+        .isNeedControl = false,
+        .isControlRecentOnly = false
+    };
+    sceneSession->NotifyUpdateAppUseControl(type, controlInfoSec);
+    EXPECT_TRUE(logMsg.find("begin call pause") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
