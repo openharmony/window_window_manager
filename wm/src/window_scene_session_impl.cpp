@@ -1028,7 +1028,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         pointerEvent->MarkProcessed();
     }
     if (isPointDown || isPointUp) {
-        TLOGNI(WmsLogTag::WMS_INPUT_KEY_FLOW, "Consume:InputId:%{public}d,wid:%{public}u,pointId:%{public}d"
+        TLOGNI(WmsLogTag::WMS_INPUT_KEY_FLOW, "Consume:id:%{public}d,wid:%{public}u,pointId:%{public}d"
             ",srcType:%{public}d,rect:[%{public}d,%{public}d,%{public}u,%{public}u]"
             ",notify:%{public}d",
             pointerEvent->GetId(), GetWindowId(), pointerEvent->GetPointerId(),
