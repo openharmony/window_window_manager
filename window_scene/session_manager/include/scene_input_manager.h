@@ -62,15 +62,21 @@ protected:
 
 private:
     void UpdateFocusedSessionId(int32_t focusedSessionId);
-    void FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
+    void FlushFullInfoToMMI(std::vector<MMI::ScreenInfo>& screenInfos,
+        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize = false);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
-    void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
-    bool CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
-        const std::vector<MMI::WindowInfo>& windowInfoList);
+    void ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
+        std::vector<MMI::ScreenInfo>& screenInfos);
+    void ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
+        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap);
+    bool CheckNeedUpdate(const std::vector<MMI::ScreenInfo>& screenInfos,
+        const std::vector<MMI::DisplayInfo>& displayInfos, const std::vector<MMI::WindowInfo>& windowInfoList);
+    void PrintScreenInfo(const std::vector<MMI::ScreenInfo>& screenInfos);
     void PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
-    void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
+    void UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
+        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         std::vector<MMI::WindowInfo> windowInfoList);
     void ConstructDumpDisplayInfo(const MMI::DisplayInfo& displayInfo,
         std::ostringstream& dumpDisplayListStream);
@@ -80,6 +86,7 @@ private:
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    std::vector<MMI::ScreenInfo> lastScreenInfos_;
     std::vector<MMI::DisplayInfo> lastDisplayInfos_;
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };

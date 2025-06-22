@@ -294,13 +294,12 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .transform = transformData,
             .offsetX = screenProperty.GetInputOffsetX(),
             .offsetY = screenProperty.GetInputOffsetY(),
-            .ppi = screenProperty.GetXDpi(),
+            .scalePercent = scalePercent,
+            .expandHeight = expandHeight,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
             .displaySourceMode = static_cast<MMI::DisplaySourceMode>(screenSession->GetScreenCombination()),
             .oneHandX = screenOneHandX,
             .oneHandY = screenOneHandY,
-            .scalePercent = scalePercent,
-            .expandHeight = expandHeight,
             .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
             .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
             .screenArea = {
@@ -318,6 +317,7 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
                 .type = displayGroupId == 0 ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL,
                 .mainDisplayId = screenProperty.GetMainScreenIdOfGroup(),
             }
+            displayGroupMap[displayGroupId] = displayGroupInfo;
         }
         displayGroupMap[displayGroupId].displayInfo.emplace_back(displayInfo);
     }
@@ -354,11 +354,11 @@ void SceneInputManager::FlushFullInfoToMMI(std::vector<MMI::ScreenInfo>& screenI
     }
     std::vector<MMI::DisplayGroupInfo> displayGroupInfos;
     for (auto& [displayGroupId, displayGroup] : displayGroupMap) {
-        displayGroup.windowsInfo = windowInfoMap[displayGroupId];
-        displayGroup.focusWindowId = focusInfoMap[displayGroupId];
         if (!isOverBatchSize && !windowInfoMap[displayGroupId].empty()) {
             windowInfoMap[displayGroupId].back().action = MMI::WINDOW_UPDATE_ACTION::ADD_END;
         }
+        displayGroup.windowsInfo = windowInfoMap[displayGroupId];
+        displayGroup.focusWindowId = focusInfoMap[displayGroupId];
         displayGroupInfos.emplace_back(displayGroup);
     }
     MMI::UserScreenInfo userScreenInfo = {
@@ -399,14 +399,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .screens = screenInfos,
             .displayGroups = displayGroupInfos
         };
-        int mainScreenWidth = 0;
-        int mainScreenHeight = 0;
-        if (!displayGroupInfos.empty() && !displayGroupInfos[0].displaysInfo.empty()) {
-            mainScreenWidth = displayGroupInfos[0].displaysInfo[0].width;
-            mainScreenHeight = displayGroupInfos[0].displaysInfo[0].height;
-        }
-        TLOGI(WmsLogTag::WMS_EVENT, "userId:%{public}d width:%{public}d height:%{public}d",
-            currentUserId_, mainScreenWidth, mainScreenHeight);
+        TLONGI(WmsLogTag::WMS_EVENT, "userId:%{public}d", currentUserId_);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(userScreenInfo);
     };
     if (eventHandler_) {
@@ -540,27 +533,6 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
     }
 }
 
-void SceneInputManager::PrintScreenInfo(const std::vector<MMI::ScreenInfo>& screenInfos)
-{
-    int screenListSize = static_cast<int>(screenInfos.size());
-    std::ostringstream screenListStream;
-    static std::string lastScreenList = "";
-    for (auto& screenInfo : screenInfos) {
-        screenListStream << screenInfo.id << "|" << screenInfo.uniqueId << "|"
-                         << static_cast<uint32_t>(screenInfo.screenType) << "|"
-                         << screenInfo.width << "|" << screenInfo.height << "|"
-                         << screenInfo.physicalWidth << "|" << screenInfo.physicalHeight << "|"
-                         << static_cast<int32_t>(screenInfo.tpDirection) << "|"
-                         << screenInfo.dpi << "|" << screenInfo.ppi << ",";
-
-
-    std::string screenList = screenListStream.str();
-    if (lastScreenList != screenList) {
-        TLOGNI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", screenListSize, screenList.c_str());
-        lastScreenList = screenList;
-    }
-}
-
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
@@ -614,6 +586,27 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     SessionChangeRecorder::GetInstance().RecordSceneSessionChange(RecordType::EVENT_RECORD, changeInfo);
 }
 
+void SceneInputManager::PrintScreenInfo(const std::vector<MMI::ScreenInfo>& screenInfos)
+{
+    int screenListSize = static_cast<int>(screenInfos.size());
+    std::ostringstream screenListStream;
+    static std::string lastScreenList = "";
+    for (auto& screenInfo : screenInfos) {
+        screenListStream << screenInfo.id << "|" << screenInfo.uniqueId << "|"
+                         << static_cast<uint32_t>(screenInfo.screenType) << "|"
+                         << screenInfo.width << "|" << screenInfo.height << "|"
+                         << screenInfo.physicalWidth << "|" << screenInfo.physicalHeight << "|"
+                         << static_cast<int32_t>(screenInfo.tpDirection) << "|"
+                         << screenInfo.dpi << "|" << screenInfo.ppi << ",";
+    }
+
+    std::string screenList = screenListStream.str();
+    if (lastScreenList != screenList) {
+        TLOGNI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", screenListSize, screenList.c_str());
+        lastScreenList = screenList;
+    }
+}
+
 void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos)
 {
     int displayListSize = static_cast<int>(displayInfos.size());
@@ -623,19 +616,16 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
     for (auto& displayInfo : displayInfos) {
         displayListStream << displayInfo.id << "|" << displayInfo.x << "|" << displayInfo.y << "|"
                           << displayInfo.width << "|" << displayInfo.height << "|"
+                          << displayInfo.dpi << "|"
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
                           << static_cast<int32_t>(displayInfo.displayMode) << "|"
-                          << displayInfo.offsetX << "|" << displayInfo.offsetY << "|"
+                          << displayInfo.scalePercent << "|" << displayInfo.expandHeight << "|"
                           << displayInfo.isCurrentOffScreenRendering << "|"
-                          << displayInfo.screenRealWidth << "|" << displayInfo.screenRealHeight << "|"
-                          << displayInfo.screenRealPPI << "|" << displayInfo.screenRealDPI << "|"
-                          << static_cast<int32_t>(displayInfo.screenCombination) << "|"
-                          << displayInfo.validWidth << "|" << displayInfo.validHeight << "|"
-                          << displayInfo.fixedDirection << "|" << displayInfo.physicalWidth << "|"
-                          << displayInfo.physicalHeight << "|" << displayInfo.oneHandX << "|"
-                          << displayInfo.oneHandY << "|" << displayInfo.scalePercent << "|"
-                          << displayInfo.expandHeight << "|" << displayInfo.uniqueId << ",";
+                          << static_cast<uint32_t>(displayInfo.displaySourceMode) << "|" << displayInfo.oneHandX << "|"
+                          << displayInfo.oneHandY << "|" << displayInfo.sreenArea.area.x << "|"
+                          << displayInfo.sreenArea.area.y << "|" << displayInfo.sreenArea.area.width << "|"
+                          << displayInfo.sreenArea.area.height << "|" << displayInfo.rsId << ",";
         ConstructDumpDisplayInfo(displayInfo, dumpDisplayListStream);
     }
 
@@ -665,21 +655,23 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
     MMI::InputManager::GetInstance()->SetCurrentUser(userId);
 }
 
-void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
+void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
+    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
+        FushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList);
         return;
     }
     int32_t windowBatchSize = MAX_WINDOWINFO_NUM;
     if (windowInfoList[0].defaultHotAreas.size() > MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
         windowBatchSize = MMI::InputManager::GetInstance()->GetWinSyncBatchSize(
             static_cast<int32_t>(windowInfoList[0].defaultHotAreas.size()),
-            static_cast<int32_t>(displayInfos.size()));
+            static_cast<int32_t>(displayGroupMap.size()));
     }
     int32_t windowListSize = static_cast<int32_t>(windowInfoList.size());
     if (windowListSize <= windowBatchSize) {
-        FlushFullInfoToMMI(displayInfos, windowInfoList);
+        FlushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList);
         return;
     }
     std::unordered_map<int32_t, std::vector<int32_t>> windowIndexMap;
@@ -694,7 +686,7 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Displa
     auto iterBegin = windowInfoList.begin();
     auto iterEnd = windowInfoList.end();
     auto iterNext = std::next(iterBegin, windowBatchSize);
-    FlushFullInfoToMMI(displayInfos, std::vector<MMI::WindowInfo>(iterBegin, iterNext), true);
+    FlushFullInfoToMMI(screenInfos, displayGroupMap, std::vector<MMI::WindowInfo>(iterBegin, iterNext), true);
     while (iterNext != iterEnd) {
         auto iterNewBegin = iterNext;
         if (iterNewBegin->defaultHotAreas.size() <= MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
@@ -816,24 +808,14 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
     transformStream << "]";
     dumpDisplayListStream << "id:" << displayInfo.id << "|x:" << displayInfo.x << "|y:" << displayInfo.y
                           << "|width:" << displayInfo.width << "|height:" << displayInfo.height << "|dpi:"
-                          << displayInfo.dpi << "|name:" << displayInfo.name << "|uniq:" << displayInfo.uniq
-                          << "|direction:" << static_cast<int32_t>(displayInfo.direction) << "|displayDirection:"
+                          << displayInfo.dpi << "|name:" << displayInfo.name << "|direction:"
+                          << static_cast<int32_t>(displayInfo.direction) << "|displayDirection:"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|displayMode:"
                           << static_cast<int32_t>(displayInfo.displayMode) << "|transform:" << transformStream.str()
-                          << "|offsetX:" << displayInfo.offsetX << "|offsetY:" << displayInfo.offsetY << "|ppi:"
-                          << displayInfo.ppi << "|scalePercent:" << displayInfo.scalePercent << "|expandHeight:"
+                          << "|offsetX:" << displayInfo.offsetX << "|offsetY:" << displayInfo.offsetY
+                          << "|scalePercent:" << displayInfo.scalePercent << "|expandHeight:"
                           << displayInfo.expandHeight << "|isCurrentOffScreenRendering:"
-                          << displayInfo.isCurrentOffScreenRendering << "|screenRealWidth:"
-                          << displayInfo.screenRealWidth << "|screenRealHeight:" << displayInfo.screenRealHeight
-                          << "|screenRealPPI:" << displayInfo.screenRealPPI << "|screenRealDPI:"
-                          << displayInfo.screenRealDPI << "|screenCombination:"
-                          << static_cast<int32_t>(displayInfo.screenCombination) << "|validWidth:"
-                          << displayInfo.validWidth << "|validHeight:" << displayInfo.validHeight
-                          << "|fixedDirection:" << displayInfo.fixedDirection << "|physicalWidth:"
-                          << displayInfo.physicalWidth << "|physicalHeight:" << displayInfo.physicalHeight
-                          << "|oneHandX:" << displayInfo.oneHandX << "|oneHandY:" << displayInfo.oneHandY
-                          << "|pointerActiveWidth:" << displayInfo.pointerActiveWidth << "|pointerActiveHeight:"
-                          << displayInfo.pointerActiveHeight << "|uniqueId:" << displayInfo.uniqueId << ", ";
+                          << displayInfo.isCurrentOffScreenRendering << ", ";
 }
 
 void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInfo,
