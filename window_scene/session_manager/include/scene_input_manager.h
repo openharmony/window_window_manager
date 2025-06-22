@@ -22,6 +22,7 @@
 #include <ui_content.h>
 #include "input_manager.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_property.h"
 #include "wm_common.h"
 #include "wm_single_instance.h"
 
