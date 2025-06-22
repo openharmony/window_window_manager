@@ -82,6 +82,21 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
     return rotation;
 }
 
+MMI::Rotation ConvertToMMIRotation(float degree)
+{
+    MMI::Rotation rotation = MMI::Rotation::ROTATION_0;
+    if (NearEqual(degree, DIRECTION0)) {
+        rotation = MMI::Rotation::ROTATION_0;
+    } else if (NearEqual(degree, DIRECTION90)) {
+        rotation = MMI::Rotation::ROTATION_90;
+    } else if (NearEqual(degree, DIRECTION180)) {
+        rotation = MMI::Rotation::ROTATION_180;
+    } else if (NearEqual(degree, DIRECTION270)) {
+        rotation = MMI::Rotation::ROTATION_270;
+    }
+    return rotation;
+}
+
 bool CmpMMIWindowInfo(const MMI::WindowInfo& a, const MMI::WindowInfo& b)
 {
     return a.defaultHotAreas.size() > b.defaultHotAreas.size();
