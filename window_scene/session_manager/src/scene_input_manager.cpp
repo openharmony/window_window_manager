@@ -319,7 +319,7 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             };
             displayGroupMap[displayGroupId] = displayGroupInfo;
         }
-        displayGroupMap[displayGroupId].displayInfos.emplace_back(displayInfo);
+        displayGroupMap[displayGroupId].displaysInfo.emplace_back(displayInfo);
     }
 }
 
@@ -602,7 +602,7 @@ void SceneInputManager::PrintScreenInfo(const std::vector<MMI::ScreenInfo>& scre
 
     std::string screenList = screenListStream.str();
     if (lastScreenList != screenList) {
-        TLOGNI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", screenListSize, screenList.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", screenListSize, screenList.c_str());
         lastScreenList = screenList;
     }
 }
@@ -623,9 +623,9 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.scalePercent << "|" << displayInfo.expandHeight << "|"
                           << displayInfo.isCurrentOffScreenRendering << "|"
                           << static_cast<uint32_t>(displayInfo.displaySourceMode) << "|" << displayInfo.oneHandX << "|"
-                          << displayInfo.oneHandY << "|" << displayInfo.sreenArea.area.x << "|"
-                          << displayInfo.sreenArea.area.y << "|" << displayInfo.sreenArea.area.width << "|"
-                          << displayInfo.sreenArea.area.height << "|" << displayInfo.rsId << ",";
+                          << displayInfo.oneHandY << "|" << displayInfo.screenArea.area.x << "|"
+                          << displayInfo.screenArea.area.y << "|" << displayInfo.screenArea.area.width << "|"
+                          << displayInfo.screenArea.area.height << "|" << displayInfo.rsId << ",";
         ConstructDumpDisplayInfo(displayInfo, dumpDisplayListStream);
     }
 

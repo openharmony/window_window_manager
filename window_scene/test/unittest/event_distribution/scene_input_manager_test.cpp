@@ -373,7 +373,7 @@ HWTEST_F(SceneInputManagerTest, UpdateConstrainedModalUIExtInfo, TestSize.Level1
  */
 HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, TestSize.Level1)
 {
-    std::vector<MMI::ScreenInfo> screenInfos,
+    std::vector<MMI::ScreenInfo> screenInfos;
     std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
@@ -917,10 +917,10 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate, TestSize.Level1)
     ASSERT_TRUE(result);
     std::vector<MMI::ScreenInfo> screenInfos01;
     MMI::ScreenInfo screenInfo01;
-    screenInfo01.id = 0;
-    screenInfo01.emplace_back(screenInfos01);
+    screenInfo01.id = 1;
+    screenInfos01.emplace_back(screenInfo01);
     SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfo01, displayInfos, windowInfoList);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos01, displayInfos, windowInfoList);
     ASSERT_FALSE(result);
 }
 } // namespace
