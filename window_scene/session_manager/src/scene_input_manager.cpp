@@ -309,17 +309,17 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             },
             .rsId = screenProperty.GetRsId()
         };
-        DisplayGroupId displayGroupId = screenProperty.GetDisplayGroupId();
+        DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
         if (displayGroupMap.count(displayGroupId) == 0) {
             MMI::DisplayGroupInfo displayGroupInfo = {
                 .id = displayGroupId,
                 .name = "displayGroup" + std::to_string(displayGroupId),
                 .type = displayGroupId == 0 ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL,
                 .mainDisplayId = screenProperty.GetMainScreenIdOfGroup(),
-            }
+            };
             displayGroupMap[displayGroupId] = displayGroupInfo;
         }
-        displayGroupMap[displayGroupId].displayInfo.emplace_back(displayInfo);
+        displayGroupMap[displayGroupId].displayInfos.emplace_back(displayInfo);
     }
 }
 
@@ -343,7 +343,7 @@ std::unordered_map<DisplayId, int32_t> SceneInputManager::GetFocusedSessionMap()
     return focusInfoMap;
 }
 
-void SceneInputManager::FlushFullInfoToMMI(std::vector<MMI::ScreenInfo>& screenInfos,
+void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
     std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize)
 {
@@ -660,7 +660,7 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Screen
     std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
-        FushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList);
+        FlushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList);
         return;
     }
     int32_t windowBatchSize = MAX_WINDOWINFO_NUM;
@@ -718,7 +718,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
             TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
             return;
         }
-        std::map<<ScreenId, ScreenProperty> screensProperties =
+        std::map<ScreenId, ScreenProperty> screensProperties =
             ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         std::vector<MMI::ScreenInfo> screenInfos;
         ConstructScreenInfos(screensProperties, screenInfos);

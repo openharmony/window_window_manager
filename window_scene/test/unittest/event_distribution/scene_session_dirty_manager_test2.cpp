@@ -471,6 +471,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Le
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
+    std::vector<MMI::ScreenInfo> screenInfos;
     checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }

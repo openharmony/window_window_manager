@@ -888,14 +888,14 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayGroupInfos, TestSize.Level1)
     EXPECT_EQ(displayGroupMap.size(), 0);
     ScreenProperty screenProperty0;
     screenProperty0.SetValidHeight(10);
-    Rosen::ScreenSessionMangerClient::GetInstance().screenSessionMap_[0] =
+    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
         sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     screensProperties[0] = screenProperty0;
     SceneInputManager::GetInstance().ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
-    EXPECT_EQ(screenInfos.size(), 1);
+    EXPECT_EQ(displayGroupMap.size(), 1);
     screensProperties[1] = screenProperty0;
     SceneInputManager::GetInstance().ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
-    EXPECT_EQ(screenInfos.size(), 1);
+    EXPECT_EQ(displayGroupMap.size(), 1);
 }
 
 /**
@@ -903,7 +903,7 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayGroupInfos, TestSize.Level1)
  * @tc.desc: CheckNeedUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdate, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
     std::vector<MMI::DisplayInfo> displayInfos;
