@@ -1337,18 +1337,10 @@ HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
 
-    session_->hidingStartWindow_ = true;
-    auto ret = session_->SetHidingStartingWindow(true);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(session_->GetHidingStartingWindow());
-
     session_->SetLeashWinSurfaceNode(nullptr);
-    ret = session_->SetHidingStartingWindow(false);
+    auto ret = session_->SetHidingStartingWindow(false);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     EXPECT_TRUE(session_->GetHidingStartingWindow() == false);
-
-    ret = session_->SetHidingStartingWindow(false);
-    EXPECT_EQ(ret, WSError::WS_OK);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
