@@ -110,6 +110,7 @@ constexpr int32_t CURVE_PARAM_DIMENSION = 4;
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
 const std::string EMPTY_DEVICE_ID = "";
+const std::string STARTWINDOW_TYPE = "startWindowType";
 const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
@@ -4950,7 +4951,8 @@ std::shared_ptr<Global::Resource::ResourceManager> SceneSessionManager::GetResou
         loadPath = abilityInfo.resourcePath;
     }
 
-    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA)) {
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA |
+        Global::Resource::SELECT_PROF)) {
         TLOGW(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
     return resourceMgr;
@@ -4981,6 +4983,10 @@ bool SceneSessionManager::GetPathInfoFromResource(const std::shared_ptr<Global::
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
     StartingWindowInfo& startingWindowInfo)
 {
+    const std::map<std::string, std::string> START_WINDOW_KEY_AND_DEFAULT_MAP = {
+        {STARTWINDOW_TYPE, "REQUIRED_SHOW"},
+    };
+
     auto resourceMgr = GetResourceManager(abilityInfo);
     if (!resourceMgr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
@@ -4990,6 +4996,13 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     if (hapPathEmpty) {
         TLOGW(WmsLogTag::WMS_PATTERN, "hapPath empty:%{public}s", abilityInfo.bundleName.c_str());
     }
+
+    const auto startWindowType = START_WINDOW_KEY_AND_DEFAULT_MAP.find(STARTWINDOW_TYPE);
+    if (startWindowType != START_WINDOW_KEY_AND_DEFAULT_MAP.end()) {
+        startingWindowInfo.startWindowType_ = startingWindowRdbMgr_->GetStartWindowValFromProfile(
+            abilityInfo, resourceMgr, startWindowType->first, startWindowType->second);
+    }
+
     if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId,
             startingWindowInfo.backgroundColorEarlyVersion_) != Global::Resource::RState::SUCCESS ||
         !GetPathInfoFromResource(resourceMgr, hapPathEmpty,
@@ -5375,6 +5388,9 @@ void SceneSessionManager::SetSessionInfoStartWindowType(const sptr<SceneSession>
         if (CONVERT_STRING_TO_START_WINDOW_TYPE_MAP.count(startingWindowInfo.startWindowType_) > 0) {
             sceneSession->EditSessionInfo().startWindowType_ =
                 CONVERT_STRING_TO_START_WINDOW_TYPE_MAP.at(startingWindowInfo.startWindowType_);
+        }
+        if (sceneSession->GetSessionInfo().startWindowType_ == StartWindowType::RETAIN_AND_INVISIBLE) {
+            sceneSession->SetHidingStartingWindow(true);
         }
         TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, startWindowType:%{public}d",
             sceneSession->GetPersistentId(), sceneSession->GetSessionInfo().startWindowType_);
@@ -10079,6 +10095,10 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "filter DragScale window.");
         return false;
     }
+    if (sceneSession->GetHidingStartingWindow()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "filter hiding starting win: %{public}d", sceneSession->GetPersistentId());
+        return false;
+    }
     sptr<AccessibilityWindowInfo> info = sptr<AccessibilityWindowInfo>::MakeSptr();
     if (sceneSession->GetSessionInfo().isSystem_) {
         info->wid_ = 1;
@@ -10170,11 +10190,19 @@ void SceneSessionManager::GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionDa
     VisibleData& rsVisibleData = occlusiontionData->GetVisibleData();
     for (auto iter = rsVisibleData.begin(); iter != rsVisibleData.end(); iter++) {
         WindowLayerState windowLayerState = static_cast<WindowLayerState>(iter->second);
+        auto visibilityState = static_cast<WindowVisibilityState>(iter->second);
+        sptr<SceneSession> session = SelectSesssionFromMap(iter->first);
         switch (windowLayerState) {
             case WINDOW_ALL_VISIBLE:
             case WINDOW_SEMI_VISIBLE:
-            case WINDOW_IN_VISIBLE:
                 currVisibleData.emplace_back(iter->first, static_cast<WindowVisibilityState>(iter->second));
+                break;
+            case WINDOW_IN_VISIBLE:
+                if (session != nullptr && session->GetHidingStartingWindow()) {
+                    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "change to visible: %{public}d", session->GetPersistentId());
+                    visibilityState = WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+                }
+                currVisibleData.emplace_back(iter->first, visibilityState);
                 break;
             case WINDOW_LAYER_DRAWING:
                 currDrawingContentData.emplace_back(iter->first, true);
@@ -12392,7 +12420,11 @@ void SceneSessionManager::PostProcessFocus()
 
         WSError ret = WSError::WS_DO_NOTHING;
         if (session->GetPostProcessFocusState().isFocused_) {
-            if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
+            if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP &&
+                session->IsDelayFocusChange()) {
+                TLOGI(WmsLogTag::WMS_FOCUS, "delay focus change until the window is visible");
+                continue;
+            } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
                 ret = RequestSessionFocusImmediately(session->GetPersistentId());
             } else if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::RECENT) {
                 ret = RequestSessionFocus(session->GetPersistentId(),
