@@ -1249,6 +1249,26 @@ HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, TestSize.Leve
     dirction = ConvertDegreeToMMIRotation(30.0);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
 }
+
+/**
+ * @tc.name: ConvertToMMIRotation
+ * @tc.desc: ConvertToMMIRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, ConvertToMMIRotation, TestSize.Level1)
+{
+    MMI::Rotation rotation = MMI::Rotation::ROTATION_0;
+    rotation = ConvertToMMIRotation(0.0);
+    ASSERT_EQ(rotation, MMI::Rotation::ROTATION_0);
+    rotation = ConvertToMMIRotation(90.0);
+    ASSERT_EQ(rotation, MMI::Rotation::ROTATION_90);
+    rotation = ConvertToMMIRotation(180.0);
+    ASSERT_EQ(rotation, MMI::Rotation::ROTATION_180);
+    rotation = ConvertToMMIRotation(270.0);
+    ASSERT_EQ(rotation, MMI::Rotation::ROTATION_270);
+    rotation = ConvertToMMIRotation(30.0);
+    ASSERT_EQ(rotation, MMI::Rotation::ROTATION_0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
