@@ -1237,13 +1237,14 @@ void JsSceneSession::ProcessBufferAvailableChangeRegister()
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetBufferAvailableChangeListener([weakThis = wptr(this), where = __func__](const bool isAvailable) {
+    session->SetBufferAvailableChangeListener([weakThis = wptr(this), where = __func__]
+        (const bool isAvailable, bool startWindowInvisible) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnBufferAvailableChange(isAvailable);
+        jsSceneSession->OnBufferAvailableChange(isAvailable, startWindowInvisible);
     });
     TLOGD(WmsLogTag::DEFAULT, "success");
 }
@@ -3771,10 +3772,11 @@ void JsSceneSession::OnUpdateTransitionAnimation(const WindowTransitionType& typ
         std::to_string(static_cast<int>(type)));
 }
 
-void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
+void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable, bool startWindowInvisible)
 {
-    TLOGD(WmsLogTag::DEFAULT, "state: %{public}u", isBufferAvailable);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isBufferAvailable, env = env_] {
+    TLOGD(WmsLogTag::DEFAULT, "state: %{public}u, %{public}u", isBufferAvailable, startWindowInvisible);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+                isBufferAvailable, startWindowInvisible, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "OnBufferAvailableChange jsSceneSession id:%{public}d has been destroyed",
@@ -3787,7 +3789,8 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
             return;
         }
         napi_value jsBufferAvailableObj = CreateJsValue(env, isBufferAvailable);
-        napi_value argv[] = { jsBufferAvailableObj };
+        napi_value jsStartWindowInvisibleObj = CreateJsValue(env, startWindowInvisible);
+        napi_value argv[] = { jsBufferAvailableObj, jsStartWindowInvisibleObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnBufferAvailableChange");
