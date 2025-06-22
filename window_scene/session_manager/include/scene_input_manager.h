@@ -62,7 +62,7 @@ protected:
 
 private:
     void UpdateFocusedSessionId(int32_t focusedSessionId);
-    void FlushFullInfoToMMI(std::vector<MMI::ScreenInfo>& screenInfos,
+    void FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
         std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize = false);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
