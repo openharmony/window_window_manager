@@ -3480,15 +3480,13 @@ WSRect Session::GetClientRect() const
 
 WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
 {
-    if (hidingStartWindow == hidingStartWindow_) {
-        return WSError::WS_OK;
-    }
-    TLOGI(WmsLogTag::WMS_PATTERN, "hidingStartWindow: %{public}d", hidingStartWindow);
     hidingStartWindow_ = hidingStartWindow;
     auto leashSurfaceNode = GetLeashWinSurfaceNode();
     if (leashSurfaceNode == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "no leashWindow: %{public}d", hidingStartWindow);
         return WSError::WS_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_PATTERN, "hidingStartWindow: %{public}d", hidingStartWindow);
     hidingStartWindow ? leashSurfaceNode->SetAlpha(0) : leashSurfaceNode->SetAlpha(1);
     SetTouchable(!hidingStartWindow);
     return WSError::WS_OK;
