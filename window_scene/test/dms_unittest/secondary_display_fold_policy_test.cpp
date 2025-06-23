@@ -381,7 +381,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Te
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
     ScreenProperty property = policy.screenProperty_;
 
-    policy.SetStatusFullActiveRectAndTpFeature(property);
+    policy.SetStatusFullActiveRectAndTpFeature();
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
@@ -398,7 +398,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusMainActiveRectAndTpFeature, Te
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
     ScreenProperty property = policy.screenProperty_;
 
-    policy.SetStatusMainActiveRectAndTpFeature(property);
+    policy.SetStatusMainActiveRectAndTpFeature();
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
@@ -415,7 +415,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeatu
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
     ScreenProperty property = policy.screenProperty_;
 
-    policy.SetStatusGlobalFullActiveRectAndTpFeature(property);
+    policy.SetStatusGlobalFullActiveRectAndTpFeature();
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
