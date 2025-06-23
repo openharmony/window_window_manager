@@ -4312,7 +4312,7 @@ void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFu
         }
         napi_value jsIsAnimating = CreateJsValue(env, isAnimating);
         napi_value jsIsFullScreen = CreateJsValue(env, isFullScreen);
-        napi_value argv[] = { jsIsAnimating };
+        napi_value argv[] = { jsIsAnimating, isFullScreen };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
