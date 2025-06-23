@@ -1875,10 +1875,13 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
         callback->onCallback(1, 1);
     });
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    session->SetSessionRect(preRect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = true;
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
-    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
     EXPECT_EQ(preRect, session->GetSessionRect());
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
 
     session->keyFramePolicy_.running_ = false;
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
