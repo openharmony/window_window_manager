@@ -142,7 +142,7 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
 WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    TLOGI(WmsLogTag::DEFAULT, "called");
+    TLOGI(WmsLogTag::DEFAULT, "called, WindowManagerAgentType: ", type);
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
@@ -162,7 +162,7 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
         return ret;
     }
     agentSet.erase(agent);
-    TLOGI(WmsLogTag::DEFAULT, "success");
+    TLOGI(WmsLogTag::DEFAULT, "success, WindowManagerAgentType: ", type);
 
     return ret;
 }
