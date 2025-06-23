@@ -25,25 +25,36 @@
 
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace OHOS {
 namespace Rosen {
 
 class MockWindow : public Window {
 public:
+    WindowState state_ = WindowState::STATE_INITIAL;
     const uint32_t mockWindowId_ = 101;
     MockWindow() {};
     ~MockWindow() {};
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(NotifyPrepareCloseFloatingBall, void());
-    MOCK_METHOD2(UpdateFloatingBall, void(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+    MOCK_METHOD2(UpdateFloatingBall, WMError(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon));
     MOCK_METHOD1(RestoreFbMainWindow, WMError(const std::shared_ptr<AAFwk::Want>& want));
     MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
     uint32_t GetWindowId() const override
     {
         return mockWindowId_;
+    }
+
+    void SetWindowState(const WindowState& state)
+    {
+        state_ = state;
+    }
+
+    WindowState GetWindowState() const override
+    {
+        return state_;
     }
 };
 
@@ -74,6 +85,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    sptr<FloatingBallController> fbController_;
+    sptr<FbOption> option_;
+    sptr<MockWindow> mw_;
 };
 
 void FloatingBallControllerTest::SetUpTestCase()
@@ -86,10 +101,20 @@ void FloatingBallControllerTest::TearDownTestCase()
 
 void FloatingBallControllerTest::SetUp()
 {
+    int32_t mockWindowId = 100;
+    mw_ = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw_);
+    fbController_ = sptr<FloatingBallController>::MakeSptr(mw_, mockWindowId, nullptr);
+    ASSERT_NE(nullptr, fbController_);
+    option_ = sptr<FbOption>::MakeSptr();
+    ASSERT_NE(nullptr, option_);
 }
 
 void FloatingBallControllerTest::TearDown()
 {
+    fbController_ = nullptr;
+    option_ = nullptr;
+    mw_ = nullptr;
 }
 
 namespace {
@@ -100,23 +125,21 @@ namespace {
  */
 HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    fbController->fbOption_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->CreateFloatingBallWindow());
-    fbController->fbOption_ = option;
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->CreateFloatingBallWindow());
-
     AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController->contextPtr_ = contextPtr;
-    fbController->CreateFloatingBallWindow();
-    fbController->UpdateMainWindow(nullptr);
-    EXPECT_EQ(100, fbController->mainWindowId_);
-    fbController->UpdateMainWindow(mw);
-    EXPECT_EQ(101, fbController->mainWindowId_);
+    fbController_->contextPtr_ = contextPtr;
+    fbController_->fbOption_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow());
+    fbController_->fbOption_ = option_;
+    mw_->SetWindowState(WindowState::STATE_INITIAL);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow());
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow());
+
+    fbController_->CreateFloatingBallWindow();
+    fbController_->UpdateMainWindow(nullptr);
+    EXPECT_EQ(100, fbController_->mainWindowId_);
+    fbController_->UpdateMainWindow(mw_);
+    EXPECT_EQ(101, fbController_->mainWindowId_);
     delete contextPtr;
 }
 
@@ -127,35 +150,30 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
  */
 HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
     sptr<FbOption> nullOption = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->StartFloatingBall(nullOption));
-    fbController->curState_ = FbWindowState::STATE_STARTING;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StartFloatingBall(option));
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StartFloatingBall(option));
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(nullOption));
+    fbController_->curState_ = FbWindowState::STATE_STARTING;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StartFloatingBall(option_));
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StartFloatingBall(option_));
 
-    fbController->curState_ = FbWindowState::STATE_UNDEFINED;
-    FloatingBallManager::SetActiveController(fbController);
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->StartFloatingBall(option));
-    FloatingBallManager::RemoveActiveController(fbController);
+    fbController_->curState_ = FbWindowState::STATE_UNDEFINED;
+    FloatingBallManager::SetActiveController(fbController_);
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
+    FloatingBallManager::RemoveActiveController(fbController_);
 
-    auto activeFbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
+    auto activeFbController = sptr<FloatingBallController>::MakeSptr(mw_, 100, nullptr);
     FloatingBallManager::SetActiveController(activeFbController);
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_CONTROLLER, fbController->StartFloatingBall(option));
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_CONTROLLER, fbController_->StartFloatingBall(option_));
 
     FloatingBallManager::RemoveActiveController(activeFbController);
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController->StartFloatingBall(option));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController->curState_);
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
+    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->curState_);
 
     AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController->contextPtr_ = contextPtr;
-    EXPECT_NE(WMError::WM_OK, fbController->StartFloatingBall(option));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController->GetControllerState());
+    fbController_->contextPtr_ = contextPtr;
+    EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
+    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetControllerState());
     delete contextPtr;
 }
 
@@ -166,23 +184,18 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, LifeCycleTest01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, fbController->RegisterFbLifecycle(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController_->RegisterFbLifecycle(nullptr));
     auto lifeListener = sptr<MockLifeCycleListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, fbController->RegisterFbLifecycle(lifeListener));
+    EXPECT_EQ(WMError::WM_OK, fbController_->RegisterFbLifecycle(lifeListener));
     // repeat register
-    EXPECT_EQ(WMError::WM_OK, fbController->RegisterFbLifecycle(lifeListener));
-    fbController->fbLifeCycleListeners_.emplace_back(nullptr);
-    fbController->OnFloatingBallStart();
-    fbController->OnFloatingBallStop();
+    EXPECT_EQ(WMError::WM_OK, fbController_->RegisterFbLifecycle(lifeListener));
+    fbController_->fbLifeCycleListeners_.emplace_back(nullptr);
+    fbController_->OnFloatingBallStart();
+    fbController_->OnFloatingBallStop();
     // unregister
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, fbController->UnRegisterFbLifecycle(nullptr));
-    EXPECT_EQ(WMError::WM_OK, fbController->UnRegisterFbLifecycle(lifeListener));
-    fbController->fbLifeCycleListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController_->UnRegisterFbLifecycle(nullptr));
+    EXPECT_EQ(WMError::WM_OK, fbController_->UnRegisterFbLifecycle(lifeListener));
+    fbController_->fbLifeCycleListeners_.clear();
 }
 
 /**
@@ -192,22 +205,17 @@ HWTEST_F(FloatingBallControllerTest, LifeCycleTest01, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, ClickTest01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, fbController->RegisterFbClickObserver(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController_->RegisterFbClickObserver(nullptr));
     auto clickListener = sptr<MockClickListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, fbController->RegisterFbClickObserver(clickListener));
+    EXPECT_EQ(WMError::WM_OK, fbController_->RegisterFbClickObserver(clickListener));
     // repeat register
-    EXPECT_EQ(WMError::WM_OK, fbController->RegisterFbClickObserver(clickListener));
-    fbController->fbClickObservers_.emplace_back(nullptr);
-    fbController->OnFloatingBallClick();
+    EXPECT_EQ(WMError::WM_OK, fbController_->RegisterFbClickObserver(clickListener));
+    fbController_->fbClickObservers_.emplace_back(nullptr);
+    fbController_->OnFloatingBallClick();
     // unregister
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, fbController->UnRegisterFbClickObserver(nullptr));
-    EXPECT_EQ(WMError::WM_OK, fbController->UnRegisterFbClickObserver(clickListener));
-    fbController->fbClickObservers_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController_->UnRegisterFbClickObserver(nullptr));
+    EXPECT_EQ(WMError::WM_OK, fbController_->UnRegisterFbClickObserver(clickListener));
+    fbController_->fbClickObservers_.clear();
 }
 
 /**
@@ -217,24 +225,21 @@ HWTEST_F(FloatingBallControllerTest, ClickTest01, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, UpdateFloatingBall01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
+    fbController_->curState_ = FbWindowState::STATE_STOPPED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController_->UpdateFloatingBall(option_));
 
-    fbController->curState_ = FbWindowState::STATE_STOPPED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController->UpdateFloatingBall(option));
-
-    fbController->curState_ = FbWindowState::STATE_STARTED;
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
     sptr<FbOption> nullOption = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController->UpdateFloatingBall(nullOption));
-    fbController->window_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController->UpdateFloatingBall(option));
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->UpdateFloatingBall(nullOption));
+    fbController_->window_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->UpdateFloatingBall(option_));
 
-    fbController->window_ = mw;
-    EXPECT_CALL(*(mw), UpdateFloatingBall(_, _)).Times(1);
-    EXPECT_EQ(WMError::WM_OK, fbController->UpdateFloatingBall(option));
+    fbController_->window_ = mw_;
+    fbController_->curState_ = FbWindowState::STATE_STOPPED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController_->UpdateFloatingBall(option_));
+    EXPECT_CALL(*(mw_), UpdateFloatingBall(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_EQ(WMError::WM_OK, fbController_->UpdateFloatingBall(option_));
 }
 
 /**
@@ -244,22 +249,17 @@ HWTEST_F(FloatingBallControllerTest, UpdateFloatingBall01, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, StopFloatingBall01, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    fbController->curState_ = FbWindowState::STATE_STOPPED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StopFloatingBallFromClient());
-    fbController->curState_ = FbWindowState::STATE_STOPPING;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StopFloatingBallFromClient());
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_CALL(*(mw), NotifyPrepareCloseFloatingBall()).Times(1);
-    fbController->window_ = mw;
-    EXPECT_EQ(WMError::WM_OK, fbController->StopFloatingBallFromClient());
-    fbController->window_ = nullptr;
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController->StopFloatingBallFromClient());
+    fbController_->curState_ = FbWindowState::STATE_STOPPED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StopFloatingBallFromClient());
+    fbController_->curState_ = FbWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StopFloatingBallFromClient());
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_CALL(*(mw_), NotifyPrepareCloseFloatingBall()).Times(1);
+    fbController_->window_ = mw_;
+    EXPECT_EQ(WMError::WM_OK, fbController_->StopFloatingBallFromClient());
+    fbController_->window_ = nullptr;
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StopFloatingBallFromClient());
 }
 
 /**
@@ -269,28 +269,23 @@ HWTEST_F(FloatingBallControllerTest, StopFloatingBall01, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    fbController->stopFromClient_ = false;
-    fbController->curState_ = FbWindowState::STATE_STOPPING;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StopFloatingBall());
-    fbController->curState_ = FbWindowState::STATE_STOPPED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController->StopFloatingBall());
+    fbController_->stopFromClient_ = false;
+    fbController_->curState_ = FbWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StopFloatingBall());
+    fbController_->curState_ = FbWindowState::STATE_STOPPED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StopFloatingBall());
 
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_CALL(*(mw), Destroy(_)).Times(1);
-    fbController->window_ = mw;
-    EXPECT_EQ(WMError::WM_OK, fbController->StopFloatingBall());
-    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController->GetControllerState());
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_CALL(*(mw_), Destroy(_)).Times(1);
+    fbController_->window_ = mw_;
+    EXPECT_EQ(WMError::WM_OK, fbController_->StopFloatingBall());
+    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController_->GetControllerState());
 
-    fbController->window_ = nullptr;
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController->StopFloatingBall());
-    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController->DestroyFloatingBallWindow());
-    EXPECT_EQ(nullptr, fbController->GetFbWindow());
+    fbController_->window_ = nullptr;
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StopFloatingBall());
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, fbController_->DestroyFloatingBallWindow());
+    EXPECT_EQ(nullptr, fbController_->GetFbWindow());
 }
 
 /**
@@ -300,20 +295,15 @@ HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
  */
 HWTEST_F(FloatingBallControllerTest, RestoreFloatingBallAbility, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController->RestoreMainWindow(want));
-    fbController->window_ = mw;
-    fbController->curState_ = FbWindowState::STATE_STOPPING;
-    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController->RestoreMainWindow(want));
-    fbController->curState_ = FbWindowState::STATE_STARTED;
-    EXPECT_CALL(*(mw), RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, fbController->RestoreMainWindow(want));
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->RestoreMainWindow(want));
+    fbController_->window_ = mw_;
+    fbController_->curState_ = FbWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController_->RestoreMainWindow(want));
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    EXPECT_CALL(*(mw_), RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, fbController_->RestoreMainWindow(want));
 }
 
 /**
@@ -323,15 +313,15 @@ HWTEST_F(FloatingBallControllerTest, RestoreFloatingBallAbility, TestSize.Level1
  */
 HWTEST_F(FloatingBallControllerTest, GetFloatingBallInfo, TestSize.Level1)
 {
-    auto mw = sptr<MockWindow>::MakeSptr();
-    ASSERT_NE(nullptr, mw);
-    auto option = sptr<FbOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto fbController = sptr<FloatingBallController>::MakeSptr(mw, 100, nullptr);
-    EXPECT_CALL(*(mw), GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    fbController->window_ = mw;
+    EXPECT_CALL(*(mw_), GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    fbController_->window_ = mw_;
     uint32_t mockId = 1;
-    EXPECT_EQ(WMError::WM_OK, fbController->GetFloatingBallWindowInfo(mockId));
+    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController_->GetFloatingBallWindowInfo(mockId));
+    fbController_->curState_ = FbWindowState::STATE_STARTED;
+    fbController_->window_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->GetFloatingBallWindowInfo(mockId));
+    fbController_->window_ = mw_;
+    EXPECT_EQ(WMError::WM_OK, fbController_->GetFloatingBallWindowInfo(mockId));
 }
 }
 }

@@ -1310,7 +1310,7 @@ int SessionStub::HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_SYSTEM, "read fbTemplateInfo failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateFloatingBall(*fbTemplateInfo);
+    WMError errCode = UpdateFloatingBall(*fbTemplateInfo);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
         return ERR_INVALID_DATA;

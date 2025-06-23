@@ -1292,6 +1292,11 @@ private:
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
 
+    /*
+     * Floating ball
+     */
+    WSError CheckCreateFb(const sptr<SceneSession>& parentSession);
+
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
