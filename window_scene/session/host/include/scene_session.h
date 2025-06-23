@@ -753,7 +753,8 @@ public:
     void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
     void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
-    void OnNextVsyncReceivedWhenDrag();
+    void OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
+        bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
     WSError GetCrossAxisState(CrossAxisState& state) override;
