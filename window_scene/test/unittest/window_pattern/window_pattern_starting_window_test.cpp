@@ -352,6 +352,110 @@ HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize
     ssm_->GetBundleStartingWindowInfos(bundleInfo, outValues);
     ASSERT_EQ(outValues.size(), 0);
 }
+
+/**
+ * @tc.name: GetPreLoadStartingWindow
+ * @tc.desc: GetPreLoadStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetPreLoadStartingWindow, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->preLoadStartingWindowMap_.clear();
+    SessionInfo sessionInfo;
+    EXPECT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
+    sessionInfo.bundleName_ = "bundleName_";
+    sessionInfo.moduleName_ = "moduleName_";
+    sessionInfo.abilityName_ = "abilityName_";
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
+    ssm_->preLoadStartingWindowMap_[key] = std::make_shared<Media::PixelMap>();
+    ASSERT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
+    ssm_->preLoadStartingWindowMap_.clear();
+    EXPECT_EQ(true, ssm_->preLoadStartingWindowMap_.empty());
+}
+
+/**
+ * @tc.name: RemovePreLoadStartingWindowFromMap
+ * @tc.desc: RemovePreLoadStartingWindowFromMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, RemovePreLoadStartingWindowFromMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->preLoadStartingWindowMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName_";
+    sessionInfo.moduleName_ = "moduleName_";
+    sessionInfo.abilityName_ = "abilityName_";
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
+    ssm_->preLoadStartingWindowMap_[key] = std::make_shared<Media::PixelMap>();
+    SessionInfo anotherSessionInfo;
+    ssm_->RemovePreLoadStartingWindowFromMap(anotherSessionInfo);
+    EXPECT_EQ(false, ssm_->preLoadStartingWindowMap_.empty());
+    ssm_->RemovePreLoadStartingWindowFromMap(anotherSessionInfo);
+    EXPECT_EQ(true, ssm_->preLoadStartingWindowMap_.empty());
+}
+
+/**
+ * @tc.name: CheckAndGetPreLoadResourceId
+ * @tc.desc: CheckAndGetPreLoadResourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, CheckAndGetPreLoadResourceId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    StartingWindowInfo startingWindowInfo;
+    uint32_t resId = 0;
+    startingWindowInfo.configFileEnabled_ = true;
+    EXPECT_EQ(false, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.configFileEnabled_ = false;
+    EXPECT_EQ(false, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.svg";
+    EXPECT_EQ(false, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///abc12345678.jpg";
+    EXPECT_EQ(false, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.png";
+    EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.jpg";
+    EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+}
+
+/**
+ * @tc.name: PreLoadStartingWindow
+ * @tc.desc: PreLoadStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->PreLoadStartingWindow(sceneSession);
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    info.moduleName_ = "moduleName_";
+    info.abilityName_ = "abilityName_";
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->PreLoadStartingWindow(sceneSession);
+    ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
+ * @tc.name: NotifyPreLoadStartingWindowFinished
+ * @tc.desc: NotifyPreLoadStartingWindowFinished
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, NotifyPreLoadStartingWindowFinished, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "bundleName_";
+    info.moduleName_ = "moduleName_";
+    info.abilityName_ = "abilityName_";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->NotifyPreLoadStartingWindowFinished();
+    ASSERT_NE(nullptr, sceneSession);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
