@@ -3664,7 +3664,8 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         const auto& sessionInfo = extensionParentSession->GetSessionInfo();
         auto hostBundleName = extensionParentSession->IsAnco()?
             SessionUtils::GetBundleNameBySessionName(hostInfo.sessionName) : hostInfo.elementName_.GetBundleName();
-        if (sessionInfo.bundleName_ != hostBundleName) {
+        if (sessionInfo.bundleName_ != hostBundleName &&
+            sessionInfo.bundleName_ != info.hostElementName.GetBundleName()) {
             TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
                 " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(), hostBundleName.c_str());
             ReportSubWindowCreationFailure(pid, info.elementName.GetAbilityName(), sessionInfo.bundleName_,
