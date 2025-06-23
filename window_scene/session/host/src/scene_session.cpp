@@ -3714,7 +3714,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false, needSetFullScreen);
+            session->OnThrowSlipAnimationStateChange(false, true);
             session->NotifyFullScreenAfterThrowSlip(rect);
         };
     } else {
@@ -3724,7 +3724,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false, needSetFullScreen);
+            session->OnThrowSlipAnimationStateChange(false, false);
         };
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
