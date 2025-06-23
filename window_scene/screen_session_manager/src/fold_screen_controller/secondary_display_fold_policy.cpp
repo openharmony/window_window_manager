@@ -239,7 +239,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     if (displayMode == FoldDisplayMode::MAIN) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
-    auto taskScreenOnFullOn = [=] {
+    auto taskScreenOnFullOn = [displayMode] {
         if (displayMode == FoldDisplayMode::FULL) {
             SetStatusFullActiveRectAndTpFeature();
         } else if (displayMode == FoldDisplayMode::MAIN) {
@@ -250,7 +250,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
             TLOGW(WmsLogTag::DMS, "unKnown displayMode");
         }
     };
-    screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
+    screenPowerTaskScheduler_->PostAsyncTask(std::move(taskScreenOnFullOn), "screenOnFullOnTask");
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
