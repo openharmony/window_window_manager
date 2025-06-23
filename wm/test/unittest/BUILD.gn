@@ -616,7 +616,10 @@ ohos_unittest("wm_oh_window_pip_test") {
 ohos_unittest("wm_window_manager_agent_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_manager_agent_proxy_test.cpp" ]
+  sources = [
+    "window_manager_agent_proxy_test.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+  ]
 
   deps = [
     ":wm_unittest_common",
