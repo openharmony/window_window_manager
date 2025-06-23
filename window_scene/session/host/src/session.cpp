@@ -469,6 +469,16 @@ void Session::NotifyRemoveBlank()
     }
 }
 
+void Session::NotifyPreLoadStartingWindowFinished()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnPreLoadStartingWindowFinished();
+        }
+    }
+}
+
 void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist, bool needSaveSnapshot)
 {
     /*
