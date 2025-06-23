@@ -236,6 +236,10 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
 void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
     if (displayMode == FoldDisplayMode::MAIN) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
@@ -250,7 +254,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
             TLOGW(WmsLogTag::DMS, "unKnown displayMode");
         }
     };
-    screenPowerTaskScheduler_->PostAsyncTask(std::move(taskScreenOnFullOn), "screenOnFullOnTask");
+    screenPowerTaskScheduler_->PostAsyncTask(std::move(taskScreenOnFullOn), __func__);
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
         screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
@@ -274,7 +278,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
         if (displayMode == FoldDisplayMode::MAIN) {
             screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
         }
-        TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
+        TLOGI(WmsLogTag::DMS, "screenBounds : width= %{public}f, height= %{public}f",
             screenSession->GetScreenProperty().GetBounds().rect_.width_,
             screenSession->GetScreenProperty().GetBounds().rect_.height_);
     }
