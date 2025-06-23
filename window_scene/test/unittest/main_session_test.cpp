@@ -128,7 +128,7 @@ HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
     pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
-    auto hasSnapshot = pMainSession->ScenePersistence_->HasSnapshot();
+    auto hasSnapshot = pMainSession->scenePersistence_->HasSnapshot();
     ASSERT_EQ(HasSnapshot, false);
 }
 
