@@ -894,6 +894,29 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSessionInfoWindowInputType
+ * @tc.desc: SetSessionInfoWindowInputType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSessionInfoWindowInputType, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoWindowInputType";
+    info.bundleName_ = "SetSessionInfoWindowInputType";
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->SetSessionInfoWindowInputType(static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_AXIS_MOVE));
+
+    SessionInfo sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.windowInputType_, static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_AXIS_MOVE));
+
+    sceneSession->SetSessionInfoWindowInputType(static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL));
+    sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.windowInputType_, static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL));
+}
+
+/**
  * @tc.name: SetSelfToken
  * @tc.desc: SetSelfToken
  * @tc.type: FUNC

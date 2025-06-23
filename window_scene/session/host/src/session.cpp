@@ -326,6 +326,16 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
 }
 
+void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, type:%{public}u", GetPersistentId(), windowInputType);
+    {
+        std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
+        sessionInfo_.windowInputType_ = windowInputType;
+    }
+    NotifySessionInfoChange();
+}
+
 DisplayId Session::GetScreenId() const
 {
     return sessionInfo_.screenId_;
