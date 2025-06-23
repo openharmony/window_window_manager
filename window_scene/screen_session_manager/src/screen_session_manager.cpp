@@ -1655,9 +1655,10 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
         TLOGI(WmsLogTag::DMS, "hW: %{public}u, hH: %{public}u, hD: %{public}f, hR: %{public}u, hER: %{public}d, "
-            "dW: %{public}u, dH: %{public}u, dR: %{public}u, dO: %{public}u", info.width_, info.height_, info.density_,
-            info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(), displayInfo->GetHeight(),
-            displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+            "hO: %{public}u, hEO: %{public}d, dW: %{public}u, dH: %{public}u, dR: %{public}u, dO: %{public}u",
+            info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_,
+            info.displayOrientation_, info.enableHookDisplayOrientation_, displayInfo->GetWidth(),
+            displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
 
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
@@ -1674,6 +1675,9 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, screenSession is nullptr.");
                 return nullptr;
             }
+        }
+        if (info.enableHookDisplayOrientation_) {
+            displayInfo->SetDisplayOrientation(static_cast<DisplayOrientation>(info.displayOrientation_));
         }
     }
     return displayInfo;

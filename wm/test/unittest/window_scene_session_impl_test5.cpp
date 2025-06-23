@@ -2013,6 +2013,30 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Fun
     window->UpdateEnableDragWhenSwitchMultiWindow(true);
     EXPECT_EQ(true, window->property_->dragEnabled_);
 }
+
+/**
+ * @tc.name: GetConfigurationFromAbilityInfo
+ * @tc.desc: GetConfigurationFromAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    context->SetAbilityInfo(info);
+    window->context_ = context;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->GetConfigurationFromAbilityInfo();
+    auto supportType = window->property_->GetWindowModeSupportType();
+    EXPECT_EQ(supportType,
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN || WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

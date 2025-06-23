@@ -2502,6 +2502,38 @@ HWTEST_F(SceneSessionManagerTest12, RegisterGetStartWindowConfigCallback, TestSi
     ssm_->RegisterGetStartWindowConfigCallback(nullptr);
     EXPECT_TRUE(g_logMsg.find("session is nullptr") != std::string::npos);
 }
+
+/**
+ * @tc.name: NotifyHookOrientationChange01
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange01, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    WMError result = ssm_->NotifyHookOrientationChange(INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyHookOrientationChange02
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testBundleName";
+    sessionInfo.moduleName_ = "testModuleName";
+    sessionInfo.abilityName_ = "testAbilityName"
+    sessionInfo.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_->erase(sceneSession->GetPersistentId());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
