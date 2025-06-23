@@ -42,6 +42,7 @@ public:
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
     /*
      * App Use Control
@@ -56,7 +57,7 @@ protected:
 private:
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
     bool isNeedSyncGlobalPos_ = true; // only accessed in main thread
-    
+
     /*
      * App Use Control
      */

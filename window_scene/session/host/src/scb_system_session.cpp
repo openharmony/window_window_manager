@@ -228,6 +228,11 @@ bool SCBSystemSession::IsVisibleForeground() const
     return isVisible_;
 }
 
+bool SCBSystemSession::IsVisibleNotBackground() const
+{
+    return isVisible_;
+}
+
 void SCBSystemSession::NotifyClientToUpdateAvoidArea()
 {
     SceneSession::NotifyClientToUpdateAvoidArea();

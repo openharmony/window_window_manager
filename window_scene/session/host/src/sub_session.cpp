@@ -224,4 +224,13 @@ bool SubSession::IsVisibleForeground() const
     }
     return Session::IsVisibleForeground();
 }
+
+bool SubSession::IsVisibleNotBackground() const
+{
+    const auto& mainOrFloatSession = GetMainOrFloatSession();
+    if (mainOrFloatSession) {
+        return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
+}
 } // namespace OHOS::Rosen

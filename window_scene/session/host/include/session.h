@@ -169,7 +169,7 @@ public:
      */
     virtual bool GetIsUseControlSession() const { return false; }
     virtual void SetIsUseControlSession(bool isUseControlSession) {}
-    
+
     /*
      * Callbacks for ILifecycleListener
      */
@@ -366,7 +366,7 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
-    
+
     /*
      * Keyboard Window
      */
@@ -415,6 +415,7 @@ public:
     bool IsSystemSession() const;
     bool IsTerminated() const;
     bool IsSessionForeground() const;
+    bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
     virtual void SetBlankFlag(bool isAddBlank) {};
     virtual bool GetBlankFlag() const { return false; }
@@ -501,7 +502,7 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-    
+
     /*
      * Window Lifecycle
      */
@@ -531,6 +532,7 @@ public:
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
 
     virtual bool IsVisibleForeground() const;
+    virtual bool IsVisibleNotBackground() const;
     void SetIsStarting(bool isStarting);
     void SetUIStateDirty(bool dirty);
     void SetMainSessionUIStateDirty(bool dirty);
@@ -847,7 +849,7 @@ private:
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    
+
     /*
      * Window Lifecycle
      */

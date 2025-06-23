@@ -700,6 +700,11 @@ bool KeyboardSession::IsVisibleForeground() const
     return isVisible_;
 }
 
+bool KeyboardSession::IsVisibleNotBackground() const
+{
+    return isVisible_;
+}
+
 void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
 {
     auto sessionProperty = GetSessionProperty();
