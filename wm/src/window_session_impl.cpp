@@ -51,6 +51,7 @@
 #include "window_helper.h"
 #include "color_parser.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
@@ -71,6 +72,7 @@ constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
+constexpr int32_t WINDOW_CONNECT_TIMEOUT = 3000;
 
 /*
  * DFX
@@ -294,6 +296,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
     getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
+    updateRectCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     windowOption_ = option;
@@ -652,6 +655,17 @@ WMError WindowSessionImpl::Connect()
     auto ret = hostSession->Connect(
         iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_,
         token, identityToken_);
+    if (SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        updateRectCallback_->GetUpdateRectResult(WINDOW_CONNECT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_CONNECT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "Connect timeout, persistentId:%{public}d", GetPersistentId());
+        }
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
         property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
     if (IsInCompatScaleMode() || WindowHelper::IsUIExtensionWindow(GetType())) {
@@ -1058,7 +1072,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
         layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
     }
-
+    NotifyFirstValidLayoutUpdate(preRect, wmRect);
     return WSError::WS_OK;
 }
 
@@ -6694,6 +6708,16 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
         if (listener != nullptr) {
             listener->OnWindowStatusDidChange(windowStatus);
         }
+    }
+}
+
+void WindowSessionImpl::NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect)
+{
+    bool isFirstValidLayoutUpdate = true;
+    if (preRect.IsUninitializedSize() && !newRect.IsUninitializedSize() &&
+        isFirstValidLayoutUpdate_.compare_exchange_strong(isFirstValidLayoutUpdate, false)) {
+        updateRectCallback_->OnFirstValidRectUpdate(GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rect:%{public}s", GetPersistentId(), newRect.ToString().c_str());
     }
 }
 
