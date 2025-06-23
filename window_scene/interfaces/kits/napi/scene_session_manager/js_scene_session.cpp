@@ -1802,13 +1802,14 @@ void JsSceneSession::RegisterThrowSlipAnimationStateChangeCallback()
         return;
     }
     const char* const where = __func__;
-    session->RegisterThrowSlipAnimationStateChangeCallback([weakThis = wptr(this), where](bool isAnimating) {
+    session->RegisterThrowSlipAnimationStateChangeCallback(
+        [weakThis = wptr(this), where](bool isAnimating, bool isFullScreen) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnThrowSlipAnimationStateChange(isAnimating);
+        jsSceneSession->OnThrowSlipAnimationStateChange(isAnimating, isFullScreen);
     });
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "register success, persistent id: %{public}d", persistentId_);
 }
@@ -4294,10 +4295,10 @@ void JsSceneSession::OnMainModalTypeChange(bool isModal)
     taskScheduler_->PostMainThreadTask(task, "OnMainModalTypeChange: " + std::to_string(isModal));
 }
 
-void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
+void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAnimating, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAnimating, isFullScreen, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession id: %{public}d has been destroyed",
@@ -4310,6 +4311,7 @@ void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
             return;
         }
         napi_value jsIsAnimating = CreateJsValue(env, isAnimating);
+        napi_value jsIsFullScreen = CreateJsValue(env, isFullScreen);
         napi_value argv[] = { jsIsAnimating };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
