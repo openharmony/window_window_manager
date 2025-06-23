@@ -161,6 +161,7 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
         return ret;
     }
     agentSet.erase(agent);
+    TLOGI(WmsLogTag::DEFAULT, "success");
 
     return ret;
 }
