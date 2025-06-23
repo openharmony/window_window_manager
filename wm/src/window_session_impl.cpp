@@ -6580,19 +6580,19 @@ void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     }
 }
 
-void WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
     const std::shared_ptr<Media::PixelMap>& icon)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
-        return;
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-    hostSession->UpdateFloatingBall(fbTemplateInfo);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
+    return hostSession->UpdateFloatingBall(fbTemplateInfo);
 }
- 
+
 WMError WindowSessionImpl::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
 {
     if (IsWindowSessionInvalid()) {
@@ -6603,7 +6603,7 @@ WMError WindowSessionImpl::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
     return hostSession->RestoreFbMainWindow(want);
 }
- 
+
 void WindowSessionImpl::NotifyPrepareCloseFloatingBall()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyPrepareCloseFloatingBall");

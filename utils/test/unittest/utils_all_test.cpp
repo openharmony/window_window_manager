@@ -20,6 +20,8 @@
 
 #include "agent_death_recipient.h"
 #include "iremote_object_mocker.h"
+#include "wm_common.h"
+#include "color_parser.h"
 #include "perform_reporter.h"
 #include "singleton_container.h"
 #include "surface_reader_handler_impl.h"
@@ -210,6 +212,36 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, TestSize.Level1)
 HWTEST_F(UtilsAllTest, SysCapUtilGetClientName, TestSize.Level1)
 {
     ASSERT_NE("", SysCapUtil::GetClientName());
+}
+
+/**
+ * @tc.name: FindCodeByError
+ * @tc.desc: test FindCodeByError
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsAllTest, FindCodeByError, TestSize.Level1)
+{
+    EXPECT_EQ(FindCodeByError(WMError::WM_OK), WmErrorCode::WM_OK);
+    EXPECT_EQ(FindCodeByError(WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED),
+        WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
+    WMError error = static_cast<WMError>(static_cast<int>(WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED) + 1);
+    EXPECT_EQ(FindCodeByError(error), WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+}
+
+/**
+ * @tc.name: FindCodeByError
+ * @tc.desc: test FindCodeByError
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsAllTest, IsValidColorNoAlpha, TestSize.Level1)
+{
+    EXPECT_TRUE(ColorParser::IsValidColorNoAlpha("#008EF5"));
+    EXPECT_TRUE(ColorParser::IsValidColorNoAlpha("#FF008EF5"));
+    EXPECT_FALSE(ColorParser::IsValidColorNoAlpha("InvalidColor"));
+    EXPECT_FALSE(ColorParser::IsValidColorNoAlpha("#009HG5"));
+    EXPECT_FALSE(ColorParser::IsValidColorNoAlpha("##009FF5"));
+    EXPECT_FALSE(ColorParser::IsValidColorNoAlpha("#08EF5"));
+    EXPECT_FALSE(ColorParser::IsValidColorNoAlpha("#80008EF5"));
 }
 } // namespace
 } // namespace Rosen

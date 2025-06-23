@@ -343,7 +343,7 @@ public:
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
-    void UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+    WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;
     void NotifyPrepareCloseFloatingBall() override;
     WSError SendFbActionEvent(const std::string& action) override;

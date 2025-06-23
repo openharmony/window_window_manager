@@ -1480,13 +1480,15 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> icon = nullptr;
 
     EXPECT_EQ(window->GetHostSession(), nullptr);
-    window->UpdateFloatingBall(fbTemplateInfo, icon);
+    auto error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, error);
 
     auto session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     window->property_->persistentId_ = 1234;
     EXPECT_FALSE(window->IsWindowSessionInvalid());
-    window->UpdateFloatingBall(fbTemplateInfo, icon);
+    error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_OK, error);
 }
 
 /**
