@@ -3714,7 +3714,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false);
+            session->OnThrowSlipAnimationStateChange(false, needSetFullScreen);
             session->NotifyFullScreenAfterThrowSlip(rect);
         };
     } else {
@@ -3724,19 +3724,19 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false);
+            session->OnThrowSlipAnimationStateChange(false, needSetFullScreen);
         };
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
-    OnThrowSlipAnimationStateChange(true);
+    OnThrowSlipAnimationStateChange(true, needSetFullScreen);
     rect = endRect;
     pcFoldScreenController_->ResetRecords();
     return true;
 }
 
-void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
+void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}d", isAnimating);
     if (isAnimating) {
@@ -3751,7 +3751,7 @@ void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
         leashWinSurfaceNode->SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
     }
     if (onThrowSlipAnimationStateChangeFunc_) {
-        onThrowSlipAnimationStateChangeFunc_(isAnimating);
+        onThrowSlipAnimationStateChangeFunc_(isAnimating, isFullScreen);
     }
 }
 
@@ -5736,7 +5736,8 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
     }, __func__);
 }
 
-void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func)
+void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(
+    std::function<void(bool isAnimating, bool isFullScreen)>&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() mutable {
         auto session = weakThis.promote();

@@ -786,8 +786,8 @@ public:
      */
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
-    void OnThrowSlipAnimationStateChange(bool isAnimating);
-    void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
+    void OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen);
+    void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating, bool isFullScreen)>&& func);
     bool IsMissionHighlighted();
     bool IsPcFoldDevice();
     void MaskSupportEnterWaterfallMode();
@@ -1003,7 +1003,7 @@ protected:
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic<uint32_t> throwSlipToFullScreenAnimCount_ = 0;
-    std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
+    std::function<void(bool isAnimating, bool isFullScreen)> onThrowSlipAnimationStateChangeFunc_;
 
     /*
      * Compatible Mode
