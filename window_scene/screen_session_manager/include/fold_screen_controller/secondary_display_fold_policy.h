@@ -46,9 +46,9 @@ private:
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
-    void SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusMainActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusGlobalFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void SetStatusFullActiveRectAndTpFeature();
+    void SetStatusMainActiveRectAndTpFeature();
+    void SetStatusGlobalFullActiveRectAndTpFeature();
     void InitScreenParams();
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
