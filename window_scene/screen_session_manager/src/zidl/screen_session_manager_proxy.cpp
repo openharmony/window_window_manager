@@ -3812,7 +3812,8 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_) || !data.WriteUint32(hookInfo.rotation_) ||
-        !data.WriteBool(hookInfo.enableHookRotation_)) {
+        !data.WriteBool(hookInfo.enableHookRotation_) || !data.WriteUint32(hookInfo.displayOrientation_) ||
+        !data.WriteBool(hookInfo.enableHookDisplayOrientation_)) {
         TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
         return;
     }

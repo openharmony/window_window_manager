@@ -14299,6 +14299,8 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.density_ = density;
     dmHookInfo.rotation_ = 0;
     dmHookInfo.enableHookRotation_ = false;
+    dmHookInfo.displayOrientation_ = 0;
+    dmHookInfo.enableHookDisplayOrientation_ = false;
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
@@ -14306,8 +14308,9 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
 WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "width: %{public}u, height: %{public}u, density: %{public}f, rotation: %{public}u, "
-        "enableHookRotation: %{public}d, enable: %{public}d", hookInfo.width_, hookInfo.height_, hookInfo.density_,
-        hookInfo.rotation_, hookInfo.enableHookRotation_, enable);
+        "enableHookRotation: %{public}d, orientation: %{public}u, enableHookOrientation: %{public}d, "
+        "enable: %{public}d", hookInfo.width_, hookInfo.height_, hookInfo.density_, hookInfo.rotation_,
+        hookInfo.enableHookRotation_, hookInfo.displayOrientation_, hookInfo.enableHookDisplayOrientation_, enable);
     if (enable && (uid <= 0 || hookInfo.width_ <= 0 || hookInfo.height_ <= 0 || hookInfo.density_ <= 0)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "App hookInfo param error.");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -14318,8 +14321,21 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     dmHookInfo.density_ = hookInfo.density_;
     dmHookInfo.rotation_ = hookInfo.rotation_;
     dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
+    dmHookInfo.displayOrientation_ = hookInfo.displayOrientation_;
+    dmHookInfo.enableHookDisplayOrientation_ = hookInfo.enableHookDisplayOrientation_;
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::NotifyHookOrientationChange(int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session id:%{public}d is not found", persistentId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sceneSession::UpdateOrientation();
+    return WMError::WM_OK; 
 }
 
 void DisplayChangeListener::OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo)
