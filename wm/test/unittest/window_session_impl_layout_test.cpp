@@ -395,6 +395,39 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyAfterUIContentReady, TestSize.Level1
     ASSERT_EQ(false, window->IsNeedRenotifyTransform());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyAfterUIContentReady end";
 }
+
+/**
+ * @tc.name: NotifyFirstValidLayoutUpdate
+ * @tc.desc: NotifyFirstValidLayoutUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyFirstValidLayoutUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyFirstValidLayoutUpdate start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyFirstValidLayoutUpdate");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+
+    Rect preRect = { 0, 0, 1000, 1000 };
+    Rect newRect = { 0, 0, 0, 0 };
+    window->isFirstValidLayoutUpdate_ = true;
+    window->NotifyFirstValidLayoutUpdate(preRect, newRect);
+    EXPECT_EQ(window->isFirstValidLayoutUpdate_, true);
+
+    preRect = { 0, 0, 0, 0 };
+    window->NotifyFirstValidLayoutUpdate(preRect, newRect);
+    EXPECT_EQ(window->isFirstValidLayoutUpdate_, true);
+
+
+    newRect = { 0, 0, 1000, 1000 };
+    window->NotifyFirstValidLayoutUpdate(preRect, newRect);
+    EXPECT_EQ(window->isFirstValidLayoutUpdate_, false);
+
+    window->NotifyFirstValidLayoutUpdate(preRect, newRect);
+    EXPECT_EQ(window->isFirstValidLayoutUpdate_, false);
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyFirstValidLayoutUpdate end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -90,5 +90,15 @@ void FutureCallback::ResetRotationResultLock()
 {
     getRotationResultFuture_.ResetLock({});
 }
+
+int32_t FutureCallback::GetUpdateRectResult(long timeOut)
+{
+    return updateRectFuture_.GetResult(timeOut);
+}
+
+void FutureCallback::OnFirstValidRectUpdate(int32_t persistentId)
+{
+    updateRectFuture_.SetValue(persistentId);
+}
 } // namespace Rosen
 } // namespace OHOS
