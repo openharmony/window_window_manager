@@ -112,14 +112,14 @@ HWTEST_F(WindowAnimateToTest, AnimateTo02, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetFrameRectForParticalZoomIn
- * @tc.desc: test founction SetFrameRectForParticalZoomIn.
+ * @tc.name: SetFrameRectForPartialZoomIn
+ * @tc.desc: test founction SetFrameRectForPartialZoomIn.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAnimateToTest, SetFrameRectForParticalZoomIn, TestSize.Level1)
+HWTEST_F(WindowAnimateToTest, SetFrameRectForPartialZoomIn, TestSize.Level1)
 {
     Utils::TestWindowInfo windowInfo = {
-        .name = "SetFrameRectForParticalZoomIn",
+        .name = "SetFrameRectForPartialZoomIn",
         .rect = { 0, 0, 10, 10 }, // 0, 10 is valid rect params
         .type = WindowType::WINDOW_TYPE_MAGNIFICATION,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
@@ -131,7 +131,7 @@ HWTEST_F(WindowAnimateToTest, SetFrameRectForParticalZoomIn, TestSize.Level1)
     const sptr<Window>& window = Utils::CreateTestWindow(windowInfo);
     EXPECT_NE(nullptr, window);
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 } // namespace
 } // namespace Rosen

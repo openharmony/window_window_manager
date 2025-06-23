@@ -1194,9 +1194,7 @@ private:
     void NotifyExtensionSecureLimitChange(bool isLimit);
 
     // window animation
-    WSError SetFrameRectForPartialZoomInInner(const Rect& frameRect, int32_t rotatePolicy);
-    Rect RecalculateFrameRect(const Rect& frameRect, uint32_t rotation, uint32_t displayWidth, uint32_t displayHeight);
-    int32_t GetRotatePolicy();
+    WSError SetFrameRectForPartialZoomInInner(const Rect& frameRect);
 
     /*
      * PiP Window

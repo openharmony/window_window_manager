@@ -9264,78 +9264,6 @@ void SceneSession::SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& fu
     onGetAllAppUseControlMapFunc_ = std::move(func);
 }
 
-/**
- * Get the rotate policy of a screen :
- * const.window.device.rotate_policy defines the rotate policy of unfoldable phone and pad, and:
- *     0 is default value and means window rotate policy;
- *     1 means screen rotate policy;
- *     2 means foldable device, should use const.window.foldabledevice.rotate_policy to define rotate policy
- * const.window.foldabledevice.rotate_policy defines the rotate policy of foldable device, and:
- *     "0,0" is default value and means window rotate in folded device and window rotate in expand device
- *     "0,1" means window rotate in folded device and screen rotate in expand device
- *     "1,0" means screen rotate in folded device and window rotate in expand device
- *     "1,1" means screen rotate in folded device and screen rotate in expand device
- */
-int32_t SceneSession::GetRotatePolicy()
-{
-    static const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
-    static const std::string FOLDABLE_ROTATE_POLICY =
-        system::GetParameter("const.window.foldabledevice.rotate_policy", "0,0");
-    FoldStatus foldStatus = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
-    TLOGI(WmsLogTag::WMS_ANIMATION, "ROTATE_POLICY: %{public}d, FOLDABLE_ROTATE_POLICY: %{public}s, "
-          "foldstatus: %{public}d", ROTATE_POLICY, FOLDABLE_ROTATE_POLICY.c_str(), foldStatus);
-    if (ROTATE_POLICY != 2) { // 2 : foldable device
-        return ROTATE_POLICY;
-    }
-    auto foldableRotatePolicyArr = WindowHelper::Split(FOLDABLE_ROTATE_POLICY, ",");
-    if (foldableRotatePolicyArr.size() >= 2) { // 2 rotate policies in foldable device
-        // 0 is window rotate policy index; 1 is screen rotate policy index
-        return (foldStatus == FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND || foldStatus == FoldStatus::EXPAND) ?
-            std::atoi(foldableRotatePolicyArr[1].c_str()) : std::atoi(foldableRotatePolicyArr[0].c_str());
-    }
-    // If the size of foldableRotatePolicyArr is 1 return foldableRotatePolicyArr[0]
-    return foldableRotatePolicyArr.size() == 1 ? std::atoi(foldableRotatePolicyArr[0].c_str()) : ROTATE_POLICY_WINDOW;
-}
-
-/**
- * Translate frameRect to the coordinate of frameBuffer when
- * the coordinate of frameRect and frameBuffer is different in rotation scene.
- */
-Rect SceneSession::RecalculateFrameRect(const Rect& frameRect, uint32_t rotation,
-                                        uint32_t displayWidth, uint32_t displayHeight)
-{
-    Rect newRect = frameRect;
-    switch (rotation) {
-        case 90: { // degree 90
-            newRect.posX_ = frameRect.posY_;
-            newRect.posY_ = displayWidth - frameRect.posX_ - frameRect.width_;
-            newRect.width_ = frameRect.height_;
-            newRect.height_ = frameRect.width_;
-            break;
-        }
-        case 180: { // degree 180
-            newRect.posX_ = displayWidth - frameRect.posX_ - frameRect.width_;
-            newRect.posY_ = displayHeight - frameRect.posY_ - frameRect.height_;
-            newRect.width_ = frameRect.width_;
-            newRect.height_ = frameRect.height_;
-            break;
-        }
-        case 270: { // degree 270
-            newRect.posX_ = displayHeight - frameRect.posY_ - frameRect.height_;
-            newRect.posY_ = frameRect.posX_;
-            newRect.width_ = frameRect.height_;
-            newRect.height_ = frameRect.width_;
-            break;
-        }
-        default:
-            break;
-    }
-    TLOGI(WmsLogTag::WMS_ANIMATION, "rotation: %{public}d, displayWidth: %{public}d, displayHeight: %{public}d"
-        "frameRect: %{public}s, newRect: %{public}s", rotation, displayWidth, displayHeight,
-        frameRect.ToString().c_str(), newRect.ToString().c_str());
-    return newRect;
-}
-
 WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -9348,49 +9276,21 @@ WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
             TLOGE(WmsLogTag::WMS_ANIMATION, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        int32_t rotatePolicy = session->GetRotatePolicy();
-        return session->SetFrameRectForPartialZoomInInner(frameRect, rotatePolicy);
+        return session->SetFrameRectForPartialZoomInInner(frameRect);
     }, __func__);
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect, int rotatePolicy)
+WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 {
     auto surfaceNode = GetSurfaceNode();
     if (surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    auto currentScreenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
-    if (currentScreenSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "screen session is null");
-        return WSError::WS_ERROR_INVALID_DISPLAY;
-    }
-    const ScreenProperty& screenProperty = currentScreenSession->GetScreenProperty();
-    uint32_t screenWidth = screenProperty.GetBounds().rect_.width_;
-    uint32_t screenHeight = screenProperty.GetBounds().rect_.height_;
-    Rect screenRect = {
-        screenProperty.GetBounds().rect_.left_,
-        screenProperty.GetBounds().rect_.top_,
-        screenWidth,
-        screenHeight
-    };
-    if (!frameRect.IsInsideOf(screenRect)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s",
-              screenRect.ToString().c_str());
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    float deviceRotation = SessionHelper::ConvertDisplayOrientationToFloat(screenProperty.GetDeviceOrientation());
-    float screenComponentRotation = screenProperty.GetScreenComponentRotation();
-    uint32_t rotation = static_cast<uint32_t>(deviceRotation + screenComponentRotation) % 360; // degree 360
-    TLOGI(WmsLogTag::WMS_ANIMATION, "rotate policy: %{public}d, device rotation: %{public}f, "
-        "screen component rotation: %{public}f", rotatePolicy, deviceRotation, screenComponentRotation);
-    rotation = rotatePolicy != ROTATE_POLICY_SCREEN ? rotation :
-        static_cast<uint32_t>(screenComponentRotation) % 360; // degree 360
     AutoRSTransaction trans(GetRSUIContext(), true);
-    Rect newRect = RecalculateFrameRect(frameRect, rotation, screenWidth, screenHeight);
-    surfaceNode->SetRegionToBeMagnified({ newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ });
+    surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
+    TLOGI(WmsLogTag::WMS_ANIMATION, "frameRect: %{public}s", frameRect.ToString().c_str());
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
