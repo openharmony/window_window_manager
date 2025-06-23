@@ -120,6 +120,23 @@ sptr<KSSceneSessionMocker> KeyboardSessionTest::GetSceneSessionMocker(const std:
 
 namespace {
 /**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: test IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    keyboardSession->isVisible_ = false;
+    EXPECT_EQ(false, keyboardSession->IsVisibleNotBackground());
+    keyboardSession->isVisible_ = true;
+    EXPECT_EQ(true, keyboardSession->IsVisibleNotBackground());
+}
+
+/**
  * @tc.name: Show
  * @tc.desc: test function : Show
  * @tc.type: FUNC
@@ -1343,7 +1360,7 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
             }
             return sceneSession;
         };
-    
+
     keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
     auto resultId = keyboardSession->GetCallingSessionId();

@@ -359,6 +359,15 @@ bool SystemSession::IsVisibleForeground() const
     return Session::IsVisibleForeground();
 }
 
+bool SystemSession::IsVisibleNotBackground() const
+{
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG &&
+        parentSession_ && WindowHelper::IsMainWindow(parentSession_->GetWindowType())) {
+        return parentSession_->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
+}
+
 void SystemSession::UpdatePiPWindowStateChanged(bool isForeground)
 {
     if (specificCallback_ == nullptr || !specificCallback_->onPiPStateChange_) {

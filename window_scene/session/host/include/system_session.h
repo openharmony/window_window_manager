@@ -39,6 +39,7 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
 
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;

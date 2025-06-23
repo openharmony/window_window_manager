@@ -829,6 +829,11 @@ bool Session::IsSessionForeground() const
     return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
 
+bool Session::IsSessionNotBackground() const
+{
+    return state_ >= SessionState::STATE_DISCONNECT && state_ <= SessionState::STATE_ACTIVE;
+}
+
 WSError Session::SetPointerStyle(MMI::WindowArea area)
 {
     WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
@@ -3673,6 +3678,11 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
 bool Session::IsVisibleForeground() const
 {
     return isVisible_ && IsSessionForeground();
+}
+
+bool Session::IsVisibleNotBackground() const
+{
+    return isVisible_ && IsSessionNotBackground();
 }
 
 void Session::SetIsStarting(bool isStarting)

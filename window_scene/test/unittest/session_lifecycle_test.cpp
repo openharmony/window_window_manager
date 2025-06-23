@@ -436,6 +436,74 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, Function | SmallTest |
 }
 
 /**
+ * @tc.name: IsSessionNotBackground
+ * @tc.desc: IsSessionNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsSessionNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_INACTIVE;
+    EXPECT_EQ(false, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    EXPECT_EQ(false, session_->IsSessionNotBackground());
+}
+
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: IsVisibleNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isVisible_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(false, session_->IsVisibleNotBackground());
+    session_->isVisible_ = true;
+    EXPECT_EQ(true, session_->IsVisibleNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    EXPECT_EQ(false, session_->IsVisibleNotBackground());
+}
+
+/**
+ * @tc.name: IsVisibleNotBackground01
+ * @tc.desc: IsVisibleNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.moduleName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    subSession->isVisible_ = true;
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), true);
+
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    subSession->SetParentSession(parentSession);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    parentSession->isVisible_ = true;
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), true);
+}
+
+/**
  * @tc.name: NotifyActivation
  * @tc.desc: NotifyActivation Test
  * @tc.type: FUNC
