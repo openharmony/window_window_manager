@@ -142,6 +142,7 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
 WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    TLOGI(WmsLogTag::DEFAULT, "called");
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
