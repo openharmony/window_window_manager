@@ -1980,44 +1980,44 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated02, Te
 }
 
 /**
- * @tc.name: SetFrameRectForParticalZoomIn01
- * @tc.desc: Test SetFrameRectForParticalZoomIn when window type is invalid
+ * @tc.name: SetFrameRectForPartialZoomIn01
+ * @tc.desc: Test SetFrameRectForPartialZoomIn when window type is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn01");
+    option->SetWindowName("SetFrameRectForPartialZoomIn01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
     // window type is WINDOW_TYPE_APP_MAIN_WINDOW
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 
 /**
- * @tc.name: SetFrameRectForParticalZoomIn02
- * @tc.desc: Test SetFrameRectForParticalZoomIn when window session is invalid
+ * @tc.name: SetFrameRectForPartialZoomIn02
+ * @tc.desc: Test SetFrameRectForPartialZoomIn when window session is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn02");
+    option->SetWindowName("SetFrameRectForPartialZoomIn02");
     option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForPartialZoomIn(frameRect));
 
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SetFrameRectForParticalZoomIn02";
-    sessionInfo.abilityName_ = "SetFrameRectForParticalZoomIn02";
+    sessionInfo.bundleName_ = "SetFrameRectForPartialZoomIn02";
+    sessionInfo.abilityName_ = "SetFrameRectForPartialZoomIn02";
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = 100; // 100 is persistent id
     window->state_ = WindowState::STATE_CREATED;
-    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 
 /**
