@@ -5275,6 +5275,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPreLoadStartingWindow(c
     std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
     auto iter = preLoadMap.find(key);
     if (iter == preLoadMap.end()) {
+        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}s not found", key.c_str());
         return nullptr;
     }
     return iter->second;
