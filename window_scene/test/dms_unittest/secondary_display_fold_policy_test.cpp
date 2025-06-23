@@ -369,6 +369,29 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult04, TestSize.Le
 }
 
 /**
+ * @tc.name: SendPropertyChangeResult05
+ * @tc.desc: test function : SendPropertyChangeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult05, TestSize.Level1)
+{
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>("test");
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = nullptr;
+    std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
+    EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
+
+    FoldDisplayMode displayMode = FoldDisplayMode::GLOBAL_FULL;
+    policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
+    EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
+    usleep(200000);
+}
+
+/**
  * @tc.name: SetStatusFullActiveRectAndTpFeature
  * @tc.desc: test function : SetStatusFullActiveRectAndTpFeature
  * @tc.type: FUNC
