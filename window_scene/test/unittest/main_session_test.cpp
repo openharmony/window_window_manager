@@ -129,7 +129,7 @@ HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
     EXPECT_NE(nullptr, pMainSession);
 
     auto hasSnapshot = pMainSession->scenePersistence_->HasSnapshot();
-    ASSERT_EQ(HasSnapshot, false);
+    ASSERT_EQ(hasSnapshot, false);
 }
 
 /**
