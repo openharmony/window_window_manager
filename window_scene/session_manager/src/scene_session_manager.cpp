@@ -2544,6 +2544,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
         LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
+        PreLoadStartingWindow(sceneSession);
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
@@ -5262,6 +5263,101 @@ void SceneSessionManager::CacheStartingWindowInfo(const std::string& bundleName,
     }
     std::map<std::string, StartingWindowInfo> infoMap({{ key, startingWindowInfo }});
     startingWindowMap_.emplace(bundleName, infoMap);
+}
+
+std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPreLoadStartingWindow(const SessionInfo& sessionInfo)
+{
+    std::unordered_map<std::string, std::shared_ptr<Media::PixelMap>> preLoadMap;
+    {
+        std::shared_lock<std::shared_mutex> lock(preLoadstartingWindowMapMutex_);
+        preLoadMap = preLoadStartingWindowMap_;
+    }
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
+    auto iter = preLoadMap.find(key);
+    if (iter == preLoadMap.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
+void SceneSessionManager::RemovePreLoadStartingWindowFromMap(const SessionInfo& sessionInfo)
+{
+    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
+    std::unique_lock<std::shared_mutex> lock(preLoadstartingWindowMapMutex_);
+    auto iter = preLoadStartingWindowMap_.find(key);
+    if (iter != preLoadStartingWindowMap_.end()) {
+        preLoadStartingWindowMap_.erase(iter);
+    }
+}
+
+void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
+{
+    const char* const where = __func__;
+    auto loadTask = [this, weakSceneSession = wptr(sceneSession), where]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:PreLoadStartingWindow");
+        sptr<SceneSession> sceneSession = weakSceneSession.promote();
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is nullptr", where);
+            return;
+        }
+        auto sessionInfo = sceneSession->GetSessionInfo();
+        if (!SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not main window",
+                where, sceneSession->GetPersistentId());
+            return;
+        }
+        StartingWindowInfo startingWindowInfo;
+        GetStartupPage(sessionInfo, startingWindowInfo);
+        uint32_t resId = 0;
+        if (!CheckAndGetPreLoadResourceId(startingWindowInfo, resId)) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s check no need preLoad", where);
+            return;
+        }
+        if (sessionInfo.abilityInfo == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d abilityInfo is nullptr",
+                where, sceneSession->GetPersistentId());
+            return;
+        }
+        auto pixelMap = GetPixelMap(resId, sessionInfo.abilityInfo);
+        if (pixelMap == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s pixelMap is nullptr", where);
+            return;
+        }
+        std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
+        {
+            std::unique_lock<std::shared_mutex> lock(preLoadstartingWindowMapMutex_);
+            preLoadStartingWindowMap_[key] = pixelMap;
+        }
+        sceneSession->NotifyPreLoadStartingWindowFinished();
+    };
+    ffrtQueueHelper_->SubmitTask(loadTask);
+}
+
+bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId)
+{
+    if (startingWindowInfo.configFileEnabled_) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "config file enabled");
+        return false;
+    }
+    const auto& iconPath= startingWindowInfo.iconPathEarlyVersion_;
+    auto pos = iconPath.find_last_of('.');
+    constexpr uint32_t RESOURCE_PATH_HEAD_LENGTH = 12;
+    if (pos == std::string::npos || pos <= RESOURCE_PATH_HEAD_LENGTH) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "format error: %{private}s", iconPath.c_str());
+        return false;
+    }
+    const auto& extName = iconPath.substr(pos);
+    if (extName != ".png" && extName != ".jpg") {
+        TLOGI(WmsLogTag::WMS_PATTERN, "format not need preLoad: %{private}s", iconPath.c_str());
+        return false;
+    }
+    const auto& resIdStr = iconPath.substr(RESOURCE_PATH_HEAD_LENGTH, pos - RESOURCE_PATH_HEAD_LENGTH);
+    if (!WindowHelper::IsNumber(resIdStr)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "number format error: %{public}s", resIdStr.c_str());
+        return false;
+    }
+    resId = std::stoul(resIdStr);
+    return true;
 }
 
 void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)

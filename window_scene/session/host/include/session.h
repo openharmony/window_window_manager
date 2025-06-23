@@ -128,6 +128,7 @@ public:
         int64_t uiExtensionIdLevel) {}
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
+    virtual void OnPreLoadStartingWindowFinished() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -225,6 +226,7 @@ public:
     void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true);
     void NotifyRemoveSnapshot();
     void NotifyUpdateSnapshotWindow();
+    void NotifyPreLoadStartingWindowFinished();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
