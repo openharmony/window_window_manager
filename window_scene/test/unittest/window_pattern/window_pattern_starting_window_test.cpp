@@ -369,7 +369,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetPreLoadStartingWindow, TestSize.Lev
     sessionInfo.abilityName_ = "abilityName_";
     std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
     ssm_->preLoadStartingWindowMap_[key] = std::make_shared<Media::PixelMap>();
-    EXPECT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
+    ASSERT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
     ssm_->preLoadStartingWindowMap_.clear();
     EXPECT_EQ(true, ssm_->preLoadStartingWindowMap_.empty());
 }
@@ -437,7 +437,7 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->PreLoadStartingWindow(sceneSession);
-    EXPECT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession);
 }
 
 /**
@@ -451,10 +451,10 @@ HWTEST_F(WindowPatternStartingWindowTest, NotifyPreLoadStartingWindowFinished, T
     info.bundleName_ = "bundleName_";
     info.moduleName_ = "moduleName_";
     info.abilityName_ = "abilityName_";
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->NotifyPreLoadStartingWindowFinished();
-    EXPECT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession);
 }
 } // namespace
 } // namespace Rosen
