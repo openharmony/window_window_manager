@@ -33,6 +33,7 @@ namespace {
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
+// 10ms = 1000 * 1000 * 10 ns
 constexpr int32_t POSTURE_INTERVAL = 10000000;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
 constexpr uint16_t HALL_B_C_COLUMN_ORDER = 1;
