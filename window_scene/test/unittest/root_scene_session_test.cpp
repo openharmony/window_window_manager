@@ -287,7 +287,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
  */
 HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_02, TestSize.Level1)
 {
-    ASSERT_NE(nullptr, ssm_);
+    EXPECT_NE(nullptr, ssm_);
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetSceneSessionVectorByType_ = [](WindowType type) {
         return ssm_->GetSceneSessionVectorByType(type);
