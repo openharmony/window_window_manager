@@ -63,20 +63,20 @@ protected:
 private:
     void UpdateFocusedSessionId(int32_t focusedSessionId);
     void FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
-        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize = false);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
     void ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
         std::vector<MMI::ScreenInfo>& screenInfos);
     void ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
-        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap);
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap);
     bool CheckNeedUpdate(const std::vector<MMI::ScreenInfo>& screenInfos,
         const std::vector<MMI::DisplayInfo>& displayInfos, const std::vector<MMI::WindowInfo>& windowInfoList);
     void PrintScreenInfo(const std::vector<MMI::ScreenInfo>& screenInfos);
     void PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
     void UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
-        std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         std::vector<MMI::WindowInfo> windowInfoList);
     void ConstructDumpDisplayInfo(const MMI::DisplayInfo& displayInfo,
         std::ostringstream& dumpDisplayListStream);
