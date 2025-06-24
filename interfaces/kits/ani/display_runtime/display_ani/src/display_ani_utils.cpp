@@ -123,7 +123,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     auto hdrFormats = info->GetHdrFormats();
     TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), 0);
     if (colorSpaces.size() != 0) {
-        ani_array_int colorSpacesAni;
+        ani_array colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
         if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>colorSpaces",
             static_cast<ani_ref>(colorSpacesAni))) {
@@ -131,7 +131,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
         }
     }
     if (hdrFormats.size() != 0) {
-        ani_array_int hdrFormatsAni;
+        ani_array hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
         if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats",
             static_cast<ani_ref>(hdrFormatsAni))) {
@@ -141,14 +141,28 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     return ANI_OK;
 }
 
-void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec)
+void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array* aniArray, std::vector<uint32_t> vec)
 {
-    if (ANI_OK != env->Array_New_Int(size, aniArray)) {
+    if (ANI_OK != env->Array_New(size, nullptr, aniArray)) {
         TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
     }
-    ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
-    if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
+    ani_class intClass = nullptr;
+    if (ANI_OK != env->FindClass("Lstd/core/Int;", &intClass)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find int class error");
+    }
+    ani_method intCtor = nullptr;
+    if (ANI_OK != env->Class_FindMethod(intClass, "<ctor>", "I:V", &intCtor)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Find int class constructor error");
+    }
+
+    for (ani_size i = 0; i < size; ++i) {
+        ani_object boxedInt {};
+        if (ANI_OK != env->Object_New(intClass, intCtor, &boxedInt, vec[i])) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Create boxed int error");
+        }
+        if (ANI_OK != env->Array_Set(*aniArray, i, boxedInt)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Array set error");
+        }
     }
 }
 
