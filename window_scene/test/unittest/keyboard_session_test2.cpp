@@ -942,6 +942,56 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, TestSize.Level1)
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);
 }
+
+/**
+ * @tc.name: CloseKeyboardSyncTransaction5
+ * @tc.desc: test function: CloseKeyboardSyncTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction5, TestSize.Level1)
+{
+    std::string abilityName = "CloseKeyboardSyncTransaction5";
+    std::string bundleName = "CloseKeyboardSyncTransaction5";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    WindowAnimationInfo animationInfo;
+    animationInfo.callingId = 3;
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    keyboardSession->keyboardCallback_ = keyboardCallback;
+
+    ASSERT_NE(keyboardSession->GetSessionProperty(), nullptr);
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(1);
+    animationInfo.isGravityChanged = true;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), 1);
+
+    animationInfo.isGravityChanged = false;
+    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return true; };
+    keyboardSession->state_ = SessionState::STATE_ACTIVE;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), 1);
+
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), INVALID_WINDOW_ID);
+
+    animationInfo.isGravityChanged = true;
+    keyboardSession->state_ = SessionState::STATE_ACTIVE;
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(2);
+    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return false; };
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), 2);
+
+    animationInfo.isGravityChanged = false;
+    keyboardSession->state_ = SessionState::STATE_BACKGROUND;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), 2);
+
+    keyboardSession->state_ = SessionState::STATE_ACTIVE;
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(keyboardSession->GetSessionProperty()->GetCallingSessionId(), 3);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
