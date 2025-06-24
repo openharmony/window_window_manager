@@ -55,6 +55,7 @@ public:
     bool BatchInsert(int64_t& outInsertNum,
         const std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& inputValues);
     bool DeleteDataByBundleName(const std::string& bundleName);
+    bool DeleteAllData();
     bool QueryData(const StartingWindowRdbItemKey& key, StartingWindowInfo& value);
     std::string GetStartWindowValFromProfile(const AppExecFwk::AbilityInfo& abilityInfo,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,

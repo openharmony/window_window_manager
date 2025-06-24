@@ -149,9 +149,26 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, TestSize.Le
     itemKey.bundleName = "testName";
     StartingWindowInfo startingWindowInfo;
     auto res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
     res = startingWindowRdbMgr_->DeleteDataByBundleName("testName");
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: DeleteAllData
+ * @tc.desc: DeleteAllData
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteAllData, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    StartingWindowRdbItemKey itemKey;
+    itemKey.bundleName = "testName";
+    StartingWindowInfo startingWindowInfo;
+    auto res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
+    EXPECT_EQ(res, true);
+    res = startingWindowRdbMgr_->DeleteAllData();
+    EXPECT_EQ(res, true);
 }
 
 /**
