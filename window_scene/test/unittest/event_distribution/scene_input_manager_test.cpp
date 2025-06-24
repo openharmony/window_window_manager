@@ -374,7 +374,7 @@ HWTEST_F(SceneInputManagerTest, UpdateConstrainedModalUIExtInfo, TestSize.Level1
 HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::DisplayInfo displayinfo;
@@ -636,7 +636,7 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, TestSize.Level1)
 HWTEST_F(SceneInputManagerTest, FlushFullInfoToMMI, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     SceneInputManager::GetInstance().FlushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList);
@@ -883,7 +883,7 @@ HWTEST_F(SceneInputManagerTest, ConstructScreenInfos, TestSize.Level1)
 HWTEST_F(SceneInputManagerTest, ConstructDisplayGroupInfos, TestSize.Level1)
 {
     std::map<ScreenId, ScreenProperty> screensProperties;
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     SceneInputManager::GetInstance().ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
     EXPECT_EQ(displayGroupMap.size(), 0);
     ScreenProperty screenProperty0;

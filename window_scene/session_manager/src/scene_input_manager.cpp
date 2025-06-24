@@ -248,7 +248,7 @@ void SceneInputManager::ConstructScreenInfos(std::map<ScreenId, ScreenProperty>&
 }
 
 void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap)
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap)
 {
     if (screensProperties.empty()) {
         TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
@@ -344,11 +344,11 @@ std::unordered_map<DisplayId, int32_t> SceneInputManager::GetFocusedSessionMap()
 }
 
 void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize)
 {
     auto focusInfoMap = GetFocusedSessionMap();
-    std::unordered_map<DisplayId, std::vector<MMI::WindowInfo>> windowInfoMap;
+    std::unordered_map<DisplayGroupId, std::vector<MMI::WindowInfo>> windowInfoMap;
     for (const auto& windowInfo : windowInfoList) {
         windowInfoMap[windowInfo.groupId].emplace_back(windowInfo);
     }
@@ -388,7 +388,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         std::vector<MMI::ScreenInfo> screenInfos;
         ConstructScreenInfos(screensProperties, screenInfos);
-        std::unordered_map<DisplayId, MMI::DisplayGroupInfo> displayGroupMap;
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         std::vector<MMI::DisplayGroupInfo> displayGroupInfos;
         for (auto& [displayGroupId, displayGroup] : displayGroupMap) {
@@ -656,7 +656,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 }
 
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
-    std::unordered_map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
+    std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     std::vector<MMI::WindowInfo> windowInfoList)
 {
     if (windowInfoList.size() == 0) {
@@ -722,7 +722,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
             ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         std::vector<MMI::ScreenInfo> screenInfos;
         ConstructScreenInfos(screensProperties, screenInfos);
-        std::unordered_map<DisplayId, MMI::DisplayGroupInfo> displayGroupMap;
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         if (displayGroupMap.empty()) {
             std::ostringstream oss;
