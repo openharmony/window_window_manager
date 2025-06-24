@@ -1654,8 +1654,8 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
-        TLOGI(WmsLogTag::DMS, "hW: %{public}u, hH: %{public}u, hD: %{public}f, hR: %{public}u, hER: %{public}d, "
-            "hO: %{public}u, hEO: %{public}d, dW: %{public}u, dH: %{public}u, dR: %{public}u, dO: %{public}u",
+        TLOGI(WmsLogTag::DMS, "hW: %{public}u, hH: %{public}u, hD: %{public}f, hR: %{public}u, hER: %{public}d,"
+            " hO: %{public}u, hEO: %{public}d, dW: %{public}u, dH: %{public}u, dR: %{public}u, dO: %{public}u",
             info.width_, info.height_, info.density_, info.rotation_, info.enableHookRotation_,
             info.displayOrientation_, info.enableHookDisplayOrientation_, displayInfo->GetWidth(),
             displayInfo->GetHeight(), displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
