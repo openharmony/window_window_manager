@@ -425,6 +425,36 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest08
+ * @tc.desc: sessionStub ProcessRemoteRequestTest08
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -1631,6 +1661,73 @@ HWTEST_F(SessionStubTest, HandleSetFrameRectForPartialZoomIn, Function | SmallTe
     res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteUint32(0) && data.WriteUint32(0);
     EXPECT_EQ(res, true);
     EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateFloatingBall
+ * @tc.desc: sessionStub HandleUpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStopFloatingBall
+ * @tc.desc: sessionStub HandleStopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStopFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStartFloatingBallMainWindow
+ * @tc.desc: sessionStub HandleStartFloatingBallMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStartFloatingBallMainWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    data.WriteParcelable(want.get());
+    result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFloatingBallWindowId
+ * @tc.desc: sessionStub HandleGetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleGetFloatingBallWindowId(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

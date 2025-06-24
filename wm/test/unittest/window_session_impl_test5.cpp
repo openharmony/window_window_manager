@@ -1266,6 +1266,39 @@ HWTEST_F(WindowSessionImplTest5, HideTitleButton03, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetUIContentByName
+ * @tc.desc: SetUIContentByName, load content by name
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetUIContentByName, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetUIContentByName");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"SetUIContentByName", "SetUIContentByName", "SetUIContentByName"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "test";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+
+    intentParam = "";
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+}
+
+/**
  * @tc.name: HideTitleButton04
  * @tc.desc: HideTitleButton04
  * @tc.type: FUNC
@@ -1391,6 +1424,120 @@ HWTEST_F(WindowSessionImplTest5, HideTitleButton08, Function | SmallTest | Level
     EXPECT_FALSE(hideMaximizeButton);
     EXPECT_FALSE(hideMinimizeButton);
     EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: GetFloatingBallWindowId
+ * @tc.desc: GetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetFloatingBallWindowId, TestSize.Level1)
+{
+    uint32_t windowId = 0;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetFloatingBallWindowId");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetFloatingBallWindowId(windowId));
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*session, GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_OPERATION));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->GetFloatingBallWindowId(windowId));
+
+    EXPECT_CALL(*session, GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->GetFloatingBallWindowId(windowId));
+}
+
+/**
+ * @tc.name: SendFbActionEvent
+ * @tc.desc: SendFbActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SendFbActionEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    std::string action = "click";
+    ASSERT_EQ(WSError::WS_OK, window->SendFbActionEvent(action));
+}
+
+/**
+ * @tc.name: UpdateFloatingBall
+ * @tc.desc: UpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    FloatingBallTemplateBaseInfo fbTemplateInfo;
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    window->UpdateFloatingBall(fbTemplateInfo, icon);
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    window->UpdateFloatingBall(fbTemplateInfo, icon);
+}
+
+/**
+ * @tc.name: NotifyPrepareCloseFloatingBall
+ * @tc.desc: NotifyPrepareCloseFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    window->NotifyPrepareCloseFloatingBall();
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    EXPECT_TRUE(window->IsWindowSessionInvalid());
+    window->NotifyPrepareCloseFloatingBall();
+
+    window->property_->persistentId_ = 1234;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    window->NotifyPrepareCloseFloatingBall();
+}
+
+/**
+ * @tc.name: RestoreFbMainWindow
+ * @tc.desc: RestoreFbMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, window->RestoreFbMainWindow(want));
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+
+    EXPECT_CALL(*session, RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_FB_STATE_ABNORMALLY));
+    ASSERT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, window->RestoreFbMainWindow(want));
+
+    EXPECT_CALL(*session, RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->RestoreFbMainWindow(want));
 }
 } // namespace
 } // namespace Rosen

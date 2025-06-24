@@ -477,6 +477,35 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent11, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandlePointerEventForFocus_NullPtr
+ * @tc.desc: HandlePointerEventForFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, HandlePointerEventForFocus_NullPtr, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    WSError ret = session_->HandlePointerEventForFocus(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: HandlePointerEventForFocus_Hover
+ * @tc.desc: HandlePointerEventForFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, HandlePointerEventForFocus_Hover, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WSError ret = session_->HandlePointerEventForFocus(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TransferFocusStateEvent03
  * @tc.desc: TransferFocusStateEvent Test
  * @tc.type: FUNC
@@ -530,7 +559,8 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
     session_->SetBufferAvailableChangeListener(nullptr);
 
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue += 1; };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue += 1; };
     session_->SetBufferAvailableChangeListener(func);
     ASSERT_EQ(resultValue, 1);
 }
@@ -638,22 +668,70 @@ HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Lev
 }
 
 /**
- * @tc.name: PresentFoucusIfNeed
- * @tc.desc: PresentFoucusIfNeed Test
+ * @tc.name: PresentFocusIfNeed01
+ * @tc.desc: PresentFocusIfNeed Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest3, PresentFoucusIfNeed, TestSize.Level1)
+HWTEST_F(WindowSessionTest3, PresentFocusIfNeed01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
-    session_->PresentFoucusIfNeed(pointerAction);
-    pointerAction = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    session_->PresentFoucusIfNeed(pointerAction);
-    session_->property_->focusable_ = false;
-    session_->PresentFoucusIfNeed(pointerAction);
+    bool hasNotifyManagerToRequestFocus = false;
     session_->isFocused_ = true;
-    session_->PresentFoucusIfNeed(pointerAction);
-    EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
+    session_->property_->focusable_ = false;
+    session_->SetRequestFocusStatusNotifyManagerListener(
+        [&hasNotifyManagerToRequestFocus](int32_t persistentId, const bool isFocused, const bool byForeground,
+            FocusChangeReason reason) {
+            hasNotifyManagerToRequestFocus = true;
+        });
+
+    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_MOVE;
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+
+    session_->isFocused_ = false;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+}
+
+/**
+ * @tc.name: PresentFocusIfNeed02
+ * @tc.desc: PresentFocusIfNeed Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, PresentFocusIfNeed02, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool hasNotifyManagerToRequestFocus = false;
+    session_->isFocused_ = false;
+    session_->property_->focusable_ = false;
+    session_->SetRequestFocusStatusNotifyManagerListener(
+        [&hasNotifyManagerToRequestFocus](int32_t persistentId, const bool isFocused, const bool byForeground,
+            FocusChangeReason reason) {
+            hasNotifyManagerToRequestFocus = true;
+        });
+
+    hasNotifyManagerToRequestFocus = false;
+    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    session_->property_->focusable_ = true;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+
+    hasNotifyManagerToRequestFocus = false;
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+
+    hasNotifyManagerToRequestFocus = false;
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
 }
 
 /**
@@ -865,7 +943,8 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue = 1; };
     session_->SetBufferAvailableChangeListener(func);
     session_->SetBufferAvailable(true);
     ASSERT_EQ(session_->bufferAvailable_, true);
@@ -879,7 +958,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) { resultValue = 1; };
+    NotifySessionInfoChangeNotifyManagerFunc func = [&resultValue](int32_t persistentid) { resultValue = 1; };
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
@@ -922,22 +1001,6 @@ HWTEST_F(WindowSessionTest3, PcAppInPadNormalClose, TestSize.Level1)
     session_->sessionStage_ = mockSessionStage;
     result = session_->PcAppInPadNormalClose();
     ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetSnapshotPixelMap
- * @tc.desc: GetSnapshotPixelMap Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, TestSize.Level1)
-{
-    session_->scenePersistence_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    EXPECT_NE(nullptr, session_->scenePersistence_);
-    session_->scenePersistence_->isSavingSnapshot_.store(true);
-    session_->snapshot_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
 
 /**

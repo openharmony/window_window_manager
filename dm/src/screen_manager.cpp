@@ -50,6 +50,7 @@ public:
     DMError RegisterDisplayManagerAgent();
     DMError UnregisterDisplayManagerAgent();
     void OnRemoteDied();
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
 
 private:
     void NotifyScreenConnect(sptr<ScreenInfo> info);
@@ -813,5 +814,15 @@ DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>&
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
+}
+
+DMError ScreenManager::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    return pImpl_->SetVirtualScreenAutoRotation(screenId, enable);
+}
+
+DMError ScreenManager::Impl::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
 }
 } // namespace OHOS::Rosen

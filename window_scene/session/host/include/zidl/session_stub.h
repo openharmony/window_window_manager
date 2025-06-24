@@ -117,6 +117,12 @@ private:
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel& reply);
 
+    // Floating Ball
+    int HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply);
+    int HandleStopFloatingBall(MessageParcel& data, MessageParcel& reply);
+    int HandleStartFloatingBallMainWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetFloatingBallWindowId(MessageParcel& data, MessageParcel& reply);
+
     // Window Pattern
     int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSnapshotUpdate(MessageParcel& data, MessageParcel& reply);

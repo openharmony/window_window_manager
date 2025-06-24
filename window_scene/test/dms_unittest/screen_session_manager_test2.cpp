@@ -21,7 +21,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
 #include "fold_screen_state_internel.h"
-#include "../mock/mock_accesstoken_kit.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -872,6 +872,51 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenIds, Function | SmallTest | 
     std::vector<ScreenId> screenIds1;
     auto ret1 = ssm_->GetPhysicalScreenIds(screenIds1);
     EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation01
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation01, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSASystemApp(false);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation02
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation02, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSASystemApp(true);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation03
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation03, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSASystemApp(true);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 }
 }

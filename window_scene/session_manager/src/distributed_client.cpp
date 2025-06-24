@@ -51,7 +51,7 @@ void DistributedClient::ConnectDistributedSchedLocked()
     }
     auto proxy = samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
     if (!proxy) {
-        TLOGW(WmsLogTag::DEFAULT, "get dms proxy failed");
+        TLOGW(WmsLogTag::DEFAULT, "Proxy failed");
         return;
     }
     dmsDeath_ = sptr<DmsDeathRecipient>::MakeSptr();
@@ -164,11 +164,11 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
 int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state,
     int32_t callingUid)
 {
-    TLOGI(WmsLogTag::DEFAULT, "missionId:%{public}d,state:%{public}d,callingUid:%{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "missionId:%{public}d,state:%{public}d,callingUid:%{public}d",
         missionId, state, callingUid);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "remote system ablity is null");
+        TLOGD(WmsLogTag::DEFAULT, "remote system ablity is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;

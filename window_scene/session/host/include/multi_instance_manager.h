@@ -41,6 +41,8 @@ public:
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr, const std::shared_ptr<TaskScheduler>& taskScheduler);
     void IncreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
     void DecreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
+    void DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(const std::string& bundleName,
+        const std::string& instanceKey);
 
     // Locks appInfoMutex_
     void SetCurrentUserId(int32_t userId);

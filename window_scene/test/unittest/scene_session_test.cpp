@@ -592,6 +592,29 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetPrivacyMode03
+ * @tc.desc: Set PrivacyMode as true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestAbility";
+    info.bundleName_ = "TestBundle";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sceneSession->SetEventHandler(handler, handler);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetPrivacyMode(true);
+    ASSERT_EQ(true, sceneSession->appUseControlMap_.size() == 0);
+}
+
+/**
  * @tc.name: UpdateScreenshotAppEventRegistered
  * @tc.desc: UpdateScreenshotAppEventRegistered01
  * @tc.type: FUNC
@@ -908,6 +931,20 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
                                               const RectAnimationConfig& rectAnimationConfig) { return; };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
+
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = oriProperty;
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = moveDragController;
+    SizeChangeReason reason = { SizeChangeReason::DRAG };
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->compatibleDragScaleFlags_ = true;
+    sceneSession->NotifySessionRectChange(overlapRect, reason, 11);
+    EXPECT_EQ(sceneSession->IsDragResizeScale(reason), true);
 }
 
 /**
@@ -1014,6 +1051,36 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSystemBarProperty03
+ * @tc.desc: SetSystemBarProperty03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemBarProperty03";
+    info.bundleName_ = "SetSystemBarProperty03";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallback->onNotifyWindowSystemBarPropertyChangeFunc_ = [](
+        WindowType type, const SystemBarProperty& systemBarProperty) {};
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    sceneSession->onSystemBarPropertyChange_ =[](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {};
+    SystemBarProperty statusBarProperty;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
+    EXPECT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, statusBarProperty),
+        WSError::WS_OK);
+    sceneSession->specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ = nullptr;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
 }
 
 /**

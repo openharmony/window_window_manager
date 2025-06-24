@@ -26,6 +26,7 @@
 #include "dm_common.h"
 #include <cfloat>
 #include "pixel_map.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -102,6 +103,7 @@ public:
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
+    void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -168,6 +170,7 @@ public:
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
+    FloatingBallTemplateInfo GetFbTemplateInfo() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -181,6 +184,8 @@ public:
     static void UnMarshallingSystemBarMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingPiPTemplateInfo(Parcel& parcel) const;
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFbTemplateInfo(Parcel& parcel) const;
+    static void UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
@@ -247,6 +252,14 @@ public:
     float GetWindowCornerRadius() const;
     void SetWindowShadows(const ShadowsInfo& shadowsInfo);
     ShadowsInfo GetWindowShadows() const;
+    Rect GetGlobalDisplayRect() const;
+    void SetGlobalDisplayRect(const Rect& globalDisplayRect);
+
+    /*
+     * Window Lifecycle
+     */
+    void SetUseControlStateToProperty(bool isUseControlState);
+    bool GetUseControlStateFromProperty() const;
 
     /*
      * UIExtension
@@ -293,6 +306,7 @@ public:
     bool IsAdaptToEventMapping() const;
     bool IsAdaptToProportionalScale() const;
     bool IsAdaptToBackButton() const;
+    bool IsAdaptToDragScale() const;
     bool IsDragResizeDisabled() const;
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
@@ -435,6 +449,7 @@ private:
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
+    FloatingBallTemplateInfo fbTemplateInfo_ = {};
     KeyboardLayoutParams keyboardLayoutParams_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
@@ -535,12 +550,20 @@ private:
     bool isExclusivelyHighlighted_ { true };
     
     /*
+     * Window Lifecycle
+     */
+    mutable std::mutex lifecycleUseControlMutex_;
+    bool isUseControlState_ = false;
+    
+    /*
      * Window Property
      */
     float cornerRadius_ = 0.0f;
     mutable std::mutex cornerRadiusMutex_;
     ShadowsInfo shadowsInfo_;
     mutable std::mutex shadowsInfoMutex_;
+    mutable std::mutex globalDisplayRectMutex_;
+    Rect globalDisplayRect_ { 0, 0, 0, 0 };
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
@@ -563,6 +586,9 @@ public:
 
     void SetIsAdaptToBackButton(bool isAdaptToBackButton);
     bool IsAdaptToBackButton() const;
+
+    void SetIsAdaptToDragScale(bool isAdaptToDragScale);
+    bool IsAdaptToDragScale() const;
 
     void SetDisableDragResize(bool disableDragResize);
     bool IsDragResizeDisabled() const;
@@ -597,6 +623,7 @@ public:
         ss << "isAdaptToEventMapping_:" << isAdaptToEventMapping_ << " ";
         ss << "isAdaptToProportionalScale_:" << isAdaptToProportionalScale_ << " ";
         ss << "isAdaptToBackButton_:" << isAdaptToBackButton_<< " ";
+        ss << "isAdaptToDragScale_:" << isAdaptToDragScale_<< " ";
         ss << "disableDragResize_:" << disableDragResize_<< " ";
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
@@ -612,6 +639,7 @@ private:
     bool isAdaptToEventMapping_ { false };
     bool isAdaptToProportionalScale_ { false };
     bool isAdaptToBackButton_ { false };
+    bool isAdaptToDragScale_ { false };
     bool disableDragResize_ { false };
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
@@ -727,6 +755,7 @@ struct SystemSessionConfig : public Parcelable {
     bool supportZLevel_ = false;
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
+    bool supportSnapshotAllSessionStatus_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -780,6 +809,9 @@ struct SystemSessionConfig : public Parcelable {
             !parcel.WriteBool(skipRedundantWindowStatusNotifications_) || !parcel.WriteUint32(supportFunctionType_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
+            return false;
+        }
         return true;
     }
 
@@ -829,6 +861,7 @@ struct SystemSessionConfig : public Parcelable {
         config->supportZLevel_ = parcel.ReadBool();
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
+        config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
         return config;
     }
 
@@ -850,6 +883,11 @@ struct SystemSessionConfig : public Parcelable {
     bool IsPadWindow() const
     {
         return windowUIType_ == WindowUIType::PAD_WINDOW;
+    }
+
+    bool IsPcOrPcMode() const
+    {
+        return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
     }
 };
 } // namespace Rosen

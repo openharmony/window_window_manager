@@ -1201,6 +1201,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"isAdaptToEventMapping", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
         {"isAdaptToProportionalScale", &CompatibleModeProperty::SetIsAdaptToProportionalScale},
         {"isAdaptToBackButton", &CompatibleModeProperty::SetIsAdaptToBackButton},
+        {"isAdaptToDragScale", &CompatibleModeProperty::SetIsAdaptToDragScale},
         {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
@@ -1801,6 +1802,8 @@ napi_value CreateJsSessionDragResizeType(napi_env env)
         static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME)));
     napi_set_named_property(env, objValue, "RESIZE_WHEN_DRAG_END", CreateJsValue(env,
         static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
+    napi_set_named_property(env, objValue, "RESIZE_SCALE", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_SCALE)));
     return objValue;
 }
 
@@ -1854,6 +1857,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
     napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
+    napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
     return objValue;
 }
 
@@ -2089,7 +2093,7 @@ static void SetTypeProperty(napi_value object, napi_env env, const std::string& 
 
 napi_value KeyboardGravityInit(napi_env env)
 {
-    WLOGFI("KeyboardGravityInit");
+    TLOGD(WmsLogTag::DEFAULT, "KeyboardGravityInit");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -2113,7 +2117,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value KeyboardViewModeInit(napi_env env)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
     if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
         return nullptr;
@@ -2259,6 +2263,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
+    SetTypeProperty(objValue, env, "TYPE_FLOATING_BALL", JsSessionType::TYPE_FLOATING_BALL);
     return objValue;
 }
 

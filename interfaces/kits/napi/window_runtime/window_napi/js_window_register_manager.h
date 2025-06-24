@@ -57,6 +57,7 @@ enum class RegisterListenerType : uint32_t {
     SUB_WINDOW_CLOSE_CB,
     WINDOW_WILL_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
+    WINDOW_STAGE_LIFECYCLE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
     WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_ROTATION_CHANGE_CB,
@@ -80,6 +81,8 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowStageLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,

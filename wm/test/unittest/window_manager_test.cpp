@@ -22,12 +22,20 @@
 #include "window_manager.h"
 
 #include "window_manager.cpp"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
 public:
@@ -51,6 +59,16 @@ public:
     {
         WLOGI("TestSystemBarChangedListener");
     };
+};
+
+class TestWindowSystemBarPropertyChangedListener : public IWindowSystemBarPropertyChangedListener {
+public:
+    int32_t count_ = 0;
+    void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) override
+    {
+        count_ = 1;
+        TLOGI(WmsLogTag::WMS_IMMS, "TestSystemBarChangedListener");
+    }
 };
 
 class TestWindowUpdateListener : public IWindowUpdateListener {
@@ -794,10 +812,6 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 {
     sptr<IRemoteObject> remoteObj;
     WMError res = WindowManager::GetInstance().GetUIContentRemoteObj(1, remoteObj);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
-        return;
-    }
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -809,9 +823,13 @@ HWTEST_F(WindowManagerTest, GetUIContentRemoteObj, TestSize.Level1)
 HWTEST_F(WindowManagerTest, GetFocusWindowInfo, TestSize.Level1)
 {
     FocusChangeInfo focusInfo;
-    auto ret = 0;
-    WindowManager::GetInstance().GetFocusWindowInfo(focusInfo);
-    ASSERT_EQ(0, ret);
+    DisplayId displayId = 0;
+    WindowManager::GetInstance().GetFocusWindowInfo(focusInfo, displayId);
+    WindowAdapter windowAdapter;
+
+    windowAdapter.GetFocusWindowInfo(focusInfo, displayId);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -863,11 +881,14 @@ HWTEST_F(WindowManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 0;
     bool isShowing = true;
-    auto ret = 0;
     WindowManager::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -877,10 +898,13 @@ HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     bool showwatermark = true;
-    auto ret = 0;
     WindowManager::GetInstance().NotifyWaterMarkFlagChangedResult(showwatermark);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -890,10 +914,13 @@ HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
  */
 HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     bool enable = true;
-    auto ret = 0;
     WindowManager::GetInstance().NotifyGestureNavigationEnabledResult(enable);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Notify gesture navigation enable result, enable=%{public}d")
+        != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1027,9 +1054,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, TestSize.Level
     newInfo.displayId = 0;
     newInfo.visibleWindowNum = 2;
     visibleWindowNumInfo.push_back(newInfo);
-    auto ret = 0;
     windowManager.UpdateVisibleWindowNum(visibleWindowNumInfo);
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -1969,6 +1994,74 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
 }
 
 /**
+ * @tc.name: RegisterWindowSystemBarPropertyChangedListener
+ * @tc.desc: check RegisterWindowSystemBarPropertyChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowSystemBarPropertyChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowSystemBarPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->windowSystemBarPropertyChangedListeners_;
+    windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = nullptr;
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowSystemBarPropertyChangedListener(nullptr));
+    sptr<TestWindowSystemBarPropertyChangedListener> listener =
+        sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowSystemBarPropertyChangedListener(listener));
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, windowManager.RegisterWindowSystemBarPropertyChangedListener(listener));
+    windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowSystemBarPropertyChangedListener
+ * @tc.desc: check UnregisterWindowSystemBarPropertyChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowSystemBarPropertyChangedListener, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowSystemBarPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->windowSystemBarPropertyChangedListeners_;
+    windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowSystemBarPropertyChangedListener(nullptr));
+    sptr<TestWindowSystemBarPropertyChangedListener> listener =
+        sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_DO_NOTHING, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowSystemBarPropertyChangedListener(listener));
+    windowManager.pImpl_->windowSystemBarPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: check NotifyWindowSystemBarPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldListeners = windowManager.pImpl_->windowSystemBarPropertyChangedListeners_;
+    SystemBarProperty systemBarProperty;
+    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    sptr<TestWindowSystemBarPropertyChangedListener> listener =
+        sptr<TestWindowSystemBarPropertyChangedListener>::MakeSptr();
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
+    EXPECT_EQ(1, windowManager.pImpl_->windowSystemBarPropertyChangedListeners_.size());
+    WindowManager::GetInstance().pImpl_->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_EQ(1, listener->count_);
+    windowManager.pImpl_->windowSystemBarPropertyChangedListeners_ = oldListeners;
+}
+
+/**
  * @tc.name: RegisterRectChangedListener01
  * @tc.desc: check RegisterRectChangedListener
  * @tc.type: FUNC
@@ -2058,6 +2151,7 @@ HWTEST_F(WindowManagerTest, AnimateTo01, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), AnimateTo(_, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ret = WindowManager::GetInstance().AnimateTo(windowId, animationProperty, animationOption);
     EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
+}
 }
 } // namespace
 } // namespace Rosen

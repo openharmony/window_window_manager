@@ -59,7 +59,7 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    WMError UpdateWindowModeForUITest(int32_t updateMode) override;
 
     /*
      * Window Hierarchy
@@ -307,7 +307,8 @@ public:
     /*
      * Window LifeCycle
      */
-    void Interactive() override;
+    void Resume() override;
+    void Pause() override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
@@ -497,7 +498,7 @@ private:
     /*
      * Window Lifecycle
      */
-    void NotifyFreeMultiWindowModeInteractive();
+    void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
 

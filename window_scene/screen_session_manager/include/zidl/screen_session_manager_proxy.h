@@ -230,6 +230,7 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

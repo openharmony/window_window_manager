@@ -764,6 +764,90 @@ HWTEST_F(SceneSessionTest5, DragResizeWhenEndFilter, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: HandleSessionDragEvent
+ * @tc.desc: HandleSessionDragEvent function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleSessionDragEvent, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleSessionDragEvent";
+    info.bundleName_ = "HandleSessionDragEvent";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+ 
+    session->appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    session->moveDragController_ = nullptr;
+    session->HandleSessionDragEvent(SessionEvent::EVENT_END_MOVE);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), DragResizeType::RESIZE_TYPE_UNDEFINED);
+ 
+    auto oriProperty = session->GetSessionProperty();
+    session->property_ = oriProperty;
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = moveDragController;
+    SessionEvent event = { SessionEvent::EVENT_DRAG };
+ 
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+ 
+    session->moveDragController_->isStartDrag_ = false;
+    compatibleModeProperty->SetIsAdaptToDragScale(false);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->HandleSessionDragEvent(event);
+ 
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->HandleSessionDragEvent(event);
+ 
+    event = { SessionEvent::EVENT_DRAG_START };
+    session->moveDragController_->isStartDrag_ = true;
+ 
+    compatibleModeProperty->SetIsAdaptToDragScale(false);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->HandleSessionDragEvent(event);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), session->GetAppDragResizeType());
+ 
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->HandleSessionDragEvent(event);
+}
+
+/**
+ * @tc.name: IsCompatibleModeDirtyDragScaleWindow
+ * @tc.desc: IsCompatibleModeDirtyDragScaleWindow function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCompatibleModeDirtyDragScaleWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibleModeDirtyDragScaleWindow";
+    info.bundleName_ = "IsCompatibleModeDirtyDragScaleWindow";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->compatibleDragScaleFlags_ = false;
+    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), false);
+    session->compatibleDragScaleFlags_ = true;
+    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), true);
+}
+ 
+/**
+ * @tc.name: ResetCompatibleModeDragScaleFlags
+ * @tc.desc: ResetCompatibleModeDragScaleFlags function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ResetCompatibleModeDragScaleFlags, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ResetCompatibleModeDragScaleFlags";
+    info.bundleName_ = "ResetCompatibleModeDragScaleFlags";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->ResetCompatibleModeDragScaleFlags();
+    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), false);
+}
+
+/**
  * @tc.name: UpdateKeyFrameCloneNode
  * @tc.desc: UpdateKeyFrameCloneNode function01
  * @tc.type: FUNC
@@ -1767,6 +1851,39 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, TestSize.Level1)
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+}
+
+/**
+ * @tc.name: HandleMoveDragSurfaceBounds
+ * @tc.desc: HandleMoveDragSurfaceBounds Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceBounds";
+    info.bundleName_ = "HandleMoveDragSurfaceBounds";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WSRect preRect = { 0, 0, 50, 50 };
+    WSRect rect = { 0, 0, 100, 100 };
+    WSRect globalRect = { 0, 0, 100, 100 };
+
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
+        callback->onCallback(1, 1);
+    });
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    session->keyFramePolicy_.running_ = true;
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+
+    session->keyFramePolicy_.running_ = false;
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
 }
 
 /**

@@ -20,7 +20,7 @@
 #include "scene_board_judgement.h"
 #include "iremote_object_mocker.h"
 #include "window_manager_agent_proxy.h"
-#include "../../../window_scene/test/mock/mock_message_parcel.h"
+#include "test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -456,6 +456,23 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowManagerAgentProxy->NotifyWindowStyleChange(type);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: test NotifyWindowSystemBarPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    SystemBarProperty systemBarProperty;
+    windowManagerAgentProxy->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 

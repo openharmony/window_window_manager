@@ -25,6 +25,7 @@
 #include "window_option.h"
 #include "occupied_area_change_info.h"
 #include "data_handler_interface.h"
+#include "floating_ball_template_base_info.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -142,25 +143,13 @@ public:
 
     /**
      * @brief Notify caller that window is resumed.
-     * @deprecated deprecated since app version 20, use AfterInteractive instead.
      */
     virtual void AfterResumed() {}
 
     /**
      * @brief Notify caller that window is paused.
-     * @deprecated deprecated since app version 20, use AfterNonInteractive instead.
      */
     virtual void AfterPaused() {}
-
-    /**
-     * @brief Notify caller that window is interactive.
-     */
-    virtual void AfterInteractive() {}
-
-    /**
-     * @brief Notify caller that window is noninteractive.
-     */
-    virtual void AfterNonInteractive() {}
 
     /**
      * @brief Notify caller that window is destroyed.
@@ -176,6 +165,34 @@ public:
      * @brief Notify caller that window is already background.
      */
     virtual void AfterDidBackground() {}
+};
+
+/**
+ * @class IWindowStageLifeCycle
+ *
+ * @brief IWindowStageLifeCycle is a listener used to notify caller that lifecycle of window.
+ */
+class IWindowStageLifeCycle : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller that window is on the forground.
+     */
+    virtual void AfterLifecycleForeground() {}
+
+    /**
+     * @brief Notify caller that window is on the background.
+     */
+    virtual void AfterLifecycleBackground() {}
+
+    /**
+     * @brief Notify caller that window is resumed.
+     */
+    virtual void AfterLifecycleResumed() {}
+
+    /**
+     * @brief Notify caller that window is paused.
+     */
+    virtual void AfterLifecyclePaused() {}
 };
 
 /**
@@ -900,6 +917,20 @@ public:
         const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode = DefaultCreateErrCode);
 
     /**
+     * @brief create fb window with session
+     *
+     * @param option window propertion
+     * @param fbTemplateBaseInfo baseInfo of fb window
+     * @param icon icon of fb window
+     * @param context ability context
+     * @param errCode error code of create fb window
+     * @return sptr<Window> If create fb window success, return window instance; Otherwise, return nullptr
+     */
+    static sptr<Window> CreateFb(sptr<WindowOption>& option, const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+        WMError& errCode);
+
+    /**
      * @brief find window by windowName
      *
      * @param windowName
@@ -1388,9 +1419,14 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
-     * @brief Interactive window
+     * @brief Resume window
      */
-    virtual void Interactive() {}
+    virtual void Resume() {}
+
+    /**
+     * @brief Pause window
+     */
+    virtual void Pause() {}
 
     /**
      * @brief Hide window
@@ -1875,6 +1911,28 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) { return WMError::WM_OK; }
+
+    /**
+     * @brief Register window lifecycle listener.
+     *
+     * @param listener WindowLifeCycle listener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window lifecycle listener.
+     *
+     * @param listener WindowLifeCycle listener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Register window change listener.
@@ -2720,7 +2778,7 @@ public:
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
      */
-    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const;
 
     /**
      * @brief Judge whether SceneBoard is enabled.
@@ -3715,7 +3773,7 @@ public:
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
-    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
+    virtual bool GetFreeMultiWindowModeEnabledState();
 
     /**
      * @brief Get the window status of current window.
@@ -4355,6 +4413,40 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
+
+    /**
+     * @brief update the floating ball window instance (w,h,r).
+     *
+     * @param fbTemplateInfo the tempalte info of the floating-ball.
+     * @param icon the icon of the floating-ball.
+     */
+    virtual void UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon) {}
+    
+    /**
+     * @brief Notify prepare to close window
+     */
+    virtual void NotifyPrepareCloseFloatingBall() {}
+ 
+    /**
+     * @brief restore floating ball ability (w,h,r).
+     *
+     * @param want the want of the ability.
+     */
+    virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief get windowId of floating-ball
+     *
+     * @param windowId the windowId of floating-ball.
+     */
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

@@ -58,7 +58,7 @@ public:
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
@@ -108,8 +108,10 @@ public:
     WSError CloseSpecificScene() override;
 
     // Window LifeCycle
-    void NotifyNonInteractiveStatus() override;
+    void NotifyLifecyclePausedStatus() override;
+    void NotifyAppUseControlStatus(bool isUseControl) override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
+    WSError SendFbActionEvent(const std::string& action) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

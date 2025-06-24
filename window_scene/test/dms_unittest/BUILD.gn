@@ -480,7 +480,12 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
 ohos_unittest("ws_screen_session_manager_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "screen_session_manager_proxy_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "screen_session_manager_proxy_test.cpp",
+  ]
+
+  include_dirs = [ "../mock" ]
 
   deps = [
     ":ws_unittest_common",

@@ -19,6 +19,8 @@
 #include <iremote_broker.h>
 #include <iremote_object.h>
 
+#include "wm_common.h"
+
 namespace OHOS::Rosen {
 
 class RouterStackInfo : public Parcelable {
@@ -31,7 +33,8 @@ public:
 
     bool Marshalling(Parcel &parcel) const
     {
-        return parcel.WriteInt32(winId_) && parcel.WriteString(routerStackInfo_);
+        return parcel.WriteInt32(winId_) && parcel.WriteString(routerStackInfo_) &&
+            parcel.WriteInt32(static_cast<int32_t>(errCode_));
     }
 
     static RouterStackInfo *Unmarshalling(Parcel &parcel)
@@ -40,8 +43,11 @@ public:
         if (routerStackInfo == nullptr) {
             return nullptr;
         }
+        int32_t errCode = 0;
         bool res =
-            parcel.ReadInt32(routerStackInfo->winId_) && parcel.ReadString(routerStackInfo->routerStackInfo_);
+            parcel.ReadInt32(routerStackInfo->winId_) && parcel.ReadString(routerStackInfo->routerStackInfo_)
+                && parcel.ReadInt32(errCode);
+        routerStackInfo->errCode_ = static_cast<WMError>(errCode);
         if (!res) {
             delete routerStackInfo;
             return nullptr;
@@ -51,6 +57,7 @@ public:
 
     int32_t winId_{0};
     std::string routerStackInfo_;
+    WMError errCode_ = WMError::WM_OK;
 };
 
 class ISessionRouterStackListener : public IRemoteBroker {

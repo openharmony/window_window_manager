@@ -565,7 +565,7 @@ void WindowExtensionSessionImpl::NotifyFocusStateEvent(bool focusState)
     }
     focusState_ = focusState;
     if (focusState_ != std::nullopt) {
-        TLOGI(WmsLogTag::WMS_FOCUS, "persistentId:%{public}d focusState:%{public}d",
+        TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d,%{public}d]",
             GetPersistentId(), static_cast<int32_t>(focusState_.value()));
     }
 }
@@ -739,12 +739,14 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         }
         uiContent->SetParentToken(token);
         auto usage = property_->GetUIExtensionUsage();
-        if (SessionHelper::IsSecureUIExtension(usage)) {
+        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         } else if (usage == UIExtensionUsage::EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
         } else if (usage == UIExtensionUsage::MODAL) {
             uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::PREVIEW_EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::PREVIEW_UI_EXTENSION);
         }
         uiContent->SetHostParams(extensionConfig_);
         if (initByName) {
@@ -1336,7 +1338,7 @@ WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeRegister(
             TLOGNE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeRegister error, no uiContent");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT,
+        TLOGND(WmsLogTag::WMS_UIEXT,
             "NotifyAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
     });
@@ -1752,7 +1754,7 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
                                                       [[maybe_unused]] MessageOption& option)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
     return WSError::WS_OK;
 }

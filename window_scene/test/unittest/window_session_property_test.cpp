@@ -482,6 +482,23 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Unmarshalling
+ * @tc.desc: test whether unmarshalling property is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Unmarshalling, TestSize.Level1)
+{
+    std::string winName = "test";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowName(winName);
+    Parcel parcel = Parcel();
+    property->Marshalling(parcel);
+    sptr<WindowSessionProperty> property2 = property->Unmarshalling(parcel);
+    ASSERT_NE(property2, nullptr);
+    EXPECT_EQ(property2->GetWindowName(), winName);
+}
+
+/**
  * @tc.name: UnMarshallingSystemBarMap
  * @tc.desc: UnMarshallingSystemBarMap test
  * @tc.type: FUNC
@@ -950,6 +967,21 @@ HWTEST_F(WindowSessionPropertyTest, EditSessionInfo, TestSize.Level1)
     property->SetSessionInfo(info);
     property->EditSessionInfo().abilityName_ = abilityNameNew;
     ASSERT_EQ(property->EditSessionInfo().abilityName_, abilityNameNew);
+}
+
+/**
+ * @tc.name: SetGlobalDisplayRect
+ * @tc.desc: test whether get the value that set before
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetGlobalDisplayRect, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    Rect rect = { 10, 10, 20, 20 };
+    property->SetGlobalDisplayRect(rect);
+    auto result = property->GetGlobalDisplayRect();
+    EXPECT_EQ(result, rect);
 }
 
 /**
@@ -1507,6 +1539,26 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
     property->SetIsAtomicService(isAtomicService);
     auto result = property->GetIsAtomicService();
     ASSERT_EQ(result, isAtomicService);
+}
+
+/**
+ * @tc.name: UnmarshallingFbTemplateInfoTest
+ * @tc.desc: UnmarshallingFbTemplateInfoTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+
+    Parcel parcel;
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    property->UnmarshallingFbTemplateInfo(parcel, property);
+    ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+
+    parcel.WriteParcelable(&fbTemplateInfo);
+    property->UnmarshallingFbTemplateInfo(parcel, property);
+    ASSERT_EQ(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
 }
 } // namespace
 } // namespace Rosen

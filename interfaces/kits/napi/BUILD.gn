@@ -28,5 +28,6 @@ group("napi_packages") {
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
     "window_runtime:windowstage_kit",
+    "floating_ball_napi:floatingball_napi",
   ]
 }

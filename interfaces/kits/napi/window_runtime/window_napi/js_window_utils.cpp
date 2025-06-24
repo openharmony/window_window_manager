@@ -284,6 +284,26 @@ napi_value WindowStageEventTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowStageLifecycleEventTypeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::FOREGROUND)));
+    napi_set_named_property(env, objValue, "RESUMED", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::RESUMED)));
+    napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::PAUSED)));
+    napi_set_named_property(env, objValue, "HIDDEN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::BACKGROUND)));
+    return objValue;
+}
+
 napi_value WindowAnchorInit(napi_env env)
 {
     WLOGFD("WindowAnchorInit");
@@ -584,6 +604,12 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
+    napi_value globalDisplayRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.globalDisplayRect);
+    if (globalDisplayRectObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetGlobalDisplayRect failed!");
+    }
+    napi_set_named_property(env, objValue, "globalDisplayRect", globalDisplayRectObj);
+
     WindowType type = windowPropertyInfo.type;
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
@@ -773,6 +799,8 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
+    napi_set_named_property(env, objValue, "globalDisplayRect",
+        GetRectAndConvertToJsValue(env, info->GetGlobalDisplayRect()));
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));

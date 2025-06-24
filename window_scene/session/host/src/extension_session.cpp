@@ -556,7 +556,7 @@ int32_t ExtensionSession::GetStatusBarHeight()
 WSError ExtensionSession::SendExtensionData(MessageParcel& data, MessageParcel& reply,
                                             [[maybe_unused]] MessageOption& option)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
     return WSError::WS_OK;
 }

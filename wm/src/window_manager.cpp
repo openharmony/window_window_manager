@@ -71,6 +71,7 @@ public:
         float density, DisplayOrientation orientation);
     void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
@@ -111,6 +112,8 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners_;
     sptr<WindowManagerAgent> windowPropertyChangeAgent_;
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
+    sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
+    std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -328,7 +331,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 {
-    WLOGFI("Notify water mark flag changed result, showWaterMark=%{public}d", showWaterMark);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}d", showWaterMark);
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -377,7 +380,7 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         iter = displayInfoChangedListeners_.find(token);
         if (iter == displayInfoChangedListeners_.end()) {
-            TLOGI(WmsLogTag::DMS, "can not find token in listener list, need not notify the change of display info");
+            TLOGI(WmsLogTag::DMS, "can not find token in listener list");
             return;
         }
         displayInfoChangedListeners = iter->second;
@@ -1615,6 +1618,84 @@ WMError WindowManager::UnregisterDrawingContentChangedListener(const sptr<IDrawi
         }
     }
     return ret;
+}
+
+WMError WindowManager::RegisterWindowSystemBarPropertyChangedListener(
+    const sptr<IWindowSystemBarPropertyChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is nullptr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowSystemBarPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowSystemBarPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+        pImpl_->windowSystemBarPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "RegisterWindowManagerAgent failed.");
+        pImpl_->windowSystemBarPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowSystemBarPropertyChangedListeners_.begin(),
+            pImpl_->windowSystemBarPropertyChangedListeners_.end(), listener);
+        if (iter != pImpl_->windowSystemBarPropertyChangedListeners_.end()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "listener is already registered.");
+            return WMError::WM_DO_NOTHING;
+        }
+        pImpl_->windowSystemBarPropertyChangedListeners_.emplace_back(listener);
+        TLOGI(WmsLogTag::WMS_IMMS, "listener registered success.");
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowSystemBarPropertyChangedListener(
+    const sptr<IWindowSystemBarPropertyChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is nullptr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    auto iter = std::find(pImpl_->windowSystemBarPropertyChangedListeners_.begin(),
+        pImpl_->windowSystemBarPropertyChangedListeners_.end(), listener);
+    if (iter == pImpl_->windowSystemBarPropertyChangedListeners_.end()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "could not find this listener.");
+        return WMError::WM_DO_NOTHING;
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowSystemBarPropertyChangeAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+            pImpl_->windowSystemBarPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowSystemBarPropertyChangeAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+void WindowManager::NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    pImpl_->NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+}
+
+void WindowManager::Impl::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowSystemBarPropertyChangedListeners = windowSystemBarPropertyChangedListeners_;
+    }
+    for (auto &listener : windowSystemBarPropertyChangedListeners) {
+        if (listener != nullptr) {
+            TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d, enable %{public}d.", type, systemBarProperty.enable_);
+            listener->OnWindowSystemBarPropertyChanged(type, systemBarProperty);
+        }
+    }
 }
 
 WMError WindowManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)

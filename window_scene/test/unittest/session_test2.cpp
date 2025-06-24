@@ -492,47 +492,6 @@ HWTEST_F(WindowSessionTest2, Snapshot01, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResetSnapshot
- * @tc.desc: ResetSnapshot Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, ResetSnapshot, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    session_->snapshot_ = std::make_shared<Media::PixelMap>();
-
-    session_->ResetSnapshot();
-    ASSERT_EQ(nullptr, session_->snapshot_);
-}
-
-/**
- * @tc.name: SaveSnapshot
- * @tc.desc: SaveSnapshot Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, SaveSnapshot, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-
-    session_->scenePersistence_ = nullptr;
-    session_->snapshot_ = nullptr;
-    session_->SaveSnapshot(true);
-    EXPECT_EQ(session_->snapshot_, nullptr);
-
-    session_->scenePersistence_ =
-        sptr<ScenePersistence>::MakeSptr(session_->sessionInfo_.bundleName_, session_->persistentId_);
-
-    session_->SaveSnapshot(false);
-    ASSERT_EQ(session_->snapshot_, nullptr);
-
-    session_->SaveSnapshot(true);
-    ASSERT_EQ(session_->snapshot_, nullptr);
-}
-
-/**
  * @tc.name: SetSessionStateChangeListenser
  * @tc.desc: SetSessionStateChangeListenser Test
  * @tc.type: FUNC

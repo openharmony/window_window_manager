@@ -2515,6 +2515,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleIsFreeMultiWindow
+ * @tc.desc: test HandleIsFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsFreeMultiWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleIsPcOrPadFreeMultiWindowMode
  * @tc.desc: test HandleIsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

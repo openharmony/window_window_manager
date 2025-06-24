@@ -30,6 +30,8 @@ public:
     Rect GetMoveToAsyncResult(long timeOut); // unit: ms
     void ResetResizeLock();
     void ResetMoveToLock();
+    int32_t GetUpdateRectResult(long timeOut);
+    void OnFirstValidRectUpdate(int32_t persistenId);
 
     // oriention
     OrientationInfo GetTargetOrientationResult(long timeOut); // unit: ms
@@ -46,6 +48,7 @@ private:
     RunnableFuture<Rect> moveToFuture_{};
     RunnableFuture<OrientationInfo> getTargetRotationFuture_{};
     RunnableFuture<RotationChangeResult> getRotationResultFuture_{};
+    RunnableFuture<int32_t> updateRectFuture_{};
 };
 } // namespace Rosen
 } // namespace OHOS

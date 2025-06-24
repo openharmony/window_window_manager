@@ -1243,5 +1243,23 @@ WMError WindowManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOpti
     }
     return ret;
 }
+
+WMError WindowManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool isHoverDown = pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        pointerEvent->GetSourceType() ==  MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    if (!isHoverDown) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointer event is not hover down");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().SendPointerEventForHover(pointerEvent);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "send failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

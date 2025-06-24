@@ -30,7 +30,9 @@ bool WindowVisibilityInfo::Marshalling(Parcel& parcel) const
            parcel.WriteInt32(rect_.posY_) && parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
            parcel.WriteString(bundleName_) && parcel.WriteString(abilityName_) && parcel.WriteBool(isFocused_) &&
            parcel.WriteInt32(appIndex_) && parcel.WriteBool(isSystem_) && parcel.WriteUint32(zOrder_) &&
-           parcel.WriteInt32(callingPid_);
+           parcel.WriteInt32(callingPid_) && parcel.WriteInt32(globalDisplayRect_.posX_) &&
+           parcel.WriteInt32(globalDisplayRect_.posY_) && parcel.WriteUint32(globalDisplayRect_.width_) &&
+           parcel.WriteUint32(globalDisplayRect_.height_);
 }
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
@@ -59,6 +61,8 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
     windowVisibilityInfo->isSystem_ = parcel.ReadBool();
     windowVisibilityInfo->zOrder_ = parcel.ReadUint32();
     windowVisibilityInfo->callingPid_ = parcel.ReadInt32();
+    windowVisibilityInfo->globalDisplayRect_ = { parcel.ReadInt32(), parcel.ReadInt32(),
+        parcel.ReadUint32(), parcel.ReadUint32() };
     return windowVisibilityInfo;
 }
 } // namespace OHOS::Rosen

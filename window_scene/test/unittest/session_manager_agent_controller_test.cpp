@@ -231,6 +231,25 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowStyleChange, TestSize.Le
 }
 
 /**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: NotifyWindowSystemBarPropertyChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1)
+{
+    int32_t pid = 65535;
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY;
+    EXPECT_EQ(WMError::WM_OK,
+        SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
+    SystemBarProperty systemBarProperty;
+    SessionManagerAgentController::GetInstance().NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_EQ(WMError::WM_OK,
+        SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
+}
+
+/**
  * @tc.name: NotifyWindowPropertyChange01
  * @tc.desc: NotifyWindowPropertyChange Test
  * @tc.type: FUNC

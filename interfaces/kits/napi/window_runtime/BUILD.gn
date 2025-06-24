@@ -161,6 +161,11 @@ ohos_shared_library("window_napi") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 ohos_shared_library("windowstage_kit") {
@@ -199,4 +204,9 @@ ohos_shared_library("windowstage_kit") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
