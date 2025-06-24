@@ -243,18 +243,13 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     if (displayMode == FoldDisplayMode::MAIN) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
     }
-    auto taskScreenOnFullOn = [weak = wptr(this), displayMode] {
-        auto secondaryDisplayFoldPolicy = weak.promote();
-        if (!secondaryDisplayFoldPolicy) {
-            TLOGE(WmsLogTag::DMS, "secondaryDisplayFoldPolicy is null");
-            return;
-        }
+    auto taskScreenOnFullOn = [this, displayMode] {
         if (displayMode == FoldDisplayMode::FULL) {
-            secondaryDisplayFoldPolicy->SetStatusFullActiveRectAndTpFeature();
+            SetStatusFullActiveRectAndTpFeature();
         } else if (displayMode == FoldDisplayMode::MAIN) {
-            secondaryDisplayFoldPolicy->SetStatusMainActiveRectAndTpFeature();
+            SetStatusMainActiveRectAndTpFeature();
         } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
-            secondaryDisplayFoldPolicy->SetStatusGlobalFullActiveRectAndTpFeature();
+            SetStatusGlobalFullActiveRectAndTpFeature();
         } else {
             TLOGW(WmsLogTag::DMS, "unKnown displayMode");
         }
