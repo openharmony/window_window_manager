@@ -24,6 +24,7 @@
 
 #include "window_manager_hilog.h"
 #include "parameters.h"
+#include "fold_screen_state_internel.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -43,6 +44,8 @@ const std::string SUB_TP = "1";
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 1;
 const uint32_t CHANGE_MODE_TASK_NUM = 3;
+constexpr float VERTICAL_ROTATION = 0.0F;
+constexpr float VERTICAL_ROTATION_REVERSE = 180.0F;
 } // namespace
 
 DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
@@ -351,6 +354,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOn, "screenOnTask");
     AddOrRemoveDisplayNodeToTree(onScreenId, ADD_DISPLAY_NODE);
+    TriggerSensorInSub(screenSession);
 }
 
 void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
@@ -467,5 +471,23 @@ void DualDisplayFoldPolicy::ChangeOffTentMode()
     TLOGW(WmsLogTag::DMS, "CurrentDisplayMode:%{public}d, CurrentFoldStatus:%{public}d",
         currentDisplayMode_, currentFoldStatus_);
     ChangeScreenDisplayMode(displayMode);
+}
+
+void DualDisplayFoldPolicy::TriggerSensorInSub(const sptr<ScreenSession>& screenSession)
+{
+    if (screenSession->GetScreenId() != SCREEN_ID_SUB) {
+        return;
+    }
+    sptr<ScreenSession> screenSessionMain = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
+    if (screenSessionMain == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSessionMain is null");
+        return;
+    }
+    float sensorRotation = screenSessionMain->GetSensorRotation();
+    TLOGI(WmsLogTag::DMS, "sensorRotation = %{public}f", sensorRotation);
+    if (FoldScreenStateInternel::FloatEqualAbs(sensorRotation, VERTICAL_ROTATION) ||
+        FoldScreenStateInternel::FloatEqualAbs(sensorRotation, VERTICAL_ROTATION_REVERSE)) {
+        screenSession->HandleSensorRotation(sensorRotation);
+    }
 }
 } // namespace OHOS::Rosen

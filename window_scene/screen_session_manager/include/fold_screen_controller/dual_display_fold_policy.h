@@ -54,6 +54,7 @@ private:
     void ChangeOffTentMode() override;
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     ScreenId GetScreenIdByDisplayMode(FoldDisplayMode displayMode);
+    void TriggerSensorInSub(const sptr<ScreenSession>& screenSession);
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen
