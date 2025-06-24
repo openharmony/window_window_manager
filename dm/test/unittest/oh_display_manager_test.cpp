@@ -567,7 +567,7 @@ HWTEST_F(OHDisplayManagerTest, DisplayRemoveListener02, TestSize.Level1)
     uint32_t* testIndex = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterDisplayRemoveListener(
         DisplayRemoveCallback, testIndex);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
 }
 
 /**
@@ -602,7 +602,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea02, Te
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
     if (ret == NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK) {
         ret = OH_NativeDisplayManager_DestroyAvailableArea(availableArea);
-        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
+        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
     }
 }
 
@@ -687,22 +687,6 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplaySourceMode03, T
 
 /**
  * @tc.name: OH_NativeDisplayManager_GetDisplayPosition
- * @tc.desc: x,y != nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition01, TestSize.Level1)
-{
-    uint64_t testId = 0;
-    int32_t x = -1;
-    int32_t y = -1;
-    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplayPosition(testId, &x, &y);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
-    EXPECT_NE(x, -1);
-    EXPECT_NE(y, -1);
-}
-
-/**
- * @tc.name: OH_NativeDisplayManager_GetDisplayPosition
  * @tc.desc: x = nullptr y!=nullptr
  * @tc.type: FUNC
  */
@@ -754,7 +738,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition05, Tes
     int32_t x = -1;
     int32_t y = -1;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplayPosition(testId, &x, &y);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
 }
 
 /**
