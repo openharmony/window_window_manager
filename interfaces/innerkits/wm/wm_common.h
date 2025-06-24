@@ -88,6 +88,7 @@ constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
  * Compatible Mode
  */
 constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
+constexpr float COMPACT_NORMAL_SCALE = 1.0f;
 }
 
 /**

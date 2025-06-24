@@ -552,6 +552,39 @@ HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: IsInCompatScaleStatus
+ * @tc.desc: IsInCompatScaleStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleStatus";
+    info.bundleName_ = "IsInCompatScaleStatus";
+    info.screenId_ = 0;
+    sptr<SceneSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    session->SetScale(1.0f, 1.0f, 0.5f, 0.5f);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    session->SetScale(2.0f, 1.0f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
+    session->SetScale(2.0f, 0.5f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
+}
+
+/**
  * @tc.name: CalcNewWindowRectIfNeed
  * @tc.desc: CalcNewWindowRectIfNeed
  * @tc.type: FUNC

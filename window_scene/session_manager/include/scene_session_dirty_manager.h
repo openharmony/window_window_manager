@@ -107,6 +107,12 @@ private:
     void ResetFlushWindowInfoTask();
     void CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const;
+
+    /*
+     * Compatible Mode
+     */
+    bool UpdateModalExtensionInCompatStatus(const sptr<SceneSession>& sceneSession, Matrix3f& transform) const;
+
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
     mutable std::shared_mutex constrainedModalUIExtInfoMutex_;
