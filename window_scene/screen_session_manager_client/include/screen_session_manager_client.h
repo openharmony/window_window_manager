@@ -73,6 +73,7 @@ public:
     void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+    void OnSetSurfaceNodeIdsChanged(const std::vector<uint64_t>& surfaceNodeIds) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea);
