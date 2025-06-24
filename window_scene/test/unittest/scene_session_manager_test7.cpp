@@ -24,7 +24,7 @@
 #include "session_manager.h"
 #define private public
 #include "session/host/include/keyboard_session.h"
-#undef private public
+#undef private
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,7 +35,6 @@ namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
 } // namespace
-static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 class SceneSessionManagerTest7 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -47,7 +46,7 @@ public:
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
 
-private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
     static constexpr uint32_t WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS = 500000;
     static constexpr uint32_t WAIT_SYNC_FOR_TEST_END_IN_NS = 1000000;
 };
@@ -324,14 +323,18 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams03, Function | SmallTest | Level
     uiParams.insert(std::make_pair(1, callingSessionUIParam));
     uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
     keyboardSession->stateChanged_ = true;
-    ssm_->FlushUIParams(screenId, uiParams);
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
     usleep(WAIT_SYNC_IN_NS);
-    ASSERT_EQ(false, keyboardSession->stateChanged_);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
     
+    uiParams.clear();
+    uiParams.insert(std::make_pair(1, callingSessionUIParam));
+    uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
     keyboardSession->SetScreenId(999);
     keyboardSession->stateChanged_ = true;
-    ssm_->FlushUIParams(screenId, uiParams);
-    ASSERT_EQ(true, keyboardSession->stateChanged_);
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(true, keyboardSession->stateChanged_);
 }
 
 /**

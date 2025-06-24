@@ -495,9 +495,9 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallT
  */
 HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function | SmallTest | Level1)
 {
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback_ =
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    keyboardCallback_->onGetSceneSession = [](uint32_t persistentId) {
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
         SessionInfo callingSessionInfo;
         callingSessionInfo.abilityName_ = "CallingSession";
         callingSessionInfo.bundleName_ = "CallingSession";
@@ -507,13 +507,13 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
         return callingSession;
     };
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
 
     SessionInfo info;
     info.abilityName_ = "keyboardSession";
     info.bundleName_ = "keyboardSession";
-    sptr<SceneSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback_, keyboardCallback_);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback, keyboardCallback);
     keyboardSession->property_->SetCallingSessionId(36);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
     keyboardSession->isVisible_ = true;
@@ -526,13 +526,13 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
     EXPECT_EQ(keyboardSession->stateChanged_, false);
 
-    keyboardCallback_->onGetSceneSession = [](uint32_t persistentId) { return nullptr; };
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) { return nullptr; };
     keyboardSession->isVisible_ = true;
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
     EXPECT_EQ(keyboardSession->stateChanged_, false);
 
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    keyboardCallback_->onGetSceneSession = [](uint32_t persistentId) {
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
         SessionInfo callingSessionInfo;
         callingSessionInfo.abilityName_ = "CallingSession";
         callingSessionInfo.bundleName_ = "CallingSession";
