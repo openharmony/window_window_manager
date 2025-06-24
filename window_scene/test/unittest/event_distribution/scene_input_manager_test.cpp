@@ -909,19 +909,19 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate, TestSize.Level1)
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::ScreenInfo screenInfo;
-    screenInfo.id = 0;
+    screenInfo.id = 3;
     screenInfos.emplace_back(screenInfo);
     auto result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_FALSE(result);
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
     ASSERT_TRUE(result);
+    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
+    ASSERT_FALSE(result);
     std::vector<MMI::ScreenInfo> screenInfos01;
     MMI::ScreenInfo screenInfo01;
     screenInfo01.id = 1;
     screenInfos01.emplace_back(screenInfo01);
     SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
     result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos01, displayInfos, windowInfoList);
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
 }
 } // namespace
 } // namespace Rosen
