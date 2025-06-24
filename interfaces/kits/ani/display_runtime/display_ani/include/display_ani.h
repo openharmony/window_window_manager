@@ -17,15 +17,29 @@
 
 #include "ani.h"
 #include "display.h"
+#include "display_ani_listener.h"
 
 namespace OHOS {
 namespace Rosen {
 
 class DisplayAni {
 public:
-    explicit DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display);
+    explicit DisplayAni(const sptr<Display>& display);
 
     static void getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
+    static void getAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj);
+    static ani_boolean HasImmersiveWindow(ani_env* env, ani_object obj);
+    static void RegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+    static void UnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+    static void CreateDisplayAni(sptr<Display> display, ani_object displayAni, ani_env* env);
+    void OnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+    void OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+private:
+    DMError UnregisterAllDisplayListenerWithType(std::string type);
+    DMError UnregisterDisplayListenerWithType(std::string type, ani_env *env, ani_ref aniCallback);
+    sptr<Display> display_ = nullptr;
+    std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
+    std::mutex mtx_;
 };
 }  // namespace Rosen
 }  // namespace OHOS

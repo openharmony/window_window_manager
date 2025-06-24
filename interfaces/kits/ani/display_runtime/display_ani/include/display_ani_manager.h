@@ -30,6 +30,7 @@ public:
     static ani_int getFoldDisplayModeAni(ani_env* env);
     static ani_boolean isFoldableAni(ani_env* env);
     static ani_int getFoldStatus(ani_env* env);
+    static ani_boolean IsCaptured(ani_env* env);
     static void getCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
     static void getAllDisplaysAni(ani_env* env, ani_object arrayObj);
@@ -44,10 +45,13 @@ public:
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<DisplayAniListener> displayAniListener);
+    static ani_boolean hasPrivateWindow(ani_env* env, ani_double displayId);
+    static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
 private:
     void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };
