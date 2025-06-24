@@ -5035,7 +5035,24 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     return true;
 }
 
-void SceneSessionManager::GetBundleStartingWindowInfos(const AppExecFwk::BundleInfo& bundleInfo,
+bool SceneSessionManager::GetIsDarkFromConfiguration()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr");
+        return false;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "app configuration is nullptr");
+        return false;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    TLOGI(WmsLogTag::WMS_PATTERN, "colorMode: %{public}s", colorMode.c_str());
+    return (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+}
+
+void SceneSessionManager::GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
     std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues)
 {
     for (const auto& moduleInfo : bundleInfo.hapModuleInfos) {
@@ -5044,7 +5061,7 @@ void SceneSessionManager::GetBundleStartingWindowInfos(const AppExecFwk::BundleI
                 .bundleName = abilityInfo.bundleName,
                 .moduleName = abilityInfo.moduleName,
                 .abilityName = abilityInfo.name,
-                .darkMode = darkMode_.load(),
+                .darkMode = isDark,
             };
             StartingWindowInfo startingWindowInfo;
             if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
@@ -5085,6 +5102,8 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
         TLOGE(WmsLogTag::WMS_PATTERN, "init fail %{private}s", config.dbPath.c_str());
         return;
     }
+    bool deleteAllDataRes = startingWindowRdbMgr_->DeleteAllData();
+    TLOGI(WmsLogTag::WMS_PATTERN, "delete all data res: %{public}d", deleteAllDataRes);
     if (bundleMgr_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
         return;
@@ -5093,19 +5112,22 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     int32_t ret = static_cast<int32_t>(bundleMgr_->GetBundleInfosV9(
         static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
         static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY),
+        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY),
         bundleInfos, currentUserId_));
     if (ret != 0) {
         TLOGE(WmsLogTag::WMS_PATTERN, "GetBundleInfosV9 error:%{public}d", ret);
         return;
     }
     std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
+    bool isDark = GetIsDarkFromConfiguration();
     for (const auto& bundleInfo : bundleInfos) {
-        GetBundleStartingWindowInfos(bundleInfo, inputValues);
+        GetBundleStartingWindowInfos(isDark, bundleInfo, inputValues);
     }
     int64_t outInsertNum = -1;
     auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-    TLOGI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num%{public}" PRId64, batchInsertRes, outInsertNum);
+    TLOGI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
+        batchInsertRes, bundleInfos.size() ,outInsertNum);
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
@@ -5147,7 +5169,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
                 .bundleName = sessionInfo.bundleName_,
                 .moduleName = sessionInfo.moduleName_,
                 .abilityName = sessionInfo.abilityName_,
-                .darkMode = darkMode_.load(),
+                .darkMode = GetIsDarkFromConfiguration(),
             };
             if (!startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo)) {
                 TLOGW(WmsLogTag::WMS_PATTERN, "rdb insert faild");
@@ -5197,14 +5219,12 @@ bool SceneSessionManager::GetStartingWindowInfoFromRdb(
         .bundleName = sessionInfo.bundleName_,
         .moduleName = sessionInfo.moduleName_,
         .abilityName = sessionInfo.abilityName_,
-        .darkMode = darkMode_.load(),
+        .darkMode = GetIsDarkFromConfiguration(),
     };
     bool res = startingWindowRdbMgr_->QueryData(itemKey, startingWindowInfo);
-    if (res) {
-        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s",
-            startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
-            startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str());
-    }
+    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}x, %{public}s, %{public}x, %{public}s, %{public}d",
+        startingWindowInfo.backgroundColorEarlyVersion_, startingWindowInfo.iconPathEarlyVersion_.c_str(),
+        startingWindowInfo.backgroundColor_, startingWindowInfo.iconPath_.c_str(), res);
     return res;
 }
 
@@ -5378,7 +5398,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             bundleInfo, currentUserId_);
         if (ret == 0) {
             std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
-            GetBundleStartingWindowInfos(bundleInfo, inputValues);
+            GetBundleStartingWindowInfos(GetIsDarkFromConfiguration() ,bundleInfo, inputValues);
             int64_t outInsertNum = -1;
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
@@ -5394,10 +5414,6 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
 
 void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (configuration != nullptr) {
-        darkMode_.store(configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE) ==
-            AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    }
     taskScheduler_->PostAsyncTask([this]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         startingWindowMap_.clear();
@@ -11371,7 +11387,6 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
     bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
-    darkMode_.store(isDark);
     TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
 }
 

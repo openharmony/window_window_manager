@@ -187,6 +187,19 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const std::string& bundleN
     return CheckRdbResult(ret);
 }
 
+bool StartingWindowRdbManager::DeleteAllData()
+{
+    auto rdbStore = GetRdbStore();
+    if (rdbStore == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
+        return false;
+    }
+    int32_t deletedRows = -1;
+    NativeRdb::AbsRdbPredicates absRdbPredicates(wmsRdbConfig_.tableName);
+    auto ret = rdbStore->Delete(deletedRows, absRdbPredicates);
+    return CheckRdbResult(ret);
+}
+
 bool StartingWindowRdbManager::QueryData(const StartingWindowRdbItemKey& key, StartingWindowInfo& value)
 {
     auto rdbStore = GetRdbStore();
@@ -235,7 +248,7 @@ std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExec
 {
     auto pos = abilityInfo.startWindow.find(PROFILE_PREFIX);
     if (pos == std::string::npos) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "invalid profile");
+        TLOGD(WmsLogTag::WMS_PATTERN, "invalid profile");
         return defaultVal;
     }
     std::string startWindowName = abilityInfo.startWindow.substr(pos + strlen(PROFILE_PREFIX));
