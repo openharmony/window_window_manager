@@ -52,7 +52,6 @@ static const std::map<DisplayState,      DisplayStateMode> NATIVE_TO_JS_DISPLAY_
 
 void DisplayAniUtils::convertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] rect area start");
     TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     env->Object_SetFieldByName_Double(rectObj, "<property>left", rect.posX_);
@@ -77,6 +76,34 @@ void DisplayAniUtils::convertWaterArea(WaterfallDisplayAreaRects waterfallDispla
     convertRect(waterfallDisplayAreaRects.right, static_cast<ani_object>(rightObj), env);
     convertRect(waterfallDisplayAreaRects.top, static_cast<ani_object>(topObj), env);
     convertRect(waterfallDisplayAreaRects.bottom, static_cast<ani_object>(bottomObj), env);
+}
+
+void DisplayAniUtils::convertDisplayPhysicalResolution(std::vector<DisplayPhysicalResolution>& displayPhysicalArray,
+    ani_object arrayObj, ani_env *env)
+{
+    ani_double arrayObjLen;
+    if (ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &arrayObjLen)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
+    }
+    for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
+        ani_ref obj;
+        if (ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;",
+            &obj, (ani_int)i)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
+        }
+        if (ANI_OK != env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
+            static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_))) {
+            TLOGE(WmsLogTag::DMS, "[ANI] set field of foldDisplayMode_ fail %{public}u",
+                static_cast<uint32_t>(displayPhysicalArray[i].foldDisplayMode_));
+        }
+        if (ANI_OK != env->Object_SetFieldByName_Double(static_cast<ani_object>(obj), "<property>physicalWidth",
+            displayPhysicalArray[i].physicalWidth_)) {
+            TLOGE(WmsLogTag::DMS, "[ANI] set field of physicalWidth_ fail %{public}u",
+                static_cast<uint32_t>(displayPhysicalArray[i].physicalWidth_));
+        }
+        env->Object_SetFieldByName_Double(static_cast<ani_object>(obj), "<property>physicalHeight",
+            displayPhysicalArray[i].physicalHeight_);
+    }
 }
 
 ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
@@ -111,17 +138,13 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
     env->Object_SetFieldByName_Int(obj, "<property>orientation_",
         static_cast<uint32_t>(info->GetDisplayOrientation()));
-    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
-        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
-    TLOGI(WmsLogTag::DMS, "[ANI] display = %{public}u, name = %{public}s",
-        static_cast<uint32_t>(info->GetDisplayId()), info->GetName().c_str());
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), 0);
+    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}d", (int)colorSpaces.size());
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
@@ -149,6 +172,20 @@ void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_i
     ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
     if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
         TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
+    }
+}
+
+void DisplayAniUtils::CreateAniArrayDouble(ani_env* env, ani_size size,
+    ani_array_double *aniArray, std::vector<float> vec)
+{
+    if (ANI_OK != env->Array_New_Double(size, aniArray)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create float array error");
+    }
+    std::vector<double> vecDoubles;
+    std::copy(vec.begin(), vec.end(), std::back_inserter(vecDoubles));
+    ani_double* aniArrayBuf = reinterpret_cast<ani_double *>(vecDoubles.data());
+    if (ANI_OK != env->Array_SetRegion_Double(*aniArray, 0, size, aniArrayBuf)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Array set region float error");
     }
 }
 
