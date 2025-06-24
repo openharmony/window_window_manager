@@ -29,7 +29,11 @@ public:
 
     void SetUp() override {}
 
-    void TearDown() override {}
+    void TearDown() override
+    {
+        std::lock_guard<std::mutex> lock(ssmClient_.screenSessionMapMutex_);
+        ssmClient_.screenSessionMap_.clear();
+    }
 
 protected:
     ScreenSessionManagerClient& ssmClient_;
@@ -57,8 +61,6 @@ HWTEST_F(SessionCoordinateHelperTest, TestRelativeToGlobalDisplayRect, TestSize.
     WSRect result = SessionCoordinateHelper::RelativeToGlobalDisplayRect(displayId, relativeRect);
     WSRect expectedRect { 550, 660, 300, 200 };
     EXPECT_EQ(result, expectedRect);
-
-    ssmClient_.screenSessionMap_.clear();
 }
 
 /**
@@ -95,13 +97,9 @@ HWTEST_F(SessionCoordinateHelperTest, TestGlobalToRelativeDisplayRect, TestSize.
 
     WSRect globalRect { 600, 600, 100, 100 };
     WSRelativeDisplayRect result = SessionCoordinateHelper::GlobalToRelativeDisplayRect(displayA, globalRect);
-
     EXPECT_EQ(result.displayId, displayB);
-
     WSRect expectedRect { 0, 0, 100, 100 }; // relative to display B
     EXPECT_EQ(result.rect, expectedRect);
-
-    ssmClient_.screenSessionMap_.clear();
 }
 
 /**
@@ -152,14 +150,10 @@ HWTEST_F(SessionCoordinateHelperTest, TestBuildScreenRectMap, TestSize.Level1)
 
     auto screenRectMap = SessionCoordinateHelper::BuildScreenRectMap();
     ASSERT_EQ(screenRectMap.size(), 2);
-
     WSRect expectedRect1 { 0, 0, 500, 500 };
     EXPECT_EQ(screenRectMap[1], expectedRect1);
-
     WSRect expectedRect2 { 600, 600, 400, 400 };
     EXPECT_EQ(screenRectMap[2], expectedRect2);
-
-    ssmClient_.screenSessionMap_.clear();
 }
 
 /**
@@ -178,7 +172,6 @@ HWTEST_F(SessionCoordinateHelperTest, TestMatchBestIntersectionScreen, TestSize.
     auto result = SessionCoordinateHelper::MatchBestIntersectionScreen(screenRectMap, globalRect);
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result->displayId, 2);
-
     WSRect expectedRect { 50, 50, 100, 100 }; // relative to display 2
     EXPECT_EQ(result->rect, expectedRect);
 }

@@ -29,9 +29,44 @@ namespace OHOS {
 namespace Rosen {
 class SceneScreenChangeListenerTest : public Test {
 public:
+    SceneScreenChangeListenerTest() : ssm_(SceneSessionManager::GetInstance()) {}
+
     void SetUp() override {}
-    void TearDown() override {}
+
+    void TearDown() override
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_.sceneSessionMapMutex_);
+        ssm_.sceneSessionMap_.clear();
+    }
+
+private:
+    SceneSessionManager& ssm_;
 };
+
+/**
+ * @tc.name: OnPropertyChangeWithRelativePositionUnchanged
+ * @tc.desc: No relative position change, should not trigger UpdateGlobalDisplayRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneScreenChangeListenerTest, OnPropertyChangeWithRelativePositionUnchanged, TestSize.Level1)
+{
+    constexpr ScreenId screenId = 1001;
+    SessionInfo info;
+    info.screenId_ = screenId;
+    auto mockSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    mockSession->SetScreenId(screenId);
+
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_.sceneSessionMapMutex_);
+        ssm_.sceneSessionMap_[1] = mockSession;
+    }
+
+    EXPECT_CALL(*mockSession, UpdateGlobalDisplayRect(_, _)).Times(0);
+
+    ScreenProperty property;
+    SceneScreenChangeListener::GetInstance().OnPropertyChange(
+        property, ScreenPropertyChangeReason::UNDEFINED, screenId);
+}
 
 /**
  * @tc.name: OnPropertyChangeWithRelativePositionChanged
@@ -51,28 +86,16 @@ HWTEST_F(SceneScreenChangeListenerTest, OnPropertyChangeWithRelativePositionChan
     mockSession->SetScreenId(screenId);
 
     {
-        std::unique_lock<std::shared_mutex> lock(SceneSessionManager::GetInstance().sceneSessionMapMutex_);
-        auto& sessionMap = SceneSessionManager::GetInstance().sceneSessionMap_;
-        sessionMap.clear();
-        sessionMap[1] = mockSession;
+        std::unique_lock<std::shared_mutex> lock(ssm_.sceneSessionMapMutex_);
+        ssm_.sceneSessionMap_[1] = mockSession;
     }
 
     EXPECT_CALL(*mockSession, UpdateGlobalDisplayRect(_, _))
         .Times(1)
         .WillOnce(Return(WSError::WS_OK));
 
-    // Case 1: No relative position change, should not trigger UpdateGlobalDisplayRect
-    SceneScreenChangeListener::GetInstance().OnPropertyChange(
-        property, ScreenPropertyChangeReason::UNDEFINED, screenId);
-
-    // Case 2: Relative position change detected
     SceneScreenChangeListener::GetInstance().OnPropertyChange(
         property, ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE, screenId);
-
-    {
-        std::unique_lock<std::shared_mutex> lock(SceneSessionManager::GetInstance().sceneSessionMapMutex_);
-        SceneSessionManager::GetInstance().sceneSessionMap_.clear();
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

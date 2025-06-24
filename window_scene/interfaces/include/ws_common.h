@@ -672,11 +672,11 @@ struct WSRectT {
     template<typename F = T>
     F IntersectionArea(const WSRectT<T>& other) const
     {
-        const T left   = std::max(posX_, other.posX_);
-        const T top    = std::max(posY_, other.posY_);
-        const T right  = std::min(posX_ + width_, other.posX_ + other.width_);
+        const T left = std::max(posX_, other.posX_);
+        const T top = std::max(posY_, other.posY_);
+        const T right = std::min(posX_ + width_, other.posX_ + other.width_);
         const T bottom = std::min(posY_ + height_, other.posY_ + other.height_);
-        const T interWidth  = std::max(static_cast<T>(0), right - left);
+        const T interWidth = std::max(static_cast<T>(0), right - left);
         const T interHeight = std::max(static_cast<T>(0), bottom - top);
         return static_cast<F>(interWidth) * static_cast<F>(interHeight);
     }

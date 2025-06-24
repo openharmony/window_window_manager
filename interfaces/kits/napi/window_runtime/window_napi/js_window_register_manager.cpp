@@ -784,7 +784,6 @@ WmErrorCode JsWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-
     sptr<IRectChangeInGlobalDisplayListener> rectChangeListener(listener);
     WMError ret = WMError::WM_OK;
     if (isRegister) {

@@ -2110,13 +2110,11 @@ int SessionStub::HandleUpdateGlobalDisplayRectFromClient(MessageParcel& data, Me
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read reason");
         return ERR_INVALID_DATA;
     }
-
     SizeChangeReason reason = static_cast<SizeChangeReason>(reasonValue);
-    if (reason < SizeChangeReason::UNDEFINED || reason > SizeChangeReason::END) {
+    if (reason < SizeChangeReason::UNDEFINED || reason >= SizeChangeReason::END) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid reason: %{public}u", reasonValue);
         return ERR_INVALID_DATA;
     }
-
     UpdateGlobalDisplayRectFromClient(globalDisplayRect, reason);
     return ERR_NONE;
 }

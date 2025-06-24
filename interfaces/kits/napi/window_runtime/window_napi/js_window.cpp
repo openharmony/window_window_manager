@@ -1970,7 +1970,6 @@ napi_value JsWindow::OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_inf
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
@@ -1986,7 +1985,6 @@ napi_value JsWindow::OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_inf
             napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-
         auto moveResult = window->MoveWindowToGlobalDisplay(x, y);
         auto it = WM_JS_TO_ERROR_CODE_MAP.find(moveResult);
         WmErrorCode ret = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -2321,7 +2319,6 @@ napi_value JsWindow::HandlePositionTransform(
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
@@ -2337,18 +2334,14 @@ napi_value JsWindow::HandlePositionTransform(
             napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-
         Position inputPos { x, y };
         Position resultPos = transformFunc(window, inputPos);
-
-        auto jsPosition = PositionToJsObject(env, resultPos);
+        auto jsPosition = BuildJsPosition(env, resultPos);
         if (!jsPosition) {
-            napiAsyncTask->Reject(env,
-                JsErrUtils::CreateJsError(
-                    env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to convert position to JS value"));
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to convert position to JS value"));
             return;
         }
-
         napiAsyncTask->Resolve(env, jsPosition);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
             caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());

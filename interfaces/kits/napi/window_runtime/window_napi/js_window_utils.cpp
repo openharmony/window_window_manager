@@ -1877,21 +1877,37 @@ bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
     return true;
 }
 
-napi_value PositionToJsObject(napi_env env, const Position& position)
+napi_value BuildJsRectChangeOptions(napi_env env, const Rect& rect, RectChangeReason reason)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value jsRectChangeOptions = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, jsRectChangeOptions);
+    napi_value jsRect = GetRectAndConvertToJsValue(env, rect);
+    if (jsRect == nullptr || napi_set_named_property(env, jsRectChangeOptions, "rect", jsRect) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set rect");
+        return nullptr;
+    }
+    napi_value jsReason = CreateJsValue(env, reason);
+    if (jsReason == nullptr || napi_set_named_property(env, jsRectChangeOptions, "reason", jsReason) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set rectChangeReason");
+        return nullptr;
+    }
+    return jsRectChangeOptions;
+}
 
+napi_value BuildJsPosition(napi_env env, const Position& position)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
     napi_value jsPosition = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, jsPosition);
-
     napi_value jsX = CreateJsValue(env, position.x);
-    if (napi_set_named_property(env, jsPosition, "x", jsX) != napi_ok) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set 'x' property");
+    if (jsX == nullptr || napi_set_named_property(env, jsPosition, "x", jsX) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set x pos");
         return nullptr;
     }
     napi_value jsY = CreateJsValue(env, position.y);
-    if (napi_set_named_property(env, jsPosition, "y", jsY) != napi_ok) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set 'y' property");
+    if (jsY == nullptr || napi_set_named_property(env, jsPosition, "y", jsY) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set y pos");
         return nullptr;
     }
     return jsPosition;

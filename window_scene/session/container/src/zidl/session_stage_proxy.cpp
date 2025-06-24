@@ -251,24 +251,20 @@ WSError SessionStageProxy::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write interface token");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
         !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write reason");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (!remote) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int sendRet = remote->SendRequest(

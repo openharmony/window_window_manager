@@ -2055,7 +2055,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     auto winId = GetPersistentId();
     const auto curGlobalDisplayRect = GetGlobalDisplayRect();
     if (curGlobalDisplayRect.IsSamePosition(x, y)) {
@@ -2063,7 +2062,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
             winId, x, y);
         return WMError::WM_DO_NOTHING;
     }
-
     // Use RequestRect to quickly get width and height from Resize method.
     const auto requestRect = GetRequestRect();
     if (!Rect::IsRightBottomValid(x, y, requestRect.width_, requestRect.height_)) {
@@ -2073,7 +2071,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
     WSRect newGlobalDisplayRect = { x, y, requestRect.width_, requestRect.height_ };
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, newGlobalDisplayRect: %{public}s",
         winId, newGlobalDisplayRect.ToString().c_str());
-
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateGlobalDisplayRectFromClient(newGlobalDisplayRect, SizeChangeReason::MOVE);

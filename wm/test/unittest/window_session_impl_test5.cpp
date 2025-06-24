@@ -1637,7 +1637,10 @@ HWTEST_F(WindowSessionImplTest5, TestRegisterRectChangeInGlobalDisplayListener, 
     auto result = window->RegisterRectChangeInGlobalDisplayListener(listener);
     EXPECT_EQ(result, WMError::WM_OK);
 
-    window->rectChangeInGlobalDisplayListeners_.clear();
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
 }
 
 /**
@@ -1657,7 +1660,10 @@ HWTEST_F(WindowSessionImplTest5, TestUnregisterRectChangeInGlobalDisplayListener
     auto result = window->UnregisterRectChangeInGlobalDisplayListener(listener);
     EXPECT_EQ(result, WMError::WM_OK);
 
-    window->rectChangeInGlobalDisplayListeners_.clear();
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
 }
 
 /**
@@ -1689,7 +1695,11 @@ HWTEST_F(WindowSessionImplTest5, TestNotifyGlobalDisplayRectChange, TestSize.Lev
     EXPECT_CALL(*listener2, OnRectChangeInGlobalDisplay(rect, reason)).Times(1);
 
     window->NotifyGlobalDisplayRectChange(rect, reason);
-    window->rectChangeInGlobalDisplayListeners_.clear();
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
 }
 } // namespace
 } // namespace Rosen
