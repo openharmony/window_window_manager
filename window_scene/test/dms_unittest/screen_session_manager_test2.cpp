@@ -354,7 +354,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio03, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_EQ(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: GetCutoutInfoWithRotation04
  * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
@@ -369,7 +369,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio04, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_NE(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: GetCutoutInfoWithRotation05
  * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
@@ -384,7 +384,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio05, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_NE(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr01
  * @tc.desc: SetForceCloseHdr test
@@ -401,7 +401,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr01, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr02
  * @tc.desc: SetForceCloseHdr test
@@ -418,7 +418,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr02, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr03
  * @tc.desc: SetForceCloseHdr test
@@ -435,7 +435,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr03, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser01
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -450,7 +450,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser01, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser02
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -465,7 +465,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser02, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser03
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -480,7 +480,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser03, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish01
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -495,7 +495,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish01, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish02
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -510,7 +510,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish02, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish03
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -525,7 +525,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish03, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish01
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -540,7 +540,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish01, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish02
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -555,7 +555,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish02, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish03
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -570,7 +570,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish03, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetFoldStatusExpandAndLocked01
  * @tc.desc: SetFoldStatusExpandAndLocked test
@@ -586,7 +586,7 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked01, Function | Sm
     ssm_->SetFoldStatusExpandAndLocked(isLocked);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetFoldStatusExpandAndLocked02
  * @tc.desc: SetFoldStatusExpandAndLocked test
@@ -917,6 +917,22 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation03, Function | Sm
     MockAccesstokenKit::MockIsSASystemApp(true);
     auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSystemSleep
+ * @tc.desc: IsSystemSleep test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsSystemSleep, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM);
+    EXPECT_TRUE(ssm->IsSystemSleep());
+    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+    EXPECT_FALSE(ssm->IsSystemSleep());
+    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
+    EXPECT_TRUE(ssm->IsSystemSleep());
 }
 }
 }
