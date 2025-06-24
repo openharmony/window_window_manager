@@ -2025,21 +2025,26 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo;
     sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = mockHostSession;
 
     window->property_->SetPersistentId(123);
     window->property_->SetGlobalDisplayRect({ 100, 100, 300, 300 });
     window->property_->SetRequestRect({ 0, 0, 300, 300 });
 
-    // Case 1: Same position
+    // Case 1: session is null
+    window->hostSession_ = nullptr;
     auto ret = window->MoveWindowToGlobalDisplay(100, 100);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    // Case 2: Same position
+    window->hostSession_ = mockHostSession;
+    ret = window->MoveWindowToGlobalDisplay(100, 100);
     EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
 
-    // Case 2: Illegal position
+    // Case 3: Illegal position
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 3: Move to new position
+    // Case 4: Move to new position
     EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     ret = window->MoveWindowToGlobalDisplay(200, 300);
     EXPECT_EQ(ret, WMError::WM_OK);

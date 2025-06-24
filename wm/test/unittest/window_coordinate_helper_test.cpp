@@ -136,12 +136,33 @@ HWTEST_F(WindowCoordinateHelperTest, TestExternalToLocalWithZeroScale, TestSize.
     Transform transform;
     transform.pivotX_ = 0.5f;
     transform.pivotY_ = 0.5f;
-    transform.scaleX_ = 0.0f;
-    transform.scaleY_ = 0.0f;
 
-    Position result = WindowCoordinateHelper::ExternalToLocal(window, transform, external);
-    ASSERT_EQ(result.x, 0);
-    ASSERT_EQ(result.y, 0);
+    // Case 1: Zero scale on both axes
+    {
+        transform.scaleX_ = 0.0f;
+        transform.scaleY_ = 0.0f;
+        Position result = WindowCoordinateHelper::ExternalToLocal(window, transform, external);
+        ASSERT_EQ(result.x, 0);
+        ASSERT_EQ(result.y, 0);
+    }
+
+    // Case 2: Zero scaleX
+    {
+        transform.scaleX_ = 0.0f;
+        transform.scaleY_ = 1.0f;
+        Position result = WindowCoordinateHelper::ExternalToLocal(window, transform, external);
+        ASSERT_EQ(result.x, 0);
+        ASSERT_EQ(result.y, 0);
+    }
+
+    // Case 3: Zero scaleY
+    {
+        transform.scaleX_ = 1.0f;
+        transform.scaleY_ = 0.0f;
+        Position result = WindowCoordinateHelper::ExternalToLocal(window, transform, external);
+        ASSERT_EQ(result.x, 0);
+        ASSERT_EQ(result.y, 0);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
