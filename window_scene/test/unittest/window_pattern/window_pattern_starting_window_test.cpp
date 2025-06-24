@@ -72,7 +72,6 @@ void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
     config.dbName = TEST_RDB_NAME;
     config.dbPath = TEST_RDB_PATH;
     ssm_->startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
-    ssm_->darkMode_.store(false);
 }
 
 namespace {
@@ -142,15 +141,15 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, TestSize.Level1)
     sessionInfo.moduleName_ = itemKey.moduleName = "moduleName";
     sessionInfo.abilityName_ = itemKey.abilityName = "abilityName";
     sessionInfo.bundleName_ = itemKey.bundleName = "bundleName";
-    itemKey.darkMode = ssm_->darkMode_.load();
+    itemKey.darkMode = false;
     StartingWindowInfo rdbInfo;
     rdbInfo.iconPathEarlyVersion_ = "pathFromRdb";
     StartingWindowInfo outInfo;
     outInfo.iconPathEarlyVersion_ = "default";
     bool insertRes = ssm_->startingWindowRdbMgr_->InsertData(itemKey, rdbInfo);
-    ASSERT_EQ(insertRes, true);
+    EXPECT_EQ(insertRes, true);
     ssm_->GetStartupPage(sessionInfo, outInfo);
-    ASSERT_EQ(outInfo.iconPathEarlyVersion_, "pathFromRdb");
+    EXPECT_EQ(outInfo.iconPathEarlyVersion_, "pathFromRdb");
 }
 
 /**
@@ -196,16 +195,16 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize
     sessionInfo.moduleName_ = itemKey.moduleName = "moduleName";
     sessionInfo.abilityName_ = itemKey.abilityName = "abilityName";
     sessionInfo.bundleName_ = itemKey.bundleName = "bundleName";
-    itemKey.darkMode = ssm_->darkMode_.load();
+    itemKey.darkMode = false;
     auto res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
-    ASSERT_EQ(res, false);
+    EXPECT_EQ(res, false);
     bool insertRes = ssm_->startingWindowRdbMgr_->InsertData(itemKey, outInfo);
-    ASSERT_EQ(insertRes, true);
+    EXPECT_EQ(insertRes, true);
     res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
     ssm_->startingWindowRdbMgr_ = nullptr;
     res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
-    ASSERT_EQ(res, false);
+    EXPECT_EQ(res, false);
 }
 
 /**
@@ -349,8 +348,8 @@ HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::BundleInfo bundleInfo;
     std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> outValues;
-    ssm_->GetBundleStartingWindowInfos(bundleInfo, outValues);
-    ASSERT_EQ(outValues.size(), 0);
+    ssm_->GetBundleStartingWindowInfos(false, bundleInfo, outValues);
+    EXPECT_EQ(outValues.size(), 0);
 }
 
 /**
@@ -363,13 +362,13 @@ HWTEST_F(WindowPatternStartingWindowTest, GetPreLoadStartingWindow, TestSize.Lev
     ASSERT_NE(ssm_, nullptr);
     ssm_->preLoadStartingWindowMap_.clear();
     SessionInfo sessionInfo;
-    EXPECT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
+    ASSERT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
     sessionInfo.bundleName_ = "bundleName_";
     sessionInfo.moduleName_ = "moduleName_";
     sessionInfo.abilityName_ = "abilityName_";
     std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
     ssm_->preLoadStartingWindowMap_[key] = std::make_shared<Media::PixelMap>();
-    ASSERT_EQ(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
+    ASSERT_NE(nullptr, ssm_->GetPreLoadStartingWindow(sessionInfo));
     ssm_->preLoadStartingWindowMap_.clear();
     EXPECT_EQ(true, ssm_->preLoadStartingWindowMap_.empty());
 }
@@ -392,7 +391,7 @@ HWTEST_F(WindowPatternStartingWindowTest, RemovePreLoadStartingWindowFromMap, Te
     SessionInfo anotherSessionInfo;
     ssm_->RemovePreLoadStartingWindowFromMap(anotherSessionInfo);
     EXPECT_EQ(false, ssm_->preLoadStartingWindowMap_.empty());
-    ssm_->RemovePreLoadStartingWindowFromMap(anotherSessionInfo);
+    ssm_->RemovePreLoadStartingWindowFromMap(sessionInfo);
     EXPECT_EQ(true, ssm_->preLoadStartingWindowMap_.empty());
 }
 
@@ -455,6 +454,18 @@ HWTEST_F(WindowPatternStartingWindowTest, NotifyPreLoadStartingWindowFinished, T
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->NotifyPreLoadStartingWindowFinished();
     ASSERT_NE(nullptr, sceneSession);
+}
+
+/**
+ * @tc.name: GetIsDarkFromConfiguration
+ * @tc.desc: GetIsDarkFromConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetIsDarkFromConfiguration, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    bool isDark = ssm_->GetIsDarkFromConfiguration();
+    EXPECT_EQ(false, isDark);
 }
 } // namespace
 } // namespace Rosen

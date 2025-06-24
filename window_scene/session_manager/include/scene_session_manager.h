@@ -1542,17 +1542,17 @@ private:
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
     bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
-    void GetBundleStartingWindowInfos(const AppExecFwk::BundleInfo& bundleInfo,
+    void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const StartingWindowInfo& startingWindowInfo);
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
     bool CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId);
-    std::atomic<int32_t> darkMode_ { false };
     std::unique_ptr<StartingWindowRdbManager> startingWindowRdbMgr_;
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
+    bool GetIsDarkFromConfiguration();
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
