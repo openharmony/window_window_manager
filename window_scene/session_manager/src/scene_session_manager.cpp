@@ -5088,6 +5088,7 @@ bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::s
 
 void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:InitStartingWindowRdb");
     WmsRdbConfig config;
     config.dbPath = rdbPath;
     if (mkdir(rdbPath.c_str(), S_IRWXU)) {

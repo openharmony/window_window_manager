@@ -15,6 +15,8 @@
 
 #include "rdb/starting_window_rdb_manager.h"
 
+#include <hitrace_meter.h>
+
 #include "ability_info.h"
 #include "rdb/scope_guard.h"
 #include "resource_manager.h"
@@ -190,6 +192,7 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const std::string& bundleN
 
 bool StartingWindowRdbManager::DeleteAllData()
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DeleteAllData");
     auto rdbStore = GetRdbStore();
     if (rdbStore == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
