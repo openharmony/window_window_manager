@@ -981,9 +981,9 @@ HWTEST_F(KeyboardSessionTest2, EnableCallingSessionAvoidArea01, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(KeyboardSessionTest2Callback);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback_ =
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    keyboardCallback_->onGetSceneSession = [](uint32_t persistentId) {
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
         SessionInfo callingSessionInfo;
         callingSessionInfo.abilityName_ = "CallingSession";
         callingSessionInfo.bundleName_ = "CallingSession";
@@ -992,16 +992,16 @@ HWTEST_F(KeyboardSessionTest2, EnableCallingSessionAvoidArea01, TestSize.Level1)
         return callingSession;
     };
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     SessionInfo info;
     info.abilityName_ = "keyboardSession";
     info.bundleName_ = "keyboardSession";
-    sptr<SceneSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback_, keyboardCallback_);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback, keyboardCallback);
     keyboardSession->EnableCallingSessionAvoidArea();
     EXPECT_TRUE(g_logMsg.find("Calling session is null") == std::string::npos);
 
-    keyboardCallback_->onGetSceneSession = [](uint32_t persistentId) {
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
         return nullptr;
     };
     keyboardSession->EnableCallingSessionAvoidArea();
