@@ -669,7 +669,7 @@ public:
     void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
     void SetGlobalDisplayRect(const WSRect& rect);
     WSRect GetGlobalDisplayRect() const;
-    WSRect RecalcGlobalDisplayRect() const;
+    WSRect ComputeGlobalDisplayRect() const;
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
 
     /*

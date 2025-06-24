@@ -1173,77 +1173,105 @@ HWTEST_F(SessionStageStubTest, HandleSendFbActionEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestHandleUpdateGlobalDisplayRectFromServerFailed
- * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer for various data scenarios
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerWithIncompleteRect
+ * @tc.desc: Verify that HandleUpdateGlobalDisplayRectFromServer returns error when rect data is incomplete
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServerFailed, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithIncompleteRect, TestSize.Level1)
 {
-    // Case 1: Invalid rect fields
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Missing width and height fields
+    data.WriteInt32(10); // posX
+    data.WriteInt32(20); // posY
+
+    int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerWithInvalidReason
+ * @tc.desc: Verify that HandleUpdateGlobalDisplayRectFromServer rejects missing or invalid reason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithInvalidReason, TestSize.Level1)
+{
+    constexpr int32_t posX = 10;
+    constexpr int32_t posY = 20;
+    constexpr int32_t width = 100;
+    constexpr int32_t height = 200;
+
+    auto writeRect = [&](MessageParcel& data) {
+        data.WriteInt32(posX);
+        data.WriteInt32(posY);
+        data.WriteInt32(width);
+        data.WriteInt32(height);
+    };
+
+    // Case 1: Missing reason field
     {
         MessageParcel data;
         MessageParcel reply;
-        // Only write 2 of 4 required fields
-        data.WriteInt32(10); // posX
-        data.WriteInt32(20); // posY
+        writeRect(data);
         int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
         EXPECT_EQ(result, ERR_INVALID_DATA);
     }
 
-    // Case 2: Missing reason field
+    // Case 2: reason < SizeChangeReason::UNDEFINED (invalid)
     {
         MessageParcel data;
         MessageParcel reply;
-        data.WriteInt32(10); // posX
-        data.WriteInt32(20); // posY
-        data.WriteInt32(100); // width
-        data.WriteInt32(200); // height
-        // No reason written
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
         int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
         EXPECT_EQ(result, ERR_INVALID_DATA);
     }
 
-    // Case 3: Invalid reason
+    // Case 3: reason == SizeChangeReason::END (boundary out-of-range)
     {
         MessageParcel data;
         MessageParcel reply;
-        data.WriteInt32(10);
-        data.WriteInt32(20);
-        data.WriteInt32(100);
-        data.WriteInt32(200);
-        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1); // Invalid reason
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END));
         int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
         EXPECT_EQ(result, ERR_INVALID_DATA);
     }
 
-    // Case 4: Invalid reason
+    // Case 4: reason > SizeChangeReason::END (overflow)
     {
         MessageParcel data;
         MessageParcel reply;
-        data.WriteInt32(10);
-        data.WriteInt32(20);
-        data.WriteInt32(100);
-        data.WriteInt32(200);
-        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1); // Invalid reason
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
         int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
         EXPECT_EQ(result, ERR_INVALID_DATA);
     }
 }
 
 /**
- * @tc.name: TestHandleUpdateGlobalDisplayRectFromServerSuccess
- * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer for various data scenarios
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerSuccess
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer accepts valid parameters
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServerSuccess, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerSuccess, TestSize.Level1)
 {
+    constexpr int32_t posX = 10;
+    constexpr int32_t posY = 20;
+    constexpr int32_t width = 100;
+    constexpr int32_t height = 200;
+    constexpr SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+
     MessageParcel data;
     MessageParcel reply;
-    data.WriteInt32(10);
-    data.WriteInt32(20);
-    data.WriteInt32(100);
-    data.WriteInt32(200);
-    data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED));
+
+    // Write valid rect and reason
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteInt32(width);
+    data.WriteInt32(height);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
     int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }

@@ -107,7 +107,7 @@ WSRelativeDisplayRect SessionCoordinateHelper::FallbackToOriginalOrPrimaryScreen
     const std::unordered_map<uint64_t, WSRect>& screenRectMap, const WSRect& globalRect, DisplayId originalDisplayId)
 {
     constexpr uint64_t mainDisplayId = MAIN_SCREEN_ID_DEFAULT;
-    auto it = screenRectMap.find(originalDisplayId);
+    const auto it = screenRectMap.find(originalDisplayId);
     if (it == screenRectMap.end()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fallback to mainDisplayId: %{public}" PRIu64 ", globalRect: %{public}s",
             mainDisplayId, globalRect.ToString().c_str());

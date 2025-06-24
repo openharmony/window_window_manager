@@ -1253,7 +1253,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = RecalcGlobalDisplayRect();
+    auto globalDisplayRect = ComputeGlobalDisplayRect();
     UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
 
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
@@ -4535,13 +4535,15 @@ WSRect Session::GetGlobalDisplayRect() const
     return rect;
 }
 
-WSRect Session::RecalcGlobalDisplayRect() const
+WSRect Session::ComputeGlobalDisplayRect() const
 {
-    // In multi-screen drag-and-move scenarios, the GlobalRect is relative to the
-    // top-left corner of the combined rectangle of all displays; in other scenarios,
-    // GlobalRect is relative to the top-left corner of the display it belongs to.
-    WSRect relativeDisplayRect = GetSessionGlobalRectInMultiScreen();
-    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeDisplayRect);
+    // In multi-screen drag-and-move scenarios, the global rect is relative to the top-left
+    // corner of the bounding rectangle of all screens. In other cases, it is relative to
+    // the top-left corner of its associated screen.
+    // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
+    // returns the window's rect relative to its screen, regardless of the scenario.
+    WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
+    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
 }
 
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)

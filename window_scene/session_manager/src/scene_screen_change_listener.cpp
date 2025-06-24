@@ -41,7 +41,7 @@ void SceneScreenChangeListener::HandleRelativePositionChange(const ScreenPropert
             TLOGW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
             continue;
         }
-        auto rect = session->RecalcGlobalDisplayRect();
+        auto rect = session->ComputeGlobalDisplayRect();
         session->UpdateGlobalDisplayRect(rect, SizeChangeReason::SCREEN_CHANGE);
     }
 }

@@ -1917,13 +1917,11 @@ WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, Size
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is nullptr", where);
             return;
         }
-
         if (rect == session->GetGlobalDisplayRect()) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}d skip same rect",
                 where, session->GetPersistentId());
             return;
         }
-
         // Convert global coordinates to screen-relative coordinates to be
         // compatible with the original logic of UpdateSessionRectInner.
         const auto& [displayId, relativeDisplayRect] =
@@ -3546,8 +3544,13 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), rect);
-    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+    // During drag (except DRAG_END), the rect is relative to the original display and can be
+    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
+    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
+    if (reason != SizeChangeReason::DRAG_END) {
+        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), rect);
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
+    }
 
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
@@ -7889,10 +7892,9 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         UpdateAllModalUIExtensions(uiParam.rect_);
 
         // Window Layout Global Coordinate System
-        auto globalDisplayRect = RecalcGlobalDisplayRect();
+        auto globalDisplayRect = ComputeGlobalDisplayRect();
         UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
-
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
             "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,

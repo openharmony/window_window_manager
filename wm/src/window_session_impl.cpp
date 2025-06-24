@@ -47,7 +47,6 @@
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
 #include "window_adapter.h"
-#include "window_coordinate_helper.h"
 #include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -2341,7 +2340,7 @@ Position WindowSessionImpl::ClientToGlobalDisplay(const Position& position) cons
 {
     const auto globalDisplayRect = GetGlobalDisplayRect();
     // Note: currently assumes no scaling is applied to the window.
-    const auto globalDisplayPos = WindowCoordinateHelper::LocalToExternal(globalDisplayRect, position);
+    Position globalDisplayPos = { globalDisplayRect.posX_ + position.x, globalDisplayRect.posY_ + position.y };
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, globalDisplayPos: %{public}s",
         GetPersistentId(), position.ToString().c_str(), globalDisplayPos.ToString().c_str());
     return globalDisplayPos;
@@ -2351,7 +2350,7 @@ Position WindowSessionImpl::GlobalDisplayToClient(const Position& position) cons
 {
     const auto globalDisplayRect = GetGlobalDisplayRect();
     // Note: currently assumes no scaling is applied to the window.
-    const auto clientPos = WindowCoordinateHelper::ExternalToLocal(globalDisplayRect, position);
+    Position clientPos = { position.x - globalDisplayRect.posX_, position.y - globalDisplayRect.posY_ };
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, clientPos: %{public}s",
         GetPersistentId(), position.ToString().c_str(), clientPos.ToString().c_str());
     return clientPos;
@@ -5197,11 +5196,9 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
 void WindowSessionImpl::NotifyGlobalDisplayRectChange(const Rect& rect, WindowSizeChangeReason reason)
 {
     auto listeners = GetListeners<IRectChangeInGlobalDisplayListener>();
-
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}d, rect: %{public}s, reason: %{public}d, listenerSize: %{public}zu",
         GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason), listeners.size());
-
     for (const auto& listener : listeners) {
         if (listener) {
             listener->OnRectChangeInGlobalDisplay(rect, reason);

@@ -38,7 +38,6 @@ group("unittest") {
     ":wm_window_adapter_lite_test",
     ":wm_window_adapter_test",
     ":wm_window_agent_test",
-    ":wm_window_coordinate_helper_test",
     ":wm_window_display_change_adapter_test",
     ":wm_window_effect_test",
     ":wm_window_impl_listener_test",
@@ -735,16 +734,6 @@ ohos_unittest("wm_window_input_intercept_test") {
   module_out_path = module_out_path
 
   sources = [ "window_input_intercept_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = test_external_deps
-}
-
-ohos_unittest("wm_window_coordinate_helper_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_coordinate_helper_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 

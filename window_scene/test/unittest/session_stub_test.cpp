@@ -1731,87 +1731,105 @@ HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidRect
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromClient with invalid rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidRect, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    data.WriteInt32(100); // posX
+    data.WriteInt32(200); // posY
+    data.WriteInt32(300); // width
+    // missing height
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidReason
+ * @tc.desc: Verify that ProcessRemoteRequest rejects missing or invalid reason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidReason, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    constexpr int32_t posX = 100;
+    constexpr int32_t posY = 200;
+    constexpr int32_t width = 300;
+    constexpr int32_t height = 400;
+    MessageOption option;
+
+    auto writeRect = [&](MessageParcel& data) {
+        data.WriteInt32(posX);
+        data.WriteInt32(posY);
+        data.WriteInt32(width);
+        data.WriteInt32(height);
+    };
+
+    // Case 1: Missing reason field
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: reason < SizeChangeReason::UNDEFINED
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: reason == SizeChangeReason::END (boundary overflow)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END));
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: reason > SizeChangeReason::END
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
  * @tc.name: HandleUpdateGlobalDisplayRectFromClientSuccess
- * @tc.desc: Test HandleUpdateGlobalDisplayRectFromClient handles input correctly.
+ * @tc.desc: Verify that ProcessRemoteRequest accepts valid rect and reason data
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientSuccess, TestSize.Level1)
 {
+    constexpr int32_t posX = 100;
+    constexpr int32_t posY = 200;
+    constexpr int32_t width = 300;
+    constexpr int32_t height = 400;
+    constexpr SizeChangeReason reason = SizeChangeReason::RESIZE;
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    const int32_t posX = 100;
-    const int32_t posY = 200;
-    const int32_t width = 300;
-    const int32_t height = 400;
-    const uint32_t reasonValue = static_cast<uint32_t>(SizeChangeReason::RESIZE);
 
-    EXPECT_TRUE(data.WriteInt32(posX));
-    EXPECT_TRUE(data.WriteInt32(posY));
-    EXPECT_TRUE(data.WriteInt32(width));
-    EXPECT_TRUE(data.WriteInt32(height));
-    EXPECT_TRUE(data.WriteUint32(reasonValue));
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
-    EXPECT_EQ(ERR_NONE, session_->ProcessRemoteRequest(code, data, reply, option));
-}
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteInt32(width);
+    data.WriteInt32(height);
+    data.WriteUint32(static_cast<uint32_t>(reason));
 
-/**
- * @tc.name: HandleUpdateGlobalDisplayRectFromClientFailed
- * @tc.desc: Test HandleUpdateGlobalDisplayRectFromClient handles input correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientFailed, TestSize.Level1)
-{
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
-    MessageParcel reply;
-    MessageOption option;
-    const int32_t posX = 100;
-    const int32_t posY = 200;
-    const int32_t width = 300;
-    const int32_t height = 400;
-
-    // Case 1: Malformed rect (missing height)
-    {
-        MessageParcel data;
-        data.WriteInt32(posX);
-        data.WriteInt32(posY);
-        data.WriteInt32(width);
-        // missing height
-        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
-    }
-
-    // Case 2: Missing reason
-    {
-        MessageParcel data;
-        data.WriteInt32(posX);
-        data.WriteInt32(posY);
-        data.WriteInt32(width);
-        data.WriteInt32(height);
-        // missing reason
-        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
-    }
-
-    // Case 3: Invalid reason
-    {
-        MessageParcel data;
-        data.WriteInt32(posX);
-        data.WriteInt32(posY);
-        data.WriteInt32(width);
-        data.WriteInt32(height);
-        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
-        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
-    }
-
-    // Case 4: Invalid reason
-    {
-        MessageParcel data;
-        data.WriteInt32(posX);
-        data.WriteInt32(posY);
-        data.WriteInt32(width);
-        data.WriteInt32(height);
-        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
-        EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
-    }
+    EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

@@ -477,13 +477,37 @@ public:
     }
 
     /**
-     * @brief Convert a native Position structure to a JavaScript object.
+     * @brief Create a JS object representing a window rectangle change event.
+     *
+     * The resulting object has the following structure:
+     * {
+     *   rect: { x, y, width, height },
+     *   reason: <RectChangeReason enum value>
+     * }
+     *
+     * Used to pass rectangle change info from native code to JavaScript.
      *
      * @param env The NAPI environment.
-     * @param position The native Position instance to convert.
-     * @return The JavaScript object representing the position, or nullptr on failure.
+     * @param rect The window rectangle.
+     * @param reason The change reason.
+     * @return The JS object on success, or nullptr on failure.
      */
-    napi_value PositionToJsObject(napi_env env, const Position& position);
+    napi_value BuildJsRectChangeOptions(napi_env env, const Rect& rect, RectChangeReason reason);
+
+    /**
+     * @brief Create a JS object from a native Position.
+     *
+     * The resulting object has the form:
+     * {
+     *   x: <number>,
+     *   y: <number>
+     * }
+     *
+     * @param env The NAPI environment.
+     * @param position The Position to convert.
+     * @return The JS object on success, or nullptr on failure.
+     */
+    napi_value BuildJsPosition(napi_env env, const Position& position);
 }
 }
 #endif
