@@ -115,9 +115,10 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
-    virtual WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) = 0;
+    virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; }
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
-    virtual void NotifyNonInteractiveStatus() = 0;
+    virtual void NotifyLifecyclePausedStatus() = 0;
+    virtual void NotifyAppUseControlStatus(bool isUseControl) = 0;
     virtual WSError UpdateMaximizeMode(MaximizeMode mode) = 0;
     virtual void NotifySessionForeground(uint32_t reason, bool withAnimation) = 0;
     virtual void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) = 0;
@@ -259,6 +260,16 @@ public:
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
+
+    /**
+     * @brief Send fb event to client.
+     *
+     * Send the fb event to client. Such as close, click events.
+     *
+     * @param action Indicates the action name.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFbActionEvent(const std::string& action) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

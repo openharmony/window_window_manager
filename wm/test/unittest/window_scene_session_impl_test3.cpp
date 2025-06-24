@@ -1924,7 +1924,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes02, TestSize.Level1
     supportedWindowModes.clear();
     supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
     ret = window->SetSupportedWindowModes(supportedWindowModes, true);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(WMError::WM_ERROR_ILLEGAL_PARAM, ret);
     
     supportedWindowModes.clear();
     supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);

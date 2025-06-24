@@ -92,6 +92,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_FLOAT_NAVIGATION,
     TYPE_DYNAMIC,
     TYPE_MUTISCREEN_COLLABORATION,
+    TYPE_FB,
     TYPE_END
 };
 
@@ -100,11 +101,16 @@ enum class LifeCycleEventType : uint32_t {
     ACTIVE,
     INACTIVE,
     BACKGROUND,
-    RESUMED, // RESUMED and PAUSED deprecated since api version 20, use INTERACTIVE and NONINTERACTIVE instead.
+    RESUMED,
     PAUSED,
     DESTROYED,
-    INTERACTIVE,
-    NONINTERACTIVE,
+};
+
+enum class WindowStageLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    RESUMED,
+    PAUSED,
+    BACKGROUND,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
@@ -135,6 +141,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         ApiWindowType::TYPE_FLOAT_NAVIGATION         },
     { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
+    { WindowType::WINDOW_TYPE_FB,                       ApiWindowType::TYPE_FB                       },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -165,6 +172,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION         },
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
+    { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -370,6 +378,7 @@ public:
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowStageLifecycleEventTypeInit(napi_env env);
     napi_value WindowAnchorInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);

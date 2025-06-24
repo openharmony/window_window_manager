@@ -152,17 +152,31 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
 
 void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
 {
-    auto screenSession = GetScreenSessionExtra(screenId);
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        for (const auto& iter : extraScreenSessionMap_) {
+            sptr<ScreenSession> tempScreenSession = iter.second;
+            if (tempScreenSession != nullptr) {
+                if (tempScreenSession->GetScreenId() == screenId) {
+                    screenSession = tempScreenSession;
+                    break;
+                }
+            }
+        }
+    }
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "extra screenSession is null");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "ScreenId:%{public}" PRIu64 ", rsId:%{public}" PRIu64,
+        screenSession->GetScreenId(), screenSession->GetRSScreenId());
     screenSession->DestroyScreenScene();
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         extraScreenSessionMap_.erase(screenId);
     }
-    TLOGI(WmsLogTag::DMS, "ExtraDestroyScreen end");
+    TLOGI(WmsLogTag::DMS, "end");
 }
 
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)

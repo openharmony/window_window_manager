@@ -242,6 +242,18 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetDisplaySizeById_TestDisplayId, TestSi
     displayId = 0;
     EXPECT_EQ(true, ssm_->GetDisplaySizeById(displayId, displayWidth, displayHeight));
 }
+
+/**
+ * @tc.name: UpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : UpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, UpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    const int32_t windowId = 0;
+    const int32_t updateMode = 1;
+    EXPECT_EQ(ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode), WMError::WM_ERROR_INVALID_PERMISSION);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

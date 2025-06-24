@@ -19,6 +19,7 @@
 #include <regex>
 #include "context.h"
 #include "interfaces/include/ws_common.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_ibundle_mgr.h"
@@ -82,6 +83,7 @@ void SceneSessionManagerTest6::SetUp()
 
 void SceneSessionManagerTest6::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -178,9 +180,21 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowLayerChangeInfo, TestSize.Level1)
     std::shared_ptr<RSOcclusionData> occlusionDataPtr = std::make_shared<RSOcclusionData>(visibleData);
     ASSERT_NE(nullptr, occlusionDataPtr);
     ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession02, nullptr);
+    struct RSSurfaceNodeConfig config;
+    sceneSession02->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(sceneSession02->surfaceNode_, nullptr);
+    sceneSession02->surfaceNode_->SetId(2);
+    sceneSession02->hidingStartWindow_ = true;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     ssm_->GetWindowLayerChangeInfo(occlusionDataPtr, currVisibleData, currDrawingContentData);
     ASSERT_EQ(currVisibleData.size(), 7);
     ASSERT_EQ(currDrawingContentData.size(), 4);
+    ssm_->sceneSessionMap_ = oldSessionMap;
 }
 
 /**
@@ -1085,6 +1099,30 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitSceneSession02
+ * @tc.desc: InitSceneSession02:in pc or pcmode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, InitSceneSession02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "InitSceneSession02";
+    sessionInfo.abilityName_ = "InitSceneSession02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
+    EXPECT_NE(sceneSession->getStartWindowConfigFunc_, nullptr);
+
+    sceneSession->getStartWindowConfigFunc_ = nullptr;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(sceneSession->getStartWindowConfigFunc_, nullptr);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
  * @tc.name: CheckAndNotifyWaterMarkChangedResult
  * @tc.desc: CheckAndNotifyWaterMarkChangedResult
  * @tc.type: FUNC
@@ -1186,6 +1224,9 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo01, TestSize.Level1)
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
+    sceneSession->hidingStartWindow_ = true;
+    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1678,6 +1719,7 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId001, TestSize.L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->TerminateSessionByPersistentId(sceneSession->GetPersistentId());
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }
@@ -1697,6 +1739,7 @@ HWTEST_F(SceneSessionManagerTest6, TerminateSessionByPersistentId002, TestSize.L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->TerminateSessionByPersistentId(INVALID_SESSION_ID);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
 }

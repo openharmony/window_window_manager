@@ -21,11 +21,21 @@
 #include "mock_window.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
+#include "window_manager_hilog.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -157,27 +167,26 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     window_ = GetTestWindowImpl("SetForceSplitEnable");
     ASSERT_NE(window_, nullptr);
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    int32_t res = 0;
     AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { FORCE_SPLIT_MODE, "MainPage", false };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
 
     config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
     window_->SetForceSplitEnable(config);
-    ASSERT_EQ(res, 0);
+    EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
 }
 
@@ -1220,12 +1229,16 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->touchEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->touchEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetTouchEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -1240,14 +1253,17 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->mouseEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->mouseEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetMouseEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -1257,6 +1273,8 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -1264,15 +1282,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
     window->NotifyPointerEvent(pointerEvent);
 
     pointerEvent = MMI::PointerEvent::Create();
+
+    window->inputEventConsumer_ = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    SessionInfo info;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(true, window->IsWindowDelayRaiseEnabled());
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") == std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") != std::string::npos);
+    logMsg.clear();
+
+    window->SetWindowDelayRaiseEnabled(false);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("UI content dose not consume") != std::string::npos);
+    logMsg.clear();
+
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     window->NotifyPointerEvent(pointerEvent);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    window->NotifyPointerEvent(pointerEvent);
-
-    window->inputEventConsumer_ = nullptr;
     window->NotifyPointerEvent(pointerEvent);
 }
 
@@ -1367,9 +1409,6 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->uiContent_ = nullptr;
-    ret = window->SetWindowDelayRaiseEnabled(true);
-    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ret = window->SetWindowDelayRaiseEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);

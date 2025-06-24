@@ -65,7 +65,7 @@ std::string SysCapUtil::GetBundleName()
     if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
         bundleName = bundleInfo.name;
     } else {
-        TLOGW(WmsLogTag::DEFAULT, "Failed");
+        TLOGD(WmsLogTag::DEFAULT, "Failed");
     }
     return StringUtil::Trim(bundleName);
 }
@@ -88,7 +88,7 @@ uint32_t SysCapUtil::GetApiCompatibleVersion()
         WLOGFD("targetVersion: [%{public}u], apiCompatibleVersion: [%{public}u]", bundleInfo.targetVersion,
             apiCompatibleVersion);
     } else {
-        TLOGW(WmsLogTag::DEFAULT, "Failed");
+        TLOGD(WmsLogTag::DEFAULT, "Failed");
     }
     return apiCompatibleVersion;
 }

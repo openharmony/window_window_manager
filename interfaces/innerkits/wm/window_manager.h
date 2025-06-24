@@ -256,6 +256,22 @@ private:
     std::unordered_set<int32_t> interestWindowIds_;
 };
 
+/*
+ * @class IWindowSystemBarPropertyChangedListener
+ *
+ * @brief Observe the property change of System Bar.
+ */
+class IWindowSystemBarPropertyChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
+};
+
 /**
  * @class AccessibilityWindowInfo
  *
@@ -783,6 +799,32 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
+
+    /*
+     * @brief Register window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Unregister window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Notify window System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
 
     /**
      * @brief notify display information change.

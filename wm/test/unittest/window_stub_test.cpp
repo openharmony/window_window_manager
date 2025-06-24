@@ -378,6 +378,10 @@ HWTEST_F(WindowStubTest, OnRemoteRequest14, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
+
+    data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FB) + 1);
+    res = windowStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**

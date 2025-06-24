@@ -27,6 +27,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
@@ -101,6 +102,7 @@ void SceneSessionManagerTest2::SetUp()
 
 void SceneSessionManagerTest2::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -1714,8 +1716,8 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearSession(100);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearSession(100);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
@@ -1726,8 +1728,8 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearAllSessions();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearAllSessions();
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 

@@ -55,9 +55,10 @@ private:
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
-    int HandleUpdateWindowLayoutById(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPausedStatus();
+    int HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply);
@@ -101,6 +102,7 @@ private:
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
+    int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

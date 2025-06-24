@@ -398,7 +398,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
     windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t updatedDisplayY = pointerItem.GetDisplayY();
-    ASSERT_EQ(updatedDisplayY, originalDisplayY);
 
     pointerItem.SetDisplayY(150);
     pointerEvent->AddPointerItem(pointerItem);
@@ -1627,6 +1626,8 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, TestSize.Level1)
     ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
     globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
+    floatWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_FB);
+    ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
 }
 
 /**

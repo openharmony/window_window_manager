@@ -88,6 +88,7 @@ constexpr uint32_t SIDEBAR_SNAPSHOT_MASKCOLOR_DARK = 0xff414141;
  * Compatible Mode
  */
 constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
+constexpr float COMPACT_NORMAL_SCALE = 1.0f;
 }
 
 /**
@@ -158,6 +159,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
+    WINDOW_TYPE_FB,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -192,7 +194,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP,
-    END = WINDOW_MODE_PIP,
+    WINDOW_MODE_FB,
+    END = WINDOW_MODE_FB,
 };
 
 /**
@@ -248,11 +251,13 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_FB = 1 << 5,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
                               WINDOW_MODE_SUPPORT_FLOATING |
-                              WINDOW_MODE_SUPPORT_PIP
+                              WINDOW_MODE_SUPPORT_PIP |
+                              WINDOW_MODE_SUPPORT_FB
 };
 
 /**
@@ -329,6 +334,14 @@ enum class WMError : int32_t {
     WM_ERROR_ILLEGAL_PARAM,
     WM_ERROR_FILTER_ERROR,
     WM_ERROR_TIMEOUT,
+    WM_ERROR_FB_PARAM_INVALID,
+    WM_ERROR_FB_CREATE_FAILED,
+    WM_ERROR_FB_REPEAT_CONTROLLER,
+    WM_ERROR_FB_REPEAT_OPERATION,
+    WM_ERROR_FB_INTERNAL_ERROR,
+    WM_ERROR_FB_STATE_ABNORMALLY,
+    WM_ERROR_FB_INVALID_STATE,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
 };
 
 /**
@@ -358,6 +371,14 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_ILLEGAL_PARAM = 1300016,
     WM_ERROR_FILTER_ERROR = 1300017,
     WM_ERROR_TIMEOUT = 1300018,
+    WM_ERROR_FB_PARAM_INVALID = 1300019,
+    WM_ERROR_FB_CREATE_FAILED = 1300020,
+    WM_ERROR_FB_REPEAT_CONTROLLER = 1300021,
+    WM_ERROR_FB_REPEAT_OPERATION = 1300022,
+    WM_ERROR_FB_INTERNAL_ERROR = 1300023,
+    WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
+    WM_ERROR_FB_INVALID_STATE = 1300025,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
 };
 
 /**
@@ -399,6 +420,7 @@ enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
     PARENT_CONTROL,
+    PRIVACY_WINDOW,
     CONTROL_APP_TYPE_END,
 };
 
@@ -416,6 +438,7 @@ enum class WindowUIType : uint8_t {
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
+WmErrorCode FindCodeByError(WMError error);
 
 /**
  * @brief Enumerates flag of window.
@@ -540,6 +563,7 @@ enum class DragResizeType : uint32_t {
     RESIZE_EACH_FRAME = 1,
     RESIZE_WHEN_DRAG_END = 2,
     RESIZE_KEY_FRAME = 3,
+    RESIZE_SCALE = 4,
     RESIZE_MAX_VALUE,  // invalid value begin, add new value above
 };
 
@@ -1026,23 +1050,6 @@ struct Rect {
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
-
-/**
- * @struct Position
- *
- * @brief Represent a two-dimensional position in a specific coordinate system.
- */
-struct Position {
-    int32_t x = 0;
-    int32_t y = 0;
-
-    inline std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "[" << x << ", " << y << "]";
-        return oss.str();
-    }
-};
 
 /**
  * @struct RectAnimationConfig
@@ -1601,10 +1608,42 @@ struct PiPTemplateInfo : public Parcelable {
     }
 };
 
+
+/**
+ * @brief Enumerates floating ball state.
+ */
+enum class FloatingBallState : uint32_t {
+    STARTED = 1,
+    STOPPED = 2,
+    ERROR = 3,
+};
+ 
+/**
+ * @brief Enumerates floating ball template.
+ */
+enum class FloatingBallTemplate : uint32_t {
+    STATIC = 1,
+    NORMAL = 2,
+    EMPHATIC = 3,
+    SIMPLE = 4,
+    END = 5,
+};
+
 struct PiPWindowSize {
     uint32_t width;
     uint32_t height;
     double scale;
+};
+
+/**
+ * @brief Enumerates floating ball window state.
+ */
+enum class FbWindowState : uint32_t {
+    STATE_UNDEFINED = 0,
+    STATE_STARTING = 1,
+    STATE_STARTED = 2,
+    STATE_STOPPING = 3,
+    STATE_STOPPED = 4,
 };
 
 /**
@@ -1833,6 +1872,9 @@ struct WindowMetaInfo : public Parcelable {
     uint64_t surfaceNodeId = 0;
     uint64_t leashWinSurfaceNodeId = 0;
     bool isPrivacyMode = false;
+    WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    bool isMidScene = false;
+    bool isFocused = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -1840,12 +1882,14 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) && parcel.WriteInt32(pid) &&
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
-               parcel.WriteBool(isPrivacyMode);
+               parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
+        uint32_t windowModeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
@@ -1853,11 +1897,13 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint32(windowTypeValue) || !parcel.ReadUint32(windowMetaInfo->parentWindowId) ||
             !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
-            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
+        windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
         return windowMetaInfo;
     }
 };
@@ -2173,6 +2219,7 @@ struct WindowDensityInfo {
 struct WindowPropertyInfo {
     Rect windowRect { 0, 0, 0, 0 };
     Rect drawableRect { 0, 0, 0, 0 };
+    Rect globalDisplayRect { 0, 0, 0, 0 };
     uint32_t apiCompatibleVersion = 0;
     WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     bool isLayoutFullScreen = false;
@@ -2356,9 +2403,10 @@ struct KeyboardEffectOption : public Parcelable {
     std::string ToString() const
     {
         std::ostringstream oss;
-        oss << "viewMode: " << std::to_string(static_cast<uint32_t>(viewMode_)) << ", flowLightMode: " << \
-            std::to_string(static_cast<uint32_t>(flowLightMode_)) << ", gradientMode: " << \
-            std::to_string(static_cast<uint32_t>(gradientMode_)) << ", blurHeight: " << std::to_string(blurHeight_);
+        oss << "[" << static_cast<uint32_t>(viewMode_) << ", "
+            << static_cast<uint32_t>(flowLightMode_) << ", "
+            << static_cast<uint32_t>(gradientMode_) << ", "
+            << blurHeight_ << "]";
         return oss.str();
     }
 };

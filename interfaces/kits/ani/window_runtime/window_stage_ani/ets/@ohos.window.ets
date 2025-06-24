@@ -16,6 +16,8 @@ import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import BaseContext from 'application.BaseContext';
+import { ColorMetrics } from '@ohos.arkui.node';
+
 export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
@@ -1236,18 +1238,18 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
-    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
-    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
+    private native onSync(nativeObj: long, type: string, callback: object): void;
+    private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public getWindowDecorHeight(): number {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
     }
 
-    public setWindowBackgroundColor(color: string): void {
-       this.setWindowBackgroundColor(this.nativeObj, color);
+    public setWindowBackgroundColor(color: string | ColorMetrics): void {
+       if (color instanceof string) {
+         this.setWindowBackgroundColor(this.nativeObj, color as string);
+       }
     }
 
     public setBackgroundColor(color: string): Promise<void> {
@@ -1612,21 +1614,18 @@ export class WindowInternal implements Window {
       });
     }
 
-    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback,
-        callbackForTimeout?:Callback<void>): void {
-        this.onSync(this.nativeObj, type, callback);
+    public on<T>(type: string, callback: Callback<T>): void {
+      this.onSync(this.nativeObj, type, callback);
     }
 
-    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void {
-        this.offSync(this.nativeObj, type, callback);
+    public off<T>(type: string, callback?: Callback<T>): void {
+      this.offSync(this.nativeObj, type, callback);
     }
 }
 
 export interface Window {
     getWindowDecorHeight(): double;
-    setWindowBackgroundColor(color: string): void;
+    setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;
@@ -1663,11 +1662,8 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
-    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback,
-        callbackForTimeout?:Callback<void>): void;
-    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
-        callback: WindowEventCallback | WindowSizeCallback | WindowStatusCallback): void;
+    on<T>(type: string, callback: Callback<T>): void;
+    off<T>(type: string, callback?: Callback<T>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;

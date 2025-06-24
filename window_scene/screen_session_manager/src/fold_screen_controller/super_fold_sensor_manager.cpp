@@ -147,7 +147,12 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     TLOGD(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
-    NotifyFoldAngleChanged(curAngle_);
+    auto task = [this, curAngle = curAngle_] {
+        NotifyFoldAngleChanged(curAngle);
+    };
+    if (taskScheduler_) {
+        taskScheduler_->PostAsyncTask(task, "DMSHandlePosture");
+    }
 }
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
@@ -204,7 +209,12 @@ void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
     }
     curHall_ = (status & HALL_ACTIVE);
     TLOGI(WmsLogTag::DMS, "Hall change, hall = %{public}u", curHall_);
-    NotifyHallChanged(curHall_);
+    auto task = [this, curHall = curHall_] {
+        NotifyHallChanged(curHall);
+    };
+    if (taskScheduler_) {
+        taskScheduler_->PostAsyncTask(task, "DMSHandleHall");
+    }
 }
 
 void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
@@ -293,5 +303,11 @@ float SuperFoldSensorManager::GetCurAngle()
 SuperFoldSensorManager::SuperFoldSensorManager() {}
 
 SuperFoldSensorManager::~SuperFoldSensorManager() {}
+
+void SuperFoldSensorManager::SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler)
+{
+    TLOGI(WmsLogTag::DMS, "Set task scheduler.");
+    taskScheduler_ = scheduler;
+}
 } // Rosen
 } // OHOS

@@ -59,7 +59,7 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override;
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
@@ -102,6 +102,7 @@ public:
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
     WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
+    WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 };
 } // namespace OHOS::Rosen
 

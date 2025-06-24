@@ -340,6 +340,19 @@ SessionInfo& WindowSessionProperty::EditSessionInfo()
     return sessionInfo_;
 }
 
+void WindowSessionProperty::SetGlobalDisplayRect(const Rect& globalDisplayRect)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "globalDisplayRect=%{public}s", globalDisplayRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    globalDisplayRect_ = globalDisplayRect;
+}
+
+Rect WindowSessionProperty::GetGlobalDisplayRect() const
+{
+    std::lock_guard<std::mutex> lock(globalDisplayRectMutex_);
+    return globalDisplayRect_;
+}
+
 Rect WindowSessionProperty::GetWindowRect() const
 {
     std::lock_guard<std::mutex> lock(windowRectMutex_);
@@ -830,6 +843,16 @@ PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
     return pipTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
+{
+    fbTemplateInfo_ = fbTemplateInfo;
+}
+
+FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
+{
+    return fbTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -862,6 +885,18 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
 {
     std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
     return shadowsInfo_;
+}
+
+void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState)
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    isUseControlState_ = isUseControlState;
+}
+
+bool WindowSessionProperty::GetUseControlStateFromProperty() const
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    return isUseControlState_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -996,6 +1031,26 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         return;
     }
     property->SetPiPTemplateInfo(*pipTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFbTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFbWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fbTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFbWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatingBallTemplateInfo> fbTemplateInfo = parcel.ReadParcelable<FloatingBallTemplateInfo>();
+    if (fbTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFbTemplateInfo(*fbTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1237,11 +1292,14 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
+    auto globalDisplayRect = GetGlobalDisplayRect();
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
-        parcel.WriteUint32(requestRect_.height_) &&
+        parcel.WriteUint32(requestRect_.height_) && parcel.WriteInt32(globalDisplayRect.posX_) &&
+        parcel.WriteInt32(globalDisplayRect.posY_) && parcel.WriteUint32(globalDisplayRect.width_) &&
+        parcel.WriteUint32(globalDisplayRect.height_) &&
         parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
         parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
         parcel.WriteFloat(rectAnimationConfig_.y2) &&
@@ -1291,7 +1349,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
-        MarshallingShadowsInfo(parcel);
+        MarshallingShadowsInfo(parcel) &&
+        MarshallingFbTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1305,6 +1364,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetRequestRect(reqRect);
+    Rect globalDisplayRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    property->SetGlobalDisplayRect(globalDisplayRect);
     RectAnimationConfig rectAnimationConfig = { parcel.ReadUint32(), parcel.ReadFloat(),
         parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetRectAnimationConfig(rectAnimationConfig);
@@ -1398,6 +1459,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
     UnmarshallingShadowsInfo(parcel, property);
+    UnmarshallingFbTemplateInfo(parcel, property);
     return property;
 }
 
@@ -1406,6 +1468,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowName_ = property->windowName_;
     sessionInfo_ = property->sessionInfo_;
     requestRect_ = property->requestRect_;
+    globalDisplayRect_ = property->GetGlobalDisplayRect();
     rectAnimationConfig_ = property->rectAnimationConfig_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
@@ -1446,6 +1509,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     configLimitsVP_ = property->configLimitsVP_;
     lastVpr_ = property->lastVpr_;
     pipTemplateInfo_ = property->pipTemplateInfo_;
+    fbTemplateInfo_ = property->fbTemplateInfo_;
     keyboardLayoutParams_ = property->keyboardLayoutParams_;
     windowModeSupportType_ = property->windowModeSupportType_;
     sysBarPropMap_ = property->sysBarPropMap_;
@@ -2159,6 +2223,11 @@ bool WindowSessionProperty::IsAdaptToBackButton() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToBackButton();
 }
 
+bool WindowSessionProperty::IsAdaptToDragScale() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToDragScale();
+}
+
 bool WindowSessionProperty::IsDragResizeDisabled() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsDragResizeDisabled();
@@ -2232,6 +2301,16 @@ void CompatibleModeProperty::SetIsAdaptToBackButton(bool isAdaptToBackButton)
 bool CompatibleModeProperty::IsAdaptToBackButton() const
 {
     return isAdaptToBackButton_;
+}
+
+void CompatibleModeProperty::SetIsAdaptToDragScale(bool isAdaptToDragScale)
+{
+    isAdaptToDragScale_ = isAdaptToDragScale;
+}
+
+bool CompatibleModeProperty::IsAdaptToDragScale() const
+{
+    return isAdaptToDragScale_;
 }
 
 void CompatibleModeProperty::SetDisableDragResize(bool disableDragResize)
@@ -2310,6 +2389,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAdaptToEventMapping_) &&
         parcel.WriteBool(isAdaptToProportionalScale_) &&
         parcel.WriteBool(isAdaptToBackButton_) &&
+        parcel.WriteBool(isAdaptToDragScale_) &&
         parcel.WriteBool(disableDragResize_) &&
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
@@ -2329,6 +2409,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->isAdaptToEventMapping_ = parcel.ReadBool();
     property->isAdaptToProportionalScale_ = parcel.ReadBool();
     property->isAdaptToBackButton_ = parcel.ReadBool();
+    property->isAdaptToDragScale_ = parcel.ReadBool();
     property->disableDragResize_ = parcel.ReadBool();
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();

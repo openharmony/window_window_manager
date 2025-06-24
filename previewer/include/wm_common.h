@@ -125,6 +125,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
+    WINDOW_TYPE_FB,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -169,11 +170,13 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_FB = 1 << 5,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FLOATING |
                               WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
-                              WINDOW_MODE_SUPPORT_PIP
+                              WINDOW_MODE_SUPPORT_PIP |
+                              WINDOW_MODE_SUPPORT_FB
 };
 
 /**
@@ -185,7 +188,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    WINDOW_MODE_FB,
 };
 
 /**
@@ -257,6 +261,14 @@ enum class WMError : int32_t {
     WM_ERROR_ILLEGAL_PARAM,
     WM_ERROR_FILTER_ERROR,
     WM_ERROR_TIMEOUT,
+    WM_ERROR_FB_PARAM_INVALID,
+    WM_ERROR_FB_CREATE_FAILED,
+    WM_ERROR_FB_REPEAT_CONTROLLER,
+    WM_ERROR_FB_REPEAT_OPERATION,
+    WM_ERROR_FB_INTERNAL_ERROR,
+    WM_ERROR_FB_STATE_ABNORMALLY,
+    WM_ERROR_FB_INVALID_STATE,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
 };
 
 /**
@@ -287,6 +299,14 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_ILLEGAL_PARAM = 1300016,
     WM_ERROR_FILTER_ERROR = 1300017,
     WM_ERROR_TIMEOUT = 1300018,
+    WM_ERROR_FB_PARAM_INVALID = 1300019,
+    WM_ERROR_FB_CREATE_FAILED = 1300020,
+    WM_ERROR_FB_REPEAT_CONTROLLER = 1300021,
+    WM_ERROR_FB_REPEAT_OPERATION = 1300022,
+    WM_ERROR_FB_INTERNAL_ERROR = 1300023,
+    WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
+    WM_ERROR_FB_INVALID_STATE = 1300025,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
 };
 
 /**
@@ -370,6 +390,15 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED     },
     {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
     {WMError::WM_ERROR_TIMEOUT,                        WmErrorCode::WM_ERROR_TIMEOUT                  },
+    {WMError::WM_ERROR_ILLEGAL_PARAM,                  WmErrorCode::WM_ERROR_ILLEGAL_PARAM            },
+    {WMError::WM_ERROR_FB_PARAM_INVALID,               WmErrorCode::WM_ERROR_FB_PARAM_INVALID         },
+    {WMError::WM_ERROR_FB_CREATE_FAILED,               WmErrorCode::WM_ERROR_FB_CREATE_FAILED         },
+    {WMError::WM_ERROR_FB_REPEAT_CONTROLLER,           WmErrorCode::WM_ERROR_FB_REPEAT_CONTROLLER     },
+    {WMError::WM_ERROR_FB_REPEAT_OPERATION,            WmErrorCode::WM_ERROR_FB_REPEAT_OPERATION      },
+    {WMError::WM_ERROR_FB_INTERNAL_ERROR,              WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR        },
+    {WMError::WM_ERROR_FB_STATE_ABNORMALLY,            WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY      },
+    {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
+    {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
 };
 
 /**
@@ -785,6 +814,7 @@ struct WindowDensityInfo {
 struct WindowPropertyInfo {
     Rect windowRect { 0, 0, 0, 0 };
     Rect drawableRect { 0, 0, 0, 0 };
+    Rect globalDisplayRect { 0, 0, 0, 0 };
     uint32_t apiCompatibleVersion = 0;
     WindowType type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     bool isLayoutFullScreen = false;
@@ -1192,6 +1222,9 @@ struct WindowMetaInfo : public Parcelable {
     uint64_t surfaceNodeId = 0;
     uint64_t leashWinSurfaceNodeId = 0;
     bool isPrivacyMode = false;
+    WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED;
+    bool isMidScene = false;
+    bool isFocused = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -1199,23 +1232,27 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteString(abilityName) && parcel.WriteInt32(appIndex) &&
                parcel.WriteUint32(static_cast<uint32_t>(windowType)) && parcel.WriteUint32(parentWindowId) &&
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
-               parcel.WriteBool(isPrivacyMode);
+               parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
+               parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode));
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
+        uint32_t windowModeValue = 1;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
             !parcel.ReadInt32(windowMetaInfo->appIndex) || !parcel.ReadUint32(windowTypeValue) ||
             !parcel.ReadUint32(windowMetaInfo->parentWindowId) || !parcel.ReadUint64(windowMetaInfo->surfaceNodeId) ||
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
-            !parcel.ReadBool(windowMetaInfo->isPrivacyMode)) {
+            !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
+            !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
+        windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
         return windowMetaInfo;
     }
 };

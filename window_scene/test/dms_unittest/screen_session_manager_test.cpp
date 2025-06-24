@@ -39,6 +39,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
+const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 std::string logMsg;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
     const char *msg)
@@ -6948,6 +6949,58 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 {
     DMError ret = ssm_->SetPrimaryDisplaySystemDpi(2.2);
     EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: SwitchPCMode
+ * @tc.desc: SwitchPCMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!IS_SUPPORT_PC_MODE) {
+        bool isPcDevice = ssm_->SwitchPCMode();
+        ASSERT_EQ(isPcDevice, g_isPcDevice);
+        return;
+    }
+    bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    bool isPcDevice = ssm_->SwitchPCMode();
+    if (isPcMode) {
+        EXPECT_TRUE(isPcDevice);
+    } else {
+        EXPECT_FALSE(isPcDevice);
+    }
+}
+
+/**
+ * @tc.name: SwitchExternalScreenToMirror
+ * @tc.desc: SwitchExternalScreenToMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->SwitchExternalScreenToMirror();
+    EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    ASSERT_NE(displayManagerAgent1, nullptr);
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption2";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
+    ssm_->SwitchExternalScreenToMirror();
+    EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+    ssm_->DestroyVirtualScreen(screenId);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
 }
 }
 } // namespace Rosen
