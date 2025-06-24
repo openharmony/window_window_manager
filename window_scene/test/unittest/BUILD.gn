@@ -40,6 +40,7 @@ group("unittest") {
     ":ws_scene_screen_change_listener_test",
     ":ws_scene_session_converter_test",
     ":ws_scene_session_lifecycle_test",
+    ":ws_scene_session_manager_kiosk_test",
     ":ws_scene_session_manager_lifecycle_test",
     ":ws_scene_session_manager_lifecycle_test2",
     ":ws_scene_session_manager_lite_stub_test",
@@ -53,11 +54,11 @@ group("unittest") {
     ":ws_scene_session_manager_supplement_test",
     ":ws_scene_session_manager_test",
     ":ws_scene_session_manager_two_test",
-    ":ws_scene_session_manager_kiosk_test",
     ":ws_scene_session_test",
     ":ws_scene_system_ability_listener_test",
     ":ws_session_change_recorder_test",
     ":ws_session_coordinate_helper_test",
+    ":ws_session_helper_test",
     ":ws_session_lifecycle_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
@@ -82,7 +83,6 @@ group("unittest") {
     ":ws_ssmgr_specific_window_test",
     ":ws_sub_session_lifecycle_test",
     ":ws_sub_session_test",
-    ":ws_session_helper_test",
     ":ws_system_session_lifecycle_test",
     ":ws_system_session_test",
     ":ws_task_scheduler_test",
@@ -136,9 +136,9 @@ test_external_deps = [
   "ability_runtime:ability_manager",
   "ability_runtime:app_manager",
   "ability_runtime:session_handler",
+  "access_token:libaccesstoken_sdk",
   "accessibility:accessibility_common",
   "accessibility:accessibility_interface",
-  "access_token:libaccesstoken_sdk",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
   "ffrt:libffrt",
@@ -270,9 +270,7 @@ ohos_unittest("ws_sub_session_test") {
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
-  defines = [
-    "ENABLE_MOCK_WRITE_STRING",
-  ]
+  defines = [ "ENABLE_MOCK_WRITE_STRING" ]
 
   sources = [ "sub_session_test.cpp" ]
 
@@ -528,7 +526,7 @@ ohos_unittest("ws_session_stage_proxy_lifecycle_test") {
 
   sources = [
     "../mock/mock_message_parcel.cpp",
-    "session_stage_proxy_lifecycle_test.cpp"
+    "session_stage_proxy_lifecycle_test.cpp",
   ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
@@ -553,7 +551,7 @@ ohos_unittest("ws_scene_session_manager_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock"
+    "${window_base_path}/window_scene/test/mock",
   ]
 
   sources = [
@@ -585,7 +583,7 @@ ohos_unittest("ws_scene_session_manager_one_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock"
+    "${window_base_path}/window_scene/test/mock",
   ]
 
   sources = [
@@ -624,7 +622,7 @@ ohos_unittest("ws_scene_session_manager_two_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock"
+    "${window_base_path}/window_scene/test/mock",
   ]
 
   sources = [
@@ -658,20 +656,18 @@ ohos_unittest("ws_scene_session_manager_kiosk_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock"
+    "${window_base_path}/window_scene/test/mock",
   ]
 
   sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
     "scene_session_manager_kiosk_test.cpp",
-    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp"
   ]
 
   deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
-  external_deps += [
-    "eventhandler:libeventhandler",
-  ]
+  external_deps += [ "eventhandler:libeventhandler" ]
 }
 
 ohos_unittest("ws_window_manager_service_dump_test") {
@@ -726,9 +722,7 @@ ohos_unittest("ws_scene_session_manager_proxy_test") {
     "scene_session_manager_proxy_test.cpp",
   ]
 
-  defines = [
-    "ENABLE_MOCK_READ_INT32"
-  ]
+  defines = [ "ENABLE_MOCK_READ_INT32" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -853,7 +847,7 @@ ohos_unittest("ws_scene_session_manager_stub_test2") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
-    "scene_session_manager_stub_test2.cpp"
+    "scene_session_manager_stub_test2.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
@@ -1150,9 +1144,7 @@ ohos_unittest("ws_session_stage_proxy_test") {
     "session_stage_proxy_test.cpp",
   ]
 
-  defines = [
-    "ENABLE_MOCK_WRITE_STRING",
-  ]
+  defines = [ "ENABLE_MOCK_WRITE_STRING" ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
@@ -1534,21 +1526,17 @@ ohos_unittest("ws_scene_screen_change_listener_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock/"
+    "${window_base_path}/window_scene/test/mock/",
   ]
 
-  sources = [
-    "scene_screen_change_listener_test.cpp",
-  ]
+  sources = [ "scene_screen_change_listener_test.cpp" ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 
   deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
-  external_deps += [
-    "ability_base:session_info",
-  ]
+  external_deps += [ "ability_base:session_info" ]
 }
 
 ohos_unittest("ws_session_coordinate_helper_test") {
@@ -1556,12 +1544,10 @@ ohos_unittest("ws_session_coordinate_helper_test") {
 
   include_dirs = [
     "${window_base_path}/test/common/utils/include/",
-    "${window_base_path}/window_scene/test/mock"
+    "${window_base_path}/window_scene/test/mock/",
   ]
 
-  sources = [
-    "session_coordinate_helper_test.cpp",
-  ]
+  sources = [ "session_coordinate_helper_test.cpp" ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 

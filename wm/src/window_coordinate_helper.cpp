@@ -19,14 +19,14 @@
 
 namespace OHOS {
 namespace Rosen {
-Rect WindowCoordinateHelper::ComputeScaledRect(const Rect& rect, const Transform& transform)
+Rect WindowCoordinateHelper::ComputeScaledRect(const Rect& originalRect, const Transform& transform)
 {
     // Compute the absolute position of the scaling center (pivot)
-    double pivotAbsX = static_cast<double>(rect.posX_) + rect.width_ * transform.pivotX_;
-    double pivotAbsY = static_cast<double>(rect.posY_) + rect.height_ * transform.pivotY_;
+    double pivotAbsX = static_cast<double>(originalRect.posX_) + originalRect.width_ * transform.pivotX_;
+    double pivotAbsY = static_cast<double>(originalRect.posY_) + originalRect.height_ * transform.pivotY_;
     // Apply scaling to width and height
-    double scaledWidth = rect.width_ * transform.scaleX_;
-    double scaledHeight = rect.height_ * transform.scaleY_;
+    double scaledWidth = originalRect.width_ * transform.scaleX_;
+    double scaledHeight = originalRect.height_ * transform.scaleY_;
     // Recalculate the top-left corner after scaling
     double scaledPosX = pivotAbsX - scaledWidth * transform.pivotX_;
     double scaledPosY = pivotAbsY - scaledHeight * transform.pivotY_;
@@ -41,31 +41,32 @@ Rect WindowCoordinateHelper::ComputeScaledRect(const Rect& rect, const Transform
     };
 }
 
-Position WindowCoordinateHelper::LocalToExternal(const Rect& window, const Position& localPos)
+Position WindowCoordinateHelper::LocalToExternal(const Rect& windowRect, const Position& localPos)
 {
-    int32_t externalX = window.posX_ + localPos.x;
-    int32_t externalY = window.posY_ + localPos.y;
+    int32_t externalX = windowRect.posX_ + localPos.x;
+    int32_t externalY = windowRect.posY_ + localPos.y;
     return { externalX, externalY };
 }
 
 Position WindowCoordinateHelper::LocalToExternal(
-    const Rect& window, const Transform& transform, const Position& localPos)
+    const Rect& originalWindowRect, const Transform& transform, const Position& localPos)
 {
-    Rect scaledWindow = ComputeScaledRect(window, transform);
-    int32_t externalX = scaledWindow.posX_ + static_cast<int32_t>(std::round(localPos.x * transform.scaleX_));
-    int32_t externalY = scaledWindow.posY_ + static_cast<int32_t>(std::round(localPos.y * transform.scaleY_));
+    // scaledWindowRect is the actual rect after applying scaling, still in external coordinates
+    Rect scaledWindowRect = ComputeScaledRect(originalWindowRect, transform);
+    int32_t externalX = scaledWindowRect.posX_ + static_cast<int32_t>(std::round(localPos.x * transform.scaleX_));
+    int32_t externalY = scaledWindowRect.posY_ + static_cast<int32_t>(std::round(localPos.y * transform.scaleY_));
     return { externalX, externalY };
 }
 
-Position WindowCoordinateHelper::ExternalToLocal(const Rect& window, const Position& externalPos)
+Position WindowCoordinateHelper::ExternalToLocal(const Rect& windowRect, const Position& externalPos)
 {
-    int32_t localX = externalPos.x - window.posX_;
-    int32_t localY = externalPos.y - window.posY_;
+    int32_t localX = externalPos.x - windowRect.posX_;
+    int32_t localY = externalPos.y - windowRect.posY_;
     return { localX, localY };
 }
 
 Position WindowCoordinateHelper::ExternalToLocal(
-    const Rect& window, const Transform& transform, const Position& externalPos)
+    const Rect& originalWindowRect, const Transform& transform, const Position& externalPos)
 {
     constexpr float EPSILON = 1e-6f;
     auto IsZero = [](float value) {
@@ -77,9 +78,10 @@ Position WindowCoordinateHelper::ExternalToLocal(
             transform.scaleX_, transform.scaleY_);
         return { 0, 0 };
     }
-    Rect scaledWindow = ComputeScaledRect(window, transform);
-    int32_t localX = static_cast<int32_t>((externalPos.x - scaledWindow.posX_) / transform.scaleX_);
-    int32_t localY = static_cast<int32_t>((externalPos.y - scaledWindow.posY_) / transform.scaleY_);
+    // scaledWindowRect is the actual rect after applying scaling, still in external coordinates
+    Rect scaledWindowRect = ComputeScaledRect(originalWindowRect, transform);
+    int32_t localX = static_cast<int32_t>((externalPos.x - scaledWindowRect.posX_) / transform.scaleX_);
+    int32_t localY = static_cast<int32_t>((externalPos.y - scaledWindowRect.posY_) / transform.scaleY_);
     return { localX, localY };
 }
 } // namespace Rosen

@@ -60,6 +60,9 @@ ohos_static_library("libwm_static") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/floating_ball_controller.cpp",
+    "src/floating_ball_manager.cpp",
+    "src/floating_ball_option.cpp",
     "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
@@ -97,9 +100,6 @@ ohos_static_library("libwm_static") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
-    "src/floating_ball_controller.cpp",
-    "src/floating_ball_manager.cpp",
-    "src/floating_ball_option.cpp",
   ]
 
   configs = [
@@ -208,6 +208,9 @@ ohos_shared_library("libwm") {
     "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/extension_window.cpp",
     "src/extension_window_impl.cpp",
+    "src/floating_ball_controller.cpp",
+    "src/floating_ball_manager.cpp",
+    "src/floating_ball_option.cpp",
     "src/future_callback.cpp",
     "src/gtx_input_event_sender.cpp",
     "src/input_transfer_station.cpp",
@@ -245,9 +248,6 @@ ohos_shared_library("libwm") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
-    "src/floating_ball_controller.cpp",
-    "src/floating_ball_manager.cpp",
-    "src/floating_ball_option.cpp",
   ]
 
   configs = [
@@ -379,9 +379,9 @@ ohos_shared_library("libwm_lite") {
     "hilog:libhilog",
     "image_framework:image_native",
     "init:libbegetutil",
+    "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "input:libmmi-client",
   ]
 
   defines += [ "FRAME_TRACE_ENABLE" ]
