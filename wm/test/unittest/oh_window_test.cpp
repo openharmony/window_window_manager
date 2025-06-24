@@ -146,6 +146,7 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     auto ret = OH_WindowManager_InjectTouchEvent(windowId, nullptr, windowX, windowY);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
     Input_TouchEvent* touchEvent = OH_Input_CreateTouchEvent();
+    ASSERT_NE(nullptr, touchEvent);
     touchEvent->actionTime = 100;
     touchEvent->id = 1;
     touchEvent->action = static_cast<Input_TouchEventAction>(10);
@@ -164,6 +165,7 @@ HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
     OH_Input_SetTouchEventWindowId(touchEvent, windowId);
     ret = OH_WindowManager_InjectTouchEvent(windowId, touchEvent, windowX, windowY);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_Input_DestroyTouchEvent(&touchEvent);
 }
 }
 } // namespace Rosen
