@@ -45,11 +45,11 @@ public:
      * This function applies scaling to the given rectangle based on the specified pivot point.
      * The pivot defines the relative scaling center within the rectangle that remains stationary during scaling.
      *
-     * @param rect The original rectangle in external coordinates.
+     * @param originalRect The original rectangle in external coordinates.
      * @param transform The transformation parameters, including scaling factors and pivot (scaling center).
      * @return The scaled rectangle (absolute coordinates after transformation).
      */
-    static Rect ComputeScaledRect(const Rect& rect, const Transform& transform);
+    static Rect ComputeScaledRect(const Rect& originalRect, const Transform& transform);
 
     /**
      * Convert a position from window-local coordinates to external coordinates without transformation.
@@ -57,24 +57,27 @@ public:
      * This function transforms a position defined relative to the window's local origin (top-left corner)
      * directly into external coordinates, assuming no window scaling transformation.
      *
-     * @param window The window rectangle in external coordinates.
+     * @param windowRect The window rectangle in external coordinates.
      * @param localPos The position relative to the window's local origin.
      * @return The position in external coordinates.
      */
-    static Position LocalToExternal(const Rect& window, const Position& localPos);
+    static Position LocalToExternal(const Rect& windowRect, const Position& localPos);
 
     /**
      * Convert a position from window-local coordinates to external coordinates.
      *
      * This function transforms a position defined relative to the window's local origin (top-left corner)
-     * into external coordinates, based on the applied window transformation (scaling).
+     * into external coordinates, based on the window's applied transformation (scaling and pivot).
      *
-     * @param window The window rectangle in external coordinates.
+     * @param originalWindowRect The original rectangle of the window in external coordinates,
+     *                           before scaling is applied. The actual displayed size and position
+     *                           may differ due to scaling.
      * @param transform The transformation applied to the window, including scaling and pivot.
      * @param localPos The position relative to the window's local origin.
      * @return The position in external coordinates.
      */
-    static Position LocalToExternal(const Rect& window, const Transform& transform, const Position& localPos);
+    static Position LocalToExternal(
+        const Rect& originalWindowRect, const Transform& transform, const Position& localPos);
 
     /**
      * Convert a position from external coordinates to window-local coordinates without transformation.
@@ -82,25 +85,29 @@ public:
      * This function converts a position defined in external coordinates into the window's local
      * coordinates, assuming no window scaling transformation.
      *
-     * @param window The window rectangle in external coordinates.
+     * @param windowRect The window rectangle in external coordinates.
      * @param externalPos The position in external coordinates.
      * @return The position in window-local coordinates.
      */
-    static Position ExternalToLocal(const Rect& window, const Position& externalPos);
+    static Position ExternalToLocal(const Rect& windowRect, const Position& externalPos);
+
 
     /**
      * Convert a position from external coordinates to window-local coordinates.
      *
      * This function transforms a position defined in external coordinates into the window's local
-     * coordinates. The transformation is performed based on the window's applied Transform, which
-     * includes scaling and pivot (scaling center).
+     * coordinates. The transformation is based on the window's applied Transform, which includes
+     * scaling and pivot (scaling center).
      *
-     * @param window The window rectangle in external coordinates.
+     * @param originalWindowRect The original rectangle of the window in external coordinates,
+     *                           before scaling is applied. The actual displayed size and position
+     *                           may differ due to scaling.
      * @param transform The transformation applied to the window, including scaling and pivot.
      * @param externalPos The position in external coordinates.
      * @return The position in window-local coordinates.
      */
-    static Position ExternalToLocal(const Rect& window, const Transform& transform, const Position& externalPos);
+    static Position ExternalToLocal(
+        const Rect& originalWindowRect, const Transform& transform, const Position& externalPos);
 };
 } // namespace Rosen
 } // namespace OHOS

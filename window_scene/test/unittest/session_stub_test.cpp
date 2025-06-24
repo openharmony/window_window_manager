@@ -1738,7 +1738,8 @@ HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | 
 HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Level1)
 {
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
-
+    MessageParcel reply;
+    MessageOption option;
     const int32_t posX = 100;
     const int32_t posY = 200;
     const int32_t width = 300;
@@ -1748,8 +1749,6 @@ HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Leve
 
     // Case 1: Write all valid data
     {
-        MessageParcel reply;
-        MessageOption option;
         MessageParcel data;
         EXPECT_TRUE(data.WriteInt32(posX));
         EXPECT_TRUE(data.WriteInt32(posY));
@@ -1762,8 +1761,6 @@ HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Leve
 
     // Case 2: Malformed rect (missing height)
     {
-        MessageParcel reply;
-        MessageOption option;
         MessageParcel data;
         data.WriteInt32(posX);
         data.WriteInt32(posY);
@@ -1774,8 +1771,6 @@ HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Leve
 
     // Case 3: Missing reason
     {
-        MessageParcel reply;
-        MessageOption option;
         MessageParcel data;
         data.WriteInt32(posX);
         data.WriteInt32(posY);
@@ -1787,8 +1782,6 @@ HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClient, TestSize.Leve
 
     // Case 4: Invalid reason
     {
-        MessageParcel reply;
-        MessageOption option;
         MessageParcel data;
         data.WriteInt32(posX);
         data.WriteInt32(posY);
