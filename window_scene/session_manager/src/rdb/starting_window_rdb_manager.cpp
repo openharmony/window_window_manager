@@ -55,6 +55,7 @@ constexpr int32_t DB_BACKGROUND_IMAGE_FIT_INDEX = 13;
 constexpr int32_t DB_STARTWINDOW_TYPE_INDEX = 14;
 constexpr const char* PROFILE_PREFIX = "$profile:";
 constexpr uint16_t MAX_JSON_STRING_LENGTH = 4096;
+constexpr int32_t DEFAULT_ROW_COUNT = -1;
 
 NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value)
 {
@@ -180,7 +181,7 @@ bool StartingWindowRdbManager::DeleteDataByBundleName(const std::string& bundleN
         TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
         return false;
     }
-    int32_t deletedRows = -1;
+    int32_t deletedRows = DEFAULT_ROW_COUNT;
     NativeRdb::AbsRdbPredicates absRdbPredicates(wmsRdbConfig_.tableName);
     absRdbPredicates.EqualTo(DB_BUNDLE_NAME, bundleName);
     auto ret = rdbStore->Delete(deletedRows, absRdbPredicates);
@@ -194,7 +195,7 @@ bool StartingWindowRdbManager::DeleteAllData()
         TLOGE(WmsLogTag::WMS_PATTERN, "RdbStore is null");
         return false;
     }
-    int32_t deletedRows = -1;
+    int32_t deletedRows = DEFAULT_ROW_COUNT;
     NativeRdb::AbsRdbPredicates absRdbPredicates(wmsRdbConfig_.tableName);
     auto ret = rdbStore->Delete(deletedRows, absRdbPredicates);
     return CheckRdbResult(ret);
