@@ -5127,7 +5127,7 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     int64_t outInsertNum = -1;
     auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
     TLOGI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
-        batchInsertRes, bundleInfos.size() ,outInsertNum);
+        batchInsertRes, bundleInfos.size(), outInsertNum);
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
