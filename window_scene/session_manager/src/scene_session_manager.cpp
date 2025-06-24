@@ -9861,12 +9861,16 @@ WMError SceneSessionManager::SetSurfaceNodeIds(const std::vector<uint64_t>& surf
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &surfaceNodeIds]() {
-        std::map<int32_t, sptr<SceneSession>>::iterator iter;
         for (auto surfaceNodeId : surfaceNodeIds) {
-            sptr<SceneSession> sceneSession = SelectSesssionFromMap(iter);
+            sptr<SceneSession> sceneSession = SelectSesssionFromMap(surfaceNodeId);
             if (sceneSession == nullptr) {
                 continue;
             }
+            auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+            if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+                displayId = sceneSession->GetClientDisplayId();
+            }
+            sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
         }
         return WMError::WM_OK;
     };
