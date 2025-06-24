@@ -22,6 +22,9 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
+#define private public
+#include "session/host/include/keyboard_session.h"
+#undef private public
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +35,7 @@ namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
 } // namespace
+static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 class SceneSessionManagerTest7 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -44,7 +48,6 @@ public:
     static sptr<SceneSessionManager> ssm_;
 
 private:
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
     static constexpr uint32_t WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS = 500000;
     static constexpr uint32_t WAIT_SYNC_FOR_TEST_END_IN_NS = 1000000;
 };
@@ -320,11 +323,15 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams03, Function | SmallTest | Level
     SessionUIParam keyboardSessionUIParam;
     uiParams.insert(std::make_pair(1, callingSessionUIParam));
     uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
-
-    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    keyboardSession->stateChanged_ = true;
+    ssm_->FlushUIParams(screenId, uiParams);
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_EQ(false, keyboardSession->stateChanged_);
     
     keyboardSession->SetScreenId(999);
-    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    keyboardSession->stateChanged_ = true;
+    ssm_->FlushUIParams(screenId, uiParams);
+    ASSERT_EQ(true, keyboardSession->stateChanged_);
 }
 
 /**
