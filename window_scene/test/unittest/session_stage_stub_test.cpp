@@ -1173,11 +1173,11 @@ HWTEST_F(SessionStageStubTest, HandleSendFbActionEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestHandleUpdateGlobalDisplayRectFromServer
+ * @tc.name: TestHandleUpdateGlobalDisplayRectFromServerFailed
  * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer for various data scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServer, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServerFailed, TestSize.Level1)
 {
     // Case 1: Invalid rect fields
     {
@@ -1216,7 +1216,7 @@ HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServer, Test
         EXPECT_EQ(result, ERR_INVALID_DATA);
     }
 
-    // Case 4: All fields valid
+    // Case 4: Invalid reason
     {
         MessageParcel data;
         MessageParcel reply;
@@ -1224,10 +1224,28 @@ HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServer, Test
         data.WriteInt32(20);
         data.WriteInt32(100);
         data.WriteInt32(200);
-        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED));
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1); // Invalid reason
         int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
-        EXPECT_EQ(result, ERR_NONE);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
     }
+}
+
+/**
+ * @tc.name: TestHandleUpdateGlobalDisplayRectFromServerSuccess
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer for various data scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, TestHandleUpdateGlobalDisplayRectFromServerSuccess, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteInt32(100);
+    data.WriteInt32(200);
+    data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED));
+    int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

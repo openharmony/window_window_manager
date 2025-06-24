@@ -655,25 +655,6 @@ public:
                parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
     }
 
-    std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "["
-            << "pivotX=" << pivotX_ << ", "
-            << "pivotY=" << pivotY_ << ", "
-            << "scaleX=" << scaleX_ << ", "
-            << "scaleY=" << scaleY_ << ", "
-            << "scaleZ=" << scaleZ_ << ", "
-            << "rotationX=" << rotationX_ << ", "
-            << "rotationY=" << rotationY_ << ", "
-            << "rotationZ=" << rotationZ_ << ", "
-            << "translateX=" << translateX_ << ", "
-            << "translateY=" << translateY_ << ", "
-            << "translateZ=" << translateZ_
-            << "]";
-        return oss.str();
-    }
-
 private:
     static inline bool NearZero(float val)
     {

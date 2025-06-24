@@ -917,26 +917,6 @@ public:
         translateY_ = parcel.ReadFloat();
         translateZ_ = parcel.ReadFloat();
     }
-
-    std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "["
-            << "pivotX=" << pivotX_ << ", "
-            << "pivotY=" << pivotY_ << ", "
-            << "scaleX=" << scaleX_ << ", "
-            << "scaleY=" << scaleY_ << ", "
-            << "scaleZ=" << scaleZ_ << ", "
-            << "rotationX=" << rotationX_ << ", "
-            << "rotationY=" << rotationY_ << ", "
-            << "rotationZ=" << rotationZ_ << ", "
-            << "translateX=" << translateX_ << ", "
-            << "translateY=" << translateY_ << ", "
-            << "translateZ=" << translateZ_
-            << "]";
-        return oss.str();
-    }
-
 private:
     static inline bool NearZero(float val)
     {
