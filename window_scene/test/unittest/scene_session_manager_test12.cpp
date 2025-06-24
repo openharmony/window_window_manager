@@ -2526,13 +2526,13 @@ HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Leve
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "testBundleName";
     sessionInfo.moduleName_ = "testModuleName";
-    sessionInfo.abilityName_ = "testAbilityName"
+    sessionInfo.abilityName_ = "testAbilityName";
     sessionInfo.persistentId_ = 101;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
+    WMError result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
     EXPECT_EQ(result, WMError::WM_OK);
-    ssm_->sceneSessionMap_->erase(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 } // namespace
 } // namespace Rosen
