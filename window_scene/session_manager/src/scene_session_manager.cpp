@@ -14329,7 +14329,7 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
 
 WMError SceneSessionManager::NotifyHookOrientationChange(int32_t persistentId)
 {
-    auto sceneSession = GetSceneSession();
+    auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "session id:%{public}d is not found", persistentId);
         return WMError::WM_ERROR_INVALID_PARAM;
