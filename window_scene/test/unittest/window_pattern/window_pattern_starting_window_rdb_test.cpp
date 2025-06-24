@@ -155,6 +155,23 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, TestSize.Le
 }
 
 /**
+ * @tc.name: DeleteAllData
+ * @tc.desc: DeleteAllData
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteAllData, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    StartingWindowRdbItemKey itemKey;
+    itemKey.bundleName = "testName";
+    StartingWindowInfo startingWindowInfo;
+    auto res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
+    ASSERT_EQ(res, true);
+    res = startingWindowRdbMgr_->DeleteAllData();
+    ASSERT_EQ(res, true);
+}
+
+/**
  * @tc.name: QueryData
  * @tc.desc: QueryData
  * @tc.type: FUNC
