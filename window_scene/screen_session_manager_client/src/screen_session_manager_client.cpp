@@ -321,6 +321,13 @@ void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::v
     }
 }
 
+void ScreenSessionManagerClient::OnSetSurfaceNodeIdsChanged(const std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnSetSurfaceNodeIds(surfaceNodeIds);
+    }
+}
+
 void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
 {
     if (displayChangeListener_) {

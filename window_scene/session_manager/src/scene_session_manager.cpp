@@ -9848,6 +9848,31 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
     return taskScheduler_->PostSyncTask(task, "BindDialogTarget:PID:" + std::to_string(persistentId));
 }
 
+void DisplayChangeListener::OnSetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds)
+{
+    SceneSessionManager::GetInstance().SetSurfaceNodeIds(missionIds, surfaceNodeIds, isBlackList);
+}
+
+WMError SceneSessionManager::SetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds)
+{
+    auto isSaCall = SessionPermission::IsSACalling();
+    if (!isSaCall) {
+        TLOGE(WmsLogTag::DEFAULT, "The interface only support for sa call");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, &surfaceNodeIds]() {
+        std::map<int32_t, sptr<SceneSession>>::iterator iter;
+        for (auto surfaceNodeId : surfaceNodeIds) {
+            sptr<SceneSession> sceneSession = SelectSesssionFromMap(iter);
+            if (sceneSession == nullptr) {
+                continue;
+            }
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetSurfaceNodeIdsFromMissionIds");
+}
+
 void DisplayChangeListener::OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
     std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
