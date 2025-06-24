@@ -14334,8 +14334,8 @@ WMError SceneSessionManager::NotifyHookOrientationChange(int32_t persistentId)
         TLOGE(WmsLogTag::WMS_COMPAT, "session id:%{public}d is not found", persistentId);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    sceneSession::UpdateOrientation();
-    return WMError::WM_OK; 
+    sceneSession->UpdateOrientation();
+    return WMError::WM_OK;
 }
 
 void DisplayChangeListener::OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo)
