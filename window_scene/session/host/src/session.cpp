@@ -2602,7 +2602,7 @@ uint32_t Session::GetBackgroundColor() const
     std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
     if (appContext != nullptr) {
         std::shared_ptr<AppExecFwk::Configuration> appConfig = appContext->GetConfiguration();
-        if (config != nullptr) {
+        if (appConfig != nullptr) {
             std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             backgroundColor = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
             TLOGI(WmsLogTag::WMS_PATTERN, "set backgroundColor success, backgroundColor:%{public}u", backgroundColor);
