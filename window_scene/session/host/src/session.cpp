@@ -2597,19 +2597,19 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
 
 uint32_t Session::GetBackgroundColor() const
 {
-    uint32_t backgroundColor = COLOR_WHITE;
+    uint32_t backGround = COLOR_WHITE;
     std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
     if (appContext != nullptr) {
         std::shared_ptr<AppExecFwk::Configuration> appConfig = appContext->GetConfiguration();
         if (appConfig != nullptr) {
             std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            backgroundColor = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
-            TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}u", backgroundColor);
+            backGround = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
+            TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}u", backGround);
         }
     } else {
-        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backgroundColor WHITE");
+        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backGround WHITE");
     }
-    return backgroundColor;
+    return backGround;
 }
 
 void Session::ResetSnapshot()
