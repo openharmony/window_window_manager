@@ -260,26 +260,25 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
     return aniRect;
 }
 
-
 ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& decorButtonStyle)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "[ANI]");
     ani_class aniClass;
     ani_status ret = env->FindClass("L@ohos/window/window/DecorButtonStyle;", &aniClass);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
     ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_object aniDecorButtonStyle;
     ret = env->Object_New(aniClass, aniCtor, &aniDecorButtonStyle);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
@@ -299,19 +298,19 @@ ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleBut
     ani_class aniClass;
     ani_status ret = env->FindClass("L@ohos/window/window/TitleButtonRect;", &aniClass);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] class not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_method aniCtor;
     ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_object aniTitleButtonRect;
     ret = env->Object_New(aniClass, aniCtor, &aniTitleButtonRect);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        TLOGE(WmsLogTag::WMS_DECOR, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
     CallAniMethodVoid(env, aniTitleButtonRect, aniClass, "<set>right", nullptr, ani_double(titleButtonRect.posX_));

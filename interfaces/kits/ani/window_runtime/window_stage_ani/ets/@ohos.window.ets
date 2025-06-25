@@ -1300,8 +1300,7 @@ export interface WindowLimits {
      * @type { number }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
-     * @since arkts {'1.1':'12', '1.2':'20'}
-     * @arkts 1.1&1.2
+     * @since 12
      */
     width: number;
 
@@ -1391,7 +1390,7 @@ export interface GetWindowsByCoordinateParam {
   displayId: number;
   windowNumber: number;
   x: number;
-  y:number;
+  y: number;
 }
 
 /**
@@ -1617,11 +1616,11 @@ export class WindowStageInternal implements WindowStage {
     public setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-            this.setWindowRectAutoSave(this.nativeObj, enabled, isSaveBySpecifiedFlag);
-        }).then((ret: NullishType) => {
-            resolve(undefined);
-        }).catch((err: NullishType) => {
-            reject(err as BusinessError);
+          this.setWindowRectAutoSave(this.nativeObj, enabled, isSaveBySpecifiedFlag);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -1629,11 +1628,11 @@ export class WindowStageInternal implements WindowStage {
     public setWindowRectAutoSave(enabled: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-            this.setWindowRectAutoSave(this.nativeObj, enabled, false);
-        }).then((ret: NullishType) => {
-            resolve(undefined);
-        }).catch((err: NullishType) => {
-            reject(err as BusinessError);
+          this.setWindowRectAutoSave(this.nativeObj, enabled, false);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -1641,11 +1640,11 @@ export class WindowStageInternal implements WindowStage {
     public isWindowRectAutoSave(): Promise<boolean> {
       return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): boolean => {
-            return this.isWindowRectAutoSave(this.nativeObj);
-        }).then((ret: NullishType) => {
-            resolve(ret as boolean);
-        }).catch((err: NullishType) => {
-            reject(err as BusinessError);
+          return this.isWindowRectAutoSave(this.nativeObj);
+        }).then((ret: NullishType): void => {
+          resolve(ret as boolean);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -1653,11 +1652,11 @@ export class WindowStageInternal implements WindowStage {
     public removeStartingWindow(): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-            this.removeStartingWindow(this.nativeObj);
-        }).then((ret: NullishType) => {
-            resolve(undefined);
-        }).catch((err: NullishType) => {
-            reject(err as BusinessError);
+          this.removeStartingWindow(this.nativeObj);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -1749,7 +1748,7 @@ export interface WindowStage {
     setWindowRectAutoSave(enabled: boolean): Promise<void>;
     isWindowRectAutoSave(): Promise<boolean>;
     setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void>;
-    removeStartinngWindow(): Promise<void>;
+    removeStartingWindow(): Promise<void>;
     loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
@@ -1783,7 +1782,7 @@ export class WindowInternal implements Window {
     private native getTitleButtonRect(nativeObj: long): TitleButtonRect;
     private native setTitleButtonVisible(nativeObj: long, visibleParam: TitleButtonVisibleParam): void;
     private native setWindowTitleMoveEnabled(nativeObj: long, enabled: boolean): void;
-    private native setWindowTopmost(nativeObj: long, isWindowTopMost: boolean): void;
+    private native setWindowTopmost(nativeObj: long, isWindowTopmost: boolean): void;
     private native setTitleAndDockHoverShown(nativeObj: long, isTitleHoverShown: boolean, isDockHoverShown: boolean): void;
     private native restore(nativeObj: long): void;
 
@@ -1844,17 +1843,17 @@ export class WindowInternal implements Window {
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
     public setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.setFollowParentWindowLayoutEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
-    
+
     public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
       this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
     }
@@ -1868,37 +1867,37 @@ export class WindowInternal implements Window {
     }
 
     public stopMoving(): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.stopMoving(this.nativeObj);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
 
     public setParentWindow(windowId: number): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.setParentWindow(this.nativeObj, windowId);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
 
     public setWindowTitle(titleName: string): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.setWindowTitle(this.nativeObj, titleName);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -1918,7 +1917,7 @@ export class WindowInternal implements Window {
         isMinimizeVisible: isMinimizeVisible,
         isSplitVisible: isSplitVisible,
         isCloseVisible: true,
-      }
+      };
       this.setTitleButtonVisible(this.nativeObj, visibleParam);
     }
 
@@ -1927,45 +1926,45 @@ export class WindowInternal implements Window {
     }
 
     public setWindowTopmost(isWindowTopmost: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.setWindowTopmost(this.nativeObj, isWindowTopmost);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
 
     public setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
-          let titlShow: boolean = true;
+          let titleShow: boolean = true;
           if (isTitleHoverShown != undefined) {
-            titlShow = isTitleHoverShown;
+            titleShow = isTitleHoverShown;
           }
-          let dockSHow: boolean = true;
+          let dockShow: boolean = true;
           if (isDockHoverShown != undefined) {
-            dockSHow = isDockHoverShown;
+            dockShow = isDockHoverShown;
           }
-          this.setTitleAndDockHoverShown(this.nativeObj, titlShow, dockSHow);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+          this.setTitleAndDockHoverShown(this.nativeObj, titleShow, dockShow);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
 
     public restore(): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.restore(this.nativeObj);
-        }).then((ret: NullishType) :void => {
-            resolve(undefined);
-        }).catch((err: NullishType) :void => {
-            reject(err as BusinessError);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -2799,7 +2798,7 @@ export function setNativeObj(nativeObject: long):void {
     nativeObj = nativeObject;
 }
 
-native function getWindowByCoordinate(nativeObj: long, param: window.GetWindowsByCoordinateParam): Array<Window>;
+native function getWindowsByCoordinate(nativeObj: long, param: window.GetWindowsByCoordinateParam): Array<Window>;
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function minimizeAllSync(nativeObj: long, id: number): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
@@ -2854,16 +2853,16 @@ export function minimizeAll(id: number, callback: AsyncCallback<void>): void {
 }
 
 export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
-                                       x?: number, y?:number): Promise<Array<Window>> {
-  return new Promise<Array<Window>((resolve: (value: Array<Window>) => void,
-                                    reject: (error: BusinessError) => void): void => {
-    taskpool.execute((): void => {
+                                       x?: number, y?: number): Promise<Array<Window>> {
+  return new Promise<Array<Window>>((resolve: (value: Array<Window>) => void,
+                                     reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): Array<Window> => {
       let param: window.GetWindowsByCoordinateParam = {
         displayId: displayId,
         windowNumber: 0,
         x: -1,
         y: -1
-      }
+      };
       if (windowNumber != undefined) {
         param.windowNumber = windowNumber;
       }
@@ -2873,13 +2872,13 @@ export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
       if (y != undefined) {
         param.y = y;
       }
-      return getWindowByCoordinate(nativeObj, param);
+      return getWindowsByCoordinate(nativeObj, param);
     }).then((ret: NullishType) => {
         resolve(ret as Array<Window>);
     }).catch((err: NullishType) => {
         reject(err as BusinessError);
     });
-  }); 
+  });
 }
 
 export function findWindow(name: string): Window {
