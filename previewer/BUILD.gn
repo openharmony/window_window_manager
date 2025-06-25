@@ -78,6 +78,7 @@ if (!ispreview) {
       "mock",
       "../utils/include",
       "${ide_previewer_external_path}",
+      "${window_base_path}/interfaces/kits/napi/window_animation",
     ]
     public_deps = [
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:ipc_core",
@@ -135,6 +136,7 @@ if (!ispreview) {
       "../utils/include",
       "mock",
       "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+      "${window_base_path}/interfaces/kits/napi/window_animation",
     ]
 
     deps = [

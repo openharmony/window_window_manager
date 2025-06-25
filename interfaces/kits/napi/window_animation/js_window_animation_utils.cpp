@@ -15,21 +15,28 @@
 
 #include "js_window_animation_utils.h"
 
-#include <iomanip>
-#include <regex>
-#include <sstream>
-
-#include "accesstoken_kit.h"
-#include "bundle_constants.h"
-#include "ipc_skeleton.h"
-#include "js_err_utils.h"
-#include "js_window.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
+
+template<class T>
+bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+    if (type != napi_undefined) {
+        if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
 {
@@ -48,6 +55,37 @@ napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<Tra
     return objValue;
 }
 
+napi_value ConvertStartAnimationOptionsToJsValue(napi_env env,
+    std::shared_ptr<StartAnimationOptions> startAnimationOptions)
+{
+    napi_value objValue = nullptr;
+    if (!startAnimationOptions) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, startAnimationOptions->animationType));
+    return objValue;
+}
+
+napi_value ConvertStartAnimationSystemOptionsToJsValue(napi_env env,
+    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions)
+{
+    napi_value objValue = nullptr;
+    if (!startAnimationSystemOptions) {
+        return objValue;
+    }
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "type", CreateJsValue(env, startAnimationSystemOptions->animationType));
+    if (startAnimationSystemOptions->animationConfig != nullptr) {
+        napi_value configJsValue = ConvertWindowAnimationOptionToJsValue(env,
+            *(startAnimationSystemOptions->animationConfig));
+        if (configJsValue != nullptr) {
+            napi_set_named_property(env, objValue, "animationConfig", configJsValue);
+        }
+    }
+    return objValue;
+}
+
 napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig)
 {
@@ -59,7 +97,8 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
             break;
         }
-        case WindowAnimationCurve::INTERPOLATION_SPRING: {
+        case WindowAnimationCurve::INTERPOLATION_SPRING:
+        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
@@ -103,6 +142,40 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     return true;
 }
 
+bool ConvertStartAnimationOptionsFromJsValue(napi_env env, napi_value jsObject,
+    StartAnimationOptions& startAnimationOptions)
+{
+    uint32_t animationType = 0;
+    if (!ParseJsValue(jsObject, env, "type", animationType)) {
+        return false;
+    }
+    startAnimationOptions.animationType = static_cast<AnimationType>(animationType);
+    return true;
+}
+
+// TODO 加默认错误码参数，用来兼容需要错误码的场景
+// TODO windowTransitionType新增转换机制，START需要注册
+bool ConvertStartAnimationSystemOptionsFromJsValue(napi_env env, napi_value jsObject,
+    StartAnimationSystemOptions& startAnimationSystemOptions)
+{
+    WmErrorCode result = WmErrorCode::WM_OK;
+    uint32_t animationType = 0;
+    if (!ParseJsValue(jsObject, env, "type", animationType)) {
+        return false;
+    }
+    startAnimationSystemOptions.animationType = static_cast<AnimationType>(animationType);
+    napi_value jsAnimationConfig = nullptr;
+    napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
+    if (jsAnimationConfig == nullptr) {
+        return true;
+    }
+    if (!ConvertWindowAnimationOptionFromJsValue(env, jsAnimationConfig, *(startAnimationSystemOptions.animationConfig),
+        result) ||!CheckWindowAnimationOption(env, *(startAnimationSystemOptions.animationConfig), result)) {
+        return false;
+    }
+    return true;
+}
+
 bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationConfig, WmErrorCode& result)
 {
     switch (animationConfig.curve) {
@@ -122,6 +195,9 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
                     animationConfig.param[i] = 1.0;
                 }
             }
+            break;
+        }
+        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
             break;
         }
         default:
@@ -155,7 +231,8 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
             animationConfig.duration = duration;
             break;
         }
-        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): {
+        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): 
+        case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER_CURVE): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
