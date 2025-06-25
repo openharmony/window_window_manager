@@ -1197,16 +1197,11 @@ HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithIncomp
  */
 HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithInvalidReason, TestSize.Level1)
 {
-    constexpr int32_t posX = 10;
-    constexpr int32_t posY = 20;
-    constexpr int32_t width = 100;
-    constexpr int32_t height = 200;
-
-    auto writeRect = [&](MessageParcel& data) {
-        data.WriteInt32(posX);
-        data.WriteInt32(posY);
-        data.WriteInt32(width);
-        data.WriteInt32(height);
+    auto writeRect = [](MessageParcel& data) {
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        data.WriteInt32(100); // width
+        data.WriteInt32(200); // height
     };
 
     // Case 1: Missing reason field
