@@ -52,7 +52,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
     std::array functions = {
         ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
             reinterpret_cast<void *>(AniWindowManager::WindowStageCreate)},
-        ani_native_function {"GetWindowsByCoordinate",
+        ani_native_function {"getWindowsByCoordinate",
             "JL@ohos/window/window/GetWindowsByCoordinateParam;:Lescompat/Array;",
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
         ani_native_function {"getLastWindowSync",
@@ -105,33 +105,33 @@ ani_object AniWindowManager::GetWindowsByCoordinate(ani_env* env, ani_long nativ
     return aniWindowManager != nullptr ? aniWindowManager->OnGetWindowsByCoordinate(env, getWindowsParam) : nullptr;
 }
 
-ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object getWindowsParam)
+ani_object AniWindowManager::OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam)
 {
-    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    uint64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     ani_double aniDisplayId;
     if (ANI_OK != env->Object_GetPropertyByName_Double(getWindowsParam, "displayId", &aniDisplayId)) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI] Failed to convert parameter to displayId");
-        return AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    displayId = static_cast<int64_t>(aniDisplayId);
+    displayId = static_cast<uint64_t>(aniDisplayId);
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId) == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI] invalid displayId");
-        return AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t windowNumber = 0;
     ani_double aniWindowNumber;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(getWindowsParam, "windowNumber", &aniWindowNumber)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Double(getWindowsParam, "windowNumber", &aniWindowNumber)) {
         windowNumber = static_cast<int32_t>(aniWindowNumber);
     }
     int32_t x = INVALID_COORDINATE;
     ani_double aniX;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(getWindowsParam, "x", &aniX)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Double(getWindowsParam, "x", &aniX)) {
         x = static_cast<int32_t>(aniX);
     }
     int32_t y = INVALID_COORDINATE;
     ani_double aniY;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(getWindowsParam, "y", &aniY)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Double(getWindowsParam, "y", &aniY)) {
         y = static_cast<int32_t>(aniY);
     }
     std::vector<int32_t> windowIds;
@@ -139,14 +139,14 @@ ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object getWindowsPar
         GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI] getWindowsByCoordinate failed");
-        return AniWindowsUtils::AniThrowError(env, ret);
+        return AniWindowUtils::AniThrowError(env, ret);
     }
     std::vector<ani_ref> windows(windowIds.size());
     for (size_t i = 0; i < windowIds.size(); i++) {
         sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
         windows[i] = CreateAniWindowObject(env, window);
     }
-    return AniWindowsUtils::CreateAniWindowArray(env, windows);
+    return AniWindowUtils::CreateAniWindowArray(env, windows);
 }
 
 ani_ref AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)

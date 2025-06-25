@@ -283,48 +283,48 @@ void AniWindowStage::OnUnregisterWindowCallback(ani_env* env, ani_string type, a
 void AniWindowStage::SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
-    auto windowScene = windowScene_.lock();
+    auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowScene is null");
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     auto mainWindow = windowScene->GetMainWindow();
     if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] MainWindow is nullptr", where);
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] MainWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Enable recover position failed!");
-        AniWindowsUtils::AniThrowError(env, ret);
+        AniWindowUtils::AniThrowError(env, ret);
     } else {
-        TLOGI(WmsLogTag::WMS_MAIN, "[ANI id %{public}d isSaveBySpecifiedFlag: %{public}d "
-            "enable:%{public}d", window->GetWindowId(), isSaveBySpecifiedFlag, enabled);
+        TLOGI(WmsLogTag::WMS_MAIN, "[ANI] id %{public}d isSaveBySpecifiedFlag: %{public}d "
+            "enable:%{public}d", mainWindow->GetWindowId(), isSaveBySpecifiedFlag, enabled);
     }
 }
 
 ani_boolean AniWindowStage::IsWindowRectAutoSave(ani_env* env)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
-    auto windowScene = windowScene_.lock();
+    auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowScene is null");
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ani_boolean(false);
     }
     auto mainWindow = windowScene->GetMainWindow();
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] MainWindow is nullptr");
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ani_boolean(false);
     }
     bool enabled = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->IsWindowRectAutoSave(enabled));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] get the auto-save state of the window rect failed!");
-        AniWindowsUtils::AniThrowError(env, ret);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Get the auto-save state of the window rect failed!");
+        AniWindowUtils::AniThrowError(env, ret);
         return ani_boolean(false);
     } else {
         return ani_boolean(enabled);
@@ -333,23 +333,23 @@ ani_boolean AniWindowStage::IsWindowRectAutoSave(ani_env* env)
 
 void AniWindowStage::RemoveStartingWindow(ani_env* env)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto windowScene = windowScene_.lock();
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] windowScene is null");
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] window is nullptr");
-        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] Notify remove starting window failed");
-        AniWindowsUtils::AniThrowError(env, ret);
+        AniWindowUtils::AniThrowError(env, ret);
     }
 }
 
@@ -405,7 +405,7 @@ static void SetWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeO
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     windowStage->SetWindowRectAutoSave(env, enabled, isSaveBySpecifiedFlag);
@@ -418,10 +418,10 @@ static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_object obj, ani_long n
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ani_boolean(false);
     }
-    windowStage->IsWindowRectAutoSave(env);
+    return windowStage->IsWindowRectAutoSave(env);
 }
 
 static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -430,8 +430,8 @@ static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeOb
     TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] start");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] windowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     windowStage->RemoveStartingWindow(env);
