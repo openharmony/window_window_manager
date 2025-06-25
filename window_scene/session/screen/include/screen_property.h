@@ -240,9 +240,9 @@ public:
     DisplayGroupId GetDisplayGroupId() const { return displayGroupId_; }
     void SetMainDisplayIdOfGroup(ScreenId screenId) { mainDisplayIdOfGroup_ = screenId; }
     ScreenId GetMainDisplayIdOfGroup() const { return mainDisplayIdOfGroup_; }
-    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX) { screenAreaOffsetX = screenAreaOffsetX_; }
+    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX) { screenAreaOffsetX_ = screenAreaOffsetX; }
     uint32_t GetScreenAreaOffsetX() const { return screenAreaOffsetX_; }
-    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY) { screenAreaOffsetY = screenAreaOffsetY_; }
+    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY) { screenAreaOffsetY_ = screenAreaOffsetY; }
     uint32_t GetScreenAreaOffsetY() const { return screenAreaOffsetY_; }
     void SetScreenAreaWidth(uint32_t screenAreaWidth) { screenAreaWidth_ = screenAreaWidth; }
     uint32_t GetScreenAreaWidth() const { return screenAreaWidth_; }

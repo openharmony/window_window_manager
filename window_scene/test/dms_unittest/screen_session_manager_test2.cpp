@@ -934,7 +934,7 @@ HWTEST_F(ScreenSessionManagerTest, CreateScreenProperty, Function | SmallTest | 
 
     ssm_->CreateScreenProperty(screenId, property);
     EXPECT_EQ(DISPLAY_GROUP_ID_DEFAULT, property.GetDisplayGroupId());
-    EXPECT_EQ(SCREEN_ID_DEFAULT, property.GetMainDisplayIdOfGroup());
+    EXPECT_EQ(MAIN_SCREEN_ID_DEFAULT, property.GetMainDisplayIdOfGroup());
 
     property.SetDisplayGroupId(1);
     property.SetMainDisplayIdOfGroup(1);
@@ -960,7 +960,7 @@ HWTEST_F(ScreenSessionManagerTest, InitScreenProperty, Function | SmallTest | Le
 
     ssm_->InitScreenProperty(screenId, screenModeInfo, screenCapability, property);
     EXPECT_EQ(0, property.GetScreenAreaOffsetX());
-    EXPECT_EQ(0, property.screenSession->GetScreenAreaOffsetY());
+    EXPECT_EQ(0, property.GetScreenAreaOffsetY());
     EXPECT_EQ(100, property.GetScreenAreaWidth());
     EXPECT_EQ(200, property.GetScreenAreaHeight());
 }
@@ -985,9 +985,9 @@ HWTEST_F(ScreenSessionManagerTest, InitExtendScreenProperty, Function | SmallTes
     ssm_->InitExtendScreenProperty(screenId, screenSession, property);
     EXPECT_EQ(3840, screenSession->GetValidWidth());
 
-    property.setBounds({0, 0, 1000, 1000}, 0, 0);
-    ssm->InitExtendScreenProperty(screenId, screenSession, property);
-    EXPECT_EQ(3120, screenSession->GetvalidWidth());
+    property.SetBounds({{0, 0, 1000, 1000}, 0, 0});
+    ssm_->InitExtendScreenProperty(screenId, screenSession, property);
+    EXPECT_EQ(3120, screenSession->GetValidWidth());
 }
 }
 }

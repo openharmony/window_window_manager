@@ -731,7 +731,7 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     if (screenEvent == ScreenEvent::CONNECTED) {
         TLOGI(WmsLogTag::DMS, "screenCombination:%{public}d, screenName:%{public}s",
             screenSession->GetScreenCombination(), screenSession->GetName().c_str());
-        if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
+        if(screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
             INDIVIDUAL_SCREEN_GROUP_SET.find(screenSession->GetName()) != INDIVIDUAL_SCREEN_GROUP_SET.end()) {
             screenSession->SetDisplayGroupId(displayGroupNum_++);
             screenSession->SetMainDisplayIdOfGroup(screenId);

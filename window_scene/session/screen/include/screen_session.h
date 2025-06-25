@@ -349,7 +349,9 @@ public:
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
-    // displayInfo
+    /*
+     * Display Group Info
+     */
     void SetDisplayGroupId(DisplayGroupId displayGroupId);
     DisplayGroupId GetDisplayGroupId() const;
     void SetMainDisplayIdOfGroup(ScreenId screenId);
