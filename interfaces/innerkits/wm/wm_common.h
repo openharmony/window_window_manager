@@ -527,6 +527,7 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
+    SCREEN_RELATIVE_POSITION_CHANGE,
     END,
 };
 
@@ -1039,6 +1040,11 @@ struct Rect {
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 
+    bool IsSamePosition(int32_t x, int32_t y) const
+    {
+        return posX_ == x && posY_ == y;
+    }
+
     inline std::string ToString() const
     {
         std::ostringstream oss;
@@ -1047,6 +1053,22 @@ struct Rect {
     }
 
     static const Rect EMPTY_RECT;
+
+    /**
+     * @brief Checks whether the right-bottom corner of a rectangle stays within the valid range.
+     *
+     * @param x The x-coordinate of the left-top corner.
+     * @param y The y-coordinate of the left-top corner.
+     * @param width The rectangle's width.
+     * @param height The rectangle's height.
+     * @return true if right-bottom corner stays within int32_t range; false if overflow happens.
+     */
+    static bool IsRightBottomValid(int32_t x, int32_t y, uint32_t width, uint32_t height)
+    {
+        int64_t right = static_cast<int64_t>(x) + width;
+        int64_t bottom = static_cast<int64_t>(y) + height;
+        return right <= INT32_MAX && bottom <= INT32_MAX;
+    }
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
