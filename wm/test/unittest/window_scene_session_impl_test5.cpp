@@ -613,6 +613,8 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     mainWindow->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     EXPECT_EQ(mainWindow->property_->GetWindowModeSupportType(), WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     EXPECT_EQ(mainWindow->SwitchFreeMultiWindow(false), WSError::WS_OK);
+    EXPECT_EQ(WindowHelper::IsWindowModeSupported(mainWindow->property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN), false);
     EXPECT_EQ(mainWindow->windowSystemConfig_.freeMultiWindowEnable_, false);
 }
 
