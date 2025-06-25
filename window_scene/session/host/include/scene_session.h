@@ -330,7 +330,7 @@ public:
     /*
      * Floating Ball Window
      */
-    WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override { return WSError::WS_OK; };
+    WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override { return WMError::WM_OK; };
     WSError StopFloatingBall() override { return WSError::WS_OK; };
     WMError GetFloatingBallWindowId(uint32_t& windowId) override { return WMError::WM_OK; };
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override { return WMError::WM_OK; };

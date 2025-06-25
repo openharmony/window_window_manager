@@ -527,13 +527,13 @@ public:
     virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
 
     /**
-     * @brief update the floating-ball window instance (w,h,r).
+     * @brief update the floating-ball window instance.
      *
      * @param fbTemplateInfo the template info of the floating-ball.
      */
-    virtual WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+    virtual WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
     {
-        return WSError::WS_OK;
+        return WMError::WM_OK;
     }
  
     virtual WMError GetFloatingBallWindowId(uint32_t& windowId)

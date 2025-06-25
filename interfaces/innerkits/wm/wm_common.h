@@ -438,7 +438,7 @@ enum class WindowUIType : uint8_t {
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
-WmErrorCode FindCodeByError(WMError error);
+WmErrorCode ConvertErrorToCode(WMError error);
 
 /**
  * @brief Enumerates flag of window.

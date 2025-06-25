@@ -40,6 +40,7 @@ public:
 
 private:
     napi_value OnStartFloatingBall(napi_env env, napi_callback_info info);
+    napi_value StartFloatingBallTask(napi_env env, const FbOption& option);
     napi_value OnUpdateFloatingBall(napi_env env, napi_callback_info info);
     napi_value OnStopFloatingBall(napi_env env, napi_callback_info info);
     napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
@@ -50,8 +51,8 @@ private:
     napi_value OnGetFloatingBallWindowInfo(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
-    WmErrorCode RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
-    WmErrorCode UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
+    napi_value RegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
+    napi_value UnRegisterListenerWithType(napi_env env, const std::string& type, napi_value value);
     WmErrorCode UnRegisterListener(const std::string& type, const sptr<JsFbWindowListener>& fbWindowListener);
 
     WMError ProcessStateChangeRegister(const sptr<JsFbWindowListener>& listener);
