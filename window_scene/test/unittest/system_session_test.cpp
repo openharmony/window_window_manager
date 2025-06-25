@@ -18,9 +18,9 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
-#include "mock/mock_accesstoken_kit.h"
 #include "session/host/include/session.h"
 #include <ui/rs_surface_node.h>
 #include "window_event_channel_base.h"

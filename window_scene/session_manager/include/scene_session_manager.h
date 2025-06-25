@@ -1295,7 +1295,7 @@ private:
     /*
      * Floating ball
      */
-    WSError CheckCreateFb(const sptr<SceneSession>& parentSession);
+    WSError IsFloatingBallValid(const sptr<SceneSession>& parentSession);
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);

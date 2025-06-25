@@ -3569,9 +3569,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_FB) {
-        auto checkResult = CheckCreateFb(parentSession);
-        if (checkResult != WSError::WS_OK) {
-            return checkResult;
+        auto ret = IsFloatingBallValid(parentSession);
+        if (ret != WSError::WS_OK) {
+            return ret;
         }
     }
 
@@ -3815,7 +3815,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
     return false;
 }
 
-WSError SceneSessionManager::CheckCreateFb(const sptr<SceneSession>& parentSession)
+WSError SceneSessionManager::IsFloatingBallValid(const sptr<SceneSession>& parentSession)
 {
     if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
         parentSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
