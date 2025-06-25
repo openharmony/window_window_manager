@@ -349,6 +349,20 @@ public:
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
+    // displayInfo
+    void SetDisplayGroupId(DisplayGroupId displayGroupId);
+    DisplayGroupId GetDisplayGroupId() const;
+    void SetMainDisplayIdOfGroup(ScreenId screenId);
+    ScreenId GetMainDisplayIdOfGroup() const;
+    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX);
+    uint32_t GetScreenAreaOffsetX() const;
+    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY);
+    uint32_t GetScreenAreaOffsetY() const;
+    void SetScreenAreaWidth(uint32_t screenAreaWidth);
+    uint32_t GetScreenAreaWidth() const;
+    void SetScreenAreaHeight(uint32_t screenAreaHeight);
+    uint32_t GetScreenAreaHeight() const;
+
 private:
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
