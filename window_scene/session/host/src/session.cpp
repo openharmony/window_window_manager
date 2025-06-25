@@ -2565,7 +2565,6 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
     uint32_t backGround = GetBackgroundColor();
-
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
@@ -2605,7 +2604,7 @@ uint32_t Session::GetBackgroundColor() const
         if (appConfig != nullptr) {
             std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             backgroundColor = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
-            TLOGI(WmsLogTag::WMS_PATTERN, "set backgroundColor success, backgroundColor:%{public}u", backgroundColor);
+            TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}u", backgroundColor);
         }
     } else {
         TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backgroundColor WHITE");
