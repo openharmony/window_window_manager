@@ -646,7 +646,7 @@ void PcFoldScreenManager::ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId d
         iter != systemKeyboardStatusChangeCallbacksCopy.end();) {
         auto callback = iter->second.lock();
         if (callback != nullptr) {
-            (*callback)(displayId, status, prevStatus);
+            (*callback)(displayId, hasSystemKeyboard);
         }
         iter++;
     }
