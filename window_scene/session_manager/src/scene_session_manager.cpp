@@ -3951,6 +3951,8 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
     sessionInfo.appInstanceKey_ = property->GetAppInstanceKey();
     sessionInfo.screenId_ = property->GetDisplayId();
     sessionInfo.isAbilityHook_ = property->GetIsAbilityHook();
+    sessionInfo.supportedWindowModes =
+        WindowHelper::ConvertSupportTypeToSupportModes(property->GetWindowModeSupportType());
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "

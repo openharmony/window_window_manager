@@ -1386,6 +1386,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
+    napi_set_named_property(env, objValue, "supportWindowModes",
+        CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);

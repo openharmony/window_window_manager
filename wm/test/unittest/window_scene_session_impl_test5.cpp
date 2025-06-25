@@ -589,6 +589,34 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwitchFreeMultiWindow03
+ * @tc.desc: SwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+ 
+    sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    mainWindow->property_->SetPersistentId(1);
+    mainWindow->hostSession_ = session;
+    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    mainWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    mainWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
+    mainWindow->haveSetSupportedWindowModes_ = true;
+    mainWindow->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    EXPECT_EQ(mainWindow->property_->GetWindowModeSupportType(), WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    EXPECT_EQ(mainWindow->SwitchFreeMultiWindow(false), WSError::WS_OK);
+    EXPECT_EQ(mainWindow->windowSystemConfig_.freeMultiWindowEnable_, false);
+}
+
+/**
  * @tc.name: ShowKeyboard01
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
