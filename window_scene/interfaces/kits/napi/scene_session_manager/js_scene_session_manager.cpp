@@ -1285,7 +1285,7 @@ napi_value JsSceneSessionManager::UpdateAppHookDisplayInfo(napi_env env, napi_ca
 
 napi_value JsSceneSessionManager::NotifyHookOrientationChange(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyHookOrientationChange(env, info) : NapiGetUndefined(env);
 }
@@ -4048,16 +4048,12 @@ napi_value JsSceneSessionManager::OnNotifyHookOrientationChange(napi_env env, na
 
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     int32_t persistentId = 0;
     if (!ConvertFromJsValue(env, argv[0], persistentId)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to persistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyHookOrientationChange(persistentId);

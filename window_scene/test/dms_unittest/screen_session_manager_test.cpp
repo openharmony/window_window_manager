@@ -60,6 +60,7 @@ public:
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
     void SetAceessTokenPermission(const std::string processName);
+    sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -85,6 +86,17 @@ void ScreenSessionManagerTest::SetUp()
 void ScreenSessionManagerTest::TearDown()
 {
     usleep(SLEEP_TIME_IN_US);
+}
+
+sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string name, ScreenId &screenId)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = name;
+    screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(name, screenId, rsid, 0);
+    return screenSession;
 }
 
 namespace {
@@ -1123,25 +1135,21 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid02, TestSize.Level1)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "HookDisplayInfoByUid02";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
-    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession("HookDisplayInfoByUid02", screenId, rsid, 0);
+    ScreenId screenId;
+    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid02", screenId);
     ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
     DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 0, true };
     ssm_->displayHookMap_[uid] = dmHookInfo;
-    ASSERT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    ASSERT_EQ(displayInfo->GetWidth(), 500);
-    ASSERT_EQ(displayInfo->GetHeight(), 500);
-    ASSERT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
-    ASSERT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
-    ASSERT_EQ(displayInfo->GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(displayInfo->GetWidth(), 500);
+    EXPECT_EQ(displayInfo->GetHeight(), 500);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
+    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    EXPECT_EQ(displayInfo->GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
@@ -1153,24 +1161,45 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
 {
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "HookDisplayInfoByUid03";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
-    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession("HookDisplayInfoByUid03", screenId, rsid, 0);
+    ScreenId screenId;
+    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid03", screenId);
     ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
     DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 0, false };
     ssm_->displayHookMap_[uid] = dmHookInfo;
-    ASSERT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    ASSERT_EQ(displayInfo->GetWidth(), 500);
-    ASSERT_EQ(displayInfo->GetHeight(), 500);
-    ASSERT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
-    ASSERT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    EXPECT_EQ(displayInfo->GetWidth(), 500);
+    EXPECT_EQ(displayInfo->GetHeight(), 500);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
+    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    ssm_->displayHookMap_.erase(uid);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: HookDisplayInfoByUid03
+ * @tc.desc: HookDisplayInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
+{
+    ScreenId screenId;
+    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid04", screenId);
+    ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
+    sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    uint32_t uid = getuid();
+    DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 99, true };
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
+    EXPECT_EQ(displayInfo->GetWidth(), 500);
+    EXPECT_EQ(displayInfo->GetHeight(), 500);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
+    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
