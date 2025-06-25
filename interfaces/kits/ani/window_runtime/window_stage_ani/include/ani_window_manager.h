@@ -34,6 +34,7 @@ public:
 
     static ani_status AniWindowManagerInit(ani_env* env);
     static ani_object WindowStageCreate(ani_env* env, ani_long scene);
+    static ani_object GetWindowsByCoordinate(ani_env* env, ani_long nativeObj, ani_object getWindowsParam);
     static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
     static ani_ref FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName);
     static void MinimizeAll(ani_env* env, ani_long nativeObj, ani_double displayId);
@@ -42,6 +43,7 @@ public:
     static void ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_double sourceWindowId, ani_double targetWindowId);
 private:
+    ani_object OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam);
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_ref OnFindWindow(ani_env* env, ani_string windowName);
     void OnMinimizeAll(ani_env* env, ani_double displayId);

@@ -1237,6 +1237,93 @@ export interface WindowLimits {
 }
 
 /**
+   * Rectangular area of the title buttons relative to the upper right corner of the window.
+   *
+   * @interface TitleButtonRect
+   * @syscap SystemCapability.Window.SessionManager
+   * @since 11
+   */
+  /**
+   * Rectangular area of the title buttons relative to the upper right corner of the window.
+   *
+   * @interface TitleButtonRect
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 12
+   */
+  export interface TitleButtonRect {
+
+    /**
+     * The right of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The right of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    right: number;
+
+    /**
+     * The top of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The top of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    top: number;
+
+    /**
+     * The width of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The width of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'12', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    width: number;
+
+    /**
+     * The height of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The height of the Rect.
+     *
+     * @type { number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    height: number;
+  }
+
+/**
  * The decor button style of the window.
  * 
  * @interface DecorButtonStyle
@@ -1291,6 +1378,20 @@ export interface WindowTitleButtonVisibleParam {
   isMaximizeButtonVisible: boolean;
   isMinimizeButtonVisible: boolean;
   isCloseButtonVisible: boolean;
+}
+
+export interface TitleButtonVisibleParam {
+  isMaximizeVisible: boolean;
+  isMinimizeVisible: boolean;
+  isSplitVisible: boolean;
+  isCloseVisible: boolean;
+}
+
+export interface GetWindowsByCoordinateParam {
+  displayId: number;
+  windowNumber: number;
+  x: number;
+  y:number;
 }
 
 /**
@@ -1502,6 +1603,9 @@ export class WindowStageInternal implements WindowStage {
         this.nativeObj = nativeObj;
     }
 
+    public native setWindowRectAutoSave(nativeObj: long, enabled: boolean, isSaveBySpecifiedFlag: boolean): void;
+    public native isWindowRectAutoSave(nativeObj: long): boolean;
+    public native removeStartingWindow(nativeObj: long): void;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native loadContent(nativeObj:long, path: String): int;
     public native disableWindowDecorSync(nativeObj:long): void;
@@ -1509,6 +1613,54 @@ export class WindowStageInternal implements WindowStage {
     public native getMainWindowSync(nativeObj: long): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
+
+    public setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+            this.setWindowRectAutoSave(this.nativeObj, enabled, isSaveBySpecifiedFlag);
+        }).then((ret: NullishType) => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowRectAutoSave(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+            this.setWindowRectAutoSave(this.nativeObj, enabled, false);
+        }).then((ret: NullishType) => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isWindowRectAutoSave(): Promise<boolean> {
+      return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): boolean => {
+            return this.isWindowRectAutoSave(this.nativeObj);
+        }).then((ret: NullishType) => {
+            resolve(ret as boolean);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public removeStartingWindow(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+            this.removeStartingWindow(this.nativeObj);
+        }).then((ret: NullishType) => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+      });
+    }
 
     public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
       try {
@@ -1594,6 +1746,10 @@ export class WindowStageInternal implements WindowStage {
 }
 
 export interface WindowStage {
+    setWindowRectAutoSave(enabled: boolean): Promise<void>;
+    isWindowRectAutoSave(): Promise<boolean>;
+    setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void>;
+    removeStartinngWindow(): Promise<void>;
     loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
@@ -1615,6 +1771,21 @@ export class WindowInternal implements Window {
     public setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
     }
+
+    private native setFollowParentWindowLayoutEnabled(nativeObj: long, enabled: boolean): void;
+    private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
+    private native getParentWindow(nativeObj: long): Window;
+    private native getWindowDecorVisible(nativeObj: long): boolean;
+    private native stopMoving(nativeObj: long): void;
+    private native setParentWindow(nativeObj: long, windowId: double): void;
+    private native setWindowTitle(nativeObj: long, titleName: string): void;
+    private native getDecorButtonStyle(nativeObj: long): DecorButtonStyle;
+    private native getTitleButtonRect(nativeObj: long): TitleButtonRect;
+    private native setTitleButtonVisible(nativeObj: long, visibleParam: TitleButtonVisibleParam): void;
+    private native setWindowTitleMoveEnabled(nativeObj: long, enabled: boolean): void;
+    private native setWindowTopmost(nativeObj: long, isWindowTopMost: boolean): void;
+    private native setTitleAndDockHoverShown(nativeObj: long, isTitleHoverShown: boolean, isDockHoverShown: boolean): void;
+    private native restore(nativeObj: long): void;
 
     private native startMoving(nativeObj: long): void;
     private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: double, offsetY: double): void;
@@ -1671,6 +1842,133 @@ export class WindowInternal implements Window {
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+
+    public setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.setFollowParentWindowLayoutEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+    
+    public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
+      this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
+    }
+
+    public getParentWindow(): Window {
+      return this.getParentWindow(this.nativeObj);
+    }
+
+    public getWindowDecorVisible(): boolean {
+      return this.getWindowDecorVisible(this.nativeObj);
+    }
+
+    public stopMoving(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.stopMoving(this.nativeObj);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setParentWindow(windowId: number): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.setParentWindow(this.nativeObj, windowId);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowTitle(titleName: string): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.setWindowTitle(this.nativeObj, titleName);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public getDecorButtonStyle(): DecorButtonStyle {
+      return this.getDecorButtonStyle(this.nativeObj);
+    }
+
+    public getTitleButtonRect(): TitleButtonRect {
+      return this.getTitleButtonRect(this.nativeObj);
+    }
+
+    public setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
+                                 isSplitVisible: boolean): void {
+      let visibleParam: window.TitleButtonVisibleParam = {
+        isMaximizeVisible: isMaximizeVisible,
+        isMinimizeVisible: isMinimizeVisible,
+        isSplitVisible: isSplitVisible,
+        isCloseVisible: true,
+      }
+      this.setTitleButtonVisible(this.nativeObj, visibleParam);
+    }
+
+    public setWindowTitleMoveEnabled(enabled: boolean): void {
+      this.setWindowTitleMoveEnabled(this.nativeObj, enabled);
+    }
+
+    public setWindowTopmost(isWindowTopmost: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.setWindowTopmost(this.nativeObj, isWindowTopmost);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          let titlShow: boolean = true;
+          if (isTitleHoverShown != undefined) {
+            titlShow = isTitleHoverShown;
+          }
+          let dockSHow: boolean = true;
+          if (isDockHoverShown != undefined) {
+            dockSHow = isDockHoverShown;
+          }
+          this.setTitleAndDockHoverShown(this.nativeObj, titlShow, dockSHow);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public restore(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.restore(this.nativeObj);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
 
     public startMoving(): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
@@ -2396,6 +2694,21 @@ export class WindowInternal implements Window {
 }
 
 export interface Window {
+    setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void>;
+    setWindowDelayRaiseOnDrag(isEnabled: boolean): void;
+    getParentWindow(): Window;
+    getWindowDecorVisible(): boolean;
+    stopMoving(): Promise<void>;
+    setParentWindow(windowId: number): Promise<void>;
+    setWindowTitle(titleName: string): Promise<void>;
+    getDecorButtonStyle(): DecorButtonStyle;
+    getTitleButtonRect(): TitleButtonRect;
+    setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean, isSplitVisible: boolean): void;
+    setWindowTitleMoveEnabled(enabled: boolean): void;
+    setWindowTopmost(isWindowTopmost: boolean): Promise<void>;
+    setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void>;
+    restore(): Promise<void>;
+
     startMoving(): Promise<void>;
     startMoving(offsetX: double, offsetY: double): Promise<void>;
     setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
@@ -2486,6 +2799,7 @@ export function setNativeObj(nativeObject: long):void {
     nativeObj = nativeObject;
 }
 
+native function getWindowByCoordinate(nativeObj: long, param: window.GetWindowsByCoordinateParam): Array<Window>;
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function minimizeAllSync(nativeObj: long, id: number): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
@@ -2537,6 +2851,35 @@ export function minimizeAll(id: number, callback: AsyncCallback<void>): void {
     }).catch((err: NullishType) => {
         callback(err as BusinessError, undefined);
     });
+}
+
+export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
+                                       x?: number, y?:number): Promise<Array<Window>> {
+  return new Promise<Array<Window>((resolve: (value: Array<Window>) => void,
+                                    reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): void => {
+      let param: window.GetWindowsByCoordinateParam = {
+        displayId: displayId,
+        windowNumber: 0,
+        x: -1,
+        y: -1
+      }
+      if (windowNumber != undefined) {
+        param.windowNumber = windowNumber;
+      }
+      if (x != undefined) {
+        param.x = x;
+      }
+      if (y != undefined) {
+        param.y = y;
+      }
+      return getWindowByCoordinate(nativeObj, param);
+    }).then((ret: NullishType) => {
+        resolve(ret as Array<Window>);
+    }).catch((err: NullishType) => {
+        reject(err as BusinessError);
+    });
+  }); 
 }
 
 export function findWindow(name: string): Window {
