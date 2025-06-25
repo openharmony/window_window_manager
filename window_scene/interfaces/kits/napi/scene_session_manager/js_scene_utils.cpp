@@ -21,6 +21,7 @@
 #include <js_runtime_utils.h>
 #include <napi_common_want.h>
 
+#include "js_window_animation_utils.h"
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
@@ -1336,6 +1337,14 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
+    }
+    if (sessionInfo.startAnimationOptions != nullptr) {
+        napi_set_named_property(env, objValue, "startAnimationOptions",
+            ConvertStartAnimationOptionsToJsValue(env, sessionInfo.startAnimationOptions));
+    }
+    if (sessionInfo.startAnimationSystemOptions != nullptr) {
+        napi_set_named_property(env, objValue, "startAnimationSystemOptions",
+            ConvertStartAnimationSystemOptionsToJsValue(env, sessionInfo.startAnimationSystemOptions));
     }
     return objValue;
 }
