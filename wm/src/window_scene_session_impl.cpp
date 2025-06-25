@@ -5201,6 +5201,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     UpdateEnableDragWhenSwitchMultiWindow(enable);
 
     return WSError::WS_OK;
+    
 }
 
 bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
