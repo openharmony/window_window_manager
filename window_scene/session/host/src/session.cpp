@@ -15,6 +15,7 @@
 
 #include "session/host/include/session.h"
 
+#include <application_context.h>
 #include <regex>
 #include <string>
 
@@ -51,6 +52,8 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -2561,11 +2564,14 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
+    uint32_t backGround = GetBackgroundColor();
+
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = useCurWindow,
+        .backGround = backGround,
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
     if (!ret) {
@@ -2588,6 +2594,23 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     }
     TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
     return nullptr;
+}
+
+uint32_t Session::GetBackgroundColor() const
+{
+    uint32_t backgroundColor = COLOR_WHITE;
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext != nullptr) {
+        std::shared_ptr<AppExecFwk::Configuration> appConfig = appContext->GetConfiguration();
+        if (config != nullptr) {
+            std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            backgroundColor = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
+            TLOGI(WmsLogTag::WMS_PATTERN, "set backgroundColor success, backgroundColor:%{public}u", backgroundColor);
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backgroundColor WHITE");
+    }
+    return backgroundColor;
 }
 
 void Session::ResetSnapshot()
