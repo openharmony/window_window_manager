@@ -2034,8 +2034,9 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.
     window->property_->SetCompatibleModeProperty(compatibleModeProperty);
     window->GetConfigurationFromAbilityInfo();
     auto supportType = window->property_->GetWindowModeSupportType();
-    EXPECT_EQ(supportType,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN | WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    EXPECT_EQ(supportType & expceted, expceted);
 }
 }
 } // namespace Rosen

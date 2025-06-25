@@ -1676,7 +1676,8 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 return nullptr;
             }
         }
-        if (info.enableHookDisplayOrientation_) {
+        if (info.enableHookDisplayOrientation_ &&
+            info.displayOrientation_ <= static_cast<uint32_t>(DisplayOrientation::UNKNOWN)) {
             displayInfo->SetDisplayOrientation(static_cast<DisplayOrientation>(info.displayOrientation_));
         }
     }
