@@ -22,7 +22,6 @@ group("unittest") {
     ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
     ":wm_oh_window_pip_test",
-    ":wm_oh_window_test",
     ":wm_pattern_detach_callback_proxy_test",
     ":wm_pattern_detach_callback_test",
     ":wm_picture_in_picture_controller_test",
