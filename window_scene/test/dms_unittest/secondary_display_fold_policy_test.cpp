@@ -285,6 +285,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult01, TestSize.Le
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
 
+    ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     FoldDisplayMode displayMode = FoldDisplayMode::MAIN;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -310,6 +311,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult02, TestSize.Le
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
 
+    ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -335,6 +337,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult03, TestSize.Le
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
 
+    ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     FoldDisplayMode displayMode = FoldDisplayMode::GLOBAL_FULL;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -617,6 +620,141 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, TestSize.Level1)
     targetMainScreenRegion = {0, 0, 2232, 3184};
     policy.SetMainScreenRegion(mainScreenRegion);
     EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+}
+
+/**
+ * @tc.name: ChangeScreenDisplayModeToCoordinationFeatureTest
+ * @tc.desc: ChangeScreenDisplayModeToCoordinationFeatureTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayModeToCoordinationFeatureTest, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
+    policy.ChangeScreenDisplayModeToCoordination();
+    EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, true);
+}
+ 
+/**
+ * @tc.name: CloseCoordinationScreenFeatureTest
+ * @tc.desc: CloseCoordinationScreenFeatureTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, CloseCoordinationScreenFeatureTest, TestSize.Level1)
+{
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+        policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
+        policy.ChangeScreenDisplayModeToCoordination();
+        policy.CloseCoordinationScreen();
+        EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
+    }
+}
+ 
+/**
+ * @tc.name: AddOrRemoveDisplayNodeToTreeFeatureTest
+ * @tc.desc: AddOrRemoveDisplayNodeToTreeFeatureTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, AddOrRemoveDisplayNodeToTreeFeatureTest, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    // test invalid screen
+    ScreenId screenId = -1;
+    int32_t command = 1;
+    policy.AddOrRemoveDisplayNodeToTree(screenId, command);
+    EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
+
+    // add to tree
+    screenId = 0;
+    command = 1;
+    policy.AddOrRemoveDisplayNodeToTree(screenId, command);
+    EXPECT_EQ(ScreenSessionManager::GetInstance().GetScreenSession(screenId), nullptr);
+
+    // move from tree
+    screenId = 0;
+    command = 0;
+    policy.AddOrRemoveDisplayNodeToTree(screenId, command);
+    EXPECT_EQ(ScreenSessionManager::GetInstance().GetScreenSession(screenId), nullptr);
+}
+ 
+/**
+ * @tc.name: ExitCoordinationFeatureTest
+ * @tc.desc: ExitCoordinationFeatureTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, ExitCoordinationFeatureTest, TestSize.Level1)
+{
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+        policy.currentFoldStatus_ = FoldStatus::EXPAND;
+        policy.ChangeScreenDisplayModeToCoordination();
+        policy.ExitCoordination();
+        EXPECT_FALSE(ScreenSessionManager::GetInstance().GetCoordinationFlag());
+    }
+}
+ 
+/**
+ * @tc.name: SetStatusConditionalActiveRectAndTpFeature
+ * @tc.desc: test function : SetStatusGlobalFullActiveRectAndTpFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusConditionalActiveRectAndTpFeature, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    ScreenProperty property = policy.screenProperty_;
+
+    policy.SetStatusConditionalActiveRectAndTpFeature(property);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
+ 
+/**
+ * @tc.name: SendCoordinationPropertyChangeResultSync
+ * @tc.desc: test function : SendCoordinationPropertyChangeResultSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SendCoordinationPropertyChangeResultSync, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>("test");
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+    std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
+    EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
+
+    ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
+    FoldDisplayMode displayMode = FoldDisplayMode::COORDINATION;
+    policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
+    uint32_t currentHeight = screenProperty.GetBounds().rect_.GetHeight();
+    EXPECT_EQ(currentWidth, secondaryDisplayParams[0]);
+    EXPECT_EQ(currentHeight, secondaryDisplayParams[INDEX_THREE]);
 }
 }
 } // namespace Rosen

@@ -172,8 +172,8 @@ void AbstractScreen::SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNo
 {
     rSDisplayNodeConfig_ = config;
     startPoint_ = startPoint;
-    TLOGI(WmsLogTag::DMS, "SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
-    rsDisplayNode->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
+    TLOGI(WmsLogTag::DMS, "SetScreenOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
+    RSInterfaces::GetInstance().SetScreenOffset(rsId_, startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
@@ -187,7 +187,7 @@ void AbstractScreen::SetPropertyForDisplayNode(const std::shared_ptr<RSDisplayNo
         rsDisplayNode->SetSecurityDisplay(true);
         TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success");
     }
-    // If setDisplayOffset is not valid for SetFrame/SetBounds
+    // If SetScreenOffset is not valid for SetFrame/SetBounds
     rsDisplayNode->SetFrame(0, 0, width, height);
     rsDisplayNode->SetBounds(0, 0, width, height);
 }
@@ -248,7 +248,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     TLOGD(WmsLogTag::DMS, "InitRSDefaultDisplayNode success");
 }
 
-void AbstractScreen::UpdateRSDisplayNode(Point startPoint)
+void AbstractScreen::UpdateRSDisplayNode(Point startPoint, sptr<AbstractScreen> absScreen)
 {
     TLOGD(WmsLogTag::DMS, "update display offset from [%{public}d %{public}d] to [%{public}d %{public}d]",
         startPoint_.posX_, startPoint_.posY_, startPoint.posX_, startPoint.posY_);
@@ -258,7 +258,11 @@ void AbstractScreen::UpdateRSDisplayNode(Point startPoint)
     }
     
     startPoint_ = startPoint;
-    rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
+    if (absScreen == nullptr) {
+        TLOGD(WmsLogTag::DMS, "absScreen is nullptr");
+        return;
+    }
+    RSInterfaces::GetInstance().SetScreenOffset(absScreen->rsId_, startPoint.posX_, startPoint.posY_);
 }
 
 ScreenId AbstractScreen::GetScreenGroupId() const
@@ -626,7 +630,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
     dmsScreen->startPoint_ = Point();
     if (dmsScreen->rsDisplayNode_ != nullptr) {
-        dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
+        RSInterfaces::GetInstance().SetScreenOffset(dmsScreen->rsId_, 0, 0);
         dmsScreen->rsDisplayNode_->RemoveFromTree();
         RSTransactionAdapter::FlushImplicitTransaction(dmsScreen->GetRSUIContext());
         dmsScreen->rsDisplayNode_ = nullptr;
@@ -645,7 +649,7 @@ bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScr
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
     if (dmsScreen->rsDisplayNode_ != nullptr) {
-        dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
+        RSInterfaces::GetInstance().SetScreenOffset(dmsScreen->rsId_, 0, 0);
         dmsScreen->rsDisplayNode_->RemoveFromTree();
         RSTransactionAdapter::FlushImplicitTransaction(dmsScreen->GetRSUIContext());
     }
