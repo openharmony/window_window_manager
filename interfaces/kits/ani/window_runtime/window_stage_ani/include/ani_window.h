@@ -75,6 +75,20 @@ public:
         ani_string color, ani_object offsetX, ani_object offsetY);
     static void Finalizer(ani_env* env, ani_long nativeObj);
 
+    void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enabled);
+    void SetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
+    ani_ref GetParentWindow(ani_env* env);
+    ani_boolean GetWindowDecorVisible(ani_env* env);
+    void StopMoving(ani_env* env);
+    void SetParentWindow(ani_env* env, ani_double windowId);
+    void SetWindowTitle(ani_env* env, ani_string titleName);
+    ani_object GetDecorButtonStyle(ani_env* env);
+    ani_object GetTitleButtonRect(ani_env* env);
+    void SetTitleButtonVisible(ani_env* env, ani_object titleButtonVisibleParam);
+    void SetWindowTitleMoveEnabled(ani_env* env, ani_boolean enabled);
+    void SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost);
+    void SetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown);
+    void Restore(ani_env* env);
     void StartMoving(ani_env* env);
     void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
     void SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam);

@@ -43,6 +43,9 @@ class AniWindowStage {
     static void LoadContentWithStorage(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
 
+    void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
+    ani_boolean IsWindowRectAutoSave(ani_env* env);
+    void RemoveStartingWindow(ani_env* env);
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
     ani_ref GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);

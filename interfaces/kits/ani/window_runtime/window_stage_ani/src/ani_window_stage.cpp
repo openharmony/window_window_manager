@@ -280,6 +280,79 @@ void AniWindowStage::OnUnregisterWindowCallback(ani_env* env, ani_string type, a
     }
 }
 
+void AniWindowStage::SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowScene is null");
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] MainWindow is nullptr", where);
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Enable recover position failed!");
+        AniWindowsUtils::AniThrowError(env, ret);
+    } else {
+        TLOGI(WmsLogTag::WMS_MAIN, "[ANI id %{public}d isSaveBySpecifiedFlag: %{public}d "
+            "enable:%{public}d", window->GetWindowId(), isSaveBySpecifiedFlag, enabled);
+    }
+}
+
+ani_boolean AniWindowStage::IsWindowRectAutoSave(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowScene is null");
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return ani_boolean(false);
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] MainWindow is nullptr");
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return ani_boolean(false);
+    }
+    bool enabled = false;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->IsWindowRectAutoSave(enabled));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] get the auto-save state of the window rect failed!");
+        AniWindowsUtils::AniThrowError(env, ret);
+        return ani_boolean(false);
+    } else {
+        return ani_boolean(enabled);
+    }
+}
+
+void AniWindowStage::RemoveStartingWindow(ani_env* env)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] windowScene is null");
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] window is nullptr");
+        AniWindowsUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] Notify remove starting window failed");
+        AniWindowsUtils::AniThrowError(env, ret);
+    }
+}
+
 void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
 {
     AniWindowStage::LoadContentWithStorage(env, obj, nativeObj, path, nullptr);
@@ -324,6 +397,46 @@ void AniWindowStage::OnLoadContentWithStorage(ani_env* env, ani_string path, ani
 }  // namespace Rosen
 }  // namespace OHOS
 
+static void SetWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeObj,
+                                  ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag)
+{
+    using namespace OHOS::Rosen;
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
+    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        return;
+    }
+    windowStage->SetWindowRectAutoSave(env, enabled, isSaveBySpecifiedFlag);
+}
+
+static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
+    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        return ani_boolean(false);
+    }
+    windowStage->IsWindowRectAutoSave(env);
+}
+
+static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] start");
+    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+        return;
+    }
+    windowStage->RemoveStartingWindow(env);
+}
+
 static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
@@ -353,6 +466,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
+        ani_native_function {"setWindowRectAutoSave", "JZZ:V",
+            reinterpret_cast<void *>(SetWindowRectAutoSave)},
+        ani_native_function {"isWindowRectAutoSave", "J:Z",
+            reinterpret_cast<void *>(IsWindowRectAutoSave)},
+        ani_native_function {"removeStartingWindow", "J:V",
+            reinterpret_cast<void *>(RemoveStartingWindow)},
         ani_native_function {"loadContent", "JLstd/core/String;:I",
             reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"loadContentSync",
