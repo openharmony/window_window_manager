@@ -59,7 +59,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
 };
 
-WmErrorCode FindCodeByError(WMError error)
+WmErrorCode ConvertErrorToCode(WMError error)
 {
     auto iter = WM_JS_TO_ERROR_CODE_MAP.find(error);
     if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
