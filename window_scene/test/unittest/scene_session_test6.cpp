@@ -1212,6 +1212,32 @@ HWTEST_F(SceneSessionTest6, SendPointerEventForHover, Function | SmallTest | Lev
     ret = sceneSession->SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromClient
+ * @tc.desc: Verify UpdateGlobalDisplayRectFromClient updates rect asynchronously when necessary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: Same rect, should early return and skip update
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        auto result = session->UpdateGlobalDisplayRectFromClient(rect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
+
+    // Case 2: Different rect, update should be posted and processed
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        WSRect newRect = { rect.posX_ + 10, rect.posY_ + 20, rect.width_, rect.height_ };
+        auto result = session->UpdateGlobalDisplayRectFromClient(newRect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

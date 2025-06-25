@@ -230,6 +230,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
             return HandleUpdateWindowModeForUITest(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
+            return HandleUpdateGlobalDisplayRectFromServer(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT):
             return HandleSendFbActionEvent(data, reply);
         default:
@@ -310,6 +312,32 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     }
     WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateGlobalDisplayRectFromServer(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read rect");
+        return ERR_INVALID_DATA;
+    }
+    WSRect globalDisplayRect = { posX, posY, width, height };
+
+    uint32_t reasonValue = 0;
+    if (!data.ReadUint32(reasonValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read reason");
+        return ERR_INVALID_DATA;
+    }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(reasonValue);
+    if (reason < SizeChangeReason::UNDEFINED || reason >= SizeChangeReason::END) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid reason: %{public}u", reasonValue);
+        return ERR_INVALID_DATA;
+    }
+    UpdateGlobalDisplayRectFromServer(globalDisplayRect, reason);
     return ERR_NONE;
 }
 

@@ -440,6 +440,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
+    SCREEN_RELATIVE_POSITION_CHANGE,
     END
 };
 
@@ -723,6 +724,11 @@ struct Rect {
         return width_ == 0 && height_ == 0;
     }
 
+    bool IsSamePosition(int32_t x, int32_t y) const
+    {
+        return posX_ == x && posY_ == y;
+    }
+
     inline std::string ToString() const
     {
         std::ostringstream oss;
@@ -731,26 +737,25 @@ struct Rect {
     }
 
     static const Rect EMPTY_RECT;
+
+    /**
+     * @brief Checks whether the right-bottom corner of a rectangle stays within the valid range.
+     *
+     * @param x The x-coordinate of the left-top corner.
+     * @param y The y-coordinate of the left-top corner.
+     * @param width The rectangle's width.
+     * @param height The rectangle's height.
+     * @return true if right-bottom corner stays within int32_t range; false if overflow happens.
+     */
+    static bool IsRightBottomValid(int32_t x, int32_t y, uint32_t width, uint32_t height)
+    {
+        int64_t right = static_cast<int64_t>(x) + width;
+        int64_t bottom = static_cast<int64_t>(y) + height;
+        return right <= INT32_MAX && bottom <= INT32_MAX;
+    }
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
-
-/**
- * @struct Position
- *
- * @brief Represent a two-dimensional position in a specific coordinate system.
- */
-struct Position {
-    int32_t x = 0;
-    int32_t y = 0;
-
-    inline std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "[" << x << ", " << y << "]";
-        return oss.str();
-    }
-};
 
 /**
  * @struct SystemBarProperty

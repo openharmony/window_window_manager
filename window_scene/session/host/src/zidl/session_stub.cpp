@@ -276,6 +276,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowAnchorInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
             return HandleSetWindowTransitionAnimation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
+            return HandleUpdateGlobalDisplayRectFromClient(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
             return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
@@ -2088,6 +2090,32 @@ int SessionStub::HandleSetFrameRectForPartialZoomIn(MessageParcel& data, Message
         TLOGE(WmsLogTag::WMS_ANIMATION, "write ret failed");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateGlobalDisplayRectFromClient(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read rect");
+        return ERR_INVALID_DATA;
+    }
+    WSRect globalDisplayRect = { posX, posY, width, height };
+
+    uint32_t reasonValue = 0;
+    if (!data.ReadUint32(reasonValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read reason");
+        return ERR_INVALID_DATA;
+    }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(reasonValue);
+    if (reason < SizeChangeReason::UNDEFINED || reason >= SizeChangeReason::END) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid reason: %{public}u", reasonValue);
+        return ERR_INVALID_DATA;
+    }
+    UpdateGlobalDisplayRectFromClient(globalDisplayRect, reason);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
