@@ -1092,9 +1092,10 @@ WSError KeyboardSession::UpdateSizeChangeReason(SizeChangeReason reason)
 void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
 {
     bool needRecalculateOccupiedArea = false;
-    if ((GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
+    const uint32_t keyboardDirtyFlags = GetDirtyFlags();
+    if ((keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
-        (GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
+        (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
         needRecalculateOccupiedArea = true;
     }
