@@ -581,16 +581,22 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
     std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacksCopy;
     {
         std::unique_lock<std::mutex> lock(callbackMutex_);
+        for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
+            auto callback = iter->second.lock();
+            if (callback == nullptr) {
+                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
+                iter = foldScreenStatusChangeCallbacks_.erase(iter);
+                continue;
+            }
+            iter++;
+        }
         foldScreenStatusChangeCallbacksCopy = foldScreenStatusChangeCallbacks_;
     }
     for (auto iter = foldScreenStatusChangeCallbacksCopy.begin(); iter != foldScreenStatusChangeCallbacksCopy.end();) {
         auto callback = iter->second.lock();
-        if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
-            iter = foldScreenStatusChangeCallbacksCopy.erase(iter);
-            continue;
+        if (callback != nullptr) {
+            (*callback)(displayId, status, prevStatus);
         }
-        (*callback)(displayId, status, prevStatus);
         iter++;
     }
 }
@@ -620,16 +626,28 @@ void PcFoldScreenManager::UnregisterSystemKeyboardStatusChangeCallback(int32_t p
 
 void PcFoldScreenManager::ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId displayId, bool hasSystemKeyboard)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    for (auto iter = systemKeyboardStatusChangeCallbacks_.begin();
-        iter != systemKeyboardStatusChangeCallbacks_.end();) {
-        auto callback = iter->second.lock();
-        if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
-            iter = systemKeyboardStatusChangeCallbacks_.erase(iter);
-            continue;
+    std::unordered_map<int32_t, std::weak_ptr<SystemKeyboardStatusChangeCallback>>
+        systemKeyboardStatusChangeCallbacksCopy;
+    {
+        std::unique_lock<std::mutex> lock(callbackMutex_);
+        for (auto iter = systemKeyboardStatusChangeCallbacks_.begin();
+            iter != systemKeyboardStatusChangeCallbacks_.end();) {
+            auto callback = iter->second.lock();
+            if (callback == nullptr) {
+                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
+                iter = systemKeyboardStatusChangeCallbacks_.erase(iter);
+                continue;
+            }
+            iter++;
         }
-        (*callback)(displayId, hasSystemKeyboard);
+        systemKeyboardStatusChangeCallbacksCopy = systemKeyboardStatusChangeCallbacks_;
+    }
+    for (auto iter = systemKeyboardStatusChangeCallbacksCopy.begin();
+        iter != systemKeyboardStatusChangeCallbacksCopy.end();) {
+        auto callback = iter->second.lock();
+        if (callback != nullptr) {
+            (*callback)(displayId, status, prevStatus);
+        }
         iter++;
     }
 }
