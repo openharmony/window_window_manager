@@ -255,8 +255,8 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(width));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(height));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(width));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(height));
     return aniRect;
 }
 
