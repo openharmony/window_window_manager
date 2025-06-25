@@ -3569,6 +3569,13 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
 
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_FB) {
+        auto ret = IsFloatingBallValid(parentSession);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+    }
+
     TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
         property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
@@ -3807,6 +3814,16 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return true;
     }
     return false;
+}
+
+WSError SceneSessionManager::IsFloatingBallValid(const sptr<SceneSession>& parentSession)
+{
+    if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
+        parentSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Parent is null or state invalid");
+        return WSError::WS_ERROR_INVALID_PARENT;
+    }
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
@@ -15570,7 +15587,7 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
             return WMError::WM_OK;
         }
     }
-    TLOGW(WmsLogTag::WMS_SYSTEM, "no Fb panel");
+    TLOGW(WmsLogTag::WMS_SYSTEM, "No Fb panel");
     return WMError::WM_ERROR_FB_INTERNAL_ERROR;
 }
 

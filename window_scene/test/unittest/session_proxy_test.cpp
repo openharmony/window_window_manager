@@ -1790,23 +1790,23 @@ HWTEST_F(SessionProxyTest, UpdateFloatingBall, Function | SmallTest | Level2)
     FloatingBallTemplateInfo fbTemplateInfo;
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WSError res = sProxy->UpdateFloatingBall(fbTemplateInfo);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    WMError res = sProxy->UpdateFloatingBall(fbTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     res = sProxy->UpdateFloatingBall(fbTemplateInfo);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
     MockMessageParcel::SetWriteParcelableErrorFlag(false);
 
     sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
 
     iRemoteObjectMocker->sendRequestResult_ = 1;
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
 }
 
 /**

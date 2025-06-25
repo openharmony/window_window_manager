@@ -62,15 +62,18 @@ HWTEST_F(FloatingBallOptionTest, TestParamSetAndGet, TestSize.Level1)
     uint32_t templateType = 1;
     std::string title = "title";
     std::string content = "content";
+    std::string color = "#RRGGBB";
     std::shared_ptr<Media::PixelMap> icon = nullptr;
     option->SetTemplate(templateType);
     option->SetTitle(title);
     option->SetContent(content);
+    option->SetBackgroundColor(color);
     option->SetIcon(icon);
     EXPECT_EQ(templateType, option->GetTemplate());
     EXPECT_EQ(title, option->GetTitle());
     EXPECT_EQ(content, option->GetContent());
     EXPECT_EQ(nullptr, option->GetIcon());
+    EXPECT_EQ(color, option->GetBackgroundColor());
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
     EXPECT_EQ(title, fbTemplateBaseInfo.title_);

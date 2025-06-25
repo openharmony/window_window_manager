@@ -194,7 +194,10 @@ ohos_unittest("ws_anomaly_detection_test") {
 ohos_unittest("ws_system_session_test") {
   module_out_path = module_out_path
 
-  sources = [ "system_session_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "system_session_test.cpp"
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
