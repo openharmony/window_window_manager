@@ -4486,8 +4486,6 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}d, activeValue: %{public}u, inactiveValue: %{public}u",
-            GetPersistentId(), activeColorValue, inactiveColorValue);
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
     } else {
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null!");
