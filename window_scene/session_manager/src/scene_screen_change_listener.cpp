@@ -42,7 +42,7 @@ void SceneScreenChangeListener::HandleRelativePositionChange(const ScreenPropert
             continue;
         }
         auto rect = session->ComputeGlobalDisplayRect();
-        session->UpdateGlobalDisplayRect(rect, SizeChangeReason::SCREEN_CHANGE);
+        session->UpdateGlobalDisplayRect(rect, SizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE);
     }
 }
 } // namespace Rosen

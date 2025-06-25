@@ -784,12 +784,11 @@ WmErrorCode JsWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<IRectChangeInGlobalDisplayListener> rectChangeListener(listener);
     WMError ret = WMError::WM_OK;
     if (isRegister) {
-        ret = window->RegisterRectChangeInGlobalDisplayListener(rectChangeListener);
+        ret = window->RegisterRectChangeInGlobalDisplayListener(listener);
     } else {
-        ret = window->UnregisterRectChangeInGlobalDisplayListener(rectChangeListener);
+        ret = window->UnregisterRectChangeInGlobalDisplayListener(listener);
     }
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
     return it != WM_JS_TO_ERROR_CODE_MAP.end() ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
