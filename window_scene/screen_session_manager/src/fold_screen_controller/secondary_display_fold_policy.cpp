@@ -236,9 +236,23 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
 void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+    screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    if (displayMode == FoldDisplayMode::FULL) {
+        SetStatusFullActiveRectAndTpFeature(screenProperty_);
+        screenSession->SetScreenAreaOffsetY(screenParams_[FULL_STATUS_OFFSET_X]);
+        screenSession->SetScreenAreaHeight(screenParams_[FULL_STATUS_WIDTH]);
+    } else if (displayMode == FoldDisplayMode::MAIN) {
+        reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
+        SetStatusMainActiveRectAndTpFeature(screenProperty_);
+        screenSession->SetScreenAreaOffsetY(0);
+        screenSession->SetScreenAreaHeight(screenParams_[MAIN_STATUS_WIDTH]);
+    } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        SetStatusGlobalFullActiveRectAndTpFeature(screenProperty_);
+        screenSession->SetScreenAreaOffsetY(0);
+        screenSession->SetScreenAreaHeight(screenParams_[GLOBAL_FULL_STATUS_WIDTH]);
+    } else {
+        TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
     if (displayMode == FoldDisplayMode::MAIN) {
         reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
