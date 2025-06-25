@@ -14,15 +14,15 @@
  */
 #include <memory>
 
-#include "js_fb_window_controller.h"
-#include "window_manager_hilog.h"
-#include "floating_ball_manager.h"
-#include "js_fb_utils.h"
-#include "pixel_map_napi.h"
-#include "napi_common_want.h"
-#include "js_err_utils.h"
-#include "permission.h"
 #include "color_parser.h"
+#include "floating_ball_manager.h"
+#include "js_fb_window_controller.h"
+#include "js_err_utils.h"
+#include "js_fb_utils.h"
+#include "napi_common_want.h"
+#include "pixel_map_napi.h"
+#include "permission.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -130,7 +130,7 @@ napi_value JsFbController::StartFloatingBallTask(napi_env env, const FbOption& o
             return;
         }
         sptr<FbOption> optionPtr = sptr<FbOption>::MakeSptr(option);
-        *errCodePtr = FindCodeByError(fbController->StartFloatingBall(optionPtr));
+        *errCodePtr = ConvertErrorToCode(fbController->StartFloatingBall(optionPtr));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -191,7 +191,7 @@ napi_value JsFbController::OnUpdateFloatingBall(napi_env env, napi_callback_info
             return;
         }
         sptr<FbOption> optionPtr = sptr<FbOption>::MakeSptr(option);
-        *errCodePtr = FindCodeByError(fbController->UpdateFloatingBall(optionPtr));
+        *errCodePtr = ConvertErrorToCode(fbController->UpdateFloatingBall(optionPtr));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -232,7 +232,7 @@ napi_value JsFbController::OnStopFloatingBall(napi_env env, napi_callback_info i
             *errCodePtr = WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = FindCodeByError(fbController->StopFloatingBallFromClient());
+        *errCodePtr = ConvertErrorToCode(fbController->StopFloatingBallFromClient());
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -293,7 +293,7 @@ napi_value JsFbController::OnRestoreMainWindow(napi_env env, napi_callback_info 
             *errCodePtr = WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = FindCodeByError(fbController->RestoreMainWindow(abilityWant));
+        *errCodePtr = ConvertErrorToCode(fbController->RestoreMainWindow(abilityWant));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -485,7 +485,7 @@ napi_value JsFbController::RegisterListenerWithType(napi_env env, const std::str
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "register failed");
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(FindCodeByError(ret)), "register failed"));
+            static_cast<int32_t>(ConvertErrorToCode(ret)), "register failed"));
         return NapiGetUndefined(env);
     }
     jsCbMap_[type].insert(fbWindowListener);
@@ -629,7 +629,7 @@ WmErrorCode JsFbController::UnRegisterListener(const std::string& type,
     if (type == CLICK_EVENT) {
         ret = ProcessClickEventUnRegister(fbWindowListener);
     }
-    return FindCodeByError(ret);
+    return ConvertErrorToCode(ret);
 }
 
 WMError JsFbController::ProcessStateChangeUnRegister(const sptr<JsFbWindowListener>& listener)
@@ -686,7 +686,7 @@ napi_value JsFbController::OnGetFloatingBallWindowInfo(napi_env env, napi_callba
             return;
         }
         uint32_t windowId = 0;
-        *errCodePtr = FindCodeByError(fbController->GetFloatingBallWindowInfo(windowId));
+        *errCodePtr = ConvertErrorToCode(fbController->GetFloatingBallWindowInfo(windowId));
         *windowIdPtr = windowId;
     };
     NapiAsyncTask::CompleteCallback complete =
