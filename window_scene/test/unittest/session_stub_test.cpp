@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
+#include <ui/rs_surface_node.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"
 #include "session/host/include/zidl/session_stub.h"
@@ -26,6 +27,8 @@
 #include "want.h"
 #include "ws_common.h"
 #include "wm_common.h"
+#include "mock/mock_session_stage.h"
+#include "mock/mock_window_event_channel.h"
 #include "ui/rs_canvas_node.h"
 #include "transaction/rs_transaction.h"
 
@@ -1479,11 +1482,14 @@ HWTEST_F(SessionStubTest, HandleSetSupportedWindowModes, Function | SmallTest | 
                                                                         AppExecFwk::SupportWindowMode::SPLIT,
                                                                         AppExecFwk::SupportWindowMode::FLOATING };
     auto result = session_->HandleSetSupportedWindowModes(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-    data.WriteUint32(supportedWindowModes.size());
-    data.WriteInt32(static_cast<int32_t>(supportedWindowModes[0]));
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    uint32_t size = supportedWindowModes.size();
+    data.WriteUint32(size);
+    for (int i = 0; i < size; i++) {
+        data.WriteInt32(static_cast<int32_t>(supportedWindowModes[i]));
+    }
     result = session_->HandleSetSupportedWindowModes(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -1728,6 +1734,131 @@ HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | 
     data.WriteParcelable(nullptr);
     auto result = session_->HandleGetFloatingBallWindowId(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleConnect001
+ * @tc.desc: sessionStub HandleConnect001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect001, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    data.WriteRemoteObject(sessionStage->AsObject());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    std::string surfaceNodeName = "HandleConnectTest";
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(false);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleConnect002
+ * @tc.desc: sessionStub HandleConnect002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect002, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = "HandleConnectTest"};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleConnect003
+ * @tc.desc: sessionStub HandleConnect003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = "HandleConnectTest"};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    std::string identityToken = "HandleConnectTest";
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    data.WriteString(identityToken);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen
