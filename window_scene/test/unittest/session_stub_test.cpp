@@ -1736,7 +1736,7 @@ HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | 
     ASSERT_EQ(result, ERR_NONE);
 }
 
-/*
+/**
  * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidRect
  * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromClient with invalid rect
  * @tc.type: FUNC
