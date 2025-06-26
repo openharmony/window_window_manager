@@ -14,12 +14,96 @@
  */
 
 #include "js_window_animation_utils.h"
-
 #include "window_manager_hilog.h"
+namespace {
+    #define NAPI_CALL_NO_THROW(theCall, retVal)      \
+    do {                                         \
+        if ((theCall) != napi_ok) {              \
+            return retVal;                       \
+        }                                        \
+    } while (0)
 
-namespace OHOS {
-namespace Rosen {
-using namespace AbilityRuntime;
+template <typename T>
+napi_value CreateJsNumber(napi_env env, T value) {
+    napi_value result = nullptr;
+    if constexpr (std::is_same_v<T, int32_t>) {
+        napi_create_int32(env, value, &result);
+    } else if constexpr (std::is_same_v<T, uint32_t>) {
+        napi_create_uint32(env, value, &result);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        napi_create_int64(env, value, &result);
+    } else if constexpr (std::is_same_v<T, double>) {
+        napi_create_double(env, value, &result);
+    }
+    return result;
+}
+
+template<class T>
+napi_value CreateJsValue(napi_env env, const T& value)
+{
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    napi_value result = nullptr;
+    if constexpr (std::is_same_v<ValueType, bool>) {
+        napi_get_boolean(env, value, &result);
+        return result;
+    } else if constexpr (std::is_arithmetic_v<ValueType>) {
+        return CreateJsNumber(env, value);
+    } else if constexpr (std::is_same_v<ValueType, std::string>) {
+        napi_create_string_utf8(env, value.c_str(), value.length(), &result);
+        return result;
+    } else if constexpr (std::is_enum_v<ValueType>) {
+        return CreateJsNumber(env, static_cast<std::make_signed_t<ValueType>>(value));
+    } else if constexpr (std::is_same_v<ValueType, const char*>) {
+        (value != nullptr) ? napi_create_string_utf8(env, value, strlen(value), &result) :
+            napi_get_undefined(env, &result);
+        return result;
+    }
+}
+
+template <typename T>
+bool ConvertFromJsNumber(napi_env env, napi_value jsValue, T& outValue) {
+    if constexpr (std::is_same_v<T, int32_t>) {
+        NAPI_CALL_NO_THROW(napi_get_value_int32(env, jsValue, &outValue), false);
+    } else if constexpr (std::is_same_v<T, uint32_t>) {
+        NAPI_CALL_NO_THROW(napi_get_value_uint32(env, jsValue, &outValue), false);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        NAPI_CALL_NO_THROW(napi_get_value_int64(env, jsValue, &outValue), false);
+    } else if constexpr (std::is_same_v<T, double>) {
+        NAPI_CALL_NO_THROW(napi_get_value_double(env, jsValue, &outValue), false);
+    } 
+    return true;
+}
+
+template<class T>
+bool ConvertFromJsValue(napi_env env, napi_value jsValue, T& value)
+{
+    if (jsValue == nullptr) {
+        return false;
+    }
+
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_same_v<ValueType, bool>) {
+        NAPI_CALL_NO_THROW(napi_get_value_bool(env, jsValue, &value), false);
+        return true;
+    } else if constexpr (std::is_arithmetic_v<ValueType>) {
+        return ConvertFromJsNumber(env, jsValue, value);
+    } else if constexpr (std::is_same_v<ValueType, std::string>) {
+        size_t len = 0;
+        NAPI_CALL_NO_THROW(napi_get_value_string_utf8(env, jsValue, nullptr, 0, &len), false);
+        auto buffer = std::make_unique<char[]>(len + 1);
+        size_t strLength = 0;
+        NAPI_CALL_NO_THROW(napi_get_value_string_utf8(env, jsValue, buffer.get(), len + 1, &strLength), false);
+        value = buffer.get();
+        return true;
+    } else if constexpr (std::is_enum_v<ValueType>) {
+        std::make_signed_t<ValueType> numberValue = 0;
+        if (!ConvertFromJsNumber(env, jsValue, numberValue)) {
+            return false;
+        }
+        value = static_cast<ValueType>(numberValue);
+        return true;
+    }
+}
 
 template<class T>
 bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
@@ -29,7 +113,7 @@ bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T&
     napi_valuetype type = napi_undefined;
     napi_typeof(env, value, &type);
     if (type != napi_undefined) {
-        if (!AbilityRuntime::ConvertFromJsValue(env, value, data)) {
+        if (!ConvertFromJsValue(env, value, data)) {
             return false;
         }
     } else {
@@ -37,7 +121,9 @@ bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T&
     }
     return true;
 }
-
+}
+namespace OHOS {
+namespace Rosen {
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
 {
     napi_value objValue = nullptr;
@@ -63,7 +149,9 @@ napi_value ConvertStartAnimationOptionsToJsValue(napi_env env,
         return objValue;
     }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "type", CreateJsValue(env, startAnimationOptions->animationType));
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "type",
+        CreateJsValue(env, startAnimationOptions->animationType)),
+        "ConvertStartAnimationOptionsToJsValue failed");
     return objValue;
 }
 
@@ -75,12 +163,17 @@ napi_value ConvertStartAnimationSystemOptionsToJsValue(napi_env env,
         return objValue;
     }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "type", CreateJsValue(env, startAnimationSystemOptions->animationType));
+    NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "type",
+        CreateJsValue(env, startAnimationSystemOptions->animationType)),
+        "ConvertStartAnimationSystemOptionsToJsValue failed");
     if (startAnimationSystemOptions->animationConfig != nullptr) {
         napi_value configJsValue = ConvertWindowAnimationOptionToJsValue(env,
             *(startAnimationSystemOptions->animationConfig));
         if (configJsValue != nullptr) {
-            napi_set_named_property(env, objValue, "animationConfig", configJsValue);
+            NAPI_CHECK_RETURN_IF_NULL(napi_set_named_property(env, objValue, "animationConfig", configJsValue),
+                "Set animationConfig failed");
+        } else {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "ConvertWindowAnimationOptionToJsValue failed");
         }
     }
     return objValue;
@@ -103,7 +196,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -130,7 +223,7 @@ bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject, Tr
     napi_valuetype type = napi_undefined;
     napi_typeof(env, jsOpacityValue, &type);
     if (type != napi_undefined) {
-        if (!AbilityRuntime::ConvertFromJsValue(env, jsOpacityValue, opacity)) {
+        if (!ConvertFromJsValue(env, jsOpacityValue, opacity)) {
             result = WmErrorCode::WM_ERROR_INVALID_PARAM;
             return false;
         } else if (opacity < 0.0 || opacity > 1.0) {
@@ -149,18 +242,22 @@ bool ConvertStartAnimationOptionsFromJsValue(napi_env env, napi_value jsObject,
     if (!ParseJsValue(jsObject, env, "type", animationType)) {
         return false;
     }
+    if (animationType >= static_cast<uint32_t>(AnimationType::END)) {
+        return false;
+    }
     startAnimationOptions.animationType = static_cast<AnimationType>(animationType);
     return true;
 }
 
-// TODO 加默认错误码参数，用来兼容需要错误码的场景
-// TODO windowTransitionType新增转换机制，START需要注册
 bool ConvertStartAnimationSystemOptionsFromJsValue(napi_env env, napi_value jsObject,
     StartAnimationSystemOptions& startAnimationSystemOptions)
 {
     WmErrorCode result = WmErrorCode::WM_OK;
     uint32_t animationType = 0;
     if (!ParseJsValue(jsObject, env, "type", animationType)) {
+        return false;
+    }
+    if (animationType >= static_cast<uint32_t>(AnimationType::END)) {
         return false;
     }
     startAnimationSystemOptions.animationType = static_cast<AnimationType>(animationType);
@@ -189,10 +286,10 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             for (uint32_t i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
-                if (animationConfig.param[i] <= 0.0) {
+                if (animationConfig.params[i] <= 0.0) {
                     TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
-                        i, animationConfig.param[i]);
-                    animationConfig.param[i] = 1.0;
+                        i, animationConfig.params[i]);
+                    animationConfig.params[i] = 1.0;
                 }
             }
             break;
@@ -242,7 +339,7 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
                     result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;
                 }
-                animationConfig.param[i] = static_cast<float>(params[i]);
+                animationConfig.params[i] = static_cast<float>(params[i]);
             }
             break;
         }
