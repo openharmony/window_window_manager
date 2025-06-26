@@ -40,6 +40,7 @@
 #include "hitrace_meter.h"
 #include "rs_adapter.h"
 #include "scene_board_judgement.h"
+#include "session_helper.h"
 #include "session_permission.h"
 #include "key_event.h"
 #include "session/container/include/window_event_channel.h"
@@ -156,6 +157,8 @@ std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionIm
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
+std::map<int32_t, std::vector<sptr<IRectChangeInGlobalDisplayListener>>>
+    WindowSessionImpl::rectChangeInGlobalDisplayListeners_;
 std::map<int32_t, std::vector<sptr<IExtensionSecureLimitChangeListener>>>
     WindowSessionImpl::secureLimitChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
@@ -188,6 +191,7 @@ std::recursive_mutex WindowSessionImpl::windowStatusDidChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
+std::mutex WindowSessionImpl::rectChangeInGlobalDisplayListenerMutex_;
 std::mutex WindowSessionImpl::secureLimitChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
@@ -655,7 +659,8 @@ WMError WindowSessionImpl::Connect()
     auto ret = hostSession->Connect(
         iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_,
         token, identityToken_);
-    if (SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+    if (SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME &&
+        WindowHelper::IsMainWindow(GetType())) {
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         updateRectCallback_->GetUpdateRectResult(WINDOW_CONNECT_TIMEOUT);
@@ -2327,6 +2332,44 @@ Rect WindowSessionImpl::GetRequestRect() const
     return property_->GetRequestRect();
 }
 
+Rect WindowSessionImpl::GetGlobalDisplayRect() const
+{
+    return property_->GetGlobalDisplayRect();
+}
+
+Position WindowSessionImpl::ClientToGlobalDisplay(const Position& position) const
+{
+    const auto globalDisplayRect = GetGlobalDisplayRect();
+    // Note: currently assumes no scaling is applied to the window.
+    Position globalDisplayPos = { globalDisplayRect.posX_ + position.x, globalDisplayRect.posY_ + position.y };
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, globalDisplayPos: %{public}s",
+        GetPersistentId(), position.ToString().c_str(), globalDisplayPos.ToString().c_str());
+    return globalDisplayPos;
+}
+
+Position WindowSessionImpl::GlobalDisplayToClient(const Position& position) const
+{
+    const auto globalDisplayRect = GetGlobalDisplayRect();
+    // Note: currently assumes no scaling is applied to the window.
+    Position clientPos = { position.x - globalDisplayRect.posX_, position.y - globalDisplayRect.posY_ };
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, clientPos: %{public}s",
+        GetPersistentId(), position.ToString().c_str(), clientPos.ToString().c_str());
+    return clientPos;
+}
+
+WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}d",
+        GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason));
+    Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    if (newRect == GetGlobalDisplayRect()) {
+        return WSError::WS_DO_NOTHING;
+    }
+    property_->SetGlobalDisplayRect(newRect);
+    NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
+    return WSError::WS_OK;
+}
+
 WindowType WindowSessionImpl::GetType() const
 {
     return property_->GetWindowType();
@@ -3568,6 +3611,32 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
 }
 
 template<typename T>
+EnableIfSame<T, IRectChangeInGlobalDisplayListener,
+    std::vector<sptr<IRectChangeInGlobalDisplayListener>>> WindowSessionImpl::GetListeners()
+{
+    std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
+    auto it = rectChangeInGlobalDisplayListeners_.find(GetPersistentId());
+    if (it != rectChangeInGlobalDisplayListeners_.end()) {
+        return it->second;
+    }
+    return {};
+}
+
+WMError WindowSessionImpl::RegisterRectChangeInGlobalDisplayListener(
+    const sptr<IRectChangeInGlobalDisplayListener>& listener)
+{
+    std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
+    return RegisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterRectChangeInGlobalDisplayListener(
+    const sptr<IRectChangeInGlobalDisplayListener>& listener)
+{
+    std::lock_guard<std::mutex> lock(rectChangeInGlobalDisplayListenerMutex_);
+    return UnregisterListener(rectChangeInGlobalDisplayListeners_[GetPersistentId()], listener);
+}
+
+template<typename T>
 EnableIfSame<T, IExtensionSecureLimitChangeListener,
     std::vector<sptr<IExtensionSecureLimitChangeListener>>> WindowSessionImpl::GetListeners()
 {
@@ -4225,6 +4294,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
         ClearUselessListeners(windowRectChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(rectChangeInGlobalDisplayListenerMutex_);
+        ClearUselessListeners(rectChangeInGlobalDisplayListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(secureLimitChangeListenerMutex_);
@@ -5119,6 +5192,19 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
         }
     }
     NotifyUIExtHostWindowRectChangeListeners(rect, reason);
+}
+
+void WindowSessionImpl::NotifyGlobalDisplayRectChange(const Rect& rect, WindowSizeChangeReason reason)
+{
+    auto listeners = GetListeners<IRectChangeInGlobalDisplayListener>();
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}d, rect: %{public}s, reason: %{public}d, listenerSize: %{public}zu",
+        GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason), listeners.size());
+    for (const auto& listener : listeners) {
+        if (listener) {
+            listener->OnRectChangeInGlobalDisplay(rect, reason);
+        }
+    }
 }
 
 void WindowSessionImpl::NotifyUIExtHostWindowRectChangeListeners(const Rect rect, const WindowSizeChangeReason reason)
@@ -6579,19 +6665,19 @@ void WindowSessionImpl::UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     }
 }
 
-void WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
     const std::shared_ptr<Media::PixelMap>& icon)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
-        return;
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
-    hostSession->UpdateFloatingBall(fbTemplateInfo);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
+    return hostSession->UpdateFloatingBall(fbTemplateInfo);
 }
- 
+
 WMError WindowSessionImpl::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
 {
     if (IsWindowSessionInvalid()) {
@@ -6602,7 +6688,7 @@ WMError WindowSessionImpl::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
     return hostSession->RestoreFbMainWindow(want);
 }
- 
+
 void WindowSessionImpl::NotifyPrepareCloseFloatingBall()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyPrepareCloseFloatingBall");

@@ -791,6 +791,37 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
 }
 
+void JsWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason)
+{
+    auto it = JS_SIZE_CHANGE_REASON.find(reason);
+    RectChangeReason rectChangeReason = (it != JS_SIZE_CHANGE_REASON.end()) ? it->second : RectChangeReason::UNDEFINED;
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, where = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChangeInGlobalDisplay");
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: rect: %{public}s, rectChangeReason: %{public}u",
+            where, rect.ToString().c_str(), static_cast<uint32_t>(rectChangeReason));
+        if (!env) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: env is nullptr", where);
+            return;
+        }
+        auto listener = self.promote();
+        if (!listener) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: listener is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value jsRectChangeOptions = BuildJsRectChangeOptions(env, rect, rectChangeReason);
+        if (jsRectChangeOptions == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: jsRectChangeOptions is nullptr", where);
+            return;
+        }
+        napi_value argv[] = { jsRectChangeOptions };
+        listener->CallJsMethod(RECT_CHANGE_IN_GLOBAL_DISPLAY_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send event");
+    }
+}
+
 void JsWindowListener::OnSecureLimitChange(bool isLimit)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);

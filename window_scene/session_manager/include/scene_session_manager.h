@@ -758,6 +758,8 @@ public:
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) override;
 
+    std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -1291,6 +1293,11 @@ private:
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
+
+    /*
+     * Floating ball
+     */
+    WSError IsFloatingBallValid(const sptr<SceneSession>& parentSession);
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
