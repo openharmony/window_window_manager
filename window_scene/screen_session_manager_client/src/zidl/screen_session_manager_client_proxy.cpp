@@ -414,7 +414,7 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
     reply.ReadUInt64Vector(&surfaceNodeIds);
 }
 
-void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds)
+void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIdsChanged(const std::vector<uint64_t>& surfaceNodeIds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
