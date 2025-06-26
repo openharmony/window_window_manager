@@ -49,7 +49,7 @@ DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
     }
     auto iter = displayId2GroupIdMap_.find(displayId);
     if (iter != displayId2GroupIdMap_.end()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, "displayGroupId: %{public}" PRIu64,
+        TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
               displayId, iter->second);
         return iter->second;
     }
@@ -63,8 +63,7 @@ DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
 WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
-          "displayId: %{public}" PRIu64,
-          " ,displayGroupId: %{public}" PRIu64,
+          "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
           displayId,
           displayGroupId);
     if (displayId == DISPLAY_ID_INVALID) {
@@ -91,8 +90,7 @@ WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, Disp
 WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
-          "displayId: %{public}" PRIu64,
-          " ,displayGroupId: %{public}" PRIu64,
+          "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
           displayId,
           displayGroupId);
     if (displayId == DISPLAY_ID_INVALID) {
