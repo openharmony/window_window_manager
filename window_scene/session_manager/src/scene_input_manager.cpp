@@ -294,22 +294,22 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .offsetX = screenProperty.GetInputOffsetX(),
-            .offsetY = screenProperty.GetInputOffsetY(),
+            .oneHandX = screenOneHandX,
+            .oneHandY = screenOneHandY,
             .scalePercent = scalePercent,
             .expandHeight = expandHeight,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
             .displaySourceMode = static_cast<MMI::DisplaySourceMode>(screenSession->GetScreenCombination()),
-            .oneHandX = screenOneHandX,
-            .oneHandY = screenOneHandY,
-            .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
-            .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
             .screenArea = {
                 .id = screenId,
                 .area = {screenProperty.GetScreenAreaOffsetX(), screenProperty.GetScreenAreaOffsetY(),
                     screenProperty.GetScreenAreaWidth(), screenProperty.GetScreenAreaHeight()}
             },
-            .rsId = screenProperty.GetRsId()
+            .rsId = screenProperty.GetRsId(),
+            .offsetX = screenProperty.GetInputOffsetX(),
+            .offsetY = screenProperty.GetInputOffsetY(),
+            .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
+            .pointerActiveHeight = screenProperty.GetPointerActiveHeight()
         };
         DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
         if (displayGroupMap.count(displayGroupId) == 0) {
@@ -400,7 +400,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .screens = screenInfos,
             .displayGroups = displayGroupInfos
         };
-        TLONGI(WmsLogTag::WMS_EVENT, "userId:%{public}d", currentUserId_);
+        TLOGNI(WmsLogTag::WMS_EVENT, "userId:%{public}d", currentUserId_);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(userScreenInfo);
     };
     if (eventHandler_) {
