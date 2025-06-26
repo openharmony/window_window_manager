@@ -9927,7 +9927,7 @@ void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSessio
         if (session == nullptr) {
             continue;
         }
-        GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+        GetSurfaceNodeIdsFromSubSession(session, surfaceNodeIds);
         std::string logStr = std::to_string(session->GetSurfaceNode()->GetId());
         surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
         if (session->GetLeashWinSurfaceNode()) {
