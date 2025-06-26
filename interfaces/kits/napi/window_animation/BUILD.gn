@@ -18,6 +18,7 @@ config("window_animation_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/interfaces/kits/napi/window_animation",
     "${window_base_path}/utils/include",
