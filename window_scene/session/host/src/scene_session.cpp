@@ -48,6 +48,7 @@
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "rs_adapter.h"
+#include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -1906,6 +1907,33 @@ WSError SceneSession::UpdateSessionRect(
     return WSError::WS_OK;
 }
 
+WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+          GetPersistentId(), rect.ToString().c_str(), reason);
+    PostTask([weakThis = wptr(this), rect, reason, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is nullptr", where);
+            return;
+        }
+        if (rect == session->GetGlobalDisplayRect()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}d skip same rect",
+                where, session->GetPersistentId());
+            return;
+        }
+        // Convert global coordinates to screen-relative coordinates to be
+        // compatible with the original logic of UpdateSessionRectInner.
+        const auto& [displayId, relativeDisplayRect] =
+            SessionCoordinateHelper::GlobalToRelativeDisplayRect(session->GetDisplayId(), rect);
+        RectAnimationConfig animConfig;
+        MoveConfiguration moveConfig = { displayId, animConfig };
+        session->SetRequestMoveConfiguration(moveConfig);
+        session->UpdateSessionRectInner(relativeDisplayRect, reason, moveConfig, animConfig);
+    }, __func__ + GetRectInfo(rect));
+    return WSError::WS_OK;
+}
+
 void SceneSession::HandleCrossMoveTo(WSRect& globalRect)
 {
     HandleCrossMoveToSurfaceNode(globalRect);
@@ -3493,6 +3521,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
+    bool needSetBoundsNextVsync = false;
     throwSlipToFullScreenAnimCount_.store(0);
     UpdateSizeChangeReason(reason);
     if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
@@ -3507,18 +3536,33 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         }
         pcFoldScreenController_->RecordMoveRects(rect);
     } else {
-        SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        if (reason != SizeChangeReason::DRAG || keyFramePolicy_.running_) {
+            SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        } else {
+            needSetBoundsNextVsync = true;
+        }
     }
+
+    // Window Layout Global Coordinate System
+    // During drag (except DRAG_END), the rect is relative to the original display and can be
+    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
+    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
+    if (reason != SizeChangeReason::DRAG_END) {
+        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), rect);
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
+    }
+
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
-        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
+        nextVsyncDragCallback->onCallback = [weakThis = wptr(this),
+            globalRect, isGlobal, needFlush, needSetBoundsNextVsync, where = __func__](int64_t, int64_t) {
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
                 return;
             }
-            session->OnNextVsyncReceivedWhenDrag();
+            session->OnNextVsyncReceivedWhenDrag(globalRect, isGlobal, needFlush, needSetBoundsNextVsync);
         };
         if (requestNextVsyncFunc_) {
             requestNextVsyncFunc_(nextVsyncDragCallback);
@@ -3528,9 +3572,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
 }
 
-void SceneSession::OnNextVsyncReceivedWhenDrag()
+void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
+    bool isGlobal, bool needFlush, bool needSetBoundsNextVsync)
 {
-    PostTask([weakThis = wptr(this), where = __func__] {
+    PostTask([weakThis = wptr(this), globalRect, isGlobal, needFlush, needSetBoundsNextVsync, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
@@ -3544,6 +3589,9 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 where, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+            if (needSetBoundsNextVsync) {
+                session->SetSurfaceBounds(globalRect, isGlobal, needFlush);
+            }
             session->ResetDirtyDragFlags();
         }
     });
@@ -3621,6 +3669,15 @@ bool SceneSession::IsCompatibilityModeScale(float scaleX, float scaleY)
     if (property->IsAdaptToProportionalScale() && MathHelper::GreatNotEqual(scaleX, 0.0f) &&
         MathHelper::GreatNotEqual(scaleY, 0.0f) && (!NearEqual(scaleX, 1.0f) || !NearEqual(scaleY, 1.0f))) {
         return true;
+    }
+    return false;
+}
+
+bool SceneSession::IsInCompatScaleStatus() const
+{
+    auto property = GetSessionProperty();
+    if (property->IsAdaptToProportionalScale() || property->IsAdaptToSimulationScale()) {
+        return !NearEqual(GetScaleX(), COMPACT_NORMAL_SCALE) || !NearEqual(GetScaleY(), COMPACT_NORMAL_SCALE);
     }
     return false;
 }
@@ -7833,6 +7890,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
+
+        // Window Layout Global Coordinate System
+        auto globalDisplayRect = ComputeGlobalDisplayRect();
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "

@@ -59,6 +59,7 @@ const std::string WINDOW_STATUS_DID_CHANGE_CB = "windowStatusDidChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string RECT_CHANGE_IN_GLOBAL_DISPLAY_CB = "rectChangeInGlobalDisplay";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
@@ -88,6 +89,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowStatusDidChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
+                         public IRectChangeInGlobalDisplayListener,
                          public IExtensionSecureLimitChangeListener,
                          public IWindowWillCloseListener,
                          public IMainWindowCloseListener,
@@ -147,7 +149,13 @@ public:
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
+
+    /*
+     * Window Layout
+     */
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
+
     void OnSecureLimitChange(bool isLimit) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,

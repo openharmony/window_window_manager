@@ -18,6 +18,7 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "session/host/include/session.h"
@@ -886,14 +887,14 @@ HWTEST_F(SystemSessionTest, UpdateFloatingBall, Function | SmallTest | Level2)
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     systemSession->SetSessionProperty(property);
-    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_DO_NOTHING);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
     systemSession->SetSessionProperty(property);
-    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_OK);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_OK);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
-    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WSError::WS_OK);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_OK);
 }
 
 /**
@@ -943,7 +944,12 @@ HWTEST_F(SystemSessionTest, RestoreFbMainWindow, Function | SmallTest | Level2)
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
     systemSession->SetSessionProperty(property);
+
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_INVALID_CALLING);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
@@ -979,7 +985,7 @@ HWTEST_F(SystemSessionTest, GetFloatingBallWindowId, Function | SmallTest | Leve
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
     systemSession->SetSessionProperty(property);
-    EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_ERROR_INVALID_CALLING);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
     EXPECT_EQ(systemSession->GetFloatingBallWindowId(windowId), WMError::WM_OK);

@@ -35,6 +35,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
+    WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;

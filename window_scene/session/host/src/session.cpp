@@ -29,6 +29,7 @@
 
 #include "common/include/session_permission.h"
 #include "rs_adapter.h"
+#include "session_coordinate_helper.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -465,6 +466,16 @@ void Session::NotifyRemoveBlank()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnRemoveBlank();
+        }
+    }
+}
+
+void Session::NotifyPreLoadStartingWindowFinished()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnPreLoadStartingWindowFinished();
         }
     }
 }
@@ -1240,6 +1251,11 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     UpdateSessionState(SessionState::STATE_CONNECT);
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = ComputeGlobalDisplayRect();
+    UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
+
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
     if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_ != nullptr) {
@@ -4504,6 +4520,47 @@ void Session::DeletePersistentImageFit()
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+}
+
+void Session::SetGlobalDisplayRect(const WSRect& rect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
+    GetSessionProperty()->SetGlobalDisplayRect(SessionHelper::TransferToRect(rect));
+}
+
+WSRect Session::GetGlobalDisplayRect() const
+{
+    WSRect rect = SessionHelper::TransferToWSRect(GetSessionProperty()->GetGlobalDisplayRect());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
+    return rect;
+}
+
+WSRect Session::ComputeGlobalDisplayRect() const
+{
+    // In multi-screen drag-and-move scenarios, the global rect is relative to the top-left
+    // corner of the bounding rectangle of all screens. In other cases, it is relative to
+    // the top-left corner of its associated screen.
+    // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
+    // returns the window's rect relative to its screen, regardless of the scenario.
+    WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
+    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
+}
+
+WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
+{
+    WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}d, rect: %{public}s, reason: %{public}u, curGlobalDisplayRect: %{public}s",
+        GetPersistentId(), rect.ToString().c_str(), reason, curGlobalDisplayRect.ToString().c_str());
+    if (rect == curGlobalDisplayRect) {
+        return WSError::WS_DO_NOTHING;
+    }
+    SetGlobalDisplayRect(rect);
+    // Notify client if necessary
+    if (sessionStage_ != nullptr) {
+        sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
+    }
+    return WSError::WS_OK;
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)

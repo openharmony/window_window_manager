@@ -277,33 +277,34 @@ enum class RectChangeReason : uint32_t {
 };
 
 const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
-    { WindowSizeChangeReason::UNDEFINED,             RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE,              RectChangeReason::MAXIMIZE   },
-    { WindowSizeChangeReason::RECOVER,               RectChangeReason::RECOVER    },
-    { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
-    { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
-    { WindowSizeChangeReason::DRAG_MOVE,             RectChangeReason::MOVE       },
-    { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
-    { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
-    { WindowSizeChangeReason::HIDE,                  RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::TRANSFORM,             RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW, RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FULL_TO_SPLIT,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
-    { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
-    { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::UNDEFINED,                       RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE,                        RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER,                         RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::ROTATION,                        RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::DRAG,                            RectChangeReason::DRAG       },
+    { WindowSizeChangeReason::DRAG_START,                      RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_MOVE,                       RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::DRAG_END,                        RectChangeReason::DRAG_END   },
+    { WindowSizeChangeReason::RESIZE,                          RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MOVE,                            RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::HIDE,                            RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::TRANSFORM,                       RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW,           RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_SPLIT,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_FULL,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_FLOATING,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FLOATING_TO_FULL,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,               RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,               RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_START,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG,                      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_END,                  RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::RESIZE_BY_LIMIT,                 RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,             RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,             RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE, RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::END,                             RectChangeReason::UNDEFINED  },
 };
 
 enum class ApiModalityType : uint32_t {
@@ -474,6 +475,39 @@ public:
         }
         return true;
     }
+
+    /**
+     * @brief Create a JS object representing a window rectangle change event.
+     *
+     * The resulting object has the following structure:
+     * {
+     *   rect: { x, y, width, height },
+     *   reason: <RectChangeReason enum value>
+     * }
+     *
+     * Used to pass rectangle change info from native code to JavaScript.
+     *
+     * @param env The NAPI environment.
+     * @param rect The window rectangle.
+     * @param reason The change reason.
+     * @return The JS object on success, or nullptr on failure.
+     */
+    napi_value BuildJsRectChangeOptions(napi_env env, const Rect& rect, RectChangeReason reason);
+
+    /**
+     * @brief Create a JS object from a native Position.
+     *
+     * The resulting object has the form:
+     * {
+     *   x: <number>,
+     *   y: <number>
+     * }
+     *
+     * @param env The NAPI environment.
+     * @param position The Position to convert.
+     * @return The JS object on success, or nullptr on failure.
+     */
+    napi_value BuildJsPosition(napi_env env, const Position& position);
 }
 }
 #endif

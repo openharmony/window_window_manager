@@ -250,6 +250,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     WSRect GetSessionGlobalRectWithSingleHandScale();
     void UpdateSessionState(SessionState state) override;
@@ -329,7 +330,7 @@ public:
     /*
      * Floating Ball Window
      */
-    WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override { return WSError::WS_OK; };
+    WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override { return WMError::WM_OK; };
     WSError StopFloatingBall() override { return WSError::WS_OK; };
     WMError GetFloatingBallWindowId(uint32_t& windowId) override { return WMError::WM_OK; };
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override { return WMError::WM_OK; };
@@ -384,6 +385,11 @@ public:
     virtual WSError SetSubWindowZLevel(int32_t zLevel) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual int32_t GetSubWindowZLevel() const { return 0; }
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
+
+    /*
+     * Compatible Mode
+     */
+    bool IsInCompatScaleStatus() const;
 
     /*
      * PC Window
@@ -753,7 +759,8 @@ public:
     void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
     void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
-    void OnNextVsyncReceivedWhenDrag();
+    void OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
+        bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
     WSError GetCrossAxisState(CrossAxisState& state) override;

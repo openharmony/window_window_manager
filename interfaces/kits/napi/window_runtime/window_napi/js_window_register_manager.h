@@ -53,6 +53,7 @@ enum class RegisterListenerType : uint32_t {
     ACROSS_DISPLAYS_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
+    RECT_CHANGE_IN_GLOBAL_DISPLAY_CB,
     EXTENSION_SECURE_LIMIT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
     WINDOW_WILL_CLOSE_CB,
@@ -126,6 +127,9 @@ private:
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessRectChangeInGlobalDisplayRegister(
+        const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);

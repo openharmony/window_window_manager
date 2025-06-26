@@ -30,6 +30,7 @@ using NodeId = uint64_t;
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
 constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr ScreenId MAIN_SCREEN_ID_DEFAULT = 0;
 constexpr ScreenId SCREEN_ID_FAKE = 999;
 constexpr DisplayId DISPLAY_ID_FAKE = 999;
 constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
@@ -700,6 +701,16 @@ enum class DMDeviceStatus: uint32_t {
 struct Position {
     int32_t x = 0;
     int32_t y = 0;
+
+    bool operator==(const Position& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
+    }
 
     inline std::string ToString() const
     {

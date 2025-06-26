@@ -2534,6 +2534,43 @@ HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Leve
     EXPECT_EQ(result, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
+
+/**
+ * @tc.name: TestGetSceneSessions
+ * @tc.desc: Verify that GetSceneSessions correctly filters sessions by screenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestGetSceneSessions, TestSize.Level1)
+{
+    constexpr ScreenId screenId = 1001;
+    SessionInfo info;
+    auto session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session1->SetScreenId(screenId);
+    auto session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session2->SetScreenId(screenId);
+    auto session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session3->SetScreenId(1000); // 1000: different screenId
+
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
+        auto& sessionMap = ssm_->sceneSessionMap_;
+        sessionMap.clear();
+        sessionMap.emplace(1, session1);
+        sessionMap.emplace(2, session2);
+        sessionMap.emplace(3, session3);
+    }
+
+    auto result = ssm_->GetSceneSessions(screenId);
+    EXPECT_EQ(result.size(), 2u);
+    EXPECT_NE(std::find(result.begin(), result.end(), session1), result.end());
+    EXPECT_NE(std::find(result.begin(), result.end(), session2), result.end());
+    EXPECT_EQ(std::find(result.begin(), result.end(), session3), result.end());
+
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
+        ssm_->sceneSessionMap_.clear();
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
