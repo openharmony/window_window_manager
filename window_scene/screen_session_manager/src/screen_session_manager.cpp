@@ -938,7 +938,7 @@ void ScreenSessionManager::DestroyExtendVirtualScreen()
                 sessionIt.first);
             continue;
         }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL && 
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL &&
             screenSession->GetIsExtendVirtual()) {
             DestroyVirtualScreen(screenSession->GetScreenId());
             TLOGI(WmsLogTag::DMS, "destory screenId: %{public}" PRIu64, screenSession->GetScreenId());
@@ -2908,9 +2908,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN, reason);
 }
 
-bool ScreenSessionManager::IsSystemSleep ()
+bool ScreenSessionManager::IsSystemSleep()
 {
-    return powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM;
+    return powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM ||
+        powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY;
 }
 
 bool ScreenSessionManager::SuspendEnd()
@@ -9237,10 +9238,10 @@ void ScreenSessionManager::SetMultiScreenRelativePositionInner(sptr<ScreenSessio
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
-    firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
-        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
     CalculateXYPosition(firstScreenSession, secondScreenSession);
+    firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     if (g_isPcDevice) {
@@ -10325,7 +10326,7 @@ DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bo
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::DMS, "unique screenId: %{public}" PRIu64 " rsScreenId: %{public}" PRIu64, screenId, rsScreenId);
-    
+
     auto ret = rsInterface_.SetVirtualScreenAutoRotation(rsScreenId, enable);
     if (ret != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "rsInterface error: %{public}d", ret);

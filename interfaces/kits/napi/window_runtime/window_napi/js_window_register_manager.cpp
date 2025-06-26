@@ -57,6 +57,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {ACROSS_DISPLAYS_CHANGE_CB, RegisterListenerType::ACROSS_DISPLAYS_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
+    {RECT_CHANGE_IN_GLOBAL_DISPLAY_CB, RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB},
     {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
     {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
@@ -621,6 +622,9 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB):
+                return ProcessRectChangeInGlobalDisplayRegister(
+                    windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB):
                 return ProcessExtensionSecureLimitChangeRegister(
                     windowManagerListener, window, isRegister, env, parameter);
@@ -770,6 +774,24 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWind
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
     }
     return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(
+    const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+    bool isRegister, napi_env env, napi_value parameter)
+{
+    if (!window) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WMError ret = WMError::WM_OK;
+    if (isRegister) {
+        ret = window->RegisterRectChangeInGlobalDisplayListener(listener);
+    } else {
+        ret = window->UnregisterRectChangeInGlobalDisplayListener(listener);
+    }
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+    return it != WM_JS_TO_ERROR_CODE_MAP.end() ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener,

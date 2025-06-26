@@ -1790,23 +1790,23 @@ HWTEST_F(SessionProxyTest, UpdateFloatingBall, Function | SmallTest | Level2)
     FloatingBallTemplateInfo fbTemplateInfo;
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WSError res = sProxy->UpdateFloatingBall(fbTemplateInfo);
-    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    WMError res = sProxy->UpdateFloatingBall(fbTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     res = sProxy->UpdateFloatingBall(fbTemplateInfo);
-    ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_EQ(res, WMError::WM_OK);
 
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
     MockMessageParcel::SetWriteParcelableErrorFlag(false);
 
     sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
 
     iRemoteObjectMocker->sendRequestResult_ = 1;
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->UpdateFloatingBall(fbTemplateInfo));
 }
 
 /**
@@ -1894,6 +1894,48 @@ HWTEST_F(SessionProxyTest, NotifyFloatingBallPrepareClose, Function | SmallTest 
     iRemoteObjectMocker->sendRequestResult_ = 1;
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sProxy->NotifyFloatingBallPrepareClose();
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromClient
+ * @tc.desc: Test UpdateGlobalDisplayRectFromClient behavior in various IPC scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestUpdateGlobalDisplayRectFromClient, Function | SmallTest | Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    WSRect rect { 10, 20, 200, 100 };
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write rect
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    // Case 3: Failed to write reason
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+
+    // Case 5: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+
+    // Case 6: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
 }
 } // namespace
 } // namespace Rosen

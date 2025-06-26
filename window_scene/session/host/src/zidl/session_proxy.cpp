@@ -878,6 +878,39 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
 }
 
 /** @note @window.layout */
+WSError SessionProxy::UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write interface token");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write rect");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write reason");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is nullptr");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int sendRet = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT), data, reply, option);
+    if (sendRet != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send request, error = %{public}d", sendRet);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
 WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
 {
     MessageParcel data;
@@ -1824,35 +1857,35 @@ WSError SessionProxy::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint3
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+WMError SessionProxy::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "writeInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteParcelable(&fbTemplateInfo)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "write fbTemplateInfo failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Read reply failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(ret);
+    return static_cast<WMError>(ret);
 }
 
 WMError SessionProxy::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)

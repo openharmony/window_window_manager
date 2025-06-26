@@ -26,6 +26,7 @@
 #include <event_handler.h>
 #include <event_runner.h>
 
+#include "oh_input_manager.h"
 #include "oh_window_comm.h"
 #include "singleton_container.h"
 #include "window.h"
@@ -554,6 +555,18 @@ int32_t OH_WindowManager_InjectTouchEvent(
 {
     if (touchEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "touchEvent is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (OH_Input_GetTouchEventWindowId(touchEvent) == -1) { // -1: invalid window id
+        OH_Input_SetTouchEventWindowId(touchEvent, windowId);
+        TLOGI(WmsLogTag::WMS_EVENT, "windowId is default");
+    }
+    if (OH_Input_GetTouchEventWindowId(touchEvent) != windowId) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowIds are not equal, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();

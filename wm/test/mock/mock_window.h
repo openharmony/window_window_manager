@@ -191,6 +191,11 @@ class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
 public:
     MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
 };
+
+class MockRectChangeInGlobalDisplayListener : public IRectChangeInGlobalDisplayListener {
+public:
+    MOCK_METHOD(void, OnRectChangeInGlobalDisplay, (const Rect& rect, WindowSizeChangeReason reason), (override));
+};
 } // Rosen
 } // OHOS
 
