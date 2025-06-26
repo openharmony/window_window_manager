@@ -82,7 +82,7 @@ public:
     virtual void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) = 0;
     virtual void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) = 0;
-    virtual void OnSetSurfaceNodeIdsChanged(const std::vector<uint64_t>& surfaceNodeIds) = 0;
+    virtual void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) = 0;
     virtual void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) = 0;
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
