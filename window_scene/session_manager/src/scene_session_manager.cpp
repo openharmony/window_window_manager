@@ -59,6 +59,7 @@
 #include "res_sched_client.h"
 #include "rs_adapter.h"
 #include "scene_input_manager.h"
+#include "scene_screen_change_listener.h"
 #include "scene_system_ability_listener.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/ability_info_manager.h"
@@ -3568,6 +3569,13 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
 
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_FB) {
+        auto ret = IsFloatingBallValid(parentSession);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+    }
+
     TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
         property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
@@ -3806,6 +3814,16 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return true;
     }
     return false;
+}
+
+WSError SceneSessionManager::IsFloatingBallValid(const sptr<SceneSession>& parentSession)
+{
+    if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
+        parentSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Parent is null or state invalid");
+        return WSError::WS_ERROR_INVALID_PARENT;
+    }
+    return WSError::WS_OK;
 }
 
 void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
@@ -11558,6 +11576,9 @@ void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>
         SceneSessionManager::GetInstance().AddFocusGroup(screenSession->GetDisplayGroupId(),
                                                          screenSession->GetScreenId());
     }
+
+    // Window Layout Global Coordinate System: monitors screen position changes in the global coordinate system
+    screenSession->RegisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());
 }
 
 void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
@@ -11577,6 +11598,9 @@ void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSessi
         SceneSessionManager::GetInstance().RemoveFocusGroup(screenSession->GetDisplayGroupId(),
                                                             screenSession->GetScreenId());
     }
+
+    // Window Layout Global Coordinate System
+    screenSession->UnregisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());
 }
 
 void DisplayChangeListener::OnScreenshot(DisplayId displayId)
@@ -15582,7 +15606,7 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
             return WMError::WM_OK;
         }
     }
-    TLOGW(WmsLogTag::WMS_SYSTEM, "no Fb panel");
+    TLOGW(WmsLogTag::WMS_SYSTEM, "No Fb panel");
     return WMError::WM_ERROR_FB_INTERNAL_ERROR;
 }
 
@@ -16277,5 +16301,19 @@ void SceneSessionManager::RegisterKioskModeChangeCallback(KioskModeChangeFunc&& 
         kioskModeChangeFunc_ = std::move(callback);
         kioskModeChangeFunc_(isKioskMode_, kioskAppPersistentId_);
     }, __func__);
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId screenId)
+{
+    std::vector<sptr<SceneSession>> sceneSessions;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetScreenId() == screenId) {
+            sceneSessions.emplace_back(sceneSession);
+        }
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "screenId: %{public}" PRIu64 ", sceneSession count: %{public}zu",
+        screenId, sceneSessions.size());
+    return sceneSessions;
 }
 } // namespace OHOS::Rosen

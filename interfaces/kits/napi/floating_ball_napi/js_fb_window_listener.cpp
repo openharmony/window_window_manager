@@ -84,6 +84,10 @@ void JsFbWindowListener::OnClickEvent()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "called, clickEvent");
     auto napiTask = [jsCallback = jsCallBack_, env = env_]() {
+        if (jsCallback == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
+            return;
+        }
         CallJsFunction(env, jsCallback->GetNapiValue(), {}, 0);
     };
     if (env_ != nullptr) {

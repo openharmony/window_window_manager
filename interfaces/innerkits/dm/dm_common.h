@@ -703,6 +703,16 @@ struct Position {
     int32_t x = 0;
     int32_t y = 0;
 
+    bool operator==(const Position& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
+    }
+
     inline std::string ToString() const
     {
         std::ostringstream oss;
