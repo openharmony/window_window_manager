@@ -18,6 +18,7 @@
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
 
+#include "ability_info.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_pattern_detach_callback.h"
@@ -30,7 +31,6 @@
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
-#include "ability_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -270,10 +270,10 @@ HWTEST_F(SessionLayoutTest, UpdateWindowModeSupportType01, TestSize.Level1)
     info.bundleName_ = "UpdateWindowModeSupportType01";
     sptr<Session> session = sptr<Session>::MakeSptr(info);
 
-    EXPECT_EQ(session->UpdateWindowModeSupportType(nullptr, nullptr), false);
+    EXPECT_EQ(session->UpdateWindowModeSupportType(nullptr), false);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    EXPECT_EQ(session->UpdateWindowModeSupportType(abilityInfo, nullptr), false);
+    EXPECT_EQ(session->UpdateWindowModeSupportType(abilityInfo), false);
 }
 } // namespace
 } // namespace Rosen
