@@ -3377,6 +3377,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         avoidAreaListenerSessionSet_.erase(persistentId);
         screenshotAppEventListenerSessionSet_.erase(persistentId);
+        RemoveSubSessionFromBlackList(sceneSession);
         DestroyDialogWithMainWindow(sceneSession);
         DestroyToastSession(sceneSession);
         DestroySubSession(sceneSession); // destroy sub session by destruction
@@ -9948,7 +9949,7 @@ void SceneSessionManager::AddSubSessionToBlackList(const sptr<SceneSession>& sce
     rsInterface_.SetVirtualScreenBlackList(displayId, sceneSessionBlackListMap_[displayId]);
 }
 
-void SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::RemoveSubSessionFromBlackList(const sptr<SceneSession>& sceneSession)
 {
     auto displayId = !PcFoldScreenManager::GetInstance().IsHalfFolded(sceneSession->GetScreenId())
                          ? sceneSession->GetScreenId()
