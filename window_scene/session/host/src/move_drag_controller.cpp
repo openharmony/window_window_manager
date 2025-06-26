@@ -1025,7 +1025,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
         moveDragProperty_.originalRect_);
-    dragAreaType_ = SessionHelper::GetDragAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside,
+    dragAreaType_ = SessionHelper::GetAreaTypeForScaleResize(pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside,
         moveDragProperty_.originalRect_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
         "rect:%{public}s, type:%{public}d", pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside, vpr_,
