@@ -3620,6 +3620,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);
         }
+
         AddSubSessionToBlackList(newSession);
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
