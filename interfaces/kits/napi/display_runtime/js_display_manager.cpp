@@ -1815,9 +1815,9 @@ napi_value InitDisplaySourceMode(napi_env env)
 
 static void BindCoordinateConvertNativeFunction(napi_env env, napi_value exportObj, const char* moduleName)
 {
-    BindNativeFunction(env, exportObj, "convertRelativeCoordinateToGlobal", moduleName,
+    BindNativeFunction(env, exportObj, "convertRelativeToGlobalCoordinate", moduleName,
         JsDisplayManager::ConvertRelativeCoordinateToGlobal);
-    BindNativeFunction(env, exportObj, "convertGlobalCoordinateToRelative", moduleName,
+    BindNativeFunction(env, exportObj, "convertGlobalToRelativeCoordinate", moduleName,
         JsDisplayManager::ConvertGlobalCoordinateToRelative);
 }
 
