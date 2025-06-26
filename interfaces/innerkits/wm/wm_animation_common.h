@@ -143,7 +143,7 @@ struct WindowAnimationOption : public Parcelable {
             delete windowAnimationConfig;
             return nullptr;
         }
-        for (auto param: windowAnimationConfig->params) {
+        for (auto& param: windowAnimationConfig->params) {
             if (!parcel.ReadFloat(param)) {
                 delete windowAnimationConfig;
                 return nullptr;
