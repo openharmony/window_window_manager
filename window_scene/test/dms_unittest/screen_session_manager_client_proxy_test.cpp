@@ -220,8 +220,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnDisplayStateChanged, TestSize.Le
 }
 
 /**
- * @tc.name: 
- * Changed
+ * @tc.name: Changed
  * @tc.desc: OnGetSurfaceNodeIdsFromMissionIdsChanged test
  * @tc.type: FUNC
  */
