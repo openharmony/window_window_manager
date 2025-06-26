@@ -2602,8 +2602,8 @@ uint32_t Session::GetBackgroundColor() const
         std::shared_ptr<AppExecFwk::Configuration> appConfig = appContext->GetConfiguration();
         if (appConfig != nullptr) {
             std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            return (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
             TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}s", colorMode.c_str());
+            return (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
         }
     } else {
         TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backGroundColor WHITE");
