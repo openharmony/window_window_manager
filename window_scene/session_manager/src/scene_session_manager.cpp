@@ -3619,6 +3619,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);
         }
+
         auto displayId = newSession->GetSessionProperty()->GetDisplayId();
         if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
             displayId = newSession->GetClientDisplayId();
