@@ -51,15 +51,23 @@ public:
     static napi_value DestroyWindow(napi_env env, napi_callback_info info);
     static napi_value Hide(napi_env env, napi_callback_info info);
     static napi_value HideWithAnimation(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Layout
+     */
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToGlobal(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToGlobalDisplay(napi_env env, napi_callback_info info);
     static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowWithAnimation(napi_env env, napi_callback_info info);
+    static napi_value ClientToGlobalDisplay(napi_env env, napi_callback_info info);
+    static napi_value GlobalDisplayToClient(napi_env env, napi_callback_info info);
+
     static napi_value SetWindowType(napi_env env, napi_callback_info info);
     static napi_value SetWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetProperties(napi_env env, napi_callback_info info);
@@ -257,15 +265,26 @@ private:
     napi_value OnDestroyWindow(napi_env env, napi_callback_info info);
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Layout
+     */
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToGlobal(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_info info);
     napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowWithAnimation(napi_env env, napi_callback_info info);
+    template <typename PositionTransformFunc>
+    napi_value HandlePositionTransform(
+        napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller);
+    napi_value OnClientToGlobalDisplay(napi_env env, napi_callback_info info);
+    napi_value OnGlobalDisplayToClient(napi_env env, napi_callback_info info);
+
     napi_value OnSetWindowType(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetProperties(napi_env env, napi_callback_info info);

@@ -4415,13 +4415,16 @@ public:
     virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
 
     /**
-     * @brief update the floating ball window instance (w,h,r).
+     * @brief update the floating ball window instance.
      *
      * @param fbTemplateInfo the tempalte info of the floating-ball.
      * @param icon the icon of the floating-ball.
      */
-    virtual void UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
-        const std::shared_ptr<Media::PixelMap>& icon) {}
+    virtual WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+        const std::shared_ptr<Media::PixelMap>& icon)
+    {
+        return WMError::WM_OK;
+    }
     
     /**
      * @brief Notify prepare to close window
@@ -4429,7 +4432,7 @@ public:
     virtual void NotifyPrepareCloseFloatingBall() {}
  
     /**
-     * @brief restore floating ball ability (w,h,r).
+     * @brief restore floating ball ability.
      *
      * @param want the want of the ability.
      */

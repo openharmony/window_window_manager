@@ -71,8 +71,7 @@ WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
     fbOption_ = option;
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     fbOption_->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
-    window_->UpdateFloatingBall(fbTemplateBaseInfo, fbOption_->GetIcon());
-    return WMError::WM_OK;
+    return window_->UpdateFloatingBall(fbTemplateBaseInfo, fbOption_->GetIcon());
 }
 
 WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
@@ -87,14 +86,14 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
         TLOGI(WmsLogTag::WMS_SYSTEM, "called");
         if (fbOption_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null or Get PictureInPictureOption failed");
-            return WMError::WM_ERROR_FB_CREATE_FAILED;
+            return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
         }
         if (curState_ == FbWindowState::STATE_STARTING || curState_ == FbWindowState::STATE_STARTED) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
                 curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
             return WMError::WM_ERROR_FB_REPEAT_OPERATION;
         }
- 
+
         curState_ = FbWindowState::STATE_STARTING;
         FloatingBallManager::SetActiveController(this);
     }
@@ -117,7 +116,7 @@ WMError FloatingBallController::StartFloatingBallInner()
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Show fb window failed, err: %{public}u", errCode);
         (void)window_->Destroy();
-        return WMError::WM_ERROR_FB_INTERNAL_ERROR;
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     mainWindowLifeCycleListener_ = sptr<FloatingBallController::WindowLifeCycleListener>::MakeSptr();
     mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
@@ -134,13 +133,18 @@ void FloatingBallController::WindowLifeCycleListener::AfterDestroyed()
 
 WMError FloatingBallController::CreateFloatingBallWindow()
 {
-    if (fbOption_ == nullptr || contextPtr_ == nullptr) {
+    if (fbOption_ == nullptr || contextPtr_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb failed, invalid fbOption");
-        return WMError::WM_ERROR_FB_CREATE_FAILED;
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     auto uid = getuid();
+    auto mainWindowState = mainWindow_->GetWindowState();
     TLOGI(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u, mainWindowState:%{public}u, uid %{public}d",
-        mainWindowId_, mainWindow_->GetWindowState(), uid);
+        mainWindowId_, mainWindowState, uid);
+    if (mainWindowState != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u is not shown", mainWindowId_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     auto windowOption = sptr<WindowOption>::MakeSptr();
     windowOption->SetWindowName(FB_WINDOW_NAME + "_" + std::to_string(uid));
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_FB);
@@ -233,7 +237,7 @@ WMError FloatingBallController::RestoreMainWindow(const std::shared_ptr<AAFwk::W
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "restoreMainWindow");
     if (curState_ != FbWindowState::STATE_STARTED) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "window is null when restoreMainWindow");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "state is not started when restore main window");
         return WMError::WM_ERROR_FB_INVALID_STATE;
     }
     if (window_ == nullptr) {
@@ -301,7 +305,7 @@ WMError FloatingBallController::RegisterListener(std::vector<sptr<T>>& holder, c
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Listener already registered");
@@ -316,7 +320,7 @@ WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder,
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](const sptr<T>& registeredListener) {
@@ -327,9 +331,12 @@ WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder,
 
 WMError FloatingBallController::GetFloatingBallWindowInfo(uint32_t& windowId)
 {
+    if (curState_ != FbWindowState::STATE_STARTED) {
+        return WMError::WM_ERROR_FB_INVALID_STATE;
+    }
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is null");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     return window_->GetFloatingBallWindowId(windowId);
 }

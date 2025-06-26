@@ -392,28 +392,28 @@ int32_t SystemSession::GetSubWindowZLevel() const
     return zLevel;
 }
 
-WSError SystemSession::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+WMError SystemSession::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
 {
     if (!WindowHelper::IsFbWindow(GetWindowType())) {
-        return WSError::WS_DO_NOTHING;
+        return WMError::WM_DO_NOTHING;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), fbTemplateInfo, callingPid, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
-            return WSError::WS_ERROR_INVALID_OPERATION;
+            return WMError::WM_ERROR_INVALID_OPERATION;
         }
         if (callingPid != session->GetCallingPid()) {
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+            return WMError::WM_ERROR_INVALID_CALLING;
         }
         TLOGNI(WmsLogTag::WMS_SYSTEM, "update template %{public}d", fbTemplateInfo.template_);
         session->NotifyUpdateFloatingBall(fbTemplateInfo);
-        return WSError::WS_OK;
+        return WMError::WM_OK;
     };
     PostTask(std::move(task), __func__);
-    return WSError::WS_OK;
+    return WMError::WM_OK;
 }
 
 WSError SystemSession::StopFloatingBall()
@@ -431,7 +431,7 @@ WSError SystemSession::StopFloatingBall()
         }
         if (callingPid != session->GetCallingPid()) {
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+            return WSError::WS_ERROR_INVALID_CALLING;
         }
         session->NotifyStopFloatingBall();
         return WSError::WS_OK;
@@ -447,7 +447,6 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         return WMError::WM_DO_NOTHING;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
- 
     return PostSyncTask([weakThis = wptr(this), callingPid, &windowId, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -456,7 +455,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         }
         if (callingPid != session->GetCallingPid()) {
             TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WMError::WM_ERROR_INVALID_PERMISSION;
+            return WMError::WM_ERROR_INVALID_CALLING;
         }
         windowId = session->GetFbWindowId();
         TLOGND(WmsLogTag::WMS_SYSTEM, "%{public}s mode: %{public}u", where, windowId);
@@ -470,7 +469,7 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         return WMError::WM_DO_NOTHING;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
-        TLOGNE(WmsLogTag::WMS_SYSTEM, "check floating ball permission failed");
+        TLOGNE(WmsLogTag::WMS_SYSTEM, "Check floating ball permission failed");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
@@ -482,7 +481,7 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         }
         if (callingPid != session->GetCallingPid()) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WMError::WM_ERROR_INVALID_PERMISSION;
+            return WMError::WM_ERROR_INVALID_CALLING;
         }
         if (session->GetSessionInfo().bundleName_ != want->GetBundle()) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "Session bundle %{public}s is not want bundle %{public}s",
