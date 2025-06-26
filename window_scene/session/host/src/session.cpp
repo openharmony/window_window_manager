@@ -2657,15 +2657,14 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
-bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
-    sptr<WindowSessionProperty> property)
+bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
     std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
         ExtractSupportWindowModeFromMetaData(abilityInfo);
     auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
     const uint32_t noType = 0;
-    if (property && windowModeSupportType != noType) {
-        property->SetWindowModeSupportType(windowModeSupportType);
+    if (windowModeSupportType != noType) {
+        GetSessionProperty()->SetWindowModeSupportType(windowModeSupportType);
         return true;
     }
     return false;
@@ -3998,7 +3997,7 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (false == UpdateWindowModeSupportType(sessionInfo_.abilityInfo, GetSessionProperty())) {
+    if (!UpdateWindowModeSupportType(sessionInfo_.abilityInfo)) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "not update WindowModeSupportType");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",

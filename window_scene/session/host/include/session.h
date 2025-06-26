@@ -425,8 +425,7 @@ public:
     /*
      * Window Layout
      */
-    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
-        sptr<WindowSessionProperty> property);
+    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
 
     /*
      * Window Rotate Animation
