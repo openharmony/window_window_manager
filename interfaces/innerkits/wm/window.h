@@ -4412,7 +4412,10 @@ public:
      * @param pointerEvent PointerEvent of Multi-Model Input.
      * @return WM_OK means set success.
      */
-    virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
+    virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
 
     /**
      * @brief update the floating ball window instance (w,h,r).
