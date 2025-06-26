@@ -139,7 +139,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
             .displayDirection = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
             .screenArea = {
                 .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
-                .area = { offsetX, offsetY, static_cast<int32_t>(displayWidth), static_cast<int32_t>displayHeight }
+                .area = { offsetX, offsetY, static_cast<int32_t>(displayWidth), static_cast<int32_t>(displayHeight) }
             }
         };
         auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
