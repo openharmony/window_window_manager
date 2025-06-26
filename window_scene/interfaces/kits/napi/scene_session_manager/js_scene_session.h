@@ -445,7 +445,7 @@ private:
     void OnSubSessionZLevelChange(int32_t zLevel);
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainModalTypeChange(bool isModal);
-    void OnThrowSlipAnimationStateChange(bool isAnimating);
+    void OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void UpdateSessionLabel(const std::string& label);
