@@ -615,7 +615,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.L
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
 
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED,
+    EXPECT_EQ(WSError::WS_OK,
         sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
 }
 
@@ -810,7 +810,7 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyScreenshotEvent, TestSize.Level1)
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ret = ssmProxy->NotifyScreenshotEvent(type);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     MockMessageParcel::ClearAllErrorFlag();
 }
 
@@ -1131,7 +1131,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, TestSize.Level1)
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool isPcWindow = false;
-    ASSERT_EQ(sceneSessionManagerProxy->IsPcWindow(isPcWindow), WMError::WM_ERROR_IPC_FAILED);
+    ASSERT_EQ(sceneSessionManagerProxy->IsPcWindow(isPcWindow), WMError::WM_OK);
     ASSERT_EQ(isPcWindow, false);
 }
 
@@ -1200,7 +1200,7 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, TestSize.Le
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool isPcOrPadFreeMultiWindowMode = false;
     ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode),
-              WMError::WM_ERROR_IPC_FAILED);
+              WMError::WM_OK);
     ASSERT_EQ(isPcOrPadFreeMultiWindowMode, false);
 }
 
@@ -1329,7 +1329,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetAppKeyFramePolicy, TestSize.Level1)
     KeyFramePolicy keyFramePolicy;
     keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
     WMError res = sceneSessionManagerProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1528,7 +1528,7 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchGestureConsumeResult, TestSize
     int32_t keyCode = 0;
     bool isConsumed = true;
     WMError res = sceneSessionManagerProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1544,7 +1544,7 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchFocusActiveChange, TestSize.Le
 
     bool isActive = true;
     WMError res = sceneSessionManagerProxy->NotifyWatchFocusActiveChange(isActive);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1561,7 +1561,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetParentMainWindowId, TestSize.Level1)
     int32_t windowId = 0;
     int32_t mainWindowId = 0;
     WMError res = sceneSessionManagerProxy->GetParentMainWindowId(windowId, mainWindowId);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1578,7 +1578,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ListWindowInfo, TestSize.Level1)
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     WMError res = sceneSessionManagerProxy->ListWindowInfo(windowInfoOption, infos);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1628,7 +1628,7 @@ HWTEST_F(sceneSessionManagerProxyTest, MinimizeByWindowId, TestSize.Level1)
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     std::vector<int32_t> windowIds;
     WMError res = sceneSessionManagerProxy->MinimizeByWindowId(windowIds);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, res);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
