@@ -61,6 +61,8 @@ public:
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
+    DMHookInfo CreateDefaultHookInfo();
+    DMHookInfo CreateHookInfoInvaildDisplayOrientation();
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -97,6 +99,24 @@ sptr<ScreenSession> ScreenSessionManagerTest::InitTestScreenSession(std::string 
     auto rsid = ssm_->screenIdManager_.ConvertToRsScreenId(screenId);
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(name, screenId, rsid, 0);
     return screenSession;
+}
+
+DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
+{
+    uint32_t hookWidth = 500;
+    uint32_t hookHeight = 700;
+    float_t hookDensity = 3.0;
+    uint32_t hookRotation = static_cast<uint32_t>(Rotation::ROTATION_0);
+    uint32_t hookDisplayOrientation = static_cast<uint32_t>(DisplayOrientation::PORTRAIT);
+    DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
+    return dmHookInfo;
+}
+
+DMHookInfo ScreenSessionManagerTest::CreateHookInfoInvaildDisplayOrientation()
+{
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
+    dmHookInfo.displayOrientation_ = 99;
+    return dmHookInfo;
 }
 
 namespace {
@@ -1141,15 +1161,15 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid02, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 0, true };
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
     ssm_->displayHookMap_[uid] = dmHookInfo;
-    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    EXPECT_EQ(displayInfo->GetWidth(), 500);
-    EXPECT_EQ(displayInfo->GetHeight(), 500);
-    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
-    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
-    EXPECT_EQ(displayInfo->GetDisplayOrientation(), DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
+    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), dmHookInfo.density_);
+    EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetRotation()), dmHookInfo.rotation_);
+    EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetDisplayOrientation()), dmHookInfo.displayOrientation_);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
@@ -1167,14 +1187,16 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 0, false };
+    DMHookInfo dmHookInfo = CreateHookInfoInvaildDisplayOrientation();
+    dmHookInfo.enableHookDisplayOrientation_ = false;
     ssm_->displayHookMap_[uid] = dmHookInfo;
-    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    EXPECT_EQ(displayInfo->GetWidth(), 500);
-    EXPECT_EQ(displayInfo->GetHeight(), 500);
-    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
-    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
+    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), dmHookInfo.density_);
+    EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetRotation()), dmHookInfo.rotation_);
+    EXPECT_NE(static_cast<uint32_t>(displayInfo->GetDisplayOrientation()), dmHookInfo.displayOrientation_);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
@@ -1192,14 +1214,15 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = { 500, 500, 3.0, 0, true, 99, true };
+    DMHookInfo dmHookInfo = CreateHookInfoInvaildDisplayOrientation();
     ssm_->displayHookMap_[uid] = dmHookInfo;
-    EXPECT_EQ(ssm_->displayHookMap_.find(uid) != ssm_->displayHookMap_.end(), true);
+    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
-    EXPECT_EQ(displayInfo->GetWidth(), 500);
-    EXPECT_EQ(displayInfo->GetHeight(), 500);
-    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), 3.0);
-    EXPECT_EQ(displayInfo->GetRotation(), Rotation::ROTATION_0);
+    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
+    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
+    EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), dmHookInfo.density_);
+    EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetRotation()), dmHookInfo.rotation_);
+    EXPECT_NE(static_cast<uint32_t>(displayInfo->GetDisplayOrientation()), dmHookInfo.displayOrientation_);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
