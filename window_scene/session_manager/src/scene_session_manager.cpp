@@ -9937,16 +9937,20 @@ void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSessio
 
 void SceneSessionManager::AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession)
 {
-    auto parentSession = sceneSession->GetParentSession() if (parentSession == nullptr) { return; }
-    auto displayId = parentSession->GetSessionProperty()->GetDisplayId();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
-        displayId = parentSession->GetClientDisplayId();
+    auto parentSession = sceneSession->GetParentSession();
+    if (parentSession == nullptr) {
+        return;
     }
+    auto displayId = !PcFoldScreenManager::GetInstance().IsHalfFolded(sceneSession->GetScreenId())
+                         ? sceneSession->GetScreenId()
+                         : sceneSession->GetClientDisplayId();
     auto it = sceneSessionBlackListMap_[displayId].find(parentSession->GetPersistentId());
     if (it != sceneSessionBlackListMap_[displayId].end()) {
         sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
+        std::vector<uint64_t> surfaceNodeIds(sceneSessionBlackListMap_[displayId].begin(),
+                                             sceneSessionBlackListMap_[displayId].end());
+        rsInterface_.SetVirtualScreenBlackList(displayId, surfaceNodeIds);
     }
-    rsInterface_.SetVirtualScreenBlackList(displayId, sceneSessionBlackListMap_[displayId]);
 }
 
 void SceneSessionManager::RemoveSubSessionFromBlackList(const sptr<SceneSession>& sceneSession)
