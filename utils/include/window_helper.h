@@ -314,6 +314,22 @@ public:
         return windowModeSupportType;
     }
 
+    static std::vector<AppExecFwk::SupportWindowMode> ConvertSupportTypeToSupportModes(uint32_t windowModeSupportType)
+    {
+        std::vector<AppExecFwk::SupportWindowMode> supportModes;
+        if ((windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+        }
+        if ((windowModeSupportType & (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+            WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY)) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+        }
+        if ((windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        }
+        return supportModes;
+    }
+
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
     {
         if ((pointPosX > targetRect.posX_) &&
