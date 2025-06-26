@@ -784,8 +784,8 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
     int32_t colorMode;
     bool emptyParam = true;
     ani_ref colorModeRef;
-    env->Object_GetPropertyByName_Ref(decorStyle, "colorMode", &colorModeRef);
-    if (ANI_OK == env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorMode)) {
+    if (ANI_OK == env->Object_GetPropertyByName_Ref(decorStyle, "colorMode", &colorModeRef) &&
+        ANI_OK == env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorMode)) {
         decorButtonStyle.colorMode = colorMode;
         emptyParam = false;
     }
