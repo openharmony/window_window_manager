@@ -4537,6 +4537,9 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!SessionPermission::IsSystemCalling()) {
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -4555,17 +4558,11 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
             GetPersistentId(), inactiveColor.c_str(), inactiveColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if ((inactiveColorValue & OPAQUE) != OPAQUE) {
-        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive alpha value error", GetPersistentId());
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}d, activeValue: %{public}u, inactiveValue: %{public}u",
-            GetPersistentId(), activeColorValue, inactiveColorValue);
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
     } else {
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null!");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_NULLPTR;
     }
     return WMError::WM_OK;
 }
