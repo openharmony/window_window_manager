@@ -437,6 +437,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     void GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
     WMError SetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds);
+    void AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
     /*
@@ -1479,7 +1480,7 @@ private:
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-    std::map<DisplayId, int32_t> sceneSessionBlackListMap_;
+    std::unordered_map<DisplayId, std::unordered_set<int32_t>> sceneSessionBlackListMap_;
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;

@@ -3619,12 +3619,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);
         }
-
-        auto displayId = newSession->GetSessionProperty()->GetDisplayId();
-        if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
-            displayId = newSession->GetClientDisplayId();
-        }
-        sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
+        AddSubSessionToBlackList(newSession);
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
@@ -3706,6 +3701,7 @@ void SceneSessionManager::ReportSubWindowCreationFailure(const int32_t& pid, con
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED), pid, oss.str());
     }, __func__);
 }
+
 
 void SceneSessionManager::CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession)
 {
@@ -9924,18 +9920,45 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
 }
 
 void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession,
-                                                             std::vector<uint64_t>& surfaceNodeIds)
+                                                          std::vector<uint64_t>& surfaceNodeIds)
 {
     for (const auto& session : sceneSession->GetSubSession()) {
         if (session == nullptr) {
             continue;
         }
-        session->GetSurfaceNodeIdsFromSubSession
-        (sceneSession, surfaceNodeIds);
+        GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
         surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
         if (session->GetLeashWinSurfaceNode()) {
             surfaceNodeIds.push_back(session->GetPersistentId());
         }
+    }
+}
+
+void SceneSessionManager::AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession)
+{
+    auto parentSession = sceneSession->GetParentSession() if (parentSession == nullptr) { return; }
+    auto displayId = parentSession->GetSessionProperty()->GetDisplayId();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        displayId = parentSession->GetClientDisplayId();
+    }
+    auto it = sceneSessionBlackListMap_[displayId].find(parentSession->GetPersistentId());
+    if (it != sceneSessionBlackListMap_[displayId].end()) {
+        sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
+    }
+    rsInterface_.SetVirtualScreenBlackList(displayId, sceneSessionBlackListMap_[displayId]);
+}
+
+void SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession)
+{
+    auto displayId = !PcFoldScreenManager::GetInstance().IsHalfFolded(sceneSession->GetScreenId())
+                         ? sceneSession->GetScreenId()
+                         : sceneSession->GetClientDisplayId();
+    if (sceneSessionBlackListMap_[displayId].empty()) {
+        return;
+    }
+    auto it = sceneSessionBlackListMap_[displayId].find(sceneSession->GetPersistentId());
+    if (it != sceneSessionBlackListMap_[displayId].end()) {
+        sceneSessionBlackListMap_[displayId].erase(it);
     }
 }
 
