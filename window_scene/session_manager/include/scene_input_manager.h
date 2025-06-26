@@ -66,8 +66,7 @@ private:
         std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize = false);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
-    void ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
-        std::vector<MMI::ScreenInfo>& screenInfos);
+    std::vector<MMI::ScreenInfo> ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties);
     void ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
         std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap);
     bool CheckNeedUpdate(const std::vector<MMI::ScreenInfo>& screenInfos,

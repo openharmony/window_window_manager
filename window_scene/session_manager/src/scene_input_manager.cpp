@@ -222,12 +222,13 @@ auto SceneInputManager::GetFullWindowInfoList() ->
     return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
-void SceneInputManager::ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
-    std::vector<MMI::ScreenInfo>& screenInfos)
+std::vector<MMI::ScreenInfo> SceneInputManager::ConstructScreenInfos(
+    std::map<ScreenId, ScreenProperty>& screensProperties)
 {
+    std::vector<MMI::ScreenInfo> screenInfos;
     if (screensProperties.empty()) {
         TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
-        return;
+        return screenInfos;
     }
     for (auto& [screenId, screenProperty] : screensProperties) {
         MMI::ScreenInfo screenInfo = {
@@ -245,6 +246,7 @@ void SceneInputManager::ConstructScreenInfos(std::map<ScreenId, ScreenProperty>&
         };
         screenInfos.emplace_back(screenInfo);
     }
+    return screenInfos;
 }
 
 void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
@@ -386,8 +388,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
     auto task = [this]() {
         std::map<ScreenId, ScreenProperty> screensProperties =
             ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-        std::vector<MMI::ScreenInfo> screenInfos;
-        ConstructScreenInfos(screensProperties, screenInfos);
+        std::vector<MMI::ScreenInfo> screenInfos = ConstructScreenInfos(screensProperties);
         std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         std::vector<MMI::DisplayGroupInfo> displayGroupInfos;
@@ -720,8 +721,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
         }
         std::map<ScreenId, ScreenProperty> screensProperties =
             ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-        std::vector<MMI::ScreenInfo> screenInfos;
-        ConstructScreenInfos(screensProperties, screenInfos);
+        std::vector<MMI::ScreenInfo> screenInfos = ConstructScreenInfos(screensProperties);
         std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         if (displayGroupMap.empty()) {
