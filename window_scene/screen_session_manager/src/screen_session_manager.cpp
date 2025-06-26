@@ -6259,7 +6259,6 @@ void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
     taskScheduler_->PostAsyncTask(task, "NotifyScreenDisconnected");
 }
 
-
 void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr) {
