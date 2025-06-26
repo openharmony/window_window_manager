@@ -16,19 +16,14 @@
 #ifndef OHOS_ROSEN_WM_ANIMATION_COMMON_H
 #define OHOS_ROSEN_WM_ANIMATION_COMMON_H
 
-#include <any>
-#include <iomanip>
-#include <map>
 #include <sstream>
 #include <string>
-#include <unordered_set>
-#include <vector>
 
 #include <parcel.h>
 
 namespace OHOS {
 namespace Rosen {
-/*
+/**
 * @brief Enumerates window transition type.
 */
 enum class WindowTransitionType : uint32_t {
@@ -43,7 +38,7 @@ enum class WindowTransitionType : uint32_t {
     END,
 };
 
-/*
+/**
 * @brief Enumerates window animation curve type.
 */
 enum class WindowAnimationCurve : uint32_t {
@@ -83,6 +78,7 @@ enum class AnimationType : uint32_t {
 
 const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
+const uint32_t FLOAT_VALUE_LENGTH = 2;
 
 struct WindowAnimationProperty : public Parcelable {
     float targetScale = 0.0f;
@@ -106,24 +102,24 @@ struct WindowAnimationProperty : public Parcelable {
     }
 };
 
-/*
+/**
 * @brief Window transition animation configuration.
 */
 struct WindowAnimationOption : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
-    std::array<float, ANIMATION_PARAM_SIZE> param;
+    std::array<float, ANIMATION_PARAM_SIZE> params;
 
     bool Marshalling(Parcel& parcel) const override
     {
         if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
             return false;
         }
-        if (param.size() > ANIMATION_PARAM_SIZE) {
+        if (params.size() > ANIMATION_PARAM_SIZE) {
             return false;
         }
-        for (auto p: param) {
-            if (!parcel.WriteFloat(p)) {
+        for (const auto& param: params) {
+            if (!parcel.WriteFloat(param)) {
                 return false;
             }
         }
@@ -143,11 +139,11 @@ struct WindowAnimationOption : public Parcelable {
             delete windowAnimationConfig;
             return nullptr;
         }
-        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
+        if (windowAnimationConfig->params.size() > ANIMATION_PARAM_SIZE) {
             delete windowAnimationConfig;
             return nullptr;
         }
-        for (auto& param: windowAnimationConfig->param) {
+        for (auto& param: windowAnimationConfig->params) {
             if (!parcel.ReadFloat(param)) {
                 delete windowAnimationConfig;
                 return nullptr;
@@ -160,9 +156,9 @@ struct WindowAnimationOption : public Parcelable {
     {
         std::ostringstream oss;
         oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
-            std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
-        for (auto p: param) {
-            oss << std::fixed << std::setprecision(2) << p << ", "; // 2 means print float value length
+            std::to_string(static_cast<int32_t>(duration)) << ", params: [ ";
+        for (auto param: params) {
+            oss << std::fixed << std::setprecision(FLOAT_VALUE_LENGTH) << param << ", ";
         }
         oss << "]";
         return oss.str();
@@ -241,7 +237,7 @@ struct StartAnimationSystemOptions : public Parcelable {
     }
 };
 
-/*
+/**
 * @brief Transition animation configuration.
 */
 struct TransitionAnimation : public Parcelable {
