@@ -615,7 +615,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetStartWindowBackgroundColor, TestSize.L
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sceneSessionManagerProxy, nullptr);
 
-    EXPECT_EQ(WSError::WS_OK,
+    EXPECT_EQ(WMError::WM_OK,
         sceneSessionManagerProxy->SetStartWindowBackgroundColor("moduleName", "abilityName", 0xffffffff, 100));
 }
 
