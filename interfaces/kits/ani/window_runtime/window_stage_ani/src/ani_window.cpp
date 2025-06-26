@@ -1101,8 +1101,7 @@ void AniWindow::SetParentWindow(ani_env* env, ani_double windowId)
         WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] Set parent window failed");
         AniWindowUtils::AniThrowError(env, wmErrorCode);
-    }
-    else {
+    } else {
         TLOGI(WmsLogTag::WMS_SUB, "[ANI] window id: %{public}u set parent window id: %{public}u end",
             windowToken_->GetWindowId(), newParentWindowId);
     }
