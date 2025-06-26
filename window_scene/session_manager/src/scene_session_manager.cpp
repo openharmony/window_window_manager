@@ -3619,7 +3619,11 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);
         }
-
+        auto displayId = newSession->GetSessionProperty()->GetDisplayId();
+        if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+            displayId = newSession->GetClientDisplayId();
+        }
+        sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
@@ -9904,6 +9908,7 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
                 continue;
             }
             surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
+            GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
             if (isBlackList && sceneSession->GetLeashWinSurfaceNode()) {
                 surfaceNodeIds.push_back(missionId);
                 continue;
@@ -9915,6 +9920,22 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, "GetSurfaceNodeIdsFromMissionIds");
+}
+
+void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession,
+                                                             std::vector<uint64_t>& surfaceNodeIds)
+{
+    for (const auto& session : sceneSession->GetSubSession()) {
+        if (session == nullptr) {
+            continue;
+        }
+        session->GetSurfaceNodeIdsFromSubSession
+        (sceneSession, surfaceNodeIds);
+        surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
+        if (session->GetLeashWinSurfaceNode()) {
+            surfaceNodeIds.push_back(session->GetPersistentId());
+        }
+    }
 }
 
 WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
