@@ -35,6 +35,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
+constexpr int32_t DEFAULT_GIF_DELAY = 100;   //default delay time for gif
 }
 
 const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
@@ -60,7 +61,125 @@ WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 bool StartingWindow::transAnimateEnable_ = true;
 WindowUIType StartingWindow::windowUIType_ = WindowUIType::INVALID_WINDOW;
 AnimationConfig StartingWindow::animationConfig_;
-std::shared_ptr<Rosen::StartingWindowPageDrawInfo> StartingWindow::startingWindowPageDrawInfo_ = nullptr;
+StartingWindowShowInfo StartingWindow::startingWindowShowInfo_;
+std::atomic<bool> StartingWindow::startingWindowShowRunning_{false};
+std::thread StartingWindow::startingWindowShowThread_;
+std::mutex StartingWindow::firstFrameMutex_;
+std::condition_variable StartingWindow::firstFrameCondition_;
+std::atomic<bool> StartingWindow::firstFrameCompleted_ = false;
+
+void StartingWindow::RegisterStartingWindowShowInfo(const sptr<WindowNode>& node, const Rect& rect,
+    const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, float vpRatio)
+{
+    StartingWindowShowInfo startingWindowShowInfo { node, rect, info, vpRatio };
+    std::array<std::weak_ptr<Rosen::ResourceInfo>, size_t(StartWindowResType::Count)> resources = {
+        info->appIcon, info->illustration, info->branding, info->bgImage
+    };
+    auto now = std::chrono::steady_clock::now();
+    for (size_t i = 0; i < resources.size(); ++i) {
+        auto resInfo = resources[i].lock();
+        auto& state = startingWindowShowInfo.resStates[i];
+        if (!resInfo) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "null resource to record frame index.");
+            state.frameCount = 0;
+            continue;
+        }
+        state.delay = (!resInfo->delayTimes.empty()) ? resInfo->delayTimes : std::vector<int32_t>{ INT32_MAX };
+        if (std::all_of(state.delay.begin(), state.delay.end(), [](int32_t delay) { return delay == 0; })) {
+            for (auto& delay : state.delay) {
+                TLOGD(WmsLogTag::WMS_PATTERN, "Invalid delay time: %{public}d", delay);
+                delay = DEFAULT_GIF_DELAY;
+            }
+        }
+        state.frameCount = (resInfo->pixelMaps.size() > 1) ? resInfo->pixelMaps.size() : 1;
+        state.next = now;
+    }
+    startingWindowShowInfo_ = std::move(startingWindowShowInfo);
+}
+
+void StartingWindow::UnRegisterStartingWindowShowInfo()
+{
+    auto cleanResource = [](std::shared_ptr<Rosen::ResourceInfo>& resInfo) {
+        if (resInfo) {
+            for (auto& pixelMap : resInfo->pixelMaps) {
+                pixelMap->FreePixelMap();
+            }
+            resInfo->pixelMaps.clear();
+            resInfo->delayTimes.clear();
+            resInfo.reset();
+        }
+    };
+    if (startingWindowShowInfo_.info) {
+        cleanResource(startingWindowShowInfo_.info->appIcon);
+        cleanResource(startingWindowShowInfo_.info->bgImage);
+        cleanResource(startingWindowShowInfo_.info->illustration);
+        cleanResource(startingWindowShowInfo_.info->branding);
+    }
+    startingWindowShowInfo_.info.reset();
+    TLOGE(WmsLogTag::WMS_PATTERN, "starting window draw resource cleaned.");
+}
+
+void StartingWindow::UpdateWindowShowInfo(StartingWindowShowInfo& startingWindowShowInfo, bool& needRedraw)
+{
+    for (size_t i = 0; i < startingWindowShowInfo.resStates.size(); ++i) {
+        auto& state = startingWindowShowInfo.resStates[i];
+        auto now = std::chrono::steady_clock::now();
+        if (state.frameCount == 0 || now < state.next) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "null resource or not time yet");
+            continue;
+        }
+        state.frameIdx = (state.frameIdx + 1) % state.frameCount;
+        state.next = now + std::chrono::milliseconds(state.delay[state.frameIdx]);
+        startingWindowShowInfo.frameIndex[i] = state.frameIdx;
+        needRedraw = true;
+    }
+}
+
+void StartingWindow::DrawStartingWindowShowInfo()
+{
+    startingWindowShowRunning_ = true;
+    int32_t minDelay(DEFAULT_GIF_DELAY);
+    for (const auto& state : startingWindowShowInfo_.resStates) {
+        for (int32_t delay : state.delay) {
+            if (delay > 0 && delay < minDelay) {
+                minDelay = delay;
+            }
+        }
+    }
+    auto drawTask = [minDelay]() {
+        bool firstDraw = true;
+        while (startingWindowShowRunning_.load()) {
+            bool needRedraw = false;
+            UpdateWindowShowInfo(startingWindowShowInfo_, needRedraw);
+            if (!needRedraw) {
+                TLOGD(WmsLogTag::WMS_PATTERN, "no resource updated need to draw.");
+                continue;
+            }
+            bool ret = SurfaceDraw::DrawCustomStartingWindow(
+                startingWindowShowInfo_.node.promote()->startingWinSurfaceNode_,
+                startingWindowShowInfo_.rect,
+                startingWindowShowInfo_.info,
+                startingWindowShowInfo_.vpRatio,
+                startingWindowShowInfo_.frameIndex);
+            if (firstDraw && !ret) {
+                std::unique_lock<std::mutex> lock(firstFrameMutex_);
+                startingWindowShowRunning_ = false;
+                firstFrameCompleted_ = true;
+                firstFrameCondition_.notify_one();
+                TLOGE(WmsLogTag::WMS_PATTERN, "Failed to draw first frame of StartingWindow.");
+                break;
+            }
+            if (firstDraw) {
+                std::unique_lock<std::mutex> lock(firstFrameMutex_);
+                firstFrameCompleted_ = true;
+                firstFrameCondition_.notify_one();
+                firstDraw = false;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(minDelay));
+        }
+    };
+    startingWindowShowThread_ = std::thread(drawTask);
+}
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
@@ -206,8 +325,9 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "no starting Window SurfaceNode!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (LoadCustomStartingWindowInfo(node, GetBundleManager())) {
-        if (DrawStartingWindow(node, rect)  ==  WMError::WM_OK) {
+    auto staringWindowPageDrawInfo = GetCustomStartingWindowInfo(node, GetBundleManager());
+    if (staringWindowPageDrawInfo) {
+        if (DrawStartingWindow(staringWindowPageDrawInfo, node, rect)  ==  WMError::WM_OK) {
             return WMError::WM_OK;
         }
     }
@@ -312,6 +432,11 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
             }
             WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
             weakNode->firstFrameAvailable_ = true;
+            startingWindowShowRunning_ = false;
+            if (startingWindowShowThread_.joinable()) {
+                startingWindowShowThread_.join();
+            }
+            UnRegisterStartingWindowShowInfo();
         };
         WindowManagerService::GetInstance().PostAsyncTask(task, "firstFrameCompleteCallback");
     };
@@ -326,6 +451,13 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
         TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "cannot release leashwindow since leash is null, id:%{public}u",
             node->GetWindowId());
         return;
+    }
+    if (startingWindowShowRunning_.load()) {
+        startingWindowShowRunning_ = false;
+        if (startingWindowShowThread_.joinable()) {
+            startingWindowShowThread_.join();
+        }
+        UnRegisterStartingWindowShowInfo();
     }
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->closeWinSurfaceNode_);
@@ -486,7 +618,7 @@ std::shared_ptr<Global::Resource::ResourceManager> StartingWindow::CreateResourc
     return resourceMgr;
 }
 
-std::shared_ptr<Media::PixelMap> StartingWindow::GetPixelMap(uint32_t mediaDataId,
+std::shared_ptr<Rosen::ResourceInfo> StartingWindow::GetPixelMapListInfo(uint32_t mediaDataId,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
     const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
@@ -512,81 +644,119 @@ std::shared_ptr<Media::PixelMap> StartingWindow::GetPixelMap(uint32_t mediaDataI
         imageSource = Media::ImageSource::CreateImageSource(dataPath, opts, errorCode);
     }
     if (errorCode != 0 || imageSource == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "failed, id %{private}u err %{public}u", mediaDataId, errorCode);
+        TLOGE(WmsLogTag::WMS_PATTERN, "imageSource failed, id %{public}u err %{public}u", mediaDataId, errorCode);
         return nullptr;
     }
     Media::DecodeOptions decodeOpts;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    auto pixelMapList = imageSource->CreatePixelMapList(decodeOpts, errorCode);
     if (errorCode != 0) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "failed, id %{private}u err %{public}u", mediaDataId, errorCode);
+        TLOGE(WmsLogTag::WMS_PATTERN, "pixelMapList failed, id %{public}u err %{public}u", mediaDataId, errorCode);
         return nullptr;
     }
-    return std::shared_ptr<Media::PixelMap>(std::move(pixelMapPtr));
+    auto info = std::make_shared<Rosen::ResourceInfo>();
+    std::transform(pixelMapList->begin(), pixelMapList->end(), std::back_inserter(info->pixelMaps),
+                   [](auto& ptr) { return std::move(ptr); });
+    if (info->pixelMaps.size() > 1) {     //multi frames
+        auto delaytimes = imageSource->GetDelayTime(errorCode);
+        if (errorCode != 0) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "delaytimes failed, id %{public}u err %{public}u", mediaDataId, errorCode);
+            return nullptr;
+        }
+        info->delayTimes = std::move(*delaytimes);
+    }
+    return info;
 }
 
-bool StartingWindow::LoadCustomStartingWindowInfo(const sptr<WindowNode>& node,
-    const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
+std::shared_ptr<Rosen::StartingWindowPageDrawInfo> StartingWindow::GetCustomStartingWindowInfo(
+    const sptr<WindowNode>& node, const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
 {
     if (node == nullptr || bundleMgr == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "node or bundleMgr is nullptr.");
-        return false;
+        return nullptr;
     }
     auto abilityInfo = GetAbilityInfoFromBMS(node, bundleMgr);
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to retrieve abilityinfo from BMS");
-        return false;
+        return nullptr;
     }
     auto resourceMgr = CreateResourceManager(abilityInfo);
     if (resourceMgr == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to create resource manager");
-        return false;
+        return nullptr;
     }
-    return DoLoadCustomStartingWindowInfo(abilityInfo, resourceMgr);
+    return DoGetCustomStartingWindowInfo(abilityInfo, resourceMgr);
 }
 
-bool StartingWindow::DoLoadCustomStartingWindowInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
+std::shared_ptr<Rosen::StartingWindowPageDrawInfo> StartingWindow::DoGetCustomStartingWindowInfo(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
 {
     if (resourceMgr == nullptr || abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "resourMgr or abilityInfo is nullptr.");
-        return false;
+        return nullptr;
     }
 
-    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     const auto& startWindowRes = abilityInfo->startWindowResource;
     auto loadPixelMap = [&](uint32_t resId) {
-        return GetPixelMap(resId, resourceMgr, abilityInfo);
+        return GetPixelMapListInfo(resId, resourceMgr, abilityInfo);
     };
 
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     if (resourceMgr->GetColorById(startWindowRes.startWindowBackgroundColorId, info->bgColor) ==
         Global::Resource::RState::SUCCESS) {
-        info->bgImagePixelMap = loadPixelMap(startWindowRes.startWindowBackgroundImageId);
-        info->brandingPixelMap = loadPixelMap(startWindowRes.startWindowBrandingImageId);
+        info->bgImage = loadPixelMap(startWindowRes.startWindowBackgroundImageId);
+        info->branding = loadPixelMap(startWindowRes.startWindowBrandingImageId);
         info->startWindowBackgroundImageFit = startWindowRes.startWindowBackgroundImageFit;
-        info->appIconPixelMap = loadPixelMap(startWindowRes.startWindowAppIconId);
-        if (info->appIconPixelMap == nullptr) {
-            info->illustrationPixelMap = loadPixelMap(startWindowRes.startWindowIllustrationId);
+        info->appIcon = loadPixelMap(startWindowRes.startWindowAppIconId);
+        if (info->appIcon == nullptr) {
+            info->illustration = loadPixelMap(startWindowRes.startWindowIllustrationId);
         }
-        startingWindowPageDrawInfo_ = std::move(info);
-        return true;
+        return info;
     }
     TLOGE(WmsLogTag::WMS_PATTERN, "Failed to load custom startingwindow color.");
-    return false;
+    return nullptr;
 }
 
-WMError StartingWindow::DrawStartingWindow(const sptr<WindowNode>& node, const Rect& rect)
+WMError StartingWindow::DrawStartingWindow(const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info,
+    const sptr<WindowNode>& node, const Rect& rect)
 {
-    if (startingWindowPageDrawInfo_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "startingWindowPageDrawInfo_ is nullptr.");
+    if (startingWindowShowRunning_.load()) {
+        startingWindowShowRunning_ = false;
+        if (startingWindowShowThread_.joinable()) {
+            startingWindowShowThread_.join();
+        }
+        firstFrameCompleted_ = false;
+        UnRegisterStartingWindowShowInfo();
+    }
+
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "startingWindowPageDrawInfo is nullptr.");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     const float vpRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
-    if (!SurfaceDraw::DrawCustomStartingWindow(node->startingWinSurfaceNode_,
-        rect, startingWindowPageDrawInfo_, vpRatio)) {
-            TLOGE(WmsLogTag::WMS_PATTERN, "Draw Custom startingWindowPage failed.");
+    RegisterStartingWindowShowInfo(node, rect, info, vpRatio);
+    const auto& resInfo = startingWindowShowInfo_.info;
+    if (!resInfo->appIcon && !resInfo->bgImage && !resInfo->branding && !resInfo->illustration) {
+        if (!(SurfaceDraw::DrawCustomStartingWindow(node->startingWinSurfaceNode_, rect, resInfo, vpRatio,
+            startingWindowShowInfo_.frameIndex))) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to draw Custom starting window.");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
+        return WMError::WM_OK;
+    }
+
+    DrawStartingWindowShowInfo();
+    std::unique_lock<std::mutex> lock(firstFrameMutex_);
+    firstFrameCondition_.wait(lock, []() { return firstFrameCompleted_ == true; });
+    if (!startingWindowShowRunning_.load()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to start Custom starting window show.");
+        if (startingWindowShowThread_.joinable()) {
+            startingWindowShowThread_.join();
+        }
+        UnRegisterStartingWindowShowInfo();
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     return WMError::WM_OK;
 }
 } // Rosen
