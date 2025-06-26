@@ -48,6 +48,7 @@
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
 #include "rs_adapter.h"
+#include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -1906,6 +1907,33 @@ WSError SceneSession::UpdateSessionRect(
     return WSError::WS_OK;
 }
 
+WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+          GetPersistentId(), rect.ToString().c_str(), reason);
+    PostTask([weakThis = wptr(this), rect, reason, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is nullptr", where);
+            return;
+        }
+        if (rect == session->GetGlobalDisplayRect()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}d skip same rect",
+                where, session->GetPersistentId());
+            return;
+        }
+        // Convert global coordinates to screen-relative coordinates to be
+        // compatible with the original logic of UpdateSessionRectInner.
+        const auto& [displayId, relativeDisplayRect] =
+            SessionCoordinateHelper::GlobalToRelativeDisplayRect(session->GetDisplayId(), rect);
+        RectAnimationConfig animConfig;
+        MoveConfiguration moveConfig = { displayId, animConfig };
+        session->SetRequestMoveConfiguration(moveConfig);
+        session->UpdateSessionRectInner(relativeDisplayRect, reason, moveConfig, animConfig);
+    }, __func__ + GetRectInfo(rect));
+    return WSError::WS_OK;
+}
+
 void SceneSession::HandleCrossMoveTo(WSRect& globalRect)
 {
     HandleCrossMoveToSurfaceNode(globalRect);
@@ -3514,6 +3542,16 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             needSetBoundsNextVsync = true;
         }
     }
+
+    // Window Layout Global Coordinate System
+    // During drag (except DRAG_END), the rect is relative to the original display and can be
+    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
+    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
+    if (reason != SizeChangeReason::DRAG_END) {
+        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), rect);
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
+    }
+
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
@@ -7852,6 +7890,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
+
+        // Window Layout Global Coordinate System
+        auto globalDisplayRect = ComputeGlobalDisplayRect();
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "

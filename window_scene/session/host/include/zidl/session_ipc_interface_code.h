@@ -104,6 +104,9 @@ enum class SessionInterfaceCode {
     // Window Transition Animation For PC
     TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION,
 
+    // Window Layout Global Coordinate System
+    TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
+
     // Extension
     TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
     TRANS_ID_TRANSFER_EXTENSION_DATA = 501,

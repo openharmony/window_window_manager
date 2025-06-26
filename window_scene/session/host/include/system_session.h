@@ -44,7 +44,7 @@ public:
     /*
      * Floating Ball Window
      */
-    WSError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
     WSError StopFloatingBall() override;
     WMError GetFloatingBallWindowId(uint32_t& windowId) override;
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;

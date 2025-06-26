@@ -40,6 +40,7 @@ public:
 private:
     sptr<SceneSessionManager> ssm_;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+    sptr<SceneSession> CreateSceneSession(const std::string& bundleName, WindowType windowType);
 };
 
 void SceneSessionManagerTest8::SetUpTestCase() {}
@@ -58,6 +59,20 @@ void SceneSessionManagerTest8::TearDown()
     ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
     ssm_ = nullptr;
+}
+
+sptr<SceneSession> SceneSessionManagerTest8::CreateSceneSession(const std::string& bundleName, WindowType windowType)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = bundleName;
+ 
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(windowType);
+    property->SetWindowName(bundleName);
+ 
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_ = property;
+    return sceneSession;
 }
 
 namespace {
@@ -1129,29 +1144,18 @@ HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     uint32_t windowId = 0;
-    ASSERT_NE(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->GetFbPanelWindowId(windowId));
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, ssm_->GetFbPanelWindowId(windowId));
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ssm_->sceneSessionMap_.insert({1, CreateSceneSession("", WindowType::WINDOW_TYPE_PIP)});
+    ssm_->sceneSessionMap_.insert({2, CreateSceneSession("SCBGlobalSearch7", WindowType::WINDOW_TYPE_FB)});
+    sptr<SceneSession> sceneSession = CreateSceneSession("Fb_panel8", WindowType::WINDOW_TYPE_FB);
+    ssm_->sceneSessionMap_.insert({3, sceneSession});
 
     MockAccesstokenKit::MockAccessTokenKitRet(0);
-    ASSERT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
-    MockAccesstokenKit::MockAccessTokenKitRet(-1);
-
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "Fb_panel8";
-    sessionInfo.abilityName_ = "Fb_panel8";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
-    property->SetWindowName(sessionInfo.bundleName_);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->property_ = property;
-    sceneSession->SetSessionInfoPersistentId(18);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-
-    MockAccesstokenKit::MockAccessTokenKitRet(0);
-    ASSERT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
-    ASSERT_EQ(sceneSession->GetWindowId(), windowId);
+    EXPECT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
+    EXPECT_EQ(sceneSession->GetWindowId(), windowId);
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

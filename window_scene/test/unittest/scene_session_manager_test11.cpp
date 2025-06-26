@@ -682,6 +682,22 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.
     result = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    parentSession->GetSessionProperty()->SetSubWindowLevel(1);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, result);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    parentSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARENT, result);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_OK, result);
 }
 
 /**

@@ -1480,13 +1480,15 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> icon = nullptr;
 
     EXPECT_EQ(window->GetHostSession(), nullptr);
-    window->UpdateFloatingBall(fbTemplateInfo, icon);
+    auto error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, error);
 
     auto session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     window->property_->persistentId_ = 1234;
     EXPECT_FALSE(window->IsWindowSessionInvalid());
-    window->UpdateFloatingBall(fbTemplateInfo, icon);
+    error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_OK, error);
 }
 
 /**
@@ -1538,6 +1540,168 @@ HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
 
     EXPECT_CALL(*session, RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->RestoreFbMainWindow(want));
+}
+
+/**
+ * @tc.name: TestGetGlobalDisplayRect
+ * @tc.desc: Get global display rect from window property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestGetGlobalDisplayRect, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect expected { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(expected);
+
+    Rect actual = window->GetGlobalDisplayRect();
+    EXPECT_EQ(actual, expected);
+}
+
+/**
+ * @tc.name: TestClientToGlobalDisplay
+ * @tc.desc: Convert client position to global display position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+
+    Position clientPos { 10, 20 };
+    Position expectedGlobalPos { 110, 220 };
+
+    auto result = window->ClientToGlobalDisplay(clientPos);
+    EXPECT_EQ(result, expectedGlobalPos);
+}
+
+/**
+ * @tc.name: TestGlobalDisplayToClient
+ * @tc.desc: Convert global display position to client position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+
+    Position globalPos { 110, 220 };
+    Position expectedClientPos { 10, 20 };
+
+    auto result = window->GlobalDisplayToClient(globalPos);
+    EXPECT_EQ(result, expectedClientPos);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromServer
+ * @tc.desc: Update global display rect if different
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1001);
+
+    WSRect oldRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect({ 100, 200, 300, 400 });
+    auto ret = window->UpdateGlobalDisplayRectFromServer(oldRect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    WSRect newRect { 150, 250, 300, 400 };
+    ret = window->UpdateGlobalDisplayRectFromServer(newRect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    Rect expectedRect { 150, 250, 300, 400 };
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+}
+
+/**
+ * @tc.name: TestRegisterRectChangeInGlobalDisplayListener
+ * @tc.desc: Register a new listener successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestRegisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(123);
+
+    auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+
+    auto result = window->RegisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
+}
+
+/**
+ * @tc.name: TestUnregisterRectChangeInGlobalDisplayListener
+ * @tc.desc: Unregister an existing listener successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestUnregisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(123);
+
+    auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    window->RegisterRectChangeInGlobalDisplayListener(listener);
+
+    auto result = window->UnregisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
+}
+
+/**
+ * @tc.name: TestNotifyGlobalDisplayRectChange
+ * @tc.desc: Notify all valid listeners and skip nullptr ones
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestNotifyGlobalDisplayRectChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1001);
+
+    auto listener1 = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    auto listener2 = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    sptr<IRectChangeInGlobalDisplayListener> nullListener = nullptr;
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_[window->GetPersistentId()] = {
+            listener1, nullListener, listener2
+        };
+    }
+
+    Rect rect { 10, 20, 100, 200 };
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+
+    EXPECT_CALL(*listener1, OnRectChangeInGlobalDisplay(rect, reason)).Times(1);
+    EXPECT_CALL(*listener2, OnRectChangeInGlobalDisplay(rect, reason)).Times(1);
+
+    window->NotifyGlobalDisplayRectChange(rect, reason);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
 }
 } // namespace
 } // namespace Rosen
