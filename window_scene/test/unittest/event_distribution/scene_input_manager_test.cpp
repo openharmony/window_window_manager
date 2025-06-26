@@ -866,12 +866,11 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, TestSize.Level1)
 HWTEST_F(SceneInputManagerTest, ConstructScreenInfos, TestSize.Level1)
 {
     std::map<ScreenId, ScreenProperty> screensProperties;
-    std::vector<MMI::ScreenInfo> screenInfos;
-    SceneInputManager::GetInstance().ConstructScreenInfos(screensProperties, screenInfos);
+    std::vector<MMI::ScreenInfo> screenInfos = SceneInputManager::GetInstance().ConstructScreenInfos(screensProperties);
     EXPECT_EQ(screenInfos.size(), 0);
     ScreenProperty screenProperty;
     screensProperties[0] = screenProperty;
-    SceneInputManager::GetInstance().ConstructScreenInfos(screensProperties, screenInfos);
+    screenInfos = SceneInputManager::GetInstance().ConstructScreenInfos(screensProperties);
     EXPECT_EQ(screenInfos.size(), 1);
 }
 
