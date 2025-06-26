@@ -176,7 +176,7 @@ public:
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
-    void OnSetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
 
     /*
      * Fold Screen Status Change Report

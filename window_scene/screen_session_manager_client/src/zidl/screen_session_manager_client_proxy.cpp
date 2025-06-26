@@ -414,7 +414,8 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
     reply.ReadUInt64Vector(&surfaceNodeIds);
 }
 
-void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIdsChanged(const std::vector<uint64_t>& surfaceNodeIds)
+void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIdsChanged(DisplayId displayId,
+    const std::vector<uint64_t>& surfaceNodeIds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -426,6 +427,10 @@ void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIdsChanged(const std::vect
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "Write defaultDisplayId failed");
         return;
     }
     if (!data.WriteUInt64Vector(surfaceNodeIds)) {

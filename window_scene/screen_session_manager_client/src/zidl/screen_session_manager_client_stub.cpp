@@ -306,9 +306,10 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
 
 int ScreenSessionManagerClientStub::HandleOnSetSurfaceNodeIdsChanged(MessageParcel& data, MessageParcel& reply)
 {
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
     std::vector<uint64_t> surfaceNodeIds;
     data.ReadUInt64Vector(&surfaceNodeIds);
-    OnSetSurfaceNodeIdsChanged(surfaceNodeIds);
+    OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
     return ERR_NONE;
 }
 
