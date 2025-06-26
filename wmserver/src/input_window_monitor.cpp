@@ -169,7 +169,7 @@ void InputWindowMonitor::ConstructScreenInfos(std::vector<MMI::DisplayInfo>& dis
         screenInfo.height = displayInfo.height;
         screenInfo.tpDirection = displayInfo.direction;
         screenInfo.dpi = displayInfo.dpi;
-        screenInfo.retation = static_cast<MMI::Retation>(displayInfo.displayDirection);
+        screenInfo.rotation = static_cast<MMI::Rotation>(displayInfo.direction);
         screenInfos.emplace_back(screenInfo);
     }
 }
