@@ -170,7 +170,6 @@ public:
 
     static AreaType GetAreaTypeForScaleResize(int32_t pointWinX, int32_t pointWinY, int outside, const WSRect& rect)
     {
-
         constexpr uint32_t HALF = 2;
         int32_t leftOut = -outside;
         int32_t rightOut = rect.width_ + outside;
