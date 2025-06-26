@@ -315,7 +315,7 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
                 .id = displayGroupId,
                 .name = "displayGroup" + std::to_string(displayGroupId),
                 .type = displayGroupId == 0 ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL,
-                .mainDisplayId = screenProperty.GetMainScreenIdOfGroup(),
+                .mainDisplayId = screenProperty.GetMainDisplayIdOfGroup(),
             };
             displayGroupMap[displayGroupId] = displayGroupInfo;
         }
