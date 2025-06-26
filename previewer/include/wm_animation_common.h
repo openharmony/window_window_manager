@@ -182,7 +182,8 @@ struct StartAnimationOptions : public Parcelable {
         return true;
     }
 
-    static StartAnimationOptions* Unmarshalling(Parcel& parcel) {
+    static StartAnimationOptions* Unmarshalling(Parcel& parcel)
+    {
         StartAnimationOptions* startAnimationOptions = new StartAnimationOptions();
         uint32_t animationType = 0;
         if (!parcel.ReadUint32(animationType)) {
@@ -218,7 +219,8 @@ struct StartAnimationSystemOptions : public Parcelable {
         return true;
     }
 
-    static StartAnimationSystemOptions* Unmarshalling(Parcel& parcel) {
+    static StartAnimationSystemOptions* Unmarshalling(Parcel& parcel)
+    {
         StartAnimationSystemOptions* startAnimationSystemOptions = new StartAnimationSystemOptions();
         uint32_t animationType = 0;
         if (!parcel.ReadUint32(animationType)) {

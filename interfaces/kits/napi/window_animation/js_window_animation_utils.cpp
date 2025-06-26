@@ -24,7 +24,8 @@ namespace {
     } while (0)
 
 template <typename T>
-napi_value CreateJsNumber(napi_env env, T value) {
+napi_value CreateJsNumber(napi_env env, T value)
+{
     napi_value result = nullptr;
     if constexpr (std::is_same_v<T, int32_t>) {
         napi_create_int32(env, value, &result);
@@ -61,7 +62,8 @@ napi_value CreateJsValue(napi_env env, const T& value)
 }
 
 template <typename T>
-bool ConvertFromJsNumber(napi_env env, napi_value jsValue, T& outValue) {
+bool ConvertFromJsNumber(napi_env env, napi_value jsValue, T& outValue)
+{
     if constexpr (std::is_same_v<T, int32_t>) {
         NAPI_CALL_NO_THROW(napi_get_value_int32(env, jsValue, &outValue), false);
     } else if constexpr (std::is_same_v<T, uint32_t>) {
@@ -70,7 +72,7 @@ bool ConvertFromJsNumber(napi_env env, napi_value jsValue, T& outValue) {
         NAPI_CALL_NO_THROW(napi_get_value_int64(env, jsValue, &outValue), false);
     } else if constexpr (std::is_same_v<T, double>) {
         NAPI_CALL_NO_THROW(napi_get_value_double(env, jsValue, &outValue), false);
-    } 
+    }
     return true;
 }
 
@@ -328,7 +330,7 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
             animationConfig.duration = duration;
             break;
         }
-        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): 
+        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING):
         case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER_CURVE): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
