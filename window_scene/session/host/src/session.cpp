@@ -2564,13 +2564,13 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
-    uint32_t backGround = GetBackgroundColor();
+    uint32_t backGroundColor = GetBackgroundColor();
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = useCurWindow,
-        .backGround = backGround,
+        .backGroundColor = backGroundColor,
     };
     bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
     if (!ret) {
@@ -2597,19 +2597,19 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
 
 uint32_t Session::GetBackgroundColor() const
 {
-    uint32_t backGround = COLOR_WHITE;
+    uint32_t backGroundColor = COLOR_WHITE;
     std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
     if (appContext != nullptr) {
         std::shared_ptr<AppExecFwk::Configuration> appConfig = appContext->GetConfiguration();
         if (appConfig != nullptr) {
             std::string colorMode = appConfig->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            backGround = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
-            TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}u", backGround);
+            backGroundColor = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) ? COLOR_BLACK : COLOR_WHITE;
+            TLOGI(WmsLogTag::WMS_PATTERN, ":%{public}u", backGroundColor);
         }
     } else {
-        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backGround WHITE");
+        TLOGE(WmsLogTag::WMS_PATTERN, "app context is nullptr, use default backGroundColor WHITE");
     }
-    return backGround;
+    return backGroundColor;
 }
 
 void Session::ResetSnapshot()
