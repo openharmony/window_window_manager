@@ -34,6 +34,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr uint32_t M_STATUS_WIDTH = 1008;
 constexpr uint32_t F_STATUS_WIDTH = 2048;
 constexpr uint32_t G_STATUS_WIDTH = 3184;
+const ScreenId SCREENID = 1000;
 }
 namespace {
     std::string g_errLog;
@@ -933,6 +934,19 @@ HWTEST_F(ScreenSessionManagerTest, IsSystemSleep, Function | SmallTest | Level3)
     EXPECT_FALSE(ssm->IsSystemSleep());
     ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
     EXPECT_TRUE(ssm->IsSystemSleep());
+}
+
+/**
+ * @tc.name: GetOrCreateScreenSession
+ * @tc.desc: GetOrCreateScreenSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOrCreateScreenSession, Function | SmallTest | Level3)
+{
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
+        EXPECT_NE(session, nullptr);
+    }
 }
 }
 }

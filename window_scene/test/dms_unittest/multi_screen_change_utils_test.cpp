@@ -413,6 +413,68 @@ HWTEST_F(MultiScreenChangeUtilsTest, ScreenPropertyChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExchangeScreenSupportedRefreshRate
+ * @tc.desc: ExchangeScreenSupportedRefreshRate func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenChangeUtilsTest, ExchangeScreenSupportedRefreshRate, TestSize.Level1)
+{
+    sptr<ScreenSession> innerScreen = nullptr;
+    sptr<ScreenSession> externalScreen = nullptr;
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+ 
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    innerScreen = ssm_.GetScreenSession(screenId);
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(innerScreen, nullptr);
+ 
+    externalScreen = ssm_.GetOrCreateScreenSession(0);
+    innerScreen = nullptr;
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(externalScreen, nullptr);
+ 
+    innerScreen = ssm_.GetScreenSession(screenId);
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(innerScreen, nullptr);
+}
+
+/**
+ * @tc.name: ExchangeScreenSupportedRefreshRate01
+ * @tc.desc: ExchangeScreenSupportedRefreshRate func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenChangeUtilsTest, ExchangeScreenSupportedRefreshRate01, TestSize.Level1)
+{
+    sptr<ScreenSession> innerScreen = nullptr;
+    sptr<ScreenSession> externalScreen = nullptr;
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+ 
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    ScreenId screenId = ssm_.CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    ssm_.GetOrCreatePhysicalScreenSession(screenId);
+    innerScreen = ssm_.GetScreenSession(screenId);
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(innerScreen, nullptr);
+ 
+    ssm_.GetOrCreatePhysicalScreenSession(0);
+    externalScreen = ssm_.GetOrCreateScreenSession(0);
+    innerScreen = nullptr;
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(externalScreen, nullptr);
+ 
+    innerScreen = ssm_.GetScreenSession(screenId);
+    multiSCU_.ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
+    ASSERT_NE(innerScreen, nullptr);
+}
+
+/**
  * @tc.name: ScreenPhysicalInfoChange
  * @tc.desc: ScreenPhysicalInfoChange func
  * @tc.type: FUNC

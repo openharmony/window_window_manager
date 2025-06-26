@@ -214,6 +214,7 @@ public:
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
+    std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
