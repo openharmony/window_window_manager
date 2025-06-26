@@ -783,23 +783,25 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
 {
     int32_t colorMode;
     bool emptyParam = true;
-    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "colorMode", &colorMode)) {
+    ani_ref colorModeRef;
+    env->Object_GetPropertyByName_Ref(decorStyle, "colorMode", &colorModeRef);
+    if (ANI_OK == env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorMode)) {
         decorButtonStyle.colorMode = colorMode;
         emptyParam = false;
     }
-    int32_t buttonBackgroundSize;
-    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
-        decorButtonStyle.buttonBackgroundSize = buttonBackgroundSize;
+    ani_double buttonBackgroundSize;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
+        decorButtonStyle.buttonBackgroundSize = static_cast<int32_t>(buttonBackgroundSize);
         emptyParam = false;
     }
-    int32_t spacingBetweenButtons;
-    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
-        decorButtonStyle.spacingBetweenButtons = spacingBetweenButtons;
+    ani_double spacingBetweenButtons;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
+        decorButtonStyle.spacingBetweenButtons = static_cast<int32_t>(spacingBetweenButtons);
         emptyParam = false;
     }
-    int32_t closeButtonRightMargin;
-    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
-        decorButtonStyle.closeButtonRightMargin = closeButtonRightMargin;
+    ani_double closeButtonRightMargin;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
+        decorButtonStyle.closeButtonRightMargin = static_cast<int32_t>(closeButtonRightMargin);
         emptyParam = false;
     }
     return !emptyParam;
